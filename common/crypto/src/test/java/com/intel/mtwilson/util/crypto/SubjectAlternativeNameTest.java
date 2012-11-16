@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.util.crypto;
 
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.x500.DN;
@@ -22,7 +23,7 @@ import static org.junit.Assert.*;
  */
 public class SubjectAlternativeNameTest {
     @Test
-    public void testExtractSubjectAlternativeName() throws NoSuchAlgorithmException, GeneralSecurityException, IOException {
+    public void testExtractSubjectAlternativeName() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, CryptographyException {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate rsa = RsaUtil.generateX509Certificate("Test Cert", "ip:1.2.3.4", keypair, 30);
         String alternativeName = RsaUtil.ipAddressAlternativeName(rsa);
@@ -30,7 +31,7 @@ public class SubjectAlternativeNameTest {
     }
     
     @Test
-    public void testExtractSubjectAlternativeNameNull() throws NoSuchAlgorithmException, GeneralSecurityException, IOException {
+    public void testExtractSubjectAlternativeNameNull() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, CryptographyException {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate rsa = RsaUtil.generateX509Certificate("Test Cert", keypair, 30);
         String alternativeName = RsaUtil.ipAddressAlternativeName(rsa);
