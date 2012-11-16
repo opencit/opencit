@@ -15,6 +15,7 @@ import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.x500.DN;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
@@ -123,7 +124,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
      * @param authorizationPassword required in order to sign the certificate.  (mtwilson.ca.key.password)
      * @return 
      */
-    public X509Certificate signSslCertificate(X509Certificate csr, String authorizationPassword) throws CryptographyException {
+    public X509Certificate signSslCertificate(X509Certificate csr, String authorizationPassword) throws CryptographyException, FileNotFoundException {
         RsaCredentialX509 ca = getCA(authorizationPassword);
         String subjectName = csr.getSubjectX500Principal().getName(); // this is a string like CN=abc, O=xyz, C=US
         DN dn = new DN(subjectName);
@@ -136,9 +137,6 @@ public class TrustAgentCertificateAuthority extends BaseBO {
         try {
             X509Certificate cert = RsaUtil.createX509CertificateWithIssuer(csr.getPublicKey(), subjectCommonName, alternativeName, days, ca.getPrivateKey(), ca.getCertificate());
             return cert;
-        }
-        catch(GeneralSecurityException e) {
-            throw new CryptographyException("Cannot create X509 certificate", e);
         }
         catch(IOException e) {
             throw new CryptographyException("Cannot create X509 certificate:", e);
@@ -221,9 +219,14 @@ public class TrustAgentCertificateAuthority extends BaseBO {
             return true;
         }
         try {
-            cacert = getCACert();
-            if( cacert != null ) {
-                return true;
+            try {
+                cacert = getCACert();
+                if( cacert != null ) {
+                    return true;
+                }
+            }
+            catch(FileNotFoundException e) {
+                return false;
             }
             return false;
         }
@@ -279,7 +282,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
         }
     }
     
-    private RsaCredentialX509 getCA(String password) throws CryptographyException {
+    private RsaCredentialX509 getCA(String password) throws CryptographyException, FileNotFoundException {
         try {
             RsaCredentialX509 credential = keystore.getRsaCredentialX509(keyAlias, password);
             return credential;
@@ -298,11 +301,11 @@ public class TrustAgentCertificateAuthority extends BaseBO {
         }
     }
     
-    private RsaCredentialX509 getCA() throws CryptographyException {
+    private RsaCredentialX509 getCA() throws CryptographyException, FileNotFoundException {
         return getCA(keyPassword);
     }
     
-    private X509Certificate getCACert() throws CryptographyException {
+    private X509Certificate getCACert() throws CryptographyException, FileNotFoundException {
         return getCA().getCertificate();
     }
     
