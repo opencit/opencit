@@ -1345,7 +1345,6 @@ public class VMwareClient {
     *
     * @return TraversalSpec specification to get to the VirtualMachine managed object.
     */
-   /* not used...   
    private TraversalSpec getVMTraversalSpec() {
       // Create a traversal spec that starts from the 'root' objects
       // and traverses the inventory tree to get to the VirtualMachines.
@@ -1400,7 +1399,6 @@ public class VMwareClient {
       traversalSpec.getSelectSet().addAll(sSpecArr);
       return traversalSpec;
    }
-   */
 
    /**
     * Get the MOR of the Virtual Machine by its name.
