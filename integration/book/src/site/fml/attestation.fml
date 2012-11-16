@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faqs xmlns="http://maven.apache.org/FML/1.0.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+  title="Frequently Asked Questions"
+  toplink="false">
+
+    
+  <part id="addhost">
+
+    <title>Adding Hosts</title>
+
+    <faq id="how-to-name">
+      <question>
+        How should I name a host that I want to add?
+      </question>
+      <answer>
+        <p>You should use the already-existing name for your host.</p>
+        <p>Customers using vCenter should use the hostname shown for that host in vCenter.</p>
+        <p>Customers using other hypervisors should use the network hostname.</p>
+        <p>As a last resort use the IP address of the host.</p>
+      </answer>
+    </faq>
+
+  </part>
+
+
+</faqs>

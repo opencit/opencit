@@ -1,0 +1,39 @@
+<project name="PrivacyCA" basedir="./" default="build">
+
+	<path id="compile.classpath">
+		<pathelement path="${classpath}" />
+		<pathelement path="${java.class.path}" />
+		<fileset dir="./lib">
+			<include name="**/*.jar" />
+			<include name="**/*.zip" />
+		</fileset>
+	</path>
+
+	<!-- Build project and create distribution-->
+	<target name="build">
+		<!-- Timestamp for potential use in filenames below-->
+		<tstamp />
+
+		<!-- Clean and copy non java files-->
+		<delete dir="./bin" />
+		<mkdir dir="./bin" />
+		<copy todir="./bin">
+			<fileset dir="./src">
+				<patternset>
+					<exclude name="**/*.java" />
+				</patternset>
+			</fileset>
+		</copy>
+		<!-- Compile-->
+		<javac srcdir="./src" destdir="./bin" debug="true">
+			<classpath refid="compile.classpath"/>
+		</javac>
+
+		<!-- Build-->
+		<delete file="./PrivacyCA.jar" />
+		<jar jarfile="./PrivacyCA.jar">
+			<fileset dir="./bin"/>
+		</jar>
+	</target>
+
+</project>

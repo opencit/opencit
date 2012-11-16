@@ -1,0 +1,212 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.mtwilson</groupId>
+  <artifactId>mtwilson</artifactId>
+  <version>0.5.4-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Mt Wilson</name>
+  
+  <description>
+    Mt Wilson is a middleware solution that enables data centers to attest
+      to the trust of hypervisors and operating systems on multiple devices
+      including Servers, Clients, Network and Storage components.
+      The primary purpose of this attestation is for Trust Verification, Remediation, Reporting, 
+      and Compliance in a Data Center and Cloud environments. Whether it is public 
+      cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
+      used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
+      assess and provide an Assurance that the security components on the devices are 
+      protecting the assets executing or stored on the devices.
+  </description>
+  
+  <modules>
+    <module>integration</module>
+    <module>trust-agent</module>
+    <module>services</module>
+    <module>portals</module>
+    <module>desktop</module>
+  </modules>
+
+  <url>http://cloudsecurityportal.intel.com/mtwilson</url>
+  
+    <organization>
+        <name>Intel Corporation</name>
+        <url>http://cscenter.intel.com/portal/</url>
+    </organization>
+
+<licenses>
+  <license>
+    <name>Copyright 2012 Intel Corporation. All rights reserved.</name>
+    <!-- fill this in when we have a URL for the mt wilson license <url>http://intel.com</url> -->
+    <distribution>manual</distribution>
+    <comments>Currently Mt Wilson is available only by agreement.</comments>
+  </license>
+</licenses>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <mtwilson.version>0.5.4</mtwilson.version>
+    <mtwilson.release>SNAPSHOT</mtwilson.release>
+    <mtwilson-version>0.5.4-SNAPSHOT</mtwilson-version> <!-- deprecated; can be replaced with project.version in most places as long as they inherit their version from this pom -->
+    <jersey-version>1.9-ea04</jersey-version>
+    <maven.build.timestamp.format>yyyyMMdd.HHmm</maven.build.timestamp.format>
+  </properties>
+
+  <distributionManagement>
+      <repository>
+	  <id>cloudsecurity-maven-repository</id>
+	  <url>dav:http://cloudsecurityportal.intel.com/maven</url>
+          <name>Maven Repository in Cloud Security Portal at Intel</name>
+      </repository>
+      <site>
+          <id>cloudsecurity-website</id>
+          <url>dav:http://cloudsecurityportal.intel.com/mtwilson/0.5.4</url>
+          <name>Documentation Site in Cloud Security Portal at Intel</name>
+      </site>
+  </distributionManagement>
+
+    <issueManagement>
+        <system>Redmine</system>
+        <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/issues</url>
+    </issueManagement>
+
+    <repositories>
+
+	<repository>
+		<id>glassfish.java.net</id>
+		<name>GlassFish Maven Repository</name>
+		<url>http://download.java.net/maven/glassfish</url>
+		<layout>default</layout>
+	</repository>
+	<repository>
+		<id>m2.java.net</id>
+		<name>Java.net Maven 2 Repository</name>
+		<url>http://download.java.net/maven/2</url>
+		<layout>default</layout>
+	</repository>        
+	<repository>
+		<id>java.net</id>
+		<name>java.net Maven Repository</name>
+		<url>https://maven-repository.dev.java.net/nonav/repository</url>
+		<layout>default</layout>
+	</repository>
+	<repository>
+		<id>apache</id>
+		<name>apache repository</name>
+		<url>http://repository.apache.org/snapshots</url>
+		<layout>default</layout>
+	</repository>
+   <repository>
+	   <id>EclipseLink Repo</id>
+	   <name>EclipseLink Repository</name>
+	   <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
+   </repository>
+  <repository>
+    <id>Sonatype-public</id>
+    <name>SnakeYAML repository</name>
+    <url>http://oss.sonatype.org/content/groups/public/</url>
+  </repository>
+
+	<repository>
+		<id>cloudsecurityportal.intel.com</id>
+		<name>Cloud Security - Intel Architecture Systems Integration</name>
+		<url>http://cloudsecurityportal.intel.com/maven</url>
+		<layout>default</layout>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>m2.java.net</id>
+            <name>Java.net Maven 2 Repository</name>
+            <url>http://download.java.net/maven/2</url>
+            <layout>default</layout>
+        </pluginRepository>  
+    </pluginRepositories>
+    
+  <build>
+	<plugins>
+		<!-- begin SVN revision plugin (makes available properties like svn.revision) -->
+		<plugin>
+		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+		    <artifactId>svn-revision-number-maven-plugin</artifactId>
+		    <version>1.12</version>	
+		    <executions>
+			<execution>
+			    <goals>
+				<goal>revision</goal>
+			    </goals>
+			</execution>
+		    </executions>
+		    <configuration>
+			<entries>
+			    <entry>
+				<prefix>svn</prefix>
+			    </entry>
+			</entries>
+		    </configuration>
+		</plugin>
+		<!-- end SVN revision plugin -->
+                
+                <!-- begin website plugin -->
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+            <reportPlugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <version>2.5.1</version>
+              <configuration>
+                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+              </configuration>
+              <reports>
+                <report>dependencies</report>
+                <report>dependency-info</report>
+                <report>help</report>
+                <report>index</report>
+                <report>license</report>
+                <report>issue-tracking</report>
+                <report>summary</report>
+              </reports>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.8.1</version>
+                <configuration>
+                  <show>public</show>
+                  <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
+                </configuration>
+                <!--
+                <dependencies>
+                    <dependency>
+                        <groupId>com.intel</groupId>
+                        <artifactId>maven-intel-skin</artifactId>
+                        <version>0.1-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+                -->
+            </plugin>                
+            </reportPlugins>
+        </configuration>  
+    </plugin>
+                <!-- end website plugin -->
+	</plugins>
+
+	<extensions>
+	    <extension>
+		<groupId>org.apache.maven.wagon</groupId>
+		<artifactId>wagon-webdav-jackrabbit</artifactId>
+		<version>2.2</version>
+	    </extension>
+	</extensions>
+  </build>
+  
+</project>
+

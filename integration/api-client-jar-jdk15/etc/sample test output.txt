@@ -1,0 +1,64 @@
+C:\Users\jabuhacx\workspace\mountwilson-0.5.2\services\api-client-jar-jdk15>ant
+-f backport.xml test
+Buildfile: C:\Users\jabuhacx\workspace\mountwilson-0.5.2\services\api-client-jar
+-jdk15\backport.xml
+  [taskdef] Could not load definitions from resource net/sf/antcontrib/antcontri
+b.properties. It could not be found.
+
+test:
+    [mkdir] Created dir: C:\Users\jabuhacx\workspace\mountwilson-0.5.2\services\
+api-client-jar-jdk15\target\test
+     [java] java version "1.5.0_22"
+     [java] Java(TM) 2 Runtime Environment, Standard Edition (build 1.5.0_22-b03
+)
+     [java] Java HotSpot(TM) Client VM (build 1.5.0_22-b03, mixed mode, sharing)
+
+     [java] test
+     [java] Algorithm name: SHA256withRSA
+     [java] ApiCommand ARG 0 = BootstrapUser
+     [java] ApiCommand ARG 1 = C:\Users\jabuhacx\workspace\mountwilson-0.5.2\ser
+vices\api-client-jar-jdk15/target/test
+     [java] ApiCommand ARG 2 = https://10.1.71.103:8181
+     [java] ApiCommand ARG 3 = jonathan
+     [java] ApiCommand ARG 4 = password
+     [java] Algorithm name: SHA256withRSA
+     [java] Created new user keystore: C:\Users\jabuhacx\workspace\mountwilson-0
+.5.2\services\api-client-jar-jdk15\target\test\jonathan.jks
+     [java] Aug 15, 2012 8:52:15 PM com.intel.mtwilson.crypto.KeystoreUtil addSs
+lCertificatesToKeystore
+     [java] INFO: Added SSL certificate with alias 10.1.71.103-1, subject CN=10.
+1.71.103,OU=Mt Wilson,O=Intel,C=US, fingerprint 3c04d803a0326e7bf444287aabc7ce34
+8007fac1, from server 10.1.71.103
+     [java] Aug 15, 2012 8:52:20 PM com.intel.mtwilson.ApacheHttpClient createMe
+diaType
+     [java] SEVERE: Missing content type header from server, assuming applicatio
+n/octet-stream
+     [java] Aug 15, 2012 8:52:26 PM com.intel.mtwilson.ApiCommand main
+     [java] INFO: Added SAML Certificate with alias 10.1.71.103, subject CN=Atte
+stationService,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US, fingerprint 8693787cf92
+122fe0298a37179bb28c4a7c5d9e8, from server 10.1.71.103
+     [java] ApiCommand ARG 0 = BootstrapUser
+     [java] ApiCommand ARG 1 = C:\Users\jabuhacx\workspace\mountwilson-0.5.2\ser
+vices\api-client-jar-jdk15/target/test
+     [java] ApiCommand ARG 2 = https://10.1.71.103:8181
+     [java] ApiCommand ARG 3 = jonathan
+     [java] ApiCommand ARG 4 = password
+     [java] Algorithm name: SHA256withRSA
+     [java] Created new user keystore: C:\Users\jabuhacx\workspace\mountwilson-0
+.5.2\services\api-client-jar-jdk15\target\test\jonathan.jks
+     [java] Aug 15, 2012 8:52:33 PM com.intel.mtwilson.crypto.KeystoreUtil addSs
+lCertificatesToKeystore
+     [java] INFO: Added SSL certificate with alias 10.1.71.103-1, subject CN=10.
+1.71.103,OU=Mt Wilson,O=Intel,C=US, fingerprint 3c04d803a0326e7bf444287aabc7ce34
+8007fac1, from server 10.1.71.103
+     [java] Aug 15, 2012 8:52:39 PM com.intel.mtwilson.ApacheHttpClient createMe
+diaType
+     [java] SEVERE: Missing content type header from server, assuming applicatio
+n/octet-stream
+     [java] Aug 15, 2012 8:52:45 PM com.intel.mtwilson.ApiCommand main
+     [java] INFO: Added SAML Certificate with alias 10.1.71.103, subject CN=Atte
+stationService,OU=Mt Wilson,O=Intel,L=Folsom,ST=CA,C=US, fingerprint 8693787cf92
+122fe0298a37179bb28c4a7c5d9e8, from server 10.1.71.103
+
+BUILD SUCCESSFUL
+Total time: 42 seconds

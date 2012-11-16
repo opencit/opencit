@@ -1,0 +1,195 @@
+#!/bin/bash
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+# SCRIPT CONFIGURATION:
+script_name=tdctl
+intel_conf_dir=/etc/intel/cloudsecurity
+package_name=trust-dashboard
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+package_install_filename=${package_dir}/${package_name}.install
+package_keystore_users_dir=/var/opt/intel/${package_name}/users
+mysql_required_version=5.0
+mysql_setup_log=/var/log/intel.${package_name}.install.log
+mysql_script_dir=${package_dir}/database
+glassfish_required_version=3.0
+glassfish_application_name=TrustDashBoard
+java_required_version=1.6.0_29
+
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
+if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+shell_include_files "${package_env_filename}" "${package_install_filename}"
+
+list_mysql_install_scripts() {
+    echo ${mysql_script_dir}/bootstrap.sql
+# IAW discussion 29 Aug 2012, trust dashboard now uses the API to get all information, and does not need a separate database
+#    echo ${mysql_script_dir}/20120718221000_create_0_5_2_schema.sql
+}
+
+configure_api_baseurl() {
+  # setup mtwilson.api.baseurl
+  local default_server_url=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+  local server_url_in
+  if [ -n "${MTWILSON_SERVER}" ]; then
+    server_url_in="https://${MTWILSON_SERVER}:8181"
+  else
+    prompt_with_default server_url_in "Mt Wilson Server URL:" "${default_server_url}"
+    #server_url_in="https://${server_url_in}:8181"
+  fi
+  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${server_url_in}"
+  mtwilson_api_baseurl=${server_url_in}
+}
+
+configure_keystore_dir() {
+  # setup mtwilson.mc.keystore.dir
+  local configured_keystore_dir=`read_property_from_file mtwilson.tdbp.keystore.dir ${package_config_filename}`
+  package_keystore_users_dir=${configured_keystore_dir:-"${package_keystore_users_dir}"}
+  if [[ "$configured_keystore_dir" != "$package_keystore_users_dir" ]]; then
+    update_property_in_file mtwilson.tdbp.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
+  fi
+  mkdir -p ${package_keystore_users_dir}
+}
+
+setup_print_summary() {
+  echo "Requirements summary:"
+  if [ -n "$MYSQL_HOME" ]; then
+    echo "Mysql: $MYSQL_CLIENT_VERSION"
+  else
+    echo "Mysql: not found"
+  fi
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo "Java: not found"
+  fi
+  if [ -n "$GLASSFISH_HOME" ]; then
+    echo "Glassfish: $GLASSFISH_VERSION"
+  else
+    echo "Glassfish: not found"
+  fi
+}
+
+setup_env() {
+  mysql_detect > /dev/null
+  java_detect > /dev/null
+  glassfish_detect > /dev/null
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  echo "mysql=$mysql"
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+  echo "glassfish_bin=$glassfish_bin"
+  echo "glassfish=\"$glassfish\""
+}
+
+setup_interactive_install() {
+# IAW discussion 29 Aug 2012, trust dashboard now uses the API to get all information, and does not need a separate database
+#  if [ -n "$mysql" ]; then
+#    mysql_configure_connection "${package_config_filename}" mountwilson.tdbp.db
+#    mysql_create_database
+#    mysql_scripts=`list_mysql_install_scripts`
+#    mysql_install_scripts ${mysql_scripts}
+#  fi
+  configure_api_baseurl
+  configure_keystore_dir
+  if [ -n "$GLASSFISH_HOME" ]; then
+    glassfish_running
+    if [ -z "$GLASSFISH_RUNNING" ]; then
+      glassfish_start_report
+    fi    
+    webservice_uninstall "${glassfish_application_name}"
+    webservice_install "${glassfish_application_name}" "${package_dir}"/TrustDashBoard.war
+    webservice_running_report "${glassfish_application_name}"
+  fi
+}
+
+
+setup() {
+  mysql_clear; java_clear; glassfish_clear;
+  setup_env > "${package_env_filename}"
+  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
+      echo_warning "Missing one or more required packages"
+      setup_print_summary
+      exit 1
+  fi
+  setup_interactive_install
+}
+
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  version)
+        echo "${package_name}"
+	echo "Version ${VERSION:-Unknown}"
+	echo "Build ${BUILD:-Unknown}"
+        ;;
+  start)
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  stop)
+        webservice_stop_report "${glassfish_application_name}"
+        ;;
+  status)
+        glassfish_running_report
+        webservice_running_report "${glassfish_application_name}"
+        ;;
+  restart)
+        webservice_stop_report "${glassfish_application_name}"
+        sleep 2
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  glassfish-restart)
+        glassfish_restart
+        ;;
+  glassfish-stop)
+        glassfish_shutdown
+        ;;
+  setup)
+        setup
+        ;;
+  setup-env)
+  # for sysadmin convenience
+        setup_env
+        ;;
+  setup-env-write)
+  # for sysadmin convenience
+        setup_env > "${package_env_filename}"
+  #echo "Saved environment in ${myenvdir}/${package_env_filename}"
+        ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+        ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
+  uninstall)
+        datestr=`date +%Y-%m-%d.%H%M`
+        webservice_uninstall "${glassfish_application_name}"
+        if [ -f "${package_config_filename}" ]; then
+          mkdir -p "${intel_conf_dir}"
+          cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
+          echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
+        fi
+        # prevent disaster by ensuring that package_dir is inside /opt/intel
+        if [[ "${package_dir}" == /opt/intel/* ]]; then
+          rm -rf "${package_dir}"
+        fi
+	rm /usr/local/bin/${script_name}
+        ;;
+  help)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        ;;
+  *)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        exit 1
+esac
+
+exit $RETVAL

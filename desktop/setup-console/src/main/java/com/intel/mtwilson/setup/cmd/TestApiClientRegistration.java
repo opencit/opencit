@@ -1,0 +1,124 @@
+/*
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
+ */
+package com.intel.mtwilson.setup.cmd;
+
+import com.intel.mtwilson.ApiCommand;
+import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.ms.common.MSConfig;
+import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupException;
+import com.intel.mtwilson.setup.SetupWizard;
+import com.intel.mtwilson.io.Filename;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.configuration.Configuration;
+
+/**
+ *
+ * @author jbuhacoff
+ */
+public class TestApiClientRegistration implements Command {
+
+    /**
+     * Creates a new API Client in current directory, registers it with Mt Wilson (on localhost or as configured), and then checks the database for the expected record to validate that it's being created.
+     * @param args
+     * @throws Exception 
+     */
+    @Override
+    public void execute(String[] args) throws Exception {
+        Configuration serviceConf = MSConfig.getConfiguration();
+        String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), "https://"+getLocalHostAddress()+":8181/" });
+        File directory = new File(".");
+        String url = readInputStringWithPromptAndDefault("Mt Wilson URL", defaultUrl);
+        String username = readInputStringWithPrompt("Username");
+        String password = readInputStringWithPrompt("Password");
+        // create user
+        System.out.println(String.format("Creating keystore for %s in %s", username, directory.getAbsolutePath()));        
+        ApiCommand.main(new String[] { "CreateUser", directory.getAbsolutePath(), username, password });
+        File keystoreFile = new File(directory.getAbsolutePath() + File.separator + Filename.encode(username) + ".jks");
+        if( !keystoreFile.exists() ) {
+            System.out.println("Failed to create keystore "+keystoreFile.getAbsolutePath());
+            return;
+        }
+        // load the new key
+        SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
+        RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
+        // register user
+        System.out.println(String.format("Registering %s with service at %s", username, url));
+        ApiCommand.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), url, "Attestation,Whitelist", password });
+        // check database for record
+//        ApiClientBO bo = new ApiClientBO();
+//        ApiClientInfo apiClientRecord = bo.find(rsaCredentialX509.identity());
+//        ApiClientInfo apiClientRecord = findApiClientRecord(serviceConf, rsaCredentialX509.identity());
+//        if( apiClientRecord == null ) {
+        // approve user
+        approveApiClientRecord(serviceConf, rsaCredentialX509.identity());
+        System.out.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
+    }
+    
+    private void approveApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException {
+        SetupWizard wizard = new SetupWizard(conf);
+        try {
+            Connection c = wizard.getMSDatabaseConnection();        
+            PreparedStatement s = c.prepareStatement("UPDATE api_client_x509 SET enabled=b'1',status='Approved' WHERE hex(fingerprint)=?");
+            //s.setBytes(1, fingerprint);
+            s.setString(1, Hex.encodeHexString(fingerprint));
+            s.executeUpdate();
+            s.close();
+            c.close();
+        }
+        catch(SQLException e) {
+            throw new SetupException("Cannot find API Client record: "+e.getMessage(), e);
+        }        
+    }
+
+    
+    // XXX see also RemoteCommand in com.intel.mtwilson.setup (not used) and com.intel.mtwilson (in api-client)
+    private static String getLocalHostAddress() {
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            return addr.getHostAddress();
+        } catch (UnknownHostException ex) {
+            return "127.0.0.1";
+        }
+    }
+    
+    private String readInputStringWithPrompt(String prompt) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print(String.format("%s: ", prompt));
+        String input = in.readLine();
+//        in.close(); // don't close System.in !!
+        return input;
+    }
+
+    private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print(String.format("%s [%s]: ", prompt, defaultValue));
+        String input = in.readLine();
+//        in.close(); // don't close System.in !!
+        if( input == null || input.isEmpty() ) {
+            input = defaultValue;
+        }
+        return input;
+    }
+    
+    private String firstNonEmpty(String[] values) {
+        for(String value : values) {
+            if( value != null && !value.isEmpty() ) {
+                return value;
+            }
+        }
+        return null;
+    }
+}

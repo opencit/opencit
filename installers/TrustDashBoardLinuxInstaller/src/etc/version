@@ -1,0 +1,3 @@
+ARTIFACT=${project.artifactId}
+VERSION=${project.version}
+BUILD=${svn.revision}

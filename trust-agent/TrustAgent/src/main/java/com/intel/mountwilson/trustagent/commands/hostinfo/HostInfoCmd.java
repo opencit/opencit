@@ -1,0 +1,145 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.intel.mountwilson.trustagent.commands.hostinfo;
+
+import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.common.ErrorCode;
+import com.intel.mountwilson.common.ICommand;
+import com.intel.mountwilson.common.TAException;
+import com.intel.mountwilson.trustagent.data.TADataContext;
+import java.io.IOException;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ *
+ * @author dsmagadx
+ */
+public class HostInfoCmd implements ICommand {
+
+    Logger log = LoggerFactory.getLogger(getClass().getName());
+    TADataContext context = null;
+
+    public HostInfoCmd(TADataContext context) {
+        this.context = context;
+    }
+
+    @Override
+    public void execute() throws TAException {
+        try {
+
+            getOsAndVersion();
+            getBiosAndVersion();
+            if(context.getOsName() != null &&  context.getOsName().toLowerCase().contains("xenserver")){
+                context.setVmmName(context.getOsName());
+                context.setVmmVersion(context.getOsVersion());
+                log.info("VMM Name: " + context.getVmmName());
+                log.info("VMM Version: " + context.getVmmVersion());
+
+            }else{
+                getVmmAndVersion();
+            
+            }
+
+
+        } catch (Exception ex) {
+            throw new TAException(ErrorCode.ERROR, "Error while getting OS details.", ex);
+        }
+
+    }
+
+    /*
+    Sample response of "lsb_release -a" 
+    No LSB modules are available.
+    Distributor ID: Ubuntu
+    Description:    Ubuntu 11.10
+    Release:        11.10
+    Codename:       oneiric
+     */
+    
+    private void getOsAndVersion() throws TAException, IOException {
+        List<String> result = CommandUtil.runCommand("lsb_release -a");
+
+        for (String str : result) {
+            String[] parts = str.split(":");
+
+            if (parts != null && parts.length > 1) {
+                if (parts[0].trim().equalsIgnoreCase("Distributor ID")) {
+                    if (parts[1] != null) {
+                        context.setOsName(parts[1].trim());
+                    }
+                } else if (parts[0].trim().equalsIgnoreCase("Release")) {
+                    if (parts[1] != null) {
+                        context.setOsVersion(parts[1].trim());
+                    }
+
+                }
+            }
+        }
+        log.info("OS Name: " + context.getOsName());
+        log.info("OS Version: " + context.getOsVersion());
+
+    }
+
+    /*
+     * Sample response of dmidecode -s bios-vendor -> Intel Corp. Sample
+     * response of dmidecode -s bios-vendor -> S5500.86B.01.00.0060.090920111354
+     */
+    private void getBiosAndVersion() throws TAException, IOException {
+
+        List<String> result = CommandUtil.runCommand("dmidecode -s bios-vendor");
+        if (result != null && result.size() > 0) {
+            context.setBiosOem(result.get(0));
+        }
+        log.info("Bios OEM: " + context.getBiosOem());
+
+
+        result = CommandUtil.runCommand("dmidecode -s bios-version");
+
+        if (result != null && result.size() > 0) {
+            context.setBiosVersion(result.get(0));
+        }
+        log.info("Bios Version: " + context.getBiosVersion());
+
+
+    }
+    /*
+     * Sample response of "virsh version" command: 
+     * root@mwdevubuk02h:~# virsh version 
+     * Compiled against library: libvir 0.9.2 
+     * Using library: libvir 0.9.2 
+     * Using API: QEMU 0.9.2 
+     * Running hypervisor: QEMU 0.14.1
+     */
+
+    private void getVmmAndVersion() throws TAException, IOException {
+
+        List<String> result = CommandUtil.runCommand("virsh version");
+
+        for (String str : result) {
+            String[] parts = str.split(":");
+
+            if (parts != null && parts.length > 1) {
+                if (parts[0].trim().equalsIgnoreCase("Running hypervisor")) {
+                    if (parts[1] != null) {
+                        String[] subParts = parts[1].trim().split(" ");
+                        if (subParts[0] != null) {
+                            context.setVmmName(subParts[0]);
+                        }
+                        if (subParts[1] != null) {
+                            context.setVmmVersion(subParts[1]);
+                        }
+                    }
+                }
+            }
+            log.info("VMM Name: " + context.getVmmName());
+            log.info("VMM Version: " + context.getVmmVersion());
+
+        }
+    }
+
+    }

@@ -1,0 +1,203 @@
+#!/bin/bash
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+# SCRIPT CONFIGURATION:
+share_dir=/usr/local/share/mtwilson/util
+apiclient_dir=/usr/local/share/mtwilson/apiclient
+setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+apiclient_java=${apiclient_dir}/java
+env_dir=/usr/local/share/mtwilson/env
+#apiclient_shell=${apiclient_dir}/shell
+mysql_required_version=5.0
+glassfish_required_version=3.0
+java_required_version=1.6.0_29
+
+# FUNCTION LIBRARY and VERSION INFORMATION
+if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
+if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
+shell_include_files ${env_dir}/*
+#if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
+
+call_apiclient() {
+  java_require
+  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.ApiCommand
+  $java -cp "$APICLIENT_JARS" $mainclass $@
+}
+
+call_remoteclient() {
+  java_require
+  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.RemoteCommand
+  $java -cp "$APICLIENT_JARS" $mainclass $@
+}
+
+call_rsacommand() {
+  java_require
+  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.crypto.RsaCommand
+  $java -cp "$APICLIENT_JARS" $mainclass $@
+}
+
+call_setupcommand() {
+  java_require
+  SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.setup.TextConsole
+  $java -cp "$SETUP_CONSOLE_JARS" $mainclass $@
+}
+
+find_ctl_commands() {
+  pcactl=`which pcactl 2>/dev/null`
+  msctl=`which msctl 2>/dev/null`
+  wlmctl=`which wlmctl 2>/dev/null`
+  asctl=`which asctl 2>/dev/null`
+  mcctl=`which mcctl 2>/dev/null`
+  wpctl=`which wpctl 2>/dev/null`
+  tdctl=`which tdctl 2>/dev/null`
+}
+
+setup() {
+  java_detect; java_env_report > ${env_dir}/java
+  glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
+  find_ctl_commands
+
+  # TODO: prompt for server settings (move from mtwilson-server installer setup.sh to here)
+  # create glassfish ssl cert (TODO: move to a "glassfish" control script that should be created to make glassfish management easier... so instead of "mtwilson glassfish-stop" it would be just "glassfish stop"  etc)
+  if [ -n "${MTWILSON_SERVER}" ]; then
+    glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+  else
+    glassfish_create_ssl_cert_prompt
+  fi
+  # setup web services:
+  if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
+  if [ -n "$asctl" ]; then $asctl setup; fi
+  if [ -n "$msctl" ]; then $msctl setup; fi
+  if [ -n "$wlmctl" ]; then $wlmctl setup; fi
+  if [ -n "$mcctl" ]; then $mcctl setup; fi
+  if [ -n "$wpctl" ]; then $wpctl setup; fi
+  if [ -n "$tdctl" ]; then $tdctl setup; fi
+
+  # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
+  shift
+  call_setupcommand EncryptDatabase
+}
+
+all_status() {
+  find_ctl_commands
+  if [ -n "$pcactl" ]; then $pcactl status; fi
+  if [ -n "$asctl" ]; then $asctl status; fi
+  if [ -n "$msctl" ]; then $msctl status; fi
+  if [ -n "$wlmctl" ]; then $wlmctl status; fi
+  if [ -n "$mcctl" ]; then $mcctl status; fi
+  if [ -n "$wpctl" ]; then $wpctl status; fi
+  if [ -n "$tdctl" ]; then $tdctl status; fi
+}
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  version)
+        echo "MtWilson Linux Utility"
+	echo "Version ${VERSION}"
+	echo "Build ${BUILD}"
+        ;;
+  glassfish-detect)
+        java_require
+        glassfish_detect ${2:-$glassfish_required_version}
+        glassfish_env_report
+        ;;
+  glassfish-start)
+        java_require; glassfish_require
+        glassfish_start_report
+        ;;
+  glassfish-stop)
+        java_require; glassfish_require
+        glassfish_shutdown
+        ;;
+  glassfish-restart)
+        java_require; glassfish_require
+        glassfish_restart
+        ;;
+  glassfish-status)
+        java_require; glassfish_require
+        glassfish_running_report
+        glassfish_sslcert_report
+        ;;
+  glassfish-sslcert)
+        glassfish_create_ssl_cert_prompt
+        ;;
+  mysql-detect)
+        mysql_detect ${2:-$mysql_required_version}
+        mysql_env_report
+        ;;
+  mysql-sslcert)
+        mysql_create_ca
+        mysql_create_ssl "MySQL Server"
+        mysql_create_ssl "Attestation Service"
+        mysql_create_ssl "Management Service"
+        mysql_create_ssl "Whitelist Service"
+        mysql_create_ssl "Trust Dashboard"
+        ;;
+  java-detect)
+        java_detect ${2:-$java_required_version}
+        java_env_report
+        ;;
+  api)
+        shift
+        call_apiclient $@
+        ;;
+  remote)
+        shift
+        call_remoteclient $@
+        ;;
+  rsa)
+        shift
+        call_rsacommand $@
+        ;;
+  setup)
+        if [ $# -gt 1 ]; then
+          shift
+          call_setupcommand $@
+        else
+          setup
+        fi
+        ;;
+  status)
+        all_status
+        ;;
+  uninstall)
+        java_require; glassfish_require
+        echo "Stopping Glassfish..."
+        glassfish_shutdown
+        # application files
+        echo "Removing Glassfish in /usr/share/glassfish3..."
+        rm -rf /usr/share/glassfish3
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
+        rm -rf /opt/intel/cloudsecurity
+        echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
+        rm -rf /usr/local/share/mtwilson
+        # configuration files
+        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
+        rm -rf /etc/intel/cloudsecurity
+        # data files
+        echo "Removing Mt Wilson data in /var/opt/intel..."
+        rm -rf /var/opt/intel
+        # control scripts
+        echo "Removing Mt Wilson control scripts..."
+        echo asctl wlmctl msctl pcactl mcctl wpctl tdctl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+        # java:  rm -rf /usr/share/jdk1.6.0_29
+        echo_success "Done"
+        echo_warning "Mt Wilson database in MySQL has not been removed"
+        ;;
+  help)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        ;;
+  *)
+        echo $"Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        exit 1
+esac
+
+exit $RETVAL

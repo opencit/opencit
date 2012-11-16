@@ -1,0 +1,324 @@
+#!/bin/bash
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+# SCRIPT CONFIGURATION:
+script_name=asctl
+intel_conf_dir=/etc/intel/cloudsecurity
+package_name=attestation-service
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+package_install_filename=${package_dir}/${package_name}.install
+mysql_required_version=5.0
+mysql_setup_log=/var/log/intel.${package_name}.install.log
+mysql_script_dir=${package_dir}/database
+glassfish_required_version=3.0
+glassfish_application_name=AttestationService
+java_required_version=1.6.0_29
+
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
+if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+shell_include_files "${package_env_filename}" "${package_install_filename}"
+
+
+list_mysql_install_scripts() {
+    echo ${mysql_script_dir}/20120327214603_create_changelog.sql
+    echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
+#    echo ${mysql_script_dir}/20120403185252_add_procedure_Insert_GKV_Record.sql
+#    echo 20120405021354_add_procedure_authenticate_user.sql
+    echo ${mysql_script_dir}/20120328173612_ta_db-0.5.1-data.sql
+#    echo ${mysql_script_dir}/20120405161725_add_procedure_getuserfirstlastnames.sql
+    echo ${mysql_script_dir}/201207101_saml_cache_patch-ta_db-0.5-to-0.5.2.sql
+    echo ${mysql_script_dir}/20120829_audit_log.sql
+    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+    echo ${mysql_script_dir}/20120920085200_patch_rc3.sql
+}
+
+
+list_mysql_upgrade_scripts() {
+    echo ${mysql_script_dir}/20120327214603_create_changelog.sql
+    echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
+    echo ${mysql_script_dir}/20120328172802_patch-ta_db-0.5-to-0.5.1.sql
+    echo ${mysql_script_dir}/20120403185252_add_procedure_Insert_GKV_Record.sql
+    echo ${mysql_script_dir}/201207101_saml_cache_patch-ta_db-0.5-to-0.5.2.sql
+    echo ${mysql_script_dir}/20120829_audit_log.sql
+    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+}
+
+
+# This function downloads the Privacy CA's AIK Certificate and EK Certificate.
+# TODO XXX this should probably be ported to the Attestation Service Java code
+# so it will work on any platform...
+# Environment:
+#   - if the configuration file includes "privacyca.server" then this address
+#     will be used. otherwise, the user will be prompted for this value and it
+#     will be saved into the configuration file.
+# Parameters: None
+# Input: Privacy CA Server and Password
+# Output: PrivacyCA.cer and Endorsement.cer are saved into the config dir
+download_privacyca_certs() {
+  local privacyca_server="${PRIVACYCA_SERVER}"
+  local privacyca_username="${PRIVACYCA_USERNAME}"
+  local privacyca_password="${PRIVACYCA_PASSWORD}"
+  local privacyca_server_config
+  if [ -z "${privacyca_server}" ]; then
+    privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
+    privacyca_server=${privacyca_server_config}
+    prompt_with_default privacyca_server "Privacy CA Server:"
+  fi
+
+  if [ -n "${privacyca_server}" ]; then
+    # check if the privacy ca password is saved in a properties file
+    privacyca_username=${privacyca_username:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
+    privacyca_password=${privacyca_password:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`}
+    echo "Login to download the Privacy CA client files"
+    if [ -z "${privacyca_username}" ]; then
+      prompt_with_default privacyca_username "Username:" ${privacyca_username}
+    fi
+    if [ -z "${privacyca_password}" ]; then
+      prompt_with_default_password privacyca_password "Password:" ${privacyca_password}
+    fi
+    
+    echo "Connecting to Privacy CA..."
+
+    # zip file downloaded to /tmp so that if client and server are same machine, the download won't clobber the server's copy of clientfiles.zip in /etc
+    local zipfile=/tmp/clientfiles.zip
+    touch $zipfile
+    chmod 600 $zipfile
+    # XXX password in URL is insecure in systems that have user accounts or software which should not know this password
+    wget --no-proxy --no-check-certificate -q "https://${privacyca_server}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${privacyca_username}&password=${privacyca_password}" -O ${zipfile}
+    if [ -s ${zipfile} ]; then
+      mkdir -p /tmp/clientfiles.x
+      chmod -R 600 /tmp/clientfiles.x
+      unzip -o ${zipfile} -d /tmp/clientfiles.x
+      rm -f ${zipfile}
+      glassfish_permissions /tmp/clientfiles.x
+      mv /tmp/clientfiles.x/hisprovisioner.properties ${intel_conf_dir}/hisprovisioner.properties
+      mv /tmp/clientfiles.x/PrivacyCA.cer ${intel_conf_dir}/PrivacyCA.cer
+      mv /tmp/clientfiles.x/endorsement.p12 ${intel_conf_dir}/endorsement.p12
+      rm -r /tmp/clientfiles.x
+      # if we got here with user input then save the Privacy CA server name in properties file
+      if [ -z "${privacyca_server_config}" ]; then
+        update_property_in_file privacyca.server "${package_config_filename}" "${privacyca_server}"
+      fi
+      # use the password in hisprovisioner.propeties to extract the Endorsement certificate from endorsement.p12, then delete the password
+      if [ -f "${intel_conf_dir}/endorsement.p12" ]; then
+        export endorsement_password=`read_property_from_file EndorsementP12Pass ${intel_conf_dir}/hisprovisioner.properties`
+        openssl pkcs12 -in ${intel_conf_dir}/endorsement.p12 -out ${intel_conf_dir}/privacyca-endorsement.pem -nokeys -passin env:endorsement_password
+        export endorsement_password=
+        rm ${intel_conf_dir}/hisprovisioner.properties
+        rm ${intel_conf_dir}/endorsement.p12
+        openssl x509 -inform pem -in ${intel_conf_dir}/privacyca-endorsement.pem -out ${intel_conf_dir}/privacyca-endorsement.crt -outform der
+        chmod 600 ${intel_conf_dir}/privacyca-endorsement.crt
+        glassfish_permissions ${intel_conf_dir}/privacyca-endorsement.crt
+        rm ${intel_conf_dir}/privacyca-endorsement.pem
+      else
+        echo_failure "Cannot unzip package from Privacy CA"
+      fi
+    else
+      echo_failure "Cannot connect to Privacy CA: ${privacyca_server}"
+    fi
+  else
+    echo_failure "PrivacyCA Server and Password are required in order to download certificates"
+  fi
+  
+}
+
+
+create_saml_key() {
+  java_require
+  # TODO:  keystore password can be set in environment variable and passed like env:varname (see docs.. only in java 1.7 did they copy this from openssl)... same for key password
+  # windows path: C:\Intel\CloudSecurity\SAML.jks
+  # the saml.keystore.file property is just a file name and not an absolute path
+  # TODO XXX: use convention over configuration... document that the SAML keystore file is a file called SAML.jks inside the
+  # configuration directory, and use that fact everywhere instead of reading a configuration.
+  saml_keystore_file=`read_property_from_file saml.keystore.file ${package_config_filename}`
+  saml_keystore_password=`read_property_from_file saml.keystore.password ${package_config_filename}`
+  saml_key_alias=`read_property_from_file saml.key.alias ${package_config_filename}`
+  saml_key_password=`read_property_from_file saml.key.password ${package_config_filename}`
+  # prepend the configuration directory to the keystore filename
+  saml_keystore_file=${intel_conf_dir}/${saml_keystore_file:-"SAML.jks"}
+  saml_keystore_password=${saml_keystore_password:-"changeit"}
+  saml_key_alias=${saml_key_alias:-"samlkey1"}
+  saml_key_password=${saml_key_password:-"changeit"}
+  keytool=${JAVA_HOME}/bin/keytool
+  samlkey_exists=`$keytool -list -keystore ${saml_keystore_file} -storepass ${saml_keystore_password} | grep PrivateKeyEntry | grep "^${saml_key_alias}"`
+  if [ -n "${samlkey_exists}" ]; then
+    echo "SAML key with alias ${saml_key_alias} already exists in ${saml_keystore_file}"
+    # TODO: check if the key is at least 2048 bits. if not, prompt to create a new key.
+  else
+    $keytool -genkey -alias ${saml_key_alias} -keyalg RSA  -keysize 2048 -keystore ${saml_keystore_file} -storepass ${saml_keystore_password} -dname "CN=AttestationService, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${saml_key_password}
+  fi
+  chmod 600 ${saml_keystore_file}
+  # export the SAML certificate so it can be easily provided to API clients
+  $keytool -export -alias ${saml_key_alias} -keystore ${saml_keystore_file}  -storepass ${saml_keystore_password} -file ${intel_conf_dir}/saml.cer
+  chmod 600 ${intel_conf_dir}/saml.cer
+
+  #saml.issuer=https://localhost:8181
+  local saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
+   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
+}
+
+create_data_encryption_key() {
+  # first check to see if there is a key already set
+  data_encryption_key=`read_property_from_file mtwilson.as.dek ${package_config_filename}`
+  if [[ -n "${data_encryption_key}" ]]; then
+    echo "Data encryption key already exists"
+  else
+    echo "Creating data encryption key"
+    mtwilson setup EncryptDatabase
+  fi
+}
+
+setup_print_summary() {
+  echo "Requirements summary:"
+  if [ -n "$MYSQL_HOME" ]; then
+    echo "Mysql: $MYSQL_CLIENT_VERSION"
+  else
+    echo "Mysql: not found"
+  fi
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo "Java: not found"
+  fi
+  if [ -n "$GLASSFISH_HOME" ]; then
+    echo "Glassfish: $GLASSFISH_VERSION"
+  else
+    echo "Glassfish: not found"
+  fi
+}
+
+setup_env() {
+  mysql_detect > /dev/null
+  java_detect > /dev/null
+  glassfish_detect > /dev/null
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  echo "mysql=$mysql"
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+  echo "glassfish_bin=$glassfish_bin"
+  echo "glassfish=\"$glassfish\""
+}
+
+
+setup_interactive_install() {
+  if [ -n "$mysql" ]; then
+    mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+    mysql_configure_connection "${package_dir}/audit-handler.properties.example" mountwilson.audit.db
+    mysql_create_database
+    mysql_scripts=`list_mysql_install_scripts`
+    mysql_install_scripts ${mysql_scripts}
+  fi
+  create_saml_key
+  download_privacyca_certs
+  create_data_encryption_key
+  if [ -n "$GLASSFISH_HOME" ]; then
+    glassfish_running
+    if [ -z "$GLASSFISH_RUNNING" ]; then
+      glassfish_start_report
+    fi    
+    webservice_uninstall "${glassfish_application_name}"
+    webservice_install "${glassfish_application_name}" "${package_dir}"/AttestationService.war
+    webservice_running_report "${glassfish_application_name}"
+  fi
+}
+
+setup() {
+  mysql_clear; java_clear; glassfish_clear;
+  setup_env > "${package_env_filename}"
+  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
+      echo_warning "Missing one or more required packages"
+      setup_print_summary
+      exit 1
+  fi
+  setup_interactive_install
+}
+
+
+
+RETVAL=0
+
+
+
+
+# See how we were called.
+case "$1" in
+  version)
+        echo "${package_name}"
+	echo "Version ${VERSION:-Unknown}"
+	echo "Build ${BUILD:-Unknown}"
+        ;;
+  start)
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  stop)
+        webservice_stop_report "${glassfish_application_name}"
+        ;;
+  status)
+        glassfish_running_report
+        webservice_running_report "${glassfish_application_name}"
+        ;;
+  restart)
+        webservice_stop_report "${glassfish_application_name}"
+        sleep 2
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  glassfish-restart)
+        glassfish_restart
+        ;;
+  glassfish-stop)
+        glassfish_shutdown
+        ;;
+  setup)
+        setup
+        ;;
+  setup-env)
+  # for sysadmin convenience
+        setup_env
+        ;;
+  setup-env-write)
+  # for sysadmin convenience
+        setup_env > "${package_env_filename}"
+        ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+        ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
+  uninstall)
+        datestr=`date +%Y-%m-%d.%H%M`
+        webservice_uninstall "${glassfish_application_name}"
+        if [ -f "${package_config_filename}" ]; then
+          mkdir -p "${intel_conf_dir}"
+          cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
+          echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
+        fi
+        # prevent disaster by ensuring that package_dir is inside /opt/intel
+        if [[ "${package_dir}" == /opt/intel/* ]]; then
+          rm -rf "${package_dir}"
+        fi
+	rm /usr/local/bin/${script_name}
+        ;;
+  saml-createkey)
+        create_saml_key
+        ;;
+  privacyca-setup)
+        download_privacyca_certs
+        ;;
+  help)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall|saml-createkey|privacyca-setup}"
+        ;;
+  *)
+        echo $"Usage: ${script_name} {setup|start|stop|status|uninstall|saml-createkey|privacyca-setup}"
+        exit 1
+esac
+
+exit $RETVAL

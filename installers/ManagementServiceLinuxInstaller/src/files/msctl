@@ -1,0 +1,277 @@
+#!/bin/bash
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+# SCRIPT CONFIGURATION:
+script_name=msctl
+intel_conf_dir=/etc/intel/cloudsecurity
+package_name=management-service
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+package_install_filename=${package_dir}/${package_name}.install
+package_keystore_users_dir=/var/opt/intel/${package_name}/users
+mysql_required_version=5.0
+mysql_setup_log=/var/log/intel.${package_name}.install.log
+mysql_script_dir=${package_dir}/database
+glassfish_required_version=3.0
+glassfish_application_name=ManagementService
+java_required_version=1.6.0_29
+
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
+if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+shell_include_files "${package_env_filename}" "${package_install_filename}"
+
+
+list_mysql_install_scripts() {
+    echo ${mysql_script_dir}/bootstrap.sql
+    echo ${mysql_script_dir}/20120829_audit_log.sql
+    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+    echo ${mysql_script_dir}/20120920090600_patch_rc3.sql
+}
+
+configure_cloudportal_database() {
+  echo "Configuring Trust Dashboard Database..."
+  # mtwilson.ms.portalDBConnectionString=jdbc:mysql://10.1.71.90:3306/cloudportal
+  local portal_db_server portal_db_host portal_db_port
+  if [ -n "${mysql_hostname}" ]; then
+    portal_db_server="${mysql_hostname}:${mysql_portnum:-3306}"
+  else
+    prompt_with_default portal_db_host "Trust Dashboard Database Server:" "127.0.0.1"
+    prompt_with_default portal_db_port "Trust Dashboard Database Port:" "3306"
+    portal_db_server="${portal_db_host}:${portal_db_port}"
+  fi
+  update_property_in_file mtwilson.ms.portalDBConnectionString "${package_config_filename}" jdbc:mysql://${portal_db_server}/cloudportal
+}
+
+configure_keystore_dir() {
+  # setup mtwilson.mc.keystore.dir
+  local configured_keystore_dir=`read_property_from_file mtwilson.ms.keystore.dir ${package_config_filename}`
+  package_keystore_users_dir=${configured_keystore_dir:-"${package_keystore_users_dir}"}
+  if [[ "$configured_keystore_dir" != "$package_keystore_users_dir" ]]; then
+    update_property_in_file mtwilson.ms.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
+  fi
+  mkdir -p ${package_keystore_users_dir}
+}
+
+configure_api_baseurl() {
+  # setup mtwilson.api.baseurl
+  if [ -n "${MTWILSON_SERVER}" ]; then
+    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
+  else
+    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+    local input_api_baseurl
+    prompt_with_default input_api_baseurl "Mt Wilson Server:" "${configured_server_url}"
+    if [[ "$input_api_baseurl" == "http*" ]]; then
+      mtwilson_api_baseurl="$input_api_baseurl"
+    else
+      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
+    fi
+  fi
+  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
+}
+
+
+# Must be invoked AFTER mysql_configure_connection
+bootstrap_ms_internal_user() {
+  echo "Configuring Management Service API client..."
+
+  local configured_keystore_dir=`read_property_from_file mtwilson.ms.keystore.dir ${package_config_filename}`
+  package_keystore_users_dir=${package_keystore_users_dir:-"${configured_keystore_dir}"}
+  
+  ms_key_alias=`read_property_from_file mtwilson.api.key.alias ${package_config_filename}`
+  ms_key_password=`read_property_from_file mtwilson.api.key.password ${package_config_filename}`
+  export ms_key_alias=${ms_key_alias:-"ManagementServiceAutomation"}
+  export ms_key_password=${ms_key_password:-"password"}
+
+  local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+  mtwilson_api_baseurl=${mtwilson_api_baseurl:-"${configured_api_baseurl}"}
+
+  # run the bootstrap command
+  mtwilson=`which mtwilson 2>/dev/null`
+  if [ -z "$mtwilson" ]; then
+    echo_failure "Missing mtwilson command line tool"
+    return 1
+  fi
+  # passing the password securely to the tool via the environment variable (must be exported)
+  mtwilson api CreateUser ${package_keystore_users_dir} ${ms_key_alias} env:ms_key_password
+  mtwilson api RegisterUser ${package_keystore_users_dir}/${ms_key_alias}.jks "${mtwilson_api_baseurl}" Attestation,Whitelist env:ms_key_password
+  bootstrap_ms_approve_user ${package_keystore_users_dir} "${ms_key_alias}" "${ms_key_password}"
+}
+
+# Parameters:
+# - User directory (such as /var/opt/intel/management-console/users)
+# - Key alias (such as "admin", corresponding to "admin.jks" in the user directory)
+# - Key password
+bootstrap_ms_approve_user() {
+  java_require
+  keytool=${JAVA_HOME}/bin/keytool
+  local key_dir="${1}"
+  local key_alias="${2}"
+  local key_password="${3}"
+  local key_file="${key_dir}/${key_alias}.jks"
+  local key_cert="${key_dir}/${key_alias}.crt"
+
+  mtwilson=`which mtwilson 2>/dev/null`
+  if [ -z "$mtwilson" ]; then
+    echo_failure "Missing mtwilson command line tool"
+    return 1
+  fi
+  ## XXX technically correct:
+  #local encoded_key_alias=`echo "${key_alias}" | mtwilson rsa EncodeUsername -`
+  # XXX there are too many places where filename is just alias and not encoded, so if it exists we just use it:
+  if [ -f "${key_dir}/${key_alias}" ]; then encoded_key_alias="${key_alias}"; else encoded_key_alias=`echo "${key_alias}" | $mtwilson rsa EncodeUsername -`; fi
+
+  # XXX TODO: unsafe to pass the password on command line, but keytool does not support getting it from environment. maybe add a command to RsaUtil/RsaCommmand in api client for exporting a certificate to replace the keytool here?
+  $keytool -export -alias ${key_alias} -keystore ${key_dir}/${encoded_key_alias}.jks  -storepass ${key_password} -file ${key_dir}/${encoded_key_alias}.crt
+  local datestr=`date +%Y-%m-%d.%H%M`
+  local cert_id=`shasum -a 256 -b ${key_dir}/${encoded_key_alias}.crt | awk '{ print $1 }'`
+  echo "UPDATE api_client_x509 SET enabled=b'1', status='APPROVED', comment='Approved by `whoami` @ Management Service; do not remove' WHERE fingerprint=UNHEX('$cert_id')" > ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
+  mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+  mysql_install_scripts ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
+}
+
+setup_print_summary() {
+  echo "Requirements summary:"
+  if [ -n "$MYSQL_HOME" ]; then
+    echo "Mysql: $MYSQL_CLIENT_VERSION"
+  else
+    echo "Mysql: not found"
+  fi
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo "Java: not found"
+  fi
+  if [ -n "$GLASSFISH_HOME" ]; then
+    echo "Glassfish: $GLASSFISH_VERSION"
+  else
+    echo "Glassfish: not found"
+  fi
+}
+
+setup_env() {
+  mysql_detect > /dev/null
+  java_detect > /dev/null
+  glassfish_detect > /dev/null
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  echo "mysql=$mysql"
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+  echo "glassfish_bin=$glassfish_bin"
+  echo "glassfish=\"$glassfish\""
+}
+
+setup_interactive_install() {
+  if [ -n "$mysql" ]; then
+    mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+    mysql_create_database
+    mysql_scripts=`list_mysql_install_scripts`
+    mysql_install_scripts ${mysql_scripts}
+  fi
+  configure_cloudportal_database
+  configure_api_baseurl
+  configure_keystore_dir
+  if [ -n "$GLASSFISH_HOME" ]; then
+    glassfish_running
+    if [ -z "$GLASSFISH_RUNNING" ]; then
+      glassfish_start_report
+    fi    
+    webservice_uninstall "${glassfish_application_name}"
+    webservice_install "${glassfish_application_name}" "${package_dir}"/ManagementService.war
+    webservice_running_report "${glassfish_application_name}"
+  fi
+  bootstrap_ms_internal_user
+}
+
+
+setup() {
+  mysql_clear; java_clear; glassfish_clear;
+  setup_env > "${package_env_filename}"
+  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
+      echo_warning "Missing one or more required packages"
+      setup_print_summary
+      exit 1
+  fi
+  setup_interactive_install
+}
+
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  version)
+        echo "${package_name}"
+	echo "Version ${VERSION:-Unknown}"
+	echo "Build ${BUILD:-Unknown}"
+        ;;
+  start)
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  stop)
+        webservice_stop_report "${glassfish_application_name}"
+        ;;
+  status)
+        glassfish_running_report
+        webservice_running_report "${glassfish_application_name}"
+        ;;
+  restart)
+        webservice_stop_report "${glassfish_application_name}"
+        sleep 2
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  glassfish-restart)
+        glassfish_restart
+        ;;
+  glassfish-stop)
+        glassfish_shutdown
+        ;;
+  approve-user)
+        shift
+        bootstrap_ms_approve_user "$@"
+        ;;
+  setup)
+        setup
+        ;;
+  setup-env)
+  # for sysadmin convenience
+        setup_env
+        ;;
+  setup-env-write)
+  # for sysadmin convenience
+        setup_env > "${package_env_filename}"
+  #echo "Saved environment in ${myenvdir}/${package_env_filename}"
+        ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+        ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
+  uninstall)
+        datestr=`date +%Y-%m-%d.%H%M`
+        webservice_uninstall "${glassfish_application_name}"
+        mkdir -p "${intel_conf_dir}"
+        cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
+        echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
+        # prevent disaster by ensuring that package_dir is inside /opt/intel
+        if [[ "${package_dir}" == /opt/intel/* ]]; then
+          rm -rf "${package_dir}"
+        fi
+	rm /usr/local/bin/${script_name}
+        ;;
+  help)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        ;;
+  *)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        exit 1
+esac
+
+exit $RETVAL

@@ -1,0 +1,184 @@
+#!/bin/bash
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+# SCRIPT CONFIGURATION:
+script_name=pcactl
+intel_conf_dir=/etc/intel/cloudsecurity
+package_name=privacyca
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+package_install_filename=${package_dir}/${package_name}.install
+#package_name_rpm=AttestationService
+#package_name_deb=attestationservice
+#package_setup_cmd="asctl setup"
+glassfish_required_version=3.0
+glassfish_parent_dir=/usr/share
+#tomcat_required_version=6.0.29
+#tomcat_parent_dir=/usr/lib
+#tomcat_name=apache-tomcat-6.0.29
+java_required_version=1.6.0_29
+#APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev"
+#APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
+glassfish_application_name=HisPrivacyCAWebServices2
+
+
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
+if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+shell_include_files "${package_env_filename}" "${package_install_filename}"
+
+configure_privacyca_url() {
+  # PrivacyCaUrl = https://privacyca.server.com:8181/HisPrivacyCAWebServices2
+  local privacyca_server privacyca_url
+  if [ -n "$MTWILSON_SERVER" ]; then
+    privacyca_server="$MTWILSON_SERVER"
+  else
+    prompt_with_default privacyca_server "Privacy CA Server:" 127.0.0.1
+  fi
+  privacyca_url="https://${privacyca_server}:8181/HisPrivacyCAWebServices2"
+  update_property_in_file PrivacyCaUrl "${intel_conf_dir}/privacyca-client.properties" "${privacyca_url}"
+  # Now prompt for the client files download username and password
+  local privacyca_download_username privacyca_download_password
+  echo "You need to set a username and password for Trust Agents to download the Privacy CA client files."
+  prompt_with_default privacyca_download_username "Download Username:" admin
+  prompt_with_default_password privacyca_download_password "Download Password:" mountwilson
+  update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${privacyca_download_username}"
+  update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${privacyca_download_password}"
+}
+
+setup_print_summary() {
+  echo "Requirements summary:"
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo "Java: not found"
+  fi
+  if [ -n "$GLASSFISH_HOME" ]; then
+    echo "Glassfish: $GLASSFISH_VERSION"
+  else
+    echo "Glassfish: not found"
+  fi
+}
+
+setup_env() {
+  java_detect > /dev/null
+  glassfish_detect > /dev/null
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  echo "mysql=$mysql"
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+  echo "glassfish_bin=$glassfish_bin"
+  echo "glassfish=\"$glassfish\""
+}
+
+setup_interactive_install() {
+  configure_privacyca_url
+  if [ -n "$GLASSFISH_HOME" ]; then
+    glassfish_running
+    if [ -z "$GLASSFISH_RUNNING" ]; then
+      glassfish_start_report
+    fi    
+    webservice_uninstall "${glassfish_application_name}"
+    webservice_install "${glassfish_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
+    webservice_running_report "${glassfish_application_name}"
+    protect_privacyca_files
+  fi
+}
+
+
+setup() {
+  mysql_clear; java_clear; glassfish_clear;
+  setup_env > "${package_env_filename}"
+  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+      echo_warning "Missing one or more required packages"
+      setup_print_summary
+      exit 1
+  fi
+  setup_interactive_install
+}
+
+# The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
+protect_privacyca_files() {
+  local PRIVACYCA_FILES="${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/PrivacyCA.properties ${intel_conf_dir}/clientfiles ${intel_conf_dir}/clientfiles.zip ${intel_conf_dir}/cacerts"
+  chmod 600 $PRIVACYCA_FILES
+  glassfish_permissions $PRIVACYCA_FILES
+}
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  version)
+        echo "${package_name}"
+	echo "Version ${VERSION:-Unknown}"
+	echo "Build ${BUILD:-Unknown}"
+        ;;
+  start)
+        webservice_start_report "${glassfish_application_name}"
+        protect_privacyca_files
+        ;;
+  stop)
+        webservice_stop_report "${glassfish_application_name}"
+        ;;
+  status)
+        glassfish_running_report
+        webservice_running_report "${glassfish_application_name}"
+        ;;
+  restart)
+        webservice_stop_report "${glassfish_application_name}"
+        sleep 2
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  glassfish-restart)
+        glassfish_restart
+        ;;
+  glassfish-stop)
+        glassfish_shutdown
+        ;;
+  setup)
+        setup
+        ;;
+  setup-env)
+  # for sysadmin convenience
+        setup_env
+        ;;
+  setup-env-write)
+  # for sysadmin convenience
+        setup_env > "${package_env_filename}"
+  #echo "Saved environment in ${myenvdir}/${package_env_filename}"
+        ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+        ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
+  uninstall)
+        datestr=`date +%Y-%m-%d.%H%M`
+        webservice_uninstall "${glassfish_application_name}"
+        if [ -f "${package_config_filename}" ]; then
+          mkdir -p "${intel_conf_dir}"
+          cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
+          echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
+        fi
+        # prevent disaster by ensuring that package_dir is inside /opt/intel
+        if [[ "${package_dir}" == /opt/intel/* ]]; then
+          rm -rf "${package_dir}"
+        fi
+	rm /usr/local/bin/${script_name}
+        ;;
+  help)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        ;;
+  *)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        exit 1
+esac
+
+exit $RETVAL

@@ -1,0 +1,191 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>MtWilsonLinuxUtil</artifactId>
+
+  <packaging>pom</packaging>
+  <name>Linux Utility</name>
+  <description>Self-extracting executable that installs Linux utility functions for Mt Wilson control scripts.</description>
+
+    <parent>
+	<groupId>com.intel.mtwilson.linux</groupId>
+	<artifactId>mtwilson-linux</artifactId>
+	<version>0.5.4-SNAPSHOT</version>
+    </parent>
+  
+  <properties>
+    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
+  </properties>
+ 
+  <dependencies>
+ <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>api-client</artifactId>
+      <version>${project.parent.version}</version>
+      <type>jar</type>
+      <!--<classifier>with-dependencies</classifier>-->
+    </dependency>
+    
+ <!-- this is the setup console -->
+    <dependency>
+      <groupId>com.intel.mtwilson.desktop</groupId>
+      <artifactId>setup-console</artifactId>
+      <version>${project.parent.version}</version>
+      <type>jar</type>
+      <classifier>with-dependencies</classifier>
+    </dependency>
+  </dependencies>
+ 
+ 
+  <build>
+    <plugins>
+      <!-- begin copy other resources plugin -->
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.5</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${makeself.directory}</outputDirectory>
+		<resources>
+		    <resource>
+			<directory>src/etc</directory>
+			<includes>
+			    <include>version</include>
+			</includes>
+			<filtering>true</filtering>
+		    </resource>
+		    <resource>
+			<directory>src/files</directory>
+			<includes>
+			    <include>**/*</include>
+			</includes>
+			<filtering>false</filtering>
+		    </resource>
+		</resources>
+            </configuration>            
+          </execution>
+        </executions>
+      </plugin>
+      <!-- end copy other resources plugin -->
+      <!-- begin copy dependencies plugin -->
+	<plugin>
+	    <artifactId>maven-dependency-plugin</artifactId>
+	    <version>2.4</version>
+		<executions>
+		    <execution>
+                        <id>copy-api-client</id>
+			<phase>generate-resources</phase>
+			<goals>
+			    <goal>copy-dependencies</goal>
+			</goals>
+			<configuration>
+                            <excludeArtifactIds>setup-console</excludeArtifactIds>
+                            <!--
+                            <includeArtifactIds>api-client</includeArtifactIds>
+                            <includeClassifiers>with-dependencies</includeClassifiers>
+                            -->
+			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
+			</configuration>
+		    </execution>
+                    <!--
+		    <execution>
+                        <id>copy-slf4j</id>
+			<phase>generate-resources</phase>
+			<goals>
+			    <goal>copy-dependencies</goal>
+			</goals>
+			<configuration>
+                            <includeArtifactIds>slf4j-simple</includeArtifactIds>
+			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
+			</configuration>
+		    </execution>
+                    -->
+		    <execution>
+                        <id>copy-setup-console</id>
+			<phase>generate-resources</phase>
+			<goals>
+			    <goal>copy-dependencies</goal>
+			</goals>
+			<configuration>
+                            <includeArtifactIds>setup-console</includeArtifactIds>
+                            <includeClassifiers>with-dependencies</includeClassifiers>
+			    <outputDirectory>${makeself.directory}</outputDirectory>
+			</configuration>
+		    </execution>
+		</executions>
+	</plugin>
+    <!-- end copy dependencies plugin -->
+      <!-- begin create self-extracting installer plugin -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <id>create-single-installer</id>
+	    <phase>compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+	    <configuration>
+	    <executable>bash</executable>
+	    <arguments>
+		<argument>makebin-auto.sh</argument>
+		<argument>${makeself.directory}</argument>
+	    </arguments>
+	    </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- end create self-extracting installer plugin -->
+      <!-- begin deploy installers to repository -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+        </plugin>
+      <!-- end deploy installers to repository -->
+    </plugins>
+
+<pluginManagement>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.5</version>
+            <executions>                      
+                <execution>
+                    <id>attach-artifacts</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>attach-artifact</goal>
+                    </goals>
+                    <configuration>
+                        <artifacts>
+                            <artifact>
+                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
+                                <type>bin</type>
+                            </artifact>
+                            <artifact>
+                                <file>${makeself.directory}/functions</file>
+                                <type>sh</type>
+                            </artifact>
+                        </artifacts>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</pluginManagement>
+  
+  
+  </build>
+
+</project>

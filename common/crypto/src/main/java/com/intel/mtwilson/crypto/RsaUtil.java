@@ -1,0 +1,300 @@
+/*
+ * Copyright (C) 2011-2012 Intel Corporation
+ * All rights reserved.
+ */
+package com.intel.mtwilson.crypto;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.net.URL;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.BasicClientConnectionManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.security.x509.*;
+
+/**
+ * You can also use Java's "keytool" command on your platform
+ * to generate keys and add them to a keystore file.  
+ * Set the "mtwilson.api.keystore" property to point to this file (by default
+ * keystore.jks) 
+ * @since 0.5.2
+ * @author jbuhacoff
+ */
+public class RsaUtil {
+    private static Logger log = LoggerFactory.getLogger(RsaUtil.class);
+    public static final int MINIMUM_RSA_KEY_SIZE = 2048; // minimum 2048 bits required by Intel SAFE Guidelines
+    public static final int DEFAULT_RSA_KEY_EXPIRES_DAYS = 3650; // default 10 years validity for generated keys
+    
+    public static KeyPair generateRsaKeyPair(int keySizeInBits) throws NoSuchAlgorithmException {
+        KeyPairGenerator r = KeyPairGenerator.getInstance("RSA");
+        r.initialize(keySizeInBits);
+        KeyPair keypair = r.generateKeyPair();
+        return keypair;
+    }
+    
+    /** 
+    * Create a self-signed X.509 Certificate using SHA-256 with RSA encryption.
+    * Original source: http://bfo.com/blog/2011/03/08/odds_and_ends_creating_a_new_x_509_certificate.html
+    * StackOverflow Question: http://stackoverflow.com/questions/1615871/creating-an-x509-certificate-in-java-without-bouncycastle
+    * Java Keytool Source Code (doSelfCert): http://www.docjar.com/html/api/sun/security/tools/KeyTool.java.html
+    * 
+    * XXX This method uses Sun "internal" API's, which may be removed in a future JRE release.
+    * 
+    * @param dn the X.509 Distinguished Name, eg "CN=Test, L=London, C=GB"
+    * @param pair the KeyPair
+    * @param days how many days from now the Certificate is valid for
+    * @param algorithm the signing algorithm, eg "SHA1withRSA"
+    */ 
+    public static X509Certificate generateX509Certificate(String dn, KeyPair pair, int days) throws CryptographyException, IOException {
+        return generateX509Certificate(dn, null, pair, days);
+    }
+    
+    /**
+     * Creates a self-signed X.509 certificate using SHA-256 with RSA encryption.
+     * 
+     * XXX This method uses Sun "internal" API's, which may be removed in a future JRE release.
+     * 
+     * @param dn
+     * @param alternativeName a string like "ip:1.2.3.4"
+     * @param pair
+     * @param days
+     * @return
+     * @throws GeneralSecurityException
+     * @throws IOException 
+     */
+    public static X509Certificate generateX509Certificate(String dn, String alternativeName, KeyPair pair, int days) throws CryptographyException, IOException {
+        X500Name owner = new X500Name(dn, "Mt Wilson", "Trusted Data Center", "US"); // the constructor X500Name(dn) was throwing an exception;  replaced "Intel" with "Trusted Data Center" to avoid confusion about the owner of the certificate... this is not an "Intel certificate", it's generated at the customer site.
+        return createX509CertificateWithIssuer(pair.getPublic(), dn, alternativeName, days, pair.getPrivate(), new CertificateIssuerName(owner));
+    }
+    
+    /**
+     * Creates an X.509 certificate on the given subject's public key and distinguished name,
+     * using the given issuer private key and certificate (used as the source of issuer's name on the
+     * newly created certificate).
+     * 
+     * @param subjectPublicKey
+     * @param dn
+     * @param alternativeName a string like "ip:1.2.3.4"
+     * @param days
+     * @param issuerPrivateKey
+     * @param issuerCertificate
+     * @return
+     * @throws GeneralSecurityException
+     * @throws IOException 
+     */
+    public static X509Certificate createX509CertificateWithIssuer(PublicKey subjectPublicKey, String dn, String alternativeName, int days, PrivateKey issuerPrivateKey, X509Certificate issuerCertificate) throws CryptographyException, IOException {
+        X500Name issuerName = X500Name.asX500Name(issuerCertificate.getSubjectX500Principal());
+        return createX509CertificateWithIssuer(subjectPublicKey, dn, alternativeName, days, issuerPrivateKey, new CertificateIssuerName(issuerName));
+    }    
+    
+    /**
+     * Creates an X.509 certificate on the given subject's public key and distinguished name,
+     * using the given issuer private key and issuer name (used as the source of issuer's name on the
+     * newly created certificate).
+     * 
+     * @param subjectPublicKey
+     * @param dn actually this is just the Common Name portion of the Distinguished Name; the OU, O, and C are added automatically. XXX: this may change in a future version.
+     * @param alternativeName a string like "ip:1.2.3.4"
+     * @param days the certificate will be valid
+     * @param issuerPrivateKey
+     * @param issuerName
+     * @return
+     * @throws GeneralSecurityException
+     * @throws IOException 
+     */
+    public static X509Certificate createX509CertificateWithIssuer(PublicKey subjectPublicKey, String dn, String alternativeName, int days, PrivateKey issuerPrivateKey, CertificateIssuerName issuerName) throws  IOException, CryptographyException {
+        
+        X509CertInfo info = new X509CertInfo();
+        Date from = new Date();
+        Date to = new Date(from.getTime() + days * 86400000l);
+        CertificateValidity interval = new CertificateValidity(from, to);
+        BigInteger sn = new BigInteger(64, new SecureRandom());
+        X500Name subjectName = new X500Name(dn, "Mt Wilson", "Trusted Data Center", "US"); // the constructor X500Name(dn) was throwing an exception;  replaced "Intel" with "Trusted Data Center" to avoid confusion about the owner of the certificate... this is not an "Intel certificate", it's generated at the customer site.
+        AlgorithmId algorithm = null;
+        try {
+            info.set(X509CertInfo.VALIDITY, interval); // CertificateException, IOException
+            info.set(X509CertInfo.SERIAL_NUMBER, new CertificateSerialNumber(sn)); // CertificateException, IOException
+            info.set(X509CertInfo.SUBJECT, new CertificateSubjectName(subjectName)); // CertificateException, IOException
+            info.set(X509CertInfo.ISSUER, issuerName); // CertificateException, IOException
+            info.set(X509CertInfo.KEY, new CertificateX509Key(subjectPublicKey)); // CertificateException, IOException
+            info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3)); // CertificateException, IOException
+            if( alternativeName != null ) {
+                if( alternativeName.startsWith("ip:") ) {
+    //                InetAddress ipAddress = new InetAddress.getByName(alternativeName.substring(3));
+    //                IPAddressName ipAddressName = new IPAddressName(ipAddress.getAddress());
+                    IPAddressName ipAddressName = new IPAddressName(alternativeName.substring(3));
+                    GeneralNames generalNames = new GeneralNames();
+                    generalNames.add(new GeneralName(ipAddressName));
+                    SubjectAlternativeNameExtension san = new SubjectAlternativeNameExtension(generalNames);
+                    CertificateExtensions ext = new CertificateExtensions();
+                    ext.set(san.getExtensionId().toString(), san);
+                    info.set(X509CertInfo.EXTENSIONS, ext);
+                //   ObjectIdentifier("2.5.29.17") , false, "ipaddress".getBytes()                            
+                }
+            }
+            algorithm = new AlgorithmId(AlgorithmId.sha256WithRSAEncryption_oid); // md5WithRSAEncryption_oid
+            info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algorithm));
+        }
+        catch(CertificateException e) {
+            throw new CryptographyException("Cannot generate certificate", e);
+        }
+        try {
+            // Sign the cert to identify the algorithm that's used.
+            X509CertImpl cert = new X509CertImpl(info);
+            System.out.println("Algorithm name: "+algorithm.getName()); // if this isn't SHA256withRSA need to hard code it
+            cert.sign(issuerPrivateKey, algorithm.getName()); // NoSuchAlgorithMException, InvalidKeyException, NoSuchProviderException, , SignatureException
+
+            // Update the algorith, and resign.
+            algorithm = (AlgorithmId)cert.get(X509CertImpl.SIG_ALG);
+            info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algorithm);
+            cert = new X509CertImpl(info);
+            cert.sign(issuerPrivateKey, algorithm.getName()); // NoSuchAlgorithMException, InvalidKeyException, NoSuchProviderException, SignatureException
+            return cert;
+        }
+        catch(CertificateException e) {
+            throw new CryptographyException("Cannot sign certificate", e);
+        }
+        catch(NoSuchAlgorithmException e) {
+            throw new CryptographyException("Cannot sign certificate", e);
+        }
+        catch(InvalidKeyException e) {
+            throw new CryptographyException("Cannot sign certificate", e);
+        }
+        catch(NoSuchProviderException e) {
+            throw new CryptographyException("Cannot sign certificate", e);
+        }
+        catch(SignatureException e) {
+            throw new CryptographyException("Cannot sign certificate", e);
+        }
+    }
+    
+    /**
+     * If the X509 certificate has a Subject Alternative Name which is an IP Address,
+     * then it will be returned as a String. Otherwise, null will be returned.
+     * 
+     * The X509Certificate method getSubjectAlternativeNames() returns a list of (type,value) pairs.
+     * The types are shown in this extract of the JavaDoc:
+     * 
+GeneralName ::= CHOICE {
+      otherName                       [0]     OtherName,
+      rfc822Name                      [1]     IA5String,
+      dNSName                         [2]     IA5String,
+      x400Address                     [3]     ORAddress,
+      directoryName                   [4]     Name,
+      ediPartyName                    [5]     EDIPartyName,
+      uniformResourceIdentifier       [6]     IA5String,
+      iPAddress                       [7]     OCTET STRING,
+      registeredID                    [8]     OBJECT IDENTIFIER}
+      * 
+      * 
+      * The IP Address is type 7 
+      * 
+     * @param certificate
+     * @return 
+     */
+    public static String ipAddressAlternativeName(X509Certificate certificate) {
+        try {
+            Collection<List<?>> wtf = certificate.getSubjectAlternativeNames();
+            Iterator<List<?>> it1 = wtf.iterator();
+            while(it1.hasNext()) {
+                List<?> list = it1.next();
+                if( list.size() == 2 && list.get(0) != null && list.get(0) instanceof Integer ) {
+                    Integer type = (Integer)list.get(0);
+                    if( type == GeneralNameInterface.NAME_IP && list.get(1) != null && list.get(1) instanceof String ) { // IP Address OCTET STRING
+                        String ipAddress = (String)list.get(1);
+                        return ipAddress;
+                    }
+                } 
+            }
+        }
+        catch(CertificateParsingException e) {
+            log.error("Cannot extract Subject Alternative Name IP Address from X509 Certificate", e);
+        }
+        return null;
+    }
+    
+        public static X509Certificate toX509Certificate(byte[] certificateBytes) throws CertificateException {
+            try {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                java.security.cert.X509Certificate cert = (java.security.cert.X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBytes));
+                return cert;
+            } catch (CertificateException ex) {
+                log.error("Cannot load certificate: {}", ex);
+                throw ex;
+            }
+    }
+
+        /**
+         * This function converts a PEM-format certificate to an X509Certificate object.
+         * 
+         * Example PEM format:
+         * 
+         * -----BEGIN CERTIFICATE-----
+         * (base64 data here)
+         * -----END CERTIFICATE-----
+         * 
+         * You can also pass just the base64 certificate data without the header and footer.
+         * 
+         * @param pemOrBase64
+         * @return
+         * @throws CertificateException 
+         */
+        public static X509Certificate toX509Certificate(String pemOrBase64) throws CertificateException {
+            String base64 = pemOrBase64.replace("-----BEGIN CERTIFICATE-----","").replace("-----END CERTIFICATE-----","").replaceAll("\\s+", "");
+            X509Certificate cert = toX509Certificate(Base64.decodeBase64(base64));
+            return cert;
+        }
+        
+        public static X509Certificate[] getServerCertificates(URL url) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+            if( !"https".equals(url.getProtocol()) ) {
+                throw new IllegalArgumentException("URL scheme must be https");
+            }
+            int port = url.getPort();
+            if( port == -1 ) {
+                port = 443;
+            }
+            X509HostnameVerifier hostnameVerifier = new NopX509HostnameVerifier(); //SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER; // because we are specifically going to get certs
+            CertificateStoringX509TrustManager trustManager = new CertificateStoringX509TrustManager();
+
+            SSLContext sslcontext = SSLContext.getInstance("TLS"); // throws NoSuchAlgorithmException
+            sslcontext.init(null, new X509TrustManager[] { trustManager }, null); // key manager, trust manager, securerandom.   throws KeyManagementException
+            SSLSocketFactory sf = new SSLSocketFactory(sslcontext, hostnameVerifier);
+            Scheme https = new Scheme("https", port, sf); // default to 443 for https but if user specified a different port in URL we use that instead
+            SchemeRegistry sr = new SchemeRegistry();
+            sr.register(https);    
+            
+            BasicClientConnectionManager connectionManager = new BasicClientConnectionManager(sr);
+            HttpParams httpParams = new BasicHttpParams();
+            httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+            HttpClient httpClient = new DefaultHttpClient(connectionManager, httpParams);
+            log.debug("Saving certificates from server URL: {}", url.toExternalForm());
+            HttpHead request = new HttpHead(url.toExternalForm());
+            HttpResponse response = httpClient.execute(request); // throws IOException
+            log.debug("Server status line: {} {} ({})", new String[] { response.getProtocolVersion().getProtocol(), response.getStatusLine().getReasonPhrase(), String.valueOf(response.getStatusLine().getStatusCode()) });
+            httpClient.getConnectionManager().shutdown();
+            return trustManager.getStoredCertificates();
+        }
+}

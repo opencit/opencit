@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.mtwilson.portals</groupId>
+  <artifactId>mtwilson-portals</artifactId>
+  <packaging>pom</packaging>
+
+  <name>Mt Wilson Web Portals</name>
+
+	<parent>
+		<groupId>com.intel.mtwilson</groupId>
+		<artifactId>mtwilson</artifactId>
+		<version>0.5.4-SNAPSHOT</version>
+	</parent>
+  
+  <modules>
+        <module>ManagementConsole</module>
+	<module>WhiteListPortal</module>
+	<module>TrustDashBoard</module>
+  </modules>
+
+</project>

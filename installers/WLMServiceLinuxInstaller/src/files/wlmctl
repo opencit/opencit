@@ -1,0 +1,177 @@
+#!/bin/bash
+# NOTES:
+# Revision 388 is last revision where some of the setup was in the package
+# post-install scripts. After Revision 388, all the setup is in this control
+# script so that it can be interactive (when necessary) on all platforms.
+# To avoid user-interaction, a system administrator needs to create/copy the
+# configuration files before running the 'setup' command.
+# WARNING:
+# *** do NOT use TABS for indentation, use SPACES
+# *** TABS will cause errors in some linux distributions
+
+
+# SCRIPT CONFIGURATION:
+script_name=wlmctl
+intel_conf_dir=/etc/intel/cloudsecurity
+package_name=wlm-service
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+package_install_filename=${package_dir}/${package_name}.install
+mysql_required_version=5.0
+mysql_setup_log=/var/log/intel.mw.wlm.install.log
+mysql_script_dir=/opt/intel/cloudsecurity/wlm-service/database
+glassfish_required_version=3.0
+glassfish_application_name=WLMService
+java_required_version=1.6.0_29
+
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
+if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+shell_include_files "${package_env_filename}" "${package_install_filename}"
+
+
+list_mysql_install_scripts() {
+    echo ${mysql_script_dir}/bootstrap.sql
+    echo ${mysql_script_dir}/20120829_audit_log.sql
+    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+    echo ${mysql_script_dir}/20120920091400_patch_rc3.sql
+}
+
+
+setup_print_summary() {
+  echo "Requirements summary:"
+  if [ -n "$MYSQL_HOME" ]; then
+    echo "Mysql: $MYSQL_CLIENT_VERSION"
+  else
+    echo "Mysql: not found"
+  fi
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo "Java: not found"
+  fi
+  if [ -n "$GLASSFISH_HOME" ]; then
+    echo "Glassfish: $GLASSFISH_VERSION"
+  else
+    echo "Glassfish: not found"
+  fi
+}
+
+setup_env() {
+  mysql_detect > /dev/null
+  java_detect > /dev/null
+  glassfish_detect > /dev/null
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  echo "mysql=$mysql"
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+  echo "glassfish_bin=$glassfish_bin"
+  echo "glassfish=\"$glassfish\""
+}
+
+setup_interactive_install() {
+  if [ -n "$mysql" ]; then
+    mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+    mysql_create_database
+    mysql_scripts=`list_mysql_install_scripts`
+    mysql_install_scripts ${mysql_scripts}
+  fi
+  if [ -n "$GLASSFISH_HOME" ]; then
+    glassfish_running
+    if [ -z "$GLASSFISH_RUNNING" ]; then
+      glassfish_start_report
+    fi    
+    webservice_uninstall "${glassfish_application_name}"
+    webservice_install "${glassfish_application_name}" "${package_dir}"/WLMService.war
+    webservice_running_report "${glassfish_application_name}"
+  fi
+}
+
+
+setup() {
+  mysql_clear; java_clear; glassfish_clear;
+  setup_env > "${package_env_filename}"
+  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
+      echo_warning "Missing one or more required packages"
+      setup_print_summary
+      exit 1
+  fi
+  setup_interactive_install
+}
+
+
+RETVAL=0
+
+# See how we were called.
+case "$1" in
+  version)
+        echo "${package_name}"
+	echo "Version ${VERSION:-Unknown}"
+	echo "Build ${BUILD:-Unknown}"
+        ;;
+  start)
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  stop)
+        webservice_stop_report "${glassfish_application_name}"
+        ;;
+  status)
+        glassfish_running_report
+        webservice_running_report "${glassfish_application_name}"
+        ;;
+  restart)
+        webservice_stop_report "${glassfish_application_name}"
+        sleep 2
+        webservice_start_report "${glassfish_application_name}"
+        ;;
+  glassfish-restart)
+        glassfish_restart
+        ;;
+  glassfish-stop)
+        glassfish_shutdown
+        ;;
+  setup)
+        setup
+        ;;
+  setup-env)
+  # for sysadmin convenience
+        setup_env
+        ;;
+  setup-env-write)
+  # for sysadmin convenience
+        setup_env > "${package_env_filename}"
+  #echo "Saved environment in ${myenvdir}/${package_env_filename}"
+        ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+        ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
+  uninstall)
+        datestr=`date +%Y-%m-%d.%H%M`
+        webservice_uninstall "${glassfish_application_name}"
+        if [ -f "${package_config_filename}" ]; then
+          mkdir -p "${intel_conf_dir}"
+          cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
+          echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
+        fi
+        # prevent disaster by ensuring that package_dir is inside /opt/intel
+        if [[ "${package_dir}" == /opt/intel/* ]]; then
+          rm -rf "${package_dir}"
+        fi
+	rm /usr/local/bin/${script_name}
+        ;;
+  help)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        ;;
+  *)
+        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        exit 1
+esac
+
+exit $RETVAL

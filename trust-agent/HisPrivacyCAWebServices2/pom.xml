@@ -1,0 +1,197 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>HisPrivacyCAWebServices2</artifactId>
+
+  <packaging>pom</packaging>
+  <name>Privacy CA Web Service - HisPrivacyCAWebServices2</name>
+  <description>Installs MySQL, Java, Glassfish, Web Services, and UI Portals</description>
+
+    <parent>
+	<groupId>com.intel.mtwilson</groupId>
+	<artifactId>trust-agent-parent</artifactId>
+	<version>0.5.4-SNAPSHOT</version>
+    </parent>
+   
+ <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
+  <dependencies>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>MtWilsonCommon</artifactId>
+      <version>${project.parent.version}</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+	<groupId>org.slf4j</groupId>
+	<artifactId>slf4j-jdk14</artifactId>
+	<version>1.6.4</version>
+    </dependency>
+    
+        <!-- XXX the following dependencies are declared so the java code will compile in the IDE - but they are included separately by the ant build for now; when we fully mavenize, we can use them directly -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.servlet</artifactId>
+			<version>3.1.1</version>
+                        <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.servlet.jsp</artifactId>
+			<version>3.1.1</version>
+                        <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<version>2.2.7</version>
+                        <scope>provided</scope>
+		</dependency>
+                <dependency>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15</artifactId>
+                    <version>1.41</version>                    
+                    <scope>provided</scope>
+                </dependency>
+        <dependency>
+            <groupId>gov.niarl.his.webservices</groupId>
+            <artifactId>his-clients</artifactId>
+            <version>1.0</version>
+	    <classifier>HisPrivacyCAWebServices2-client</classifier>
+                    <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>gov.niarl.his.webservices</groupId>
+            <artifactId>his-clients</artifactId>
+            <version>1.0</version>
+	    <classifier>HisWebServices-client</classifier>
+                    <scope>provided</scope>
+        </dependency>
+
+
+  </dependencies>
+ 
+ 
+  <build>
+    <plugins>
+       <!-- begin copy artifacts plugin -->
+     <plugin>
+        <!--<groupId>org.apache.maven.plugins</groupId>-->
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.4</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <!-- exclude all the artifacts that are already in the WEB-INF/lib that is a "source" folder -->
+                <excludeArtifactIds>javax.servlet,javax.servlet.jsp,bcprov-jdk15</excludeArtifactIds>
+                <!--
+                <includeArtifactIds>api-client</includeArtifactIds>
+                <includeClassifiers>with-dependencies</includeClassifiers>
+                -->
+                <outputDirectory>${project.build.directory}/WEB-INF/lib</outputDirectory>
+                <!--
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>	
+      <!-- end copy artifacts plugin -->
+
+
+      <!-- begin build .war file -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>default-cli</id>
+            <phase>compile</phase>
+            <goals>
+                <goal>run</goal>
+            </goals>
+            <configuration>
+                <target>
+                        <ant antfile="${basedir}/build.xml"/>
+                </target>
+            </configuration>
+          </execution>
+        </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.ant</groupId>
+                    <artifactId>ant</artifactId>
+                    <version>1.8.4</version>
+                </dependency>
+                <dependency>
+                    <!-- jaxws-tools provides the apt task for ant -->
+                    <groupId>com.sun.xml.ws</groupId>
+                    <artifactId>jaxws-tools</artifactId>
+                    <version>2.2.7</version>
+                </dependency>
+<!--
+                <dependency>
+                    <groupId>ant-contrib</groupId>
+                    <artifactId>ant-contrib</artifactId>
+                    <version>1.0b3</version>
+                </dependency>
+-->
+                <dependency>
+                  <groupId>com.sun</groupId>
+                  <artifactId>tools</artifactId>
+                  <version>1.6</version> <!-- Mt Wilson builds target Java 1.6, therefore you must use JDK 1.6 to compile this. Make sure you set JDK 1.6 as the specific JDK for this maven project in your IDE in order for this to work.  -->
+                  <scope>system</scope>
+                  <systemPath>${java.home}/../lib/tools.jar</systemPath>
+                </dependency>
+            </dependencies>
+      </plugin>
+
+      <!-- end build .war file -->
+
+
+      <!-- begin deploy artifact to repository -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+        </plugin>
+      <!-- end deploy artifact to repository -->
+    </plugins>
+
+<pluginManagement>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.5</version>
+            <executions>                      
+                <execution>
+                    <id>attach-artifacts</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>attach-artifact</goal>
+                    </goals>
+                    <configuration>
+                        <artifacts>
+                            <artifact>
+                                <file>${project.build.directory}/${project.artifactId}.war</file>
+                                <type>war</type>
+                            </artifact>
+                        </artifacts>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</pluginManagement>
+  
+  
+  </build>
+
+</project>

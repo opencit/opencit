@@ -1,0 +1,48 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.intel.mountwilson.trustagent.commands;
+
+
+
+import com.intel.mountwilson.common.CommandUtil;
+import com.intel.mountwilson.common.ErrorCode;
+import com.intel.mountwilson.common.ICommand;
+import com.intel.mountwilson.common.TAException;
+import com.intel.mountwilson.his.helper.CreateIdentity;
+import com.intel.mountwilson.trustagent.data.TADataContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author dsmagadX
+ */
+public class CreateIdentityCmd implements ICommand {
+
+    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private TADataContext context;
+
+    public CreateIdentityCmd(TADataContext context) {
+        this.context = context;
+    }
+
+    @Override
+    public void execute() throws TAException {
+        try {
+        	// this will create the AIK in the configured folder
+			CreateIdentity.createIdentity();
+			
+			context.setAIKCertificate(CommandUtil.readCertificate(context.getAikCertFileName()));
+	        
+	        log.info("AIK Certificate Read to memory - {}", context.getAikCertFileName());
+
+		} catch (Exception e) {
+			
+			throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.",e);
+		}
+    }
+
+
+}

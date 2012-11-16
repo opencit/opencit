@@ -1,0 +1,111 @@
+#!/bin/bash
+#
+# description: Get the PCA key and generate an SSL certificate for the trust agent (to answer attestation requests)
+#
+
+intel_conf_dir=/etc/intel/cloudsecurity
+package_name=trustagent
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+
+# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
+if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+if [ -f "${package_env_filename}" ]; then . "${package_env_filename}"; else echo_warning "Missing file: ${package_env_filename}"; fi
+
+# TODO: move this function to mtwilson-util. it's not the same as update_property_in_file because it's specific to the /etc/hosts format
+# update the fqdn for an ip address in the /etc/hosts file, replacing the previous value and all its aliases
+# parameters: ip address, fqdn or hostname
+# example: update_property_in_file MYFLAG FILENAME true
+replace_hostname_in_etc_hosts_NOT_COMPLETE__NOT_IN_USE_YET() {
+  local hostname="${1}"
+  local old_ipaddress="${2}"
+  local new_ipaddress="${3}"
+  local ispresent=`grep "^${old_ipaddress}" /etc/hosts`
+  if [ -n "$ispresent" ]; then
+      # replace the existing entry of hostname with old-hostname
+      # add a new entry for hostname with new ip address
+      # replace just that line in the file and save the file
+      # TODO: need to decide if we want to remove the fqdn from its existing ip and move it to a new ip ??? or just change the ip under it ....
+            updatedcontent=`sed -re "s/^(${ipaddress})(.*)/\1=${value}/" /etc/hosts`
+      echo "$updatedcontent" > /etc/hosts
+  else
+      # property is not already in file so add it. extra newline in case the last line in the file does not have a newline
+      echo "" >> /etc/hosts
+      echo "${new_ipaddress}    ${hostname}" >> /etc/hosts
+  fi
+}
+
+# Check if there is a username and password already configured 
+server_pca_username=`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`
+server_pca_password=`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`
+client_pca_username=${server_pca_username:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
+client_pca_password=${server_pca_password:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
+
+prompt_with_default PRIVACYCA_IPADDRESS "Privacy CA Server IP Address:"
+echo "Login to download the Privacy CA client files"
+prompt_with_default PRIVACYCA_USERNAME "Username:" ${client_pca_username}
+prompt_with_default_password PRIVACYCA_PASSWORD "Password:" ${client_pca_password}
+
+if [ -z "${PRIVACYCA_IPADDRESS}" ]; then
+  echo_failure "Cannot connect to Privacy CA: missing IP address"
+  exit 1
+fi
+
+echo "Connecting to PCA..."
+zipfile=/tmp/clientfiles.zip
+touch $zipfile
+chmod 600 $zipfile
+wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_IPADDRESS}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_USERNAME}&password=${PRIVACYCA_PASSWORD}" -O $zipfile
+unzip -o $zipfile -d /etc/intel/cloudsecurity
+rm $zipfile
+
+chmod 600 /etc/intel/cloudsecurity/hisprovisioner.properties
+# these are created AFTER the trust agent registers with privacy ca:
+#chmod 700 /etc/intel/cloudsecurity/cert
+#chmod 600 /etc/intel/cloudsecurity/cert/*
+
+this_code_is_deprecated__trust_agent_now_uses_configured_ip_or_hostname() {
+known_privacyca_address=`cat /etc/hosts | grep privacyca.service.com | awk '{ print $1 }'`
+if [ -z "$known_privacyca_address" ]; then
+  echo "Adding privacyca.service.com to /etc/hosts"
+  echo "${PRIVACYCA_IPADDRESS} privacyca.service.com" >> /etc/hosts
+else
+  if [[ "$known_privacyca_address" != "${PRIVACYCA_IPADDRESS}" ]]; then
+    echo "Please update privacyca.service.com in /etc/hosts from $known_privacyca_address to ${PRIVACYCA_IPADDRESS}"
+    #backup_file /etc/hosts
+    #replace_hostname_in_etc_hosts privacyca.service.com $known_privacyca_address ${PRIVACYCA_IPADDRESS}
+  fi
+fi
+}
+
+
+keytool=${JAVA_HOME}/bin/keytool
+keystore=${package_dir}/cert/trustagent.jks
+storepass=intelinc
+
+# Ensure the Keystore exists and generate Trust Agent's SSL Certificate
+# TODO: This certificate does not have the alternative name extension. Get the localhost IP address and use Mt Wilson's SSL Certificate creation function (Java) to create a better certificate, or openssl, or Java 7's keytool (Java 6 and earlier do not support the extension)
+if [ -f "${keystore}" ]; then
+  has_ssl=`$keytool -list -keystore "${keystore}" -storepass "${storepass}" | grep PrivateKeyEntry | grep "^TrustAgentSSL"`
+fi
+if [ -z "$has_ssl" ]; then
+  $keytool -genkey -alias "TrustAgentSSL" -keyalg RSA  -keysize 2048 -keystore "${keystore}" -storepass "${storepass}" -dname "CN=TrustAgent, OU=Mt Wilson, O=Customer, C=US" -validity 3650  -keypass "${storepass}"
+fi
+
+
+openssl s_client -tls1 -connect ${PRIVACYCA_IPADDRESS}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
+if [ -f "${package_dir}/cert/privacyca.ssl.crt" ]; then rm ${package_dir}/cert/privacyca.ssl.txt; fi
+echo "Importing Privacy CA SSL Certificate into Trust Agent's Keystore..."
+$keytool -import -keystore $keystore -storepass "${storepass}" -file ${package_dir}/cert/privacyca.ssl.crt
+
+if [[ -f /etc/intel/cloudsecurity/PrivacyCA.cer && -f /etc/intel/cloudsecurity/endorsement.p12 && -f /etc/intel/cloudsecurity/hisprovisioner.properties ]]; then
+  echo_success "Installed Privacy CA client files"
+else
+  echo_failure "Privacy CA setup is not complete"
+  report_files_exist /etc/intel/cloudsecurity/PrivacyCA.cer /etc/intel/cloudsecurity/endorsement.p12 /etc/intel/cloudsecurity/hisprovisioner.properties
+fi
+
+

@@ -1,0 +1,178 @@
+#!/bin/bash
+#
+# chkconfig: 2345 80 30
+# description: Intel TrustAgent Service
+#
+
+###################################################################################################
+#Set environment specific variables here 
+###################################################################################################
+
+applDir="/root/mountwilson/trustagent"                     # home directory of the service application
+java_home=                                                 # This is optional. Leave this blank if you have java 1.6 as default java  
+export http_proxy=http://proxy-us.intel.com:911
+
+###################################################################################################
+
+
+provclasspath=".:./lib/activation.jar:./lib/axis.jar:./lib/bcprov-jdk15-141.jar:./lib/commons-discovery-0.2.jar:./lib/commons-logging-1.0.4.jar:./lib/FastInfoset.jar:./lib/HisPrivacyCAWebServices-client.jar:./lib/HisPrivacyCAWebServices2-client.jar:./lib/HisWebServices-client.jar:./lib/http.jar:./lib/jaxb-api.jar:./lib/jaxb-impl.jar:./lib/jaxb-xjc.jar:./lib/jaxrpc.jar:./lib/jaxws-api.jar:./lib/jaxws-rt.jar:./lib/jaxws-tools.jar:./lib/jsr173_api.jar:./lib/jsr181-api.jar:./lib/jsr250-api.jar:./lib/mail.jar:./lib/mimepull.jar:./lib/PrivacyCA.jar:./lib/resolver.jar:./lib/saaj-api.jar:./lib/saaj-impl.jar:./lib/SALlib_hibernate3.jar:./lib/stax-ex.jar:./lib/streambuffer.jar:./lib/TSSCoreService.jar:./lib/woodstox.jar:./lib/wsdl4j-1.5.1.jar"
+serviceNameLo="tagent"                                  
+serviceName="Trust Agent"                              
+serviceUser="root"                                     
+serviceGroup="root"                                    
+CLASSPATH=$applDir/lib/TrustAgent.jar:$provclasspath
+serviceUserHome="/home/$serviceUser"                   
+serviceLogFile="/var/log/$serviceNameLo.log"           
+maxShutdownTime=15                                     
+pidFile="/var/run/$serviceNameLo.pid"                  
+javaCommand="java"                                     
+javaExe="$java_home$javaCommand"                      
+javaVMArgs=" -Djavax.net.ssl.trustStore=$applDir/cert/trustagent.jks  -Djavax.net.ssl.keyStore=$applDir/cert/trustagent.jks -Djavax.net.ssl.keyStorePassword=intelinc -Dapp.path=$applDir"  
+javaArgs="-classpath $CLASSPATH com.intel.mountwilson.trustagent.TASecureServer"  
+javaCommandLine="$javaExe $javaVMArgs  $javaArgs"                       
+javaCommandLineKeyword="TrustAgent.jar"                   
+
+ 
+ #Make sthe file $1 writable by the group $serviceGroup.
+function makeFileWritable {
+   local filename="$1"
+   touch $filename || return 1
+   chgrp $serviceGroup $filename || return 1
+   chmod g+w $filename || return 1
+   return 0; }
+ 
+# Returns 0 if the process with PID $1 is running.
+function checkProcessIsRunning {
+   local pid="$1"
+   if [ -z "$pid" -o "$pid" == " " ]; then return 1; fi
+   if [ ! -e /proc/$pid ]; then return 1; fi
+   return 0; }
+ 
+# Returns 0 if the process with PID $1 is our Java service process.
+function checkProcessIsOurService {
+   local pid="$1"
+   if [ "$(ps -p $pid --no-headers -o comm)" != "$javaCommand" ]; then return 1; fi
+   grep -q --binary -F "$javaCommandLineKeyword" /proc/$pid/cmdline
+   if [ $? -ne 0 ]; then return 1; fi
+   return 0; }
+ 
+# Returns 0 when the service is running and sets the variable $pid to the PID.
+function getServicePID {
+   if [ ! -f $pidFile ]; then return 1; fi
+   pid="$(<$pidFile)"
+   echo $pid 
+   checkProcessIsRunning $pid || return 1
+   checkProcessIsOurService $pid || return 1
+   return 0; }
+ 
+function startServiceProcess {
+   cd $applDir || return 1
+   rm -f $pidFile
+   makeFileWritable $pidFile || return 1
+   makeFileWritable $serviceLogFile || return 1
+   cmd="nohup $javaCommandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
+
+   su -m $serviceUser -s $SHELL -c "$cmd" || return 1
+   sleep 0.1
+   pid="$(<$pidFile)"
+   if checkProcessIsRunning $pid; then :; else
+      echo -ne "\n$serviceName start failed, see logfile $serviceLogFile \n"
+      return 1
+   fi
+   return 0; }
+ 
+function stopServiceProcess {
+   kill $pid || return 1
+   for ((i=0; i<maxShutdownTime*10; i++)); do
+      checkProcessIsRunning $pid
+      if [ $? -ne 0 ]; then
+         rm -f $pidFile
+         return 0
+         fi
+      sleep 0.1
+      done
+   echo -e "\n$serviceName did not terminate within $maxShutdownTime seconds, sending SIGKILL..."
+   kill -s KILL $pid || return 1
+   local killWaitTime=15
+   for ((i=0; i<killWaitTime*10; i++)); do
+      checkProcessIsRunning $pid
+      if [ $? -ne 0 ]; then
+         rm -f $pidFile
+         return 0
+         fi
+      sleep 0.1
+      done
+   echo "Error: $serviceName could not be stopped within $maxShutdownTime+$killWaitTime seconds!"
+   return 1; }
+ 
+function startService {
+   getServicePID
+   if [ $? -eq 0 ]; then echo -n "$serviceName is already running\n"; RETVAL=0; return 0; fi
+   echo -n "Starting $serviceName   "
+   startServiceProcess
+   if [ $? -ne 0 ]; then RETVAL=1; echo "failed"; return 1; fi
+   echo "started PID=$pid"
+   RETVAL=0
+   return 0; }
+ 
+function stopService {
+   getServicePID
+   if [ $? -ne 0 ]; then echo -n "$serviceName is not running"; RETVAL=0; echo ""; return 0; fi
+   echo -n "Stopping $serviceName   "
+   stopServiceProcess
+   if [ $? -ne 0 ]; then RETVAL=1; echo "failed"; return 1; fi
+   echo "stopped PID=$pid"
+   RETVAL=0
+   return 0; }
+ 
+function checkServiceStatus {
+   echo -n "Checking for $serviceName:   "
+   if getServicePID; then
+    echo "running PID=$pid"
+    RETVAL=0
+   else
+    echo "stopped"
+    RETVAL=3
+   fi
+   return 0; }
+   
+function installService {
+   echo  "Installing $serviceName:  "
+   
+   cp ./tagent /etc/init.d/tagent
+   chmod +x /etc/init.d/tagent
+   chmod +x ./bin/*
+   chkconfig --add tagent
+
+   echo  "done. "
+
+   return 0; }
+   
+   
+function main {
+   RETVAL=0
+   case "$1" in
+      start)                                               # starts the Java program as a Linux service
+         startService
+         ;;
+      stop)                                                # stops the Java program service
+         stopService
+         ;;
+      restart)                                             # stops and restarts the service
+         stopService && startService
+         ;;
+      status)                                              # displays the service status
+         checkServiceStatus
+         ;;
+      install)                                             # displays the service status
+         installService
+         ;;   
+      *)
+         echo "Usage: $0 {start|stop|restart|status|install}"
+         exit 1
+         ;;
+      esac
+   exit $RETVAL
+}
+ 
+main $1

@@ -1,0 +1,10 @@
+<endpoints xmlns='http://java.sun.com/xml/ns/jax-ws/ri/runtime' version='2.0'>
+    <endpoint
+        name='hisPrivacyCAWebService2FactoryService'
+        implementation='gov.niarl.his.webservices.hisPrivacyCAWebService2.server.HisPrivacyCAWebService2FactoryService'
+        url-pattern='/hisPrivacyCAWebService2FactoryService'/>
+    <endpoint
+        name='hisPrivacyCAWebService2'
+        implementation='gov.niarl.his.webservices.hisPrivacyCAWebService2.server.HisPrivacyCAWebService2'
+        url-pattern='/hisPrivacyCAWebService2'/>
+</endpoints>

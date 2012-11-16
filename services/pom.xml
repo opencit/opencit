@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.intel.mtwilson.services</groupId>
+    <artifactId>mtwilson-services</artifactId>
+    <packaging>pom</packaging>
+
+  <name>Mt Wilson Services</name>
+
+	<parent>
+		<groupId>com.intel.mtwilson</groupId>
+		<artifactId>mtwilson</artifactId>
+		<version>0.5.4-SNAPSHOT</version>
+	</parent>
+  
+  <modules>
+    <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
+    <module>audit-data</module>
+    <module>audit-handler</module>
+    <module>ASData</module>
+    <module>MSData</module>
+    <module>MSCommon</module>
+    <module>ASCommon</module>
+    <module>MtWilsonHttpSecurityAdapters</module>
+    <module>AttestationService</module>
+    <module>WLMService</module>
+    <module>ManagementService</module>
+    <module>vmware-utils-jar</module>
+    <module>TDData</module>
+    <module>TDCommon</module>
+    <module>MSCmdUtility</module>
+  </modules>
+
+</project>
