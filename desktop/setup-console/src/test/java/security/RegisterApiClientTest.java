@@ -8,6 +8,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ClientException;
 import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientStatus;
@@ -62,7 +63,7 @@ public class RegisterApiClientTest {
     }
     
     @Test
-    public void testRegisterNewApiClient() throws ClientException, IOException, ApiException, NoSuchAlgorithmException, GeneralSecurityException {
+    public void testRegisterNewApiClient() throws ClientException, IOException, ApiException, NoSuchAlgorithmException, GeneralSecurityException, CryptographyException {
         // create a new private key and certificate
         KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
         X509Certificate certificate = RsaUtil.generateX509Certificate("jonathan"/*CN=jonathan, OU=IASI, O=Intel, L=Folsom, ST=CA, C=US"*/, keypair, 365);
