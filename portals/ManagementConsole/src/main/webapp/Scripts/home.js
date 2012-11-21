@@ -42,10 +42,25 @@ function getViewRequest() {
 	sendHTMLAjaxRequest(false, 'getView/getViewRequestPage.html', null, fnDisplayContent, null,'getViewRequest');
 }
 
+/*--Begin Added by Soni on 18/10/12 for New Screen for CA */
+function getCAStatus() {
+	$('#mainContainer').html('<div id="getCAStatus"></div>');
+	setLoadImage('getCAStatus', '40px', '500px');
+	sendHTMLAjaxRequest(false, 'getView/getCAStatusPage.html', null, fnDisplayContent, null,'getCAStatus');
+}
+/*--End Added by Soni on 18/10/12 for New Screen for CA */
+/*--Begin Added by Soni on 18/10/12 for New Screen for SAML downlaod */
+function downloadSAML() {
+	$('#mainContainer').html('<div id="getSAML"></div>');
+		setLoadImage('getSAML', '40px', '500px');
+	sendHTMLAjaxRequest(false, 'getView/getSAMLCertificatePage.html', null, fnDisplayContent, null,'getSAML');
+}
+
+/*--Begin Added by Soni on 18/10/12 for New Screen for SAML downlaod */
 function fnDisplayContent(response,elementIDToBePublised) {
 	$('#'+elementIDToBePublised).html(response);
 }
-
+/*--End Added by Soni on 18/10/12 for New Screen for SAML downlaod */
 function logoutUser() {
 	setLoadImage('mainContainer', '40px', '510px');
 	sendHTMLAjaxRequest(false, 'getData/logOutUser.html', null, displayLogingPage, null);

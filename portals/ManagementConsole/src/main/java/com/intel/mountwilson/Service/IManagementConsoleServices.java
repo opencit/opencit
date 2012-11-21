@@ -32,6 +32,9 @@ public interface IManagementConsoleServices {
 	public Role[] getAllRoles(ApiClient apiObj) throws ManagementConsolePortalException;
                 
     public List<ApiClientDetails> getApiClients(ApiClient apiObj, ApiClientListType apiType )throws ManagementConsolePortalException;
+    //Begin_Added by Soni-Function for CA
+    public List<ApiClientDetails> getCADetails(ApiClient apiObj)throws ManagementConsolePortalException;
+    //End_Added by Soni-Function for CA
     
     public boolean updateRequest(ApiClientDetails apiClientDetailsObj, ApiClient apiObj, boolean approve)	throws ManagementConsolePortalException;
 

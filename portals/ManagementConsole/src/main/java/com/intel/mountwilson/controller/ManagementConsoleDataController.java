@@ -3,6 +3,7 @@
  */
 package com.intel.mountwilson.controller;
 
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,7 +22,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -763,4 +763,81 @@ public class ManagementConsoleDataController extends MultiActionController{
 		responseView.addObject("SpecificHostValue",HostWhiteListTarget.VMM_HOST.getValue());
 		return responseView;
 	}
+    
+    //Begin_Added by Soni-Function for CA
+    public ModelAndView getAllCAStatus(HttpServletRequest req,HttpServletResponse res) {
+		log.info("ManagementConsoleDataController.getAllCAStatus >>");
+		ModelAndView responseView = new ModelAndView(new JSONView());
+		
+		try {
+            // Now get the API object from the session
+            ApiClient apiObj = getApiClientService(req, ApiClient.class);
+         
+            responseView.addObject("caStatus", services.getCADetails(apiObj));
+                        
+		} catch (Exception e) {
+			log.error("Error While getting ca status. "+e.getMessage());
+			responseView.addObject("message",e.getMessage());
+			responseView.addObject("result",false);
+			return responseView;
+                        
+		}
+		responseView.addObject("result",true);
+		
+		log.info("ManagementConsoleDataController.getAllCAStatus <<<");
+		return responseView;
+	}
+  //End_Added by Soni-Function for CA
+
+    //Begin_Added by Soni-Function to download SAML certificate
+    public ModelAndView getSAMLCertificate(HttpServletRequest req,HttpServletResponse res) {
+		log.info("In Data Contoller ManagementConsoleDataController.getSAMLCertificate  >>");
+		//ModelAndView responseView = new ModelAndView("SAMLDownload");
+		ModelAndView responseView = new ModelAndView(new JSONView());
+		 res.setContentType("application/octet-stream ");
+         res.setHeader("Content-Disposition",
+         "attachment;filename=mtwilson-saml.crt");
+		
+		try {
+            // Now get the API object from the session
+			
+            ApiClient apiObj = getApiClientService(req, ApiClient.class);
+          // InputStream in = new ByteArrayInputStream(apiObj.getSamlCertificate().getEncoded());
+           //System.err.println("SAMLcertificate     "+apiObj.getSamlCertificate().getEncoded());
+           //IOUtils.copy(in, res.getOutputStream());
+            //ServletOutputStream out = res.getOutputStream();
+        /*  FileOutputStream out = new FileOutputStream("C:/mtwilson-saml.crt");
+            System.err.println("ServletOutputStream"+out);
+            byte[] outputByte = new byte[4096];
+          //copy binary contect to output stream
+          while(in.read(outputByte, 0, 4096) != -1)
+          {System.err.println("outputByte           "+outputByte);
+          	out.write(outputByte, 0, 4096);
+            System.err.println("ServletOutputStream"+out);
+          }
+      
+          System.err.println("ServletOutputStream"+out);*/
+            responseView.addObject("SAMLcertificate", apiObj.getSamlCertificate().getEncoded());
+            responseView.addObject("result",true);
+        log.info("ManagementConsoleDataController.getSAMLCertificate <<<");
+  		
+  	/*	 in.close();
+         out.flush();
+         out.close();
+  		*/
+                        
+		} catch (Exception e) {
+			log.error("Error While getting Downlaoding Certificate. "+e.getMessage());			
+			responseView.addObject("message",e.getMessage());
+			responseView.addObject("result",false);
+			return responseView;
+			
+                        
+		}
+		
+		return responseView;
+		
+	}
+    //End_Added by Soni-Function to download SAML certificate
+    
 }

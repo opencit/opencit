@@ -56,6 +56,24 @@
 							<li><a href="javascript:getRegisterHostPage();">Register Host</a></li>
 						</ul>
 					</li>
+					<li >
+					<!--Begin Added by Soni on 18/10/12 for New Screen for CA -->
+						<a>CA</a>
+						<ul>
+							<li><a href="javascript:getCAStatus();">Enable/Disable</a></li>
+							
+						</ul>
+					</li>
+					<!--End Added by Soni on 18/10/12 for New Screen for CA-->
+					<li >
+					<!--Begin Added by Soni on 18/10/12 for New Screen for SAML -->
+						<a>SAML</a>
+						<ul>
+							<li><a href="javascript:downloadSAML();">Download SAML</a></li>
+							
+						</ul>
+					</li>
+					<!--End Added by Soni on 18/10/12 for New Screen for SAML-->
 				</ul>
 
 			</div>

@@ -553,4 +553,13 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
             }*/
             return apiClientList;
 	}
+	  //Begin_Added by Soni-Function for CA
+		@Override
+		public List<ApiClientDetails> getCADetails(ApiClient apiObj)
+				throws ManagementConsolePortalException {
+			
+			// TODO Auto-generated method stub
+			return null;
+		}
+		//End_Added by Soni-Function for CA
 }

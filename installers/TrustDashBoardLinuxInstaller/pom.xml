@@ -20,7 +20,7 @@
   
   <dependencies>
     <dependency>
-      <groupId>com.intel.mtwilson.services</groupId>
+      <groupId>com.intel.mtwilson.portals</groupId>
       <artifactId>TrustDashBoard</artifactId>
       <version>${project.version}</version>
       <type>war</type>

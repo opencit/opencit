@@ -43,6 +43,7 @@ public class VMwareClient {
 	private VimService vimService;
 	private VimPortType vimPort;
 	UserSession session = null;
+        private String vcenterEndpoint = null;
 	
 	private boolean isConnected = false;
 
@@ -73,7 +74,7 @@ public class VMwareClient {
 	 * 
 	 * @throws Exception
 	 */
-	protected void disconnect() {
+	public void disconnect() {
 		try {
 			if (isConnected) {
 				vimPort.logout(serviceContent.getSessionManager());
@@ -96,7 +97,7 @@ public class VMwareClient {
 	 *             the exception
 	 */
 	protected void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
-
+                vcenterEndpoint = url;
 		HostnameVerifier hostNameVerifier = new HostnameVerifier() {
 
 			@Override
@@ -142,7 +143,9 @@ public class VMwareClient {
 		
 	}
 
-	protected void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException  {
+        public String getEndpoint() { return vcenterEndpoint; }
+        
+	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException  {
 		String[] vcenterConn = vCenterConnectionString.split(";");
 		if (vcenterConn.length != 3) {
 			throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING,
@@ -517,7 +520,7 @@ public class VMwareClient {
      * VM Name::POWERED_ON
      * @throws Exception 
      */
-    public ArrayList getVMsForHost(String hostName, String vCenterConnectionString) throws Exception {
+    public ArrayList getVMsForHost(String hostName, String vCenterConnectionString) throws VMwareConnectionException {
         ArrayList vmList;
         ManagedObjectReference hostMOR = null;
         try
@@ -546,7 +549,7 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         finally
         {
@@ -565,7 +568,7 @@ public class VMwareClient {
      * @return : Host object containing all the details.
      * @throws Exception 
      */
-    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws Exception {
+    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws VMwareConnectionException {
         ManagedObjectReference hostMOR;
         boolean doNotDisconnect = false;
         
@@ -580,11 +583,11 @@ public class VMwareClient {
                 doNotDisconnect = true;
 
             hostMOR = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
-            if(hostMOR == null)
+             if(hostMOR == null)
             {
                 throw new Exception("Host specified does not exist in the vCenter.");
-            } 
-            
+            }
+           
             hostObj.HostName = getMORProperty(hostMOR, "name").toString();
             // hostObj.Description = serviceContent.getAbout().getVersion();
             hostObj.VMM_OSName = getMORProperty(hostMOR, "config.product.name").toString();
@@ -596,7 +599,7 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         finally
         {
@@ -615,8 +618,8 @@ public class VMwareClient {
      * @return : Array list of all the host names
      * @throws Exception 
      */
-    public ArrayList getHostDetailsForCluster(String clusterName, String connectionString) throws Exception {
-        ArrayList hostList = new ArrayList();
+    public ArrayList getHostDetailsForCluster(String clusterName, String connectionString) throws VMwareConnectionException {
+        ArrayList hostList;
         ArrayList hostDetailList = new ArrayList <TxtHostRecord> ();
         ManagedObjectReference clusterMOR = null;
         try
@@ -633,8 +636,9 @@ public class VMwareClient {
             }
             
             hostList = getDecendentMoRefs(clusterMOR, "HostSystem", null);
-            if(hostList.isEmpty())
+            if(hostList.isEmpty()) {
                 return hostList;
+            }
 
             for (int i=0; i< hostList.size(); i++)
             {
@@ -648,7 +652,7 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         finally
         {
@@ -669,7 +673,7 @@ public class VMwareClient {
      * @param vCenterConnectionString : Connection string to the vCenter server.
      * @throws Exception 
      */
-    public void powerOnOffVM(String vmName, String hostName, Boolean powerOn, String vCenterConnectionString) throws Exception {
+    public void powerOnOffVM(String vmName, String hostName, Boolean powerOn, String vCenterConnectionString) throws VMwareConnectionException {
         ManagedObjectReference hostMOR;
         ManagedObjectReference vmMOR;
         ManagedObjectReference powerTaskMOR;
@@ -679,14 +683,16 @@ public class VMwareClient {
 
             vmMOR = getDecendentMoRef(null, "VirtualMachine", vmName);
             
-            if (vmMOR == null)
+            if (vmMOR == null) {
                 throw new Exception ("Invalid virtual machine specified for the power operation.");
+            }
             
             if (powerOn)
             {
                 hostMOR = getDecendentMoRef(null, "HostSystem", hostName);
-                if (vmMOR == null)
-                    throw new Exception ("Invalid host specified for the virtual machine power on operation.");
+                if (hostMOR == null) {
+                    throw new VMwareConnectionException ("Invalid host specified for the virtual machine power on operation.");
+                }
                 powerTaskMOR = vimPort.powerOnVMTask(vmMOR, hostMOR);
             }
             else {
@@ -707,7 +713,7 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         finally
         {
@@ -724,7 +730,7 @@ public class VMwareClient {
      * @param vCenterConnectionString : Connection string to the vCenter server
      * @throws Exception 
      */
-    public void migrateVM(String vmName, String destHostName, String vCenterConnectionString) throws Exception {
+    public void migrateVM(String vmName, String destHostName, String vCenterConnectionString) throws VMwareConnectionException {
         ManagedObjectReference hostMOR;
         ManagedObjectReference vmMOR;
         ManagedObjectReference migrateTaskMOR;
@@ -735,19 +741,18 @@ public class VMwareClient {
             hostMOR = getDecendentMoRef(null, "HostSystem", destHostName);
             vmMOR = getDecendentMoRef(null, "VirtualMachine", vmName);
             
-            if (vmMOR == null || hostMOR == null)
+            if (vmMOR == null || hostMOR == null) {
                 throw new Exception ("Invalid virtual machine or host specified for the VM migration.");
+            }
             
             String vmPowerState = getMORProperty(vmMOR, "runtime.powerState").toString();
             
-            if (vmPowerState.equalsIgnoreCase("powered_on")) {
+            if (vmPowerState.equalsIgnoreCase("powered_on"))
                 migrateTaskMOR = vimPort.migrateVMTask(vmMOR, null, hostMOR, 
                         VirtualMachineMovePriority.HIGH_PRIORITY, VirtualMachinePowerState.POWERED_ON);
-            }
-            else {
+            else
                 migrateTaskMOR = vimPort.migrateVMTask(vmMOR, null, hostMOR, 
                         VirtualMachineMovePriority.HIGH_PRIORITY, VirtualMachinePowerState.POWERED_OFF);
-            }
             
             // Wait for the power operation to complete and return back
             String result = waitForTask(migrateTaskMOR);
@@ -763,7 +768,7 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         finally
         {
@@ -779,7 +784,7 @@ public class VMwareClient {
      * @return : String containing the BIOS PCR 0 value.
      * @throws Exception 
      */
-    public String getHostBIOSPCRHash(ManagedObjectReference hostMOR) throws Exception  {
+    public String getHostBIOSPCRHash(ManagedObjectReference hostMOR) throws VMwareConnectionException  {
         String biosPCRHash = "";
         List<HostTpmDigestInfo> pcrList;
         
@@ -834,7 +839,7 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         return biosPCRHash;
     } 
@@ -850,9 +855,10 @@ public class VMwareClient {
      * @return : XML string equivalent of the attestation report.
      * @throws Exception 
      */
-    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws Exception {
+    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws VMwareConnectionException {
         ManagedObjectReference hostMOR;
-        boolean doNotDisconnect = false;
+       
+        boolean doNotDisconnect;
 
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw;
@@ -867,10 +873,12 @@ public class VMwareClient {
             // If we have already established a connection, we use it. This will
             // happen when this function will be called by the getHostDetailsForCluster
             // function, which would have opened the connection to vCenter server.
+            /*
             if (!isConnected)
                 connect(hostObj.AddOn_Connection_String);
             else
                 doNotDisconnect = true;
+                */
 
             hostMOR = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
             if(hostMOR == null)
@@ -1036,12 +1044,12 @@ public class VMwareClient {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new VMwareConnectionException(ex);
         }
         finally
-        {
+        {/*
             if (!doNotDisconnect)
-                disconnect();
+                disconnect();*/
         }
     }
     
@@ -1055,7 +1063,7 @@ public class VMwareClient {
     * @throws Exception
     */
    private List<ObjectContent> retrievePropertiesAllObjects(List<PropertyFilterSpec> listpfs)
-      throws Exception {
+      throws VMwareConnectionException {
 
       RetrieveOptions propObjectRetrieveOpts = new RetrieveOptions();
 
@@ -1085,7 +1093,7 @@ public class VMwareClient {
             }
          }
       } catch (Exception e) {
-         throw e;
+         throw new VMwareConnectionException(e);
       }
 
       return listobjcontent;
@@ -1154,7 +1162,7 @@ public class VMwareClient {
       getContentsRecursively(ManagedObjectReference collector,
                              ManagedObjectReference root,
                              String[][] typeinfo, boolean recurse)
-      throws Exception {
+      throws VMwareConnectionException {
       if (typeinfo == null || typeinfo.length == 0) {
          return null;
       }
@@ -1231,7 +1239,7 @@ public class VMwareClient {
    private ManagedObjectReference getDecendentMoRef(ManagedObjectReference root,
                                                            String type,
                                                            String name)
-      throws Exception {
+      throws VMwareConnectionException {
       if (name == null || name.length() == 0) {
          return null;
       }
@@ -1273,25 +1281,25 @@ public class VMwareClient {
    }
 
    private String getProp(ManagedObjectReference obj,
-                                 String prop) throws Exception{
+                                 String prop) throws VMwareConnectionException{
       String propVal = null;
       try {
          List<DynamicProperty> dynaProArray
-            = getDynamicProarray(obj, obj.getType().toString(), prop);
+            = getDynamicProarray(obj, obj.getType(), prop);
          if(dynaProArray != null && !dynaProArray.isEmpty()) {
             if(dynaProArray.get(0).getVal() != null) {
                propVal = (String) dynaProArray.get(0).getVal();
             }
          }
       }  catch (Exception e) {
-         throw e;
+         throw new VMwareConnectionException(e);
       }
       return propVal;
    }
 
    private ArrayList filterMOR(ArrayList mors,
                                       String [][] filter)
-      throws Exception {
+      throws VMwareConnectionException {
       ArrayList filteredmors =
          new ArrayList();
       for(int i = 0; i < mors.size(); i++) {
@@ -1316,7 +1324,7 @@ public class VMwareClient {
    private ArrayList getDecendentMoRefs(ManagedObjectReference root,
                                                String type,
                                                String [][] filter)
-      throws Exception {
+      throws VMwareConnectionException {
       String[][] typeinfo
          = new String[][] {new String[] {type, "name"}, };
 
@@ -1345,6 +1353,7 @@ public class VMwareClient {
     *
     * @return TraversalSpec specification to get to the VirtualMachine managed object.
     */
+   /* not used ...
    private TraversalSpec getVMTraversalSpec() {
       // Create a traversal spec that starts from the 'root' objects
       // and traverses the inventory tree to get to the VirtualMachines.
@@ -1398,14 +1407,16 @@ public class VMwareClient {
       sSpecArr.add(vAppToVApp);
       traversalSpec.getSelectSet().addAll(sSpecArr);
       return traversalSpec;
-   }
+   }*/
 
+   // unused
    /**
     * Get the MOR of the Virtual Machine by its name.
     * @param vmName The name of the Virtual Machine
     * @return The Managed Object reference for this VM
     */
-   private ManagedObjectReference getVmByVMname(String vmname) throws Exception {
+   /*
+   private ManagedObjectReference getVmByVMname(String vmname) throws VMwareConnectionException {
       ManagedObjectReference retVal = null;
       try {
          TraversalSpec tSpec = getVMTraversalSpec();
@@ -1448,10 +1459,10 @@ public class VMwareClient {
             }
          }
       }  catch (Exception e) {
-         throw e;
+         throw new VMwareConnectionException(e);
       }
       return retVal;
-   }
+   }*/
 
    /*
     * @return An array of SelectionSpec covering VM, Host, Resource pool,
@@ -1577,7 +1588,7 @@ public class VMwareClient {
    private List<DynamicProperty> getDynamicProarray(ManagedObjectReference ref,
                                                            String type,
                                                            String propertyString)
-      throws Exception {
+      throws VMwareConnectionException {
       PropertySpec propertySpec = new PropertySpec();
       propertySpec.setAll(Boolean.FALSE);
       propertySpec.getPathSet().add(propertyString);
@@ -1601,8 +1612,11 @@ public class VMwareClient {
       return objList;
    }
 
+   
+   // unused
+   /*
    private boolean getTaskInfo(ManagedObjectReference taskmor)
-      throws Exception {
+      throws VMwareConnectionException {
       boolean valid = false;
       String res = waitForTask(taskmor);
       if(res.equalsIgnoreCase("success")) {
@@ -1612,7 +1626,8 @@ public class VMwareClient {
       }
       return valid;
    }
-
+*/
+   
    private void updateValues(List<String> props,
                                     Object[] vals,
                                     PropertyChange propchg) {
@@ -1643,7 +1658,7 @@ public class VMwareClient {
                                          List<String> filterProps,
                                          List<String> endWaitProps,
                                          Object[][] expectedVals)
-      throws Exception {
+      throws VMwareConnectionException {
       // version string is initially null
       String version = "";
       Object[] endVals = new Object[endWaitProps.size()];
@@ -1658,8 +1673,13 @@ public class VMwareClient {
       propSpec.setType(objmor.getType());
       spec.getPropSet().add(propSpec);
 
-      ManagedObjectReference filterSpecRef =
-         vimPort.createFilter(propCollectorRef, spec, true);
+      ManagedObjectReference filterSpecRef;
+      try {
+    	  filterSpecRef = vimPort.createFilter(propCollectorRef, spec, true);
+      }
+      catch(Exception e) {
+    	  throw new VMwareConnectionException(e);
+      }
 
       boolean reached = false;
 
@@ -1678,7 +1698,7 @@ public class VMwareClient {
                vimPort.waitForUpdates(propCollectorRef, version);
                retry = false;
             }  catch (Exception e) {
-               throw e;
+               throw new VMwareConnectionException(e);
             }
          }
          if(updateset != null) {
@@ -1695,7 +1715,6 @@ public class VMwareClient {
             objupary = filtup.getObjectSet();
             for (int oi = 0; oi < objupary.size(); oi++) {
                objup = objupary.get(oi);
-
                if (objup.getKind() == ObjectUpdateKind.MODIFY ||
                    objup.getKind() == ObjectUpdateKind.ENTER ||
                    objup.getKind() == ObjectUpdateKind.LEAVE) {
@@ -1721,12 +1740,17 @@ public class VMwareClient {
       }
 
       // Destroy the filter when we are done.
+      try {
       vimPort.destroyPropertyFilter(filterSpecRef);
+      }
+      catch(Exception e) {
+    	  throw new VMwareConnectionException(e);
+      }
 
       return filterVals;
    }
 
-   private String waitForTask(ManagedObjectReference taskmor) throws Exception {
+   private String waitForTask(ManagedObjectReference taskmor) throws VMwareConnectionException {
       List<String> infoList = new ArrayList<String>();
       infoList.add("info.state");
       infoList.add("info.error");

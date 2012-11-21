@@ -112,6 +112,21 @@ public class ManagementConsoleViewController extends MultiActionController{
 	logger.info("WLMViewController.getRegisterPage >>");
 	return new ModelAndView("Register");
     }	
+   /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
+    public ModelAndView getCAStatusPage(HttpServletRequest req,HttpServletResponse res ) {
+		return new ModelAndView("CAStatus");
+	}
+    
+    /*--End Added by Soni on 18/10/12 for New Screen for CA */
+    
+    /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
+    public ModelAndView getSAMLCertificatePage(HttpServletRequest req,HttpServletResponse res ) {
+    	logger.info("MGViewController.getSAMLCertificatePage >>");
+		return new ModelAndView("SAMLDownload");
+	
+	}
+    
+    /*--End Added by Soni on 18/10/12 for New Screen for CA */
     
     /*public ModelAndView getDefineWhiteListConfig(HttpServletRequest req,HttpServletResponse res) {
     	logger.info("WLMViewController.getDefineWhiteListConfig >>");
