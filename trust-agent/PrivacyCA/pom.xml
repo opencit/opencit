@@ -7,7 +7,7 @@
     <name>PrivacyCA</name>
 
     <parent>
-	<groupId>com.intel.mtwilson</groupId>
+	<groupId>com.intel.mtwilson.trustagent</groupId>
 	<artifactId>trust-agent-parent</artifactId>
 	<version>0.5.4-SNAPSHOT</version>
     </parent>

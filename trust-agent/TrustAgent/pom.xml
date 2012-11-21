@@ -6,7 +6,7 @@
     <name>Trust Agent</name>
 
     <parent>
-	<groupId>com.intel.mtwilson</groupId>
+	<groupId>com.intel.mtwilson.trustagent</groupId>
 	<artifactId>trust-agent-parent</artifactId>
 	<version>0.5.4-SNAPSHOT</version>
     </parent>
@@ -144,7 +144,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson</groupId>
+            <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>PrivacyCA</artifactId>
             <version>1.0</version>
             <!-- classifier>jar-with-dependencies</classifier   this causes an error in maven (bug in maven, it should be very straightforward) so instead of this we're going to put the PrivacyCA dependencies here -->
