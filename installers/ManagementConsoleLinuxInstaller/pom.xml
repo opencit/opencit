@@ -50,7 +50,7 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>com.intel.mtwilson.services</groupId>
+                  <groupId>com.intel.mtwilson.portals</groupId>
                   <artifactId>ManagementConsole</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
