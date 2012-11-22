@@ -59,7 +59,23 @@
                     <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
-	    
+            
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <!--
+                        <addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+                        -->
+                        <mainClass>com.intel.mtwilson.client.TextConsole</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+                    
 	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -82,14 +98,24 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>1.5</version>
         <executions>
+            <execution>
+                <id>regular-jar-with-dependencies</id>
+                <phase>package</phase>
+                <goals><goal>shade</goal></goals>
+                <configuration>
+        		<shadedArtifactAttached>true</shadedArtifactAttached>
+                	<shadedClassifierName>with-dependencies</shadedClassifierName>
+                </configuration>
+            </execution>
           <execution>
+                <id>shaded-jar-with-dependencies</id>
             <phase>package</phase>
             <goals>
               <goal>shade</goal>
             </goals>
             <configuration>
 		<shadedArtifactAttached>true</shadedArtifactAttached>
-		<shadedClassifierName>with-dependencies</shadedClassifierName> <!-- Any name that makes sense -->
+		<shadedClassifierName>with-dependencies-shaded</shadedClassifierName> <!-- Any name that makes sense -->
 		<transformers>
 		    <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
 			<resource>META-INF/BCKEY.SF</resource>

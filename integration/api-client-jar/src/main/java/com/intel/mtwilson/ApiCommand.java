@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @deprecated use com.intel.mtwilson.client.Textconsole
+ * @deprecated use com.intel.mtwilson.client.TextConsole
  * @since 0.5.2
  * @author jbuhacoff
  */
@@ -212,149 +212,10 @@ public class ApiCommand {
         }
         
         if( args[0].equals("CreateUser") ) {
-            // args[1] should be path to folder
-            File directory = new File(args[1]);
-            String username = null, password = null;
-            // args[2] is optional username (if not provided we will prompt)
-            if( args.length > 2 ) { username = args[2]; }
-            // args[3] is optional password plaintext (not recommended) or environment variable name (recommended) (if not provided we will prompt)
-            if( args.length > 3 ) { password = args[3]; }
-            
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            if( username == null || username.isEmpty() ) {
-                System.out.print("Username: ");
-                username = in.readLine();
-            }
-            if( password == null || password.isEmpty() ) {
-                System.out.print("Password: ");
-                password = in.readLine();
-                System.out.print("Password again: ");
-                String passwordAgain = in.readLine();
-                if( !password.equals(passwordAgain) ) {
-                    System.err.println("The two passwords don't match");
-                    System.exit(1);
-                }
-            }
-            else if( password.startsWith("env:") && password.length() > 4 ) {
-                String varName = password.substring(4);
-                password = System.getenv(varName);
-            }
 
-            if( password == null || password.isEmpty() || password.length() < 6 ) {
-                System.err.println("The password must be at least six characters");
-                System.exit(1);
-            }
-            //CN=jonathan, OU=IASI, O=Intel, L=Folsom, ST=CA, C=US
-            /*
-            System.out.print("Common Name (optional): "); 
-            String cn = in.readLine();
-            System.out.print("Organizational Unit (optional): ");
-            String ou = in.readLine();
-            System.out.print("Organization (optional): ");
-            String o = in.readLine();
-            System.out.print("City/locality (optional): ");
-            String l = in.readLine();
-            System.out.print("State (optional): ");
-            String st = in.readLine();
-            System.out.print("Country (optional): ");
-            String c = in.readLine();
-            if( cn.isEmpty() ) { cn = username; }
-            String[] parts = new String[] { 
-                String.format("CN=%s",cn), 
-                ou.isEmpty() ? "" : String.format("OU=%s", ou),
-                o.isEmpty() ? "" : String.format("O=%s", o), 
-                l.isEmpty() ? "" : String.format(""), st, c };
-            String subject = StringUtils.join(parts);
-            */
-            String subject = username; //String.format("CN=%s", username);
-            
-            File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + Filename.encode(username) + ".jks");
-            SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
-            KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
-            X509Certificate certificate = RsaUtil.generateX509Certificate(subject, keypair, RsaUtil.DEFAULT_RSA_KEY_EXPIRES_DAYS);
-            keystore.addKeyPairX509(keypair.getPrivate(), certificate, username, password);
-            keystore.save();
-            System.out.println("Created keystore: "+keystoreFile.getName());
-            return; //System.exit(0);
         }
         
         if( args[0].equals("RegisterUser") ) {
-            if( args.length < 4 ) {
-                System.err.println("Usage: RegisterUser /path/to/username.jks ServiceURL Role1[,Role2,...] [password]");
-                System.err.println("ServiceURL is the URL to the management service");
-                System.err.println("Try these roles:  Attestation,Whitelist,Security");
-                System.exit(1);
-            }
-            // args[1] should be path to keystore (/path/to/directory/username.jks)
-            File keystoreFile = new File(args[1]);
-            // args[2] should be the url of the server to register with
-            URL server = new URL(args[2]);
-            // args[3] should be the roles being requested, comma-separated values  (Attestation,Whitelist,Security)
-            String[] roles = StringUtils.split(args[3], ",");
-
-            String username = Filename.decode(keystoreFile.getName().substring(0, keystoreFile.getName().lastIndexOf("."))); // username is everything before ".jks"
-            String password = null;
-            // args[4] is optional password plaintext (not recommended) or environment variable name (recommended) (if not provided we will prompt)
-            if( args.length > 4 ) { password = args[4]; }
-
-            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            if( password == null || password.isEmpty() ) {
-                System.out.print("Password: ");
-                password = in.readLine();
-            }
-            else if( password.startsWith("env:") && password.length() > 4 ) {
-                String varName = password.substring(4);
-                password = System.getenv(varName);
-            }
-
-            if( password == null || password.isEmpty() || password.length() < 6 ) {
-                System.err.println("The password must be at least six characters");
-                System.exit(1);
-            }
-            
-            
-            SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
-            // download server's ssl certificates and add them to the keystore
-            KeystoreUtil.addSslCertificatesToKeystore(keystore, server);
-            // register the user with the server
-            
-            RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
-            Properties p = new Properties();
-            p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");
-            p.setProperty("mtwilson.api.ssl.verifyHostname", "true");            
-            ApiClient c = new ApiClient(server, rsaCredential, keystore, new MapConfiguration(p)); //ConfigurationFactory.fromSystemEnvironment());
-            ApiClientCreateRequest user = new ApiClientCreateRequest();
-            user.setCertificate(rsaCredential.getCertificate().getEncoded());
-            user.setRoles(roles);
-            try {
-                c.register(user);
-            }
-            catch(javax.net.ssl.SSLException e) {
-                if( e.getMessage().contains("hostname in certificate didn't match") ) {
-                    System.err.println(e.getMessage());
-                    System.out.print("Do you want to continue anyway? [Y/N] ");
-                    String ignoreHostname = in.readLine();
-                    if( ignoreHostname.toUpperCase().charAt(0) == 'Y' ) {
-                        System.err.println("To avoid this prompt in the future, address the server by the hostname in its SSL certificate or set the environment variable MTWILSON_API_SSL_VERIFY_HOSTNAME=false");
-                        Properties p2 = new Properties();
-                        p2.setProperty("mtwilson.api.ssl.verifyHostname", "false");
-                        c = new ApiClient(server, rsaCredential, keystore, new MapConfiguration(p2));
-                        c.register(user);
-                    }
-                    else {
-                        System.exit(2);
-                    }
-                }
-                else {
-                    throw e;
-                }
-            }
-            // download server's saml certificate and save in the keystore
-            X509Certificate samlCertificate = c.getSamlCertificate();
-            keystore.addTrustedSamlCertificate(samlCertificate, server.getHost());
-            log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost() });
-            keystore.save();        
-            System.out.println("OK");
             return; //System.exit(0);
         }
 

@@ -1371,8 +1371,8 @@ glassfish_create_ssl_cert() {
     # NIARL code in Trust Agent uses Bouncy Castle APIs which require a Subject Alternative Name in the Server's SSL certificate in order to validate a certificate with an IP address in the subject.
     # Java 7 supports -ext san=ip:1.2.3.4    to add the extension.  Java 6 does not.  So we use the mtwilson command to generate it. 
     #$keytool -genkey -alias s1as -keysize 2048 -keyalg RSA -dname "CN=${serverName}, OU=Mt Wilson, C=US" -keystore $keystore -storepass $keystorePassword -keypass $keystorePassword -validity 3650
-    #$mtwilson rsa CreateSSLCertificate "CN=${serverName}, OU=Mt Wilson, C=US" "ip:${serverName}" $keystore s1as "$keystorePassword"
-    $mtwilson rsa CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
+    #$mtwilson api CreateSSLCertificate "CN=${serverName}, OU=Mt Wilson, C=US" "ip:${serverName}" $keystore s1as "$keystorePassword"
+    $mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     echo "Restarting Glassfish domain..."
     glassfish_restart

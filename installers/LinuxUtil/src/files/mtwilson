@@ -24,21 +24,7 @@ shell_include_files ${env_dir}/*
 call_apiclient() {
   java_require
   APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.mtwilson.ApiCommand
-  $java -cp "$APICLIENT_JARS" $mainclass $@
-}
-
-call_remoteclient() {
-  java_require
-  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.mtwilson.RemoteCommand
-  $java -cp "$APICLIENT_JARS" $mainclass $@
-}
-
-call_rsacommand() {
-  java_require
-  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.mtwilson.crypto.RsaCommand
+  mainclass=com.intel.mtwilson.client.TextConsole
   $java -cp "$APICLIENT_JARS" $mainclass $@
 }
 
@@ -152,14 +138,6 @@ case "$1" in
   api)
         shift
         call_apiclient $@
-        ;;
-  remote)
-        shift
-        call_remoteclient $@
-        ;;
-  rsa)
-        shift
-        call_rsacommand $@
         ;;
   setup)
         if [ $# -gt 1 ]; then

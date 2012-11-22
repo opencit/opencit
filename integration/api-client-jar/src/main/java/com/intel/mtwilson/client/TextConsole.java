@@ -5,12 +5,16 @@
 package com.intel.mtwilson.client;
 
 import java.util.Arrays;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jbuhacof
  */
 public class TextConsole {
+//    private static Logger log = LoggerFactory.getLogger(TextConsole.class);
+    
     public static void main(String[] args) {
         try {
             if( args.length > 0 ) {
@@ -23,6 +27,7 @@ public class TextConsole {
             }
         }
         catch(ClassNotFoundException e) {
+            System.out.println("classnotfoundexception: "+e.getLocalizedMessage());
             System.err.println("Unrecognized command");
         }
         catch(Exception e) {

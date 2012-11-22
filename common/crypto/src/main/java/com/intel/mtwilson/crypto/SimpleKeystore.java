@@ -67,6 +67,9 @@ public class SimpleKeystore {
                     keystore.load(null, keystorePassword.toCharArray());            
                 }
             }
+            catch(FileNotFoundException e) {
+                keystore.load(null, keystorePassword.toCharArray());
+            }
             finally {
                 try {
                     if( in != null ) {
@@ -80,9 +83,6 @@ public class SimpleKeystore {
         }
         catch (KeyStoreException e) {
             throw new KeyManagementException("Cannot create a keystore of type "+KeyStore.getDefaultType(), e);
-        }
-        catch(FileNotFoundException e) {
-            throw new KeyManagementException("Cannot open keystore", e);
         }
         catch(IOException e) {
             throw new KeyManagementException("Cannot load keystore", e);
