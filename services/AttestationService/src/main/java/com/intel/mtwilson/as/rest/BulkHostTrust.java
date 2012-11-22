@@ -1,6 +1,12 @@
 package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
+import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
+import com.intel.mtwilson.security.annotations.RolesAllowed;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -8,13 +14,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
-import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
-import com.intel.mtwilson.security.annotations.RolesAllowed;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * REST Web Service
@@ -26,7 +25,7 @@ import java.util.Set;
  * @author dmagadix
  */
 @Stateless
-@Path("/hosts/bulk/trust")
+@Path("/hosts/bulk")
 public class BulkHostTrust {
 
         /**
@@ -40,7 +39,7 @@ public class BulkHostTrust {
 	 */
 	@GET
 	@Produces({ MediaType.APPLICATION_XML })
-        @Path("/saml")
+        @Path("/trust/saml")
         @RolesAllowed({"Attestation", "Report"})
 	public String getTrustSaml(
 			@QueryParam("hosts") String hosts,
@@ -71,6 +70,7 @@ public class BulkHostTrust {
 	 * @param forceVerify
 	 * @return
 	 */
+        @Path("/trust")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
         @RolesAllowed({"Attestation", "Report"})

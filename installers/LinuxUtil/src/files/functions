@@ -1157,6 +1157,17 @@ glassfish_memory() {
   $glassfish create-jvm-options "-Xmx${jvm_memory}m:-XX\\:MaxPermSize=${jvm_maxperm}m"
 }
 
+# reset glassfish overall logging handler to turn on logging
+# this is required because glassfish 3.1.1 UI has a bug that causes the
+# logging handler to be set to OFF whenever a user saves any change to
+# other logging levels. 
+# references:
+# http://java.net/jira/browse/GLASSFISH-17037
+# http://stackoverflow.com/questions/9373629/glassfish-3-1-1-suddenly-stopped-writing-to-server-log
+glassfish_enable_logging() {
+  $glassfish set-log-levels com.sun.enterprise.server.logging.GFFileHandler=ALL
+}
+
 # Environment:
 # - glassfish_required_version
 glassfish_install() {

@@ -17,6 +17,7 @@ java_required_version=1.6.0_29
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
 if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
+if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 #if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
 
@@ -128,6 +129,9 @@ case "$1" in
         ;;
   glassfish-sslcert)
         glassfish_create_ssl_cert_prompt
+        ;;
+  glassfish-enable-logging)
+        glassfish_enable_logging
         ;;
   mysql-detect)
         mysql_detect ${2:-$mysql_required_version}

@@ -378,12 +378,26 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
             if( errorParser.getRootCause() != null ) {
                 errorMessage = errorMessage.concat(": "+errorParser.getRootCause());
             }
-            return new ApiException(response, errorMessage, ErrorCode.UNKNOWN_ERROR);
+            return new ApiException(response, errorMessage, httpErrorCode(response.httpStatusCode));
         }
         else {
-            // a non-json, non-html error response from the web application: so we include the response in the exception message.
-            return new ApiException(response, new String(response.content, "UTF-8"), ErrorCode.UNKNOWN_ERROR);
+            // a non-json, non-html error response from the web application: so we include the response in the exception message. http 401 unauthorized responses are included here.
+            return new ApiException(response, new String(response.content, "UTF-8"), httpErrorCode(response.httpStatusCode));
         }
+    }
+    
+    private ErrorCode httpErrorCode(int httpErrorCode) {
+        ErrorCode e;
+        switch(httpErrorCode) {
+            case 200: e = ErrorCode.OK; break;
+            case 400: e = ErrorCode.HTTP_INVALID_REQUEST; break;
+            case 401: e = ErrorCode.HTTP_UNAUTHORIZED; break;
+            case 403: e = ErrorCode.HTTP_FORBIDDEN; break;
+            case 404: e = ErrorCode.HTTP_NOT_FOUND; break;
+            case 500: e = ErrorCode.HTTP_INTERNAL_SERVER_ERROR; break;                
+            default: e = ErrorCode.UNKNOWN_ERROR; break;
+        }
+        return e;
     }
     
     private byte[] content(ApiResponse response) throws IOException, ApiException {

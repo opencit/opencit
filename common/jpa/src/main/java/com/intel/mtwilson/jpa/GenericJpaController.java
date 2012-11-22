@@ -53,7 +53,7 @@ public abstract class GenericJpaController<T> {
         log.debug("Named query {} with {} parameters", new String[] { queryName, String.valueOf(parameters.keySet().size()) });
         EntityManager em = getEntityManager();
         try {
-            TypedQuery<T> query = em.createNamedQuery(entityClass.getName()+"."+queryName, entityClass);
+            TypedQuery<T> query = em.createNamedQuery(entityClass.getSimpleName()+"."+queryName, entityClass);
             for(String variableName : parameters.keySet()) {
                 Object variableValue = parameters.get(variableName);
                 log.debug("Named query: {} Variable: {} Value: {}", new String[] { queryName, variableName, variableValue.toString() });
