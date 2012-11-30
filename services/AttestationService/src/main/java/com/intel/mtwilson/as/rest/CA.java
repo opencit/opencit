@@ -23,6 +23,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -71,6 +72,9 @@ public class CA {
             X509Certificate csr = RsaUtil.toX509Certificate(csrBase64);
             X509Certificate caSignedCertificate = ca.signSslCertificate(csr, caPassword);
             return Base64.encodeBase64String(caSignedCertificate.getEncoded());
+        }
+        catch(FileNotFoundException e) {
+            return null;
         }
         catch(CertificateException e) {
             return null;
