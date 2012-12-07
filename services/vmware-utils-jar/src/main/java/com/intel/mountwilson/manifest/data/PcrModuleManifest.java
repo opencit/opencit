@@ -10,6 +10,9 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * XXX the interface needs to change, see comments on IManifest
+ */
 public class PcrModuleManifest extends PcrManifest implements IManifest {
 	Logger log = Logger.getLogger(getClass().getName());
 	

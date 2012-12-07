@@ -23,6 +23,13 @@ import javax.xml.namespace.QName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * XXX needs to be refactored with vmware client. right now the usage is 
+ * backwards, with the vcenterhost class managing a connection. the vcenterhost
+ * class should be RETURNED BY the vcenterclient class in order to save the
+ * caller the effort of keeping track of vmware's "managed object reference" for
+ * every object for every call.
+ */
 public abstract class VCenterHost extends VMwareClient {
         private Logger log = LoggerFactory.getLogger(getClass());
 

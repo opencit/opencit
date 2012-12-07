@@ -26,7 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * XXX needs to move to a vmware-specific package, and see also notes about
+ * IManifestStrategy interface 
  * @author dsmagadx
  */
 public class VMWareManifestStrategy extends VMwareClient implements

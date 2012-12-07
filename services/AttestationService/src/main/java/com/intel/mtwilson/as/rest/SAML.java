@@ -59,7 +59,10 @@ public class SAML {
     @GET
     @Produces({"application/samlassertion+xml"})
     @Path("/assertions/host")
-    public String getHostAssertions(@QueryParam("ID")String hostName) {
+    public String getHostAssertions(
+            @QueryParam("ID")String hostName,
+            @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify
+            ) {
         return hostTrustBO.getTrustWithSaml(hostName);
     }
 

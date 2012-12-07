@@ -3,6 +3,9 @@ package com.intel.mountwilson.manifest.data;
 import java.util.logging.Logger;
 
 
+/**
+ * XXX the interface needs to change, see comments on IManifest
+ */
 public class PcrManifest implements IManifest {
 	Logger log = Logger.getLogger(getClass().getName());
 	public PcrManifest(int pcrNumber, String pcrValue) {

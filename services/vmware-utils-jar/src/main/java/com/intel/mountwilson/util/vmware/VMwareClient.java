@@ -96,7 +96,7 @@ public class VMwareClient {
 	 * @throws Exception
 	 *             the exception
 	 */
-	protected void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
+	public void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
                 vcenterEndpoint = url;
 		HostnameVerifier hostNameVerifier = new HostnameVerifier() {
 
@@ -394,7 +394,47 @@ public class VMwareClient {
 		}
 		return ret;
 	}
+        
+        public List<String> getPropertyNames(TxtHostRecord hostObj) throws InvalidPropertyFaultMsg, InvalidPropertyFaultMsg, RuntimeFaultFaultMsg, VMwareConnectionException {
+                ManagedObjectReference moRef = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
+		// Return object array
+		ArrayList<String> list = new ArrayList<String>();
+		// PropertySpec specifiesgetHostAttestationReport what properties to
+		// retrieve and from type of Managed Object
+		PropertySpec pSpec = new PropertySpec();
+		pSpec.setType(moRef.getType());
+		pSpec.getPathSet().addAll(new ArrayList<String>());
 
+		// ObjectSpec specifies the starting object and
+		// any TraversalSpecs used to specify other objects
+		// for consideration
+		ObjectSpec oSpec = new ObjectSpec();
+		oSpec.setObj(moRef);
+
+		// PropertyFilterSpec is used to hold the ObjectSpec and
+		// PropertySpec for the call
+		PropertyFilterSpec pfSpec = new PropertyFilterSpec();
+		pfSpec.getPropSet().add(pSpec);
+		pfSpec.getObjectSet().add(oSpec);
+
+		// retrieveProperties() returns the properties
+		// selected from the PropertyFilterSpec
+
+		List<PropertyFilterSpec> pfSpecs = new ArrayList<PropertyFilterSpec>();
+		pfSpecs.add(pfSpec);
+
+		List<ObjectContent> ocs = vimPort.retrieveProperties(propCollectorRef,
+				pfSpecs);
+
+		for (ObjectContent oc : ocs) {
+			List<DynamicProperty> dps = oc.getPropSet();
+			for (DynamicProperty dp : dps) {
+                            list.add(dp.getName()); // and dp.getVal()
+			}
+		}
+		return list;
+        }
+        
 	// / <summary>
 	// / Retrieves the vCenter version information.
 	// / </summary>

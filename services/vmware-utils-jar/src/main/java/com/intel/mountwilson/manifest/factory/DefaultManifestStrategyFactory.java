@@ -7,6 +7,9 @@ import com.intel.mountwilson.manifest.IManifestStrategy;
 import com.intel.mountwilson.manifest.IManifestStrategyFactory;
 import com.intel.mountwilson.manifest.strategy.TrustAgentStrategy;
 
+/**
+ * XXX the interface needs to change, see comments on IManifestStrategyFactory
+ */
 public class DefaultManifestStrategyFactory implements IManifestStrategyFactory {
 
 

@@ -611,7 +611,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("hostName", hostname.toString());
         query.add("failure_only", Boolean.toString(true));
-        AttestationReport report = fromJSON(httpGet(asurl("/hosts/reports/attestatonreport", query)), AttestationReport.class);
+        AttestationReport report = fromJSON(httpGet(asurl("/hosts/reports/attestationreport", query)), AttestationReport.class);
         return report;        
         
     }
@@ -620,7 +620,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     public AttestationReport getAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("hostName", hostname.toString());
-        AttestationReport report = fromJSON(httpGet(asurl("/hosts/reports/attestatonreport", query)), AttestationReport.class);
+        AttestationReport report = fromJSON(httpGet(asurl("/hosts/reports/attestationreport", query)), AttestationReport.class);
         return report;        
     }
 

@@ -2,6 +2,16 @@ package com.intel.mountwilson.manifest.data;
 
 import java.util.logging.Logger;
 
+/**
+ * XXX this interface includes "eventName" which currently is vmware-specific,
+ * with possible values:
+ *   Vim25Api.HostTpmSoftwareComponentEventDetails
+ *   Vim25Api.HostTpmOptionEventDetails
+ *   Vim25Api.HostTpmBootSecurityOptionEventDetails
+ *   Vim25Api.HostTpmCommandEventDetails
+ * and these seem to have little or no bearing on our attestation work.
+ * Sudhir might be able to explain it.
+ */
 public class ModuleManifest implements IManifest {
 
     Logger log = Logger.getLogger(getClass().getName());

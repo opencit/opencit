@@ -13,6 +13,9 @@ import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.helper.TAHelper;
 import com.intel.mtwilson.datatypes.ErrorCode;
 
+/**
+ * XXX needs to move to a trust-agent specific package
+ */
 public class TrustAgentStrategy extends TAHelper implements IManifestStrategy {
 
 	

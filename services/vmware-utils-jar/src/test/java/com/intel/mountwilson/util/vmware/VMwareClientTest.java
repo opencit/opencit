@@ -2,6 +2,7 @@ package com.intel.mountwilson.util.vmware;
 
 
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.util.List;
 import org.junit.Test;
 
 //import sun.misc.BASE64Encoder;
@@ -32,9 +33,25 @@ public class VMwareClientTest {
         host.HostName = "10.1.71.174";
         host.AddOn_Connection_String = "https://10.1.71.162:443/sdk;administrator;intel123!";
         VMwareClient client = new VMwareClient();
+        client.connect(host.AddOn_Connection_String);
         String report = client.getHostAttestationReport(host, "0,17,18,20");
         System.out.println(report);
     }
+
+    @Test
+    public void testPropertyNamesFromVmwareHost() throws Exception {
+        TxtHostRecord host = new TxtHostRecord();
+        host.HostName = "10.1.71.174";
+        host.AddOn_Connection_String = "https://10.1.71.162:443/sdk;administrator;intel123!";
+        VMwareClient client = new VMwareClient();
+        client.connect(host.AddOn_Connection_String);
+        List<String> properties = client.getPropertyNames(host);
+        System.out.println("Retrieved "+properties.size()+" properties");
+        for(String p : properties) {
+            System.out.println(p);
+        }
+    }
+
 	/*
     @Test
     public void commonsEncoderCompatibleWithSun() {

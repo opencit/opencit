@@ -32,7 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * XXX this class needs to be moved to a trust-agent-specific package, it's
+ * not a reusable "manifest helper" like sha1 hash builder. it's more like
+ * the vmware client/helper classes that are in a vmware package.
  * @author dsmagadx
  */
 public class TAHelper {

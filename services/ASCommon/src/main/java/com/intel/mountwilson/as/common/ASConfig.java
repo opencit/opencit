@@ -68,9 +68,9 @@ public class ASConfig extends ConfigBase{
         Configuration config = getConfiguration();
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", config.getString("mountwilson.as.db.driver", "com.mysql.jdbc.Driver"));
-        prop.put("javax.persistence.jdbc.url" ,String.format("jdbc:mysql://%s:3306/%s?autoReconnect=true",
+        prop.put("javax.persistence.jdbc.url" ,config.getString("mountwilson.as.db.url",String.format("jdbc:mysql://%s:3306/%s?autoReconnect=true",
                     config.getString("mountwilson.as.db.host", "localhost"),
-                    config.getString("mountwilson.as.db.schema", "mw_as")));
+                    config.getString("mountwilson.as.db.schema", "mw_as"))));
         prop.put("javax.persistence.jdbc.user" ,config.getString("mountwilson.as.db.user", "root"));
         prop.put("javax.persistence.jdbc.password", config.getString("mountwilson.as.db.password", "password"));
         return prop;

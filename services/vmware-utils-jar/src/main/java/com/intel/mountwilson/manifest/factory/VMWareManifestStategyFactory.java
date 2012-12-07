@@ -14,6 +14,9 @@ import com.intel.mountwilson.util.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.ErrorCode;
 
 
+/**
+ * XXX the interface needs to change, see comments on IManifestStrategyFactory
+ */
 public class VMWareManifestStategyFactory extends VMwareClient implements IManifestStrategyFactory {
 	Logger log = Logger.getLogger(getClass().getName());
 

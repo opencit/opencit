@@ -125,7 +125,7 @@ public class Reports {
     @GET
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/attestatonreport")
+    @Path("/attestationreport")
     public AttestationReport getAttestationReport(@QueryParam("hostName")String hostName,
             @QueryParam("failure_only") @DefaultValue("false") Boolean failureOnly) {
         return reportsBO.getAttestationReport(new Hostname(hostName),failureOnly); // datatype.Hostname        

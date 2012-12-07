@@ -6,6 +6,12 @@ import java.security.NoSuchAlgorithmException;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.ErrorCode;
 
+/**
+ * XXX this class is intended to model hash-extending but does not use the
+ * same terminology as the TPM. in the TPM it's called "extending a hash".
+ * the method get_data needs to be renamed IAW java standard convention,
+ * either data() or getBytes() or toByteArray().
+ */
 public class SHA1HashBuilder {
 	private byte[] _data = null;
 
