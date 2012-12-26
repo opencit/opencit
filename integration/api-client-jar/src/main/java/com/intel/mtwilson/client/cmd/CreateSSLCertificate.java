@@ -25,14 +25,14 @@ public class CreateSSLCertificate extends AbstractCommand {
 
     @Override
     public void execute(String[] args) throws Exception {
-        if( args.length < 6 ) {
+        if( args.length < 5 ) {
             throw new IllegalArgumentException("Usage: CreateSSLCertificate \"192.168.1.100\" \"ip:192.168.1.100\" /path/to/keystore.jks alias [env:password_var]");
         }
-        String subject = args[1];
-        String alternateName = args[2];
-        File keystoreFile = new File(args[3]);
-        String alias = args[4];
-        String password = args[5];
+        String subject = args[0];
+        String alternateName = args[1];
+        File keystoreFile = new File(args[2]);
+        String alias = args[3];
+        String password = args[4];
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         if( password == null || password.isEmpty() ) {
             System.out.print("Password: ");
