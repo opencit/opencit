@@ -128,7 +128,7 @@ bootstrap_ms_approve_user() {
   $keytool -export -alias ${key_alias} -keystore ${key_dir}/${encoded_key_alias}.jks  -storepass ${key_password} -file ${key_dir}/${encoded_key_alias}.crt
   local datestr=`date +%Y-%m-%d.%H%M`
   local cert_id=`shasum -a 256 -b ${key_dir}/${encoded_key_alias}.crt | awk '{ print $1 }'`
-  echo "UPDATE api_client_x509 SET enabled=b'1', status='APPROVED', comment='Approved by `whoami` @ Management Service; do not remove' WHERE fingerprint=UNHEX('$cert_id')" > ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
+  echo "UPDATE mw_api_client_x509 SET enabled=b'1', status='APPROVED', comment='Approved by `whoami` @ Management Service; do not remove' WHERE fingerprint=UNHEX('$cert_id')" > ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
   mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
   mysql_install_scripts ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
 }

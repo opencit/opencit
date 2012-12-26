@@ -63,7 +63,7 @@ public class BootstrapUser implements Command {
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // register user
         System.out.println(String.format("Registering %s with service at %s", username, url));
-        com.intel.mtwilson.client.TextConsole.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), url, "Attestation,Whitelist", password });
+        com.intel.mtwilson.client.TextConsole.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), url, "Attestation,Whitelist,Security", password });
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();
 //        ApiClientInfo apiClientRecord = bo.find(rsaCredentialX509.identity());
