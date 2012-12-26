@@ -42,7 +42,7 @@ public class InitializeMysqlDatabase implements Command {
         //InputStream in = getClass().getResourceAsStream("/bootstrap.sql");
         DataSource ds = null;
         try {
-            ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU").getNonJtaDataSource();
+            ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", ASConfig.getJpaProperties()).getNonJtaDataSource();
         }
         catch(IOException e) {
             throw new SetupException("Cannot load persistence unit info", e);
