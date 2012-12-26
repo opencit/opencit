@@ -71,8 +71,8 @@ bootstrap_first_user() {
   export mc_first_username mc_first_password
   prompt_with_default mc_first_username "Username:" "admin"
   prompt_with_default_password mc_first_password
-  $mtwilson api BootstrapUser ${package_keystore_users_dir} ${mtwilson_api_baseurl} "${mc_first_username}" env:mc_first_password
-  msctl approve-user ${package_keystore_users_dir} "${mc_first_username}" "${mc_first_password}"
+  $mtwilson setup BootstrapUser ${package_keystore_users_dir} ${mtwilson_api_baseurl} "${mc_first_username}" env:mc_first_password
+  #msctl approve-user ${package_keystore_users_dir} "${mc_first_username}" "${mc_first_password}"
 }
 
 bootstrap_first_user__Not_Used() {

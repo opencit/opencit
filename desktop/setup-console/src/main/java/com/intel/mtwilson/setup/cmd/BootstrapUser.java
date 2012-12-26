@@ -28,7 +28,7 @@ import org.apache.commons.configuration.Configuration;
  *
  * @author jbuhacoff
  */
-public class TestApiClientRegistration implements Command {
+public class BootstrapUser implements Command {
 
     /**
      * Creates a new API Client in current directory, registers it with Mt Wilson (on localhost or as configured), and then checks the database for the expected record to validate that it's being created.
@@ -39,13 +39,20 @@ public class TestApiClientRegistration implements Command {
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
         String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), "https://"+getLocalHostAddress()+":8181/" });
-        File directory = new File(".");
+        File directory = null;
+        if( args.length > 0 ) { directory = new File(args[0]); } else { directory = new File("."); }
+        // ignore args[1] it's the baseurl that we already know
         String url = readInputStringWithPromptAndDefault("Mt Wilson URL", defaultUrl);
-        String username = readInputStringWithPrompt("Username");
-        String password = readInputStringWithPrompt("Password");
+        String username = null;
+        String password = null;
+        if( args.length > 2 ) { username = args[2]; } else { username = readInputStringWithPrompt("Username"); }
+        if( args.length > 3 ) { password = args[3]; } else { password = readInputStringWithPrompt("Password"); }
+        if( password != null && password.startsWith("env:") && password.length() > 4 ) {
+            password = System.getenv(password.substring(4)); 
+        }
         // create user
         System.out.println(String.format("Creating keystore for %s in %s", username, directory.getAbsolutePath()));        
-        ApiCommand.main(new String[] { "CreateUser", directory.getAbsolutePath(), username, password });
+        com.intel.mtwilson.client.TextConsole.main(new String[] { "CreateUser", directory.getAbsolutePath(), username, password });
         File keystoreFile = new File(directory.getAbsolutePath() + File.separator + Filename.encode(username) + ".jks");
         if( !keystoreFile.exists() ) {
             System.out.println("Failed to create keystore "+keystoreFile.getAbsolutePath());
@@ -56,7 +63,7 @@ public class TestApiClientRegistration implements Command {
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // register user
         System.out.println(String.format("Registering %s with service at %s", username, url));
-        ApiCommand.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), url, "Attestation,Whitelist", password });
+        com.intel.mtwilson.client.TextConsole.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), url, "Attestation,Whitelist", password });
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();
 //        ApiClientInfo apiClientRecord = bo.find(rsaCredentialX509.identity());

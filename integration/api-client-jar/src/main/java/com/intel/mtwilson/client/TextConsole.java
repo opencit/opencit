@@ -27,8 +27,7 @@ public class TextConsole {
             }
         }
         catch(ClassNotFoundException e) {
-            System.out.println("classnotfoundexception: "+e.getLocalizedMessage());
-            System.err.println("Unrecognized command");
+            System.err.println("Unrecognized command: "+args[0]+": "+e.getLocalizedMessage()); // ClassNotFoundException can only happen if args.length > 0
         }
         catch(Exception e) {
             e.printStackTrace(System.err);

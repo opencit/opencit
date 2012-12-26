@@ -96,7 +96,7 @@ public class SetupWizard {
         }
         */
         String dekBase64 = loadOrCreateSecretKeyAes128("mtwilson.as.dek");
-        encryptAllNonEmptyFieldsInTableWithKey(c, "tbl_hosts", "AddOn_Connection_Info", dekBase64);
+        encryptAllNonEmptyFieldsInTableWithKey(c, "mw_hosts", "AddOn_Connection_Info", dekBase64); // XXX mw_hosts in 1.1,  tbl_hosts in 1.0-RC2
         closeConnection(c);
     }
     
