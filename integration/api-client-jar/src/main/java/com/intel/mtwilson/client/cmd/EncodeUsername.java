@@ -21,16 +21,16 @@ public class EncodeUsername extends AbstractCommand {
 
     @Override
     public void execute(String[] args) throws Exception {
-        if( args.length < 2 ) {
-            throw new IllegalArgumentException("Usage: EncodeUsername alias | RsaCommand EncodeUsername -  (and supply username on stdin)");
+        if( args.length < 1 ) {
+            throw new IllegalArgumentException("Usage: EncodeUsername alias | EncodeUsername -  (and supply username on stdin)");
         }
-        if( args[1].equals("-") ) {
+        if( args[0].equals("-") ) {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             System.out.println(Filename.encode(in.readLine()));
             in.close();
         }
         else {
-            System.out.println(Filename.encode(args[1])); // XXX doesn't work.  "hello world" becomes "hello" instead of "hello%xxworld"
+            System.out.println(Filename.encode(args[0])); // XXX doesn't work.  "hello world" becomes "hello" instead of "hello%xxworld"
         }
     }
 
