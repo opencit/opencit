@@ -291,7 +291,7 @@ public abstract class PersistenceManager implements ServletContextListener {
 //        log.info("Current class loader is {}", PersistenceManager.class.getClassLoader().getClass().getName());
 //        Enumeration<URL> urls = cl.getResources("/META-INF/persistence.xml");
         ArrayList<URL> list = new ArrayList<URL>();
-        list.addAll(getResources(cl, "/persistence.xml"));
+        list.addAll(getResources(cl, "persistence.xml"));
 //        list.addAll(getResources(cl, "/META-INF/persistence.xml"));
         for(URL url : list) {
             CustomPersistenceUnitInfoImpl p = readPersistenceXml(url);
