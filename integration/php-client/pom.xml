@@ -24,8 +24,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>
                 <configuration>
 		    <skip>true</skip>
                 </configuration>

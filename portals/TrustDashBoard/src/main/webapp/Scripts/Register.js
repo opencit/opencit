@@ -29,7 +29,7 @@ function registerUser(){
 	 /* Soni_Begin_21/09/2012_issue_Bug_#398_RC2 -management console allows password on new user to be less than 6 chars   */  
     /*Adding Validation for password not be less than 6 characters*/
 	if  ($('#passwordValue').val().length<6){
-		 $('#passwordValue').parent().parent().find('td:eq(2)').append('<span class="errorMessage validationErrorDiv">Password should not be than 6 characters.</span>');
+		 $('#passwordValue').parent().parent().find('td:eq(2)').append('<span class="errorMessage validationErrorDiv">Password must be 6 or more characters.</span>');
 		 return false;
 		}
 	/* Soni_End_21/09/2012_issue_Bug_#398_RC2 -management console allows password on new user to be less than 6 chars   */

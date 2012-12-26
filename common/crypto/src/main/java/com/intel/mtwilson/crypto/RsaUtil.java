@@ -276,7 +276,7 @@ GeneralName ::= CHOICE {
             if( port == -1 ) {
                 port = 443;
             }
-            X509HostnameVerifier hostnameVerifier = new NopX509HostnameVerifier(); //SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER; // because we are specifically going to get certs
+            X509HostnameVerifier hostnameVerifier = new NopX509HostnameVerifierApache(); //SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER; // because we are specifically going to get certs
             CertificateStoringX509TrustManager trustManager = new CertificateStoringX509TrustManager();
 
             SSLContext sslcontext = SSLContext.getInstance("TLS"); // throws NoSuchAlgorithmException

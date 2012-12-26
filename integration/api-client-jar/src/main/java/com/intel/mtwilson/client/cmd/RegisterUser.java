@@ -9,6 +9,7 @@ import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.client.AbstractCommand;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.io.Filename;
 import java.io.BufferedReader;
@@ -70,7 +71,7 @@ public class RegisterUser extends AbstractCommand {
             
             SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
             // download server's ssl certificates and add them to the keystore
-            KeystoreUtil.addSslCertificatesToKeystore(keystore, server);
+            SslUtil.addSslCertificatesToKeystore(keystore, server);
             // register the user with the server
             
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);

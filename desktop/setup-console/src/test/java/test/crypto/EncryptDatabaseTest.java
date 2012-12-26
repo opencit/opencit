@@ -77,7 +77,7 @@ public class EncryptDatabaseTest {
     public void testEncryptFields() throws Exception {
         SetupWizard wizard = new SetupWizard(conf);
         Connection c = wizard.getDatabaseConnection();
-        PreparedStatement update = c.prepareStatement("UPDATE tbl_hosts SET AddOn_Connection_Info=? WHERE ID=?");
+        PreparedStatement update = c.prepareStatement("UPDATE mw_hosts SET AddOn_Connection_Info=? WHERE ID=?");
         Statement query = c.createStatement();
         ResultSet rs = query.executeQuery("SELECT ID,AddOn_Connection_Info FROM tbl_hosts");
         while(rs.next()) {

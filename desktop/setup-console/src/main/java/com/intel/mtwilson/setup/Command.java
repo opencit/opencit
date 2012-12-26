@@ -10,4 +10,5 @@ package com.intel.mtwilson.setup;
  */
 public interface Command {
     void execute(String[] args) throws Exception;
+//    void setConfiguration(Object config); // XXX use commons-configuration? or our own config object with a rich model?
 }

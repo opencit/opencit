@@ -1,24 +1,20 @@
 package com.intel.mtwilson.as.rest.data;
 
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mountwilson.as.common.ValidationException;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.HostTrustInput;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mountwilson.as.common.ValidationException;
-import static com.jayway.restassured.path.json.JsonPath.with;
-import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import static org.junit.Assert.*;
 import org.junit.Test;
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mountwilson.as.common.ASException;
-import java.util.Arrays;
-import org.codehaus.jackson.annotate.JsonProperty;
 /**
  * These tests verify that the data model serializes and de-serializes properly.
  *
@@ -96,7 +92,7 @@ public class TxtHostTest {
         
     	InputStream in = getClass().getResourceAsStream("HostTrustInputTest.sample.json");
     	try {
-	        HostTrustInput obj = mapper.readValue(in, HostTrustInput.class);
+	        OpenStackHostTrustLevelQuery obj = mapper.readValue(in, OpenStackHostTrustLevelQuery.class);
 	
 	        assertEquals(2, obj.count);
 	        assertEquals("some pcr mask",obj.pcrMask);

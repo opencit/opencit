@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>java-backport-1.6-to-1.5</artifactId>
   <packaging>jar</packaging>
   <name>Java Backport 1.6 to 1.5</name>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.5.4-SNAPSHOT</version>
 
     <parent>
 		<groupId>com.intel.mtwilson.integration</groupId>
@@ -21,13 +20,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <inherited>true</inherited>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
-		    <skip>false</skip>
-                </configuration>
             </plugin>
 	    
 
@@ -35,7 +27,6 @@
 	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-		<version>2.12.4</version>
                 <configuration>
                     <systemProperties>
                         <property>

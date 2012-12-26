@@ -11,12 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * XXX see also apache commons pool KeyedPoolableObjectFactory - 
+ * this ipmlementation was quick but it maybe completely replaceable with
+ * apache commons pool.
+ * 
  * @author jbuhacoff
  */
 public class VMwareConnectionPool {
     private Logger log = LoggerFactory.getLogger(getClass());
-    public static final int DEFAULT_MAX_SIZE = 10;
+//    public static final int DEFAULT_MAX_SIZE = 10;
     private ConcurrentHashMap<String,VMwareClient> pool = new ConcurrentHashMap<String,VMwareClient>();
 //    private ConcurrentHashMap<String,Long> lastAccess = new ConcurrentHashMap<String,Long>();
 //    private int maxSize = DEFAULT_MAX_SIZE;
@@ -24,31 +27,66 @@ public class VMwareConnectionPool {
     public VMwareConnectionPool() {
         
     }
-    
+    /*
     public VMwareConnectionPool(int maxSize) {
 //        this.maxSize = maxSize;
     }
+    */
     
+    /**
+     * If a client is already open for the given connection string, it will
+     * be returned. Otherwise, a new client is created and added to the pool.
+     * 
+     * @param connectionString
+     * @return
+     * @throws VMwareConnectionException 
+     */
     public VMwareClient getClientForConnection(String connectionString) throws VMwareConnectionException {
         if( pool.containsKey(connectionString) ) {
-            return reuseClientForConnection(connectionString);
+            VMwareClient client = reuseClientForConnection(connectionString);
+            if( client.isConnected() ) {
+                return client;
+            }
         }
-        else {
-            return createClientForConnection(connectionString);
-        }
+        return createClientForConnection(connectionString);
     }
     
-    private VMwareClient reuseClientForConnection(String connectionString) throws VMwareConnectionException {
+    /**
+     * Assumes there is already a client open for the given connection string,
+     * and returns it. If there is not already a client open, this method
+     * returns null. 
+     * 
+     * You should only call this method if you are interested in the status
+     * of a connection in the pool for reporting purposes - for normal usage
+     * getClientForConnection(String) is must more convenient because it creates
+     * the connection if it is missing and re-creates it if it has been disconnected.
+     * 
+     * @param connectionString
+     * @return
+     * @throws VMwareConnectionException 
+     */
+    public VMwareClient reuseClientForConnection(String connectionString) throws VMwareConnectionException {
         VMwareClient client = pool.get(connectionString);
 //        lastAccess.put(connectionString, System.currentTimeMillis());
-        // TODO: check that client's connection is still valid; if not automatically reconnect
         if( client != null ) {
         	log.info("Reusing vCenter connection for "+client.getEndpoint());
         }
         return client;
     }
     
-    private VMwareClient createClientForConnection(String connectionString) throws VMwareConnectionException {
+    /**
+     * Creates a new client for the given connection string and adds it to the
+     * pool. If there was already an existing client for that connection string,
+     * it is replaced with the new one.
+     * 
+     * For normal use you should call getClientForConnection(String) because it
+     * will re-use existing connections and automatically create new ones as needed.
+     * 
+     * @param connectionString
+     * @return
+     * @throws VMwareConnectionException 
+     */
+    public VMwareClient createClientForConnection(String connectionString) throws VMwareConnectionException {
         VMwareClient client = new VMwareClient();
         try {
             client.connect(connectionString);

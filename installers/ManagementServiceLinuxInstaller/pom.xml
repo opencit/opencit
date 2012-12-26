@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.intel.mtwilson.linux</groupId>
   <artifactId>ManagementService</artifactId>
@@ -15,7 +14,7 @@
     </parent>
   
   <properties>
-    <makeself.directory>${project.build.directory}/${artifactId}-${version}</makeself.directory>
+    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
   
   <dependencies>
@@ -48,6 +47,13 @@
     -->
   </dependencies>
 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
   <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
@@ -222,7 +228,7 @@
                             </artifact>
 			    -->
                             <artifact>
-                                <file>${project.build.directory}/${artifactId}-${version}.bin</file>
+                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                 <type>bin</type>
 				<!-- this is the combined debian and redhat installer -->
                             </artifact>
@@ -236,5 +242,7 @@
   
   
   </build>
+      </profile>
+  </profiles>
 
 </project>

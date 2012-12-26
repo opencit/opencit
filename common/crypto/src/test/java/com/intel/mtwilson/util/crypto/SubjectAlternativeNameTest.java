@@ -5,7 +5,6 @@
 package com.intel.mtwilson.util.crypto;
 
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.x500.DN;
 import java.io.IOException;
@@ -13,9 +12,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.Map;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *

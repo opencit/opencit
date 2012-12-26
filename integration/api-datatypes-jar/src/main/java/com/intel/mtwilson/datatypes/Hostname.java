@@ -1,17 +1,30 @@
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.validation.Fault;
+import com.intel.mtwilson.validation.Model;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * Representation of a hostname. This class enforces some rules on the 
  * syntax of the hostname to make it usable without further type checking.
  * 
+ * A Hostname can also contain an IP address value, even though the model
+ * objects are not currently related in any way. 
+ * 
+ * TODO relate the Hostname and IPAddress models in some way, possibly with
+ * an aggregated type or union, something that can be a HostnameOrIpAddress.
+ * 
+ * XXX TODO need to rewrite as extension to ObjectModel
+ * 
  * @since 0.5.1
  * @author jbuhacoff
  */
-public class Hostname {
+public class Hostname implements Model {
 
     private String hostname = null;
 
@@ -60,6 +73,12 @@ public class Hostname {
     }
     * 
     */
+    
+    // XXX TODO need to extend ObjectModel so we get this for free...
+    @Override
+    public boolean isValid() {
+        return isValid(hostname);
+    }
 
     /**
      * This method does NOT check the network for the existence of the given
@@ -110,5 +129,17 @@ public class Hostname {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public List<Fault> getFaults() {
+        if( isValid() ) {
+            return Collections.EMPTY_LIST;
+        }
+        else {
+            ArrayList<Fault> faults = new ArrayList<Fault>();
+            faults.add(new Fault("Invalid hostname: %s", hostname));            
+            return faults;
+        }
     }
 }

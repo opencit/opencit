@@ -95,9 +95,9 @@ public class SAMLSignature
 //            URL keystore = getClass().getResource(config.getString ("saml.keystore.file"));
 //            System.out.println("keystore url: "+keystore.toString());
 //            InputStream keystoreInputStream = keystore.openStream();
-            //File keystoreFile = ResourceFinder.getFile(config.getString("saml.keystore.file"));
-            //FileInputStream keystoreInputStream = new FileInputStream(keystoreFile);
-            InputStream keystoreInputStream = keystoreResource.getInputStream();
+            File keystoreFile = ResourceFinder.getFile(config.getString("saml.keystore.file"));
+            FileInputStream keystoreInputStream = new FileInputStream(keystoreFile);
+//            InputStream keystoreInputStream = keystoreResource.getInputStream(); // this obtains it from the database (or whatever resource is provided)
 //            keyStore = KeyStoreUtil.getKeyStore(SAMLSignature.class.getResourceAsStream(config.getString ("keystore")),config.getString ("storepass"));
             try {
             	keyStore = getKeyStore(keystoreInputStream,config.getString ("saml.keystore.password"));

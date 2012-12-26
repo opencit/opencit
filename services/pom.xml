@@ -27,8 +27,6 @@
     <module>WLMService</module>
     <module>ManagementService</module>
     <module>vmware-utils-jar</module>
-    <module>TDData</module>
-    <module>TDCommon</module>
     <module>MSCmdUtility</module>
   </modules>
 

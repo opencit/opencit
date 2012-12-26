@@ -31,6 +31,11 @@ public class PcrModuleManifest extends PcrManifest implements IManifest {
             return untrustedModules;
         }
 
+        /**
+         * XXX currently this code allows a host to have a SUBSET of the modules defined in the whitelist and still be trusted... 
+         * @param goodKnownValue
+         * @return 
+         */
 	@Override
 	public boolean verify(IManifest goodKnownValue) {
 		boolean isTrusted = true;
@@ -46,6 +51,7 @@ public class PcrModuleManifest extends PcrManifest implements IManifest {
 
 			for (ModuleManifest gkvModuleManifest : gkvModuleManifests.values()) {
 				
+                            // XXX if the whitelist host has 2 related modules, a v0 and v1, and the host being checked has only the second one, it will be named v0 ... so even if it has the right value it will be marked incorrect!!
 				if (moduleManifests.containsKey(gkvModuleManifest.getMFKey())) {
                                         ModuleManifest moduleManifest = moduleManifests.get(gkvModuleManifest.getMFKey());
 					boolean trustStatus = moduleManifest.verify(
@@ -60,6 +66,7 @@ public class PcrModuleManifest extends PcrManifest implements IManifest {
                                                 //Removed break here so that we get all the mismatched modules instead of the first failed one.
 					}
 				} 
+                                // XXX TODO  -- need a getMissingModules()  list?  otherwise the web interface incorrectly populates the missing module as being present...
 //				else {
 //					log.info(String.format(
 //							"Manifest %s-%s not found in the host manifest. Set trusted = false and stop processing other modules.",

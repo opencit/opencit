@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>glassfish</artifactId>
@@ -16,7 +15,7 @@
     </parent>
   
   <properties>
-    <makeself.directory>${project.build.directory}/${artifactId}-${version}</makeself.directory>
+    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
   
   <dependencies>
@@ -34,6 +33,13 @@
     </dependency>	
   </dependencies>
 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
   <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
@@ -76,8 +82,8 @@
       <!-- end copy rpm artifact plugin -->
       <!-- begin copy other resources plugin -->
       <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>2.5</version>
         <executions>
           <execution>
             <id>copy-resources</id>
@@ -148,7 +154,7 @@
                     <configuration>
                         <artifacts>
                             <artifact>
-                                <file>${project.build.directory}/${artifactId}-${version}.bin</file>
+                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                 <type>bin</type>
                             </artifact>
                         </artifacts>
@@ -161,5 +167,7 @@
   
   
   </build>
+      </profile>
+  </profiles>
 
 </project>

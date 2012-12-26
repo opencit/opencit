@@ -95,6 +95,7 @@ public class HostTrustBO extends BaseBO {
                     hostName.toString());
         }
         log.info( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
+        log.info( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
         IManifestStrategy manifestStrategy;
         IManifestStrategyFactory strategyFactory;
@@ -305,10 +306,9 @@ public class HostTrustBO extends BaseBO {
         }
     }
 
-    public PollHostsOutput getPollHosts(HostTrustInput input) {
+    public OpenStackHostTrustLevelReport getPollHosts(OpenStackHostTrustLevelQuery input) {
 
-        PollHostsOutput pollHostsOutput = new PollHostsOutput();
-        HostTrusts hostTrusts = new HostTrusts();
+        OpenStackHostTrustLevelReport hostTrusts = new OpenStackHostTrustLevelReport();
         Date today = new Date(System.currentTimeMillis());
         String trustLevel;
 
@@ -340,9 +340,7 @@ public class HostTrustBO extends BaseBO {
 
         hostTrusts.count = hostTrusts.pollHosts.size();
 
-        pollHostsOutput.hostTrusts = hostTrusts;
-
-        return pollHostsOutput;
+        return hostTrusts;
     }
 
     private String parseTrustStatus(String hostTrustStatus) {

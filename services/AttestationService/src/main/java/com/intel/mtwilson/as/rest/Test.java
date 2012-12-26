@@ -2,17 +2,17 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mountwilson.as.rest;
+package com.intel.mtwilson.as.rest;
 
-import com.intel.mountwilson.as.business.HostBO;
+import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mountwilson.as.data.TblHosts;
-import com.intel.mountwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mountwilson.util.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
-import com.intel.mtwilson.util.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.CryptographyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

@@ -5,6 +5,7 @@
 package com.intel.mtwilson;
 import com.intel.mtwilson.crypto.NopX509TrustManager;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import java.io.File;
 import java.io.IOException;
@@ -140,7 +141,7 @@ public class ApacheHttpClient implements java.io.Closeable {
             }
             
             if( requireTrustedCertificate && keystore != null ) {
-                trustManager = KeystoreUtil.createX509TrustManagerWithKeystore(keystore);                
+                trustManager = SslUtil.createX509TrustManagerWithKeystore(keystore);                
             }
             else if( requireTrustedCertificate ) { // config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true) ) {
                 //String truststore = config.getString("mtwilson.api.keystore", System.getProperty("javax.net.ssl.trustStorePath")); // if null use default java trust store...
@@ -162,7 +163,7 @@ public class ApacheHttpClient implements java.io.Closeable {
                     throw new IllegalArgumentException("Require trusted certificates is enabled but truststore is not configured");
                 }
                 keystore = new SimpleKeystore(new File(truststore), truststorePassword);
-                trustManager = KeystoreUtil.createX509TrustManagerWithKeystore(keystore);
+                trustManager = SslUtil.createX509TrustManagerWithKeystore(keystore);
             }
             else {
                 // user does not want to ensure certificates are trusted, so use a no-op trust manager

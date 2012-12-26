@@ -1,6 +1,5 @@
 package com.intel.mtwilson.datatypes;
 
-import javax.xml.datatype.XMLGregorianCalendar;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**

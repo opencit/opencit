@@ -1,9 +1,11 @@
 var uploadFileHelp = [];
 uploadFileHelp[0]="Please provide file in following format :";
 uploadFileHelp[1]="Host_Name|Host_Port_no";
-uploadFileHelp[2]="e.g.   KVM|9999";
+uploadFileHelp[2]="e.g.   myTrustAgent|9999";
 uploadFileHelp[3]="or for VMWare Type";
-uploadFileHelp[4]="e.g.   VMWare_Exsi|https://192.168.1.0/sdk;Administrator;Password";
+uploadFileHelp[4]="Host_Name|Vmware_Connection_String";
+uploadFileHelp[5]="e.g.   myVmwareHost|https://192.168.1.0/sdk;Administrator;Password";
+
 
 var vCenterStringHelp = [];
 vCenterStringHelp[0]="Please provide only the IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.";

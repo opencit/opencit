@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>setup-console</artifactId>
@@ -52,38 +51,6 @@
             </plugin>
 	    
             
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
-              <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
-            </goals>
-            <configuration>
-                <source>1.6</source>
-                <target>1.6</target>
-                <aspectLibraries>
-                    <aspectLibrary>
-                        <groupId>com.intel.mtwilson.common</groupId>
-                        <artifactId>mtwilson-validation</artifactId>
-                    </aspectLibrary>
-                </aspectLibraries>
-                <!--
-                <weaveDependencies>
-                    <weaveDependency>
-                        <groupId>com.intel.mtwilson.common</groupId>
-                        <artifactId>mtwilson-validation</artifactId>
-                    </weaveDependency>
-                </weaveDependencies>
-                -->
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      
                               
 	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -143,7 +110,6 @@
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-jdk14</artifactId>
 		<version>1.6.4</version>
-		<!--<scope>test</scope>-->
     </dependency>
     <dependency>
 		<groupId>commons-configuration</groupId>
@@ -156,9 +122,16 @@
 		<version>1.6</version>
 	</dependency>
 	<dependency>
-		<groupId>mysql</groupId>
-		<artifactId>mysql-connector-java</artifactId>
-		<version>5.1.21</version>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-lang3</artifactId>
+		<version>3.1</version>
+	</dependency>
+
+                
+	<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-mysql</artifactId>
+		<version>${project.version}</version>
 	</dependency>
         
 	<dependency>
@@ -237,12 +210,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>AttestationService</artifactId>
-			<version>${project.version}</version>
-                        <classifier>classes</classifier>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>MSData</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -251,18 +218,77 @@
 			<artifactId>MSCommon</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>ManagementService</artifactId>
-                        <classifier>classes</classifier>
-			<version>${project.version}</version>
-		</dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>MtWilsonHttpSecurity</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-jdbc</artifactId>
+      <version>3.2.0.RELEASE</version>
+      <type>jar</type>
+    </dependency>
+    
+    
+    <!-- text user interface -->
+    <dependency>
+        <groupId>com.googlecode.lanterna</groupId>
+        <artifactId>lanterna</artifactId>
+        <version>2.1.1</version>
+    </dependency>
+        
   </dependencies>  
 
+
+    <!-- to enable aspectj weaving, run maven with -Daspectj option on the command line -->
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>aspectj</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>aspectj-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
+              <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
+            </goals>
+            <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+                <!-- aspect libraries are the already-compiled aspect .jars -->
+                <aspectLibraries>
+                    <aspectLibrary>
+                        <groupId>com.intel.mtwilson.common</groupId>
+                        <artifactId>mtwilson-validation</artifactId>
+                    </aspectLibrary>
+                </aspectLibraries>
+                <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->
+                <!--
+                <weaveDependencies>
+                    <weaveDependency>
+                        <groupId>com.intel.mtwilson.services</groupId>
+                        <artifactId>ManagementService</artifactId>
+                    </weaveDependency>
+                </weaveDependencies>
+                -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>	
+      
+                    
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

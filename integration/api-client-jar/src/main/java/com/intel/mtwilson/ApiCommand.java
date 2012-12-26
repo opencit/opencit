@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.io.Filename;
 import com.intel.mtwilson.rfc822.Rfc822Date;
@@ -136,7 +137,7 @@ public class ApiCommand {
             
             // register with the web service
             // download server's ssl certificates and add them to the keystore
-            KeystoreUtil.addSslCertificatesToKeystore(keystore, server);
+            SslUtil.addSslCertificatesToKeystore(keystore, server);
             // register the user with the server
             
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);

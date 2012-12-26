@@ -13,7 +13,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
 
-public class VMWare50Esxi50 extends VMwareClient  {
+public class VMWare50Esxi50   {
 	Logger log = Logger.getLogger(getClass().getName());
 	
 
@@ -61,7 +61,7 @@ public class VMWare50Esxi50 extends VMwareClient  {
 		for (HostTpmDigestInfo hostTpmDigestInfo : report.getTpmPcrValues()) {
 			if (requestedPcrs.contains(String.valueOf(hostTpmDigestInfo
 					.getPcrNumber()))) {
-				String digestValue = byteArrayToHexString(hostTpmDigestInfo.getDigestValue());
+				String digestValue = VMwareClient.byteArrayToHexString(hostTpmDigestInfo.getDigestValue());
 				pcrMap.put(String.valueOf(hostTpmDigestInfo.getPcrNumber()),
 						new PcrManifest(hostTpmDigestInfo.getPcrNumber(),
 								digestValue));
@@ -83,7 +83,7 @@ public class VMWare50Esxi50 extends VMwareClient  {
 
 			if (requestedPcrs.contains(String.valueOf(htdi
 					.getPcrNumber()))) {
-				String digest = byteArrayToHexString(htdi.getDigestValue());
+				String digest = VMwareClient.byteArrayToHexString(htdi.getDigestValue());
 				pcrMap.put(
 						String.valueOf(htdi.getPcrNumber()),
 						new PcrManifest(htdi.getPcrNumber(), digest));

@@ -4,18 +4,15 @@
  */
 package com.intel.mtwilson.wlm.business;
 
-import com.intel.mtwilson.wlm.business.OsBO;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.OsData;
-
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *

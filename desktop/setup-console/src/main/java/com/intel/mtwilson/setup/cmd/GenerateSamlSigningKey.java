@@ -5,11 +5,9 @@
 package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
-import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
@@ -53,9 +51,8 @@ public class GenerateSamlSigningKey implements Command {
     private String samlKeyAlias = null;
     private String samlKeyPassword = null;
     
-    private BaseBO dao = null;
-    private MwKeystoreJpaController keystoreJpa = null;
-    private MwKeystore mwKeystore = null;
+//    private MwKeystoreJpaController keystoreJpa = null;
+//    private MwKeystore mwKeystore = null;
     private ByteArrayResource keystoreResource;
     private SimpleKeystore keystore = null;
 
@@ -83,7 +80,7 @@ public class GenerateSamlSigningKey implements Command {
     }
     
     private void setupConfiguration() {
-        conf = ASConfig.getConfiguration();
+        conf = ASConfig.getConfiguration(); // XXX TODO:  configuration needs to be passed to us from the caller... could be a UI, or command line, etc. it is NOT global; this command could be executed multiple times for different servers in a mt wilson cluster, each having its own SAML key but they are all signed by the same CA ...  also the CA private key & password could be local (desktop app) and not be on the server at all !!
         samlKeystoreFileRC2 = conf.getString(SAML_KEYSTORE_FILE_CONF_KEY);
         samlKeystorePassword = conf.getString(SAML_KEYSTORE_PASSWORD_CONF_KEY);
         if( samlKeystorePassword == null ) {
@@ -107,8 +104,7 @@ public class GenerateSamlSigningKey implements Command {
     }
     
     private void setupDataAccess() {
-        dao = new BaseBO();
-        keystoreJpa = new MwKeystoreJpaController(dao.getEntityManagerFactory());
+//        keystoreJpa = new MwKeystoreJpaController(dao.getEntityManagerFactory());  // only if you want keystores in the database. right now saml keystore will still be on disk, and we use a CA to keep things organized instead of having each server use the same private key.
     }
     
     /**
@@ -122,12 +118,12 @@ public class GenerateSamlSigningKey implements Command {
             CopyResource copy = new CopyResource(in, out);
             keystore = new SimpleKeystore(copy, samlKeystorePassword);
             keystore.save(); // will copy it to the byte array resource
-            mwKeystore = new MwKeystore();
-            mwKeystore.setKeystore(out.toByteArray());
-            mwKeystore.setName(HostTrustBO.SAML_KEYSTORE_NAME);
-            keystoreJpa.create(mwKeystore);
+//            mwKeystore = new MwKeystore();
+//            mwKeystore.setKeystore(out.toByteArray());
+//            mwKeystore.setName(HostTrustBO.SAML_KEYSTORE_NAME);
+//            keystoreJpa.create(mwKeystore);
             conf.clearProperty(SAML_KEYSTORE_FILE_CONF_KEY);
-            log.info("Migrated RC2 SAML Keystore File to Database Keystore: {}", HostTrustBO.SAML_KEYSTORE_NAME);
+//            log.info("Migrated RC2 SAML Keystore File to Database Keystore: {}", HostTrustBO.SAML_KEYSTORE_NAME);
         }
         catch(KeyManagementException e) {
             log.error("Cannot open RC2 SAML Keystore File", e);
@@ -155,12 +151,13 @@ public class GenerateSamlSigningKey implements Command {
      * @throws KeyManagementException
      */
     private void openKeystore() throws KeyManagementException {
-        mwKeystore = keystoreJpa.findMwKeystoreByName(HostTrustBO.SAML_KEYSTORE_NAME);
-        if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
-            keystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
+//        mwKeystore = keystoreJpa.findMwKeystoreByName(HostTrustBO.SAML_KEYSTORE_NAME);
+//        if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
+//            keystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
+            keystoreResource = new ByteArrayResource(); // XXX TODO: should we be loading it from somewhere ????
             keystore = new SimpleKeystore(keystoreResource, samlKeystorePassword);
-            log.info("Loaded SAML Keystore from database");
-        }
+//            log.info("Loaded SAML Keystore from database");
+//        }
     }
     
     /**
@@ -181,8 +178,8 @@ public class GenerateSamlSigningKey implements Command {
         keystore.addKeyPairX509(keypair.getPrivate(), samlCert, samlKeyAlias, samlKeyPassword);
         keystore.save(); // into the resource.   IOException
         // save it to database
-        mwKeystore.setKeystore(keystoreResource.toByteArray());
-        keystoreJpa.edit(mwKeystore); // NonexistentEntityException, Exception
+//        mwKeystore.setKeystore(keystoreResource.toByteArray());
+//        keystoreJpa.edit(mwKeystore); // NonexistentEntityException, Exception
         
     }
     

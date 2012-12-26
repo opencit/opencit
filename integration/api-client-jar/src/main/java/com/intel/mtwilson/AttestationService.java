@@ -36,7 +36,7 @@ public interface AttestationService {
 
     List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException;
 
-    PollHostsOutput pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException;
+    OpenStackHostTrustLevelReport pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException;
 
 
     HostsTrustReportType getHostTrustReport (List<Hostname> hostnames) throws IOException, ApiException, SignatureException, JAXBException;

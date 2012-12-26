@@ -688,11 +688,10 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
      * @param hostnames 
      */
     @Override
-    public PollHostsOutput pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException {
-        //   /PollHosts
-        HostTrustInput input = new HostTrustInput();
+    public OpenStackHostTrustLevelReport pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException {
+        OpenStackHostTrustLevelQuery input = new OpenStackHostTrustLevelQuery();
         input.hosts = (Hostname[])hostnames.toArray();
-        PollHostsOutput output = fromJSON(httpPost(asurl("/PollHosts"), toJSON(input)), PollHostsOutput.class);
+        OpenStackHostTrustLevelReport output = fromJSON(httpPost(asurl("/PollHosts"), toJSON(input)), OpenStackHostTrustLevelReport.class);
         return output;
     }
 

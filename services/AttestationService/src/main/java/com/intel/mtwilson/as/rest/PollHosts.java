@@ -1,26 +1,19 @@
 
 package com.intel.mtwilson.as.rest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
+import com.intel.mtwilson.security.annotations.*;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.HostTrustInput;
-import com.intel.mtwilson.datatypes.PollHostsOutput;
-//import javax.annotation.security.RolesAllowed;
-import com.intel.mtwilson.security.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -47,7 +40,7 @@ public class PollHosts {
      * }
      * 
      * Sample response (JSON format):
-     * {"PollHosts": {
+     * {
      *   "count":3,
      *   "hosts":{
      *     "host name 1": {
@@ -63,7 +56,7 @@ public class PollHosts {
      *       "timestamp": "Tue Feb 14 09:02:48 2012"
      *     }
      *   }
-     * }}
+     * }
      * 
      * @param input
      * @return the trust status of the specified hosts
@@ -72,7 +65,7 @@ public class PollHosts {
     @POST
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public PollHostsOutput pollHosts(HostTrustInput input) {
+    public OpenStackHostTrustLevelReport pollMultipleHosts(OpenStackHostTrustLevelQuery input) {
         try {
             log.info("PCR Mask {}", input.pcrMask);
             return new ASComponentFactory().getHostTrustBO().getPollHosts(input);
@@ -84,5 +77,6 @@ public class PollHosts {
             throw new ASException(e);
         }
     }
+
     
 }

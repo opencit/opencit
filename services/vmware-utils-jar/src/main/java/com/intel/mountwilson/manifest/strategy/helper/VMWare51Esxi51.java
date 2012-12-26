@@ -18,7 +18,7 @@ import com.vmware.vim25.HostTpmEventLogEntry;
 import com.vmware.vim25.HostTpmOptionEventDetails;
 import com.vmware.vim25.HostTpmSoftwareComponentEventDetails;
 
-public class VMWare51Esxi51  extends VMwareClient  {
+public class VMWare51Esxi51   {
 	Logger log = Logger.getLogger(getClass().getName());
 	public HashMap<String, PcrModuleManifest> getPcrModuleManiFest(
 			HostTpmAttestationReport report, List<String> requestedPcrs) {
@@ -45,7 +45,7 @@ public class VMWare51Esxi51  extends VMwareClient  {
 					.getPcrNumber()))) {
 				log.info("Obtain PCR " + hostTpmDigestInfo
 					.getPcrNumber());
-				String digestValue = byteArrayToHexString(hostTpmDigestInfo
+				String digestValue = VMwareClient.byteArrayToHexString(hostTpmDigestInfo
 						.getDigestValue());
 				pcrMap.put(String.valueOf(hostTpmDigestInfo.getPcrNumber()),
 						new PcrModuleManifest(hostTpmDigestInfo.getPcrNumber(),
@@ -75,7 +75,7 @@ public class VMWare51Esxi51  extends VMwareClient  {
 					moduleManifest.setComponentName("componentName."
 							+ componentEventDetails.getComponentName());
 					moduleManifest
-							.setDigestValue(byteArrayToHexString(componentEventDetails
+							.setDigestValue(VMwareClient.byteArrayToHexString(componentEventDetails
 									.getDataHash()));
 					moduleManifest.setPackageName(componentEventDetails
 							.getVibName());
@@ -93,7 +93,7 @@ public class VMWare51Esxi51  extends VMwareClient  {
 					moduleManifest.setComponentName("commandLine."
 							+ getCommandLine(commandEventDetails));
 					moduleManifest
-							.setDigestValue(byteArrayToHexString(commandEventDetails
+							.setDigestValue(VMwareClient.byteArrayToHexString(commandEventDetails
 									.getDataHash()));
 
 					// Add to the module manifest map of the pcr
@@ -109,7 +109,7 @@ public class VMWare51Esxi51  extends VMwareClient  {
 					moduleManifest.setComponentName("bootOptions."
 							+ optionEventDetails.getOptionsFileName());
 					moduleManifest
-							.setDigestValue(byteArrayToHexString(optionEventDetails
+							.setDigestValue(VMwareClient.byteArrayToHexString(optionEventDetails
 									.getDataHash()));
 				} else if (logEntry.getEventDetails() instanceof HostTpmBootSecurityOptionEventDetails) {
 					HostTpmBootSecurityOptionEventDetails optionEventDetails = (HostTpmBootSecurityOptionEventDetails) logEntry
@@ -120,7 +120,7 @@ public class VMWare51Esxi51  extends VMwareClient  {
 					moduleManifest.setComponentName("bootSecurityOption."
 							+ optionEventDetails.getBootSecurityOption());
 					moduleManifest
-							.setDigestValue(byteArrayToHexString(optionEventDetails
+							.setDigestValue(VMwareClient.byteArrayToHexString(optionEventDetails
 									.getDataHash()));
 
 				} else {
@@ -128,7 +128,7 @@ public class VMWare51Esxi51  extends VMwareClient  {
 							+ logEntry.getEventDetails().getClass().getName());
 				}
 				
-				pcrModuleManifest.appendDigest(toByteArray(logEntry.getEventDetails().getDataHash()));
+				pcrModuleManifest.appendDigest(VMwareClient.toByteArray(logEntry.getEventDetails().getDataHash()));
 
 				// Add to the module manifest map of the pcr
 				pcrModuleManifest.getModuleManifests().put(

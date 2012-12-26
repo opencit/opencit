@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>AttestationService</artifactId>
     <packaging>war</packaging>
@@ -20,6 +19,14 @@
       <include>**/*.properties</include>
     </includes>
   </testResource>
+  <!--
+  <testResource>
+      <directory>../ASData/src/main/resources/META-INF</directory>
+      <includes>
+          <include>**/*.xml</include>
+      </includes>
+  </testResource>
+  -->
 </testResources>	
 	
 		<plugins>
@@ -116,6 +123,26 @@
 		    <archiveClasses>true</archiveClasses>
 		    <attachClasses>true</attachClasses>
 		    <classifier>premium</classifier>
+                    <overlays>
+                        <overlay>
+                            <groupId>com.intel.mtwilson.services</groupId>
+                            <artifactId>ASData</artifactId>
+                            <type>jar</type>
+                            <includes>
+                                <include>META-INF/**/*.xml</include>
+                                <exclude>com/*</exclude>
+                            </includes>
+                        </overlay>
+                        <overlay>
+                            <groupId>com.intel.mtwilson.services</groupId>
+                            <artifactId>MSData</artifactId>
+                            <type>jar</type>
+                            <includes>
+                                <include>META-INF/**/*.xml</include>
+                                <exclude>com/*</exclude>
+                            </includes>
+                        </overlay>
+                    </overlays>
 		</configuration>
 	    </plugin>
 	    
@@ -161,10 +188,10 @@
 		<target>
 	    <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}-core.war">
 		<zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-premium.war">
-		    <exclude name="WEB-INF/lib/${project.artifactId}-${project.version}.jar"/>
+		    <exclude name="WEB-INF/lib/${project.artifactId}-${project.version}.jar" />
 		</zipfileset>
 		<zipfileset dir="${project.build.directory}" prefix="WEB-INF/lib">
-		    <include name="${project.artifactId}-${project.version}-core.jar"/>
+		    <include name="${project.artifactId}-${project.version}-core.jar" />
 		</zipfileset>
 	    </zip>
 			
@@ -218,6 +245,7 @@
         <version>1.26</version>
         <executions>
           <execution>
+              <phase>package</phase>
             <goals>
 <!--              <goal>assemble</goal> -->
               <goal>docs</goal>
@@ -291,11 +319,6 @@
             <type>pom</type>
         </dependency>
 -->
-<dependency>
-	<groupId>mysql</groupId>
-	<artifactId>mysql-connector-java</artifactId>
-	<version>5.1.6</version>
-</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.common</groupId>
 			<artifactId>mtwilson-crypto</artifactId>
@@ -394,6 +417,7 @@
 			<artifactId>commons-math3</artifactId>
 			<version>3.0</version>
 		</dependency>
+                
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
@@ -487,8 +511,12 @@
             <version>1.26</version>            
         </dependency>        
 
-        
+        <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
                         
     </dependencies>
-    <properties></properties>
+    <properties />
 </project>

@@ -1,6 +1,5 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>ManagementConsole</artifactId>
     <packaging>war</packaging>
@@ -16,12 +15,12 @@
       <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>vmware-util-jar</artifactId>
-            <version>${mtwilson-version}</version>         
+            <version>${project.version}</version>         
       </dependency>        
       <dependency>
             <groupId>com.intel.mtwilson.common</groupId>
             <artifactId>mtwilson-crypto</artifactId>
-            <version>${mtwilson-version}</version>         
+            <version>${project.version}</version>         
       </dependency>        
         <dependency>
             <groupId>mysql</groupId>
@@ -31,7 +30,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>MtWilsonHttpSecurityAdapters</artifactId>
-            <version>${mtwilson-version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>

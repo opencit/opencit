@@ -8,6 +8,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class PollHostsOutput {
     
-    @JsonProperty("PollHosts") public  HostTrusts hostTrusts = null;
+    @JsonProperty("PollHosts") public  OpenStackHostTrustLevelReport hostTrusts = null;
     
 }

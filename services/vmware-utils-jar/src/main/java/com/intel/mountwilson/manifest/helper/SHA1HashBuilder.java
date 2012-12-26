@@ -54,8 +54,9 @@ public class SHA1HashBuilder {
 
 		if (_data == null) {
 			_data = new byte[20];
-			for(int i = 0; i< 20 ; i++ )
+			for(int i = 0; i< 20 ; i++ ) {
 				_data[i] =0;
+                        }
 		}
 
 	}

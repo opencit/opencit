@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>TrustAgent</artifactId>
     <packaging>jar</packaging>
@@ -147,7 +146,7 @@
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>PrivacyCA</artifactId>
             <version>1.0</version>
-            <!-- classifier>jar-with-dependencies</classifier   this causes an error in maven (bug in maven, it should be very straightforward) so instead of this we're going to put the PrivacyCA dependencies here -->
+            <!-- classifier>jar-with-dependencies</classifier this causes an error in maven (bug in maven, it should be very straightforward) so instead of this we're going to put the PrivacyCA dependencies here -->
         </dependency>
        		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>

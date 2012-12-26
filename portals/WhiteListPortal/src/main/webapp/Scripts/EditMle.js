@@ -75,8 +75,8 @@ function fnEditMleInfo(element) {
         var name = $.trim($(this).attr('name'));
         data[name]=val;
     });
-   	data["osVersion"]=$(row).find("td:eq(6)").attr('version');
-   	data["osName"]=$(row).find("td:eq(6)").attr('osName');
+   	data["osVersion"]=$(row).find("td:eq(5)").attr('version');
+   	data["osName"]=$(row).find("td:eq(5)").attr('osName');
     setLoadImage('mainContainer');
 	sendHTMLAjaxRequest(false, 'getView/getAddMLEPage.html', null, fnEditMleData, null,data);
 }
@@ -254,8 +254,8 @@ function fnDeleteMleInfo(element) {
 	        var name = $(this).attr('name');
 	        data[name]=val;
 	    });
-	   	data["osVersion"]=row.find("td:eq(6)").attr('version');
-	   	data["osName"]=row.find("td:eq(6)").attr('osName');
+	   	data["osVersion"]=row.find("td:eq(5)").attr('version');
+	   	data["osName"]=row.find("td:eq(5)").attr('osName');
 	   	var mleName = $.trim(row.find("td:eq(1)").text()); 
 		var dataToSend = fnGetMleDataForDelete(data);
 		$('#mainTableDivEditMle').prepend(disabledDiv);

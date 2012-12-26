@@ -29,7 +29,7 @@ public class ASComponentFactory {
         } catch (IllegalAccessException e) {
             log.error("Cannot load class: "+e.toString());
         } catch(ClassNotFoundException e) {
-            log.error("Cannot load class: "+e.toString());
+            log.info("Class not found: "+e.toString());
         }
         return premium;
     }

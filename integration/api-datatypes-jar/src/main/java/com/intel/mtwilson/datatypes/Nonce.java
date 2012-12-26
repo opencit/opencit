@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.validation.ObjectModel;
 import java.math.BigInteger;
 
 /**
@@ -16,8 +17,8 @@ import java.math.BigInteger;
  * ambiguous.
  * @author jbuhacoff
  */
-public class Nonce {
-    byte[] data;
+public class Nonce extends ObjectModel {
+    private byte[] data;
     public Nonce() {
         // TODO: default constructor should create a random number
     }
@@ -25,8 +26,13 @@ public class Nonce {
         data = array;
     }
     public Nonce(BigInteger nonce) {
-        
+        data = nonce.toByteArray(); // XXX watch out for 2's complement representation
     }
     
     public byte[] toByteArray() { return data; }
+
+    @Override
+    protected void validate() {
+//        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

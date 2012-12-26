@@ -1,39 +1,39 @@
 package com.intel.mtwilson.as.business;
 
-import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
-import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
-import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
-import com.intel.mtwilson.as.controller.TblMleJpaController;
-import com.intel.mtwilson.as.controller.TblTaLogJpaController;
-import com.intel.mtwilson.as.controller.TblHostsJpaController;
-import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
-import com.intel.mtwilson.as.data.TblMle;
-import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblModuleManifest;
-import com.intel.mtwilson.as.data.TblTaLog;
-import com.intel.mtwilson.as.data.TblSamlAssertion;
-import com.intel.mtwilson.as.data.TblHostSpecificManifest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
-import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
-import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.data.ModuleManifest;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.manifest.data.PcrModuleManifest;
 import com.intel.mountwilson.util.vmware.VCenterHost;
-import com.intel.mtwilson.datatypes.*;
+import com.intel.mountwilson.util.vmware.VMwareClient;
+import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
+import com.intel.mtwilson.as.controller.TblHostsJpaController;
+import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
+import com.intel.mtwilson.as.controller.TblMleJpaController;
+import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
+import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
+import com.intel.mtwilson.as.controller.TblTaLogJpaController;
+import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
+import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.TblHostSpecificManifest;
+import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.data.TblMle;
+import com.intel.mtwilson.as.data.TblModuleManifest;
+import com.intel.mtwilson.as.data.TblSamlAssertion;
+import com.intel.mtwilson.as.data.TblTaLog;
+import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.*;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmCommandEventDetails;
 import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.HostTpmEventLogEntry;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -144,7 +144,7 @@ public class HostBO extends BaseBO {
 						.getTpmPcrValues()) {
 					if (LOCATION_PCR.equals(String.valueOf(hostTpmDigestInfo
 							.getPcrNumber()))) {
-						String digestValue = byteArrayToHexString(hostTpmDigestInfo
+						String digestValue = VMwareClient.byteArrayToHexString(hostTpmDigestInfo
 								.getDigestValue());
 
 						pcrManifestMap.put(String.valueOf(hostTpmDigestInfo
@@ -156,7 +156,7 @@ public class HostBO extends BaseBO {
 
 						PcrModuleManifest manifest = new PcrModuleManifest(
 								hostTpmDigestInfo.getPcrNumber(),
-								byteArrayToHexString(hostTpmDigestInfo
+								VMwareClient.byteArrayToHexString(hostTpmDigestInfo
 										.getDigestValue()));
 
 						pcrManifestMap.put(String.valueOf(hostTpmDigestInfo
@@ -178,7 +178,7 @@ public class HostBO extends BaseBO {
 
 					if (LOCATION_PCR
 							.equals(String.valueOf(htdi.getPcrNumber()))) {
-						String digest = byteArrayToHexString(htdi
+						String digest = VMwareClient.byteArrayToHexString(htdi
 								.getDigestValue());
 						pcrMap.put(String.valueOf(htdi.getPcrNumber()),
 								new PcrManifest(htdi.getPcrNumber(), digest));
@@ -214,7 +214,7 @@ public class HostBO extends BaseBO {
 								moduleManifest.setComponentName("commandLine."
 										+ getCommandLine(commandEventDetails));
 								moduleManifest
-										.setDigestValue(byteArrayToHexString(commandEventDetails
+										.setDigestValue(VMwareClient.byteArrayToHexString(commandEventDetails
 												.getDataHash()));
 
 								// Add to the module manifest map of the pcr
@@ -613,7 +613,7 @@ public class HostBO extends BaseBO {
             try {
                 TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey);
                 List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
-                List<TblHosts> tblHostList = null;
+                List<TblHosts> tblHostList;
 
                 
                 if (searchCriteria != null && !searchCriteria.isEmpty())

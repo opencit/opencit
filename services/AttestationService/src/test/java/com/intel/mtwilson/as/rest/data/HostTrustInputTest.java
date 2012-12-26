@@ -1,6 +1,6 @@
 package com.intel.mtwilson.as.rest.data;
 
-import com.intel.mtwilson.datatypes.HostTrustInput;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mountwilson.as.common.ValidationException;
 import static com.jayway.restassured.path.json.JsonPath.with;
@@ -37,7 +37,7 @@ public class HostTrustInputTest {
     @Test
     public void writeJSON() throws JsonGenerationException,
             JsonMappingException, IOException {
-        HostTrustInput test = new HostTrustInput();
+        OpenStackHostTrustLevelQuery test = new OpenStackHostTrustLevelQuery();
         test.count = 2;
         test.pcrMask = "some pcr mask";
         test.hosts = new Hostname[] { new Hostname("test-host-1"), new Hostname("ESX host 2") };
@@ -67,7 +67,7 @@ public class HostTrustInputTest {
         
     	InputStream in = getClass().getResourceAsStream("HostTrustInputTest.sample.json");
     	try {
-	        HostTrustInput obj = mapper.readValue(in, HostTrustInput.class);
+	        OpenStackHostTrustLevelQuery obj = mapper.readValue(in, OpenStackHostTrustLevelQuery.class);
 	
 	        assertEquals(2, obj.count);
 	        assertEquals("some pcr mask",obj.pcrMask);

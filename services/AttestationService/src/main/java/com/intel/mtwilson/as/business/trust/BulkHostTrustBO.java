@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public class BulkHostTrustBO {
     private Logger log = LoggerFactory.getLogger(getClass());
     private HostTrustBO hostTrustBO = new ASComponentFactory().getHostTrustBO(); 
-    private static VMwareConnectionPool vcenterPool = new VMwareConnectionPool();
     private int maxThreads;
     private int timeout;
     

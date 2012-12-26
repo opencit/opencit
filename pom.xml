@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.intel.mtwilson</groupId>
@@ -22,11 +21,15 @@
   </description>
   
   <modules>
+    <module>common</module>
+    <module>database</module>
     <module>integration</module>
     <module>trust-agent</module>
     <module>services</module>
     <module>portals</module>
     <module>desktop</module>
+	<module>database</module>
+    <module>installers</module>
   </modules>
 
   <url>http://cloudsecurityportal.intel.com/mtwilson</url>
@@ -36,6 +39,12 @@
         <url>http://cscenter.intel.com/portal/</url>
     </organization>
 
+  <scm>
+    <connection>scm:svn:svn://10.1.71.117/mountwilson-0.5.4/trunk</connection>
+    <developerConnection>scm:svn:svn://10.1.71.117/mountwilson-0.5.4/trunk</developerConnection>
+    <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/repository</url>
+  </scm>
+  
 <licenses>
   <license>
     <name>Copyright 2012 Intel Corporation. All rights reserved.</name>
@@ -47,9 +56,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mtwilson.version>0.5.4</mtwilson.version>
-    <mtwilson.release>SNAPSHOT</mtwilson.release>
-    <mtwilson-version>0.5.4-SNAPSHOT</mtwilson-version> <!-- deprecated; can be replaced with project.version in most places as long as they inherit their version from this pom -->
+    <mtwilson.version>0.5.4-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
+    <mtwilson.release>1.0.0-SNAPSHOT</mtwilson.release> <!-- mtwilson.release is the official release number that should be reported by the applications and shown on the installer filename -->
     <jersey-version>1.9-ea04</jersey-version>
     <maven.build.timestamp.format>yyyyMMdd.HHmm</maven.build.timestamp.format>
   </properties>
@@ -128,28 +136,20 @@
     
   <build>
 	<plugins>
-		<!-- begin SVN revision plugin (makes available properties like svn.revision) -->
+                
 		<plugin>
 		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
 		    <artifactId>svn-revision-number-maven-plugin</artifactId>
-		    <version>1.12</version>	
 		    <executions>
 			<execution>
+                            <phase>initialize</phase>
 			    <goals>
 				<goal>revision</goal>
 			    </goals>
 			</execution>
 		    </executions>
-		    <configuration>
-			<entries>
-			    <entry>
-				<prefix>svn</prefix>
-			    </entry>
-			</entries>
-		    </configuration>
 		</plugin>
-		<!-- end SVN revision plugin -->
-                
+            
                 <!-- begin website plugin -->
     <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -206,7 +206,100 @@
 		<version>2.2</version>
 	    </extension>
 	</extensions>
+        
+        <pluginManagement>
+            <plugins>
+                
+		<!-- begin SVN revision plugin (makes available properties like svn.revision) -->
+		<plugin>
+		    <groupId>com.google.code.maven-svn-revision-number-plugin</groupId>
+		    <artifactId>svn-revision-number-maven-plugin</artifactId>
+		    <version>1.13</version>	
+		    <configuration>
+			<entries>
+			    <entry>
+				<prefix>svn</prefix>
+			    </entry>
+			</entries>
+		    </configuration>
+		</plugin>
+                
+                <!-- specify version of maven-compiler-plugin, do not skip tests (use -DskipTests=true on command line to skip tests) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+		    <skip>false</skip>
+                    <showDeprecation>true</showDeprecation>
+                </configuration>
+            </plugin>
+                
+            <!-- Specify version of maven-jar-plugin and default MANIFEST.MF entries. The variables are evaluated by the project that is being built, not by this parent pom. Also they are automatically picked up by the maven-shade-plugin -->
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.4</version>
+            <configuration>
+                <archive>
+                    <manifestEntries>
+                      <Release>${project.version}</Release>
+                      <Build-Number>${svn.revision}</Build-Number>
+                    </manifestEntries>
+                </archive>
+            </configuration>
+        </plugin>
+                
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2</version>
+      </plugin>
+
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.12.4</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.5</version>
+      </plugin>
+      
+	<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-dependency-plugin</artifactId>
+	    <version>2.4</version>
+        </plugin>
+              
+    <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.7</version>
+    </plugin>
+    
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>1.5</version>
+        </plugin>
+
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.5</version>
+      </plugin>
+                                                                      
+            </plugins>     
+        </pluginManagement>
+        
   </build>
+  
+  
   
 </project>
 

@@ -51,6 +51,32 @@ public class VMwareClientTest {
             System.out.println(p);
         }
     }
+    
+    @Test
+    public void testSessionIsConnected() throws Exception {
+        TxtHostRecord host = new TxtHostRecord();
+        host.HostName = "10.1.71.174";
+        host.AddOn_Connection_String = "https://10.1.71.162:443/sdk;administrator;intel123!";
+        VMwareClient client = new VMwareClient();
+        client.connect(host.AddOn_Connection_String);
+        String report = client.getHostAttestationReport(host, "0,17,18,20");
+        System.out.println(report);
+        System.out.println("session is connected? "+client.isConnected());
+        // you can disconnect officially:
+        client.disconnect();
+        // or  try it by disconnecting from your network:
+        /*
+        try {
+            System.out.println("sleeping 5 seconds... disconnect networking now!!");
+            Thread.currentThread().sleep(5000);
+        }
+        catch(InterruptedException e ) {
+            System.out.println("interrupted...");
+        }
+        */
+        System.out.println("(after disconnect) session is connected? "+client.isConnected());
+    }
+    
 
 	/*
     @Test

@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>TrustAgent</artifactId>
 
@@ -14,14 +13,14 @@
     </parent>
   
   <properties>
-    <makeself.directory>${project.build.directory}/${artifactId}-${version}</makeself.directory>
+    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson</groupId>
       <artifactId>TrustAgent</artifactId>
-      <version>${mtwilson-version}</version>
+      <version>${project.version}</version>
       <classifier>jar-with-dependencies</classifier>
       <type>jar</type>
     </dependency>	
@@ -40,6 +39,13 @@
     </dependency>	
   </dependencies>
 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
   <build>
     <plugins>
        <!-- begin copy artifacts  plugin -->
@@ -142,16 +148,16 @@
               <tasks>
                 <zip destfile="${project.build.directory}/${project.build.finalName}.zip">
 		    <fileset dir="${basedir}/src/etc">
-			<include name="*.properties"/>
-			<include name="*.jks"/>
+			<include name="*.properties" />
+			<include name="*.jks" />
 		    </fileset>
 		    <fileset dir="${project.build.directory}">
-			<include name="version"/>
-			<include name="TrustAgent.jar"/>
+			<include name="version" />
+			<include name="TrustAgent.jar" />
 		    </fileset>
-		    <fileset dir="${basedir}/src/linux-bin"/>
-		    <zipfileset dir="${basedir}/src/commands" prefix="commands"/>
-		    <zipfileset dir="${basedir}/src/commands-citrix-xen" prefix="commands-citrix-xen"/>
+		    <fileset dir="${basedir}/src/linux-bin" />
+		    <zipfileset dir="${basedir}/src/commands" prefix="commands" />
+		    <zipfileset dir="${basedir}/src/commands-citrix-xen" prefix="commands-citrix-xen" />
                 </zip>
               </tasks>
             </configuration>
@@ -221,5 +227,7 @@
   
   
   </build>
+      </profile>
+  </profiles>
 
 </project>

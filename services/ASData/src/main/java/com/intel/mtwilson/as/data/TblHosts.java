@@ -70,6 +70,15 @@ public class TblHosts implements Serializable {
     @Lob
     @Column(name = "AIK_Certificate")
     private String aIKCertificate;
+    
+    @Lob
+    @Column(name = "SSL_Certificate")
+    private byte[] sslCertificate;
+    
+    @Column(name = "SSL_Policy")
+    private String sslPolicy;
+    
+    
     @Column(name = "Email")
     private String email;
     @Column(name = "Error_Code")
@@ -123,6 +132,13 @@ public class TblHosts implements Serializable {
         this.iPAddress = iPAddress;
     }
 
+    /**
+     * XXX TODO the port field is only used for Linux hosts running Trust Agent
+     * and needs to be removed;  all agent connection information should be
+     * stored in the "AddOn_Connection_String" in a URI format. For Linux hosts
+     * with Trust Agent that format might be "linux:https://hostname:9999"
+     * @return 
+     */
     public int getPort() {
         return port;
     }
@@ -153,6 +169,16 @@ public class TblHosts implements Serializable {
 
     public void setAIKCertificate(String aIKCertificate) {
         this.aIKCertificate = aIKCertificate;
+    }
+    
+    public byte[] getSSLCertificate() { return sslCertificate; }
+    public void setSSLCertificate(byte[] encodedSslCertificate) {
+        sslCertificate = encodedSslCertificate;
+    }
+    
+    public String getSSLPolicy() { return sslPolicy; }
+    public void setSSLPolicy(String sslPolicy) { 
+        this.sslPolicy = sslPolicy; 
     }
 
     public String getEmail() {

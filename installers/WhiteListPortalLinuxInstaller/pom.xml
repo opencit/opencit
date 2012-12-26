@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>WhiteListPortal</artifactId>
@@ -15,20 +14,20 @@
     </parent>
   
   <properties>
-    <makeself.directory>${project.build.directory}/${artifactId}-${version}</makeself.directory>
+    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
   
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.portals</groupId>
       <artifactId>WhiteListPortal</artifactId>
-      <version>${mtwilson-version}</version>
+      <version>${project.version}</version>
       <type>war</type>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>MtWilsonLinuxUtil</artifactId>
-      <version>${mtwilson-version}</version>
+      <version>${project.version}</version>
       <type>sh</type>
     </dependency>	
     <!--
@@ -48,6 +47,13 @@
     -->
   </dependencies>
 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
   <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
@@ -75,7 +81,7 @@
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>MtWilsonLinuxUtil</artifactId>
-                  <version>${mtwilson-version}</version>
+                  <version>${project.version}</version>
                   <type>sh</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>functions</destFileName>
@@ -171,18 +177,18 @@
                         <artifacts>
 			<!--
                             <artifact>
-                                <file>${project.build.directory}/wp-${mtwilson.version}-debian.bin</file>
+                                <file>${project.build.directory}/wp-${project.version}-debian.bin</file>
                                 <type>bin</type>
 				<classifier>debian</classifier>
                             </artifact>
                             <artifact>
-                                <file>${project.build.directory}/wp-${mtwilson.version}-redhat.bin</file>
+                                <file>${project.build.directory}/wp-${project.version}-redhat.bin</file>
                                 <type>bin</type>
 				<classifier>redhat</classifier>
                             </artifact>
 			    -->
                             <artifact>
-                                <file>${project.build.directory}/${artifactId}-${version}.bin</file>
+                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                 <type>bin</type>
 				<!-- this is the combined debian and redhat installer -->
                             </artifact>
@@ -196,5 +202,7 @@
   
   
   </build>
+      </profile>
+  </profiles>
 
 </project>

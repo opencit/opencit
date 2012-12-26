@@ -23,12 +23,12 @@ import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.manifest.factory.DefaultManifestStrategyFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
-import com.mysql.jdbc.StringUtils;
 import java.io.StringWriter;
 import java.util.*;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
+//import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,7 +211,7 @@ public class ReportsBO extends BaseBO {
             boolean tpmSupport = true;
             String hostType = "";
 
-            if (StringUtils.isNullOrEmpty(tblHosts.getAIKCertificate())) {
+            if (tblHosts.getAIKCertificate() == null || tblHosts.getAIKCertificate().isEmpty()) {
                 tpmSupport = false;
             }
 

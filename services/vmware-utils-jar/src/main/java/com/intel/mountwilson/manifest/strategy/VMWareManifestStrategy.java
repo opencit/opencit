@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * IManifestStrategy interface 
  * @author dsmagadx
  */
-public class VMWareManifestStrategy extends VMwareClient implements
+public class VMWareManifestStrategy implements
         IManifestStrategy {
 
     private Logger log = LoggerFactory.getLogger(getClass());
@@ -40,6 +40,10 @@ public class VMWareManifestStrategy extends VMwareClient implements
         return entityManagerFactory;
     }
 
+    /**
+     * XXX the EntityManagerFactory belongs to a specific data storage implementation JPA,
+     * and should be replaced with an appropriate Repository object.
+     */
     public VMWareManifestStrategy(EntityManagerFactory entityManagerFactory) {
         this.entityManagerFactory = entityManagerFactory;
     }

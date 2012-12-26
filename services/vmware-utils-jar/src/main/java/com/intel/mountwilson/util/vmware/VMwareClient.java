@@ -17,11 +17,14 @@ import javax.xml.ws.BindingProvider;
 import org.apache.commons.codec.binary.Base64;
 
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.crypto.NopX509HostnameVerifier;
+import com.intel.mtwilson.crypto.NopX509TrustManager;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.vmware.vim25.*;
 import java.io.StringWriter;
 import java.util.*;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -29,6 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * How to use secure SSL connections:
+ * 
+ * setSslHostnameVerifier();
+ * setSslTrustManager(SslUtil.createX509TrustManagerWithKeystore(simpleKeystore));
+ * connect(...)
  * 
  * @author dsmagadX
  */
@@ -44,7 +52,9 @@ public class VMwareClient {
 	private VimPortType vimPort;
 	UserSession session = null;
         private String vcenterEndpoint = null;
-	
+	private HostnameVerifier hostnameVerifier = null;
+        private X509TrustManager trustManager = null;
+        
 	private boolean isConnected = false;
 
         private static String[] meTree = {
@@ -69,6 +79,19 @@ public class VMwareClient {
             "TaskHistoryCollector"
         };  
         
+        public VMwareClient() {
+            
+        }
+        
+        public void setSslHostnameVerifier(HostnameVerifier hostnameVerifier) {
+            this.hostnameVerifier = hostnameVerifier;
+        }
+        
+        public void setSslCertificateTrustManager(X509TrustManager trustManager) {
+            this.trustManager = trustManager;
+        }
+        
+        
 	/**
 	 * Disconnects the user session.
 	 * 
@@ -76,7 +99,7 @@ public class VMwareClient {
 	 */
 	public void disconnect() {
 		try {
-			if (isConnected) {
+			if (isConnected() ) {
 				vimPort.logout(serviceContent.getSessionManager());
 			}
 			isConnected = false;
@@ -98,17 +121,17 @@ public class VMwareClient {
 	 */
 	public void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
                 vcenterEndpoint = url;
-		HostnameVerifier hostNameVerifier = new HostnameVerifier() {
-
-			@Override
-			public boolean verify(String urlHostName, SSLSession session) {
-				return true;
-			}
-		};
-
-		trustAllHttpsCertificates();
-
-		HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
+                
+                if( hostnameVerifier == null ) {
+                    log.warn("SSL Hostname Verifier not set; will accept any remote hostname");
+                    HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier());
+                }
+                else {
+                    HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+                }
+                
+                setupSslCertificateTrustManager();
+                
 
 		SVC_INST_REF.setType(SVC_INST_NAME);
 		SVC_INST_REF.setValue(SVC_INST_NAME);
@@ -143,6 +166,21 @@ public class VMwareClient {
 		
 	}
 
+        public boolean isConnected() {
+            if( !isConnected ) { return false; }
+            try {
+                return vimPort.sessionIsActive(serviceContent.getSessionManager(), session.getKey(), session.getUserName());
+            }
+            catch(Exception e) {
+                log.debug("session not active: {}", e.toString());
+                return false;
+            }
+            catch(Error e) {
+                log.debug("session not active: {}", e.toString());
+                return false;
+            }
+        }
+        
         public String getEndpoint() { return vcenterEndpoint; }
         
 	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException  {
@@ -155,7 +193,7 @@ public class VMwareClient {
 		connect(vcenterConn[0], vcenterConn[1], vcenterConn[2]);
 	}
 
-	protected byte[] toByteArray(List<Byte> list) {
+	public static byte[] toByteArray(List<Byte> list) {
 		byte[] ret = new byte[list.size()];
 		for (int i = 0; i < ret.length; i++) {
 			ret[i] = list.get(i);
@@ -335,7 +373,10 @@ public class VMwareClient {
 		// retrieved</param>
 		// / <returns>Value of the property</returns>
 
-	protected Object getMORProperty(ManagedObjectReference moRef,
+        /**
+         * XXX temporary public access until the code is refactored
+         */
+	public Object getMORProperty(ManagedObjectReference moRef,
 			String propertyName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg  {
 		return getMORProperties(moRef, new String[] { propertyName })[0];
 	}
@@ -435,6 +476,10 @@ public class VMwareClient {
 		return list;
         }
         
+        public String getVCenterVersion() {
+            return serviceContent.getAbout().getVersion();
+		}
+
 	// / <summary>
 	// / Retrieves the vCenter version information.
 	// / </summary>
@@ -452,13 +497,23 @@ public class VMwareClient {
 		}
 	}
 
-	protected HostTpmAttestationReport getAttestationReport(
+        /**
+         * XXX temporary public access until the code is refactored
+         */
+	public HostTpmAttestationReport getAttestationReport(
 			ManagedObjectReference hostObj) throws RuntimeFaultFaultMsg  {
 		return vimPort.queryTpmAttestationReport(hostObj);
 
 	}
 
-	protected ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        /**
+         * TODO: this method should return a VCenterHost object, and VCenterHost should provide convenient access
+         * to information such as "is tpm enabled" and "get attestation report" for that host, wrapping all of the
+         * calls with managed object references to the vmware api. 
+         * 
+         * XXX temporary public access until this code is refactored
+         */
+	public ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
 		// Get the host objects in the vcenter
 		ManagedObjectReference[] hostObjects = getEntitiesByType("HostSystem");
 		if (hostObjects != null && hostObjects.length != 0) {
@@ -509,10 +564,17 @@ public class VMwareClient {
 		}
 	}
 
-	private void trustAllHttpsCertificates() throws NoSuchAlgorithmException, KeyManagementException {
+	private void setupSslCertificateTrustManager() throws NoSuchAlgorithmException, KeyManagementException {
 		// Create a trust manager that does not validate certificate chains:
 		javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[1];
-		javax.net.ssl.TrustManager tm = new TrustAllTrustManager();
+                javax.net.ssl.TrustManager tm;
+                if( trustManager == null ) {
+                    log.warn("SSL Trusted Certificates not set; will accept any certificate");
+                    tm = new TrustAllTrustManager();
+                }
+                else {
+                    tm = trustManager;
+                }
 		trustAllCerts[0] = tm;
 		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
 				.getInstance("SSL");
@@ -523,22 +585,22 @@ public class VMwareClient {
 				.getSocketFactory());
 	}
 
-	protected String byteArrayToBase64String(List<Byte> digestValue) {
+	public String byteArrayToBase64String(List<Byte> digestValue) {
 		String digest = Base64.encodeBase64String(toByteArray(digestValue));
 		return digest;
 	}
 
-	protected String byteArrayToHexString(List<Byte> digestValue) {
+	public static String byteArrayToHexString(List<Byte> digestValue) {
 
 		return byteArrayToHexString(toByteArray(digestValue));
 	}
 
-	protected String byteArrayToHexString(byte[] bytes) {
+	public static String byteArrayToHexString(byte[] bytes) {
 		BigInteger bi = new BigInteger(1, bytes);
 	    return String.format("%0" + (bytes.length << 1) + "X", bi);
 	}
 
-	protected static byte[] hexStringToByteArray(String s) {
+	public static byte[] hexStringToByteArray(String s) {
 	    int len = s.length();
 	    byte[] data = new byte[len / 2];
 	    for (int i = 0; i < len; i += 2) {

@@ -10,6 +10,16 @@ import org.codehaus.jackson.annotate.JsonValue;
  * Internally it uses the java.net.URI class to validate IPv4 and IPv6
  * addresses but this may change in the future.
  * 
+ * The reason we are not using InetAddress as the underlying validator is that
+ * it doesn't convert numeric IP address in String format to byte[] - given a String, it will
+ * try to look it up as a hostname. Given a String which is an invalid IP address
+ * (such as 127.0.0.w) it will delay while looking it up and then fail. 
+ * 
+ * What we need for this class is quick validation or fault identification of a String like "127.0.0.w"
+ * and for that purpose the URI class is more convenient.  
+ * 
+ * Alternatives to using URI are to implement a regexp parser or simple string format parser.
+ * 
  * @since 0.5.1
  * @author jbuhacoff
  */
