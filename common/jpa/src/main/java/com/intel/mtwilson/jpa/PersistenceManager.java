@@ -224,7 +224,7 @@ public abstract class PersistenceManager implements ServletContextListener {
         List<PersistenceProvider> providers = resolver.getPersistenceProviders();
         
         for (PersistenceProvider provider : providers) {
-            emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, jpaProperties);
+            emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
             if (emf != null) {
                 break;
             }
@@ -266,8 +266,13 @@ public abstract class PersistenceManager implements ServletContextListener {
             if( unitInfo != null ) {
                 if( unitInfo.ds == null ) {
                     log.info("Found PersistenceUnit {}, creating DataSource", persistenceUnitName);
-                    unitInfo.jpaProperties = jpaProperties;
-                    unitInfo.ds = createDataSource(jpaProperties);
+                    Properties copy = new Properties();
+                    copy.putAll(jpaProperties);
+                    unitInfo.jpaProperties = copy;
+                    unitInfo.ds = createDataSource(copy);
+                    // the Apache BasicDataSource does not support getConnection(username,password) so in order to force EclipseLink to use getConnection() we remove the username and password from the JPA properties
+                    unitInfo.jpaProperties.remove("javax.persistence.jdbc.user");
+                    unitInfo.jpaProperties.remove("javax.persistence.jdbc.password");
                 }
                 return unitInfo;
             }
