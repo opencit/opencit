@@ -258,8 +258,8 @@ public abstract class PersistenceManager implements ServletContextListener {
      * @return 
      */
     public static PersistenceUnitInfo getPersistenceUnitInfo(String persistenceUnitName, Properties jpaProperties) throws IOException {
-        if( persistenceInfoMap.isEmpty() ) {
-            loadAllPersistenceUnits();
+        if( !persistenceInfoMap.containsKey(persistenceUnitName) ) {
+            loadPersistenceUnit(persistenceUnitName);
         }
         if( persistenceInfoMap.containsKey(persistenceUnitName) ) {
             CustomPersistenceUnitInfoImpl unitInfo = persistenceInfoMap.get(persistenceUnitName);
@@ -267,49 +267,39 @@ public abstract class PersistenceManager implements ServletContextListener {
                 if( unitInfo.ds == null ) {
                     log.info("Found PersistenceUnit {}, creating DataSource", persistenceUnitName);
                     unitInfo.jpaProperties = jpaProperties;
-        //            p.jdbcDriver = jpaProperties.getProperty("javax.persistence.jdbc.driver");
-        //            p.jdbcUrl = jpaProperties.getProperty("javax.persistence.jdbc.url");
-        //            p.jdbcUsername = jpaProperties.getProperty("javax.persistence.jdbc.user");
-        //            p.jdbcPassword = jpaProperties.getProperty("javax.persistence.jdbc.password");
                     unitInfo.ds = createDataSource(jpaProperties);
                 }
                 return unitInfo;
             }
         }
         throw new FileNotFoundException("Cannot find persistence.xml for "+persistenceUnitName);
-//        InputStream in = PersistenceManager.class.getResourceAsStream("/META-INF/persistence.xml"); // try also /META-INF
-//            if( in == null ) { throw new FileNotFoundException("Cannot find persistence.xml"); }   
-//        finally {
-//            if( in != null ) { in.close(); }
-//        }        
-    }
-    
-    private static void loadAllPersistenceUnits() throws IOException {
-//        ClassLoader cl = ClassLoader.getSystemClassLoader(); // XXX could also use a different one provided by container...
-        ClassLoader cl = PersistenceManager.class.getClassLoader();
-        log.info("Loading all persistence.xml files in classpath using classloader: {}", cl.getClass().getName());
-//        log.info("Current class loader is {}", PersistenceManager.class.getClassLoader().getClass().getName());
-//        Enumeration<URL> urls = cl.getResources("/META-INF/persistence.xml");
-        ArrayList<URL> list = new ArrayList<URL>();
-        list.addAll(getResources(cl, "persistence.xml"));
-//        list.addAll(getResources(cl, "/META-INF/persistence.xml"));
-        for(URL url : list) {
-            CustomPersistenceUnitInfoImpl p = readPersistenceXml(url);
-            persistenceInfoMap.put(p.getPersistenceUnitName(), p);
-        }
     }
     /*
-    private static void loadPersistenceUnit(String persistenceUnitName) throws IOException {
+    private static void loadAllPersistenceUnits() throws IOException {
         ClassLoader cl = PersistenceManager.class.getClassLoader();
-        log.info("Loading persistence.xml for {} using classloader: {}", new String[] { persistenceUnitName,  cl.getClass().getName() });
+        log.info("Loading all persistence.xml files in classpath using classloader: {}", cl.getClass().getName());
         ArrayList<URL> list = new ArrayList<URL>();
-        list.addAll(getResources(cl, String.format("/persistence-%s.xml", persistenceUnitName)));
-        list.addAll(getResources(cl, String.format("/META-INF/persistence-%s.xml", persistenceUnitName)));
+        list.addAll(getResources(cl, "META-INF/persistence.xml"));
         for(URL url : list) {
             CustomPersistenceUnitInfoImpl p = readPersistenceXml(url);
             persistenceInfoMap.put(p.getPersistenceUnitName(), p);
         }
     }*/
+    private static void loadPersistenceUnit(String persistenceUnitName) throws IOException {
+        ClassLoader cl = PersistenceManager.class.getClassLoader();
+        log.info("Loading persistence.xml for {} using classloader: {}", new String[] { persistenceUnitName,  cl.getClass().getName() });
+        ArrayList<URL> list = new ArrayList<URL>();
+        list.addAll(getResources(cl, String.format("META-INF/persistence-%s.xml", persistenceUnitName)));
+        list.addAll(getResources(cl, String.format("META-INF/%s/persistence.xml", persistenceUnitName)));
+        list.addAll(getResources(cl, String.format("META-INF/persistence.xml", persistenceUnitName)));
+        for(URL url : list) {
+            CustomPersistenceUnitInfoImpl p = readPersistenceXml(url);
+            // only save the descriptor if we do not already have one loaded for that persistence unit
+            if( !persistenceInfoMap.containsKey(p.getPersistenceUnitName()) ) {
+                persistenceInfoMap.put(p.getPersistenceUnitName(), p);
+            }
+        }
+    }
     
     private static List<URL> getResources(ClassLoader cl, String name) throws IOException {
         ArrayList<URL> list = new ArrayList<URL>();
