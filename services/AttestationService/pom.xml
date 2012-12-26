@@ -123,6 +123,7 @@
 		    <archiveClasses>true</archiveClasses>
 		    <attachClasses>true</attachClasses>
 		    <classifier>premium</classifier>
+<!--
                     <overlays>
                         <overlay>
                             <groupId>com.intel.mtwilson.services</groupId>
@@ -143,6 +144,7 @@
                             </includes>
                         </overlay>
                     </overlays>
+-->                    
 		</configuration>
 	    </plugin>
 	    

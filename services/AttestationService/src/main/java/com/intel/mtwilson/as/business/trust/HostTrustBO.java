@@ -44,6 +44,11 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.FileResource;
+import com.intel.mtwilson.io.Resource;
+import com.intel.mtwilson.util.ResourceFinder;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.security.KeyManagementException;
 import org.apache.commons.configuration.Configuration;
 import org.joda.time.DateTime;
@@ -60,7 +65,7 @@ public class HostTrustBO extends BaseBO {
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS;
     private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(getEntityManagerFactory());
-    private ByteArrayResource samlKeystoreResource = null;
+    private Resource samlKeystoreResource = null;
     
     private HostBO hostBO;
     
@@ -76,9 +81,18 @@ public class HostTrustBO extends BaseBO {
     public void setHostBO(HostBO hostBO) { this.hostBO = hostBO; }
 
     private void loadSamlSigningKey() {
+        // XXX was going to store saml keys in the database but a better way is for each server to have its own and to make a CA sign all of them
+        /*
         MwKeystore mwKeystore = keystoreJpa.findMwKeystoreByName(SAML_KEYSTORE_NAME);
         if( mwKeystore != null && mwKeystore.getKeystore() != null ) {
             samlKeystoreResource = new ByteArrayResource(mwKeystore.getKeystore());
+        }
+        */
+        try {
+            samlKeystoreResource = new FileResource(ResourceFinder.getFile(ASConfig.getConfiguration().getString("saml.keystore.file", "SAML.jks")));
+        }
+        catch(FileNotFoundException e) {
+            log.error("Cannot find SAML keystore");
         }
     }
     
