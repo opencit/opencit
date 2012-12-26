@@ -78,7 +78,7 @@ public class BootstrapUser implements Command {
         SetupWizard wizard = new SetupWizard(conf);
         try {
             Connection c = wizard.getMSDatabaseConnection();        
-            PreparedStatement s = c.prepareStatement("UPDATE api_client_x509 SET enabled=b'1',status='Approved' WHERE hex(fingerprint)=?");
+            PreparedStatement s = c.prepareStatement("UPDATE mw_api_client_x509 SET enabled=b'1',status='Approved' WHERE hex(fingerprint)=?"); // XXX TODO should use repository code for this, not hardcoded query, because table names may change between releases or deployments
             //s.setBytes(1, fingerprint);
             s.setString(1, Hex.encodeHexString(fingerprint));
             s.executeUpdate();
