@@ -27,6 +27,9 @@ whitelist_portal=`find_installer WhiteListPortal`
 management_console=`find_installer ManagementConsole`
 trust_dashboard=`find_installer TrustDashBoard`
 
+# Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
+export MTWILSON_SETUP_NODEPLOY=
+
 # Gather default configuration
 MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
 MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}

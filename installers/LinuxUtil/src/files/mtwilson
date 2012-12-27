@@ -50,6 +50,9 @@ setup() {
   glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
   find_ctl_commands
 
+  # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to glassfish directly)
+  export MTWILSON_SETUP_NODEPLOY=1
+
   # Gather default configuration
   MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
   MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}

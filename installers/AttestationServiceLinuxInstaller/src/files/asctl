@@ -223,10 +223,14 @@ setup_interactive_install() {
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
-    fi    
-    webservice_uninstall "${glassfish_application_name}"
-    webservice_install "${glassfish_application_name}" "${package_dir}"/AttestationService.war
-    webservice_running_report "${glassfish_application_name}"
+    fi
+    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+      webservice_start_report "${glassfish_application_name}"
+    else
+      webservice_uninstall "${glassfish_application_name}"
+      webservice_install "${glassfish_application_name}" "${package_dir}"/AttestationService.war
+      webservice_running_report "${glassfish_application_name}"
+    fi
   fi
 }
 

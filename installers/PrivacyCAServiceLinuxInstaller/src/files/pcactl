@@ -84,9 +84,13 @@ setup_interactive_install() {
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
     fi    
-    webservice_uninstall "${glassfish_application_name}"
-    webservice_install "${glassfish_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
-    webservice_running_report "${glassfish_application_name}"
+    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+      webservice_start_report "${glassfish_application_name}"
+    else
+      webservice_uninstall "${glassfish_application_name}"
+      webservice_install "${glassfish_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
+      webservice_running_report "${glassfish_application_name}"
+    fi
     protect_privacyca_files
   fi
 }
