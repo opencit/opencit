@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
+ * XXX TODO conflicts with MwPortalUser in MSData ... probably use the MSData version
  * @since 0.5.4 redefined to store portal users with password-protected keystore; password field is deprecated.
  * @author dsmagadx
  */

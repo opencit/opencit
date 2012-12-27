@@ -317,7 +317,7 @@ public class TblHostsJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("TblHosts.findByName");
+            Query query = em.createNamedQuery("com.intel.mtwilson.as.data.TblHosts.findByName");
 
             query.setParameter("name", name);
           
