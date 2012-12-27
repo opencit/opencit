@@ -21,7 +21,11 @@ public class JacksonMappingProvider implements ContextResolver<ObjectMapper> {
     private final ObjectMapper mapper = new ObjectMapper();
     
     public JacksonMappingProvider() {
-        mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        DeserializationConfig.Feature[] values = DeserializationConfig.Feature.values();
+        for(DeserializationConfig.Feature value : values) {
+            System.out.println("[JACKSON DeserializationConfig.Feature] "+value.name());
+        }
+//        mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
     }
     
     @Override
