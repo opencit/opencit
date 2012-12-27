@@ -28,7 +28,6 @@
     <module>services</module>
     <module>portals</module>
     <module>desktop</module>
-	<module>database</module>
     <module>installers</module>
   </modules>
 
