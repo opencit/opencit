@@ -20,8 +20,11 @@ import com.intel.mtwilson.crypto.CryptographyException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
+import org.eclipse.persistence.queries.DatabaseQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -317,6 +320,18 @@ public class TblHostsJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
+            if( em instanceof EntityManagerImpl ) {
+                System.out.println("Got EclipseLink JPA");
+                EntityManagerImpl x = (EntityManagerImpl)em;
+                Map<String,List<DatabaseQuery>> queries = x.getServerSession().getQueries();
+                System.out.println("There are "+queries.size()+" named queries defined");
+                for(String queryName : queries.keySet()) {
+                    System.out.println("Query name: "+queryName);
+                }
+            }
+            else {
+                System.out.println("JPA IMPLEMENTATION IS NOT ECLIPSE LINK ??");
+            }
 //            Query query = em.createNamedQuery("com.intel.mtwilson.as.data.TblHosts.findByName");
             Query query = em.createNamedQuery("TblHosts.findByName");
 
