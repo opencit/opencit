@@ -80,25 +80,6 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>HisPrivacyCAWebServices2.war</destFileName>
                 </artifactItem>
-		<!--
-                <artifactItem>
-                  <groupId>com.oracle</groupId>
-                  <artifactId>jdk</artifactId>
-                  <version>1.6.0_29</version>
-                  <type>bin</type>
-	          <classifier>linux-x64</classifier>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>jdk-1.6.0_29-linux-x64.bin</destFileName>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.oracle</groupId>
-                  <artifactId>glassfish</artifactId>
-                  <version>3.1.1</version>
-                  <type>zip</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>glassfish-3.1.1.zip</destFileName>
-                </artifactItem>
-		-->
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
               <overWriteReleases>false</overWriteReleases>

@@ -1158,7 +1158,8 @@ glassfish_memory() {
 }
 
 # reset glassfish overall logging handler to turn on logging
-# this is required because glassfish 3.1.1 UI has a bug that causes the
+# this is required because glassfish 3.1.1 and later...
+#  UI has a bug that causes the
 # logging handler to be set to OFF whenever a user saves any change to
 # other logging levels. 
 # references:
@@ -1171,7 +1172,7 @@ glassfish_enable_logging() {
 # Environment:
 # - glassfish_required_version
 glassfish_install() {
-  local GLASSFISH_PACKAGE="${1:-glasfish-3.1.1.zip}"
+  local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
   GLASSFISH_YUM_PACKAGES="unzip"
   GLASSFISH_APT_PACKAGES="unzip"
   glassfish_detect

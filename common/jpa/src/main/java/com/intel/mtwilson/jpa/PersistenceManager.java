@@ -182,16 +182,9 @@ public abstract class PersistenceManager implements ServletContextListener {
      * @return 
      */
     public static EntityManagerFactory createFactory(String persistenceUnitName, Properties properties) {
-        try {
-            log.debug("Loading database driver {} for persistence unit {}", new String[] { properties.getProperty("javax.persistence.jdbc.driver"), persistenceUnitName });
-            Class.forName(properties.getProperty("javax.persistence.jdbc.driver"));
 //            EntityManagerFactory factory = Persistence.createEntityManagerFactory(persistenceUnitName,properties); // use provided JPA implementation (EclipseLink) which does not maintain the connection pool propertly
             EntityManagerFactory factory = createEntityManagerFactory(persistenceUnitName, properties); // create our own with Apache DBCP and Commons Pool
             return factory;
-        } catch (ClassNotFoundException ex) {
-            log.error("Cannot load JDBC Driver for persistence unit", ex);
-        }
-        return null;
     }
     
     /**
@@ -205,11 +198,15 @@ public abstract class PersistenceManager implements ServletContextListener {
      */
     public static EntityManagerFactory createEntityManagerFactory(String persistenceUnitName, Properties jpaProperties) {
         log.debug("Loading database driver {} for persistence unit {}", new String[] { jpaProperties.getProperty("javax.persistence.jdbc.driver"), persistenceUnitName });
+        try {
+            Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));
+        } catch (ClassNotFoundException ex) {
+            log.error("Cannot load JDBC Driver for persistence unit", ex);
+        }
         
         PersistenceUnitInfo persistenceUnitInfo = null;
         try {
             persistenceUnitInfo = getPersistenceUnitInfo(persistenceUnitName, jpaProperties);
-            // TODO:  need to do something like this: Class.forName(properties.getProperty("javax.persistence.jdbc.driver"));  to load the JDBC driver, either defined in persistence.xml or in mtwilson.properties
         }
         catch(IOException e) {
             throw new PersistenceException("Cannot load PersistenceUnit named "+persistenceUnitName, e);            
@@ -223,16 +220,31 @@ public abstract class PersistenceManager implements ServletContextListener {
 
         List<PersistenceProvider> providers = resolver.getPersistenceProviders();
         
-        for (PersistenceProvider provider : providers) {
-            emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
-            if (emf != null) {
-                break;
+        // check if we have the requested provider
+        if( persistenceUnitInfo.getPersistenceProviderClassName() != null ) {
+            log.info("Looking for specific JPA provider: {}", persistenceUnitInfo.getPersistenceProviderClassName());
+            for(PersistenceProvider provider : providers) {
+                log.info("Looking at provider: {}", provider.getClass().getName());
+                if( provider.getClass().getName().equals(persistenceUnitInfo.getPersistenceProviderClassName()) ) {
+                    emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
+                    if( emf != null ) {
+                        log.info("Found requested persistence provider");
+                        return emf;
+                    }
+                }
             }
         }
-        if (emf == null) {
-            throw new PersistenceException("No Persistence provider for EntityManager named " + persistenceUnitName);
+        // check if any other provider can accomodate the persistence unit
+        log.info("Looking for any compatible JPA provider");
+        for (PersistenceProvider provider : providers) {
+            log.info("Looking at provider: {}", provider.getClass().getName());
+            emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
+            if (emf != null) {
+                log.info("Found compatible persistence provider");
+                return emf;
+            }
         }
-        return emf;
+        throw new PersistenceException("No Persistence provider for EntityManager named " + persistenceUnitName);
     }
     
     private static final HashMap<String,CustomPersistenceUnitInfoImpl> persistenceInfoMap = new HashMap<String,CustomPersistenceUnitInfoImpl>();
