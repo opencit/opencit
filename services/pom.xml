@@ -23,10 +23,10 @@
     <module>MSCommon</module>
     <module>ASCommon</module>
     <module>MtWilsonHttpSecurityAdapters</module>
+    <module>vmware-utils-jar</module>
     <module>AttestationService</module>
     <module>WLMService</module>
     <module>ManagementService</module>
-    <module>vmware-utils-jar</module>
     <module>MSCmdUtility</module>
   </modules>
 
