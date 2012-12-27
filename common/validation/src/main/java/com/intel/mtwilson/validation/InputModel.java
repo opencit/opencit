@@ -45,13 +45,6 @@ package com.intel.mtwilson.validation;
  * only be the same object if you call value() multiple times without changing
  * the input.
  * 
- * XXX TODO possibly re-factor to extend ObjectModel instead of implementing
- * Model itself. The fault() and getFault() can be reused.  Not sure about
- * isValid(), since ObjectModel uses hashCode() to determine freshness and
- * InputModel needs to use its input's hashCode(), not its own hashCode. Maybe
- * override hashCode() in InputModel to return the underlying value (whether
- * valid or not) or the underlying input hashCode().
- * 
  * @since 1.1
  * @author jbuhacoff
  */
