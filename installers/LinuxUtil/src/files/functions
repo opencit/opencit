@@ -569,6 +569,23 @@ hostaddress() {
 
 
 
+### FUNCTION LIBRARY: SSH FUNCTIONS
+
+# Displays the fingerprints of all ssh host keys on this server
+ssh_fingerprints() {
+  local has_ssh_keygen=`which ssh-keygen 2>/dev/null`
+  if [ -z "$has_ssh_keygen" ]; then echo_warning "missing program: ssh-keygen"; return; fi
+  local ssh_pubkeys=`find /etc -name ssh_host_*.pub`
+  for file in $ssh_pubkeys
+  do
+    local keybits=`ssh-keygen -lf "$file" | awk '{ print $1 }'`
+    local keyhash=`ssh-keygen -lf "$file" | awk '{ print $2 }'`
+    local keytype=`ssh-keygen -lf "$file" | awk '{ print $4 }' | tr -d '()'`
+    echo "$keyhash ($keytype-$keybits)"
+  done
+}
+
+
 ### FUNCTION LIBRARY: MYSQL FUNCTIONS
 
 mysql_default_connection_properties() {
@@ -1275,9 +1292,7 @@ glassfish_sslcert_report() {
   local keystorePassword=changeit
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
-  local keytool=${JAVA_HOME}/bin/keytool
-  local owner_expires=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "^Owner|^Valid"`
-  echo "$owner_expires"
+  java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }
 
 # used by attestation_service_install to create a new domain just for attestation service
@@ -1674,6 +1689,17 @@ java_install() {
   else
     echo "Java is already installed"
   fi
+}
+
+java_keystore_cert_report() {
+  local keystore="${1:-keystore.jks}"
+  local keystorePassword="${2:-changeit}"
+  local alias="${3:-s1as}"
+  local keytool=${JAVA_HOME}/bin/keytool
+  local owner_expires=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "^Owner|^Valid"`
+  echo "$owner_expires"
+  local fingerprints=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "MD5:|SHA1:"`
+  echo "$fingerprints"
 }
 
 

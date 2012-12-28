@@ -9,6 +9,7 @@ apiclient_dir=/usr/local/share/mtwilson/apiclient
 setupconsole_dir=/opt/intel/cloudsecurity/setup-console
 apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
+conf_dir=/etc/intel/cloudsecurity
 #apiclient_shell=${apiclient_dir}/shell
 mysql_required_version=5.0
 glassfish_required_version=3.0
@@ -43,6 +44,13 @@ find_ctl_commands() {
   mcctl=`which mcctl 2>/dev/null`
   wpctl=`which wpctl 2>/dev/null`
   tdctl=`which tdctl 2>/dev/null`
+}
+
+mtwilson_saml_cert_report() {
+  local keystore=`read_property_from_file saml.keystore.file ${conf_dir}/attestation-service.properties`
+  local keystorePassword=`read_property_from_file saml.keystore.password ${conf_dir}/attestation-service.properties`
+  local keyalias=`read_property_from_file saml.key.alias ${conf_dir}/attestation-service.properties`
+  java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
 }
 
 setup() {
@@ -170,6 +178,16 @@ case "$1" in
         else
           setup
         fi
+        ;;
+  fingerprint)
+        # show server ssh fingerprint, glassfish ssl fingerprint, and saml cert fingerprint
+        echo "== SSH HOST KEYS =="
+        ssh_fingerprints
+        java_require; glassfish_require
+        echo "== GLASSFISH SSL CERTIFICATE =="
+        glassfish_sslcert_report
+        echo "== MT WILSON SAML CERTIFICATE =="
+        mtwilson_saml_cert_report
         ;;
   status)
         all_status
