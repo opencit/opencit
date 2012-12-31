@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>MtWilsonCommon</artifactId>
+  <artifactId>webservice-util</artifactId>
   <packaging>jar</packaging>
-  <name>Mt Wilson Common</name>
-  <description>Mt Wilson Common Components</description>
+  <name>Webservice Util</name>
+  <description>Configuration, web application exceptions,  Components</description>
     <parent>
-        <groupId>com.intel.mtwilson.integration</groupId>
-        <artifactId>mtwilson-integration</artifactId>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
         <version>0.5.4-SNAPSHOT</version>
     </parent>
 

@@ -320,19 +320,6 @@ public class TblHostsJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            if( em instanceof EntityManagerImpl ) {
-                System.out.println("Got EclipseLink JPA");
-                EntityManagerImpl x = (EntityManagerImpl)em;
-                Map<String,List<DatabaseQuery>> queries = x.getServerSession().getQueries();
-                System.out.println("There are "+queries.size()+" named queries defined");
-                for(String queryName : queries.keySet()) {
-                    System.out.println("Query name: "+queryName);
-                }
-            }
-            else {
-                System.out.println("JPA IMPLEMENTATION IS NOT ECLIPSE LINK ??");
-            }
-//            Query query = em.createNamedQuery("com.intel.mtwilson.as.data.TblHosts.findByName");
             Query query = em.createNamedQuery("TblHosts.findByName");
 
             query.setParameter("name", name);

@@ -42,8 +42,9 @@ public class ConnectionUtil {
 		if (exceptionObject.getClass().equals(ApiException.class)) {
 			/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */
 			ApiException ae=(ApiException) exceptionObject;
-            return new ManagementConsolePortalException(ae.getMessage());
-        	/* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
+                        // Added the error code to the display of the message                        
+                        return new ManagementConsolePortalException(ae.getMessage() + "[" + ae.getErrorCode() + "]");
+                        /* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
 			//return new WLMPortalException("ApiException."+exceptionObject.getMessage(),exceptionObject);
 		}
 		if (exceptionObject.getClass().equals(IllegalArgumentException.class)) {

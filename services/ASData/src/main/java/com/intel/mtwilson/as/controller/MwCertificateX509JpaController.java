@@ -8,6 +8,8 @@ import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwCertificateX509;
 import com.intel.mtwilson.jpa.GenericJpaController;
 import java.io.Serializable;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -135,6 +137,58 @@ public class MwCertificateX509JpaController extends GenericJpaController<MwCerti
         } finally {
             em.close();
         }
+    }
+
+    public List<MwCertificateX509> findAllCertificates() {
+        return searchByNamedQuery("findAll");
+    }
+    public List<MwCertificateX509> findCertificateByName(String name) {
+        return searchByNamedQuery("findByName", "name", name);
+    }
+    public List<MwCertificateX509> findCertificateByNameLike(String name) {
+        return searchByNamedQuery("findByNameLike", "name", "%"+name+"%");
+    }
+    public List<MwCertificateX509> findCertificateByMD5(String md5_hash) {
+        return searchByNamedQuery("findByMD5", "md5_hash", md5_hash);
+    }
+    public List<MwCertificateX509> findCertificateByMD5Enabled(String md5_hash, Boolean enabled) {
+        HashMap<String,Object> parameters = new HashMap<String,Object>();
+        parameters.put("md5_hash", md5_hash);
+        parameters.put("enabled", enabled);
+        return searchByNamedQuery("findByMD5Enabled", parameters);
+    }
+    public List<MwCertificateX509> findCertificateBySHA1(String sha1_hash) {
+        return searchByNamedQuery("findBySHA1", "sha1_hash", sha1_hash);
+    }
+    public List<MwCertificateX509> findCertificateBySHA1Enabled(String sha1_hash, Boolean enabled) {
+        HashMap<String,Object> parameters = new HashMap<String,Object>();
+        parameters.put("sha1_hash", sha1_hash);
+        parameters.put("enabled", enabled);
+        return searchByNamedQuery("findBySHA1Enabled", parameters);
+    }
+    public List<MwCertificateX509> findCertificateByIssuer(String issuer) {
+        return searchByNamedQuery("findByIssuer", "issuer", issuer);
+    }
+    public List<MwCertificateX509> findCertificateByCommentLike(String comment) {
+        return searchByNamedQuery("findByCommentLike", "comment", "%"+comment+"%");
+    }
+    public List<MwCertificateX509> findCertificateByExpiresAfter(Date expiresAfter) {
+        return searchByNamedQuery("findByExpiresAfter", "expires", expiresAfter);
+    }
+    public List<MwCertificateX509> findCertificateByExpiresBefore(Date expiresBefore) {
+        return searchByNamedQuery("findByExpiresBefore", "expires", expiresBefore);
+    }
+    public List<MwCertificateX509> findCertificateByEnabled(Boolean enabled) {
+        return searchByNamedQuery("findByEnabled", "enabled", enabled);
+    }
+    public List<MwCertificateX509> findCertificateByStatus(String status) {
+        return searchByNamedQuery("findByStatus", "status", status);
+    }
+    public List<MwCertificateX509> findCertificateByEnabledStatus(Boolean enabled, String status) {
+        HashMap<String,Object> parameters = new HashMap<String,Object>();
+        parameters.put("enabled", enabled);
+        parameters.put("status", status);
+        return searchByNamedQuery("findByEnabledStatus", parameters);
     }
     
 }

@@ -32,6 +32,7 @@ import org.objectweb.jotm.Current;
  * @author jbuhacoff
  */
 public class CustomPersistenceUnitInfoImpl implements PersistenceUnitInfo {
+    protected URL url;
     protected DataSource ds;
     protected Properties jpaProperties;
     protected String persistenceUnitName; // ex: ASDataPU
@@ -85,39 +86,18 @@ public class CustomPersistenceUnitInfoImpl implements PersistenceUnitInfo {
 
     @Override
     public URL getPersistenceUnitRootUrl() {
+        if( url != null ) { return url; }
         try {
             return new URL("http://localhost");
         }
         catch(MalformedURLException e) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            throw new IllegalArgumentException("Invalid persistence unit root url: "+e.getLocalizedMessage());
         }
-//        return null;
     }
 
     @Override
     public List<String> getManagedClassNames() {
         return classList;
-        /*
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("com.intel.mtwilson.as.data.TblHosts");
-        list.add("com.intel.mtwilson.as.data.TblMle");
-        list.add("com.intel.mtwilson.as.data.TblModuleManifest");
-        list.add("com.intel.mtwilson.as.data.TblPcrManifest");
-        list.add("com.intel.mtwilson.as.data.TblRequestQueue");
-        list.add("com.intel.mtwilson.as.data.TblTaLog");
-        list.add("com.intel.mtwilson.as.data.TblDbPortalUser");
-        list.add("com.intel.mtwilson.as.data.TblLocationPcr");
-        list.add("com.intel.mtwilson.as.data.TblOs");
-        list.add("com.intel.mtwilson.as.data.TblOem");
-        list.add("com.intel.mtwilson.as.data.TblHostSpecificManifest");
-        list.add("com.intel.mtwilson.as.data.TblPackageNamespace");
-        list.add("com.intel.mtwilson.as.data.TblEventType");
-        list.add("com.intel.mtwilson.as.data.TblSamlAssertion");
-        list.add("com.intel.mtwilson.as.data.MwCertificateX509");
-        list.add("com.intel.mtwilson.as.data.MwKeystore");
-        list.add("com.intel.mtwilson.as.data.TblModuleManifestLog");
-        return list;
-        */
     }
 
     @Override
@@ -153,9 +133,15 @@ public class CustomPersistenceUnitInfoImpl implements PersistenceUnitInfo {
     @Override
     public ClassLoader getClassLoader() {
 //        throw new UnsupportedOperationException("Not supported yet.");
-        return ClassLoader.getSystemClassLoader();
+//        return ClassLoader.getSystemClassLoader();
+        return getClass().getClassLoader();
     }
 
+    /**
+     * XXX currently we do not support this feature; our usage of EclipseLink
+     * appears to be working well without it. 
+     * @param ct 
+     */
     @Override
     public void addTransformer(ClassTransformer ct) {
 //        throw new UnsupportedOperationException("Not supported yet.");
@@ -164,7 +150,8 @@ public class CustomPersistenceUnitInfoImpl implements PersistenceUnitInfo {
     @Override
     public ClassLoader getNewTempClassLoader() {
 //        throw new UnsupportedOperationException("Not supported yet.");
-        return ClassLoader.getSystemClassLoader();
+//        return ClassLoader.getSystemClassLoader();
+        return getClass().getClassLoader();
     }
     
 }

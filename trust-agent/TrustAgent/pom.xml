@@ -154,8 +154,8 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
-                        <groupId>com.intel.mtwilson.integration</groupId>
-                        <artifactId>MtWilsonCommon</artifactId>
+                        <groupId>com.intel.mtwilson.services</groupId>
+                        <artifactId>webservice-util</artifactId>
                         <version>${project.parent.version}</version>
                 </dependency>
            	<dependency>

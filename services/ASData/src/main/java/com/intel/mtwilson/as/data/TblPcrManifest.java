@@ -37,8 +37,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblPcrManifest.findById", query = "SELECT t FROM TblPcrManifest t WHERE t.id = :id"),
     @NamedQuery(name = "TblPcrManifest.findByName", query = "SELECT t FROM TblPcrManifest t WHERE t.name = :name"),
     @NamedQuery(name = "TblPcrManifest.findByValue", query = "SELECT t FROM TblPcrManifest t WHERE t.value = :value"),
-    @NamedQuery(name = "TblPcrManifest.findByCreatedOn", query = "SELECT t FROM TblPcrManifest t WHERE t.createdOn = :createdOn"),
-    @NamedQuery(name = "TblPcrManifest.findByUpdatedOn", query = "SELECT t FROM TblPcrManifest t WHERE t.updatedOn = :updatedOn"),
+//    @NamedQuery(name = "TblPcrManifest.findByCreatedOn", query = "SELECT t FROM TblPcrManifest t WHERE t.createdOn = :createdOn"),
+//    @NamedQuery(name = "TblPcrManifest.findByUpdatedOn", query = "SELECT t FROM TblPcrManifest t WHERE t.updatedOn = :updatedOn"),
     @NamedQuery(name = "TblPcrManifest.findByPCRDescription", query = "SELECT t FROM TblPcrManifest t WHERE t.pCRDescription = :pCRDescription"),
     @NamedQuery(name = "TblPcrManifest.findByMleIdName", query = "SELECT t FROM TblPcrManifest t WHERE t.mleId.id = :mleId and t.name = :name")})
 
@@ -55,6 +55,8 @@ public class TblPcrManifest implements Serializable {
     @Basic(optional = false)
     @Column(name = "Value")
     private String value;
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     @Basic(optional = false)
     @Column(name = "Created_On")
     @Temporal(TemporalType.TIMESTAMP)
@@ -63,14 +65,19 @@ public class TblPcrManifest implements Serializable {
     @Column(name = "Updated_On")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn;
+    */
     @Column(name = "PCR_Description")
     private String pCRDescription;
+    
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     @JoinColumn(name = "Updated_By", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblDbPortalUser updatedBy;
     @JoinColumn(name = "Created_By", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblDbPortalUser createdBy;
+    */
     @JoinColumn(name = "MLE_ID", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblMle mleId;
@@ -86,8 +93,17 @@ public class TblPcrManifest implements Serializable {
         this.id = id;
         this.name = name;
         this.value = value;
+        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+        /*
         this.createdOn = createdOn;
         this.updatedOn = updatedOn;
+        */
+    }
+
+    public TblPcrManifest(Integer id, String name, String value) {
+        this.id = id;
+        this.name = name;
+        this.value = value;
     }
 
     public Integer getId() {
@@ -114,6 +130,8 @@ public class TblPcrManifest implements Serializable {
         this.value = value;
     }
 
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     public Date getCreatedOn() {
         return createdOn;
     }
@@ -129,7 +147,7 @@ public class TblPcrManifest implements Serializable {
     public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
-
+    */
     public String getPCRDescription() {
         return pCRDescription;
     }
@@ -138,6 +156,8 @@ public class TblPcrManifest implements Serializable {
         this.pCRDescription = pCRDescription;
     }
 
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     public TblDbPortalUser getUpdatedBy() {
         return updatedBy;
     }
@@ -152,7 +172,7 @@ public class TblPcrManifest implements Serializable {
 
     public void setCreatedBy(TblDbPortalUser createdBy) {
         this.createdBy = createdBy;
-    }
+    }*/
 
     public TblMle getMleId() {
         return mleId;

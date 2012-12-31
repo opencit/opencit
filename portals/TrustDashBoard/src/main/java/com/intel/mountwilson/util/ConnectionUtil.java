@@ -42,9 +42,9 @@ public class ConnectionUtil {
 			
 			/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */
 			ApiException ae=(ApiException) exceptionObject;
-            return new DemoPortalException(ae.getMessage());
-        	/* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
-            //return new DemoPortalException("ApiException."+exceptionObject.getMessage(),exceptionObject);
+                        return new DemoPortalException(ae.getMessage() + "[" + ae.getErrorCode() + "]");
+                        /* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
+                        //return new DemoPortalException("ApiException."+exceptionObject.getMessage(),exceptionObject);
 		}
 		if (exceptionObject.getClass().equals(IllegalArgumentException.class)) {
 			return new DemoPortalException("IllegalArgumentException: "+exceptionObject.getMessage(),exceptionObject);

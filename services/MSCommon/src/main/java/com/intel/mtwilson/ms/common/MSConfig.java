@@ -39,9 +39,9 @@ public class MSConfig extends ConfigBase {
         
         defaults.setProperty("mtwilson.ms.biosPCRs", "0");
         defaults.setProperty("mtwilson.ms.vmmPCRs", "17;18;19;20");
-        defaults.setProperty("mtwilson.ms.portalDBConnectionString", "jdbc:mysql://127.0.0.1:3306/cloudportal");
-        defaults.setProperty("mtwilson.ms.portalDBUserName", "root");
-        defaults.setProperty("mtwilson.ms.portalDBPassword", "password");        
+//        defaults.setProperty("mtwilson.ms.portalDBConnectionString", "jdbc:mysql://127.0.0.1:3306/cloudportal"); // XXX TODO deprecated;   cloudportal database has been dropped as of 1.0-RC2
+//        defaults.setProperty("mtwilson.ms.portalDBUserName", "root");
+//        defaults.setProperty("mtwilson.ms.portalDBPassword", "password");        
         defaults.setProperty("mtwilson.ms.keystore.dir", "/var/opt/intel/management-service/users"); // XXX TODO make a linux default and windows default, utiilizing some centralized configuration functions suh as getDataDirectory() which would already provide an os-specific directory that has already been created (or with a function to create it)
 
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
@@ -52,8 +52,8 @@ public class MSConfig extends ConfigBase {
         defaults.setProperty("mtwilson.api.ssl.verifyHostname", "true"); 
         defaults.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");
         
+        defaults.setProperty("mtwilson.ssl.required", "true"); // secure by default; must set to false to allow non-SSL connections
         //defaults.setProperty("mtwilson.api.trust", "127.0.0.1"); // this setting is disabled because it violates "secure by default"
-        //defaults.setProperty("com.intel.mountwilson.http.enabled", "true"); // this setting is disabled because it violates "secure by default"
         
         return defaults;
     }

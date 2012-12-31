@@ -59,10 +59,10 @@ public class ManagementConsoleViewController extends MultiActionController{
 			modelAndView.addObject("BIOSWhiteList",wlBiosList);
 			
 			List<String> wlVMMList = new ArrayList<String>();
-			wlVMMList.add(HostWhiteListTarget.VMM_GLOBAL.getValue());
 			wlVMMList.add(HostWhiteListTarget.VMM_OEM.getValue());
 			wlVMMList.add(HostWhiteListTarget.VMM_HOST.getValue());
-			modelAndView.addObject("vmmWhiteList",wlVMMList);
+			wlVMMList.add(HostWhiteListTarget.VMM_GLOBAL.getValue());			
+                        modelAndView.addObject("vmmWhiteList",wlVMMList);
 			
 		} catch (Exception e) {
 			logger.severe("Error while Getting Host Entry from Config file."+e.getMessage());

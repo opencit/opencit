@@ -30,12 +30,15 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblHosts.findByDescription", query = "SELECT t FROM TblHosts t WHERE t.description = :description"),
     @NamedQuery(name = "TblHosts.findByAddOnConnectionInfo", query = "SELECT t FROM TblHosts t WHERE t.addOnConnectionInfo = :addOnConnectionInfo"),
     @NamedQuery(name = "TblHosts.findByEmail", query = "SELECT t FROM TblHosts t WHERE t.email = :email"),
-    @NamedQuery(name = "TblHosts.findByCreatedOn", query = "SELECT t FROM TblHosts t WHERE t.createdOn = :createdOn"),
-    @NamedQuery(name = "TblHosts.findByUpdatedOn", query = "SELECT t FROM TblHosts t WHERE t.updatedOn = :updatedOn"),
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+//    @NamedQuery(name = "TblHosts.findByCreatedOn", query = "SELECT t FROM TblHosts t WHERE t.createdOn = :createdOn"),
+//    @NamedQuery(name = "TblHosts.findByUpdatedOn", query = "SELECT t FROM TblHosts t WHERE t.updatedOn = :updatedOn"),
     @NamedQuery(name = "TblHosts.findByErrorCode", query = "SELECT t FROM TblHosts t WHERE t.errorCode = :errorCode"),
     @NamedQuery(name = "TblHosts.findByErrorDescription", query = "SELECT t FROM TblHosts t WHERE t.errorDescription = :errorDescription"),
     @NamedQuery(name = "TblHosts.findByNameSearchCriteria", query = "SELECT t FROM TblHosts t WHERE t.name like :search")})
 public class TblHosts implements Serializable {
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     @Basic(optional =     false)
     @Column(name = "Created_On")
     @Temporal(TemporalType.TIMESTAMP)
@@ -44,6 +47,8 @@ public class TblHosts implements Serializable {
     @Column(name = "Updated_On")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn;
+    * 
+    */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "hostId")
     private Collection<TblSamlAssertion> tblSamlAssertionCollection;
     @Column(name = "Location")
@@ -104,8 +109,12 @@ public class TblHosts implements Serializable {
         this.name = name;
         this.iPAddress = iPAddress;
         this.port = port;
+        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+        /*
         this.createdOn = createdOn;
         this.updatedOn = updatedOn;
+        * 
+        */
     }
 
     public Integer getId() {
@@ -189,6 +198,8 @@ public class TblHosts implements Serializable {
         this.email = email;
     }
 
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     public Date getCreatedOn() {
         return createdOn;
     }
@@ -204,6 +215,8 @@ public class TblHosts implements Serializable {
     public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
+    * 
+    */
 
     public Integer getErrorCode() {
         return errorCode;

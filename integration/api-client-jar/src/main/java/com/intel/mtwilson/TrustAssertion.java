@@ -6,6 +6,7 @@ package com.intel.mtwilson;
 
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SamlUtil;
+import com.intel.mtwilson.crypto.X509Util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -191,7 +192,7 @@ public class TrustAssertion {
     
     public X509Certificate getAikCertificate() throws CertificateException {
         String pem = assertionMap.get("AIK_Certificate");
-        X509Certificate cert = RsaUtil.toX509Certificate(pem);
+        X509Certificate cert = X509Util.decodePemCertificate(pem);
         return cert;
     }
     

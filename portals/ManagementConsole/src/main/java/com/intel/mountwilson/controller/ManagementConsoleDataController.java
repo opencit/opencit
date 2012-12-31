@@ -273,9 +273,9 @@ public class ManagementConsoleDataController extends MultiActionController{
 	
 	private HostWhiteListTarget getVmmWhiteListTarget(String target) throws Exception{
 		List<HostWhiteListTarget> vmmTargetList = new ArrayList<HostWhiteListTarget>();
-		vmmTargetList.add(HostWhiteListTarget.VMM_GLOBAL);
-		vmmTargetList.add(HostWhiteListTarget.VMM_HOST);
 		vmmTargetList.add(HostWhiteListTarget.VMM_OEM);
+		vmmTargetList.add(HostWhiteListTarget.VMM_HOST);
+		vmmTargetList.add(HostWhiteListTarget.VMM_GLOBAL);
 		for (HostWhiteListTarget whiteListTargets : vmmTargetList){
 			if (whiteListTargets.getValue().equals(target)){	
 				return whiteListTargets; 

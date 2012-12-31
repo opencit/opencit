@@ -21,6 +21,10 @@ public class RsaCredentialX509 extends RsaCredential {
      * Initializes the RsaCredential using the provided private key and X509
      * certificate. The digest of the X509 certificate will be used as the
      * identity. Note this is not the same as the digest of the public key.
+     * 
+     * It is assumed that the public key in the certificate
+     * correspond to the given private key.
+     * 
      * @param privateKey
      * @param certificate
      * @throws CertificateEncodingException

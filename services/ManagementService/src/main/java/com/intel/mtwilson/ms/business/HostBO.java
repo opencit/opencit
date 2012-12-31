@@ -661,10 +661,36 @@ public class HostBO extends BaseBO {
                     // Retrieve the attestation report from the host
                     attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
                 } catch (Throwable te) {
+                    
+                    // Bug# 467: We have seen cases where in because of an error with TrustAgent we may not
+                    // get the attestation report. In such cases, we would have created the MLEs with empty values,
+                    // which has to be deleted.
+                    
+                    // Delete the BIOS MLE
+                    try {
+                        if (biosMLEAlreadyExists == false)
+                            deleteMLE(apiClient, gkvHost, true);
+                    } catch (Exception ex) {
+                        // ignore the error. It is already logged in the function
+                    }
+                    
+                    // Delete the VMM MLE
+                    try {
+                        if (vmmMLEAlreadyExists == false)
+                            deleteMLE(apiClient, gkvHost, false);
+                    } catch (Exception ex) {
+                        // ignore the error. It is already logged in the function
+                    }
+
+                    // Also note that we are ignoring any exception coming from the deleteMLE call as we do not
+                    // want to lose the original error                    
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
 
                 if (attestationReport != null && !attestationReport.isEmpty()) {
+                    // Bug# 467: We do not want to delete the MLEs here since we were able to successfully make a call to 
+                    // get the attestation report but it is not having the data. So, we are ok to leave the MLEs
+                    // with empty white lists.
                     if (!attestationReport.contains("ComponentName"))
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                 }
@@ -680,25 +706,13 @@ public class HostBO extends BaseBO {
                     apiClient.deleteHost(new Hostname((gkvHost.HostName)));
                     log.info(String.format("Successfully deleted the host '%s' as the user did not want the host to be registered.", gkvHost.HostName));
                     
-                    // Also delete the MLEs that the user didn't intend to add. 
+                    // Also delete the MLEs that the user didn't intend to add. This for the fix for Bug# 478.
                     if ((hostConfigObj.addBiosWhiteList()== false) && (biosMLEAlreadyExists == false)) {
-                        MLESearchCriteria mleDetails = new MLESearchCriteria();
-                        mleDetails.mleName = gkvHost.BIOS_Name;
-                        mleDetails.mleVersion = gkvHost.BIOS_Version;
-                        mleDetails.oemName = gkvHost.BIOS_Oem;
-                        mleDetails.osName = "";
-                        mleDetails.osVersion = "";
-                        apiClient.deleteMLE(mleDetails);
+                        deleteMLE(apiClient, gkvHost, true);
                     }
                     
                     if ((hostConfigObj.addVmmWhiteList() == false) && (vmmMLEAlreadyExists == false)){
-                        MLESearchCriteria mleDetails = new MLESearchCriteria();
-                        mleDetails.mleName = gkvHost.VMM_Name;
-                        mleDetails.mleVersion = gkvHost.VMM_Version;
-                        mleDetails.osName = gkvHost.VMM_OSName;
-                        mleDetails.osVersion = gkvHost.VMM_OSVersion;
-                        mleDetails.oemName = "";
-                        apiClient.deleteMLE(mleDetails);
+                        deleteMLE(apiClient, gkvHost, false);
                     }                    
                 }
                 
@@ -1105,6 +1119,51 @@ public class HostBO extends BaseBO {
         return vmmMLEAlreadyExists;
     }
 
+    
+    /**
+     * Author: Sudhir
+     * 
+     * This is a helper function to delete the MLE.
+     * 
+     * @param apiCLientObj : Handle to the ApiClient object
+     * @param hostObj : TxtHostRecord object having the details of the MLE to be deleted.
+     * @param isBIOSMLE : This flag will be set to true if the MLE being deleted is BIOS. For VMM MLEs it would be FALSE
+     */
+    private void deleteMLE(ApiClient apiCLientObj, TxtHostRecord hostObj, Boolean isBIOSMLE){
+        MLESearchCriteria mleDetails = new MLESearchCriteria();
+        try {
+            
+            if (isBIOSMLE) {
+                // Process the deletion of the BIOS MLE                
+                mleDetails.mleName = hostObj.BIOS_Name;
+                mleDetails.mleVersion = hostObj.BIOS_Version;
+                mleDetails.oemName = hostObj.BIOS_Oem;
+                mleDetails.osName = "";
+                mleDetails.osVersion = "";
+                apiCLientObj.deleteMLE(mleDetails);
+                
+            } else {
+                // Process the deletion of the VMM MLE
+                mleDetails.mleName = hostObj.VMM_Name;
+                mleDetails.mleVersion = hostObj.VMM_Version;
+                mleDetails.osName = hostObj.VMM_OSName;
+                mleDetails.osVersion = hostObj.VMM_OSVersion;
+                mleDetails.oemName = "";
+                apiCLientObj.deleteMLE(mleDetails);                
+            }
+                        
+        } catch (ApiException ae) {
+            log.error("API Client error during deletion of MLE. " + ae.getErrorCode() + " :" + ae.getMessage());
+            throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() +
+                    ": Error during MLE Deletion. " + ae.getMessage());
+            
+        } catch (Exception ex) {
+            log.error("Error during MLE deletion. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during BIOS MLE configuration. " + ex.getMessage());
+            
+        }
+    }
+    
     /**
      * Author : Sudhir
      * 

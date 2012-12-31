@@ -1,5 +1,7 @@
 -- created 2012-09-20
 
+-- This file contains schema changes from Mt Wilson 1.0-RC2 to Mt Wilson 1.1
+
 -- Names of all database tables belonging to Mt Wilson are now prefixed with
 -- "mw_" for consistency and to facilitate integration with other systems
 ALTER TABLE `changelog` RENAME TO `mw_changelog`;

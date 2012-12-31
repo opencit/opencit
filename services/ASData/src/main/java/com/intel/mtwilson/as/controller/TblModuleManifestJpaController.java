@@ -22,7 +22,7 @@ import org.eclipse.persistence.config.CacheUsage;
 import org.eclipse.persistence.config.HintValues;
 import org.eclipse.persistence.config.QueryHints;
 
-import com.intel.mtwilson.as.data.TblDbPortalUser;
+//import com.intel.mtwilson.as.data.TblDbPortalUser;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblEventType;
 import com.intel.mtwilson.as.data.TblPackageNamespace;
@@ -55,6 +55,8 @@ public class TblModuleManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             TblDbPortalUser updatedBy = tblModuleManifest.getUpdatedBy();
             if (updatedBy != null) {
                 updatedBy = em.getReference(updatedBy.getClass(), updatedBy.getId());
@@ -65,6 +67,7 @@ public class TblModuleManifestJpaController implements Serializable {
                 createdBy = em.getReference(createdBy.getClass(), createdBy.getId());
                 tblModuleManifest.setCreatedBy(createdBy);
             }
+            */
             TblMle mleId = tblModuleManifest.getMleId();
             if (mleId != null) {
                 mleId = em.getReference(mleId.getClass(), mleId.getId());
@@ -87,6 +90,8 @@ public class TblModuleManifestJpaController implements Serializable {
             }
             tblModuleManifest.setTblHostSpecificManifestCollection(attachedTblHostSpecificManifestCollection);
             em.persist(tblModuleManifest);
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             if (updatedBy != null) {
                 updatedBy.getTblModuleManifestCollection().add(tblModuleManifest);
                 em.merge(updatedBy);
@@ -94,7 +99,7 @@ public class TblModuleManifestJpaController implements Serializable {
             if (createdBy != null) {
                 createdBy.getTblModuleManifestCollection().add(tblModuleManifest);
                 em.merge(createdBy);
-            }
+            }*/
             if (mleId != null) {
                 mleId.getTblModuleManifestCollection().add(tblModuleManifest);
                 em.merge(mleId);
@@ -127,10 +132,13 @@ public class TblModuleManifestJpaController implements Serializable {
         try {
             em.getTransaction().begin();
             TblModuleManifest persistentTblModuleManifest = em.find(TblModuleManifest.class, tblModuleManifest.getId());
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             TblDbPortalUser updatedByOld = persistentTblModuleManifest.getUpdatedBy();
             TblDbPortalUser updatedByNew = tblModuleManifest.getUpdatedBy();
             TblDbPortalUser createdByOld = persistentTblModuleManifest.getCreatedBy();
             TblDbPortalUser createdByNew = tblModuleManifest.getCreatedBy();
+            */
             TblMle mleIdOld = persistentTblModuleManifest.getMleId();
             TblMle mleIdNew = tblModuleManifest.getMleId();
             TblEventType eventIDOld = persistentTblModuleManifest.getEventID();
@@ -151,6 +159,8 @@ public class TblModuleManifestJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             if (updatedByNew != null) {
                 updatedByNew = em.getReference(updatedByNew.getClass(), updatedByNew.getId());
                 tblModuleManifest.setUpdatedBy(updatedByNew);
@@ -158,7 +168,7 @@ public class TblModuleManifestJpaController implements Serializable {
             if (createdByNew != null) {
                 createdByNew = em.getReference(createdByNew.getClass(), createdByNew.getId());
                 tblModuleManifest.setCreatedBy(createdByNew);
-            }
+            }*/
             if (mleIdNew != null) {
                 mleIdNew = em.getReference(mleIdNew.getClass(), mleIdNew.getId());
                 tblModuleManifest.setMleId(mleIdNew);
@@ -179,6 +189,8 @@ public class TblModuleManifestJpaController implements Serializable {
             tblHostSpecificManifestCollectionNew = attachedTblHostSpecificManifestCollectionNew;
             tblModuleManifest.setTblHostSpecificManifestCollection(tblHostSpecificManifestCollectionNew);
             tblModuleManifest = em.merge(tblModuleManifest);
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             if (updatedByOld != null && !updatedByOld.equals(updatedByNew)) {
                 updatedByOld.getTblModuleManifestCollection().remove(tblModuleManifest);
                 updatedByOld = em.merge(updatedByOld);
@@ -195,6 +207,7 @@ public class TblModuleManifestJpaController implements Serializable {
                 createdByNew.getTblModuleManifestCollection().add(tblModuleManifest);
                 em.merge(createdByNew);
             }
+            */
             if (mleIdOld != null && !mleIdOld.equals(mleIdNew)) {
                 mleIdOld.getTblModuleManifestCollection().remove(tblModuleManifest);
                 mleIdOld = em.merge(mleIdOld);
@@ -267,6 +280,8 @@ public class TblModuleManifestJpaController implements Serializable {
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             TblDbPortalUser updatedBy = tblModuleManifest.getUpdatedBy();
             if (updatedBy != null) {
                 updatedBy.getTblModuleManifestCollection().remove(tblModuleManifest);
@@ -277,6 +292,7 @@ public class TblModuleManifestJpaController implements Serializable {
                 createdBy.getTblModuleManifestCollection().remove(tblModuleManifest);
                 em.merge(createdBy);
             }
+            */
             TblMle mleId = tblModuleManifest.getMleId();
             if (mleId != null) {
                 mleId.getTblModuleManifestCollection().remove(tblModuleManifest);

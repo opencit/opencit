@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author jbuhacoff
  */
 public class SimpleKeystore {
+    public static String CA = "CA";
     public static String SSL = "SSL";
     public static String SAML = "SAML";
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -107,7 +108,9 @@ public class SimpleKeystore {
     }
 
     public void save() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        keystore.store(keystoreResource.getOutputStream(), keystorePassword.toCharArray());
+        OutputStream out = keystoreResource.getOutputStream();
+        keystore.store(out, keystorePassword.toCharArray());
+        out.close();
     }
     
     /**
@@ -227,6 +230,14 @@ public class SimpleKeystore {
     }
 
     /**
+     * Returns an array of aliases representing trusted certificate authorities.
+     * @return 
+     */
+    public String[] listTrustedCaCertificates() throws KeyStoreException {
+        return listTrustedCertificates(CA);
+    }
+    
+    /**
      * Saves a trusted SSL or SAML certificate into the keystore. In production
      * you need to prompt the user to verify the fingerprint of the certificate
      * ebfore you add it, in order to prevent man-in-the-middle attacks.
@@ -298,13 +309,13 @@ public class SimpleKeystore {
     }
 
     /**
-     * Saves server's SSL certificates into keystore - assumes they are trusted.
+     * Saves server's SAML certificates into keystore - assumes they are trusted.
      * In production you need to prompt the user to
      * verify the fingerprint of the certificate before you add it, to prevent
      * man-in-the-middle attacks.
-     * Since these are SSL certificates they are added to the keystore with the
-     * "SSL" trusted purpose tag in their alias, so when you want to load this
-     * cert again you need to load it as "alias (ssl)"
+     * Since these are SAML certificates they are added to the keystore with the
+     * "SAML" trusted purpose tag in their alias, so when you want to load this
+     * cert again you need to load it as "alias (saml)"
      * @throws MalformedURLException
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
@@ -314,6 +325,23 @@ public class SimpleKeystore {
         addTrustedCertificate(cert, alias, SAML);
     }
 
+    /**
+     * Saves CA certificates into keystore - assumes they are trusted.
+     * In production you need to prompt the user to
+     * verify the fingerprint of the certificate before you add it, to prevent
+     * man-in-the-middle attacks.
+     * Since these are CA certificates they are added to the keystore with the
+     * "CA" trusted purpose tag in their alias, so when you want to load this
+     * cert again you need to load it as "alias (ca)"
+     * @throws MalformedURLException
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     * @throws IOException 
+     */
+    public void addTrustedCaCertificate(X509Certificate cert, String alias) throws KeyManagementException {
+        addTrustedCertificate(cert, alias, CA);
+    }
+    
     public void delete(String alias) throws KeyManagementException {
         try {
             keystore.deleteEntry(alias);

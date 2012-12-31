@@ -71,7 +71,8 @@ public class ReportsBO extends BaseBO {
                         hostType.setHostName(host.toString()); // datatype.Hostname
                         hostType.setMLEInfo(getMleInfo(tblHosts));
                         hostType.setTrustStatus(getTrustStatus(log.getError()));
-                        hostType.setCreatedOn(Util.getCalendar(tblHosts.getCreatedOn()));
+                        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                        // hostType.setCreatedOn(Util.getCalendar(tblHosts.getCreatedOn()));
                         hostType.setVerifiedOn(Util.getCalendar(log.getUpdatedOn()));
                         hostsTrustReportType.getHost().add(hostType);
                     }

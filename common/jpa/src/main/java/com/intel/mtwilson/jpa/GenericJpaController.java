@@ -100,8 +100,9 @@ public abstract class GenericJpaController<T> {
     }
     
     /**
+     * Convenience method for a 1-parameter named query.
      * Added to facilitate implementation of named queries in generated
-     * JPA controllers.
+     * JPA controllers. 
      * @param queryName
      * @param variableName
      * @param variableValue
@@ -111,6 +112,19 @@ public abstract class GenericJpaController<T> {
     protected List<T> searchByNamedQuery(String queryName, String variableName, Object variableValue) {
         HashMap<String,Object> parameters = new HashMap<String,Object>();
         parameters.put(variableName, variableValue);
+        return searchByNamedQuery(queryName, parameters);
+    }
+
+    /**
+     * Convenience method for a 0-parameter named query.
+     * Added to facilitate implementation of named queries in generated
+     * JPA controllers.
+     * @param queryName
+     * @return 
+     * @since 0.5.4
+     */
+    protected List<T> searchByNamedQuery(String queryName) {
+        HashMap<String,Object> parameters = new HashMap<String,Object>();
         return searchByNamedQuery(queryName, parameters);
     }
     

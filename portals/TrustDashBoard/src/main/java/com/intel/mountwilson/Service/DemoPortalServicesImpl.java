@@ -599,9 +599,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
    	@Override
 	public List<HostReportTypeVO> getHostTrustReport(List<String> hostNames,ApiClient client)throws DemoPortalException {
 		
-		AttestationService service = (AttestationService) client;
-        HostsTrustReportType report = null;
-        List<HostReportTypeVO> hostReportTypeVO = new ArrayList<HostReportTypeVO>();
+            AttestationService service = (AttestationService) client;
+            HostsTrustReportType report = null;
+            List<HostReportTypeVO> hostReportTypeVO = new ArrayList<HostReportTypeVO>();
 		try {
             List<Hostname> hostList = new ArrayList<Hostname>();
             for (String host : hostNames) {
@@ -619,7 +619,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                     HostReportTypeVO vo = new HostReportTypeVO();
                     vo.setHostName(hostType.getHostName());
                     vo.setMleInfo(hostType.getMLEInfo());
-                    vo.setCreatedOn(formatter.format(hostType.getCreatedOn().toGregorianCalendar().getTime()));
+                    // Since the created and updated data for the host will be in the Audit DB from 1.1 release,
+                    // we will not have this data here.
+                    vo.setCreatedOn("");
                     vo.setTrustStatus(hostType.getTrustStatus());
                     vo.setVerifiedOn(formatter.format(hostType.getVerifiedOn().toGregorianCalendar().getTime()));
                     hostReportTypeVO.add(vo);

@@ -22,7 +22,7 @@ public class X509Test {
         System.out.println("PEM: "+pem);
         String base64 = pem.replace("-----BEGIN CERTIFICATE-----","").replace("-----END CERTIFICATE-----","").replaceAll("\\s+", "");
         System.out.println("Base64: "+base64);
-        X509Certificate cert = RsaUtil.toX509Certificate(Base64.decodeBase64(base64));
+        X509Certificate cert = X509Util.decodeDerCertificate(Base64.decodeBase64(base64));
         cert.checkValidity();
         System.out.println("Subject: "+cert.getSubjectX500Principal().getName());
         System.out.println("Issuer: "+cert.getIssuerX500Principal().getName());

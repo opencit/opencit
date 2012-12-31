@@ -29,33 +29,22 @@ import org.slf4j.LoggerFactory;
  * @since 0.5.3
  * @author jbuhacoff
  */
-public class RemoteCommand {
-    private static Logger log = LoggerFactory.getLogger(RemoteCommand.class);
+public class SshUtil {
+    private static Logger log = LoggerFactory.getLogger(SshUtil.class);
     
     private static interface Command {
         void run(String[] args);
     }
     
-    private static String getLocalHostAddress() {
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            return addr.getHostAddress();
-        } catch (UnknownHostException ex) {
-            return "127.0.0.1";
-        }
-    }
-
     /**
      * Executes a remote command with no timeout
      * 
      * @param ssh
      * @param command
      * @return
-     * @throws ConnectionException
-     * @throws TransportException
-     * @throws IOException 
+     * @throws IOException which could be a ConnectionException or TransportException
      */
-    private static String remote(SSHClient ssh, String command) throws ConnectionException, TransportException, IOException {
+    public static String remote(SSHClient ssh, String command) throws IOException {
         return remote(ssh, command, null);
     }
     
@@ -67,19 +56,17 @@ public class RemoteCommand {
      * @param command string to execute on the remote shell
      * @param timeoutSeconds or null to wait indefinitely for the command to complete
      * @return
-     * @throws ConnectionException
-     * @throws TransportException
-     * @throws IOException 
+     * @throws IOException which could be a ConnectionException or TransportException
      */
-    private static String remote(SSHClient ssh, String command, Integer timeoutSeconds) throws ConnectionException, TransportException, IOException {
+    public static String remote(SSHClient ssh, String command, Timeout timeout) throws IOException {
         Session session = ssh.startSession();
         try {
             Session.Command cmd = session.exec(command); // ConnectionException, TransportException
-            if( timeoutSeconds == null ) {
+            if( timeout == null ) {
                 cmd.join();
             }
             else {
-                cmd.join(timeoutSeconds, TimeUnit.SECONDS);  // the parameters are the timeout. if you want to wait indefinitely call join()
+                cmd.join((int)timeout.toSeconds(), TimeUnit.SECONDS);  // the parameters are the timeout. if you want to wait indefinitely call join()
             }
             log.debug("Command exit status: {}", cmd.getExitStatus());
             String output = IOUtils.toString(cmd.getInputStream()); // IOException
@@ -90,6 +77,17 @@ public class RemoteCommand {
         }
     }
         
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 
     /**
@@ -106,7 +104,7 @@ public class RemoteCommand {
      * @throws ApiException
      * @throws SignatureException 
      */
-    private static void executeRemoteCommand(String ipAddress, String rootPassword, SshRemoteCommand command) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException, ApiException, SignatureException, Exception {
+    public static void executeRemoteCommand(String ipAddress, String rootPassword, SshRemoteCommand command) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException, ApiException, SignatureException, Exception {
         SSHClient ssh = new SSHClient();
         //ssh.loadKnownHosts(); // this is only if we have a known_hosts file...
         //ssh.addHostKeyVerifier("..."); // this is only if we know the fingerprint of the remote host we're connecting to
@@ -121,7 +119,19 @@ public class RemoteCommand {
         }
     }
     
-    private static interface SshRemoteCommand {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    public static interface SshRemoteCommand {
         void execute(SSHClient ssh) throws Exception;
     }
     
@@ -180,6 +190,14 @@ public class RemoteCommand {
             
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
     
     /**
      * Syntax:

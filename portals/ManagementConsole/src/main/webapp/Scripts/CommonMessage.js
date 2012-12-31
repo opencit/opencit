@@ -31,12 +31,15 @@ requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the key packages of the 
 
 var applicableWhiteListTargetHelp = [];
 applicableWhiteListTargetHelp[0]="This option allows users to choose how the white list is configured.";
-applicableWhiteListTargetHelp[1]="BIOS:OEM - The White List will be used to verify the BIOS for the hosts(servers) from the same OEM vendor.";
-applicableWhiteListTargetHelp[2]="BIOS:Host - The White List will be used to verify the BIOS for just one host, which is specified as the 'White List Host'";
-applicableWhiteListTargetHelp[3]=" ";
-applicableWhiteListTargetHelp[4]="VMM:Global - The White List will be used to verify the VMM for the hosts(servers) from multiple OEM vendors.";
-applicableWhiteListTargetHelp[5]="VMM:OEM - The White List will be used to verify the VMM for the hosts(servers) from the same OEM vendor.";
-applicableWhiteListTargetHelp[6]="VMM:Host - The White List will be used to verify the VMM for just one host, which is specified as the 'White List Host'";
+applicableWhiteListTargetHelp[1]=" ";
+applicableWhiteListTargetHelp[2]="<b>BIOS Configuration</b>";
+applicableWhiteListTargetHelp[3]="Select the <b>OEM</b> Option to provide whitelist for each OEM Type and BIOS Version.  All the Servers/Hosts of a given OEM Type & BIOS Version will be verified with this Whitelist.";
+applicableWhiteListTargetHelp[4]="Select the <b>HOST</b> option to provide whitelist by Host and BIOS Version. (ex: for HP Servers, by design PCR 0 measurement changes for every host).";
+applicableWhiteListTargetHelp[5]=" ";
+applicableWhiteListTargetHelp[6]="<b>Hypervisor (VMM) Configuration</b>";
+applicableWhiteListTargetHelp[7]="Select the <b>OEM</b> Option to provide whitelist for each OEM Type and VMM/OS Version.  All the Servers/Hosts of a given OEM Type & VMM/OS Version will be verified with this Whitelist.";
+applicableWhiteListTargetHelp[8]="Select the <b>HOST</b> option to provide whitelist by Host and VMM/OS Version.  This whitelist will be used to verify <b>ONLY</b> the specified host.";
+applicableWhiteListTargetHelp[9]="Select the <b>GLOBAL</b> option to provide the whitelist for each VMM/OS version and build number.  All the servers/hosts across all OEM types run this specified VMM/OS version and build will be verified with this whitelist.";
 
 
 

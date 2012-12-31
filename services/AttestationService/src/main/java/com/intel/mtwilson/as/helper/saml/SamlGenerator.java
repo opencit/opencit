@@ -84,8 +84,6 @@ public class SamlGenerator {
      * saml.key.password=password           # password of the signing key
      * jsr105Provider=org.jcp.xml.dsig.internal.dom.XMLDSigRI # SAML XML signature provider
      * keystore.path=.            # disk path to SAML keystore (currently ignored)
-     * keyalg=RSA                 # signing key algorithm (currently ignored)
-     * keysize=1024               # signing key size (currently ignored)
      * 
      * 
      * @param configuration with the keys described

@@ -28,7 +28,7 @@ public class TestByteArrayResource {
     
     @Test
     public void testReadFromEmptyResource() throws IOException {
-        ByteArrayResource resource = new ByteArrayResource(new byte[] { });
+        ByteArrayResource resource = new ByteArrayResource(); // can also pass new byte[] { }  or new byte[0] which is the same as what the no-arg constructor does
         InputStream in = resource.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         System.out.println(reader.readLine()); // immediate EOF, should display "null"

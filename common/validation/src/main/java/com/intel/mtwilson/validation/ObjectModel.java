@@ -46,6 +46,10 @@ public abstract class ObjectModel implements Model {
     protected final void fault(Throwable e, String format, Object... args) {
         faults.add(new Fault(e, format, args));
     }
+
+    protected final void fault(Model m, String format, Object... args) {
+        faults.add(new Fault(m, format, args));
+    }
     
     /**
      * If the model has changed since the last call to isValid() then it will be revalidated.
@@ -54,7 +58,7 @@ public abstract class ObjectModel implements Model {
     @Override
     public final boolean isValid() {
         if( faults == null || lastHashCode == null || lastHashCode != hashCode() ) {
-            faults = new ArrayList<Fault>();
+            faults = new ArrayList<Fault>(); // make a new list instead of clearing so that a caller can say getFaults(), make a change, then getFaults() again, and compare the faults. 
             validate();
             lastHashCode = hashCode();
         }

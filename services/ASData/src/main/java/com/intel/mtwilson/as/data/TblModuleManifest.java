@@ -39,10 +39,11 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblModuleManifest.findAll", query = "SELECT t FROM TblModuleManifest t"),
     @NamedQuery(name = "TblModuleManifest.findById", query = "SELECT t FROM TblModuleManifest t WHERE t.id = :id"),
     @NamedQuery(name = "TblModuleManifest.findByDescription", query = "SELECT t FROM TblModuleManifest t WHERE t.description = :description"),
-    @NamedQuery(name = "TblModuleManifest.findByCreatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.createdOn = :createdOn"),
+//    @NamedQuery(name = "TblModuleManifest.findByCreatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.createdOn = :createdOn"),
     @NamedQuery(name = "TblModuleManifest.findByMleId", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId"),
-    @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName"),
-    @NamedQuery(name = "TblModuleManifest.findByUpdatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.updatedOn = :updatedOn")})
+    @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName")
+    })
+//    @NamedQuery(name = "TblModuleManifest.findByUpdatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.updatedOn = :updatedOn")
 
 
 public class TblModuleManifest implements Serializable {
@@ -62,6 +63,8 @@ public class TblModuleManifest implements Serializable {
     private String packageVersion;
     @Column(name = "UseHostSpecificDigestValue")
     private Boolean useHostSpecificDigestValue;
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     @Basic(optional = false)
     @Column(name = "Created_On")
     @Temporal(TemporalType.TIMESTAMP)
@@ -70,6 +73,7 @@ public class TblModuleManifest implements Serializable {
     @Column(name = "Updated_On")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn;
+    */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "moduleManifestID")
     private Collection<TblHostSpecificManifest> tblHostSpecificManifestCollection;
     @JoinColumn(name = "Event_ID", referencedColumnName = "ID")
@@ -86,12 +90,17 @@ public class TblModuleManifest implements Serializable {
     private Integer id;
     @Column(name = "Description")
     private String description;
+    
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     @JoinColumn(name = "Updated_By", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblDbPortalUser updatedBy;
     @JoinColumn(name = "Created_By", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblDbPortalUser createdBy;
+    */
+    
     @JoinColumn(name = "MLE_ID", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblMle mleId;
@@ -105,8 +114,11 @@ public class TblModuleManifest implements Serializable {
 
     public TblModuleManifest(Integer id, Date createdOn, Date updatedOn) {
         this.id = id;
+        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+        /*
         this.createdOn = createdOn;
         this.updatedOn = updatedOn;
+        */
     }
 
     public Integer getId() {
@@ -127,6 +139,8 @@ public class TblModuleManifest implements Serializable {
         this.description = description;
     }
 
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     public Date getCreatedOn() {
         return createdOn;
     }
@@ -142,7 +156,10 @@ public class TblModuleManifest implements Serializable {
     public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
+    */
 
+    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+    /*
     public TblDbPortalUser getUpdatedBy() {
         return updatedBy;
     }
@@ -158,7 +175,8 @@ public class TblModuleManifest implements Serializable {
     public void setCreatedBy(TblDbPortalUser createdBy) {
         this.createdBy = createdBy;
     }
-
+    */
+    
     public TblMle getMleId() {
         return mleId;
     }

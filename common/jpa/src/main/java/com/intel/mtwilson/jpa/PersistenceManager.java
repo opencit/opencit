@@ -341,7 +341,9 @@ public abstract class PersistenceManager implements ServletContextListener {
         InputStream in = null;
         try {
             in = url.openStream();
-            return readPersistenceXml(in);
+            CustomPersistenceUnitInfoImpl p = readPersistenceXml(in);
+            p.url = url;
+            return p;
         }
         finally {
             if( in != null ) { in.close(); }

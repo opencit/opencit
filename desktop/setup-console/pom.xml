@@ -195,7 +195,7 @@
 	<dependency>
 	    <groupId>net.schmizz</groupId>
 	    <artifactId>sshj</artifactId>
-	    <version>0.8.0</version>
+	    <version>0.8.1</version>
 	</dependency>
 	<!-- end sshj for remote administration  -->
 		<dependency>

@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
@@ -15,7 +17,6 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509PK;
 import com.intel.mtwilson.ms.helper.BaseBO;
-import com.intel.mtwilson.util.CertUtils;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class ApiClientBO extends BaseBO {
         try {
             X509Certificate x509Certificate = null;
             try {
-                x509Certificate = CertUtils.getX509Certificate(apiClientRequest.getCertificate());
+                x509Certificate = X509Util.decodeDerCertificate(apiClientRequest.getCertificate());
             } catch (CertificateException e) {
                 throw new MSException(e, ErrorCode.MS_INVALID_CERTIFICATE_DATA, e.getMessage());
             }
@@ -109,12 +110,12 @@ public class ApiClientBO extends BaseBO {
      * @param fingerprint
      * @return 
      */
-    private boolean isDuplicate(byte[] fingerprint) {
-		
-    	if(new ApiClientX509JpaController(getMSEntityManagerFactory()).findApiClientX509ByFingerprint(fingerprint) != null)
-    		return true;
-		return false;
-	}
+    private boolean isDuplicate(byte[] fingerprint) {		
+        if(new ApiClientX509JpaController(getMSEntityManagerFactory()).findApiClientX509ByFingerprint(fingerprint) != null) {
+                return true;
+        }
+        return false;
+    }
 
     /**
      * 
@@ -195,7 +196,7 @@ public class ApiClientBO extends BaseBO {
      */
     private byte[] getFingerPrint(X509Certificate x509Certificate) {
         try {
-            return CertUtils.sha256fingerprint(x509Certificate);
+            return X509Util.sha256fingerprint(x509Certificate);
             
         } catch (CertificateEncodingException ce) {
             throw new MSException(ce,ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getMessage());

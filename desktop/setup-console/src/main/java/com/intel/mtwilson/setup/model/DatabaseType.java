@@ -28,4 +28,25 @@ public enum DatabaseType {
 
     @Override
     public String toString() { return displayName; }
+    
+    public static DatabaseType fromDriver(String driverClassName) {
+        DatabaseType[] types = DatabaseType.values();
+        for(DatabaseType t : types) {
+            if( t.defaultJdbcDriver().equals(driverClassName) ) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    public static DatabaseType fromPort(int portNumber) {
+        DatabaseType[] types = DatabaseType.values();
+        for(DatabaseType t : types) {
+            if( t.defaultPort() == portNumber ) {
+                return t;
+            }
+        }
+        return null;
+    }
+
 }

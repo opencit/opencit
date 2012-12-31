@@ -17,7 +17,7 @@ public class ByteArrayResource implements Resource {
     private byte[] array;
     
     public ByteArrayResource() {
-        this.array = new byte[] {};
+        this.array = new byte[0];
     }
     
     public ByteArrayResource(byte[] array) {

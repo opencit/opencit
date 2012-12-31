@@ -4,32 +4,20 @@
  */
 package com.intel.mtwilson.ms.rest;
 
+import com.intel.mtwilson.as.data.MwCertificateX509;
 import com.intel.mtwilson.crypto.Password;
-import java.io.File;
-import java.io.IOException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.ms.business.CertificateAuthorityBO;
-import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.security.annotations.PermitAll;
-import com.intel.mtwilson.util.CertUtils;
-import com.intel.mtwilson.util.ResourceFinder;
+import com.intel.mtwilson.security.annotations.RolesAllowed;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Web Service
@@ -47,6 +35,7 @@ public class CA {
     }
 
     @POST @Path("/enable")
+    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
     @Consumes("application/json")
     @Produces({MediaType.TEXT_PLAIN})
     public String enableCa(String newSaltedPasswordString) {
@@ -61,11 +50,28 @@ public class CA {
     }
 
     @POST @Path("/disable")
+    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
     @Produces({MediaType.TEXT_PLAIN})
     public String disableCa() {
         try {
             dao.disableCa();
             return Boolean.TRUE.toString();
+        } catch (Exception e) {
+            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+        }
+        
+    }
+
+    @GET @Path("/certificate")
+    @RolesAllowed({"Security"}) // XXX TODO maybe need a separate "CA" role
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    public byte[] getCaCertificate() {
+        try {
+            MwCertificateX509 cacert = dao.getCaCertificate();
+            if( cacert == null ) {
+                throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage());
+            }
+            return cacert.getCertificate();
         } catch (Exception e) {
             throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
         }

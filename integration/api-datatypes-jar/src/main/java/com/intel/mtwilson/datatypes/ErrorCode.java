@@ -90,7 +90,7 @@ public enum ErrorCode {
     // 3000 to 3100 General Management Service errors
     // 3100 to 3200 APIClient
     MS_EXPIRED_CERTIFICATE(3101, "Client certificate has already expired. %s"),
-    MS_CERTIFICATE_STILL_NOT_VALID(3102, "Client certificate is not yet valid. Validaty date is in the future. %s"),
+    MS_CERTIFICATE_STILL_NOT_VALID(3102, "Client certificate is not yet valid. Validity date is in the future. %s"),
     MS_DUPLICATE_CERTIFICATE(3103, "Certificate already registered in the system."),
     MS_CERTIFICATE_ENCODING_ERROR(3104, "Error in certificate encoding. Cannot generate fingerprint. %s"),
     MS_BAD_CERTIFICATE_FILE(3105,"Certificate file is not valid."),

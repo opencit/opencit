@@ -3,19 +3,20 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
-import com.intel.mtwilson.io.ConfigurationUtil;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.HmacCredential;
-import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.HmacCredential;
 import com.intel.mtwilson.crypto.Password;
+import com.intel.mtwilson.crypto.RsaCredential;
+import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
+import com.intel.mtwilson.io.ConfigurationUtil;
 import com.intel.mtwilson.security.http.*;
 import java.io.File;
 import java.io.IOException;
@@ -632,8 +633,12 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
 
     @Override
     public X509Certificate getCaCertificate() throws IOException, ApiException, SignatureException {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // TODO: get the CA certificate from attestation service
+        byte[] cacert = binary(httpGet(msurl("/ca/certificate")));
+        try {
+            return X509Util.decodeDerCertificate(cacert);
+        } catch (CertificateException ex) {
+            throw new ApiException("Invalid certificate", ex);
+        }
     }
     
     @Override
@@ -717,7 +722,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         byte[] certificateBytes = binary(httpGet(msurl("/saml/certificate")));
         X509Certificate certificate;
         try {
-            certificate = RsaUtil.toX509Certificate(certificateBytes);
+            certificate = X509Util.decodeDerCertificate(certificateBytes);
         } catch (CertificateException ex) {
             throw new ApiException("Cannot read certificate from response", ex);
         }

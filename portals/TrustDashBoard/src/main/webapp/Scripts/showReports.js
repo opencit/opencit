@@ -87,7 +87,9 @@ function createReportTable(response){
                '<tr>'+
                '<th class="reportResultRow1">Host Name</th>'+
                '<th class="reportResultRow2">MLE Details</th>'+
-               '<th class="reportResultRow3">Created</th>'+
+               // Since we are not going to store the created and updated data for host in the host table, we will not
+               // show this data here.
+               //'<th class="reportResultRow3">Created</th>'+
                '<th class="reportResultRow4">Trust Status</th>'+
                '<th class="reportResultRow5Header">Trust Verified</th>'+
                '<tr></thead></table>';
@@ -100,7 +102,7 @@ function createReportTable(response){
                 str+='<tr class="'+classValue+'">'+
                     '<td class="reportResultRow1">'+response[item].hostName+'</td>'+
                     '<td class="reportResultRow2">'+response[item].mleInfo+'</td>'+
-                    '<td class="reportResultRow3">'+response[item].createdOn+'</td>'+
+                    // '<td class="reportResultRow3">'+response[item].createdOn+'</td>'+
                     '<td class="reportResultRow4">'+response[item].trustStatus+'</td>'+
                     '<td class="reportResultRow5">'+response[item].verifiedOn+'</td>'+
                     '</tr>';

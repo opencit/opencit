@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
-import com.intel.mtwilson.as.controller.TblDbPortalUserJpaController;
+//import com.intel.mtwilson.as.controller.TblDbPortalUserJpaController;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.data.TblEventType;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -20,7 +20,7 @@ import com.intel.mtwilson.as.data.TblPackageNamespace;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblMle;
-import com.intel.mtwilson.as.data.TblDbPortalUser;
+//import com.intel.mtwilson.as.data.TblDbPortalUser;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.wlm.helper.BaseBO;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
@@ -43,8 +43,8 @@ public class MleBO extends BaseBO {
         Logger log = LoggerFactory.getLogger(getClass().getName());
 	TblMleJpaController mleJpaController = null;
 	TblPcrManifestJpaController pcrManifestJpaController = null;
-        TblDbPortalUserJpaController dbPortalUserJpaController = null;
-	TblDbPortalUser loggedInUser = null;
+//        TblDbPortalUserJpaController dbPortalUserJpaController = null;
+//	TblDbPortalUser loggedInUser = null;
 	TblModuleManifestJpaController moduleManifestJpaController = null;
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
@@ -52,18 +52,20 @@ public class MleBO extends BaseBO {
 	public MleBO() {
             mleJpaController = new TblMleJpaController(getEntityManagerFactory());
             pcrManifestJpaController = new TblPcrManifestJpaController(getEntityManagerFactory());
-            dbPortalUserJpaController = new TblDbPortalUserJpaController(getEntityManagerFactory());
+//            dbPortalUserJpaController = new TblDbPortalUserJpaController(getEntityManagerFactory());
             moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
             eventTypeJpaController = new TblEventTypeJpaController(getEntityManagerFactory());
             packageNSJpaController = new TblPackageNamespaceJpaController(getEntityManagerFactory());
 	}
 
+        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+        /*
         private TblDbPortalUser getLoggedInUser() {
             if( loggedInUser == null ) {
                 loggedInUser = dbPortalUserJpaController.findTblDbPortalUser(1);
             }
             return loggedInUser;
-        }
+        }*/
         
 	/**
 	 * For VMM, the OS Name and OS Version in the new MLE must ALREADY be in the
@@ -85,7 +87,7 @@ public class MleBO extends BaseBO {
                     if(mleData.getName().toUpperCase().contains("ESX")){
                             String version = getUpperCase(mleData.getVersion()).substring(0, 2);
                             if(!version.equals("51") && !version.equals("50")){
-                                    throw new ASException(ErrorCode.WS_ESX_MLE_NOT_SUPPORTED, ErrorCode.WS_ESX_MLE_NOT_SUPPORTED.getMessage());
+                                    throw new ASException(ErrorCode.WS_ESX_MLE_NOT_SUPPORTED);
                             }
                     }
                     tblMle = getTblMle(mleData);
@@ -132,8 +134,7 @@ public class MleBO extends BaseBO {
                                     mleData.getOsVersion(), mleData.getOemName());
 
                     if (tblMle == null) {
-                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, String.format(ErrorCode.WS_MLE_DOES_NOT_EXIST.getMessage(),
-                                    mleData.getName(), mleData.getVersion()));
+                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
                     }
 
                     setTblMle(tblMle, mleData);
@@ -167,8 +168,7 @@ public class MleBO extends BaseBO {
                                 osVersion, oemName);
 
                 if (tblMle == null) {
-                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, String.format(ErrorCode.WS_MLE_DOES_NOT_EXIST.getMessage(),
-                                mleName, mleVersion));
+                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
                 }
 
                 // Bug:438 - Need to check the type of the MLE and accordingly call the function
@@ -183,8 +183,7 @@ public class MleBO extends BaseBO {
                     log.info(String.format("MLE '%s' is currently associated with '%d' hosts. ", mleName, tblHostsCollection.size()));
 
                     if (!tblHostsCollection.isEmpty()) {
-                        throw new ASException(ErrorCode.WS_MLE_ASSOCIATION_EXISTS, String.format(ErrorCode.WS_MLE_ASSOCIATION_EXISTS.getMessage(),
-                            mleName, mleVersion, tblHostsCollection.size()));
+                        throw new ASException(ErrorCode.WS_MLE_ASSOCIATION_EXISTS, mleName, mleVersion, tblHostsCollection.size());
                     }
                 }
                 
@@ -260,8 +259,7 @@ public class MleBO extends BaseBO {
                     TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
 
                     if (tblMle == null) {
-                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, String.format(ErrorCode.WS_MLE_DOES_NOT_EXIST.getMessage(),
-                                mleName, mleVersion));                        
+                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);                        
                     }
 
                     MleData mleData = createMleDataFromDatabaseRecord(tblMle, true);
@@ -449,10 +447,13 @@ public class MleBO extends BaseBO {
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(manifestData.getName());
 				pcrManifest.setValue(manifestData.getValue());
+                                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                                /*
 				pcrManifest.setCreatedOn(today);
 				pcrManifest.setCreatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedOn(today);
+                                */
 				pcrManifest.setMleId(tblMle);
 				pcrManifestJpaController.create(pcrManifest);
 			}
@@ -491,8 +492,9 @@ public class MleBO extends BaseBO {
                                                 pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),
 						pcrManifest.getName()));
 					pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()));
-					pcrManifest.setUpdatedBy(getLoggedInUser());
-					pcrManifest.setUpdatedOn(today);
+                                        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+//					pcrManifest.setUpdatedBy(getLoggedInUser());
+//					pcrManifest.setUpdatedOn(today);
 					pcrManifestJpaController.edit(pcrManifest);
 					newPCRMap.remove(pcrManifest.getName());
 				} else {
@@ -508,10 +510,13 @@ public class MleBO extends BaseBO {
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(pcrName);
 				pcrManifest.setValue(newPCRMap.get(pcrName));
+                                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                                /*
 				pcrManifest.setCreatedOn(today);
 				pcrManifest.setCreatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedOn(today);
+                                */
 				pcrManifest.setMleId(tblMle);
 
 				log.info(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s",
@@ -692,8 +697,11 @@ public class MleBO extends BaseBO {
                                                 
                 // Now update the pcr in the database.
                 tblPcr.setValue(pcrData.getPcrDigest());
+                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                /*
 		tblPcr.setUpdatedBy(getLoggedInUser());
 		tblPcr.setUpdatedOn(new Date(System.currentTimeMillis()));
+                */
                 pcrManifestJpaController.edit(tblPcr);
                 
             } catch (ASException ase) {
@@ -827,8 +835,11 @@ public class MleBO extends BaseBO {
                 newModuleRecord.setUseHostSpecificDigestValue(moduleData.getUseHostSpecificDigest());
                 newModuleRecord.setExtendedToPCR(moduleData.getExtendedToPCR());
                 newModuleRecord.setDescription(moduleData.getDescription());
+                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                /*
                 newModuleRecord.setCreatedBy(getLoggedInUser());
                 newModuleRecord.setCreatedOn(new Date(System.currentTimeMillis()));
+                */
                 // Create the new white list record.
                 moduleManifestJpaController.create(newModuleRecord);
 
@@ -901,8 +912,11 @@ public class MleBO extends BaseBO {
                                 
                 tblModule.setDigestValue(moduleData.getDigestValue());
                 tblModule.setDescription(moduleData.getDescription());
+                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                /*
                 tblModule.setUpdatedBy(getLoggedInUser());
 		tblModule.setUpdatedOn(new Date(System.currentTimeMillis()));
+                */
                 // Create the new white list record.
                 moduleManifestJpaController.edit(tblModule);
 

@@ -22,7 +22,8 @@ public class TLSPolicy {
      * The target server must present an X509 certificate that matches what we
      * already have saved in our trusted certificates repository for the server.
      * This policy enables self-signed certificates and certificates without
-     * the alternative name extension.
+     * the alternative name extension, but if the extension is present it must
+     * match the hostname.
      * It's important that the trusted certificates repository be per server
      * because if it is global then a single compromised server can be used
      * to stage a MITM attack against attestation of non-compromised servers.
@@ -33,6 +34,9 @@ public class TLSPolicy {
      * Same as TRUST_KNOWN_CERTIFICATE, but if the repository does not have a certificate
      * already saved for that server, the server's current certificate is the first
      * known certificate and is automatically saved in the repository. 
+     * This policy enables self-signed certificates and certificates without
+     * the alternative name extension, but if the extension is present it must
+     * match the hostname.
      * This option requires a second-channel comparison of the certificate fingerprints in order
      * to be secure. In practice this means an administrator should get a list of all servers
      * and their SSL certificates obtained using this policy, and compare the fingerprints of 
@@ -40,6 +44,12 @@ public class TLSPolicy {
      * Any mismatch indicates a possible MITM attack has occurred. 
      */
     public static final TLSPolicy TRUST_FIRST_CERTIFICATE = new TLSPolicy("TRUST_FIRST_CERTIFICATE");
+    
+    /**
+     * Accepts any certificate and does not check the hostname against the
+     * alternativeAddress extension.
+     */
+    public static final TLSPolicy INSECURE = new TLSPolicy("INSECURE");
     
     private String policyName;
     
@@ -61,6 +71,7 @@ public class TLSPolicy {
         if( policyName.equals(TRUST_CA_VERIFY_HOSTNAME.toString()) ) { return TRUST_CA_VERIFY_HOSTNAME; }
         if( policyName.equals(TRUST_KNOWN_CERTIFICATE.toString()) ) { return TRUST_KNOWN_CERTIFICATE; }
         if( policyName.equals(TRUST_FIRST_CERTIFICATE.toString()) ) { return TRUST_FIRST_CERTIFICATE; }
+        if( policyName.equals(INSECURE.toString()) ) { return INSECURE; }
         throw new IllegalArgumentException("Unknown TLSPolicy: "+policyName);
     }
 }

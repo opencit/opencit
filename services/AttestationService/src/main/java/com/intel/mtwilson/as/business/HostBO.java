@@ -277,7 +277,8 @@ public class HostBO extends BaseBO {
                         log.info("Saving Host in database");
 			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 			tblHosts.setBiosMleId(biosMleId);
-			tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
+                        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+			// tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
 			tblHosts.setDescription(host.getDescription());
 			tblHosts.setEmail(host.getEmail());
 			if (host.getIPAddress() != null)
@@ -477,8 +478,9 @@ public class HostBO extends BaseBO {
 				getEntityManagerFactory(), dataEncryptionKey);
 		tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 		tblHosts.setBiosMleId(biosMleId);
-		tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
-		tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
+                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+		// tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
+		// tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
 		tblHosts.setDescription(host.getDescription());
 		tblHosts.setEmail(host.getEmail());
 		if (host.getIPAddress() != null)

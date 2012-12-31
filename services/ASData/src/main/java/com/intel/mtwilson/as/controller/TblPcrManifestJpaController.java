@@ -15,7 +15,7 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import com.intel.mtwilson.as.data.TblDbPortalUser;
+//import com.intel.mtwilson.as.data.TblDbPortalUser;
 import com.intel.mtwilson.as.data.TblMle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +46,8 @@ public class TblPcrManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             TblDbPortalUser updatedBy = tblPcrManifest.getUpdatedBy();
             if (updatedBy != null) {
                 updatedBy = em.getReference(updatedBy.getClass(), updatedBy.getId());
@@ -55,13 +57,15 @@ public class TblPcrManifestJpaController implements Serializable {
             if (createdBy != null) {
                 createdBy = em.getReference(createdBy.getClass(), createdBy.getId());
                 tblPcrManifest.setCreatedBy(createdBy);
-            }
+            }*/
             TblMle mleId = tblPcrManifest.getMleId();
             if (mleId != null) {
                 mleId = em.getReference(mleId.getClass(), mleId.getId());
                 tblPcrManifest.setMleId(mleId);
             }
             em.persist(tblPcrManifest);
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             if (updatedBy != null) {
                 updatedBy.getTblPcrManifestCollection().add(tblPcrManifest);
                 em.merge(updatedBy);
@@ -69,7 +73,7 @@ public class TblPcrManifestJpaController implements Serializable {
             if (createdBy != null) {
                 createdBy.getTblPcrManifestCollection().add(tblPcrManifest);
                 em.merge(createdBy);
-            }
+            }*/
             if (mleId != null) {
                 mleId.getTblPcrManifestCollection().add(tblPcrManifest);
                 em.merge(mleId);
@@ -85,12 +89,17 @@ public class TblPcrManifestJpaController implements Serializable {
         try {
             em.getTransaction().begin();
             TblPcrManifest persistentTblPcrManifest = em.find(TblPcrManifest.class, tblPcrManifest.getId());
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             TblDbPortalUser updatedByOld = persistentTblPcrManifest.getUpdatedBy();
             TblDbPortalUser updatedByNew = tblPcrManifest.getUpdatedBy();
             TblDbPortalUser createdByOld = persistentTblPcrManifest.getCreatedBy();
             TblDbPortalUser createdByNew = tblPcrManifest.getCreatedBy();
+            */
             TblMle mleIdOld = persistentTblPcrManifest.getMleId();
             TblMle mleIdNew = tblPcrManifest.getMleId();
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             if (updatedByNew != null) {
                 updatedByNew = em.getReference(updatedByNew.getClass(), updatedByNew.getId());
                 tblPcrManifest.setUpdatedBy(updatedByNew);
@@ -98,12 +107,14 @@ public class TblPcrManifestJpaController implements Serializable {
             if (createdByNew != null) {
                 createdByNew = em.getReference(createdByNew.getClass(), createdByNew.getId());
                 tblPcrManifest.setCreatedBy(createdByNew);
-            }
+            }*/
             if (mleIdNew != null) {
                 mleIdNew = em.getReference(mleIdNew.getClass(), mleIdNew.getId());
                 tblPcrManifest.setMleId(mleIdNew);
             }
             tblPcrManifest = em.merge(tblPcrManifest);
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             if (updatedByOld != null && !updatedByOld.equals(updatedByNew)) {
                 updatedByOld.getTblPcrManifestCollection().remove(tblPcrManifest);
                 updatedByOld = em.merge(updatedByOld);
@@ -120,6 +131,7 @@ public class TblPcrManifestJpaController implements Serializable {
                 createdByNew.getTblPcrManifestCollection().add(tblPcrManifest);
                 em.merge(createdByNew);
             }
+            */
             if (mleIdOld != null && !mleIdOld.equals(mleIdNew)) {
                 mleIdOld.getTblPcrManifestCollection().remove(tblPcrManifest);
                 mleIdOld = em.merge(mleIdOld);
@@ -154,6 +166,8 @@ public class TblPcrManifestJpaController implements Serializable {
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The tblPcrManifest with id " + id + " no longer exists.", enfe);
             }
+            // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+            /*
             TblDbPortalUser updatedBy = tblPcrManifest.getUpdatedBy();
             if (updatedBy != null) {
                 updatedBy.getTblPcrManifestCollection().remove(tblPcrManifest);
@@ -164,6 +178,7 @@ public class TblPcrManifestJpaController implements Serializable {
                 createdBy.getTblPcrManifestCollection().remove(tblPcrManifest);
                 em.merge(createdBy);
             }
+            */
             TblMle mleId = tblPcrManifest.getMleId();
             if (mleId != null) {
                 mleId.getTblPcrManifestCollection().remove(tblPcrManifest);

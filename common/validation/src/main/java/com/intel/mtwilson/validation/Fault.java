@@ -23,25 +23,47 @@ package com.intel.mtwilson.validation;
 public class Fault {
     private final String description;
     private final Throwable cause;
+    private final Fault[] more;
     
     public Fault(String description) {
         this.cause = null;
         this.description = description;
+        this.more = new Fault[0];
     }
     
     public Fault(String format, Object... args) {
         this.cause = null;
         this.description = String.format(format, args);
+        this.more = new Fault[0];
     }
     
     public Fault(Throwable e, String description) {
         this.cause = e;
         this.description = description;
+        this.more = new Fault[0];
     }
     
     public Fault(Throwable e, String format, Object... args) {
         this.cause = e;
         this.description = String.format(format, args);
+        this.more = new Fault[0];
+    }
+    
+    /**
+     * Faults from the given model are copied to as "more faults" for this one.
+     * It is safe to reset or continue using the given model.
+     * @param m
+     * @param format
+     * @param args 
+     */
+    public Fault(Model m, String format, Object... args) {
+        this.cause = null;
+        this.description = String.format(format, args);
+        int size = m.getFaults().size();
+        this.more = new Fault[size];
+        for(int i=0; i<size; i++) {
+            this.more[i] = m.getFaults().get(i);
+        }
     }
     
     @Override
@@ -57,5 +79,15 @@ public class Fault {
      */
     public Throwable getCause() {
         return cause;
+    }
+    
+    /**
+     * This method returns an array of faults related to this one. Typically
+     * these are faults that resulted in the failure described by this fault.
+     * 
+     * @return an array of Fault objects; may be null or zero-length if there aren't any other associated faults
+     */
+    public Fault[] getMore() {
+        return more;
     }
 }

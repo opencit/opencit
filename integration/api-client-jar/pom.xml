@@ -432,20 +432,14 @@
 		    </dependency>
 	<!-- end saml verification -->
     
-	<!-- begin sshj for remote administration -->
-	<dependency>
-	    <groupId>net.schmizz</groupId>
-	    <artifactId>sshj</artifactId>
-	    <version>0.8.0</version>
-	</dependency>
-	<!-- end sshj for remote administration  -->
     
     <!-- for Java 1.5 version of the api client -->
+       <!--
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>java-backport-1.6-to-1.5</artifactId>
 	    <version>0.1-SNAPSHOT</version>
-	</dependency>
+	</dependency>-->
     <!-- end Java 1.5 backport dependencies -->
   </dependencies>  
 
