@@ -17,6 +17,13 @@
     <makeself.directory>${project.build.directory}/${artifactId}-${version}</makeself.directory>
   </properties>
   
+  <build>
+      <resources>
+          <resource>
+              <directory>src/files</directory>
+          </resource>
+      </resources>      
+  </build>
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.portals</groupId>

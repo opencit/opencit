@@ -143,7 +143,7 @@ public class Bootstrap {
      * @throws Exception 
      */
     private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore) throws Exception {
-        X509Certificate[] certs = RsaUtil.getServerCertificates(server);
+        X509Certificate[] certs = SslUtil.getServerCertificates(server);
         String aliasBasename = server.getHost();
         if( certs.length == 1 ) {
             System.out.println("Adding trusted certificate with SHA-1 fingerprint: "+Hex.encodeHexString(sha1fingerprint(certs[0])));

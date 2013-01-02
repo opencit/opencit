@@ -20,6 +20,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Set;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -297,7 +298,13 @@ public class KeystoreUtil {
      * keystore with the given username and password, generates an RSA key and
      * X509 certificate for the user, registers the certificate with Mt Wilson,
      * and downloads the Mt Wilson SSL Certificate and SAML Signing Certificate
-     * to the new keystore.
+     * to the new keystore. Also any CA certificates available will be added
+     * to the keystore. 
+     * 
+     * XXX TODO: there is no mechanism right now for the user to confirm the
+     * server's TLS certificate fingerprint.  That is necessary for security.
+     * The user could confirm after calling this function and before using
+     * the keystore. Should we provide a helper method?
      * 
      * The underlying Resource implementation determines the location where the
      * keystore will be saved.
@@ -333,6 +340,36 @@ public class KeystoreUtil {
         catch(Exception e) {
             throw new CryptographyException("Cannot register user", e);
         }
+        
+        try {
+            // download all ca certs from the server
+            Set<X509Certificate> cacerts = c.getCaCertificates();
+            for(X509Certificate cacert : cacerts) {
+                try {
+                    log.info("Adding CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                }
+                catch(Exception e) {
+                    log.error(e.toString());
+                    e.printStackTrace();
+                    throw new CryptographyException("Cannot add CA certificate", e);
+                }
+            }            
+        }
+        catch(Exception e) {
+            log.error(e.toString());
+            e.printStackTrace(System.err);
+            if( e.getCause() != null ) {
+               log.error("caused by: "+e.getCause().toString());
+               e.getCause().printStackTrace(System.err);
+               if( e.getCause().getCause() != null ) {
+                    log.error("caused by: "+e.getCause().getCause().toString());
+                    e.getCause().getCause().printStackTrace(System.err);
+               }
+            }
+            throw new CryptographyException("Cannot download CA certificates", e);
+        }
+        
         try {
             // download server's saml certificate and save in the keystore
             X509Certificate samlCertificate = c.getSamlCertificate(); //IOException , SignatureException, ApiException

@@ -7,8 +7,8 @@
   <name>Http Authorization</name>
   
     <parent>
-		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>mtwilson-services</artifactId>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-integration</artifactId>
 		<version>0.5.4-SNAPSHOT</version>
     </parent>
 
@@ -137,7 +137,12 @@
 		<scope>provided</scope>
         </dependency>        
         <!-- end restassured support -->
-    
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>api-datatypes</artifactId>
+      <version>0.5.4-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>  
 
 </project>

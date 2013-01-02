@@ -7,10 +7,14 @@ $(function() {
 			fnTestValidation('MainContent_tbVersion',normalReg);
 		});
 		fnChangeleType($('#MainContent_ddlMLEType'));
+                // We do not want to display the host name associated with the MLE in Add MLE page.
+                // It will be displayed only during the EDIT LE page.
+                $('#mleSourceHost').hide();
 	}else {
 		$('.requiredField').each(function() {
 			$(this).remove();
 		});
+                $('#mleSourceHost').show();
 	}
 });
 

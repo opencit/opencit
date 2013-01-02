@@ -18,6 +18,7 @@ import com.intel.mtwilson.setup.*;
 import com.intel.mtwilson.setup.cmd.*;
 import com.intel.mtwilson.setup.model.*;
 import com.intel.mtwilson.validation.Fault;
+import com.intel.mtwilson.validation.Model;
 import java.io.Console;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -139,13 +140,20 @@ public class Main {
                         remote.signSamlCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
                         remote.uploadSamlCertToServer();
                         // tls
-                        remote.downloadTlsCertFromServer();
+                        remote.downloadTlsKeystoreFromServer(); // XXX TODO we are assuming GLASSFISH,  need to make this dependent on webContainerType , probably with an object-oriented design
+                        if( ctx.tlsCertificate == null ) {
+                            System.err.println("FAILED TO READ TLS CERT"); 
+                            printFaults(remote);
+                            remote.close(); return; 
+                        }
+//                        remote.downloadTlsCertFromServer();
                         remote.signTlsCertWithCaCert();// XXX TODO  we could check if it's already signed by our CA, and if it's not expiring soon we can just skip this step.
-                        remote.uploadTlsCertToServer();
-//                        createServerTlsCertificate();
-//                        deployServerTlsCertificateToServer(); // using ssh, write it to glassfish keystore.jks
-//                        createServerSamlCertificate();
-//                        deployServerSamlCertificateToServer(); // using ssh, write it to mt wilson conf dir (inside keystore if possible and separate .crt file)
+                        remote.uploadTlsCertToServer(); // XXX TODO  needs to be rewritten for apache/nginx 
+                        remote.uploadTlsKeystoreToServer(); 
+                        // privacy ca
+                        remote.downloadPrivacyCaKeystoreFromServer();
+                        remote.signPrivacyCaCertWithRootCaCert();
+                        remote.uploadPrivacyCaKeystoreToServer();
                     }
                     
                     remote.close();
@@ -339,12 +347,37 @@ public class Main {
                 return model.value();
             }
             else {
-                // TODO: print faults
-                for(Fault f : model.getFaults()) {
-                    System.err.println(f.toString());
-                }
+                printFaults(model);
             }            
             // TODO: allow user to break by typing 'exit', 'cancel', 'abort', etc, and we can throw an exception like UserAbortException (must create it) so the main program can have a chance to save what has already been validated and exit, or skip to the next step, or something.
+        }
+    }
+    
+    private static void printFaults(Model model) {
+        System.err.println("--- Errors ---");
+        for(Fault f : model.getFaults()) {
+            printFault(f, 0); // level 0 means no indentation
+        }
+    }
+    
+    /**
+     * 
+     * @param f
+     * @param level of indentation;  use 0 for top-level faults, and increment once for each level of logical nesting
+     */
+    private static void printFault(Fault f, int level) {
+        String indentation = ""; 
+        for(int i=0; i<level; i++) { indentation += "  "; } // each level is indented two spaces from the previous level
+        System.err.println(String.format("%s- %s", indentation, f.toString()));
+        if( f.getCause() != null ) {
+            System.err.println(String.format("%s  Caused by: %s", indentation, f.getCause().toString()));
+        }
+        if( f.getMore() != null && f.getMore().length > 0 ) {
+            System.err.println(String.format("%s  Related errors:", indentation));
+            Fault[] more = f.getMore();
+            for(int i=0; i<more.length; i++) {
+                printFault(more[i], level+1);
+            }
         }
     }
 

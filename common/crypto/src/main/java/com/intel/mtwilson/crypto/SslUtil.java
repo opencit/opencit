@@ -14,10 +14,23 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.BasicClientConnectionManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +61,7 @@ public class SslUtil {
      */
     public static void addSslCertificatesToKeystore(SimpleKeystore keystore, URL server) throws CryptographyException, IOException {
         try {
-            X509Certificate[] certs = RsaUtil.getServerCertificates(server);
+            X509Certificate[] certs = getServerCertificates(server);
             String aliasBasename = server.getHost();
             if (certs != null) {
                 int certificateNumber = 0;
@@ -95,6 +108,34 @@ public class SslUtil {
             throw new KeyManagementException("Cannot create X509TrustManager", e);
         }
         throw new IllegalArgumentException("TrustManagerFactory did not return an X509TrustManager instance");
+    }
+
+    public static X509Certificate[] getServerCertificates(URL url) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        if (!"https".equals(url.getProtocol())) {
+            throw new IllegalArgumentException("URL scheme must be https");
+        }
+        int port = url.getPort();
+        if (port == -1) {
+            port = 443;
+        }
+        X509HostnameVerifier hostnameVerifier = new NopX509HostnameVerifierApache();
+        CertificateStoringX509TrustManager trustManager = new CertificateStoringX509TrustManager();
+        SSLContext sslcontext = SSLContext.getInstance("TLS");
+        sslcontext.init(null, new X509TrustManager[]{trustManager}, null);
+        SSLSocketFactory sf = new SSLSocketFactory(sslcontext, hostnameVerifier);
+        Scheme https = new Scheme("https", port, sf);
+        SchemeRegistry sr = new SchemeRegistry();
+        sr.register(https);
+        BasicClientConnectionManager connectionManager = new BasicClientConnectionManager(sr);
+        HttpParams httpParams = new BasicHttpParams();
+        httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        HttpClient httpClient = new DefaultHttpClient(connectionManager, httpParams);
+        log.debug("Saving certificates from server URL: {}", url.toExternalForm());
+        HttpHead request = new HttpHead(url.toExternalForm());
+        HttpResponse response = httpClient.execute(request);
+        log.debug("Server status line: {} {} ({})", new String[]{response.getProtocolVersion().getProtocol(), response.getStatusLine().getReasonPhrase(), String.valueOf(response.getStatusLine().getStatusCode())});
+        httpClient.getConnectionManager().shutdown();
+        return trustManager.getStoredCertificates();
     }
     
 }

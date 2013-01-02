@@ -22,9 +22,11 @@ import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblMle;
 //import com.intel.mtwilson.as.data.TblDbPortalUser;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.wlm.helper.BaseBO;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.datatypes.*;
 import java.util.*;
 //import java.util.logging.Level;
@@ -164,8 +166,7 @@ public class MleBO extends BaseBO {
          */
 	public String deleteMle(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
             try {
-                TblMle tblMle = getMleDetails(mleName, mleVersion, osName,
-                                osVersion, oemName);
+                TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
 
                 if (tblMle == null) {
                         throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
@@ -196,6 +197,10 @@ public class MleBO extends BaseBO {
                         pcrManifestJpaController.destroy(manifest.getId());
                 }
 
+                // We also need to delete entries in the MleSource table for the MLE. This table would store the host
+                // name that was used to white list the MLE.
+                deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
+                
                 mleJpaController.destroy(tblMle.getId());
 
             } catch (ASException ase) {
@@ -1076,6 +1081,174 @@ public class MleBO extends BaseBO {
             }                                
                 
             return modManifestList;
+	}
+        
+        /**
+         * Creates a new mapping entry in the DB between the MLE and the host that was used for whitelisiting.
+         * 
+         * @param mleSourceObj : Object containing the details of the host and the MLE.
+         * @return True or False
+         */
+        public String addMleSource(MleSource mleSourceObj) {
+            TblMle tblMle;
+            MleData mleData = null;
+            try {
+
+                try {
+                    mleData = mleSourceObj.getMleData();
+                    // Verify if the MLE exists in the system.
+                    tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
+                                    mleData.getOsVersion(), mleData.getOemName());
+                } catch (NoResultException nre){
+                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                }
+                                
+                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                
+                // Let us check if there is a mapping entry already for this MLE. If it does, then we need to return
+                // back appropriate error.
+                MwMleSource mleSourceCurrentObj = mleSourceJpaController.findByMleId(tblMle.getId());
+                
+                if (mleSourceCurrentObj != null) {
+                    log.error("White List host is already mapped to the MLE - " + tblMle.getName());
+                    throw new ASException(ErrorCode.WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS, mleData.getName());
+                }
+                
+                // Else create a new entry in the DB.
+                MwMleSource mleSourceData = new MwMleSource();
+                mleSourceData.setMleId(tblMle);
+                mleSourceData.setHostName(mleSourceObj.getHostName());        
+                        
+                mleSourceJpaController.create(mleSourceData);
+                
+            } catch (ASException ase) {
+                    throw ase;
+            } catch (Exception e) {
+                throw new ASException(e);
+            }                                
+            return "true";
+	}
+        
+        
+        /**
+         * Updates an existing MLE with the name of the white list host that was used to modify the white list values.
+         * @param mleSourceObj
+         * @return 
+         */
+        public String updateMleSource(MleSource mleSourceObj) {
+            TblMle tblMle;
+            MleData mleData = null;
+            try {
+
+                try {
+                    mleData = mleSourceObj.getMleData();
+                    // Verify if the MLE exists in the system.
+                    tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
+                                    mleData.getOsVersion(), mleData.getOemName());
+                } catch (NoResultException nre){
+                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                }
+                                
+                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                // If the mapping does not exist already in the db, then we need to return back error.
+                MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
+                if (mwMleSource == null) {
+                    throw new ASException(ErrorCode.WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST, mleData.getName());
+                }
+                
+                mwMleSource.setHostName(mleSourceObj.getHostName());        
+                mleSourceJpaController.edit(mwMleSource);
+                
+            } catch (ASException ase) {
+                    throw ase;
+            } catch (Exception e) {
+                throw new ASException(e);
+            }                                
+            return "true";
+	}
+
+        
+        /**
+         * Deletes an existing mapping between the MLE and the WhiteList host that was used during the creation of MLE.
+         * This method is called during the deletion of MLEs.
+         * 
+         * @param mleName
+         * @param mleVersion
+         * @param osName
+         * @param osVersion
+         * @param oemName
+         * @return 
+         */
+        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
+            TblMle tblMle;
+            try {
+                
+                try {
+                    // First check if the entry exists in the MLE table.
+                    tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+
+                } catch (NoResultException nre){
+                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
+                }
+                                
+                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
+                // If the mapping does not exist, it is ok. We don't need to worry. Actually for MLES
+                // configured manully, this entry does not exist.
+                if  (mwMleSource != null)                                
+                    mleSourceJpaController.destroy(mwMleSource.getId());
+                
+            } catch (ASException ase) {
+                    throw ase;
+            } catch (Exception e) {
+                throw new ASException(e);
+            }                                      
+            return "true";
+	}
+
+        
+        /**
+         * Retrieves the host name that was used to white list the MLE specified.
+         * 
+         * @param mleName
+         * @param mleVersion
+         * @param osName
+         * @param osVersion
+         * @param oemName
+         * @return 
+         */
+        public String getMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
+            TblMle tblMle;
+            String hostName = null;
+            try {
+                
+                try {
+                    // First check if the entry exists in the MLE table.
+                    tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+
+                } catch (NoResultException nre){
+                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
+                }
+                                
+                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
+                
+                // Now check if the data exists in the MLE Source table. If there is no corresponding entry, then we know that
+                // the MLE was configured manually. 
+                if (mwMleSource == null) {
+                    hostName = "Manually configured white list";
+                }
+                else {
+                    hostName = mwMleSource.getHostName();
+                }
+                
+                return hostName;
+                
+            } catch (ASException ase) {
+                    throw ase;
+            } catch (Exception e) {
+                throw new ASException(e);
+            }                                                
 	}
         
 }

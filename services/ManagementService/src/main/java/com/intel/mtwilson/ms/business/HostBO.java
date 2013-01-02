@@ -706,14 +706,24 @@ public class HostBO extends BaseBO {
                     apiClient.deleteHost(new Hostname((gkvHost.HostName)));
                     log.info(String.format("Successfully deleted the host '%s' as the user did not want the host to be registered.", gkvHost.HostName));
                     
-                    // Also delete the MLEs that the user didn't intend to add. This for the fix for Bug# 478.
+                    // Also delete the MLEs that the user didn't intend to add. This is the fix for Bug# 478.
                     if ((hostConfigObj.addBiosWhiteList()== false) && (biosMLEAlreadyExists == false)) {
                         deleteMLE(apiClient, gkvHost, true);
+                    } else {
+                        // Since either a new BIOS MLE was created or an existing one was updated, we need to store the 
+                        // mapping of the white list host that was used to configure the MLE in the DB.
+                        configureMleSource(apiClient, gkvHost, true);
+                        log.info("Successfully configured the details of the host that was used to white list the BIOS MLE - " + gkvHost.BIOS_Name);
                     }
                     
                     if ((hostConfigObj.addVmmWhiteList() == false) && (vmmMLEAlreadyExists == false)){
                         deleteMLE(apiClient, gkvHost, false);
-                    }                    
+                    } else {
+                        // Since either a new VMM MLE was created or an existing one was updated, we need to store the 
+                        // mapping of the white list host that was used to configure the MLE in the DB.
+                        configureMleSource(apiClient, gkvHost, false);
+                        log.info("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
+                    }                   
                 }
                 
                 // If in case the host is already configured, let us update it with the latest MLE configuration
@@ -792,6 +802,17 @@ public class HostBO extends BaseBO {
                         apiClient.updateHost(newHostObj);
                         log.info(String.format("Successfully updated the host %s with the new MLE information.", gkvHost.HostName));                                            
                     }
+                }
+                
+                // Now we need to configure the MleSource table with the details of the host that was used for white listing the MLE.
+                if (hostConfigObj.addBiosWhiteList()) {
+                    configureMleSource(apiClient, gkvHost, true);
+                    log.info("Successfully configured the details of the host that was used to white list the BIOS MLE - " + gkvHost.BIOS_Name);
+                }
+                
+                if (hostConfigObj.addVmmWhiteList()) {
+                    configureMleSource(apiClient, gkvHost, false);
+                    log.info("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
                 }
             }            
 
@@ -1121,6 +1142,67 @@ public class HostBO extends BaseBO {
 
     
     /**
+     * 
+     * @param apiClientObj
+     * @param hostObj
+     * @param isBIOSMLE 
+     */
+    private void configureMleSource(ApiClient apiClientObj, TxtHostRecord hostObj, Boolean isBIOSMLE){
+        MleSource mleSourceObj = new MleSource();
+        MleData mleDataObj = new MleData();
+        try {
+            
+            if (isBIOSMLE) {
+                mleDataObj.setName(hostObj.BIOS_Name);
+                mleDataObj.setVersion(hostObj.BIOS_Version);
+                mleDataObj.setOemName(hostObj.BIOS_Oem);
+                mleDataObj.setOsName("");
+                mleDataObj.setOsVersion("");
+                mleDataObj.setMleType(MleData.MleType.BIOS.toString());
+                
+            } else {
+                mleDataObj.setName(hostObj.VMM_Name);
+                mleDataObj.setVersion(hostObj.VMM_Version);
+                mleDataObj.setOemName("");
+                mleDataObj.setOsName(hostObj.VMM_OSName);
+                mleDataObj.setOsVersion(hostObj.VMM_OSVersion);
+                mleDataObj.setMleType(MleData.MleType.VMM.toString());
+            }
+            
+            // Because of the way MleData works it needs the MleType and AttestationType data when
+            // retrieving the contents from it. So, we are just populating it with PCR. This value
+            // will not be used during the creation of MleSource mapping.
+            mleDataObj.setAttestationType(MleData.AttestationType.PCR.toString());            
+            mleSourceObj.setMleData(mleDataObj);
+            mleSourceObj.setHostName(hostObj.HostName);
+            
+            // Since this function would be called during both creation and updation, we need to handle both the scenarios.
+            try {
+                apiClientObj.addMleSource(mleSourceObj);
+            } catch (ApiException iae) {
+                if (iae.getErrorCode() == ErrorCode.WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS.getErrorCode()) {
+                    // Since the mapping already exists, it means that the user is updating the white list. So, let us call the update method
+                    apiClientObj.updateMleSource(mleSourceObj);
+                }
+                else {
+                    throw new MSException(iae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(iae.getErrorCode()).toString() +
+                        ": Error during MLE white list host mapping. " + iae.getMessage());                    
+                }
+            }
+                        
+        } catch (ApiException ae) {
+            log.error("API Client error during deletion of MLE. " + ae.getErrorCode() + " :" + ae.getMessage());
+            throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() +
+                    ": Error during MLE white list host mapping. " + ae.getMessage());
+            
+        } catch (Exception ex) {
+            log.error("Error during MLE deletion. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE white list host mapping. " + ex.getMessage());
+            
+        }
+    }
+
+    /**
      * Author: Sudhir
      * 
      * This is a helper function to delete the MLE.
@@ -1129,7 +1211,7 @@ public class HostBO extends BaseBO {
      * @param hostObj : TxtHostRecord object having the details of the MLE to be deleted.
      * @param isBIOSMLE : This flag will be set to true if the MLE being deleted is BIOS. For VMM MLEs it would be FALSE
      */
-    private void deleteMLE(ApiClient apiCLientObj, TxtHostRecord hostObj, Boolean isBIOSMLE){
+    private void deleteMLE(ApiClient apiClientObj, TxtHostRecord hostObj, Boolean isBIOSMLE){
         MLESearchCriteria mleDetails = new MLESearchCriteria();
         try {
             
@@ -1140,7 +1222,6 @@ public class HostBO extends BaseBO {
                 mleDetails.oemName = hostObj.BIOS_Oem;
                 mleDetails.osName = "";
                 mleDetails.osVersion = "";
-                apiCLientObj.deleteMLE(mleDetails);
                 
             } else {
                 // Process the deletion of the VMM MLE
@@ -1149,8 +1230,9 @@ public class HostBO extends BaseBO {
                 mleDetails.osName = hostObj.VMM_OSName;
                 mleDetails.osVersion = hostObj.VMM_OSVersion;
                 mleDetails.oemName = "";
-                apiCLientObj.deleteMLE(mleDetails);                
             }
+            
+            apiClientObj.deleteMLE(mleDetails);            
                         
         } catch (ApiException ae) {
             log.error("API Client error during deletion of MLE. " + ae.getErrorCode() + " :" + ae.getMessage());
@@ -1159,7 +1241,7 @@ public class HostBO extends BaseBO {
             
         } catch (Exception ex) {
             log.error("Error during MLE deletion. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during BIOS MLE configuration. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE configuration. " + ex.getMessage());
             
         }
     }

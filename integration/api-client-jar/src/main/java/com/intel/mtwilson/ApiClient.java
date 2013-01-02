@@ -30,6 +30,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -631,21 +632,45 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         // TODO: getSamlForHost(), then verifyTrustAssertion(), then extract the host's TLS Certificate (RC3 feature) from the TrustAssertion object (Because it's included in the SAML)
     }
 
+    /**
+     * Returns a set of X509Certificate objects comprised of the Mt Wilson Root CA and any intermediate CA's that
+     * are available. 
+     * 
+     * Note: this method returns only CA certs, which does NOT return the server's TLS certificate or SAML certificate.
+     * 
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException Do 
+     */
     @Override
-    public X509Certificate getCaCertificate() throws IOException, ApiException, SignatureException {
-        byte[] cacert = binary(httpGet(msurl("/ca/certificate")));
+    public Set<X509Certificate> getCaCertificates() throws IOException, ApiException, SignatureException {
+        String rootca = text(httpGet(msurl("/ca/certificate/rootca/current")));
+        String privacyca = text(httpGet(msurl("/ca/certificate/privacyca/current")));
+        String samlca = text(httpGet(msurl("/ca/certificate/saml/current")));
+        String tlsca = text(httpGet(msurl("/ca/certificate/tls/current")));
+        // XXX TODO later there will be a saml intermediate CA and a TLS intermediate CA ... at that time we need to retrieve them and add to this
         try {
-            return X509Util.decodeDerCertificate(cacert);
+            List<X509Certificate> rootCaCerts = X509Util.decodePemCertificates(rootca);
+            List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(privacyca);
+            List<X509Certificate> samlCaCerts = X509Util.decodePemCertificates(samlca);
+            List<X509Certificate> tlsCaCerts = X509Util.decodePemCertificates(tlsca);
+            HashSet<X509Certificate> cacerts = new HashSet<X509Certificate>();
+            cacerts.addAll(rootCaCerts);
+            cacerts.addAll(privacyCaCerts);
+            cacerts.addAll(samlCaCerts);
+            cacerts.addAll(tlsCaCerts);
+            for(X509Certificate cert : cacerts) {
+                if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert;  0 and above indicates a CA cert
+                    cacerts.remove(cert);
+                }
+            }
+            return cacerts;
         } catch (CertificateException ex) {
             throw new ApiException("Invalid certificate", ex);
         }
     }
     
-    @Override
-    public void setCaCertificate(X509Certificate certificate) throws IOException, ApiException, SignatureException {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // TODO: send the CA certificate to attestation service        
-    }
 
     @Override
     public CaInfo getCaStatus() throws IOException, ApiException, SignatureException {
@@ -653,6 +678,13 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         // TODO: create a CaInfo object, which combines data from two sources:  1) the Mt Wilson CA Certificate, 2) the "ca" user in the HMAC users table
     }
 
+    /**
+     * XXX needs a rename, because we're talking about the host provisioning ca specifically
+     * @param newPasswordString to authorize new hosts
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
     @Override
     public void enableCaWithPassword(String newPasswordString) throws IOException, ApiException, SignatureException {
         try {
@@ -665,6 +697,12 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         }
     }
 
+    /**
+     * XXX needs a rename, because we're talking about the host provisioning ca specifically
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
     @Override
     public void disableCa() throws IOException, ApiException, SignatureException {
             String result = text(httpPost(msurl("/ca/disable"), null));
@@ -1230,6 +1268,42 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     public boolean configureWhiteList(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException {
         String result = text(httpPost(msurl("/host/whitelist/custom"), toJSON(hostConfigObj)));
         return "true".equals(result);                
+    }
+    
+    @Override
+    public boolean addMleSource(MleSource mleSourceObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPost(wlmurl("/mles/source"), toJSON(mleSourceObj)));
+        return "true".equals(result);                
+    }
+
+    @Override
+    public boolean updateMleSource(MleSource mleSourceObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPut(wlmurl("/mles/source"), toJSON(mleSourceObj)));
+        return "true".equals(result);                    
+    }
+
+    @Override
+    public boolean deleteMleSource(MleData mleDataObj) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("mleName", mleDataObj.getName());        
+        query.add("mleVersion", mleDataObj.getVersion());        
+        query.add("osName", mleDataObj.getOsName());        
+        query.add("osVersion", mleDataObj.getOsVersion());        
+        query.add("oemName", mleDataObj.getOemName());        
+        String result = text(httpDelete(wlmurl("/mles/source", query))); 
+        return "true".equals(result);                
+    }
+    
+    @Override
+    public String getMleSource(MleData mleDataObj) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("mleName", mleDataObj.getName());        
+        query.add("mleVersion", mleDataObj.getVersion());        
+        query.add("osName", mleDataObj.getOsName());        
+        query.add("osVersion", mleDataObj.getOsVersion());        
+        query.add("oemName", mleDataObj.getOemName());        
+        String result = text(httpGet(wlmurl("/mles/source", query)));
+        return result;                        
     }
     
 }

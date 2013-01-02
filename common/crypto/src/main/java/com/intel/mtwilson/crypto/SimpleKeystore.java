@@ -55,7 +55,7 @@ public class SimpleKeystore {
         keystoreResource = resource;
         keystorePassword = password;
         try {
-            keystore = KeyStore.getInstance(KeyStore.getDefaultType()); // KeyStoreException. XXX TODO we need to implement AES-128 keystore encryption provider
+            keystore = KeyStore.getInstance(KeyStore.getDefaultType()); // XXX we are expecting "JKS".   can throw KeyStoreException. XXX TODO we need to implement AES-128 keystore encryption provider
             InputStream in = null;
             try {
                 in = resource.getInputStream();
@@ -106,6 +106,8 @@ public class SimpleKeystore {
     public SimpleKeystore(File file, String password) throws KeyManagementException {
         this(new FileResource(file), password);
     }
+    
+    public Resource getResource() { return keystoreResource; }
 
     public void save() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         OutputStream out = keystoreResource.getOutputStream();
@@ -180,7 +182,7 @@ public class SimpleKeystore {
     }
 
     public X509Certificate getX509Certificate(String certAlias, String purpose) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
-        String trustedAlias = String.format("%s (%s)", certAlias, purpose);
+        String trustedAlias = purpose == null ? certAlias : String.format("%s (%s)", certAlias, purpose);
         return getX509Certificate(trustedAlias);
     }
     
@@ -242,6 +244,9 @@ public class SimpleKeystore {
      * you need to prompt the user to verify the fingerprint of the certificate
      * ebfore you add it, in order to prevent man-in-the-middle attacks.
      * The trusted purpose (SSL, SAML, etc) is added to the certificate's alias.
+     * 
+     * If a different certificate already exists under the alias, it is replaced.
+     * 
      * @throws MalformedURLException
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
@@ -250,7 +255,7 @@ public class SimpleKeystore {
     public void addTrustedCertificate(X509Certificate cert, String alias, String purpose) throws KeyManagementException {
         try {
             List<String> aliases = Collections.list(keystore.aliases());
-            String trustedAlias = String.format("%s (%s)", alias, purpose);
+            String trustedAlias = purpose == null ? alias : String.format("%s (%s)", alias, purpose);
             if( aliases.contains(trustedAlias) ) {
                 // is it the same certificate? if so, we can ignore this request
                 X509Certificate existing = getX509Certificate(trustedAlias);
@@ -275,8 +280,15 @@ public class SimpleKeystore {
             throw new KeyManagementException("Cannot add trusted certificate", e);
         }
     }
+    
+    public void addTrustedCertificate(X509Certificate cert, String alias) throws KeyManagementException {
+        addTrustedCertificate(cert, alias, null);
+    }
 
     /**
+     * Replaces an existing keypair with the same alias or adds a new keypair
+     * if one did not already exist.
+     * 
      * @param privateKey
      * @param cert
      * @param alias 
@@ -284,6 +296,10 @@ public class SimpleKeystore {
      */
     public void addKeyPairX509(PrivateKey privateKey, X509Certificate cert, String alias, String keyPassword) throws KeyManagementException {
         try {
+            List<String> aliases = Collections.list(keystore.aliases());
+            if( aliases.contains(alias) ) {
+                keystore.deleteEntry(alias);
+            }            
             keystore.setKeyEntry(alias, privateKey, keyPassword.toCharArray(), new X509Certificate[] { cert });        
         }
         catch(KeyStoreException e) {

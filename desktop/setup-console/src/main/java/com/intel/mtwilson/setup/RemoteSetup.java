@@ -4,18 +4,23 @@
  */
 package com.intel.mtwilson.setup;
 
+import com.intel.mtwilson.crypto.Pkcs12;
+import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.datatypes.Md5Digest;
 import com.intel.mtwilson.datatypes.Sha1Digest;
 import com.intel.mtwilson.datatypes.TLSPolicy;
+import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.setup.model.Database;
 import com.intel.mtwilson.setup.model.DatabaseType;
 import com.intel.mtwilson.setup.model.PrivacyCA;
 import com.intel.mtwilson.setup.model.WebContainerType;
 import com.intel.mtwilson.setup.model.WebServiceSecurityPolicy;
+import com.intel.mtwilson.validation.BuilderModel;
 import com.intel.mtwilson.validation.Fault;
 import com.intel.mtwilson.validation.ObjectModel;
 import java.io.ByteArrayInputStream;
@@ -37,19 +42,57 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyPair;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.util.concurrent.TimeUnit;
 import net.schmizz.sshj.xfer.InMemoryDestFile;
 import net.schmizz.sshj.xfer.InMemorySourceFile;
 import net.schmizz.sshj.xfer.scp.SCPException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import sun.security.x509.X500Name;
 
 /**
+ * 
+ * Test case for signing remote Glassfish TLS certificate:
+ * 
+ * First import the mtwilson root ca you created into your computer's Trusted Certificate Authorities list (double click the file, follow prompts)
+ * cd /usr/share/glassfish3/glassfish/domains/domain1/config
+ * keytool -list -keystore keystore.jks -storepass changeit
+ * keytool -keystore keystore.jks -storepass changeit -exportcert -alias glassfish-instance -file ssl.selfsigned.crt
+ * openssl x509 -in ssl.selfsigned.crt -inform der -text
+ * cp keystore.jks keystore.jks.bak
+ * Run the setup tool... now keytool -list will show an extra cert (mtwilson-rootca) and the glassfish cert will be signed by that root ca
+ * keytool -list -keystore keystore.jks -storepass changeit
+ * keytool -keystore keystore.jks -storepass changeit -exportcert -alias glassfish-instance -file ssl.casigned.crt
+ * openssl x509 -in ssl.casigned.crt -inform der -text
+ * keytool -keystore keystore.jks -storepass changeit -exportcert -alias mtwilson-rootca -file mtwilson.rootca.crt
+ * openssl x509 -in mtwilson.rootca.crt -inform der -text
+ * Restart glassfish or just cause it to reload ssl settings (Configurations -> server-config -> Network Config -> Network Listeners -> http-listener-2 -> SSL -> Save)
+ * Check that the connection to server is now trusted by visiting https://yourserver:8181/TrustDashBoard 
+ * (If you're using Chrome, you must restart your browser due to a bug in Chome that will still show the site as untrusted, until you restart the browser)
+ * 
+ * Test case for signing remote Privacy CA certificate:
+ * cd /etc/intel/cloudsecurity
+ * openssl pkcs12 -in PrivacyCA.p12 -out PrivacyCA.p12.txt   (the password you need is in PrivacyCA.properties, copy/paste it into all prompts)
+ * openssl x509 -in PrivacyCA.p12.text -inform pem -text   (you will see subject and issuer are both CN=HIS_Privacy_CA)
+ * cp PrivacyCA.p12 PrivacyCA.p12.bak
+ * Run the setup tool...
+ * keytool -list -keystore PrivacyCA.p12 -storetype PKCS12 -storepass changeit
+ * keytool -exportcert -keystore PrivacyCA.p12 -storetype PKCS12 -storepass changeit -alias 1 -file PrivacyCA.p12.casigned.crt
+ * keytool -printcert -file PrivacyCA.p12.casigned.crt
+ * openssl pkcs12 -in PrivacyCA.p12 -out PrivacyCA.p12.casigned.txt   (the password you need is in PrivacyCA.properties, copy/paste it into all prompts)
+ * openssl x509 -in PrivacyCA.p12.casigned.txt -inform pem -text   (you will see subject and issuer are both CN=HIS_Privacy_CA)
+ * Should see an extra cert in that file now, for mtwilson root ca,  and should see mt wilson root ca as issuer of the privacy ca cert.
+ * 
  * @author jbuhacoff
  */
-public class RemoteSetup extends ObjectModel implements Closeable {
+public class RemoteSetup extends BuilderModel implements Closeable {
     private final SetupContext ctx;
     private final Properties properties = new Properties();
     private final SSHClient ssh = new SSHClient();
@@ -139,7 +182,6 @@ public class RemoteSetup extends ObjectModel implements Closeable {
      */
     private boolean existsRemoteFile(String remotePath) throws IOException {
         String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); // XXX using this only internally (no for arbitrary user input) so this should be ok, but it is a good idea to shell-escape it anyway
-//        System.out.println("result of ls -1 "+absolutePath+":  '"+result+"'");
         if( result == null || result.isEmpty() ) { return false; }
         return true;
     }
@@ -277,7 +319,9 @@ public class RemoteSetup extends ObjectModel implements Closeable {
     public void deployRootCACertToServer() throws IOException, CertificateEncodingException {
 //        MemorySrcFile caCertDer = new MemorySrcFile();
         uploadLocalFile(ctx.rootCa.getCertificate().getEncoded(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt");
-    }
+         String pem = X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
+        uploadLocalFile(pem.getBytes(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); // we also do a PEM version because if customer wants to bring our entire certificate hierarchy under theirs they need to sign our root ca with their certificate - and then append their certificate to this PEM file.
+   }
     
     
     public void downloadSamlCertFromServer() throws IOException  {
@@ -328,12 +372,15 @@ public class RemoteSetup extends ObjectModel implements Closeable {
     }
     
     public void uploadSamlCertToServer() throws CertificateEncodingException, IOException {
-        uploadLocalFile(ctx.samlCertificate.getEncoded(), ctx.samlCertificateFile);        
+        uploadLocalFile(ctx.samlCertificate.getEncoded(), ctx.samlCertificateFile);   
+        String pem = X509Util.encodePemCertificate(ctx.samlCertificate)+X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
+        uploadLocalFile(pem.getBytes(), ctx.samlCertificateFile+".pem");
     }
 
     
     /**
      * XXX TODO  this varies by web container / proxy ... for tomcat we need to upload the cert for administrator convenience but for functionality we need to update the java keystore... that might be similar procedure to tomcat but it will not be the same for apache and nginx
+     * Right now assuming GLASSFISH,  bu tthis method should be adapted for apache and nginx instead since for glassfish we use the downloadTlsKeystoreFromServer method INSTEAD OF THIS ONE.
      * 
      * @throws IOException 
      */
@@ -361,11 +408,67 @@ public class RemoteSetup extends ObjectModel implements Closeable {
     }
     
     /**
+     * For Java Web Containers (Glassfish, Tomcat)  downloads the keystore.jks
+     * file and opens it using the known password to obtain the current TLS
+     * certificate.  This method can be used INSTEAD OF downloadTlsCertFromServer.
+     * 
+     * XXX TODO this is web server dependent... should be implemented in object-oriented fashion;  right now assuming GLASSFISH
+     * 
+     * @throws IOException 
+     */
+    public void downloadTlsKeystoreFromServer() throws IOException  {
+        if( ctx.tlsKeystoreFile == null ) {
+            fault("Cannot download TLS keystore from server: location is not configured");
+            return;
+        }
+        boolean hasTlsKeystoreFile = existsRemoteFile(ctx.tlsKeystoreFile);
+        if( !hasTlsKeystoreFile ) {
+            // SAML cert file is not there; TODO we could check if the keystore is there and try to extract it, but for now we just abort
+            fault("Cannot download TLS keystore from server: file is missing");
+            return;
+        }
+        MemoryDstFile file = downloadRemoteFile(ctx.tlsKeystoreFile);
+        InputStream in = file.getInputStream();
+        byte[] fileContent = IOUtils.toByteArray(in);
+        IOUtils.closeQuietly(in);
+        try {
+            ByteArrayResource resource = new ByteArrayResource(fileContent);
+            ctx.tlsKeystore = new SimpleKeystore(resource, ctx.tlsKeystorePassword);
+            // XXX hack - using same password for key as for the keystore;  this happens to be the glassfish default but it may not always be true
+            ctx.tlsKeyPassword = ctx.tlsKeystorePassword;
+            // XXX hack,  glassfish cert is either in "s1as" or in "glassfish-instance" , but it could be anything so we need to grab the actual alias name from the glassfish configuration in getRemoteSetings()
+            if( ctx.tlsKeyAlias == null && ArrayUtils.contains(ctx.tlsKeystore.aliases(), "s1as") ) {
+                ctx.tlsKeyAlias = "s1as";
+            }
+            if( ctx.tlsKeyAlias == null && ArrayUtils.contains(ctx.tlsKeystore.aliases(), "glassfish-instance") ) {
+                ctx.tlsKeyAlias = "glassfish-instance";
+            }
+            if( ctx.tlsKeyAlias != null ) {
+                RsaCredentialX509 x509 = ctx.tlsKeystore.getRsaCredentialX509(ctx.tlsKeyAlias, ctx.tlsKeyPassword);
+                ctx.tlsKeypair = new KeyPair(x509.getPublicKey(), x509.getPrivateKey());
+                ctx.tlsCertificate = x509.getCertificate();
+            }
+        }
+        catch(Exception e) { // KeyManagementException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException
+            fault(e, "Cannot read TLS keystore");
+        }
+    }
+    
+    /**
      * Precondition:  ctx.rootCa and ctx.tlsCertificate are set
+     * 
+     * Glassfish default TLS certificate has a name like "localhost-instance" which of
+     * course doesn't match either the IP or any DNS name that may be assigned.
+     * So when we sign the certificate we set an additional common name to the server address
+     * if the original one doesn't already match.
      */
     public void signTlsCertWithCaCert() {
+        String subjectName = ctx.tlsCertificate.getSubjectX500Principal().getName();
+        if( !subjectName.contains("CN="+ctx.serverAddress.toString())) {
+            subjectName = "CN="+ctx.serverAddress.toString()+","+subjectName;
+        }
         X509Builder x509 = X509Builder.factory()
-                .subjectName(X500Name.asX500Name(ctx.tlsCertificate.getSubjectX500Principal()))
+                .subjectName(subjectName) // X500Name.asX500Name(ctx.tlsCertificate.getSubjectX500Principal()))
                 .subjectPublicKey(ctx.tlsCertificate.getPublicKey())
                 .expires(3650, TimeUnit.DAYS)
                 .issuer(ctx.rootCa)
@@ -391,10 +494,87 @@ public class RemoteSetup extends ObjectModel implements Closeable {
      */
     public void uploadTlsCertToServer() throws CertificateEncodingException, IOException {
         uploadLocalFile(ctx.tlsCertificate.getEncoded(), ctx.tlsCertificateFile);        
+        String pem = X509Util.encodePemCertificate(ctx.tlsCertificate)+X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
+        uploadLocalFile(pem.getBytes(), ctx.tlsCertificateFile+".pem");
     }
     
     
+    /**
+     * This method saves ctx.tlsCertificate into the tls.tlsKeystore, and then
+     * uploads the modified keystore to the server.  
+     * It also saves tls.rootCa certificate into the keystore as an additional
+     * trusted certificate.
+     * 
+     * XXX TODO:  instead of throwing the exceptions, catch them and add faults instead
+     */
+    public void uploadTlsKeystoreToServer() throws KeyManagementException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        ctx.tlsKeystore.addTrustedCaCertificate(ctx.rootCa.getCertificate(), "mtwilson-rootca");
+        ctx.tlsKeystore.addKeyPairX509(ctx.tlsKeypair.getPrivate(), ctx.tlsCertificate, ctx.tlsKeyAlias, ctx.tlsKeyPassword); // XXX TODO  assumes Glassfish default alias; also, do we need to delete the previous one first???
+//        ctx.tlsKeystore.addTrustedCertificate(ctx.tlsCertificate, ctx.tlsKeyAlias); // can't use it because glassfish stores the cert along witht the private key, so we need to replace the entire entry, which is password protected
+        ctx.tlsKeystore.save(); // saves to bytearrayresource we created when downloaded it
+        uploadLocalFile(IOUtils.toByteArray(ctx.tlsKeystore.getResource().getInputStream()), ctx.tlsKeystoreFile);        
+    }
+        
     
+    public void downloadPrivacyCaKeystoreFromServer() throws IOException {
+        if( ctx.privacyCA.ekSigningKeyFilename == null ) {
+            fault("Cannot download PrivacyCA keystore from server: location is not configured");
+            return;
+        }
+        boolean hasPcaKeystoreFile = existsRemoteFile(ctx.privacyCA.ekSigningKeyFilename);
+        if( !hasPcaKeystoreFile ) {
+            fault("Cannot download PrivacyCA keystore from server: file is missing");
+            return;
+        }
+        MemoryDstFile file = downloadRemoteFile(ctx.privacyCA.ekSigningKeyFilename);
+        InputStream in = file.getInputStream();
+        byte[] fileContent = IOUtils.toByteArray(in);
+        IOUtils.closeQuietly(in);
+        try {
+            ByteArrayResource resource = new ByteArrayResource(fileContent);
+            ctx.privacyCA.keystore = new Pkcs12(resource, ctx.privacyCA.ekSigningKeyPassword);
+            // pkcs12 files either don't have aliases or the aliases are just the key index; either way for the PrivacyCA.p12 file that mt wilson generates, the alias name is "1"
+//                ctx.tlsCertificate = ctx.tlsKeystore.getX509Certificate(ctx.tlsKeyAlias); // doesn't work, because the certificate is protected by a password since it's part of a privatekeyeentry  ... XXX TODO : assuming Glassfish *and* assuming default TLS alias 
+            RsaCredentialX509 x509 = ctx.privacyCA.keystore.getRsaCredentialX509("1", ctx.privacyCA.ekSigningKeyPassword);
+            ctx.privacyCA.ekSigningKeyPair = new KeyPair(x509.getPublicKey(), x509.getPrivateKey());
+            ctx.privacyCA.ekSigningKeyCertificate = x509.getCertificate();
+        }
+        catch(Exception e) { // KeyManagementException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException
+            fault(e, "Cannot read Privacy CA keystore");
+        }
+        
+    }
+    
+    public void signPrivacyCaCertWithRootCaCert() {
+        X509Builder x509 = X509Builder.factory()
+                .subjectName(X500Name.asX500Name(ctx.privacyCA.ekSigningKeyCertificate.getSubjectX500Principal()))
+                .subjectPublicKey(ctx.privacyCA.ekSigningKeyCertificate.getPublicKey())
+                .expires(3650, TimeUnit.DAYS)
+                .issuer(ctx.rootCa)
+                .keyUsageCertificateAuthority();
+        if( ctx.serverAddress.isHostname() ) {
+            x509.dnsAlternativeName(ctx.serverAddress.toString());
+        }
+        else {
+            x509.ipAlternativeName(ctx.serverAddress.toString());
+        }
+        X509Certificate newPcaCert = x509.build();
+        if( newPcaCert == null ) {
+            fault(x509, "Cannot create a new TLS certificate");
+            return;
+        }
+        ctx.privacyCA.ekSigningKeyCertificate = newPcaCert;
+        
+    }
+    
+    public void uploadPrivacyCaKeystoreToServer() throws IOException, KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, KeyManagementException {
+        RsaCredentialX509 x509 = new RsaCredentialX509(ctx.privacyCA.ekSigningKeyPair.getPrivate(), ctx.privacyCA.ekSigningKeyCertificate);
+        ctx.privacyCA.keystore.setRsaCredentialX509(x509, new X509Certificate[] { ctx.rootCa.getCertificate() }, "1", ctx.privacyCA.ekSigningKeyPassword); // XXX TODO  assumes Glassfish default alias; also, do we need to delete the previous one first???
+        ctx.privacyCA.keystore.save(); // saves to bytearrayresource we created when downloaded it
+        uploadLocalFile(IOUtils.toByteArray(ctx.privacyCA.keystore.getResource().getInputStream()), ctx.privacyCA.ekSigningKeyFilename);        
+        String pem = X509Util.encodePemCertificate(ctx.privacyCA.ekSigningKeyCertificate)+X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
+        uploadLocalFile(pem.getBytes(), ctx.privacyCA.ekSigningKeyFilename+".pem");
+    }
     
     
     /**
@@ -574,6 +754,9 @@ public class RemoteSetup extends ObjectModel implements Closeable {
         }
         
         ctx.privacyCA.ekSigningKeyFilename = asprops.getProperty("P12filename", "PrivacyCA.p12"); // probably should not be configurable... should have a specific location.
+        if( !ctx.privacyCA.ekSigningKeyFilename.startsWith("/") ) {
+            ctx.privacyCA.ekSigningKeyFilename = String.format("/etc/intel/cloudsecurity/%s", ctx.privacyCA.ekSigningKeyFilename);
+        }
         ctx.privacyCA.ekSigningKeyPassword = asprops.getProperty("P12password");
         ctx.privacyCA.ekSigningKeyDownloadUsername = asprops.getProperty("ClientFilesDownloadUsername");
         ctx.privacyCA.ekSigningKeyDownloadPassword = asprops.getProperty("ClientFilesDownloadPassword");
@@ -598,6 +781,7 @@ public class RemoteSetup extends ObjectModel implements Closeable {
                 if( asprops.getProperty("GLASSFISH_HOME") != null ) {
                     ctx.webContainerType = WebContainerType.GLASSFISH;
                     ctx.tlsKeystoreFile = asprops.getProperty("GLASSFISH_HOME") + "/domains/domain1/config/keystore.jks";
+                    ctx.tlsKeystorePassword = "changeit";
                     ctx.tlsCertificateFile = asprops.getProperty("GLASSFISH_HOME") + "/domains/domain1/config/ssl."+ctx.serverAddress.toString()+".crt";
                     // TODO maybe move this to importGlassfishProperties ?
                 }
@@ -611,12 +795,4 @@ public class RemoteSetup extends ObjectModel implements Closeable {
         
     }
     
-    @Override
-    protected void validate() {
-        if( ctx.serverAddress == null ) { fault("Remote server address required"); }
-        if( username == null ) { fault("Remote server SSH username required"); }
-        if( password == null ) { fault("Remote server SSH password required"); }
-        
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 }

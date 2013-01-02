@@ -65,7 +65,14 @@
 				</div>
 			</div>
 			
-			<!-- <div class="singleDiv" id="mainfestGKVSCheck">
+			<div class="singleDiv" id="mleSourceHost">
+				<div class="labelDiv">White List Host :</div>
+				<div class="valueDiv">
+					<input type="text"  class="inputs textBox_Border" disabled="disabled" id="MainContent_tbMleSourceHost" maxlength="200">
+				</div>
+			</div>
+
+                        <!-- <div class="singleDiv" id="mainfestGKVSCheck">
 				<div class="labelDiv">&nbsp;</div>
 				<div class="valueDiv">
 					<input type="checkbox" id="" onclick="fnToggelManifestList(checked)"><span>Uplaod GKVs directly from a trusted host</span>

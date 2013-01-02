@@ -45,6 +45,7 @@ package com.intel.mtwilson.wlm.rest;
 
 import com.intel.mtwilson.wlm.business.MleBO;
 import com.intel.mtwilson.datatypes.MleData;
+import com.intel.mtwilson.datatypes.MleSource;
 import com.intel.mtwilson.datatypes.PCRWhiteList;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
 //import com.intel.mountwilson.wlm.rest.data.ModuleWhiteListData;
@@ -360,4 +361,48 @@ public class Mle {
         return mleBO.getModuleWhiteList(mleName, mleVersion, osName, osVersion, oemName);
     }
 
+    @POST
+    @RolesAllowed({"Whitelist"})
+    @Path("/source")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String addMleSource(MleSource mleSourceObj) {
+        return mleBO.addMleSource(mleSourceObj);
+    }
+
+    @PUT
+    @RolesAllowed({"Whitelist"})
+    @Path("/source")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String updateMleSource(MleSource mleSourceObj) {
+        return mleBO.updateMleSource(mleSourceObj);
+    }
+
+    @DELETE
+    @RolesAllowed({"Whitelist"})
+    @Path("/source")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteMleSource(
+            @QueryParam("mleName") String mleName, 
+            @QueryParam("mleVersion") String mleVersion,
+            @QueryParam("osName") String osName,
+            @QueryParam("osVersion") String osVersion,
+            @QueryParam("oemName") String oemName) {
+        return mleBO.deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
+    }
+
+    @GET
+    @RolesAllowed({"Whitelist"})
+    @Path("/source")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getMleSource(
+            @QueryParam("mleName") String mleName, 
+            @QueryParam("mleVersion") String mleVersion,
+            @QueryParam("osName") String osName,
+            @QueryParam("osVersion") String osVersion,
+            @QueryParam("oemName") String oemName) {
+        return mleBO.getMleSource(mleName, mleVersion, osName, osVersion, oemName);
+    }
+    
 }

@@ -107,7 +107,7 @@ public class KeystoreTest {
     public void addServerSslCertificateToKeystore() throws Exception {
         KeyStore keystore = KeystoreUtil.open(new MapConfiguration(config));
         URL url = new URL(config.getProperty("mtwilson.api.baseurl"));        
-        X509Certificate[] certs = RsaUtil.getServerCertificates(url);
+        X509Certificate[] certs = SslUtil.getServerCertificates(url);
         String aliasBasename = "serverCert";
         int certificateNumber = 0;
         for(X509Certificate cert : certs) {
@@ -140,7 +140,7 @@ public class KeystoreTest {
         System.out.println(String.format("%d certificates", aliases1.length));
         // add server ssl certificate
         URL url = new URL(config.getProperty("mtwilson.api.baseurl"));        
-        X509Certificate[] certs = RsaUtil.getServerCertificates(url);
+        X509Certificate[] certs = SslUtil.getServerCertificates(url);
         String aliasBasename = "serverCert";
         int certificateNumber = 0;
         for(X509Certificate cert : certs) {
@@ -173,7 +173,7 @@ public class KeystoreTest {
     
     @Test
     public void testGetServerSslCerts() throws IOException, NoSuchAlgorithmException, KeyManagementException, CertificateEncodingException {
-        X509Certificate[] certs = RsaUtil.getServerCertificates(new URL("https://10.1.71.81:8181/AttestationService"));
+        X509Certificate[] certs = SslUtil.getServerCertificates(new URL("https://10.1.71.81:8181/AttestationService"));
         for(X509Certificate cert : certs) {
             System.out.println(String.format("Subject: %s", cert.getSubjectX500Principal().getName()));
             System.out.println(String.format("Issuer: %s", cert.getIssuerX500Principal().getName()));
@@ -210,7 +210,7 @@ public class KeystoreTest {
             String saveCertAndTryAgain = in.readLine().trim();
             if( saveCertAndTryAgain.toUpperCase().startsWith("Y") ) {
                 // download server SSL certificates
-                X509Certificate[] serverCertificates = RsaUtil.getServerCertificates(url);
+                X509Certificate[] serverCertificates = SslUtil.getServerCertificates(url);
                 // create a new temporary trust store and add those certificates
                 KeyStore keystore = KeyStore.getInstance("JKS");
                 keystore.load(null, null);

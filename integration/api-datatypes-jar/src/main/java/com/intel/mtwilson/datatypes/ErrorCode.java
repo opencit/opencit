@@ -84,6 +84,8 @@ public enum ErrorCode {
     WS_MODULE_WHITELIST_ALREADY_EXISTS(2016, "White list for the module '%s' is already configured in the system."),
     WS_MODULE_WHITELIST_DOES_NOT_EXIST(2017, "White list for the module '%s' is not configured in the system"),
     WS_NAME_SPACE_DOES_NOT_EXIST(2018, "Name space table is not configured in the system. Please contact administrator."),
+    WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS(2019, "White list host mapping already exists for the MLE '%s'."),
+    WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST(2019, "White list host mapping does not exist for the MLE '%s'."),
     
     
     // Below are error codes for the Management service

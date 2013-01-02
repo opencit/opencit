@@ -30,5 +30,6 @@
     <class>com.intel.mtwilson.security.jpa.data.TblApiClient</class>
     -->
     <class>com.intel.mtwilson.as.data.TblModuleManifestLog</class>
+    <class>com.intel.mtwilson.as.data.MwMleSource</class>
   </persistence-unit>
 </persistence>

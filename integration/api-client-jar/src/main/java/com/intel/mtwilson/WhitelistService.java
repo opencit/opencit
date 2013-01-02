@@ -55,4 +55,12 @@ public interface WhitelistService {
     
     List<ModuleWhiteList> listModuleWhiteListForMLE(String mleName, String mleVersion, 
             String osName, String osVersion, String oemName) throws IOException, ApiException, SignatureException;
+    
+    boolean addMleSource(MleSource mleSourceObj) throws IOException, ApiException, SignatureException;
+    
+    boolean updateMleSource(MleSource mleSourceObj) throws IOException, ApiException, SignatureException;
+    
+    boolean deleteMleSource(MleData mleDataObj) throws IOException, ApiException, SignatureException;
+    
+    String getMleSource(MleData mleDataObj) throws IOException, ApiException, SignatureException;
 }

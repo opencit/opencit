@@ -29,7 +29,7 @@ public class SaveSSLCertificates {
 
     @Test
     public void testSaveSSLCerts() throws IOException, NoSuchAlgorithmException, KeyManagementException, CertificateEncodingException {
-        X509Certificate[] certs = RsaUtil.getServerCertificates(new URL("https://10.1.71.81:8181/AttestationService"));
+        X509Certificate[] certs = SslUtil.getServerCertificates(new URL("https://10.1.71.81:8181/AttestationService"));
         for(X509Certificate cert : certs) {
             System.out.println(String.format("Subject: %s", cert.getSubjectX500Principal().getName()));
             System.out.println(String.format("Issuer: %s", cert.getIssuerX500Principal().getName()));
@@ -66,7 +66,7 @@ public class SaveSSLCertificates {
             String saveCertAndTryAgain = in.readLine().trim();
             if( saveCertAndTryAgain.toUpperCase().startsWith("Y") ) {
                 // download server SSL certificates
-                X509Certificate[] serverCertificates = RsaUtil.getServerCertificates(url);
+                X509Certificate[] serverCertificates = SslUtil.getServerCertificates(url);
                 // create a new temporary trust store and add those certificates
                 KeyStore keystore = KeyStore.getInstance("JKS");
                 keystore.load(null, null);

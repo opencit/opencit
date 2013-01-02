@@ -242,35 +242,4 @@ GeneralName ::= CHOICE { otherName [0] OtherName, rfc822Name [1]
         }
         return null;
     }
-
-
-    public static X509Certificate[] getServerCertificates(URL url) throws NoSuchAlgorithmException, KeyManagementException, IOException {
-        if (!"https".equals(url.getProtocol())) {
-            throw new IllegalArgumentException("URL scheme must be https");
-        }
-        int port = url.getPort();
-        if (port == -1) {
-            port = 443;
-        }
-        X509HostnameVerifier hostnameVerifier = new NopX509HostnameVerifierApache(); //SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER; // because we are specifically going to get certs
-        CertificateStoringX509TrustManager trustManager = new CertificateStoringX509TrustManager();
-
-        SSLContext sslcontext = SSLContext.getInstance("TLS"); // throws NoSuchAlgorithmException
-        sslcontext.init(null, new X509TrustManager[]{trustManager}, null); // key manager, trust manager, securerandom.   throws KeyManagementException
-        SSLSocketFactory sf = new SSLSocketFactory(sslcontext, hostnameVerifier);
-        Scheme https = new Scheme("https", port, sf); // default to 443 for https but if user specified a different port in URL we use that instead
-        SchemeRegistry sr = new SchemeRegistry();
-        sr.register(https);
-
-        BasicClientConnectionManager connectionManager = new BasicClientConnectionManager(sr);
-        HttpParams httpParams = new BasicHttpParams();
-        httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-        HttpClient httpClient = new DefaultHttpClient(connectionManager, httpParams);
-        log.debug("Saving certificates from server URL: {}", url.toExternalForm());
-        HttpHead request = new HttpHead(url.toExternalForm());
-        HttpResponse response = httpClient.execute(request); // throws IOException
-        log.debug("Server status line: {} {} ({})", new String[]{response.getProtocolVersion().getProtocol(), response.getStatusLine().getReasonPhrase(), String.valueOf(response.getStatusLine().getStatusCode())});
-        httpClient.getConnectionManager().shutdown();
-        return trustManager.getStoredCertificates();
-    }
 }

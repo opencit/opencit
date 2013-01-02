@@ -10,6 +10,7 @@ import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mountwilson.util.ConverterUtil;
 import com.intel.mtwilson.WhitelistService;
 import com.intel.mtwilson.datatypes.MLESearchCriteria;
+import com.intel.mtwilson.datatypes.MleData;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,27 +148,27 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public MLEDataVO getSingleMleData(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.getSingleMleData >>");
-		MLEDataVO mleObject = null;
-       try {
-    	   MLESearchCriteria criteria = new MLESearchCriteria();
-    	   criteria.mleName = dataVO.getMleName();
-    	   criteria.mleVersion = dataVO.getMleVersion();
-    	   if (dataVO.getOemName() != null) {
-    		   criteria.oemName = dataVO.getOemName();
-    		   criteria.osName = "";
-    		   criteria.osVersion = "";
-    	   }else{
-    		   criteria.osName = dataVO.getOsName();
-    		   criteria.osVersion = dataVO.getOsVersion();
-    		   criteria.oemName = "";
-    	   }
-    	   mleObject = ConverterUtil.getMleDataVoObject(apiClientServices.getMLEManifest(criteria));
-       }catch (Exception e) {
-			throw ConnectionUtil.handleException(e);
-      }
-       log.info("MLEClientServiceImpl.getSingleMleData <<");
-       return mleObject;
+            log.info("MLEClientServiceImpl.getSingleMleData >>");
+            MLEDataVO mleObject = null;
+            try {
+                MLESearchCriteria criteria = new MLESearchCriteria();
+                criteria.mleName = dataVO.getMleName();
+                criteria.mleVersion = dataVO.getMleVersion();
+                if (dataVO.getOemName() != null) {
+                        criteria.oemName = dataVO.getOemName();
+                        criteria.osName = "";
+                        criteria.osVersion = "";
+                }else{
+                        criteria.osName = dataVO.getOsName();
+                        criteria.osVersion = dataVO.getOsVersion();
+                        criteria.oemName = "";
+                }
+                mleObject = ConverterUtil.getMleDataVoObject(apiClientServices.getMLEManifest(criteria));
+            }catch (Exception e) {
+                throw ConnectionUtil.handleException(e);
+            }
+            log.info("MLEClientServiceImpl.getSingleMleData <<");
+            return mleObject;
 	}
         
         /**
@@ -193,5 +194,36 @@ public class MLEClientServiceImpl implements IMLEClientService {
        log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle <<");
        return moduleManifestList;
 	}
-	
+
+        /**
+         * Retries the name of the host that was used for white listing the MLE.
+         * 
+         * @param dataVO : Object containing the details of the MLE for which the host information needs to be retrieved.
+         * @param apiClientServices: ApiClient object
+         * @return : Name of the host
+         * @throws WLMPortalException 
+         */
+	@Override
+	public String getMleSourceHost(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
+            log.info("MLEClientServiceImpl.getMleSourceHost >>");
+            String hostName;
+            try {
+                MleData mleDataObj = ConverterUtil.getMleApiClientObject(dataVO);
+                if (dataVO.getOemName() != null) {
+                        mleDataObj.setOemName(dataVO.getOemName());
+                        mleDataObj.setOsName("");
+                        mleDataObj.setOsVersion("");
+                }else{
+                        mleDataObj.setOsName(dataVO.getOsName());
+                        mleDataObj.setOsVersion(dataVO.getOsVersion());
+                        mleDataObj.setOemName("");
+                }
+                hostName = apiClientServices.getMleSource(mleDataObj);
+            }catch (Exception e) {
+                throw ConnectionUtil.handleException(e);
+            }
+            log.info("MLEClientServiceImpl.getMleSourceHost <<");
+            return hostName;
+	}
+        
 }

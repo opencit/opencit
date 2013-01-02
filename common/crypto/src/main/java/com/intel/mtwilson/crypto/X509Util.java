@@ -13,8 +13,11 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -83,6 +86,16 @@ public class X509Util {
         String content = text.replace(BEGIN_CERTIFICATE, "").replace(END_CERTIFICATE, "");
         byte[] der = Base64.decodeBase64(content);
         return decodeDerCertificate(der);
+    }
+    
+    public static List<X509Certificate> decodePemCertificates(String text) throws CertificateException {
+        String[] pems = StringUtils.splitByWholeSeparator(text, END_CERTIFICATE);
+        ArrayList<X509Certificate> certs = new ArrayList<X509Certificate>(pems.length);
+        for(String pem : pems) {
+            if( pem.trim().isEmpty() ) { continue; }
+            certs.add(decodePemCertificate(pem));
+        }
+        return certs;
     }
 
     /**

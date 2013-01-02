@@ -23,9 +23,9 @@ public class JavaExamples {
     @Test
     public void register() throws Exception {
         File directory = new File(System.getProperty("user.home", "."));
-        String username = "test1"; // you choose a username
+        String username = "test2"; // you choose a username
         String password = "changeit"; // you choose a password
-        URL server = new URL("https://10.1.71.212:8181"); // your Mt Wilson server
+        URL server = new URL("https://10.1.71.80:8181"); // your Mt Wilson server
         String[] roles = new String[] { "Attestation", "Whitelist" };
         KeystoreUtil.createUserInDirectory(directory, username, password, server, roles);
     }

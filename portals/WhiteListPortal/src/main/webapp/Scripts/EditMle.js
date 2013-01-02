@@ -107,6 +107,7 @@ function fnEditMleData(response,data) {
 
 function fnEditMleDataSuccess(responseJson,dataToSend) {
 	if (responseJson.result) {
+                var mleSourceHostName = responseJson.mleSource;
 		var response = responseJson.dataVo;
 		hostNameList = [];
 		hostNameList[0] = response;
@@ -125,6 +126,7 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 		
 		$('#MainContent_ddlAttestationType').html('<option selected="selected">'+response.attestation_Type+'</option>');
 		$('#MainContent_tbDesc').val(response.mleDescription);
+		$('#MainContent_tbMleSourceHost').val(mleSourceHostName);
 		
 		if (response.attestation_Type == "Module" || response.attestation_Type == "MODULE") {
 			//$('#mainfestGKVSCheck').remove();

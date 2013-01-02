@@ -22,5 +22,6 @@ public interface IMLEClientService {
 	MLEDataVO getSingleMleData(MLEDataVO dataVO,WhitelistService apiClientServices)throws WLMPortalException;
 	boolean deleteMLE(MLEDataVO dataVO,WhitelistService apiClientServices)throws WLMPortalException;
         List<ModuleWhiteList> getManifestListForModuleTypeMle(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException;
+        String getMleSourceHost(MLEDataVO dataVO,WhitelistService apiClientServices)throws WLMPortalException;
 
 }

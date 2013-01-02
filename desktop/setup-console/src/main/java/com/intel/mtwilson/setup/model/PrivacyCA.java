@@ -4,8 +4,11 @@
  */
 package com.intel.mtwilson.setup.model;
 
+import com.intel.mtwilson.crypto.Pkcs12;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.setup.Timeout;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 
 /**
  *
@@ -18,5 +21,7 @@ public class PrivacyCA  {
     public String ekSigningKeyDownloadUsername;
     public String ekSigningKeyDownloadPassword;
     public Timeout pcaCertificateValidity; // usually configured in number of days
-    
+    public Pkcs12 keystore;
+    public KeyPair ekSigningKeyPair;
+    public X509Certificate ekSigningKeyCertificate;
 }

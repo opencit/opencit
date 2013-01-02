@@ -6,12 +6,14 @@ package com.intel.mtwilson.setup;
 
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.setup.model.*;
 import java.net.URL;
 import java.security.KeyPair;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
 /**
@@ -35,18 +37,23 @@ public class SetupContext {
     public RsaCredentialX509 rootCa;
     
     public KeyPair tlsKeypair;
+    public String tlsCertificateFile;
     public X509Certificate tlsCertificate;
     public String tlsKeystoreFile;
-    public String tlsCertificateFile;
+    public String tlsKeystorePassword;
+    public SimpleKeystore tlsKeystore; // only applies to Tomcat, Glassfish, or other Java container... for apache and nginx it's different.
+    public String tlsKeyAlias;
+    public String tlsKeyPassword;
     
     public KeyPair samlKeypair;
     public X509Certificate samlCertificate;
     public String samlCertificateFile; // XXX TODO should not be configurable. 
     public String samlIssuer; // XXX TODO:  this should not be configurable, it should be the SUBJECT from the server's SAML certificate !!!!
-    public String samlKeyAlias;
-    public String samlKeyPassword;
     public String samlKeystoreFile; // XXX TODO should not be configurable.  decide on a filename in the mt wilson config dir and that's what it has to be. if the user wants to use a different file, they can copy one to replace it, or link it at filesystem level.
     public String samlKeystorePassword; 
+    public SimpleKeystore samlKeystore;
+    public String samlKeyAlias;
+    public String samlKeyPassword;
     public Integer samlValidityPeriodInSeconds;
     
     // XXX TODO: maybe for consistency we should generate the privacy ca and install it... instead of the niarl code ??

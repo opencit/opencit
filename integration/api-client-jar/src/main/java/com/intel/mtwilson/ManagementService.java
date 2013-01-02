@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -40,10 +41,8 @@ public interface ManagementService {
 
     X509Certificate getSamlCertificate() throws IOException, ApiException, SignatureException;
 
-    X509Certificate getCaCertificate() throws IOException, ApiException, SignatureException;
+    Set<X509Certificate> getCaCertificates() throws IOException, ApiException, SignatureException;
     
-    void setCaCertificate(X509Certificate certificate) throws IOException, ApiException, SignatureException;
-
     CaInfo getCaStatus() throws IOException, ApiException, SignatureException;
     
     void enableCaWithPassword(String newPassword) throws IOException, ApiException, SignatureException;

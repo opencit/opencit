@@ -87,7 +87,9 @@ public class TblMle implements Serializable {
     private Collection<TblPcrManifest> tblPcrManifestCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "mleId")
     private Collection<TblModuleManifest> tblModuleManifestCollection;
-
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "mleId")
+    private Collection<MwMleSource> mwMleSourceCollection;
+    
     public TblMle() {
     }
 
@@ -196,6 +198,15 @@ public class TblMle implements Serializable {
         this.tblModuleManifestCollection = tblModuleManifestCollection;
     }
 
+    @XmlTransient
+    public Collection<MwMleSource> getMwMleSourceCollection() {
+        return mwMleSourceCollection;
+    }
+
+    public void setMwMleSourceCollection(Collection<MwMleSource> mwMleSourceCollection) {
+        this.mwMleSourceCollection = mwMleSourceCollection;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;

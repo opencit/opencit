@@ -326,12 +326,14 @@ public class WLMDataController extends MultiActionController {
 		log.info("WLMDataController.viewSingleMLEData>>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		MLEDataVO dataVO = new MLEDataVO();
+                MLEDataVO detailMLEVO = null;
+                
 		try {
 			dataVO.setMleName(req.getParameter("mleName"));
 			dataVO.setMleVersion(req.getParameter("mleVersion"));
-            dataVO.setAttestation_Type(req.getParameter("attestation_Type"));
+                        dataVO.setAttestation_Type(req.getParameter("attestation_Type"));
 			
-            String mleType = req.getParameter("mleType");
+                        String mleType = req.getParameter("mleType");
             
 			if (mleType != null && mleType.equalsIgnoreCase("VMM")) {
 				dataVO.setOsName(req.getParameter("osName"));
@@ -346,7 +348,10 @@ public class WLMDataController extends MultiActionController {
 		}
 		
 		try {
-			responseView.addObject("dataVo",mleClientService.getSingleMleData(dataVO,getWhitelistService(req)));
+                        // TODO: Had to temporarily store the detailed MLE object so that it can be reused to retrieve the mleSource details.
+                        // The MleData object expects the MLE_Type detail to be present to get the OS/OEM details. Need to fix this
+                        detailMLEVO = mleClientService.getSingleMleData(dataVO,getWhitelistService(req));
+			responseView.addObject("dataVo", detailMLEVO);
                         responseView.addObject("result",true);
 		} catch (WLMPortalException e) {
 			responseView.addObject("result",false);
@@ -354,9 +359,18 @@ public class WLMDataController extends MultiActionController {
 			log.error(e.toString());
 		}
 		
-		log.info("WLMDataController.viewSingleMLEData <<<");
-		return responseView;
-		
+                // Now that we got the details of the MLE, we need to get the host details that
+                // was used for white listing this MLE.
+		try {
+			responseView.addObject("mleSource", mleClientService.getMleSourceHost(detailMLEVO,getWhitelistService(req)));
+		} catch (WLMPortalException e) {
+			responseView.addObject("result",false);
+			responseView.addObject("message",e.getMessage());
+			log.error(e.toString());
+		}
+
+                log.info("WLMDataController.viewSingleMLEData <<<");
+		return responseView;		
 	}
         
         public ModelAndView getWhiteListForMle(HttpServletRequest req,HttpServletResponse res) {
