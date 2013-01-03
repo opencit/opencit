@@ -13,6 +13,7 @@ import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.x500.DN;
 import java.io.FileNotFoundException;
@@ -105,6 +106,8 @@ public class TrustAgentCertificateAuthority extends BaseBO {
     }
     
     /**
+     * @deprecated see code in setup-console 
+     * 
      * For simplicity, the CSR format is simply a self-signed certificate with
      * the details that the requestor would like to use in the CA-signed certificate.
      * 
@@ -129,7 +132,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
         String subjectName = csr.getSubjectX500Principal().getName(); // this is a string like CN=abc, O=xyz, C=US
         DN dn = new DN(subjectName);
         String subjectCommonName = dn.getCommonName() != null ? dn.getCommonName() : subjectName;
-        String alternativeName = RsaUtil.ipAddressAlternativeName(csr);
+        String alternativeName = X509Util.ipAddressAlternativeName(csr);
         if( alternativeName != null ) {
             alternativeName = "ip:" + alternativeName;
         }

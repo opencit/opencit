@@ -138,6 +138,11 @@ public class Bootstrap {
     
     /**
      * Uses the server's address as the certificate alias
+     * XXX TODO this should now be governed by the tls policy - if it's a "trust first" policy
+     * then the policy implementation will add it to the keystore IF it's not already there,
+     * otherwise and also if it's "trust known" it will check if it's there and if so it will
+     * use it, but it will never replace it with a new one or accept anything else - 
+     * and if it's a trust CA policy nothing needs to be added.
      * @param server
      * @param keystore
      * @throws Exception 

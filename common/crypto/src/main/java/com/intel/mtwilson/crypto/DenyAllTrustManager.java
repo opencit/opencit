@@ -12,14 +12,16 @@ import javax.net.ssl.X509TrustManager;
  *
  * @author jbuhacoff
  */
-public class NopX509TrustManager implements X509TrustManager {
+public class DenyAllTrustManager implements X509TrustManager {
     
     @Override
     public void checkClientTrusted(X509Certificate[] xcs, String authType) throws CertificateException {
+        throw new CertificateException("Client certificate denied; check configuration");
     }
 
     @Override
     public void checkServerTrusted(X509Certificate[] xcs, String authType) throws CertificateException {
+        throw new CertificateException("Server certificate denied; check configuration");
     }
 
     @Override

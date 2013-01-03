@@ -307,6 +307,10 @@ public class SimpleKeystore {
         }
     }
     
+    public void setRsaCredentialX509(RsaCredentialX509 x509, String alias, String keyPassword) throws KeyManagementException {
+        addKeyPairX509(x509.getPrivateKey(), x509.getCertificate(), alias, keyPassword);
+    }
+    
     /**
      * Saves server's SSL certificates into keystore - assumes they are trusted.
      * In production you need to prompt the user to
@@ -364,6 +368,19 @@ public class SimpleKeystore {
         }
         catch(KeyStoreException e) {
             throw new KeyManagementException("Cannot delete entry: "+alias, e);
+        }
+    }
+    
+    
+    public static enum Tag {
+        NONE,
+        CA,
+        TLS,
+        SAML;
+        
+        public String tag() {
+            if( this.equals(NONE) ) { return ""; }
+            return String.format(" (%s)", name());
         }
     }
 }

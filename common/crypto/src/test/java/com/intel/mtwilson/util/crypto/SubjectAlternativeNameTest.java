@@ -39,7 +39,7 @@ public class SubjectAlternativeNameTest {
     public void testExtractSubjectAlternativeName() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, CryptographyException {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate rsa = RsaUtil.generateX509Certificate("Test Cert", "ip:1.2.3.4", keypair, 30);
-        String alternativeName = RsaUtil.ipAddressAlternativeName(rsa);
+        String alternativeName = X509Util.ipAddressAlternativeName(rsa);
         System.out.println(alternativeName);
     }
     
@@ -47,7 +47,7 @@ public class SubjectAlternativeNameTest {
     public void testExtractSubjectAlternativeNameNull() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, CryptographyException {
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate rsa = RsaUtil.generateX509Certificate("Test Cert", keypair, 30);
-        String alternativeName = RsaUtil.ipAddressAlternativeName(rsa);
+        String alternativeName = X509Util.ipAddressAlternativeName(rsa);
         System.out.println(alternativeName); // should be null
     }
     

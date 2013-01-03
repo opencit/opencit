@@ -43,7 +43,7 @@ public class SslUtil {
     private static final Logger log = LoggerFactory.getLogger(SslUtil.class);
     
     public static KeyStore createTrustedSslKeystore(SimpleKeystore keystore) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
-        String[] aliases = keystore.listTrustedCertificates(SimpleKeystore.SSL);
+        String[] aliases = keystore.listTrustedSslCertificates();
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(null, null);
         for (String alias : aliases) {
@@ -52,6 +52,16 @@ public class SslUtil {
         return ks;
     }
 
+    public static KeyStore createTrustedSslKeystore(X509Certificate[] certificates) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        ks.load(null, null);
+        for (int i=0; i<certificates.length; i++) { 
+            X509Certificate cert = certificates[i];
+            ks.setCertificateEntry("cert"+i, cert);
+        }
+        return ks;
+    }
+    
     /**
      * Used by registerUserWithKeystore to automatically add a server's ssl certificates to the keystore.
      * It's important for the user to later review the keystore and validate those certificate fingerprints!!
@@ -90,6 +100,30 @@ public class SslUtil {
         try {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(createTrustedSslKeystore(keystore));
+            TrustManager[] tms = tmf.getTrustManagers();
+            for (TrustManager tm : tms) {
+                if (tm instanceof X509TrustManager) {
+                    return (X509TrustManager) tm;
+                }
+            }
+        } catch (NoSuchAlgorithmException e) {
+            throw new KeyManagementException("Cannot create X509TrustManager", e);
+        } catch (IOException e) {
+            throw new KeyManagementException("Cannot create X509TrustManager", e);
+        } catch (CertificateException e) {
+            throw new KeyManagementException("Cannot create X509TrustManager", e);
+        } catch (UnrecoverableEntryException e) {
+            throw new KeyManagementException("Cannot create X509TrustManager", e);
+        } catch (KeyStoreException e) {
+            throw new KeyManagementException("Cannot create X509TrustManager", e);
+        }
+        throw new IllegalArgumentException("TrustManagerFactory did not return an X509TrustManager instance");
+    }
+    
+    public static X509TrustManager createX509TrustManagerWithCertificates(X509Certificate[] certificates) throws KeyManagementException {
+        try {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(createTrustedSslKeystore(certificates));
             TrustManager[] tms = tmf.getTrustManagers();
             for (TrustManager tm : tms) {
                 if (tm instanceof X509TrustManager) {

@@ -140,9 +140,40 @@
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
       <artifactId>api-datatypes</artifactId>
-      <version>0.5.4-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.common</groupId>
+      <artifactId>mtwilson-crypto</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+    
+    
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-embedded</artifactId>
+      <version>6.1.26</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-ssl</artifactId>
+      <version>7.0.0.pre5</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-sslengine</artifactId>
+      <version>7.0.0.pre5</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+    
+    
   </dependencies>  
 
 </project>

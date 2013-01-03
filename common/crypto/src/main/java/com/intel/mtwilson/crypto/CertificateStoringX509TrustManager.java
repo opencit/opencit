@@ -31,7 +31,7 @@ public class CertificateStoringX509TrustManager implements X509TrustManager {
 
     @Override
     public X509Certificate[] getAcceptedIssuers() {
-        return null; //throw new UnsupportedOperationException("Not supported yet.");
+        return new X509Certificate[0];
     }
     
 }

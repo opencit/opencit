@@ -202,44 +202,4 @@ public class RsaUtil {
             throw new CryptographyException("Cannot sign certificate", e);
         }
     }
-
-    /**
-     * If the X509 certificate has a Subject Alternative Name which is an IP
-     * Address, then it will be returned as a String. Otherwise, null will be
-     * returned.
-     *
-     * The X509Certificate method getSubjectAlternativeNames() returns a list of
-     * (type,value) pairs. The types are shown in this extract of the JavaDoc:
-     *     * 
-GeneralName ::= CHOICE { otherName [0] OtherName, rfc822Name [1]
-     * IA5String, dNSName [2] IA5String, x400Address [3] ORAddress,
-     * directoryName [4] Name, ediPartyName [5] EDIPartyName,
-     * uniformResourceIdentifier [6] IA5String, iPAddress [7] OCTET STRING,
-     * registeredID [8] OBJECT IDENTIFIER}
-     *
-     *
-     * The IP Address is type 7
-     *
-     * @param certificate
-     * @return
-     */
-    public static String ipAddressAlternativeName(X509Certificate certificate) {
-        try {
-            Collection<List<?>> wtf = certificate.getSubjectAlternativeNames();
-            Iterator<List<?>> it1 = wtf.iterator();
-            while (it1.hasNext()) {
-                List<?> list = it1.next();
-                if (list.size() == 2 && list.get(0) != null && list.get(0) instanceof Integer) {
-                    Integer type = (Integer) list.get(0);
-                    if (type == GeneralNameInterface.NAME_IP && list.get(1) != null && list.get(1) instanceof String) { // IP Address OCTET STRING
-                        String ipAddress = (String) list.get(1);
-                        return ipAddress;
-                    }
-                }
-            }
-        } catch (CertificateParsingException e) {
-            log.error("Cannot extract Subject Alternative Name IP Address from X509 Certificate", e);
-        }
-        return null;
-    }
 }
