@@ -14,3 +14,5 @@ INSERT INTO `tbl_os` (`ID`, `NAME`, `VERSION`, `DESCRIPTION`) VALUES (9,'UBUNTU'
 INSERT INTO `tbl_os` (`ID`, `NAME`, `VERSION`, `DESCRIPTION`) VALUES (10,'SUSE','11 P2',NULL);
 INSERT INTO `tbl_os` (`ID`, `NAME`, `VERSION`, `DESCRIPTION`) VALUES (11,'VMWare','5.0','');
 INSERT INTO `tbl_package_namespace` (`ID`, `Name`, `VendorName`) VALUES (1,'Standard_Global_NS','VMware');
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328173612,NOW(),'create 0.5.1 data');

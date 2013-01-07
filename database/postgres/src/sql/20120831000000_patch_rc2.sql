@@ -20,3 +20,6 @@ CREATE TABLE `tbl_module_manifest_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE audit_log_entry MODIFY COLUMN `data` MEDIUMTEXT ;
+
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120831000000,NOW(),'patch rc2');

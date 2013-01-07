@@ -16,6 +16,8 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.x500.DN;
+import com.intel.mtwilson.crypto.X509Util;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -31,7 +33,7 @@ import java.util.Map;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.intel.mtwilson.crypto.X509Util;
 /**
  * The Trust Agent Certificate Authority is an RSA key pair that signs SSL
  * certificates during Trust Agent installs.

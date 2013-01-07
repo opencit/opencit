@@ -77,11 +77,11 @@ public class TblHosts implements Serializable {
     private String aIKCertificate;
     
     @Lob
-    @Column(name = "SSL_Certificate")
-    private byte[] sslCertificate;
+    @Column(name = "TlsKeystore")
+    private byte[] tlsKeystore;
     
-    @Column(name = "SSL_Policy")
-    private String sslPolicy;
+    @Column(name = "TlsPolicy")
+    private String tlsPolicy;
     
     
     @Column(name = "Email")
@@ -180,14 +180,14 @@ public class TblHosts implements Serializable {
         this.aIKCertificate = aIKCertificate;
     }
     
-    public byte[] getSSLCertificate() { return sslCertificate; }
+    public byte[] getSSLCertificate() { return tlsKeystore; }
     public void setSSLCertificate(byte[] encodedSslCertificate) {
-        sslCertificate = encodedSslCertificate;
+        tlsKeystore = encodedSslCertificate;
     }
     
-    public String getSSLPolicy() { return sslPolicy; }
+    public String getSSLPolicy() { return tlsPolicy; }
     public void setSSLPolicy(String sslPolicy) { 
-        this.sslPolicy = sslPolicy; 
+        this.tlsPolicy = sslPolicy; 
     }
 
     public String getEmail() {

@@ -1,6 +1,20 @@
 
-delimiter ;
+-- first thing we create is the changelog
+CREATE TABLE `changelog` (
+  `ID` decimal(20,0) NOT NULL,
+  `APPLIED_AT` varchar(25) NOT NULL,
+  `DESCRIPTION` varchar(255) NOT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- backdate an entry for the bootstrap sql file since the changelog didn't exist then;   TODO move the changelog into the bootstrap sql or move the content of the bootstrap sql into a create-api-client sql AFTER create-changelog and delete the bootstrap.sql
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120101000000,NOW(),'bootstrap');
+
+-- Spring's ResourceDatabasePopulator does not recognize the "delimiter" command
+-- and requires the delimiter to be semicolon
+--delimiter ;
+
+-- should move to its own file, it's not really a bootstrap item
 CREATE TABLE `api_client_x509` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,

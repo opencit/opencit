@@ -166,19 +166,51 @@ public class SimpleKeystore {
         throw new FileNotFoundException("Keystore does not contain the specified key");
     }
     
+    private X509Certificate certificateIn(KeyStore.TrustedCertificateEntry certEntry) {
+        if( certEntry == null ) { return null; }
+        Certificate myCertificate = certEntry.getTrustedCertificate();
+        if( myCertificate instanceof X509Certificate ) { //if( "X.509".equals(myCertificate.getType()) ) {
+            return (X509Certificate)myCertificate;
+        }
+        throw new IllegalArgumentException("Certificate is not X509: "+myCertificate.getType());
+        //PublicKey myPublicKey = pkEntry.getCertificate().getPublicKey();
+        //return new RsaCredential(myPrivateKey, myPublicKey);
+    }
+
+    private X509Certificate certificateIn(KeyStore.PrivateKeyEntry certEntry) {
+        if( certEntry == null ) { return null; }
+        Certificate myCertificate = certEntry.getCertificate();
+        if( myCertificate instanceof X509Certificate ) { //if( "X.509".equals(myCertificate.getType()) ) {
+            return (X509Certificate)myCertificate;
+        }
+        throw new IllegalArgumentException("Certificate is not X509: "+myCertificate.getType());
+        //PublicKey myPublicKey = pkEntry.getCertificate().getPublicKey();
+        //return new RsaCredential(myPrivateKey, myPublicKey);
+    }
+    
+    public X509Certificate getX509CertificateWithPassword(String certAlias, String password) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
+        KeyStore.PrivateKeyEntry certEntry = (KeyStore.PrivateKeyEntry)keystore.getEntry(certAlias, new KeyStore.PasswordProtection(password.toCharArray()));
+        X509Certificate myCertificate = certificateIn(certEntry);
+        if( myCertificate != null ) {
+            return myCertificate;
+        }
+        throw new KeyStoreException("Cannot load certificate with alias: "+certAlias);        
+    }
+    
     public X509Certificate getX509Certificate(String certAlias) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
         // load the certificate
-        KeyStore.TrustedCertificateEntry certEntry = (KeyStore.TrustedCertificateEntry)keystore.getEntry(certAlias, null);
-        if( certEntry != null ) {
-            Certificate myCertificate = certEntry.getTrustedCertificate();
-            if( myCertificate instanceof X509Certificate ) { //if( "X.509".equals(myCertificate.getType()) ) {
-                return (X509Certificate)myCertificate;
+        try {
+            KeyStore.TrustedCertificateEntry certEntry = (KeyStore.TrustedCertificateEntry)keystore.getEntry(certAlias, null);
+            X509Certificate myCertificate = certificateIn(certEntry);
+            if( myCertificate != null ) {
+                return myCertificate;
             }
-            throw new IllegalArgumentException("Certificate is not X509: "+myCertificate.getType());
-            //PublicKey myPublicKey = pkEntry.getCertificate().getPublicKey();
-            //return new RsaCredential(myPrivateKey, myPublicKey);
+            throw new KeyStoreException("Cannot load certificate with alias: "+certAlias);
         }
-        throw new KeyStoreException("Cannot load certificate with alias: "+certAlias);
+        catch(UnrecoverableEntryException e) {
+            // automatically try again with the keystore password
+            return getX509CertificateWithPassword(certAlias, keystorePassword);
+        }
     }
 
     public X509Certificate getX509Certificate(String certAlias, String purpose) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
