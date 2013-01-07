@@ -41,6 +41,14 @@
     -->
   </dependencies>
 
+  <build>
+      <resources>
+          <resource>
+              <directory>src/files</directory>
+          </resource>
+      </resources>
+  </build>
+ 
   <profiles>
       <profile>
           <activation>

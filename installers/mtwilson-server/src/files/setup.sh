@@ -44,6 +44,9 @@ prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
 export MTWILSON_SERVER
 echo
 
+# XXX TODO ask about mysql vs postgres
+# XXX TODO ask about glassfish vs tomcat
+
 mysql_userinput_connection_properties
 export mysql_hostname mysql_portnum mysql_database mysql_username mysql_password
 

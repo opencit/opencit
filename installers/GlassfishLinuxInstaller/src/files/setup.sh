@@ -15,3 +15,24 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # SCRIPT EXECUTION
 java_require
 glassfish_install $GLASSFISH_PACKAGE
+
+echo "You must choose an administrator username and password for Glassfish"
+echo "The Glassfish control panel is at https://${MTWILSON_SERVER:-127.0.0.1}:4848"
+prompt_with_default AS_ADMIN_USER "Glassfish admin username:"
+export AS_ADMIN_USER
+prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:"
+
+export AS_ADMIN_PASSWORDFILE=/etc/glassfish/admin.passwd
+mkdir -p /etc/glassfish
+touch /etc/glassfish/admin.passwd
+chmod 600 /etc/glassfish/admin.passwd
+echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > /etc/glassfish/admin.passwd
+
+glassfish_require
+echo "Glassfish will now ask you for the same information:"
+# $glassfish is an alias for full path of asadmin
+$glassfish change-admin-password --user admin
+# XXX it asks for the password twice ...  can we script with our known value?
+$glassfish enable-secure-admin
+
+echo
