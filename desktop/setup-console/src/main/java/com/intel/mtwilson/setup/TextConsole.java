@@ -4,14 +4,31 @@
  */
 package com.intel.mtwilson.setup;
 
+import java.io.Console;
 import java.util.Arrays;
+import java.util.logging.LogManager;
 
 /**
- *
+ * TODO:  should deprecate this in favor of com.intel.mtwilson.setup.ui.console.Main
  * @author jbuhacof
  */
 public class TextConsole {
+    public static final Console console = System.console();
+    public static final SetupContext ctx = new SetupContext();
     public static void main(String[] args) {
+        if (console == null) {
+            System.err.println("No console.");
+            System.exit(1);
+        }
+        if( args.length == 0 ) {
+            System.err.println("Usage: <command> [args]");
+            System.exit(1);
+        }
+        // turn off jdk logging because sshj logs to console
+        LogManager.getLogManager().reset();
+//        Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);  
+//        globalLogger.setLevel(java.util.logging.Level.OFF);          
+
         try {
             if( args.length > 0 ) {
                 String commandName = args[0];
@@ -19,6 +36,7 @@ public class TextConsole {
                 Object commandObject = commandClass.newInstance();
                 Command command = (Command)commandObject;
                 String[] subargs = Arrays.copyOfRange(args, 1, args.length);
+                command.setContext(ctx);
                 command.execute(subargs);
             }
         }
