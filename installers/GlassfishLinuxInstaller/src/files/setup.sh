@@ -24,8 +24,9 @@ prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:"
 
 export AS_ADMIN_PASSWORDFILE=/etc/glassfish/admin.passwd
 mkdir -p /etc/glassfish
-touch /etc/glassfish/admin.passwd
-chmod 600 /etc/glassfish/admin.passwd
+touch /etc/glassfish/admin.user /etc/glassfish/admin.passwd
+chmod 600 /etc/glassfish/admin.user /etc/glassfish/admin.passwd
+echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > /etc/glassfish/admin.user
 echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > /etc/glassfish/admin.passwd
 
 glassfish_require

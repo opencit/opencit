@@ -1102,6 +1102,14 @@ glassfish_detect() {
       fi
     fi
   done
+
+  # read the admin username and pasword, if present. format of both files is shell  VARIABLE=VALUE
+  if [ -f /etc/glassfish/admin.user ]; then
+    export AS_ADMIN_USER=`read_property_from_file AS_ADMIN_USER /etc/glassfish/admin.user`
+  fi
+  if [ -f /etc/glassfish/admin.passwd ]; then
+    export AS_ADMIN_PASSWORDFILE=/etc/glassfish/admin.passwd
+  fi
 }
 
 # must load from config file or call glassfish_detect prior to calling this function
