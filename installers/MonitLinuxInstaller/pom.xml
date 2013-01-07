@@ -34,6 +34,13 @@
       <classifier>linux-src</classifier>
     </dependency>	
   </dependencies>
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
 
   <build>
     <plugins>
@@ -161,7 +168,7 @@
     </plugins>
 </pluginManagement>
   
-  
-  </build>
-
+   </build>
+      </profile>
+  </profiles>
 </project>

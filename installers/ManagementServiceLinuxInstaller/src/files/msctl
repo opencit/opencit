@@ -32,8 +32,9 @@ list_mysql_install_scripts() {
     echo ${mysql_script_dir}/20120920090600_patch_rc3.sql
 }
 
+# STDALEX_TODO remove this completly
 # XXX TODO deprecated;   cloudportal database has been dropped as of 1.0-RC2
-configure_cloudportal_database() {
+#configure_cloudportal_database() {
 #  echo "Configuring Trust Dashboard Database..."
 #  # mtwilson.ms.portalDBConnectionString=jdbc:mysql://10.1.71.90:3306/cloudportal
 #  local portal_db_server portal_db_host portal_db_port
@@ -45,7 +46,7 @@ configure_cloudportal_database() {
 #    portal_db_server="${portal_db_host}:${portal_db_port}"
 #  fi
 #  update_property_in_file mtwilson.ms.portalDBConnectionString "${package_config_filename}" jdbc:mysql://${portal_db_server}/cloudportal
-}
+#}
 
 configure_keystore_dir() {
   # setup mtwilson.mc.keystore.dir
@@ -175,7 +176,9 @@ setup_interactive_install() {
     mysql_scripts=`list_mysql_install_scripts`
     mysql_install_scripts ${mysql_scripts}
   fi
-  configure_cloudportal_database
+  # STDALEX_TODO remove this completly
+  #depreciated; cloudportal database has been dropped as of 1.0-RC2
+  #configure_cloudportal_database
   configure_api_baseurl
   configure_keystore_dir
   if [ -n "$GLASSFISH_HOME" ]; then
