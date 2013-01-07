@@ -306,9 +306,9 @@ public abstract class PersistenceManager implements ServletContextListener {
         ClassLoader cl = PersistenceManager.class.getClassLoader();
         log.info("Loading persistence.xml for {} using classloader: {}", new String[] { persistenceUnitName,  cl.getClass().getName() });
         ArrayList<URL> list = new ArrayList<URL>();
-        list.addAll(getResources(cl, String.format("META-INF/persistence-%s.xml", persistenceUnitName)));
-        list.addAll(getResources(cl, String.format("META-INF/%s/persistence.xml", persistenceUnitName)));
-        list.addAll(getResources(cl, String.format("META-INF/persistence.xml", persistenceUnitName)));
+        list.addAll(listResources(cl, String.format("META-INF/persistence-%s.xml", persistenceUnitName)));
+        list.addAll(listResources(cl, String.format("META-INF/%s/persistence.xml", persistenceUnitName)));
+        list.addAll(listResources(cl, String.format("META-INF/persistence.xml", persistenceUnitName)));
         for(URL url : list) {
             CustomPersistenceUnitInfoImpl p = readPersistenceXml(url);
             // only save the descriptor if we do not already have one loaded for that persistence unit
@@ -318,13 +318,9 @@ public abstract class PersistenceManager implements ServletContextListener {
         }
     }
     
-    private static List<URL> getResources(ClassLoader cl, String name) throws IOException {
-        ArrayList<URL> list = new ArrayList<URL>();
+    private static List<URL> listResources(ClassLoader cl, String name) throws IOException {
         Enumeration<URL> urls = cl.getResources(name);
-        while(urls.hasMoreElements()) {
-            list.add(urls.nextElement());
-        }
-        log.info("Found {} resources for {}", new String[] { String.valueOf(list.size()), name });
+        List<URL> list = Collections.list(urls);
         return list;
     }
     

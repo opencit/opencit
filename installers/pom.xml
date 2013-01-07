@@ -24,6 +24,7 @@
     <module>TrustAgentLinuxInstaller</module>
     <module>TrustDashBoardLinuxInstaller</module>
     <module>WhiteListPortalLinuxInstaller</module>
+    <module>MonitLinuxInstaller</module>
     <module>mtwilson-server</module>
   </modules>
 

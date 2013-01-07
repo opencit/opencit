@@ -149,7 +149,15 @@
     <artifactId>jaxen</artifactId>
     <version>1.1.4</version>
 </dependency>
-    
+
+<!--
+	<dependency>
+	    <groupId>com.intel.mtwilson.common</groupId>
+	    <artifactId>mtwilson-io</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
+-->
+        
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>api-datatypes</artifactId>

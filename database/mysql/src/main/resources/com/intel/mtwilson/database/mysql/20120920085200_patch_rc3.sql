@@ -117,4 +117,3 @@ ALTER TABLE `mw_hosts` ADD COLUMN `SSL_Certificate` blob NULL;
 ALTER TABLE `mw_hosts` ADD COLUMN `SSL_Policy` varchar(255) NULL;
 
 INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120920085200,NOW(),'patch for 1.1');
-

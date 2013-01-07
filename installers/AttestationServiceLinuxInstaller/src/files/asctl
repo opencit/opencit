@@ -23,7 +23,7 @@ if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else ec
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 
-
+# bug #509 the sql script setup is moved to a java program, this function is not needed anymore
 list_mysql_install_scripts() {
     echo ${mysql_script_dir}/20120327214603_create_changelog.sql
     echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
@@ -38,6 +38,7 @@ list_mysql_install_scripts() {
 }
 
 
+# bug #509 the sql script setup is moved to a java program, this function is not needed anymore
 list_mysql_upgrade_scripts() {
     echo ${mysql_script_dir}/20120327214603_create_changelog.sql
     echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
@@ -213,8 +214,11 @@ setup_interactive_install() {
     mysql_configure_connection "${package_config_filename}" mountwilson.as.db
     mysql_configure_connection "${package_dir}/audit-handler.properties.example" mountwilson.audit.db
     mysql_create_database
-    mysql_scripts=`list_mysql_install_scripts`
-    mysql_install_scripts ${mysql_scripts}
+    # bug #509 use java program to set up the database
+    #mysql_scripts=`list_mysql_install_scripts`
+    #mysql_install_scripts ${mysql_scripts}
+
+    mtwilson setup InitDatabase mysql
   fi
   create_saml_key
   download_privacyca_certs

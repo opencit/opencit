@@ -48,7 +48,7 @@ public class EncryptDatabaseTest {
     public void testCheckAdequateFieldSize() throws Exception {
         SetupWizard wizard = new SetupWizard(conf);
         Connection c = wizard.getDatabaseConnection();
-        ResultSet rs = c.getMetaData().getColumns("mw_as", null, "tbl_hosts", "AddOn_Connection_Info");
+        ResultSet rs = c.getMetaData().getColumns("mw_as", null, "mw_hosts", "AddOn_Connection_Info");
         /*  this code snippet will show the available columns.  we're interested in DATA_TYPE and TYPE_NAME and COLUMN_SIZE and COLUMN_NAME, maybe SQL_DATA_TYPE
         ResultSetMetaData meta = rs.getMetaData();
         for(int i=1; i<=meta.getColumnCount(); i++) {
@@ -62,7 +62,7 @@ public class EncryptDatabaseTest {
             if( columnType.equals("VARCHAR") && varcharSize < 240 ) {
                 System.out.println("Size of column AddOn_Connection_Info "+columnType+"("+String.valueOf(varcharSize)+") is too small for encrypted data; attempting to increase size to 240...");
                 Statement update = c.createStatement();
-                update.executeUpdate("ALTER TABLE `tbl_hosts` MODIFY COLUMN `AddOn_Connection_Info` varchar(240) DEFAULT NULL;");
+                update.executeUpdate("ALTER TABLE `mw_hosts` MODIFY COLUMN `AddOn_Connection_Info` varchar(240) DEFAULT NULL;");
                 update.close();
             }
             else {
@@ -79,7 +79,7 @@ public class EncryptDatabaseTest {
         Connection c = wizard.getDatabaseConnection();
         PreparedStatement update = c.prepareStatement("UPDATE mw_hosts SET AddOn_Connection_Info=? WHERE ID=?");
         Statement query = c.createStatement();
-        ResultSet rs = query.executeQuery("SELECT ID,AddOn_Connection_Info FROM tbl_hosts");
+        ResultSet rs = query.executeQuery("SELECT ID,AddOn_Connection_Info FROM mw_hosts");
         while(rs.next()) {
             String value = rs.getString("AddOn_Connection_Info");
             if( value != null && !value.isEmpty() ) {
@@ -101,7 +101,7 @@ public class EncryptDatabaseTest {
         SetupWizard wizard = new SetupWizard(conf);
         Connection c = wizard.getDatabaseConnection();
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery("SELECT ID,Name,AddOn_Connection_Info FROM tbl_hosts");
+        ResultSet rs = s.executeQuery("SELECT ID,Name,AddOn_Connection_Info FROM mw_hosts");
         while(rs.next()) {
             String value = rs.getString("AddOn_Connection_Info");
             if( value != null && !value.isEmpty() ) {

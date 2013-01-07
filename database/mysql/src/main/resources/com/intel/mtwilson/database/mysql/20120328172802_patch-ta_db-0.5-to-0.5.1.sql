@@ -1,11 +1,6 @@
 -- created 2012-03-28
+-- OPTIONAL: if other scripts run before and after this one, this one is not strictly needed
 
-CREATE TABLE `changelog` (
-  `ID` decimal(20,0) NOT NULL,
-  `APPLIED_AT` varchar(25) NOT NULL,
-  `DESCRIPTION` varchar(255) NOT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172802,NOW(),'update schema from 0.5 to 0.5.1');
 
 CREATE TABLE `tbl_api_client` (

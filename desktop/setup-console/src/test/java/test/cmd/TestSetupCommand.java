@@ -16,7 +16,7 @@ import com.intel.mtwilson.setup.cmd.*;
 public class TestSetupCommand {
     @Test
     public void testInitializeMysqlDatabase() throws SetupException {
-        InitializeMysqlDatabase cmd = new InitializeMysqlDatabase();
+        InitDatabase cmd = new InitDatabase();
         cmd.execute(null);
     }
 

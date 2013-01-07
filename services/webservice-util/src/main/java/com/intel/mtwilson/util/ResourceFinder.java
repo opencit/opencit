@@ -23,7 +23,7 @@ public class ResourceFinder {
     // returns a File from which you can getAbsolutePath or wrap with FileInputStream
     public static File getFile(String filename) throws FileNotFoundException {
         // try standard install locations        
-        System.out.println("ResourceFinder os.name="+System.getProperty("os.name"));
+//        System.out.println("ResourceFinder os.name="+System.getProperty("os.name"));
         ArrayList<File> files = new ArrayList<File>();
         // first try an absolute filename or relative to current directory
         files.add(new File(filename));
@@ -46,7 +46,7 @@ public class ResourceFinder {
             }
         }
         
-        throw new FileNotFoundException("cannot find "+filename);        
+        throw new FileNotFoundException("cannot find "+filename+" [os.name="+System.getProperty("os.name")+"]");        
     }
     
     public static URL getURL(String filename) throws FileNotFoundException {

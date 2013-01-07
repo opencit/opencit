@@ -251,6 +251,6 @@ class MtWilson
 	}
 	
 }
-/* END HTTPMAIL CLASS */
+/* END MtWilson CLASS */
 
 ?>

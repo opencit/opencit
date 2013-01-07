@@ -29,4 +29,24 @@
                 <skipTests>true</skipTests>
             </properties>
         </action>
+        <action>
+            <actionName>test</actionName>
+            <goals>
+                <goal>test</goal>
+            </goals>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+        </action>
+        <action>
+            <actionName>test.single</actionName>
+            <goals>
+                <goal>test-compile</goal>
+                <goal>surefire:test</goal>
+            </goals>
+            <properties>
+                <test>${packageClassName}</test>
+                <skipTests>false</skipTests>
+            </properties>
+        </action>
     </actions>
