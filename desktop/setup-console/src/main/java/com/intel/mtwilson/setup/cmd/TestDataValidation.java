@@ -6,6 +6,7 @@ package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.validation.Fault;
 import com.intel.mtwilson.validation.InvalidModelException;
 import com.intel.mtwilson.validation.Model;
@@ -17,6 +18,12 @@ import java.util.List;
  * @author jbuhacoff
  */
 public class TestDataValidation implements Command {
+    private SetupContext ctx = null;
+
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     public void execute(String[] args) throws Exception {

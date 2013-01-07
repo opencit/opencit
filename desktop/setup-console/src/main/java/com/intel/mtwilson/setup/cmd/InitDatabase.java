@@ -8,6 +8,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.io.Classpath;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import java.io.IOException;
@@ -53,6 +54,12 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * @author jbuhacoff
  */
 public class InitDatabase implements Command {
+    private SetupContext ctx = null;
+
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     public void execute(String[] args) throws SetupException {

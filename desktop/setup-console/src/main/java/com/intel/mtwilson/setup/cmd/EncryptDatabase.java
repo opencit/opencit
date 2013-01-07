@@ -6,6 +6,7 @@ package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import org.apache.commons.configuration.Configuration;
@@ -15,6 +16,12 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class EncryptDatabase implements Command {
+    private SetupContext ctx = null;
+
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     public void execute(String[] args) throws SetupException {

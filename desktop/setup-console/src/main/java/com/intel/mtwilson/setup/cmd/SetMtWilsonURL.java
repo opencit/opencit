@@ -5,6 +5,7 @@
 package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupContext;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -17,6 +18,13 @@ import java.util.Enumeration;
  * @author jbuhacoff
  */
 public class SetMtWilsonURL implements Command {
+
+      private SetupContext ctx = null;
+
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
 
     
     

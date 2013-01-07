@@ -14,6 +14,7 @@ import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.CopyResource;
 import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
@@ -56,6 +57,13 @@ public class GenerateSamlSigningKey implements Command {
     private ByteArrayResource keystoreResource;
     private SimpleKeystore keystore = null;
 
+    private SetupContext ctx = null;
+
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
+    
     @Override
     public void execute(String[] args) throws Exception {
         setupConfiguration();

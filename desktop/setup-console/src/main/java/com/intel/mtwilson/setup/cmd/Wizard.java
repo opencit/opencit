@@ -17,6 +17,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.TerminalSize;
 import com.intel.mtwilson.setup.Platform;
+import com.intel.mtwilson.setup.SetupContext;
 import java.nio.charset.Charset;
 
 /**
@@ -33,6 +34,12 @@ import java.nio.charset.Charset;
  * @author jbuhacoff
  */
 public class Wizard implements Command {
+    private SetupContext ctx = null;
+
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
 
     @Override
     public void execute(String[] args) throws SetupException {

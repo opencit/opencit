@@ -12,6 +12,7 @@ import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.io.Filename;
+import com.intel.mtwilson.setup.SetupContext;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +30,13 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class BootstrapUser implements Command {
+    private SetupContext ctx = null;
 
+    @Override
+    public void setContext(SetupContext ctx) {
+        this.ctx = ctx;
+    }
+    
     /**
      * Creates a new API Client in current directory, registers it with Mt Wilson (on localhost or as configured), and then checks the database for the expected record to validate that it's being created.
      * @param args
@@ -128,4 +135,5 @@ public class BootstrapUser implements Command {
         }
         return null;
     }
+
 }

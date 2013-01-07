@@ -33,9 +33,9 @@ import java.nio.charset.Charset;
  * 
  * @author jbuhacoff
  */
-public class Main implements Command {
+public class Main  {
 
-    @Override
+//    @Override
     public void execute(String[] args) throws SetupException {
         
         // createTextTerminal requires the file stty.exe
