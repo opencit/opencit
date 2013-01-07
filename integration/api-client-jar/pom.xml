@@ -326,6 +326,11 @@
 	    <type>jar</type>
 	</dependency>
 		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>http-authorization</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>MtWilsonHttpSecurity</artifactId>
 			<version>${project.version}</version>

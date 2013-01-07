@@ -4,12 +4,16 @@
  */
 package com.intel.mtwilson.agent;
 
+import com.intel.mountwilson.manifest.data.IManifest;
+import com.intel.mountwilson.util.vmware.VCenterHost;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.Aik;
 import com.intel.mtwilson.datatypes.Nonce;
+import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.datatypes.Pcr;
-import com.intel.mtwilson.datatypes.PcrValue;
 import com.intel.mtwilson.datatypes.TpmQuote;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +24,7 @@ import java.util.Set;
  * all the platform-specific calls and procedures into those agents in a 
  * clean way. 
  * 
- * To obtain a HostAgent object, use the AgentFactory to create one for a 
+ * To obtain a HostAgent object, use the HostAgentFactory to create one for a 
  * given host. All the methods in this interface apply to the given host.
  * 
  * All the methods in this interface are intended to retrieve information
@@ -91,11 +95,26 @@ public interface HostAgent {
     byte[] getAikCaCertificate(); 
     
     /**
-     * When connections to the host or its master/manager use SSL, this
-     * method should return the SSL certificate obtained from the connection.
+     * XXX draft to approximate getting the bios/os/vmm details from the host...
+     * maybe split it up into those three functions? or return a host information
+     * object with those details? should be similar to or the same as the host portion of the mle 
+     * object ?
      * @return 
      */
-    X509Certificate getSslCertificate();
+    String getHostInformation();
+    
+    
+    /**
+     * Every vendor has a different API for obtaining the TPM Quote, module
+     * information, etc. 
+     * An administrator may want to log the "raw output" from the vendor before
+     * parsing and validating. 
+     * For Vmware, it's an XML document with their externally-unverifiable report
+     * on the host. For Citrix and Intel, it's an XML document containing the TPM Quote and
+     * other information. 
+     * @return 
+     */
+    String getVendorHostReport();
     
     /**
      * XXX this is a draft - need to check it against linux & citrix requirements
@@ -107,7 +126,7 @@ public interface HostAgent {
      * @param pcr
      * @return 
      */
-    TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<Pcr> pcr);
+    TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<PcrIndex> pcr);
     
     /**
      * Agents should return the entire set of PCRs from the host. The attestation
@@ -115,7 +134,7 @@ public interface HostAgent {
      * Returning all PCR's is cheap (there are only 24) and makes the API simple.
      * @return 
      */
-    Set<PcrValue> getPcrValues();
+    List<Pcr> getPcrValues();
     
     /**
      * Agents should return the entire set of module measurements from the host.
@@ -128,7 +147,7 @@ public interface HostAgent {
      * some platforms? needed or not?)
      * @return 
      */
-    Set<String> getModuleManifest();
+    List<String> getModuleManifest();
     
     /**
      * XXX draft,  return a list of pcr values (after an assumed initial zero) that
@@ -138,5 +157,21 @@ public interface HostAgent {
      * @param number
      * @return 
      */
-    List<PcrValue> getPcrHistory(Pcr number);
+    List<Pcr> getPcrHistory(PcrIndex number);
+    
+    
+    /**
+     * XXX TODO this method is moved here from the previous interface ManifestStrategy.
+     * It's currently here to minimize code changes for the current release
+     * but its functionality needs to be moved to the other HostAgent methods.
+     * The VCenterHost was written with abstract methods for processDigest() and
+     * processReport() and these were overridden "on the fly" with anonymous
+     * subclasses in two places.  No time right now to rewrite it properly but
+     * they are essentially post-processing the results we obtain from vcenter.
+     * So in this adapted getManifest() method, we just provide the subclass
+     * instance so it can be called for the post-processing.
+     * @param host
+     * @return 
+     */
+    HashMap<String, ? extends IManifest> getManifest(VCenterHost postProcessing);
 }

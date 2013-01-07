@@ -114,6 +114,7 @@ public class HostTrustBO extends BaseBO {
         IManifestStrategy manifestStrategy;
         IManifestStrategyFactory strategyFactory;
 
+        // XXX TODO BUG #497   the factory is what is supposed to decide on which implementation to create... but here we are selecting a factory with the logic that should be in the factory, and the factories themselves end up being nothing more than a verbose constructor for the end-implementation.
         if (tblHosts.getVmmMleId().getName().contains("ESX")) {
             strategyFactory = new VMWareManifestStategyFactory();
         } else {

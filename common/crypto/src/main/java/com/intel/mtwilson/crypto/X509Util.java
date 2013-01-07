@@ -210,8 +210,16 @@ public class X509Util {
         }
     }
     
+    /**
+     * Two ways to tell if a certificate is a CA:
+     * 1) getBasicConstraints() > -1   means it's a CA and the value is the max certificate path length
+     * 2) getKeyUsage() != null && getKeyUsage()[5] == true  means it has the "CA" key usage flag set
+     * Currently we only check the basic constraints
+     * @param certificate
+     * @return 
+     */
     public static boolean isCA(X509Certificate certificate) {
-        return certificate.getBasicConstraints() > -1;  // -1 indicates not a CA cert, 0 and above indicates CA cert
+        return certificate.getBasicConstraints() > -1;  // -1 indicates not a CA cert, 0 and above indicates CA cert        
     }
 
 }

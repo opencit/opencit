@@ -11,16 +11,16 @@ import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.xml.ws.BindingProvider;
 
 import org.apache.commons.codec.binary.Base64;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.crypto.NopX509HostnameVerifier;
-import com.intel.mtwilson.crypto.NopX509TrustManager;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.tls.TlsClient;
+import com.intel.mtwilson.tls.TlsPolicy;
 import com.vmware.vim25.*;
 import java.io.StringWriter;
 import java.util.*;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author dsmagadX
  */
-public class VMwareClient {
+public class VMwareClient implements TlsClient {
         private Logger log = LoggerFactory.getLogger(getClass());
 
 	private static final ManagedObjectReference SVC_INST_REF = new ManagedObjectReference();
@@ -52,6 +52,7 @@ public class VMwareClient {
 	private VimPortType vimPort;
 	UserSession session = null;
         private String vcenterEndpoint = null;
+        private TlsPolicy tlsPolicy = null;
 	private HostnameVerifier hostnameVerifier = null;
         private X509TrustManager trustManager = null;
         
@@ -533,6 +534,11 @@ public class VMwareClient {
 		// If the code reaches here that means that we did not find the host
 		throw new ASException(ErrorCode.AS_HOST_NOT_FOUND_IN_VCENTER,hostName);
 	}
+
+    @Override
+    public void setTlsPolicy(TlsPolicy tlsPolicy) {
+        this.tlsPolicy = tlsPolicy;
+    }
 
 	private class TrustAllTrustManager implements javax.net.ssl.TrustManager,
 			javax.net.ssl.X509TrustManager {

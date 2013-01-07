@@ -158,6 +158,7 @@
       <type>jar</type>
       <scope>test</scope>
     </dependency>
+    <!--
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty-ssl</artifactId>
@@ -173,7 +174,7 @@
       <scope>test</scope>
     </dependency>
     
-    
+    -->
   </dependencies>  
 
 </project>

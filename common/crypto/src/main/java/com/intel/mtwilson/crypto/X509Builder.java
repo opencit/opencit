@@ -5,14 +5,18 @@
 package com.intel.mtwilson.crypto;
 
 import com.intel.mtwilson.validation.BuilderModel;
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
+import sun.security.util.ObjectIdentifier;
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.BasicConstraintsExtension;
 import sun.security.x509.CertificateAlgorithmId;
@@ -24,10 +28,13 @@ import sun.security.x509.CertificateValidity;
 import sun.security.x509.CertificateVersion;
 import sun.security.x509.CertificateX509Key;
 import sun.security.x509.DNSName;
+import sun.security.x509.ExtendedKeyUsageExtension;
 import sun.security.x509.GeneralName;
 import sun.security.x509.GeneralNames;
 import sun.security.x509.IPAddressName;
 import sun.security.x509.KeyUsageExtension;
+import sun.security.x509.OIDMap;
+import sun.security.x509.PKIXExtensions;
 import sun.security.x509.SubjectAlternativeNameExtension;
 import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
@@ -61,7 +68,22 @@ public class X509Builder extends BuilderModel {
     private AlgorithmId algorithm = null;
     private KeyUsageExtension keyUsageExtension = null;
     private CertificateExtensions certificateExtensions = null;
+    private ExtendedKeyUsageExtension extendedKeyUsageExtension = null;
+    private Vector<ObjectIdentifier> extendedKeyUsageExtensionList = null; // suppress warning, the corresponding Sun API requires Vector<ObjectIdentifier>
+    private boolean extendedKeyUsageExtensionIsCritical = false;
     
+    // the following OID's are copied from sun.security.x509.ExtendedKeyUsageExtension... don't know why they didn't make them public:
+    private static final int[] anyExtendedKeyUsageOidData = {2, 5, 29, 37, 0};   
+    private static final int[] serverAuthOidData = {1, 3, 6, 1, 5, 5, 7, 3, 1};     
+    private static final int[] clientAuthOidData = {1, 3, 6, 1, 5, 5, 7, 3, 2};  
+    private static final int[] codeSigningOidData = {1, 3, 6, 1, 5, 5, 7, 3, 3};   
+    private static final int[] emailProtectionOidData = {1, 3, 6, 1, 5, 5, 7, 3, 4};  
+    private static final int[] ipsecEndSystemOidData = {1, 3, 6, 1, 5, 5, 7, 3, 5}; 
+    private static final int[] ipsecTunnelOidData = {1, 3, 6, 1, 5, 5, 7, 3, 6};   
+    private static final int[] ipsecUserOidData = {1, 3, 6, 1, 5, 5, 7, 3, 7};  
+    private static final int[] timeStampingOidData = {1, 3, 6, 1, 5, 5, 7, 3, 8};   
+    private static final int[] OCSPSigningOidData = {1, 3, 6, 1, 5, 5, 7, 3, 9};  
+
     public X509Builder() { }
     
     /**
@@ -349,6 +371,7 @@ public class X509Builder extends BuilderModel {
         try {
             this.algorithm = algorithmId; // new AlgorithmId(AlgorithmId.sha256WithRSAEncryption_oid); // md5WithRSAEncryption_oid
             info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algorithm));
+//                info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algorithm); // was present in older monolith version of the certificate factory, but it seems we don't really need it
         }
         catch(Exception e) {
             fault(e, "algorithm(%s)", algorithmId.getName());
@@ -451,6 +474,59 @@ public class X509Builder extends BuilderModel {
         return this;
     }
     
+    public X509Builder extKeyUsageIsCritical() {
+        extendedKeyUsageExtensionIsCritical = true;
+        try {
+            v3();
+            if( extendedKeyUsageExtensionList != null ) { 
+                extendedKeyUsageExtension = new ExtendedKeyUsageExtension(extendedKeyUsageExtensionIsCritical, extendedKeyUsageExtensionList);
+                if( certificateExtensions == null ) { certificateExtensions = new CertificateExtensions(); }
+                certificateExtensions.set(extendedKeyUsageExtension.getExtensionId().toString(), extendedKeyUsageExtension);
+                info.set(X509CertInfo.EXTENSIONS, certificateExtensions);             
+            }
+        }
+        catch(Exception e) {
+            fault(e, "extKeyUsageIsCritical");
+        }
+        return this;
+    }
+    
+    public X509Builder extKeyUsageServerAuth() {
+        try {
+            extKeyUsage(new ObjectIdentifier(serverAuthOidData));
+        }
+        catch(Exception e) {
+            fault(e, "extKeyUsageServerAuth");
+        }
+        return this;
+    }
+    
+    public X509Builder extKeyUsageClientAuth() {
+        try {
+            extKeyUsage(new ObjectIdentifier(clientAuthOidData));
+        }
+        catch(Exception e) {
+            fault(e, "extKeyUsageClientAuth");
+        }
+        return this;
+    }
+    
+    public X509Builder extKeyUsage(ObjectIdentifier oid) {
+        try {
+            v3();
+            if( extendedKeyUsageExtensionList == null ) { extendedKeyUsageExtensionList = new Vector<ObjectIdentifier>(); }
+            extendedKeyUsageExtensionList.add(oid);
+            extendedKeyUsageExtension = new ExtendedKeyUsageExtension(extendedKeyUsageExtensionIsCritical, extendedKeyUsageExtensionList);
+            if( certificateExtensions == null ) { certificateExtensions = new CertificateExtensions(); }
+            certificateExtensions.set(extendedKeyUsageExtension.getExtensionId().toString(), extendedKeyUsageExtension);
+            info.set(X509CertInfo.EXTENSIONS, certificateExtensions);             
+        }
+        catch(Exception e) {
+            fault(e, "extKeyUsage(%s)", oid.toString());
+        }
+        return this;
+    }
+    
 
     public X509Certificate build() {
         if( certificateVersion == null ) {
@@ -491,8 +567,7 @@ public class X509Builder extends BuilderModel {
         }
         // Note: alternativeName is optional so we don't have any defaults or errors for it here
         if( algorithm == null ) {
-            algorithm(new AlgorithmId(AlgorithmId.sha256WithRSAEncryption_oid));
-//            System.out.println("Algorithm name: " + algorithm.getName()); // SHA256withRSA 
+            algorithm(new AlgorithmId(AlgorithmId.sha256WithRSAEncryption_oid)); // algorithm.getName() == SHA256withRSA
         }
         
         if( keyUsageExtension != null ) {
@@ -504,12 +579,17 @@ public class X509Builder extends BuilderModel {
                 X509CertImpl cert = new X509CertImpl(info);
                 cert.sign(issuerPrivateKey, algorithm.getName()); // NoSuchAlgorithMException, InvalidKeyException, NoSuchProviderException, , SignatureException
 
-                // Update the algorith, and resign.
-                algorithm = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
-                info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algorithm);
-                cert = new X509CertImpl(info);
-                cert.sign(issuerPrivateKey, algorithm.getName()); // NoSuchAlgorithMException, InvalidKeyException, NoSuchProviderException, SignatureException
-                return cert;            
+                /*
+                 * for some unknown reason, if we return the "cert" now then all 
+                 * the optioanl fields such as getBasicConstraints() and 
+                 * getKeyUsage() are missing even though they are included if you 
+                 * call getEncoded() ... but if you re-create the certificate
+                 * then those fields are present in the re-created certificate.
+                 */
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                X509Certificate cert2 = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(cert.getEncoded()));
+                
+                return cert2;            
             }
             return null;
         }

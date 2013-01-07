@@ -4,7 +4,7 @@
  */
 package validation;
 
-import com.intel.mtwilson.datatypes.Pcr;
+import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.validation.*;
 import org.junit.Test;
 
@@ -16,42 +16,42 @@ public class TestModelObject {
     
     @Test
     public void testUseOneArgConstructorValid() {
-        Pcr pcr = new Pcr(0);
+        PcrIndex pcr = new PcrIndex(0);
         boolean valid = pcr.isValid();
         System.out.println(String.format("testUseNoArgConstructorValid: Valid? %s    value? %d", String.valueOf(valid), pcr.toInteger()));
     }
 
     @Test
     public void testUseOneArgConstructorInvalid() {
-        Pcr pcr = new Pcr(-1);
+        PcrIndex pcr = new PcrIndex(-1);
         boolean valid = pcr.isValid();
         System.out.println(String.format("testUseNoArgConstructorInvalid: Valid? %s", String.valueOf(valid)));
     }
     
     @Test
     public void testCheckedModelParameterValid() {
-        Pcr pcr = new Pcr(1);
+        PcrIndex pcr = new PcrIndex(1);
         printPcr(pcr);
         printModel(pcr);
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testCheckedModelParameterInvalid() {
-        Pcr pcr = new Pcr(-1);
+        PcrIndex pcr = new PcrIndex(-1);
         printPcr(pcr);
         printModel(pcr);
     }
 
     @Test
     public void testUnheckedModelParameterValid() {
-        Pcr pcr = new Pcr(2);
+        PcrIndex pcr = new PcrIndex(2);
         printUncheckedPcr(pcr);
         printUncheckedModel(pcr);
     }
 
     @Test
     public void testUnheckedModelParameterInvalid() {
-        Pcr pcr = new Pcr(-2);
+        PcrIndex pcr = new PcrIndex(-2);
         printUncheckedPcr(pcr);
         printUncheckedModel(pcr);
     }
@@ -68,7 +68,7 @@ public class TestModelObject {
      * Because Pcr is a @Model class, it will be automatically validated when passed as a parameter here
      * @param pcr 
      */
-    private void printPcr(Pcr pcr) {
+    private void printPcr(PcrIndex pcr) {
         System.out.println(String.format("printPcr: %d", pcr.toInteger()));
     }
 
@@ -76,7 +76,7 @@ public class TestModelObject {
      * Because this Pcr parameter is annotated @Unchecked, it will not be checked.
      * @param pcr 
      */
-    private void printUncheckedPcr(@Unchecked Pcr pcr) {
+    private void printUncheckedPcr(@Unchecked PcrIndex pcr) {
         System.out.println(String.format("printUncheckedPcr: %d", pcr.toInteger()));
     }
     

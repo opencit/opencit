@@ -31,6 +31,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import com.intel.mountwilson.util.vmware.VMwareConnectionPool;
 import com.intel.mountwilson.util.vmware.VMwareConnectionException;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,8 @@ import org.slf4j.LoggerFactory;
 public class Test {
     private Logger log = LoggerFactory.getLogger(getClass());
     private HostBO hostBO = new ASComponentFactory().getHostBO(); 
-    private static VMwareConnectionPool vcenterPool = new VMwareConnectionPool();
+    private static HostAgentFactory hostAgentFactory = new HostAgentFactory(); 
+//    private static VMwareConnectionPool vcenterPool = new VMwareConnectionPool(); // BUG #497 replacing this with the HostAgentFactory - the underlying implementation uses a pool and respects tls policy for each host
     
     /**
      *
@@ -82,7 +85,7 @@ public class Test {
             List<String> results = new ArrayList<String>();
             
             for(String host : hostCollection) {
-                VCenterHostQuote task = new VCenterHostQuote( usePool ? vcenterPool : null, hostBO, host);
+                VCenterHostQuote task = new VCenterHostQuote( /* BUG #497 usePool ? vcenterPool : null,*/ hostBO, host);
                 tasks.add(task);
                 scheduler.submit(task);
             }
@@ -117,23 +120,27 @@ public class Test {
     }
     
     private class VCenterHostQuote implements Runnable {
-        private VMwareConnectionPool pool = null;
+//        private VMwareConnectionPool pool = null;
         private HostBO dao;
         private String result;
-        private String connectionString = null; // example: "https://10.1.71.162:443/sdk;administrator;intel123!";
+//        private String connectionString = null; // example: "https://10.1.71.162:443/sdk;administrator;intel123!";
         private String hostname = null; // example: "10.1.71.174"
         private String error = null;
+        private TblHosts hostRecord = null;
+        private HostAgent hostAgent = null;
         
+        /*
         public VCenterHostQuote(VMwareConnectionPool pool, HostBO dao, String hostname) {
             this.pool = pool;
             this.dao = dao;
             this.hostname = hostname;
-        }
+        }*/
 
+        /*
         public VCenterHostQuote(String connectionString, String hostname) {
             this.connectionString = connectionString;
             this.hostname = hostname;
-        }
+        }*/
         
         public VCenterHostQuote(HostBO dao, String hostname) {
             this.dao = dao;
@@ -141,26 +148,22 @@ public class Test {
         }
         
         public void loadConnectionString() throws CryptographyException {
-            TblHosts host = dao.getHostByName(new Hostname(hostname));
-            this.connectionString = host.getAddOnConnectionInfo();
+            hostRecord = dao.getHostByName(new Hostname(hostname));
+//            this.connectionString = host.getAddOnConnectionInfo();
         }
         
         @Override
         public void run() {
             if( isError() ) { return; } // avoid clobbering previous error
             try {
-                if( connectionString == null ) { loadConnectionString(); }
-                TxtHostRecord host = new TxtHostRecord();
-                host.HostName = hostname;
-                host.AddOn_Connection_String = connectionString;
-                VMwareClient client = getClient(host);
-                if( client == null ) {
-                	log.error("Cannot create client");
-                }
-                else {
-	                result = client.getHostAttestationReport(host, "0,17,18,20");
+                if( hostRecord == null ) { loadConnectionString(); }
+//                TxtHostRecord host = new TxtHostRecord();
+//                host.HostName = hostname;
+//                host.AddOn_Connection_String = connectionString;
+                hostAgent = hostAgentFactory.getHostAgent(hostRecord);
+//                VMwareClient client = hostAgent.getgetClient(host);
+	                result = hostAgent.getVendorHostReport(); //getHostAttestationReport(host, "0,17,18,20");
 	                log.info("Got response for "+hostname);
-                }
             } catch (Exception ex) {
                 error = ex.toString();
             }
@@ -171,29 +174,6 @@ public class Test {
         public String getError() { return error; }
         public String getHostname() { return hostname; }
 
-        // this code has to move to vmware client in trust utils library...
-        private VMwareClient getClient(TxtHostRecord host) {
-            if( pool == null ) {
-                try {
-                    VMwareClient client = new VMwareClient();
-                    client.connect(host.AddOn_Connection_String);
-                    return client;
-                }
-                catch(Exception e) {
-                    error = e.toString();
-                    return null;
-                }
-            }
-            else {
-                try {
-                    return pool.getClientForConnection(host.AddOn_Connection_String);
-                }
-                catch(VMwareConnectionException e) {
-                    error = e.toString();
-                    return null;
-                }
-            }
-        }
         
     }
     

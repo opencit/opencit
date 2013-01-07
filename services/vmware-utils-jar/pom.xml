@@ -87,6 +87,12 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>api-client</artifactId>
             <version>${project.version}</version>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>http-authorization</artifactId>
+      <version>0.5.4-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>  
 </project>

@@ -24,6 +24,7 @@ public class TrustAgentStrategy extends TAHelper implements IManifestStrategy {
 		super(entityManagerFactory);
 	}
 
+        // BUG #497 the Map<String,? extends IManifest> needs to be replaced with the new PcrManifest model object.
 	@Override
 	public HashMap<String, ? extends IManifest> getManifest(TblHosts tblHosts) {
 		

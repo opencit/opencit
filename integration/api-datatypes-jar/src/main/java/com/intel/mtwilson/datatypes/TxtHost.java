@@ -96,6 +96,10 @@ public class TxtHost {
     }
 
     public String getAddOn_Connection_String() {
+        if( connectionString == null && ipAddress != null && port != null ) {
+            // for backwards compatibility with cilents that don't submit a connection string for intel hosts
+            return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
+        }
         return connectionString;
     }
 

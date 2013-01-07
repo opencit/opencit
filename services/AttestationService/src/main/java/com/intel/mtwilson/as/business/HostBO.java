@@ -8,6 +8,7 @@ import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.manifest.data.PcrModuleManifest;
 import com.intel.mountwilson.util.vmware.VCenterHost;
 import com.intel.mountwilson.util.vmware.VMwareClient;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
@@ -62,6 +63,12 @@ public class HostBO extends BaseBO {
             getBiosAndVMM(host);
 
             log.info("Getting Server Identity.");
+            
+                        // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
+                        TblHosts tblHosts = new TblHosts();
+                        tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");
+                        tblHosts.setSSLCertificate(new byte[0]);
+                        tblHosts.setName(host.getHostName().toString());
 
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
 				certificate = getAIKCertificateForHost(host);
@@ -69,14 +76,14 @@ public class HostBO extends BaseBO {
 			else { // ESX host so get the location for the host and store in the
 					// table
 
-                            pcrMap = getHostPcrManifest(host);
+                            pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
 
                             log.info("Getting location for host from VCenter");
                             location = getLocation(pcrMap);
                         }
                         log.info("Saving Host in database");
 
-                        saveHostInDatabase(host, certificate, location, pcrMap);
+                        saveHostInDatabase(tblHosts, host, certificate, location, pcrMap);
 
 		} catch (ASException ase) {
 			throw ase;
@@ -112,10 +119,11 @@ public class HostBO extends BaseBO {
 		return null;
 	}
 
-	private HashMap<String, ? extends IManifest> getHostPcrManifest(TxtHost host) {
+        // BUG #497 adding TblHosts parameter to this call so we can send the TlsPolicy to the HostAgentFactory for making the connection
+	private HashMap<String, ? extends IManifest> getHostPcrManifest(TblHosts tblHosts, TxtHost host) {
 		try {
 
-			HashMap<String, ? extends IManifest> pcrMap = getPcrModuleManifestMap(host);
+			HashMap<String, ? extends IManifest> pcrMap = getPcrModuleManifestMap(tblHosts, host);
 			return pcrMap;
 			
 		} catch (ASException e) {
@@ -128,11 +136,13 @@ public class HostBO extends BaseBO {
 		}
 	}
 
+        
+        // BUG #497 XXX TODO need to rewrite to get this from the HostAgentFactory and HostAgent interfaces
 	private HashMap<String, ? extends IManifest> getPcrModuleManifestMap(
+                        TblHosts tblHosts, // BUG #497 adding TblHosts parameter to this call so we can send the TlsPolicy to the HostAgentFactory for making the connection
 			TxtHost host) {
-		HashMap<String, ? extends IManifest> pcrMap;
-		pcrMap = new VCenterHost(host.getHostName().toString(),
-				host.getAddOn_Connection_String()) {
+
+            VCenterHost postProcessing = new VCenterHost() { // BUG #497 the VCenterHost class is now completely abstract and here we are providing the desired post-processing for the information obtained from vcenter
 
 			@Override
 			public HashMap<String, ? extends IManifest> processReport(String esxiVersion,
@@ -240,8 +250,11 @@ public class HostBO extends BaseBO {
 				return commandLine;
 			}
 
-		}.getManifestMap();
-		return pcrMap;
+		};
+            
+            HostAgentFactory hostAgentFactory = new HostAgentFactory();            
+            HashMap<String, ? extends IManifest>  pcrMap = hostAgentFactory.getManifest(tblHosts, postProcessing);
+            return pcrMap;
 	}
 
 	private boolean canFetchAIKCertificateForHost(String vmmName) {
@@ -268,7 +281,7 @@ public class HostBO extends BaseBO {
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
                                 log.info("VMM is updated. Update the host specific manifest");
                                 
-                                HashMap<String, ? extends IManifest> pcrMap = getHostPcrManifest(host);
+                                HashMap<String, ? extends IManifest> pcrMap = getHostPcrManifest(tblHosts,host); // BUG #497 added tblHosts parameter
                                 //Building objects and validating that manifests are created ahead of create of host
                                 tblHostSpecificManifests = getHostSpecificManifest(pcrMap); 
                             }
@@ -463,7 +476,7 @@ public class HostBO extends BaseBO {
 		}
 	}
 
-	private void saveHostInDatabase(TxtHost host, String certificate,
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, String certificate,
 			String location, HashMap<String, ? extends IManifest> pcrMap) throws CryptographyException {
 		
 		
@@ -471,7 +484,7 @@ public class HostBO extends BaseBO {
 		List<TblHostSpecificManifest> tblHostSpecificManifests = getHostSpecificManifest(pcrMap); 
 		
 		
-		TblHosts tblHosts = new TblHosts();
+		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
 		
 
 		TblHostsJpaController hostController = new TblHostsJpaController(

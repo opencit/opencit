@@ -148,6 +148,7 @@ public class TAHelper {
         }
     }
     
+    // BUG #497 need to return 
     public HashMap<String, PcrManifest> getQuoteInformationForHost(String hostIpAddress, String pcrList, String name, int port) {
 
           try {
@@ -336,6 +337,7 @@ public class TAHelper {
         return "rsapubkey_" + sessionId + ".key";
     }
 
+    // BUG #497 need to rewrite this to return List<Pcr> ... the Pcr.equals()  does same as (actually more than) IManifest.verify() because Pcr ensures the index is the same and IManifest does not!  and also it is less redundant, because this method returns Map< pcr index as string, manifest object containing pcr index and value >  
     private HashMap<String,PcrManifest> verifyQuoteAndGetPcr(String sessionId) {
         HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         log.info( "verifyQuoteAndGetPcr for session {}",sessionId);

@@ -5,6 +5,10 @@
 package com.intel.mountwilson.util.vmware;
 
 //import java.util.HashMap;
+import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
+import com.intel.mtwilson.tls.TlsConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -20,12 +24,13 @@ import org.slf4j.LoggerFactory;
 public class VMwareConnectionPool {
     private Logger log = LoggerFactory.getLogger(getClass());
 //    public static final int DEFAULT_MAX_SIZE = 10;
-    private ConcurrentHashMap<String,VMwareClient> pool = new ConcurrentHashMap<String,VMwareClient>();
+    private ConcurrentHashMap<TlsConnection,VMwareClient> pool = new ConcurrentHashMap<TlsConnection,VMwareClient>();
 //    private ConcurrentHashMap<String,Long> lastAccess = new ConcurrentHashMap<String,Long>();
 //    private int maxSize = DEFAULT_MAX_SIZE;
+    private VmwareClientFactory factory = null;
     
-    public VMwareConnectionPool() {
-        
+    public VMwareConnectionPool(VmwareClientFactory factory) {
+        this.factory = factory;
     }
     /*
     public VMwareConnectionPool(int maxSize) {
@@ -37,18 +42,16 @@ public class VMwareConnectionPool {
      * If a client is already open for the given connection string, it will
      * be returned. Otherwise, a new client is created and added to the pool.
      * 
+     * See also borrowObject() in KeyedObjectPool in apache commons pool
+     * 
      * @param connectionString
      * @return
      * @throws VMwareConnectionException 
      */
-    public VMwareClient getClientForConnection(String connectionString) throws VMwareConnectionException {
-        if( pool.containsKey(connectionString) ) {
-            VMwareClient client = reuseClientForConnection(connectionString);
-            if( client.isConnected() ) {
-                return client;
-            }
-        }
-        return createClientForConnection(connectionString);
+    public VMwareClient getClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
+        VMwareClient client = reuseClientForConnection(tlsConnection);
+        if( client != null ) { return client; } // already validated
+        return createClientForConnection(tlsConnection);
     }
     
     /**
@@ -65,13 +68,25 @@ public class VMwareConnectionPool {
      * @return
      * @throws VMwareConnectionException 
      */
-    public VMwareClient reuseClientForConnection(String connectionString) throws VMwareConnectionException {
-        VMwareClient client = pool.get(connectionString);
+    public VMwareClient reuseClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
+        VMwareClient client = pool.get(tlsConnection);
+        if( client == null ) { return null; }
 //        lastAccess.put(connectionString, System.currentTimeMillis());
-        if( client != null ) {
-        	log.info("Reusing vCenter connection for "+client.getEndpoint());
+        if( factory.validateObject(tlsConnection, client)) {
+            log.info("Reusing vCenter connection for "+client.getEndpoint());
+            return client;                
         }
-        return client;
+        log.info("Found stale vCenter connection");
+        try {
+            factory.destroyObject(tlsConnection, client);
+        }
+        catch(Exception e) {
+            log.error("Error while trying to disconnect from vcenter", e);
+        }
+        finally {
+            pool.remove(tlsConnection); // remove it from the pool, we'll recreate it later
+            return null;
+        }
     }
     
     /**
@@ -86,29 +101,45 @@ public class VMwareConnectionPool {
      * @return
      * @throws VMwareConnectionException 
      */
-    public VMwareClient createClientForConnection(String connectionString) throws VMwareConnectionException {
-        VMwareClient client = new VMwareClient();
+    public VMwareClient createClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
         try {
-            client.connect(connectionString);
-            pool.put(connectionString, client);
-            // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
-            log.info("Opening new vCenter connection for "+client.getEndpoint());
-            return client;
+            VMwareClient client = factory.makeObject(tlsConnection);
+            if( factory.validateObject(tlsConnection, client) ) {
+                pool.put(tlsConnection, client);
+                // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
+                log.info("Opening new vCenter connection for "+client.getEndpoint());
+                return client;
+            }
+            else {
+                throw new Exception("Failed to validate new vmware connection");
+            }
         }
         catch(Exception e) {
-            throw new VMwareConnectionException("Cannot connect to "+client.getEndpoint(), e);
+            try {
+                URL url = new URL(tlsConnection.getConnectionString());
+                throw new VMwareConnectionException("Cannot connect to vcenter: "+url.getHost(), e);
+            }
+            catch(MalformedURLException e2) {
+                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection strong", e2);                
+            }
         }
     }
     
     public void close() {
-        Set<String> connectionStrings = pool.keySet();
-        for(String connectionString : connectionStrings) {
-            VMwareClient client = pool.get(connectionString);
+        Set<TlsConnection> tlsConnections = pool.keySet();
+        for(TlsConnection tlsConnection : tlsConnections) {
+            VMwareClient client = pool.get(tlsConnection);
             try {
-                client.disconnect();
+                factory.destroyObject(tlsConnection, client);
             }
             catch(Exception e) {
-                log.error("Failed to disconnect from "+client.getEndpoint(), e);
+                try {
+                    URL url = new URL(tlsConnection.getConnectionString());
+                    log.error("Failed to disconnect from vcenter: "+url.getHost(), e);
+                }
+                catch(MalformedURLException e2) {
+                    log.error("Failed to disconnect from venter with invalid connection string", e);
+                }
             }
         }
     }

@@ -32,7 +32,7 @@ public class PcrModuleManifest extends PcrManifest implements IManifest {
         }
 
         /**
-         * XXX currently this code allows a host to have a SUBSET of the modules defined in the whitelist and still be trusted... 
+         * XXX TODO WARNING currently this code allows a host to have a SUBSET of the modules defined in the whitelist and still be trusted... that's not correct, because one of the modules not in the subset could be an important auditing or security module. 
          * @param goodKnownValue
          * @return 
          */

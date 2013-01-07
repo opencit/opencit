@@ -41,6 +41,7 @@ public class PcrGKVStrategy extends BaseBO implements IGKVStrategy {
 		TblMle vmmMle = new TblMleJpaController(getEntityManagerFactory())
 				.findVmmMle(mleName, mleVersion, osName, osVersion);
 
+                // XXX TODO doesn't seem right to have this ESX 5.1 logic here. it belongs in a factory.
 		if (vmmMle.getName().contains("ESX")
 				&& vmmMle.getVersion().contains("5.1")) {
 			pcrManifestMap = getPcrManifestMap(vmmMle, true);

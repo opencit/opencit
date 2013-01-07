@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.datatypes.Pcr;
+import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.validation.Fault;
 import com.intel.mtwilson.validation.InvalidModelException;
@@ -20,8 +20,8 @@ public class TestDataValidation implements Command {
 
     @Override
     public void execute(String[] args) throws Exception {
-        Pcr pcr = new Pcr(0);
-            Pcr invalidPcr = new Pcr(-1);
+        PcrIndex pcr = new PcrIndex(0);
+            PcrIndex invalidPcr = new PcrIndex(-1);
         
         // test methods that accept a single model parameter - works
         test(pcr);
@@ -69,19 +69,19 @@ public class TestDataValidation implements Command {
         }
     }
     
-    private void test(Pcr pcr) {
+    private void test(PcrIndex pcr) {
         System.out.println(String.format("Test1 PCR %d valid? %b", pcr.toInteger(), pcr.isValid()));
     }
 
-    private void test(Pcr pcr1, Pcr pcr2) {
+    private void test(PcrIndex pcr1, PcrIndex pcr2) {
         System.out.println(String.format("Test2 PCR1 %d valid %b PCR2 %d valid %b", pcr1.toInteger(), pcr1.isValid(), pcr2.toInteger(), pcr2.isValid()));
     }
     
-    private void testUnchecked(@Unchecked Pcr pcr) {
+    private void testUnchecked(@Unchecked PcrIndex pcr) {
         System.out.println(String.format("Test Unchecked PCR %d valid? %b", pcr.toInteger(), pcr.isValid()));
     }
     
-    private void testMixed(Pcr pcr1, @Unchecked Pcr pcr2) {
+    private void testMixed(PcrIndex pcr1, @Unchecked PcrIndex pcr2) {
         System.out.println(String.format("Test Unchecked PCR1 %d valid %b PCR2 %d valid %b", pcr1.toInteger(), pcr1.isValid(), pcr2.toInteger(), pcr2.isValid()));
     }
     

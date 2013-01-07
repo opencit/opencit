@@ -34,7 +34,7 @@
     </dependency>
     <!-- Monit -->
     <dependency>
-        <groupId>com.intel.mountwilson.linux</groupId>
+        <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>monit</artifactId>
         <version>5.5</version>
         <type>bin</type>
@@ -141,7 +141,7 @@
                 </artifactItem>
                 <!-- Monit -->
                 <artifactItem>
-                    <groupId>com.intel.mountwilson.linux</groupId>
+                    <groupId>com.intel.mtwilson.linux</groupId>
                     <artifactId>monit</artifactId>
                     <version>5.5</version>
                     <type>bin</type>

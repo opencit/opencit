@@ -18,7 +18,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.intel.mtwilson</groupId>
+      <groupId>com.intel.mtwilson.trustagent</groupId>
       <artifactId>TrustAgent</artifactId>
       <version>${project.version}</version>
       <classifier>jar-with-dependencies</classifier>
@@ -38,6 +38,14 @@
       <classifier>linux-x64</classifier>
     </dependency>	
   </dependencies>
+  
+  <build>
+      <resources>
+          <resource>
+              <directory>src/files</directory>
+          </resource>
+      </resources>
+  </build>
 
   <profiles>
       <profile>
@@ -63,7 +71,7 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>com.intel.mtwilson</groupId>
+                  <groupId>com.intel.mtwilson.trustagent</groupId>
                   <artifactId>TrustAgent</artifactId>
                   <version>${project.version}</version>
                   <classifier>jar-with-dependencies</classifier>

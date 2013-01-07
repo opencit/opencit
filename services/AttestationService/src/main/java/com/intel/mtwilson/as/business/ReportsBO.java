@@ -164,6 +164,7 @@ public class ReportsBO extends BaseBO {
         }
     }
 
+    // BUG #497 XXX TODO needs rewrite to use HostAgentFactory and HostAgent interfaces
     public String getHostAttestationReport(Hostname hostName) {
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw;
@@ -182,11 +183,13 @@ public class ReportsBO extends BaseBO {
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
             }
 
+            // XXX TODO all hosts will have connection strings soon so need to use HostAgentFactory to figure out which one to create, don't do this here.  use the capability methods in the HostAGent interface to figure out what it does or doesn't support.
             if (tblHosts.getAddOnConnectionInfo() != null && tblHosts.getAddOnConnectionInfo().contains("http")) {
 
                 throw new ASException(ErrorCode.AS_OPERATION_NOT_SUPPORTED, "getHostAttestationReport does not support VMWare hosts.");
             }
 
+            // BUG #497 needs to use HostAgentFactory and HostAgent
             strategyFactory = new DefaultManifestStrategyFactory();
 
             manifestStrategy = strategyFactory.getManifestStategy(tblHosts, getEntityManagerFactory());

@@ -4,6 +4,9 @@ import java.util.logging.Logger;
 
 
 /**
+ * BUG #497 needs to be rewritten as Pcr ;  the verify() method is nothing
+ * more than equals() and it only checks the VALUE ,it does not make sure that
+ * the value is in the SAME REGISTER NUMBER, which is important.
  * XXX the interface needs to change, see comments on IManifest
  */
 public class PcrManifest implements IManifest {

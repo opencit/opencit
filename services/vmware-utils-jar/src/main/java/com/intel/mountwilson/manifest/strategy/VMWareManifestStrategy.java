@@ -14,6 +14,7 @@ import com.intel.mountwilson.manifest.strategy.helper.VMWare50Esxi50;
 import com.intel.mountwilson.manifest.strategy.helper.VMWare51Esxi51;
 import com.intel.mountwilson.util.vmware.VCenterHost;
 import com.intel.mountwilson.util.vmware.VMwareClient;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
@@ -48,6 +49,7 @@ public class VMWareManifestStrategy implements
         this.entityManagerFactory = entityManagerFactory;
     }
 
+    // BUG #497 moving to VmwareHostAgent
     @Override
     public HashMap<String, ? extends IManifest> getManifest(TblHosts host) {
         return getQuoteInformationForHost(host);
@@ -56,7 +58,7 @@ public class VMWareManifestStrategy implements
     private List<String> getRequestedPcrs(TblHosts tblHosts) {
         ArrayList<String> pcrs = new ArrayList<String>();
 
-        TblMle biosMle = new TblMleJpaController(entityManagerFactory).findMleById(tblHosts.getBiosMleId().getId());
+        TblMle biosMle = new TblMleJpaController(entityManagerFactory).findMleById(tblHosts.getBiosMleId().getId()); // XXX don't know why we are doing another database lookup, the tblHosts.getBiosMleId() is not an Id it's the full record and it has the same information we are looking up here
 
         String biosPcrList = biosMle.getRequiredManifestList();
 
@@ -68,7 +70,7 @@ public class VMWareManifestStrategy implements
 
 
         // Get the Vmm MLE without accessing cache
-        TblMle vmmMle = new TblMleJpaController(getEntityManagerFactory()).findMleById(tblHosts.getVmmMleId().getId());
+        TblMle vmmMle = new TblMleJpaController(getEntityManagerFactory()).findMleById(tblHosts.getVmmMleId().getId()); // XXX don't know why we are doing another database lookup, the tblHosts.getVmmMleId() is not an Id it's the full record and it has the same information we are looking up here
 
 
         String vmmPcrList = vmmMle.getRequiredManifestList();
@@ -85,11 +87,21 @@ public class VMWareManifestStrategy implements
         return pcrs;
     }
 
+    /**
+     * BUG #497
+     * This method creates a new vcenterhost object with the database record
+     * for the host, and that new object connects to vcenter and gets the information.
+     * XXX TODO this needs to be rewritten to fit into HostAgentFactory and HostAgent.
+     * It's public but currently ONLY called from getManifest() in this class.
+     * getManifest() itself is called from ReportsBO and HostTrustBO.
+     * @param host
+     * @return 
+     */
     public HashMap<String, ? extends IManifest> getQuoteInformationForHost(
             final TblHosts host) {
 
-        HashMap<String, ? extends IManifest> manifestMap = new VCenterHost(host) {
-
+        // BUG #497 the VCenterHost class is now completely abstract and here we are providing post-processing for the manifest map
+        VCenterHost postProcessing = new VCenterHost() {
             @Override
             public HashMap<String, ? extends IManifest> processReport(String esxVersion,
                     HostTpmAttestationReport report) {
@@ -110,9 +122,11 @@ public class VMWareManifestStrategy implements
                 
                 return new VMWare50Esxi50().getPcrManiFest(htdis, getRequestedPcrs(host));
 
-            }
-        }.getManifestMap();
-
+            }            
+        };
+        HostAgentFactory hostAgentFactory = new HostAgentFactory();
+        HashMap<String, ? extends IManifest> manifestMap = hostAgentFactory.getManifest(host, postProcessing);
+        
         log.info("PCR map {}", manifestMap);
 
         return manifestMap;
