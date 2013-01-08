@@ -1160,6 +1160,8 @@ glassfish_permissions() {
 glassfish_memory() {
   local jvm_memory="${1:-2048}"
   local jvm_maxperm="${2:-512}"
+  # glassfish must be started in order to do this
+  $glassfish start-domain
   # first we have to find the current options and remove them
   local prev_jvm_memory=`$glassfish list-jvm-options | grep "\-Xmx" | head -n 1`
   local prev_jvm_maxperm=`$glassfish list-jvm-options | grep "\-XX:MaxPermSize" | head -n 1`

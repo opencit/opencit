@@ -36,7 +36,7 @@ echo "Glassfish will now ask you for the same information:"
 # $glassfish is an alias for full path of asadmin
 $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old change-admin-password
 # XXX it asks for the password twice ...  can we script with our known value?
-$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old start-domain
-$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old enable-secure-admin
+$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd start-domain
+$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd enable-secure-admin
 
 echo
