@@ -25,12 +25,12 @@ if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_w
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 
 
-list_mysql_install_scripts() {
-    echo ${mysql_script_dir}/bootstrap.sql
-    echo ${mysql_script_dir}/20120829_audit_log.sql
-    echo ${mysql_script_dir}/20120831_patch_rc2.sql
-    echo ${mysql_script_dir}/20120920090600_patch_rc3.sql
-}
+#list_mysql_install_scripts() {
+#    echo ${mysql_script_dir}/bootstrap.sql
+#    echo ${mysql_script_dir}/20120829_audit_log.sql
+#    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+#    echo ${mysql_script_dir}/20120920090600_patch_rc3.sql
+#}
 
 # STDALEX_TODO remove this completly
 # XXX TODO deprecated;   cloudportal database has been dropped as of 1.0-RC2
@@ -173,8 +173,8 @@ setup_interactive_install() {
   if [ -n "$mysql" ]; then
     mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
     mysql_create_database
-    mysql_scripts=`list_mysql_install_scripts`
-    mysql_install_scripts ${mysql_scripts}
+    #mysql_scripts=`list_mysql_install_scripts`
+    #mysql_install_scripts ${mysql_scripts}
   fi
   # STDALEX_TODO remove this completly
   #depreciated; cloudportal database has been dropped as of 1.0-RC2

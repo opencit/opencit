@@ -24,30 +24,30 @@ if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_w
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 
 # bug #509 the sql script setup is moved to a java program, this function is not needed anymore
-list_mysql_install_scripts() {
-    echo ${mysql_script_dir}/20120327214603_create_changelog.sql
-    echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
+#list_mysql_install_scripts() {
+#    echo ${mysql_script_dir}/20120327214603_create_changelog.sql
+#    echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
+##    echo ${mysql_script_dir}/20120403185252_add_procedure_Insert_GKV_Record.sql
+##    echo 20120405021354_add_procedure_authenticate_user.sql
+#    echo ${mysql_script_dir}/20120328173612_ta_db-0.5.1-data.sql
+##    echo ${mysql_script_dir}/20120405161725_add_procedure_getuserfirstlastnames.sql
+#    echo ${mysql_script_dir}/201207101_saml_cache_patch-ta_db-0.5-to-0.5.2.sql
+#    echo ${mysql_script_dir}/20120829_audit_log.sql
+#    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+#    echo ${mysql_script_dir}/20120920085200_patch_rc3.sql
+#}
+
+
+## bug #509 the sql script setup is moved to a java program, this function is not needed anymore
+#list_mysql_upgrade_scripts() {
+#    echo ${mysql_script_dir}/20120327214603_create_changelog.sql
+#    echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
+#    echo ${mysql_script_dir}/20120328172802_patch-ta_db-0.5-to-0.5.1.sql
 #    echo ${mysql_script_dir}/20120403185252_add_procedure_Insert_GKV_Record.sql
-#    echo 20120405021354_add_procedure_authenticate_user.sql
-    echo ${mysql_script_dir}/20120328173612_ta_db-0.5.1-data.sql
-#    echo ${mysql_script_dir}/20120405161725_add_procedure_getuserfirstlastnames.sql
-    echo ${mysql_script_dir}/201207101_saml_cache_patch-ta_db-0.5-to-0.5.2.sql
-    echo ${mysql_script_dir}/20120829_audit_log.sql
-    echo ${mysql_script_dir}/20120831_patch_rc2.sql
-    echo ${mysql_script_dir}/20120920085200_patch_rc3.sql
-}
-
-
-# bug #509 the sql script setup is moved to a java program, this function is not needed anymore
-list_mysql_upgrade_scripts() {
-    echo ${mysql_script_dir}/20120327214603_create_changelog.sql
-    echo ${mysql_script_dir}/20120328172740_create_0_5_1_schema.sql
-    echo ${mysql_script_dir}/20120328172802_patch-ta_db-0.5-to-0.5.1.sql
-    echo ${mysql_script_dir}/20120403185252_add_procedure_Insert_GKV_Record.sql
-    echo ${mysql_script_dir}/201207101_saml_cache_patch-ta_db-0.5-to-0.5.2.sql
-    echo ${mysql_script_dir}/20120829_audit_log.sql
-    echo ${mysql_script_dir}/20120831_patch_rc2.sql
-}
+#    echo ${mysql_script_dir}/201207101_saml_cache_patch-ta_db-0.5-to-0.5.2.sql
+#    echo ${mysql_script_dir}/20120829_audit_log.sql
+#    echo ${mysql_script_dir}/20120831_patch_rc2.sql
+#}
 
 
 # This function downloads the Privacy CA's AIK Certificate and EK Certificate.
