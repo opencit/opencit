@@ -21,7 +21,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  * support the feature ACCEPT_SINGLE_VALUE_AS_ARRAY. 
  * 
  * Glassfish 3.1.2.2 includes a newer version jackson that does support this
- * feature.
+ * feature. 
  * 
  * @author jbuhacoff
  * @since 1.1 
