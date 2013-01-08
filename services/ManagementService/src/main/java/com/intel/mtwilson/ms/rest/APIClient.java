@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -59,8 +60,10 @@ public class APIClient {
     @RolesAllowed({"Security"})
     @PUT
     @Consumes("application/json")
-    public void updateApiClient(ApiClientUpdateRequest apiClientRequest) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public String updateApiClient(ApiClientUpdateRequest apiClientRequest) {
         new ApiClientBO().update(apiClientRequest);
+        return "OK";
     }
     /**
      * POST method for creating an instance of APIClient. The
@@ -75,8 +78,10 @@ public class APIClient {
     @RolesAllowed({"Security"})
     @POST
     @Consumes("application/json")
-    public void addApiClient(ApiClientCreateRequest apiClientRequest) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public String addApiClient(ApiClientCreateRequest apiClientRequest) {
         new ApiClientBO().create(apiClientRequest);
+        return "OK";
     }
 
     /**
@@ -170,9 +175,11 @@ public class APIClient {
     @POST
     @Path("/register")
     @Consumes("application/json")
-    public void registerApiClient(ApiClientCreateRequest apiClientRequest) {
+    @Produces(MediaType.TEXT_PLAIN)
+    public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
         log.info("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
         new ApiClientBO().create(apiClientRequest);
+        return "OK";
     }
 
     
