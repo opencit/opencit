@@ -16,7 +16,9 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 java_require
 glassfish_install $GLASSFISH_PACKAGE
 
+cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
 cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
+cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
 glassfish_stop
 glassfish_start
 

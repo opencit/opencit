@@ -33,7 +33,19 @@
     </dependency>	
 <dependency>
 	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-core-asl</artifactId>
+	<version>1.9.11</version>
+        <type>jar</type>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
 	<artifactId>jackson-mapper-asl</artifactId>
+	<version>1.9.11</version>
+        <type>jar</type>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-xc</artifactId>
 	<version>1.9.11</version>
         <type>jar</type>
 </dependency>
@@ -89,11 +101,27 @@
                 </artifactItem>
                 <artifactItem>
                     <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core-asl</artifactId>
+                    <version>1.9.11</version>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jackson-core-asl.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-mapper-asl</artifactId>
                     <version>1.9.11</version>
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jackson-mapper-asl.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-xc</artifactId>
+                    <version>1.9.11</version>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jackson-xc.jar</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>
