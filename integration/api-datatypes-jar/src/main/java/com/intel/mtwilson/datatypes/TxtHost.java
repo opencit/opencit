@@ -56,6 +56,11 @@ public class TxtHost {
         trustStatus = new HostTrustStatus(); //defaults to all false
         aikCertificate = host.AIK_Certificate; // may be null
 
+        // BUG #497  now all hosts require a connection string
+        if (connectionString == null || connectionString.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Connection string for host or its vCenter (for ESX hosts) is required: %s", hostname));
+        }
+        /*
         if (requiresConnectionString()) {
             if (connectionString == null || connectionString.isEmpty()) {
                 throw new IllegalArgumentException(String.format("AddOn connection string for connecting to vCenter server for host: %s", hostname));
@@ -70,7 +75,7 @@ public class TxtHost {
             if(connectionString != null && !connectionString.isEmpty() ){
             	throw new IllegalArgumentException(String.format("Addon connection string should be blank for Host : %s", hostname));
             }
-        }
+        }*/
     }
 
     // Sample JSON output (not used)
@@ -120,10 +125,12 @@ public class TxtHost {
     }
 
     final public boolean requiresConnectionString() {
+        // BUG #497  now every host requies a connection string 
+        return true; /*
         if (vmm.getName().toUpperCase().contains("ESX")) {
             return true;
         }
-        return false;
+        return false;*/
     }
     
     final public boolean isBiosTrusted() { return trustStatus.bios; }

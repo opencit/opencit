@@ -135,6 +135,9 @@ public class HostAgentFactory {
      */
     private HostAgent getHostAgent(InternetAddress hostAddress, String connectionString, TlsPolicy tlsPolicy) throws IOException {
         Vendor[] vendors = Vendor.values();
+        if( connectionString == null ) {
+            throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
+        }
         for(Vendor vendor : vendors) {
             String prefix = vendor.name().toLowerCase()+":"; // "INTEL" becomes "intel:"
             if( connectionString.startsWith(prefix) ) {

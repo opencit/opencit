@@ -755,7 +755,7 @@ public class HostBO extends BaseBO {
                     // Retrieve the attestation report from the host
                     attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
                     log.info("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
-
+                    log.info("Attestation report content: "+attestationReport);
                 } catch (Throwable te) {
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }

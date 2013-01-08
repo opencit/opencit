@@ -590,6 +590,8 @@ public class HostBO extends BaseBO {
 					host.getHostName());
 		}
 
+                // BUG #497  every host requires a connection string now, and will not have the "ip address" field anymore. 
+                /*
 		if (!host.requiresConnectionString() && host.getIPAddress() != null ) {
 			tblHosts = tblHostsJpaController.findByIPAddress(host
 					.getIPAddress().toString()); // datatype.IPAddress
@@ -600,7 +602,7 @@ public class HostBO extends BaseBO {
 						host.getIPAddress());
 			}
 		}
-
+                */
 	}
 
         /**
