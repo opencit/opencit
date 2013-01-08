@@ -35,6 +35,7 @@ MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
 MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
 
 # Prompt for installation settings
+echo "Configuring Mt Wilson Server Name..."
 echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
 This address will be used in the server SSL certificate and in all Mt Wilson URLs,
 such as https://${MTWILSON_SERVER:-127.0.0.1}.

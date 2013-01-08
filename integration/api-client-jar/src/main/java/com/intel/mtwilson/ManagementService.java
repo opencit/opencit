@@ -39,10 +39,17 @@ public interface ManagementService {
     
     boolean configureWhiteList(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException;
 
+    // TODO: deprecate in next release in favor of getSamlCertificates()
     X509Certificate getSamlCertificate() throws IOException, ApiException, SignatureException;
 
-    Set<X509Certificate> getCaCertificates() throws IOException, ApiException, SignatureException;
+    Set<X509Certificate> getRootCaCertificates() throws IOException, ApiException, SignatureException;
+
+    Set<X509Certificate> getPrivacyCaCertificates() throws IOException, ApiException, SignatureException;
     
+    Set<X509Certificate> getSamlCertificates() throws IOException, ApiException, SignatureException;
+    
+    Set<X509Certificate> getTlsCertificates() throws IOException, ApiException, SignatureException;
+
     CaInfo getCaStatus() throws IOException, ApiException, SignatureException;
     
     void enableCaWithPassword(String newPassword) throws IOException, ApiException, SignatureException;

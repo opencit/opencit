@@ -13,6 +13,8 @@ import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -48,7 +50,7 @@ public class CA {
             dao.enableCaWithPassword(newPassword);
             return Boolean.TRUE.toString();
         } catch (Exception e) {
-            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e.toString());
         }
         
     }
@@ -61,7 +63,7 @@ public class CA {
             dao.disableCa();
             return Boolean.TRUE.toString();
         } catch (Exception e) {
-            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e.toString());
         }
         
     }
@@ -91,15 +93,19 @@ public class CA {
     public String getRootCaCertificateChain() {
         try {
             File rootCaPemFile = new File("/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); // XXX TODO needs to be obtained from configuration object
-            if( rootCaPemFile.canRead() ) {
-                FileInputStream in = new FileInputStream(rootCaPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
-            }
-            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage()); // XXX TODO it's strange having errorcode, then errorcode.getmessage everywhere these exceptions are formed... it would be better to have a constructor new MSException(ErrorCode, String... args)  so if the message has any placeholders it would be filled in by the arguments
-        } catch (Exception e) {
-            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+            FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
+            String content = IOUtils.toString(in); // IOException
+            IOUtils.closeQuietly(in);
+            return content;
+        } 
+        catch (FileNotFoundException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Mt Wilson Root CA certificate file is not found");
+        }
+        catch (IOException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Failed to read Mt Wilson Root CA certificate file");
+        }
+        catch (Exception e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e.toString());
         }
         
     }
@@ -110,15 +116,19 @@ public class CA {
     public String getSamlCertificateChain() {
         try {
             File samlPemFile = new File("/etc/intel/cloudsecurity/saml.cer.pem"); // XXX TODO needs to be obtained from configuration object
-            if( samlPemFile.canRead() ) {
-                FileInputStream in = new FileInputStream(samlPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
-            }
-            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage()); // XXX TODO it's strange having errorcode, then errorcode.getmessage everywhere these exceptions are formed... it would be better to have a constructor new MSException(ErrorCode, String... args)  so if the message has any placeholders it would be filled in by the arguments
-        } catch (Exception e) {
-            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+            FileInputStream in = new FileInputStream(samlPemFile);
+            String content = IOUtils.toString(in);
+            IOUtils.closeQuietly(in);
+            return content;
+        }
+        catch (FileNotFoundException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "SAML certificate file is not found");
+        }
+        catch (IOException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Failed to read SAML certificate file");
+        }
+        catch (Exception e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e.toString());
         }
         
     }
@@ -129,15 +139,19 @@ public class CA {
     public String getPrivacyCaCertificateChain() {
         try {
             File privacyCaPemFile = new File("/etc/intel/cloudsecurity/PrivacyCA.p12.pem"); // XXX TODO needs to be obtained from configuration object
-            if( privacyCaPemFile.canRead() ) {
-                FileInputStream in = new FileInputStream(privacyCaPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
-            }
-            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage()); // XXX TODO it's strange having errorcode, then errorcode.getmessage everywhere these exceptions are formed... it would be better to have a constructor new MSException(ErrorCode, String... args)  so if the message has any placeholders it would be filled in by the arguments
-        } catch (Exception e) {
-            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+            FileInputStream in = new FileInputStream(privacyCaPemFile);
+            String content = IOUtils.toString(in);
+            IOUtils.closeQuietly(in);
+            return content;
+        }
+        catch (FileNotFoundException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Privacy CA certificate file is not found");
+        }
+        catch (IOException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Failed to read Privacy CA certificate file");
+        }
+        catch (Exception e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e.toString());
         }
         
     }
@@ -148,15 +162,19 @@ public class CA {
     public String getTlsCertificateChain() {
         try {
             File tlsPemFile = new File("/usr/share/glassfish3/glassfish/domains/domain1/config/ssl.10.1.71.80.crt.pem"); // XXX TODO needs to be obtained from configuration object
-            if( tlsPemFile.canRead() ) {
-                FileInputStream in = new FileInputStream(tlsPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
-            }
-            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage()); // XXX TODO it's strange having errorcode, then errorcode.getmessage everywhere these exceptions are formed... it would be better to have a constructor new MSException(ErrorCode, String... args)  so if the message has any placeholders it would be filled in by the arguments
-        } catch (Exception e) {
-            throw new MSException(ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e);
+            FileInputStream in = new FileInputStream(tlsPemFile);
+            String content = IOUtils.toString(in);
+            IOUtils.closeQuietly(in);
+            return content;
+        }
+        catch (FileNotFoundException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Server SSL certificate file is not found");
+        }
+        catch (IOException e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), "Failed to read server SSL certificate file");
+        }
+        catch (Exception e) {
+            throw new MSException(e, ErrorCode.SYSTEM_ERROR, ErrorCode.SYSTEM_ERROR.getMessage(), e.toString());
         }
         
     }

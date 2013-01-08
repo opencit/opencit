@@ -75,6 +75,7 @@ public class RegisterUser extends AbstractCommand {
             
             
             SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
+            // XXX TODO need to comply with user's specified tls policy, or assume "trust first certificate" if no policy is configured
             // download server's ssl certificates and add them to the keystore  and display for user to confirm later XXX TODO maybe prompt user to accept/decline them before adding, instaed of checking what was added after;  or be able to set an ssl policy here so if we already trust the root CA this should work seamlessly.
             String[] tlsCertAliases0 = keystore.listTrustedSslCertificates();
             SslUtil.addSslCertificatesToKeystore(keystore, server);
@@ -119,16 +120,45 @@ public class RegisterUser extends AbstractCommand {
                 }
             }
             
-            // download all ca certs from the server
-            Set<X509Certificate> cacerts = c.getCaCertificates();
-            for(X509Certificate cacert : cacerts) {
-                keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
-                log.info("Added CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+            // download all ca certs from the server (root ca, privacy ca, saml ca, etc)  
+            try {
+                Set<X509Certificate> cacerts = c.getRootCaCertificates();
+                for(X509Certificate cacert : cacerts) {
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                    log.info("Added CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                }
+            }
+            catch(Exception e) {
+                log.warn("Cannot download Mt Wilson Root CA certificate from server");
+            }
+            // download privacy ca certificates
+            try {
+                Set<X509Certificate> cacerts = c.getPrivacyCaCertificates();
+                for(X509Certificate cacert : cacerts) {
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                    log.info("Added Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                }
+            }
+            catch(Exception e) {
+                log.warn("Cannot download Privacy CA certificate from server");
             }
             // download server's saml certificate and save in the keystore
-            X509Certificate samlCertificate = c.getSamlCertificate();
-            keystore.addTrustedSamlCertificate(samlCertificate, server.getHost());
-            log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost() });
+            try {
+                Set<X509Certificate> cacerts = c.getSamlCertificates();
+                for(X509Certificate cert : cacerts) {
+                    if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert; so we add it as the saml cert
+                        keystore.addTrustedSamlCertificate(cert, server.getHost());
+                        log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                    }
+                    else {
+                        keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                        log.info("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                    }
+                }
+            }
+            catch(Exception e) {
+                log.warn("Cannot download SAML certificate from server");
+            }
             keystore.save();        
             System.out.println("OK");
     }

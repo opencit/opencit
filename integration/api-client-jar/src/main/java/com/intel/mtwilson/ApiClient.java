@@ -643,13 +643,9 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
      * @throws ApiException
      * @throws SignatureException Do 
      */
+    /*
     @Override
     public Set<X509Certificate> getCaCertificates() throws IOException, ApiException, SignatureException {
-        String rootca = text(httpGet(msurl("/ca/certificate/rootca/current")));
-        String privacyca = text(httpGet(msurl("/ca/certificate/privacyca/current")));
-        String samlca = text(httpGet(msurl("/ca/certificate/saml/current")));
-        String tlsca = text(httpGet(msurl("/ca/certificate/tls/current")));
-        // XXX TODO later there will be a saml intermediate CA and a TLS intermediate CA ... at that time we need to retrieve them and add to this
         try {
             List<X509Certificate> rootCaCerts = X509Util.decodePemCertificates(rootca);
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(privacyca);
@@ -669,7 +665,76 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         } catch (CertificateException ex) {
             throw new ApiException("Invalid certificate", ex);
         }
+    }*/
+    
+    @Override
+    public Set<X509Certificate> getRootCaCertificates() throws IOException, ApiException, SignatureException {
+       String rootca = text(httpGet(msurl("/ca/certificate/rootca/current")));
+        try {
+            List<X509Certificate> rootCaCerts = X509Util.decodePemCertificates(rootca);
+            HashSet<X509Certificate> cacerts = new HashSet<X509Certificate>();
+            cacerts.addAll(rootCaCerts); 
+            // we expect that these are all CA certs, so we are not specifically checking:
+            /*
+            for(X509Certificate cert : cacerts) {
+                if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert;  0 and above indicates a CA cert
+                    cacerts.remove(cert);
+                }
+            }*/
+            return cacerts;
+        } catch (CertificateException ex) {
+            throw new ApiException("Invalid certificate", ex);
+        }         
     }
+
+    @Override
+    public Set<X509Certificate> getPrivacyCaCertificates() throws IOException, ApiException, SignatureException {
+        String privacyca = text(httpGet(msurl("/ca/certificate/privacyca/current")));
+        try {
+            List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(privacyca);
+            HashSet<X509Certificate> cacerts = new HashSet<X509Certificate>();
+            cacerts.addAll(privacyCaCerts);
+            // we expect that these are all CA certs, so we are not specifically checking:
+            /*
+            for(X509Certificate cert : cacerts) {
+                if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert;  0 and above indicates a CA cert
+                    cacerts.remove(cert);
+                }
+            }*/
+            return cacerts;
+        } catch (CertificateException ex) {
+            throw new ApiException("Invalid certificate", ex);
+        }
+    }
+    
+    // includes the server's saml certificate and any root certificates if available
+    @Override
+    public Set<X509Certificate> getSamlCertificates() throws IOException, ApiException, SignatureException {
+        String samlca = text(httpGet(msurl("/ca/certificate/saml/current")));
+        try {
+            List<X509Certificate> samlCaCerts = X509Util.decodePemCertificates(samlca);
+            HashSet<X509Certificate> certs = new HashSet<X509Certificate>();
+            certs.addAll(samlCaCerts);
+            return certs;
+        } catch (CertificateException ex) {
+            throw new ApiException("Invalid certificate", ex);
+        }
+    }
+    
+    // includes the server's tls certificate and any root certificates if available
+    @Override
+    public Set<X509Certificate> getTlsCertificates() throws IOException, ApiException, SignatureException {
+        String tlsca = text(httpGet(msurl("/ca/certificate/tls/current")));
+        try {
+            List<X509Certificate> tlsCaCerts = X509Util.decodePemCertificates(tlsca);
+            HashSet<X509Certificate> certs = new HashSet<X509Certificate>();
+            certs.addAll(tlsCaCerts);
+            return certs;
+        } catch (CertificateException ex) {
+            throw new ApiException("Invalid certificate", ex);
+        }        
+    }
+    
     
 
     @Override

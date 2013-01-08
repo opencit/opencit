@@ -341,9 +341,9 @@ public class KeystoreUtil {
             throw new CryptographyException("Cannot register user", e);
         }
         
+        // download root ca certs from the server
         try {
-            // download all ca certs from the server
-            Set<X509Certificate> cacerts = c.getCaCertificates();
+            Set<X509Certificate> cacerts = c.getRootCaCertificates();
             for(X509Certificate cacert : cacerts) {
                 try {
                     log.info("Adding CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
@@ -351,35 +351,53 @@ public class KeystoreUtil {
                 }
                 catch(Exception e) {
                     log.error(e.toString());
-                    e.printStackTrace();
-                    throw new CryptographyException("Cannot add CA certificate", e);
                 }
             }            
         }
         catch(Exception e) {
             log.error(e.toString());
-            e.printStackTrace(System.err);
-            if( e.getCause() != null ) {
-               log.error("caused by: "+e.getCause().toString());
-               e.getCause().printStackTrace(System.err);
-               if( e.getCause().getCause() != null ) {
-                    log.error("caused by: "+e.getCause().getCause().toString());
-                    e.getCause().getCause().printStackTrace(System.err);
-               }
-            }
-            throw new CryptographyException("Cannot download CA certificates", e);
         }
         
+        // download privacy ca certs from server
         try {
-            // download server's saml certificate and save in the keystore
-            X509Certificate samlCertificate = c.getSamlCertificate(); //IOException , SignatureException, ApiException
-            keystore.addTrustedSamlCertificate(samlCertificate, server.getHost()); // KeyManagementException
-            log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost() }); // CertificateEncodingException
-            keystore.save();        //CertificateException
+            Set<X509Certificate> cacerts = c.getPrivacyCaCertificates();
+            for(X509Certificate cacert : cacerts) {
+                try {
+                    log.info("Adding Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                    keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                }
+                catch(Exception e) {
+                    log.error(e.toString());
+                }
+            }            
         }
         catch(Exception e) {
-            throw new CryptographyException("Cannot save SAML certificate", e);
+            log.error(e.toString());
         }
+        
+        // download saml ca certs from server
+        try {
+            Set<X509Certificate> cacerts = c.getSamlCertificates();
+            for(X509Certificate cert : cacerts) {
+                try {
+                    if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert; so we add it as the saml cert
+                        keystore.addTrustedSamlCertificate(cert, server.getHost());
+                        log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                    }
+                    else {
+                        keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
+                        log.info("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                    }
+                }
+                catch(Exception e) {
+                    log.error(e.toString());
+                }
+            }            
+        }
+        catch(Exception e) {
+            log.error(e.toString());
+        }
+        
         return keystore;
     }
     
