@@ -1203,6 +1203,12 @@ glassfish_install() {
   GLASSFISH_YUM_PACKAGES="unzip"
   GLASSFISH_APT_PACKAGES="unzip"
   glassfish_detect
+
+  glassfish_running
+  if [[ -n "$GLASSFISH_RUNNING" ]]; then
+    glassfish_stop
+  fi
+
   if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
     if [ -d /usr/share/glassfish3 ]; then
       # we do not remove it automatically in case there are applications or data in there that the user wants to save!!
@@ -1250,6 +1256,9 @@ glassfish_install() {
   glassfish_admin_user
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_memory 2048 512
+  # must restart glassfish for enable-secure-admin and memory options to take effect
+  glassfish_stop
+  glassfish_start
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function
