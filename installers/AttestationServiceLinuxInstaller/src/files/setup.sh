@@ -33,12 +33,12 @@ WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
 mkdir -p "${package_dir}"
-mkdir -p "${package_dir}"/database
+#mkdir -p "${package_dir}"/database
 chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
 cp $WAR_PACKAGE "${package_dir}"
-cp sql/*.sql "${package_dir}"/database/
+#cp sql/*.sql "${package_dir}"/database/
 chmod 600 "${package_name}.properties"
 cp "${package_name}.properties" "${package_dir}/${package_name}.properties.example"
 cp "audit-handler.properties" "${package_dir}/audit-handler.properties.example"
