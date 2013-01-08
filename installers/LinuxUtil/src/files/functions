@@ -1196,6 +1196,10 @@ glassfish_enable_logging() {
   $glassfish set-log-levels com.sun.enterprise.server.logging.GFFileHandler=ALL
 }
 
+# must restart glassfish for enable-secure-admin and memory options to take effect, so call these after calling this function:
+#  glassfish_stop
+#  glassfish_start
+# (they are not done automatically in case the caller has other glassfish setup that would also require a restart)
 # Environment:
 # - glassfish_required_version
 glassfish_install() {
@@ -1256,9 +1260,6 @@ glassfish_install() {
   glassfish_start
   #glassfish_admin_user
   glassfish_memory 2048 512
-  # must restart glassfish for enable-secure-admin and memory options to take effect
-  glassfish_stop
-  glassfish_start
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function

@@ -17,5 +17,7 @@ java_require
 glassfish_install $GLASSFISH_PACKAGE
 
 cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
+glassfish_stop
+glassfish_start
 
 echo
