@@ -37,7 +37,7 @@ WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
 mkdir -p "${package_dir}"
-#mkdir -p "${package_dir}"/database
+mkdir -p "${package_dir}"/database
 chmod 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
