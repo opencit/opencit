@@ -24,16 +24,19 @@ prompt_with_default_password AS_ADMIN_PASSWORD "Glassfish admin password:"
 
 export AS_ADMIN_PASSWORDFILE=/etc/glassfish/admin.passwd
 mkdir -p /etc/glassfish
-touch /etc/glassfish/admin.user /etc/glassfish/admin.passwd
-chmod 600 /etc/glassfish/admin.user /etc/glassfish/admin.passwd
+touch /etc/glassfish/admin.user /etc/glassfish/admin.passwd /etc/glassfish/admin.passwd.old
+chmod 600 /etc/glassfish/admin.user /etc/glassfish/admin.passwd /etc/glassfish/admin.passwd.old
 echo "AS_ADMIN_USER=${AS_ADMIN_USER}" > /etc/glassfish/admin.user
 echo "AS_ADMIN_PASSWORD=${AS_ADMIN_PASSWORD}" > /etc/glassfish/admin.passwd
+echo "AS_ADMIN_PASSWORD=" > /etc/glassfish/admin.passwd.old
+#echo "AS_ADMIN_MASTERPASSWORD=changeit" >> /etc/glassfish/admin.passwd
 
 glassfish_require
 echo "Glassfish will now ask you for the same information:"
 # $glassfish is an alias for full path of asadmin
-$glassfish change-admin-password --user admin
+$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old change-admin-password
 # XXX it asks for the password twice ...  can we script with our known value?
-$glassfish enable-secure-admin
+$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old start-domain
+$glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old enable-secure-admin
 
 echo
