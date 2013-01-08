@@ -1252,9 +1252,9 @@ glassfish_install() {
     glassfish_create_ssl_cert_prompt
   fi
 
-  glassfish_start
-  glassfish_admin_user
   glassfish_permissions "${GLASSFISH_HOME}"
+  glassfish_start
+  #glassfish_admin_user
   glassfish_memory 2048 512
   # must restart glassfish for enable-secure-admin and memory options to take effect
   glassfish_stop
@@ -1780,14 +1780,14 @@ webservice_start() {
   local glassfish_application_name="$1"
   webservice_running  "${glassfish_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    $glassfish  --user=admin --passwordfile=/etc/glassfish/admin.passwd enable $WEBSERVICE_DEPLOYED
+    $glassfish enable $WEBSERVICE_DEPLOYED
   fi
 }
 webservice_stop() {
   local glassfish_application_name="$1"
   webservice_running "${glassfish_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    $glassfish  --user=admin --passwordfile=/etc/glassfish/admin.passwd disable $WEBSERVICE_DEPLOYED
+    $glassfish disable $WEBSERVICE_DEPLOYED
   fi
 }
 
@@ -1838,10 +1838,10 @@ webservice_install() {
   local WAR_FILE="${webservice_war_file}"
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then
       echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-      ${glassfish}  --user=admin --passwordfile=/etc/glassfish/admin.passwd redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
+      ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
     else
       echo "Deploying ${glassfish_application_name} to Glassfish..."
-      ${glassfish}  --user=admin --passwordfile=/etc/glassfish/admin.passwd deploy --name ${glassfish_application_name} ${WAR_FILE}
+      ${glassfish} deploy --name ${glassfish_application_name} ${WAR_FILE}
     fi
 }
 
@@ -1852,7 +1852,7 @@ webservice_uninstall() {
   local WAR_NAME="${glassfish_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
-    ${glassfish}  --user=admin --passwordfile=/etc/glassfish/admin.passwd undeploy ${WEBSERVICE_DEPLOYED}
+    ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
   else
     echo "Application is not deployed on Glassfish; skipping undeploy"
   fi
