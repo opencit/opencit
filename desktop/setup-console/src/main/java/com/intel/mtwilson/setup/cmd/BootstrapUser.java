@@ -45,11 +45,18 @@ public class BootstrapUser implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
-        String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), System.getenv("MTWILSON_API_BASEURL"), "https://"+getLocalHostAddress()+":8181/" });
         File directory = null;
         if( args.length > 0 ) { directory = new File(args[0]); } else { directory = new File("."); }
+        String url = null;
         // ignore args[1] it's the baseurl that we already know
-        String url = readInputStringWithPromptAndDefault("Mt Wilson URL", defaultUrl);
+        String envUrl = System.getenv("MTWILSON_API_BASEURL");
+        if( envUrl != null && !envUrl.isEmpty() ) {
+            url = envUrl;
+        }
+        else {
+            String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), "https://"+getLocalHostAddress()+":8181/" });
+            url = readInputStringWithPromptAndDefault("Mt Wilson URL", defaultUrl);
+        }
         String username = null;
         String password = null;
         if( args.length > 2 ) { username = args[2]; } else { username = readInputStringWithPrompt("Username"); }

@@ -100,11 +100,11 @@ public class RegisterUser extends AbstractCommand {
                 c.register(user);
             }
             catch(javax.net.ssl.SSLException e) {
-                if( e.getMessage().contains("hostname in certificate didn't match") ) {
+                if( e.getMessage().contains("hostname in certificate didn't match") && !"false".equals(System.getenv("MTWILSON_API_SSL_VERIFY_HOSTNAME")) ) {
                     System.err.println(e.getMessage());
                     System.out.print("Do you want to continue anyway? [Y/N] ");
                     String ignoreHostname = in.readLine();
-                    if( ignoreHostname.toUpperCase().charAt(0) == 'Y' ) {
+                    if( ignoreHostname != null && ignoreHostname.length() > 0 && ignoreHostname.toUpperCase().charAt(0) == 'Y' ) {
                         System.err.println("To avoid this prompt in the future, address the server by the hostname in its SSL certificate or set the environment variable MTWILSON_API_SSL_VERIFY_HOSTNAME=false");
                         Properties p2 = new Properties();
                         p2.setProperty("mtwilson.api.ssl.verifyHostname", "false");
