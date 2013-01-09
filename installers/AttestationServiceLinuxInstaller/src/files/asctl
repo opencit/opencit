@@ -61,20 +61,17 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 # Input: Privacy CA Server and Password
 # Output: PrivacyCA.cer and Endorsement.cer are saved into the config dir
 download_privacyca_certs() {
-  local privacyca_server="${PRIVACYCA_SERVER}"
-  local privacyca_username="${PRIVACYCA_DOWNLOAD_USERNAME}"
-  local privacyca_password="${PRIVACYCA_DOWNLOAD_PASSWORD}"
   local privacyca_server_config
-  if [ -z "${privacyca_server}" ]; then
+  if [ -z "${PRIVACYCA_SERVER}" ]; then
     privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
-    privacyca_server=${privacyca_server_config}
-    prompt_with_default privacyca_server "Privacy CA Server:"
+    PRIVACYCA_SERVER=${privacyca_server_config}
+    prompt_with_default PRIVACYCA_SERVER "Privacy CA Server:"
   fi
 
-  if [ -n "${privacyca_server}" ]; then
+  if [ -n "${PRIVACYCA_SERVER}" ]; then
     # check if the privacy ca password is saved in a properties file
-    local default_privacyca_username=${privacyca_username:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
-    local default_privacyca_password=${privacyca_password:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`}
+    local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
+    local default_privacyca_password=${PRIVACYCA_DOWNLOAD_PASSWORD:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`}
     echo "Login to download the Privacy CA client files"
     prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
     prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
@@ -86,7 +83,7 @@ download_privacyca_certs() {
     touch $zipfile
     chmod 600 $zipfile
     # XXX password in URL is insecure in systems that have user accounts or software which should not know this password
-    wget --no-proxy --no-check-certificate -q "https://${privacyca_server}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${privacyca_username}&password=${privacyca_password}" -O ${zipfile}
+    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O ${zipfile}
     if [ -s ${zipfile} ]; then
       mkdir -p /tmp/clientfiles.x
       chmod -R 600 /tmp/clientfiles.x
@@ -99,7 +96,7 @@ download_privacyca_certs() {
       rm -r /tmp/clientfiles.x
       # if we got here with user input then save the Privacy CA server name in properties file
       if [ -z "${privacyca_server_config}" ]; then
-        update_property_in_file privacyca.server "${package_config_filename}" "${privacyca_server}"
+        update_property_in_file privacyca.server "${package_config_filename}" "${PRIVACYCA_SERVER}"
       fi
       # use the password in hisprovisioner.propeties to extract the Endorsement certificate from endorsement.p12, then delete the password
       if [ -f "${intel_conf_dir}/endorsement.p12" ]; then
@@ -116,7 +113,7 @@ download_privacyca_certs() {
         echo_failure "Cannot unzip package from Privacy CA"
       fi
     else
-      echo_failure "Cannot connect to Privacy CA: ${privacyca_server}"
+      echo_failure "Cannot connect to Privacy CA: ${PRIVACYCA_SERVER}"
     fi
   else
     echo_failure "PrivacyCA Server and Password are required in order to download certificates"

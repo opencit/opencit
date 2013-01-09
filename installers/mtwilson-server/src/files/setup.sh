@@ -52,13 +52,14 @@ echo
 # XXX TODO ask about glassfish vs tomcat
 
 mysql_userinput_connection_properties
-export mysql_hostname mysql_portnum mysql_database mysql_username mysql_password
+#export mysql_hostname mysql_portnum mysql_database mysql_username mysql_password
+export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
 
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 # Install MySQL server (if user selected localhost)
-if [[ "$mysql_hostname" == "127.0.0.1" || "$mysql_hostname" == "localhost" || -n `echo "${hostaddress_list}" | grep "$mysql_hostname"` ]]; then
+if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
   mysql_server_install
   mysql_start
 fi
