@@ -43,12 +43,12 @@ server_pca_password=`read_property_from_file ClientFilesDownloadPassword ${intel
 client_pca_username=${server_pca_username:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
 client_pca_password=${server_pca_password:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
 
-prompt_with_default PRIVACYCA_IPADDRESS "Privacy CA Server IP Address:"
+prompt_with_default PRIVACYCA_SERVER "Privacy CA Server IP Address:"
 echo "Login to download the Privacy CA client files"
-prompt_with_default PRIVACYCA_USERNAME "Username:" ${client_pca_username}
-prompt_with_default_password PRIVACYCA_PASSWORD "Password:" ${client_pca_password}
+prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${client_pca_username}
+prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${client_pca_password}
 
-if [ -z "${PRIVACYCA_IPADDRESS}" ]; then
+if [ -z "${PRIVACYCA_SERVER}" ]; then
   echo_failure "Cannot connect to Privacy CA: missing IP address"
   exit 1
 fi
@@ -57,7 +57,7 @@ echo "Connecting to PCA..."
 zipfile=/tmp/clientfiles.zip
 touch $zipfile
 chmod 600 $zipfile
-wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_IPADDRESS}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_USERNAME}&password=${PRIVACYCA_PASSWORD}" -O $zipfile
+wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
 unzip -o $zipfile -d /etc/intel/cloudsecurity
 rm $zipfile
 
@@ -70,12 +70,12 @@ this_code_is_deprecated__trust_agent_now_uses_configured_ip_or_hostname() {
 known_privacyca_address=`cat /etc/hosts | grep privacyca.service.com | awk '{ print $1 }'`
 if [ -z "$known_privacyca_address" ]; then
   echo "Adding privacyca.service.com to /etc/hosts"
-  echo "${PRIVACYCA_IPADDRESS} privacyca.service.com" >> /etc/hosts
+  echo "${PRIVACYCA_SERVER} privacyca.service.com" >> /etc/hosts
 else
-  if [[ "$known_privacyca_address" != "${PRIVACYCA_IPADDRESS}" ]]; then
-    echo "Please update privacyca.service.com in /etc/hosts from $known_privacyca_address to ${PRIVACYCA_IPADDRESS}"
+  if [[ "$known_privacyca_address" != "${PRIVACYCA_SERVER}" ]]; then
+    echo "Please update privacyca.service.com in /etc/hosts from $known_privacyca_address to ${PRIVACYCA_SERVER}"
     #backup_file /etc/hosts
-    #replace_hostname_in_etc_hosts privacyca.service.com $known_privacyca_address ${PRIVACYCA_IPADDRESS}
+    #replace_hostname_in_etc_hosts privacyca.service.com $known_privacyca_address ${PRIVACYCA_SERVER}
   fi
 fi
 }
@@ -95,7 +95,7 @@ if [ -z "$has_ssl" ]; then
 fi
 
 
-openssl s_client -tls1 -connect ${PRIVACYCA_IPADDRESS}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+openssl s_client -tls1 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
 openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
 if [ -f "${package_dir}/cert/privacyca.ssl.crt" ]; then rm ${package_dir}/cert/privacyca.ssl.txt; fi
 echo "Importing Privacy CA SSL Certificate into Trust Agent's Keystore..."

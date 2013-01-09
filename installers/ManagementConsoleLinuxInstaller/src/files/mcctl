@@ -36,11 +36,13 @@ configure_keystore_dir() {
 
 configure_api_baseurl() {
   # setup mtwilson.api.baseurl
-  if [ -n "${MTWILSON_SERVER}" ]; then
+  local input_api_baseurl
+  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
     mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-    local input_api_baseurl
     prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
     if [[ "$input_api_baseurl" == "http*" ]]; then
       mtwilson_api_baseurl="$input_api_baseurl"
@@ -68,11 +70,11 @@ bootstrap_first_user() {
   local datestr=`date +%Y-%m-%d.%H%M`
 
   # XXX as implemented, the BootstrapUser command only works when Management Console is on same server as Management Service... TODO need to add ssh for remote access, or ask for adtabase connection details and just go and approve it oursevels (well, from the java code)
-  export mc_first_username mc_first_password
-  prompt_with_default mc_first_username "Username:" "admin"
-  prompt_with_default_password mc_first_password
-  $mtwilson setup BootstrapUser ${package_keystore_users_dir} ${mtwilson_api_baseurl} "${mc_first_username}" env:mc_first_password
-  #msctl approve-user ${package_keystore_users_dir} "${mc_first_username}" "${mc_first_password}"
+  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
+  prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
+  prompt_with_default_password MC_FIRST_PASSWORD
+  $mtwilson setup BootstrapUser ${package_keystore_users_dir} ${mtwilson_api_baseurl} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
+  #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
 }
 
 bootstrap_first_user__Not_Used() {

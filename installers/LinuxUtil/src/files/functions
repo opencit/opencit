@@ -174,6 +174,13 @@ is_java_version_at_least() {
 prompt_yes_no() {
   local resultvarname="${1}"
   local userprompt="${2}"
+  # bug #512 add support for answer file
+  if [ -n "${!resultvarname}" ]; then
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    echo "$userprompt [Y/n] ${!resultvarname}"
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+    return
+  fi
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
   echo -n "$userprompt [Y/n] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
@@ -209,6 +216,13 @@ prompt_with_default() {
   local userprompt="${2}"
   local default_value
   eval default_value="${3:-\$$resultvarname}"
+  # bug #512 add support for answer file
+  if [ -n "${!resultvarname:-$default_value}" ]; then
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    echo "$userprompt [$default_value] ${!resultvarname:-$default_value}"
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+    return
+  fi
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
   echo -n "$userprompt [$default_value] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
@@ -225,6 +239,13 @@ prompt_with_default_password() {
   local default_value
   eval default_value="${3:-\$$resultvarname}"
   local default_value_display="********"
+  # bug #512 add support for answer file
+  if [ -n "${!resultvarname:-$default_value}" ]; then
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    echo "$userprompt [$default_value_display] ${!resultvarname:-$default_value_display}"
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+    return
+  fi
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
   echo -n "$userprompt [$default_value_display] "
@@ -589,10 +610,10 @@ ssh_fingerprints() {
 ### FUNCTION LIBRARY: MYSQL FUNCTIONS
 
 mysql_default_connection_properties() {
-    if [ -z "$mysql_hostname" ]; then mysql_hostname="127.0.0.1"; fi
-    if [ -z "$mysql_portnum" ]; then mysql_portnum="3306"; fi
-    if [ -z "$mysql_username" ]; then mysql_username="root"; fi
-    if [ -z "$mysql_password" ]; then mysql_password=""; fi
+    if [ -z "$MYSQL_HOSTNAME" ]; then MYSQL_HOSTNAME="127.0.0.1"; fi
+    if [ -z "$MYSQL_PORTNUM" ]; then MYSQL_PORTNUM="3306"; fi
+    if [ -z "$MYSQL_USERNAME" ]; then MYSQL_USERNAME="root"; fi
+    if [ -z "$MYSQL_PASSWORD" ]; then MYSQL_PASSWORD=""; fi
     if [ -z "$mysql_database" ]; then mysql_database="mw_as"; fi
 }
 
@@ -604,19 +625,19 @@ mysql_default_connection_properties() {
 mysql_read_connection_properties() {
     local config_file="$1"
     local prefix="${2:-mysql}"
-    mysql_hostname=`read_property_from_file ${prefix}.host "${config_file}"`
-    mysql_portnum=`read_property_from_file ${prefix}.port "${config_file}"`
-    mysql_username=`read_property_from_file ${prefix}.user "${config_file}"`
-    mysql_password=`read_property_from_file ${prefix}.password "${config_file}"`
+    MYSQL_HOSTNAME=`read_property_from_file ${prefix}.host "${config_file}"`
+    MYSQL_PORTNUM=`read_property_from_file ${prefix}.port "${config_file}"`
+    MYSQL_USERNAME=`read_property_from_file ${prefix}.user "${config_file}"`
+    MYSQL_PASSWORD=`read_property_from_file ${prefix}.password "${config_file}"`
     mysql_database=`read_property_from_file ${prefix}.schema "${config_file}"`
 }
 mysql_write_connection_properties() {
     local config_file="$1"
     local prefix="${2:-mysql}"
-    update_property_in_file ${prefix}.host "${config_file}" "${mysql_hostname}"
-    update_property_in_file ${prefix}.port "${config_file}" "${mysql_portnum}"
-    update_property_in_file ${prefix}.user "${config_file}" "${mysql_username}"
-    update_property_in_file ${prefix}.password "${config_file}" "${mysql_password}"
+    update_property_in_file ${prefix}.host "${config_file}" "${MYSQL_HOSTNAME}"
+    update_property_in_file ${prefix}.port "${config_file}" "${MYSQL_PORTNUM}"
+    update_property_in_file ${prefix}.user "${config_file}" "${MYSQL_USERNAME}"
+    update_property_in_file ${prefix}.password "${config_file}" "${MYSQL_PASSWORD}"
     update_property_in_file ${prefix}.schema "${config_file}" "${mysql_database}"
 }
 
@@ -626,11 +647,11 @@ mysql_write_connection_properties() {
 mysql_userinput_connection_properties() {
     echo "Configuring MySQL Connection..."
     mysql_default_connection_properties
-    prompt_with_default mysql_hostname "Hostname:"
-    prompt_with_default mysql_portnum "Port Num:"
+    prompt_with_default MYSQL_HOSTNAME "Hostname:"
+    prompt_with_default MYSQL_PORTNUM "Port Num:"
     prompt_with_default mysql_database "Database:"
-    prompt_with_default mysql_username "Username:"
-    prompt_with_default_password mysql_password "Password:"    
+    prompt_with_default MYSQL_USERNAME "Username:"
+    prompt_with_default_password MYSQL_PASSWORD "Password:"    
 }
 
 mysql_clear() {
@@ -729,7 +750,7 @@ mysql_require() {
 mysql_connection() {
   mysql_require
   mysql_default_connection_properties
-  mysql_connect="$mysql --batch --host=${mysql_hostname} --port=${mysql_portnum} --user=${mysql_username} --password=${mysql_password}"
+  mysql_connect="$mysql --batch --host=${MYSQL_HOSTNAME} --port=${MYSQL_PORTNUM} --user=${MYSQL_USERNAME} --password=${MYSQL_PASSWORD}"
 }
 
 # Environment:
@@ -836,9 +857,8 @@ mysql_configure_connection() {
     while [ -n "$mysql_connection_error" ]
     do
       echo_warning "Cannot connect to MySQL: $mysql_connection_error"
-      local configure_now
-      prompt_yes_no configure_now "Do you want to configure it now?"
-      if [[ "no" == "$configure_now" ]]; then
+      prompt_yes_no MYSQL_RETRY_CONFIGURE_AFTER_FAILURE "Do you want to configure it now?"
+      if [[ "no" == "$MYSQL_RETRY_CONFIGURE_AFTER_FAILURE" ]]; then
         echo "MySQL settings are in ${package_config_filename}"
         echo "Run '${script_name} setup' after configuring to continue."
         return 1
@@ -846,7 +866,7 @@ mysql_configure_connection() {
       mysql_userinput_connection_properties
       mysql_test_connection
     done
-      echo_success "Connected to database \`${mysql_database}\` on ${mysql_hostname}"
+      echo_success "Connected to database \`${mysql_database}\` on ${MYSQL_HOSTNAME}"
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
@@ -854,13 +874,14 @@ mysql_configure_connection() {
 #      fi
 }
 
+
 # requires a mysql connection that can access the existing database, OR (if it doesn't exist)
 # requires a mysql connection that can create databases and grant privileges
 # call mysql_configure_connection before calling this function
 mysql_create_database() {
   mysql_test_connection
   local create_sql="CREATE DATABASE \`${mysql_database}\`;"
-  local grant_sql="GRANT ALL ON \`${mysql_database}\`.* TO \`${mysql_username}\` IDENTIFIED BY '${mysql_password}';"
+  local grant_sql="GRANT ALL ON \`${mysql_database}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
   if [ -z "$mysql_connection_error" ]; then
     if [ -n "$is_mysql_available" ]; then
       echo_success "Database \`${mysql_database}\` already exists"
@@ -901,7 +922,7 @@ mysql_install_scripts() {
   local scriptlist="$@"
   mysql_test_connection
   if [ -n "$is_mysql_available" ]; then
-    echo "Connected to ${mysql_hostname} as ${mysql_username}. Executing script..."
+    echo "Connected to ${MYSQL_HOSTNAME} as ${MYSQL_USERNAME}. Executing script..."
     for scriptname in $scriptlist
     do
         mysql_run_script $scriptname
@@ -1013,7 +1034,8 @@ mysql_create_ssl() {
   echo "Creating MySQL SSL Certificate..."
   mkdir -p "${mysql_ssl_dir}"
   if [ -z "$dname" ]; then
-    prompt_with_default mysql_ssl_cert_dname "Common name (username):"
+    prompt_with_default MYSQL_SSL_CERT_CN "Common name (username):"
+    dname=${MYSQL_SSL_CERT_CN}
   fi
   local filename=`echo "${dname}" | sed "s/[^a-zA-Z0-9-]/_/g"`
   local ssl_key="${mysql_ssl_dir}/${filename}.key.pem"
@@ -1396,10 +1418,10 @@ glassfish_create_ssl_cert_prompt() {
     echo_warning "This feature has been disabled: glassfish_create_ssl_cert_prompt"
     return
     # SSL Certificate setup
-    local should_create_sslcert
-    prompt_yes_no should_create_sslcert "Do you want to set up an SSL certificate for Glassfish?"
+    #local should_create_sslcert
+    prompt_yes_no GLASSFISH_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Glassfish?"
     echo
-    if [ "${should_create_sslcert}" == "yes" ]; then
+    if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
       java_require
       glassfish_require
       local ssl_domain

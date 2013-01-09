@@ -62,8 +62,8 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 # Output: PrivacyCA.cer and Endorsement.cer are saved into the config dir
 download_privacyca_certs() {
   local privacyca_server="${PRIVACYCA_SERVER}"
-  local privacyca_username="${PRIVACYCA_USERNAME}"
-  local privacyca_password="${PRIVACYCA_PASSWORD}"
+  local privacyca_username="${PRIVACYCA_DOWNLOAD_USERNAME}"
+  local privacyca_password="${PRIVACYCA_DOWNLOAD_PASSWORD}"
   local privacyca_server_config
   if [ -z "${privacyca_server}" ]; then
     privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`

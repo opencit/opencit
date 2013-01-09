@@ -60,7 +60,9 @@ configure_keystore_dir() {
 
 configure_api_baseurl() {
   # setup mtwilson.api.baseurl
-  if [ -n "${MTWILSON_SERVER}" ]; then
+  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
     mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`

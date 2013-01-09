@@ -497,12 +497,14 @@ public class HostBO extends BaseBO {
 		// tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
 		tblHosts.setDescription(host.getDescription());
 		tblHosts.setEmail(host.getEmail());
-		if (host.getIPAddress() != null)
+		if (host.getIPAddress() != null) {
 			tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                }
 		tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
 
-		if (host.getPort() != null)
+		if (host.getPort() != null) {
 			tblHosts.setPort(host.getPort());
+                }
 		tblHosts.setVmmMleId(vmmMleId);
 		tblHosts.setAIKCertificate(certificate);
 		tblHosts.setLocation(location);

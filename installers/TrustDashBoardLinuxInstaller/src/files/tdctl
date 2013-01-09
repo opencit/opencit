@@ -34,7 +34,9 @@ configure_api_baseurl() {
   # setup mtwilson.api.baseurl
   local default_server_url=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
   local server_url_in
-  if [ -n "${MTWILSON_SERVER}" ]; then
+  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+    server_url_in="${MTWILSON_API_BASEURL}"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
     server_url_in="https://${MTWILSON_SERVER}:8181"
   else
     prompt_with_default server_url_in "Mt Wilson Server URL:" "${default_server_url}"

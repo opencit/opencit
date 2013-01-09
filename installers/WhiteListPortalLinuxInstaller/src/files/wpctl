@@ -33,19 +33,21 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 
 configure_api_baseurl() {
   # setup mtwilson.api.baseurl
-  if [ -n "${MTWILSON_SERVER}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
+  local input_api_baseurl
+  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+    input_api_baseurl="$MTWILSON_API_BASEURL"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
+    input_api_baseurl="https://${MTWILSON_SERVER}:8181"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-    local input_api_baseurl
-    prompt_with_default input_api_baseurl "Mt Wilson Server:" "${configured_server_url}"
-    if [[ "$input_api_baseurl" == "http*" ]]; then
-      mtwilson_api_baseurl="$input_api_baseurl"
+    prompt_with_default MTWILSON_API_BASEURL "Mt Wilson Server:" "${configured_server_url}"
+    if [[ "$MTWILSON_API_BASEURL" == "http*" ]]; then
+      input_api_baseurl="$MTWILSON_API_BASEURL"
     else
-      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
+      input_api_baseurl="https://${MTWILSON_API_BASEURL}:8181"
     fi
   fi
-  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
+  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${input_api_baseurl}"
 }
 
 setup_print_summary() {

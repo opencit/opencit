@@ -33,7 +33,9 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 configure_privacyca_url() {
   # PrivacyCaUrl = https://privacyca.server.com:8181/HisPrivacyCAWebServices2
   local privacyca_server privacyca_url
-  if [ -n "$MTWILSON_SERVER" ]; then
+  if [ -n "$PRIVACY_SERVER" ]; then
+    privacyca_server="$PRIVACY_SERVER"
+  elif [ -n "$MTWILSON_SERVER" ]; then
     privacyca_server="$MTWILSON_SERVER"
   else
     prompt_with_default privacyca_server "Privacy CA Server:" 127.0.0.1
