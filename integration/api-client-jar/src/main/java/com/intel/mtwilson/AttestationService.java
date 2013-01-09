@@ -8,7 +8,6 @@ import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
-
 import java.io.IOException;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;

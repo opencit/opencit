@@ -546,6 +546,10 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     }
     
     public void signPrivacyCaCertWithRootCaCert() {
+        if( ctx.privacyCA.ekSigningKeyCertificate == null ) {
+            fault("Cannot sign Privacy CA EK Signing Key Certificate: missing certificate");
+            return;
+        }
         X509Builder x509 = X509Builder.factory()
                 .subjectName(X500Name.asX500Name(ctx.privacyCA.ekSigningKeyCertificate.getSubjectX500Principal()))
                 .subjectPublicKey(ctx.privacyCA.ekSigningKeyCertificate.getPublicKey())
@@ -568,6 +572,18 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     }
     
     public void uploadPrivacyCaKeystoreToServer() throws IOException, KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, KeyManagementException {
+        if( ctx.privacyCA.ekSigningKeyPair == null ) {
+            fault("Cannot upload Privacy CA Keystore to server: missing EK Signing Key Private Key");
+            return;
+        }
+        if( ctx.privacyCA.ekSigningKeyCertificate == null ) {
+            fault("Cannot upload Privacy CA Keystore to server: missing EK Signing Key Certificate");
+            return;
+        }
+        if( ctx.privacyCA.keystore == null ) {
+            fault("Cannot upload Privacy CA Keystore to server: missing keystore");
+            return;
+        }
         RsaCredentialX509 x509 = new RsaCredentialX509(ctx.privacyCA.ekSigningKeyPair.getPrivate(), ctx.privacyCA.ekSigningKeyCertificate);
         ctx.privacyCA.keystore.setRsaCredentialX509(x509, new X509Certificate[] { ctx.rootCa.getCertificate() }, "1", ctx.privacyCA.ekSigningKeyPassword); // XXX TODO  assumes Glassfish default alias; also, do we need to delete the previous one first???
         ctx.privacyCA.keystore.save(); // saves to bytearrayresource we created when downloaded it

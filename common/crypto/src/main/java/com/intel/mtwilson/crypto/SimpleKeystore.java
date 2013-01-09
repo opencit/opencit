@@ -62,6 +62,11 @@ public class SimpleKeystore {
                 try {
                     keystore.load(in, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
                 }
+                catch(NullPointerException e) {
+                    // means file (or database field) was empty or non-existent... even if we "canRead"
+                    log.warn("Failed to read keystore", e);
+                    keystore.load(null, keystorePassword.toCharArray());            
+                }
                 catch(EOFException e) {
                     // means file was empty or non-existent... even if we "canRead"
                     log.warn("Failed to read keystore", e);

@@ -106,12 +106,14 @@ public class VMWareManifestStrategy implements
             public HashMap<String, ? extends IManifest> processReport(String esxVersion,
                     HostTpmAttestationReport report) {
                 log.info("Processing Attestation Report for ESX version " + esxVersion);
-                if(esxVersion.contains("5.1"))
+                if(esxVersion.contains("5.1")) {
                     return new VMWare51Esxi51().getPcrModuleManiFest(report,
                         getRequestedPcrs(host));
-                else
+                }
+                else {
                     return new VMWare50Esxi50().getPcrManiFest(report, 
                             getRequestedPcrs(host));
+                }
             }
 
             @Override

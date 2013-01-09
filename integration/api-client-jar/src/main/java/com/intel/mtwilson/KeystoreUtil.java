@@ -252,6 +252,8 @@ public class KeystoreUtil {
      * 
      * The path to the new keystore will be "directory/username.jks"
      * 
+     * Implies Tls Policy TRUST_FIRST_CERTIFICATE
+     * 
      * @param directory where the keystore should be saved
      * @param username arbitrary, needs to be unique only within the directory, should not contain any path-forming characters such as .. or slashes
      * @param password arbitrary
@@ -267,7 +269,16 @@ public class KeystoreUtil {
         FileResource resource = new FileResource(keystoreFile);
         return createUserInResource(resource, username, password, server, roles);
     }
-    
+
+    /**
+     * 
+     * @param resource
+     * @param username
+     * @param password
+     * @return
+     * @throws CryptographyException
+     * @throws IOException 
+     */
     private static SimpleKeystore createUserKeystoreInResource(Resource resource, String username, String password) throws CryptographyException, IOException {
         try {
             // create the keystore and a new credential
@@ -308,6 +319,8 @@ public class KeystoreUtil {
      * 
      * The underlying Resource implementation determines the location where the
      * keystore will be saved.
+     * 
+     * Implies Tls Policy TRUST_FIRST_CERTIFICATE
      * 
      * @param resource like FileResource or ByteArrayResource to which the keystore will be saved
      * @param username arbitrary, needs to be unique only within the resource container, and any restrictions on allowed characters are determined by the resource implmenetation

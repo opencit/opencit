@@ -4,9 +4,6 @@
  */
 package com.intel.mtwilson.tls;
 
-import com.intel.mtwilson.tls.TlsPolicy;
-import java.security.cert.X509Certificate;
-import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

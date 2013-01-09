@@ -8,8 +8,11 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.x500.DN;
+import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +92,21 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
     @Override
     public void addCertificate(X509Certificate certificate) throws KeyManagementException {
         keystore.addTrustedSslCertificate(certificate, certificate.getSubjectX500Principal().getName());
+        try {
+            keystore.save();
+        }
+        catch(KeyStoreException e) {
+            throw new KeyManagementException("Cannot add certificate to keystore: "+e.toString(), e);
+        }
+        catch(IOException e) {
+            throw new KeyManagementException("Cannot add certificate to keystore: "+e.toString(), e);
+        }
+        catch(NoSuchAlgorithmException e) {
+            throw new KeyManagementException("Cannot add certificate to keystore: "+e.toString(), e);
+        }
+        catch(CertificateException e) {
+            throw new KeyManagementException("Cannot add certificate to keystore: "+e.toString(), e);
+        }
         hashCode = null; // signal to recalculate the hashcode due to changed contents
     }
 /*
