@@ -7,6 +7,9 @@ export mysql_required_version=5.0
 export glassfish_required_version=3.0
 export java_required_version=1.6.0_29
 
+if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+
 find_installer() {
   local installer="${1}"
   binfile=`ls -1 $installer-*.bin | head -n 1`
