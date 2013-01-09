@@ -9,6 +9,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
 /**
  * TODO: Once we use the same API DataTypes package in the backend service, we can 
  * use the OS and OEM data objects here instead of declaring them separately again.
+ * TODO replace pcrName and pcrDigest with the Pcr object.
+ * XXX TODO oemName should be moved out of this class (and corresponding database table)
+ * and into a separate table that links oem's to mle's. or create a separate class
+ * for Mle(Name,Version,Os,Pcr) and BiosMle(Name,Version,Oem,Pcr) with corresponding
+ * separate database tables. "either or" optional fields pervade the entire application
+ * complicating logic everywhere, and in most cases a piece of code is only interested
+ * in one or the other so a streamlined class is much easier to read at first sight.
  * 
  * @author ssbangal
  */

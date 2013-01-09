@@ -112,8 +112,4 @@ CREATE TABLE `mw_configuration` (
 --  `weight` int(11) DEFAULT '0',
 -- Also if all values are encoded with some type then we won't have ambiguity. FOr example, encoding a string:  s:6:hello!    or use a specific JSON hash or array structure for encoding
 
--- bug #497 allow administrator to save trusted vcenter ssl certificate and verify it on each connection
-ALTER TABLE `mw_hosts` ADD COLUMN `SSL_Certificate` blob NULL;
-ALTER TABLE `mw_hosts` ADD COLUMN `SSL_Policy` varchar(255) NULL;
-
 INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120920085200,NOW(),'patch for 1.1');

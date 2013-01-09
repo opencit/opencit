@@ -86,12 +86,17 @@ public abstract class ConfigBase {
 					+ "CloudSecurity" + File.separator + propertiesFilename));
 			files.add(new File(System.getProperty("user.home") + File.separator
 					+ propertiesFilename));
+                        
+			files.add(new File("C:" + File.separator + "Intel" + File.separator
+					+ "CloudSecurity" + File.separator + "mtwilson.properties"));
+                        
 		}
 		// linux-specific location
 		if (System.getProperty("os.name", "").toLowerCase().contains("linux")
 				|| System.getProperty("os.name", "").toLowerCase()
 						.contains("unix")) {
 			files.add(new File("/etc/intel/cloudsecurity/" + propertiesFilename));
+			files.add(new File("/etc/intel/cloudsecurity/mtwilson.properties"));
 		}
 		// add all the files we found
 		for (File f : files) {

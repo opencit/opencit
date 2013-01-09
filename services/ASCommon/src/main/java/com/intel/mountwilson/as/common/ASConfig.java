@@ -67,12 +67,25 @@ public class ASConfig extends ConfigBase{
     public static Properties getJpaProperties() {
         Configuration config = getConfiguration();
         Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", config.getString("mountwilson.as.db.driver", "com.mysql.jdbc.Driver"));
-        prop.put("javax.persistence.jdbc.url" ,config.getString("mountwilson.as.db.url",String.format("jdbc:mysql://%s:3306/%s?autoReconnect=true",
-                    config.getString("mountwilson.as.db.host", "localhost"),
-                    config.getString("mountwilson.as.db.schema", "mw_as"))));
-        prop.put("javax.persistence.jdbc.user" ,config.getString("mountwilson.as.db.user", "root"));
-        prop.put("javax.persistence.jdbc.password", config.getString("mountwilson.as.db.password", "password"));
+        prop.put("javax.persistence.jdbc.driver", 
+                config.getString("mountwilson.as.db.driver", 
+                config.getString("mtwilson.db.driver",
+                "com.mysql.jdbc.Driver")));
+        prop.put("javax.persistence.jdbc.url" , 
+                config.getString("mountwilson.as.db.url",
+                config.getString("mtwilson.db.url",
+                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                    config.getString("mountwilson.as.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.as.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.as.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        prop.put("javax.persistence.jdbc.user",
+                config.getString("mountwilson.as.db.user",
+                config.getString("mtwilson.db.user",
+                "root")));
+        prop.put("javax.persistence.jdbc.password", 
+                config.getString("mountwilson.as.db.password", 
+                config.getString("mtwilson.db.password", 
+                "password")));
         return prop;
     }
     
