@@ -58,10 +58,13 @@ erase_data_with_user_confirmation() {
   echo_warning "You are about to delete the Mt Wilson database."
   prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
   if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
+    mysql_read_connection_properties "${conf_dir}/attestation-service.properties" "mountwilson.as.db"
     mysql_test_connection
     if [ -n "$is_mysql_available" ]; then
       echo "Connected to ${mysql_hostname} as ${mysql_username}. Dropping database..."
       $mysql_connect --force -e "DROP DATABASE ${mysql_database}"
+    else
+      echo_failure "${mysql_connection_error}"
     fi
   fi
 }
@@ -230,7 +233,6 @@ case "$1" in
         echo asctl wlmctl msctl pcactl mcctl wpctl tdctl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
         # java:  rm -rf /usr/share/jdk1.6.0_29
         echo_success "Done"
-        echo_warning "Mt Wilson database in MySQL has not been removed"
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
