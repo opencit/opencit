@@ -53,6 +53,19 @@ mtwilson_saml_cert_report() {
   java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
 }
 
+erase_data_with_user_confirmation() {
+  # WARNING: the following prompt value SHOULD NOT be scripted in an answer file
+  echo_warning "You are about to delete the Mt Wilson database."
+  prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
+  if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
+    mysql_test_connection
+    if [ -n "$is_mysql_available" ]; then
+      echo "Connected to ${mysql_hostname} as ${mysql_username}. Dropping database..."
+      $mysql_connect --force -e "DROP DATABASE ${mysql_database}"
+    fi
+  fi
+}
+
 setup() {
   java_detect; java_env_report > ${env_dir}/java
   glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
@@ -191,6 +204,9 @@ case "$1" in
         ;;
   status)
         all_status
+        ;;
+  erase-data)
+        erase_data_with_user_confirmation
         ;;
   uninstall)
         java_require; glassfish_require

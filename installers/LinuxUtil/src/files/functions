@@ -901,7 +901,7 @@ mysql_install_scripts() {
   local scriptlist="$@"
   mysql_test_connection
   if [ -n "$is_mysql_available" ]; then
-    echo "Connected to ${mysql_hostname} as ${mysql_username}. Importing schema..."
+    echo "Connected to ${mysql_hostname} as ${mysql_username}. Executing script..."
     for scriptname in $scriptlist
     do
         mysql_run_script $scriptname
