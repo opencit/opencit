@@ -62,8 +62,8 @@ erase_data_with_user_confirmation() {
     mysql_read_connection_properties "${conf_dir}/attestation-service.properties" "mountwilson.as.db"
     mysql_test_connection
     if [ -n "$is_mysql_available" ]; then
-      echo "Connected to ${mysql_hostname} as ${mysql_username}. Dropping database..."
-      $mysql_connect --force -e "DROP DATABASE ${mysql_database}"
+      echo "Connected to ${MYSQL_HOSTNAME} as ${MYSQL_USERNAME}. Dropping database..."
+      $mysql_connect --force -e "DROP DATABASE ${MYSQL_DATABASE}"
     else
       echo_failure "${mysql_connection_error}"
     fi
