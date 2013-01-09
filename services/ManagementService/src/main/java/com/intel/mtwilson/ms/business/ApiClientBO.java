@@ -85,7 +85,7 @@ public class ApiClientBO extends BaseBO {
             throw new MSException(ex,ErrorCode.MS_EXPIRED_CERTIFICATE, ex.getMessage());
             
         } catch (CertificateNotYetValidException ex) {
-            throw new MSException(ex,ErrorCode.MS_CERTIFICATE_STILL_NOT_VALID, ex.getMessage());
+            throw new MSException(ex,ErrorCode.MS_CERTIFICATE_NOT_YET_VALID, ex.getMessage());
             
         }
 

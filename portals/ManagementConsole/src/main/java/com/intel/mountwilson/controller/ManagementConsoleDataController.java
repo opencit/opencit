@@ -756,9 +756,9 @@ public class ManagementConsoleDataController extends MultiActionController{
 		responseView.addObject("wlBiosList",wlBios);
 		
 		List<String> wlVMM = new ArrayList<String>();
-		wlVMM.add(HostWhiteListTarget.VMM_GLOBAL.getValue());
 		wlVMM.add(HostWhiteListTarget.VMM_OEM.getValue());
 		wlVMM.add(HostWhiteListTarget.VMM_HOST.getValue());
+		wlVMM.add(HostWhiteListTarget.VMM_GLOBAL.getValue());
 		responseView.addObject("wlVMMList",wlVMM);
 		responseView.addObject("SpecificHostValue",HostWhiteListTarget.VMM_HOST.getValue());
 		return responseView;

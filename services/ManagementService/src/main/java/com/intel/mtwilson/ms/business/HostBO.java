@@ -755,14 +755,15 @@ public class HostBO extends BaseBO {
                     // Retrieve the attestation report from the host
                     attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
                     log.info("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
-                    log.info("Attestation report content: "+attestationReport);
                 } catch (Throwable te) {
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
                                                     
                 if (attestationReport != null && !attestationReport.isEmpty()) {
-                    if (!attestationReport.contains("ComponentName"))
+                    if (!attestationReport.contains("ComponentName")) {
+                        log.info("Attestation report content: "+attestationReport);
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
+                    }
                 }
                     
                 
@@ -796,8 +797,9 @@ public class HostBO extends BaseBO {
                         log.info("Database already has the configuration details for host : " + hostSearchObj.getName());
 
                         // Since we might have changed the MLE configuration on the host, let us update the host
-                        if (gkvHost.Port == null)
+                        if (gkvHost.Port == null) {
                             gkvHost.Port = 0;
+                        }
                         TxtHost newHostObj = new TxtHost(gkvHost);
                         apiClient.updateHost(newHostObj);
                         log.info(String.format("Successfully updated the host %s with the new MLE information.", gkvHost.HostName));                                            
