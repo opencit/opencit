@@ -97,14 +97,14 @@ Detected the following options on this server:"
   # Attestation service auto-configuration
   export PRIVACYCA_SERVER=${MTWILSON_SERVER}
 
-
-  # TODO: prompt for server settings (move from mtwilson-server installer setup.sh to here)
+  # TODO should be completely removed because functions to create certificates are moving to the java tool
+  # ## TODO: prompt for server settings (move from mtwilson-server installer setup.sh to here)
   # create glassfish ssl cert (TODO: move to a "glassfish" control script that should be created to make glassfish management easier... so instead of "mtwilson glassfish-stop" it would be just "glassfish stop"  etc)
-  if [ -n "${MTWILSON_SERVER}" ]; then
-    glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-  else
-    glassfish_create_ssl_cert_prompt
-  fi
+  #if [ -n "${MTWILSON_SERVER}" ]; then
+  #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+  #else
+  #  glassfish_create_ssl_cert_prompt
+  #fi
   # setup web services:
   if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
   if [ -n "$asctl" ]; then $asctl setup; fi
@@ -162,7 +162,8 @@ case "$1" in
         glassfish_sslcert_report
         ;;
   glassfish-sslcert)
-        glassfish_create_ssl_cert_prompt
+        echo_warning "This feature has been disabled: mtwilson glassfish-sslcert"
+        #glassfish_create_ssl_cert_prompt
         ;;
   glassfish-enable-logging)
         glassfish_enable_logging

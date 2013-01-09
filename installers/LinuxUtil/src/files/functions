@@ -1250,11 +1250,12 @@ glassfish_install() {
     echo "Glassfish is already installed in $GLASSFISH_HOME"
   fi
 
-  if [ -n "${MTWILSON_SERVER}" ]; then
-    glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-  else
-    glassfish_create_ssl_cert_prompt
-  fi
+  # TODO this functionality is moving to the java tool ; completely remove it from here
+  #if [ -n "${MTWILSON_SERVER}" ]; then
+  #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+  #else
+  #  glassfish_create_ssl_cert_prompt
+  #fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_start
@@ -1392,6 +1393,8 @@ glassfish_delete_domain() {
 }
 
 glassfish_create_ssl_cert_prompt() {
+    echo_warning "This feature has been disabled: glassfish_create_ssl_cert_prompt"
+    return
     # SSL Certificate setup
     local should_create_sslcert
     prompt_yes_no should_create_sslcert "Do you want to set up an SSL certificate for Glassfish?"
@@ -1407,10 +1410,13 @@ glassfish_create_ssl_cert_prompt() {
     fi
 }
 
+# TODO this functionality is moving to the java tool ; completely remove it from here
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 # XXX this function assumes we're using the first glassfish domain... usually "domain1"
 glassfish_create_ssl_cert() {
+  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
+  return
   java_require
   glassfish_require
   local serverName="${1}"
