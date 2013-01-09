@@ -45,7 +45,7 @@ public class BootstrapUser implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
-        String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), "https://"+getLocalHostAddress()+":8181/" });
+        String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), System.getenv("MTWILSON_API_BASEURL"), "https://"+getLocalHostAddress()+":8181/" });
         File directory = null;
         if( args.length > 0 ) { directory = new File(args[0]); } else { directory = new File("."); }
         // ignore args[1] it's the baseurl that we already know

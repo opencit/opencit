@@ -614,7 +614,7 @@ mysql_default_connection_properties() {
     if [ -z "$MYSQL_PORTNUM" ]; then MYSQL_PORTNUM="3306"; fi
     if [ -z "$MYSQL_USERNAME" ]; then MYSQL_USERNAME="root"; fi
     if [ -z "$MYSQL_PASSWORD" ]; then MYSQL_PASSWORD=""; fi
-    if [ -z "$mysql_database" ]; then mysql_database="mw_as"; fi
+    if [ -z "$MYSQL_DATABASE" ]; then MYSQL_DATABASE="mw_as"; fi
 }
 
 # parameters:
@@ -629,7 +629,7 @@ mysql_read_connection_properties() {
     MYSQL_PORTNUM=`read_property_from_file ${prefix}.port "${config_file}"`
     MYSQL_USERNAME=`read_property_from_file ${prefix}.user "${config_file}"`
     MYSQL_PASSWORD=`read_property_from_file ${prefix}.password "${config_file}"`
-    mysql_database=`read_property_from_file ${prefix}.schema "${config_file}"`
+    MYSQL_DATABASE=`read_property_from_file ${prefix}.schema "${config_file}"`
 }
 mysql_write_connection_properties() {
     local config_file="$1"
@@ -638,7 +638,7 @@ mysql_write_connection_properties() {
     update_property_in_file ${prefix}.port "${config_file}" "${MYSQL_PORTNUM}"
     update_property_in_file ${prefix}.user "${config_file}" "${MYSQL_USERNAME}"
     update_property_in_file ${prefix}.password "${config_file}" "${MYSQL_PASSWORD}"
-    update_property_in_file ${prefix}.schema "${config_file}" "${mysql_database}"
+    update_property_in_file ${prefix}.schema "${config_file}" "${MYSQL_DATABASE}"
 }
 
 # parameters:
@@ -649,7 +649,7 @@ mysql_userinput_connection_properties() {
     mysql_default_connection_properties
     prompt_with_default MYSQL_HOSTNAME "Hostname:"
     prompt_with_default MYSQL_PORTNUM "Port Num:"
-    prompt_with_default mysql_database "Database:"
+    prompt_with_default MYSQL_DATABASE "Database:"
     prompt_with_default MYSQL_USERNAME "Username:"
     prompt_with_default_password MYSQL_PASSWORD "Password:"    
 }
@@ -756,11 +756,11 @@ mysql_connection() {
 # Environment:
 # - mysql_required_version
 # sets the is_mysql_available variable to "yes" or ""
-# sets the is_mysql_database_created variable to "yes" or ""
+# sets the is_MYSQL_DATABASE_created variable to "yes" or ""
 mysql_test_connection() {
   mysql_connection
   is_mysql_available=""
-  local mysql_test_result=`$mysql_connect -e "show databases" 2>/tmp/intel.mysql.err | grep "^${mysql_database}\$" | wc -l`
+  local mysql_test_result=`$mysql_connect -e "show databases" 2>/tmp/intel.mysql.err | grep "^${MYSQL_DATABASE}\$" | wc -l`
   if [ $mysql_test_result -gt 0 ]; then
     is_mysql_available="yes"
   fi
@@ -866,7 +866,7 @@ mysql_configure_connection() {
       mysql_userinput_connection_properties
       mysql_test_connection
     done
-      echo_success "Connected to database \`${mysql_database}\` on ${MYSQL_HOSTNAME}"
+      echo_success "Connected to database \`${MYSQL_DATABASE}\` on ${MYSQL_HOSTNAME}"
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
@@ -880,11 +880,11 @@ mysql_configure_connection() {
 # call mysql_configure_connection before calling this function
 mysql_create_database() {
   mysql_test_connection
-  local create_sql="CREATE DATABASE \`${mysql_database}\`;"
-  local grant_sql="GRANT ALL ON \`${mysql_database}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
+  local create_sql="CREATE DATABASE \`${MYSQL_DATABASE}\`;"
+  local grant_sql="GRANT ALL ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USERNAME}\` IDENTIFIED BY '${MYSQL_PASSWORD}';"
   if [ -z "$mysql_connection_error" ]; then
     if [ -n "$is_mysql_available" ]; then
-      echo_success "Database \`${mysql_database}\` already exists"
+      echo_success "Database \`${MYSQL_DATABASE}\` already exists"
       return 0
     else
       echo "Creating database..."
@@ -911,7 +911,7 @@ mysql_run_script() {
   local scriptfile="${1}"
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "##### [${datestr}] Script file: ${scriptfile}" >> ${mysql_setup_log}
-  $mysql_connect --force ${mysql_database} < "${scriptfile}" 2>> ${mysql_setup_log}
+  $mysql_connect --force ${MYSQL_DATABASE} < "${scriptfile}" 2>> ${mysql_setup_log}
 }
 
 # requires a mysql connection that can create tables and procedures inside an existing database.
