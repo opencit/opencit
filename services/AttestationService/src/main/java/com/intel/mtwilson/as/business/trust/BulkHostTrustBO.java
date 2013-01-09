@@ -6,9 +6,9 @@ package com.intel.mtwilson.as.business.trust;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mountwilson.util.vmware.VMwareClient;
-import com.intel.mountwilson.util.vmware.VMwareConnectionException;
-import com.intel.mountwilson.util.vmware.VMwareConnectionPool;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
+import com.intel.mtwilson.agent.vmware.VMwareConnectionException;
+import com.intel.mtwilson.agent.vmware.VMwareConnectionPool;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
 import com.intel.mtwilson.datatypes.ErrorCode;

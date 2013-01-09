@@ -7,7 +7,7 @@ package com.intel.mtwilson.agent;
 import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.strategy.TrustAgentStrategy;
 import com.intel.mountwilson.manifest.strategy.VMWareManifestStrategy;
-import com.intel.mountwilson.util.vmware.VCenterHost;
+import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.SimpleKeystore;

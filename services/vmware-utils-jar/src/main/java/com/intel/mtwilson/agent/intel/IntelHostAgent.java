@@ -2,10 +2,13 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.agent.vmware;
+package com.intel.mtwilson.agent.intel;
 
+import com.intel.mtwilson.agent.vmware.*;
 import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.strategy.helper.VMWare51Esxi51;
+import com.intel.mtwilson.agent.vmware.VCenterHost;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.audit.data.AuditLog;
 import com.intel.mtwilson.datatypes.Aik;
@@ -35,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Instances of VmwareAgent should be created by the VmwareAgentFactory
  * @author jbuhacoff
  */
-public class VmwareHostAgent implements HostAgent {
+public class IntelHostAgent implements HostAgent {
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient final VMwareClient vmware;
     private final String hostname;
@@ -46,7 +49,7 @@ public class VmwareHostAgent implements HostAgent {
     private String vendorHostReport = null;
     private HashMap<String, ? extends IManifest> manifestMap = null; // XXX TODO needs to change, it's not a clear programming interface
     
-    public VmwareHostAgent(VMwareClient vmware, String hostname) throws Exception {
+    public IntelHostAgent(VMwareClient vmware, String hostname) throws Exception {
         this.vmware = vmware;
         this.hostname = hostname;
         hostObj = vmware.getManagedObjectReference(hostname);

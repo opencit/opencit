@@ -6,8 +6,8 @@ import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.data.ModuleManifest;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.manifest.data.PcrModuleManifest;
-import com.intel.mountwilson.util.vmware.VCenterHost;
-import com.intel.mountwilson.util.vmware.VMwareClient;
+import com.intel.mtwilson.agent.vmware.VCenterHost;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -69,6 +69,7 @@ public class HostBO extends BaseBO {
                         tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");
                         tblHosts.setSSLCertificate(new byte[0]);
                         tblHosts.setName(host.getHostName().toString());
+                        tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
 				certificate = getAIKCertificateForHost(host);

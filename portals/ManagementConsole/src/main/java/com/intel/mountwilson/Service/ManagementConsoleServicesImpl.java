@@ -20,7 +20,7 @@ import com.intel.mountwilson.datamodel.ApiClientDetails;
 import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.ConnectionUtil;
-import com.intel.mountwilson.util.vmware.VMwareClient;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ManagementService;

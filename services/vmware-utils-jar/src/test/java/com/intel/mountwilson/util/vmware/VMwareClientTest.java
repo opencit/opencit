@@ -1,6 +1,7 @@
 package com.intel.mountwilson.util.vmware;
 
 
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import java.util.List;
 import org.junit.Test;

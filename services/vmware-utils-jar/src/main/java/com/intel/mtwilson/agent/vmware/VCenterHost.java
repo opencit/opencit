@@ -1,4 +1,4 @@
-package com.intel.mountwilson.util.vmware;
+package com.intel.mtwilson.agent.vmware;
 
 import java.util.HashMap;
 import java.util.List;

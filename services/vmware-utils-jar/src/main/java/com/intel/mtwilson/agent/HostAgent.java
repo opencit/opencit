@@ -5,7 +5,7 @@
 package com.intel.mtwilson.agent;
 
 import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.util.vmware.VCenterHost;
+import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.Aik;
 import com.intel.mtwilson.datatypes.Nonce;

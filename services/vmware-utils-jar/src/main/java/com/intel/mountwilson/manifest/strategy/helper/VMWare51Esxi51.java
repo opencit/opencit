@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.manifest.data.ModuleManifest;
 import com.intel.mountwilson.manifest.data.PcrModuleManifest;
-import com.intel.mountwilson.util.vmware.VMwareClient;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmBootSecurityOptionEventDetails;

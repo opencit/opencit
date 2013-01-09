@@ -2,8 +2,10 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.agent.vmware;
+package com.intel.mtwilson.agent.intel;
 
+import com.intel.mtwilson.agent.vmware.*;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.tls.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
@@ -17,7 +19,7 @@ import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
  * 
  * @author jbuhacoff
  */
-public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,VMwareClient> {
+public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,VMwareClient> {
     
     @Override
     public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {

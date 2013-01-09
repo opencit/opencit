@@ -2,7 +2,7 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.agent.vmware;
+package com.intel.mtwilson.agent.intel;
 
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
@@ -14,19 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The VmwareHostAgentFactory creates instances of VmwareHostAgent. It does
- * not create instances of VmwareClient. It uses 
+ * The IntelHostAgentFactory creates instances of IntelHostAgent. It does
+ * not create instances of IntelClient. It uses the IntelClientFactory to do that.
  * @author jbuhacoff
  */
-public class VmwareHostAgentFactory implements VendorHostAgentFactory {
+public class IntelHostAgentFactory implements VendorHostAgentFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
-    protected static VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory()); 
     
     @Override
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
         try {
-            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
-            return new VmwareHostAgent(client, hostAddress.toString());
+//            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
+//            return new IntelHostAgent(client, hostAddress.toString());
+            return null;
         }
         catch(Exception e) {
             throw new IOException("Cannot get vmware client for host: "+hostAddress.toString()+": "+e.toString());
