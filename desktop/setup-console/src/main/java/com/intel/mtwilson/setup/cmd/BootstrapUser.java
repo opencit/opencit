@@ -48,12 +48,8 @@ public class BootstrapUser implements Command {
         File directory = null;
         if( args.length > 0 ) { directory = new File(args[0]); } else { directory = new File("."); }
         String url = null;
-        // ignore args[1] it's the baseurl that we already know
-        String envUrl = System.getenv("MTWILSON_API_BASEURL");
-        if( envUrl != null && !envUrl.isEmpty() ) {
-            url = envUrl;
-        }
-        else {
+        if( args.length > 1 ) { url = args[1]; } else { url = System.getenv("MTWILSON_API_BASEURL"); }
+        if( url == null || url.isEmpty() ) {
             String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), "https://"+getLocalHostAddress()+":8181/" });
             url = readInputStringWithPromptAndDefault("Mt Wilson URL", defaultUrl);
         }
@@ -63,6 +59,10 @@ public class BootstrapUser implements Command {
         if( args.length > 3 ) { password = args[3]; } else { password = readInputStringWithPrompt("Password"); }
         if( password != null && password.startsWith("env:") && password.length() > 4 ) {
             password = System.getenv(password.substring(4)); 
+        }
+        if( password ==  null || password.isEmpty() ) {
+            System.out.println("Password is required");
+            return;
         }
         // create user
         System.out.println(String.format("Creating keystore for %s in %s", username, directory.getAbsolutePath()));        

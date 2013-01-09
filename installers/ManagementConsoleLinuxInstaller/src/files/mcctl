@@ -59,7 +59,7 @@ bootstrap_first_user() {
   local configured_keystore_dir=`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
   package_keystore_users_dir=${package_keystore_users_dir:-"${configured_keystore_dir}"}
   local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-  mtwilson_api_baseurl=${mtwilson_api_baseurl:-"${configured_api_baseurl}"}
+  local mtwilson_api_baseurl=${MTWILSON_API_BASEURL:-"${configured_api_baseurl}"}
 
   # run the bootstrap command
   mtwilson=`which mtwilson 2>/dev/null`

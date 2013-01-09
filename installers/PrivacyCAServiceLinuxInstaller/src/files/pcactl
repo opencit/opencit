@@ -43,12 +43,12 @@ configure_privacyca_url() {
   privacyca_url="https://${privacyca_server}:8181/HisPrivacyCAWebServices2"
   update_property_in_file PrivacyCaUrl "${intel_conf_dir}/privacyca-client.properties" "${privacyca_url}"
   # Now prompt for the client files download username and password
-  local privacyca_download_username privacyca_download_password
+  #local privacyca_download_username PRIVACYCA_DOWNLOAD_PASSWORD
   echo "You need to set a username and password for Trust Agents to download the Privacy CA client files."
-  prompt_with_default privacyca_download_username "Download Username:" admin
-  prompt_with_default_password privacyca_download_password "Download Password:" mountwilson
-  update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${privacyca_download_username}"
-  update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${privacyca_download_password}"
+  prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Download Username:" admin
+  prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Download Password:" mountwilson
+  update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
+  update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD}"
 }
 
 setup_print_summary() {

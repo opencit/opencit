@@ -73,8 +73,12 @@ download_privacyca_certs() {
     local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
     local default_privacyca_password=${PRIVACYCA_DOWNLOAD_PASSWORD:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`}
     echo "Login to download the Privacy CA client files"
-    prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
-    prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
+    if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME" ]; then
+      prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
+    fi
+    if [ -z "${PRIVACYCA_DOWNLOAD_PASSWORD" ]; then
+      prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
+    fi
     
     echo "Connecting to Privacy CA..."
 
