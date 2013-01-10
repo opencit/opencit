@@ -64,7 +64,12 @@ public class MSConfig extends ConfigBase {
         String keys[] = new String[] { "mtwilson.api.baseurl", "mountwilson.ms.db.host", "mountwilson.ms.db.schema", "mountwilson.ms.db.user", "mtwilson.db.host", "mtwilson.db.schema", "mtwilson.db.user" };
         for(String key : keys) {
             String value = c.getString(key);
-            System.out.println(String.format("MSConfig [%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
+            System.out.print("-");
+            String labelStr = label==null?"null":label;
+            String keyStr = key==null?"null":key;
+            String valueStr = value==null?"null":value;
+            String lineStr = String.format("MSConfig [%s]: %s=%s", labelStr, keyStr, valueStr);
+            System.out.println(lineStr);
         }
     }
     
