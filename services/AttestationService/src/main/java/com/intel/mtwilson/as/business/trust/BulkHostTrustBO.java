@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.business.trust;
 
+import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -35,35 +37,41 @@ import org.slf4j.LoggerFactory;
 public class BulkHostTrustBO {
     private Logger log = LoggerFactory.getLogger(getClass());
     private HostTrustBO hostTrustBO = new ASComponentFactory().getHostTrustBO(); 
-    private int maxThreads;
+//    private int maxThreads;
     private int timeout;
+    private static ExecutorService scheduler = Executors.newFixedThreadPool(ASConfig.getConfiguration().getInt("mtwilson.bulktrust.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
     
-    public BulkHostTrustBO(int maxThreads, int timeout) {
-        this.maxThreads = maxThreads;
+    public BulkHostTrustBO(/*int maxThreads,*/ int timeout) {
+//        this.maxThreads = maxThreads;
         this.timeout = timeout;
     }
     
     public String getBulkTrustSaml(Set<String> hosts, boolean forceVerify) {
         try {
             Set<HostQuoteSaml> tasks = new HashSet<HostQuoteSaml>();
-            ExecutorService scheduler = Executors.newFixedThreadPool(maxThreads);
+            ArrayList<Future<?>> taskStatus = new ArrayList<Future<?>>();
+            
             
             List<String> results = new ArrayList<String>();
             
             for(String host : hosts) {
                 HostQuoteSaml task = new HostQuoteSaml(hostTrustBO, host, forceVerify);
                 tasks.add(task);
-                scheduler.submit(task);
+                Future<?> status = scheduler.submit(task);
+                taskStatus.add(status);
             }
             
-            scheduler.shutdown();
+            for(Future<?> status : taskStatus) {
+                status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
+            }
+//            scheduler.shutdown(); //  bug #503 remove this and replace with calls to Future.get() to get all our results
             
-            if( scheduler.awaitTermination(timeout, TimeUnit.SECONDS) ) {
-                log.info("All tasks completed on time");
-            }
-            else {
-                log.info("Timeout reached before all tasks completed"); // should set the error code ErrorCode.AS_ASYNC_TIMEOUT on the ones that timed out (no result available)
-            }
+//            if( scheduler.awaitTermination(timeout, TimeUnit.SECONDS) ) { //  bug #503 replace with waiting for all Futures that WE SUBMITTED to return (because in static thread pool other requests may be submitting tasks to the same pool... we don't want to wait for all of them, jus tours )
+//                log.info("All tasks completed on time");
+//            }
+//            else {
+//                log.info("Timeout reached before all tasks completed"); // should set the error code ErrorCode.AS_ASYNC_TIMEOUT on the ones that timed out (no result available)
+//            }
             
             for(HostQuoteSaml task : tasks) {
                 if( task.getResult() == null ) {
@@ -89,24 +97,30 @@ public class BulkHostTrustBO {
         try {
                         
             Set<HostQuoteJson> tasks = new HashSet<HostQuoteJson>();
-            ExecutorService scheduler = Executors.newFixedThreadPool(maxThreads);
+//            ExecutorService scheduler = Executors.newFixedThreadPool(maxThreads);
+            ArrayList<Future<?>> taskStatus = new ArrayList<Future<?>>();
             
             List<HostTrust> results = new ArrayList<HostTrust>();
             
             for(String host : hosts) {
                 HostQuoteJson task = new HostQuoteJson(hostTrustBO, host, forceVerify);
                 tasks.add(task);
-                scheduler.submit(task);
+                Future<?> status = scheduler.submit(task);
+                taskStatus.add(status);
             }
             
-            scheduler.shutdown();
+            for(Future<?> status : taskStatus) {
+                status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
+            }
             
-            if( scheduler.awaitTermination(timeout, TimeUnit.SECONDS) ) {
-                log.info("All tasks completed on time");
-            }
-            else {
-                log.info("Timeout reached before all tasks completed"); // should set the error code ErrorCode.AS_ASYNC_TIMEOUT on the ones that timed out (no result available)
-            }
+//            scheduler.shutdown();
+            
+//            if( scheduler.awaitTermination(timeout, TimeUnit.SECONDS) ) {
+//                log.info("All tasks completed on time");
+//            }
+//            else {
+//                log.info("Timeout reached before all tasks completed"); // should set the error code ErrorCode.AS_ASYNC_TIMEOUT on the ones that timed out (no result available)
+//            }
             
             
             for(HostQuoteJson task : tasks) {

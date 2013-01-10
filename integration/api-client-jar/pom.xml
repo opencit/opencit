@@ -130,11 +130,8 @@
 			<shadedPattern>intel.apiclient.javax.xml</shadedPattern>
 		    </relocation>
 		    <relocation>
-			<pattern>com</pattern>
-			<shadedPattern>intel.apiclient.com</shadedPattern>
-			<excludes>
-			    <exclude>com.intel.*</exclude>
-			</excludes>
+			<pattern>com.sun</pattern>
+			<shadedPattern>intel.apiclient.com.sun</shadedPattern>
 		    </relocation>
 		</relocations>
             </configuration>

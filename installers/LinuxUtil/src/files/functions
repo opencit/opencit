@@ -1178,6 +1178,20 @@ glassfish_permissions() {
   done
 }
 
+# sets a system property for logback configuration file location
+glassfish_logback() {
+  # see if it's already set
+  local prev_logback=`$glassfish list-system-properties | grep "logback.configurationFile" | head -n 1`
+  # loop just in case there is more than one defined
+  while [ -n "${prev_logback}" ]
+  do
+    echo "Deleting existing system property ${prev_logback}"
+    $glassfish delete-system-properties "${prev_logback}"
+    prev_logback=`$glassfish list-system-properties | grep "logback.configurationFile" | head -n 1`
+  done
+  $glassfish create-system-properties logback.configurationFile=/etc/intel/cloudsecurity/logback.xml
+}
+
 # set the -Xmx and -XX:MaxPermSize memory parameters for the glassfish JVM
 glassfish_memory() {
   local jvm_memory="${1:-2048}"
@@ -1283,6 +1297,7 @@ glassfish_install() {
   glassfish_start
   #glassfish_admin_user
   glassfish_memory 2048 512
+  glassfish_logback
 }
 
 # glassfish must already be running to execute "enable-secure-domain",  so glassfish_start is required before calling this function

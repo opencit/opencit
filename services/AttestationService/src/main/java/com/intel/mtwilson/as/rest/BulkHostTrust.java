@@ -44,7 +44,7 @@ public class BulkHostTrust {
 	public String getTrustSaml(
 			@QueryParam("hosts") String hosts,
 			@QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
-                        @QueryParam("threads") @DefaultValue("5") Integer threads,
+//                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                         @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
 
 		if (hosts == null || hosts.length() == 0) {
@@ -54,7 +54,7 @@ public class BulkHostTrust {
                 
             Set<String> hostSet = new HashSet<String>();
             hostSet.addAll(Arrays.asList(hosts.split(",")));
-                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(threads, timeout);
+                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */timeout);
 		return bulkHostTrustBO.getBulkTrustSaml(hostSet,forceVerify);
 
 
@@ -77,7 +77,7 @@ public class BulkHostTrust {
 	public BulkHostTrustResponse getTrustJson(
 			@QueryParam("hosts") String hosts,
 			@QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
-                        @QueryParam("threads") @DefaultValue("5") Integer threads,
+//                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                         @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
 
 		if (hosts == null || hosts.length() == 0) {
@@ -87,7 +87,7 @@ public class BulkHostTrust {
                 
             Set<String> hostSet = new HashSet<String>();
             hostSet.addAll(Arrays.asList(hosts.split(",")));
-                 BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(threads, timeout);
+                 BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads,*/ timeout);
 		return bulkHostTrustBO.getBulkTrustJson(hostSet,forceVerify);
 
 
