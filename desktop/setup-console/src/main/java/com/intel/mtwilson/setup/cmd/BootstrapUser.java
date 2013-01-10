@@ -45,18 +45,22 @@ public class BootstrapUser implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
-        File directory = null;
-        if( args.length > 0 ) { directory = new File(args[0]); } else { directory = new File("."); }
-        String url = null;
-        if( args.length > 1 ) { url = args[1]; } else { url = System.getenv("MTWILSON_API_BASEURL"); }
-        if( url == null || url.isEmpty() ) {
-            String defaultUrl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), "https://"+getLocalHostAddress()+":8181/" });
-            url = readInputStringWithPromptAndDefault("Mt Wilson URL", defaultUrl);
+        
+        String directoryPath = serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
+        File directory = new File(directoryPath);
+        if( !directory.exists() || !directory.isDirectory() ) {
+            directory = new File(".");
         }
+        directoryPath = readInputStringWithPromptAndDefault("Keystore directory", directory.getAbsolutePath());
+        directory = new File(directoryPath);
+        
+        String baseurl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), System.getenv("MTWILSON_API_BASEURL"), "https://"+getLocalHostAddress()+":8181" });
+        baseurl = readInputStringWithPromptAndDefault("Mt Wilson URL", baseurl);
+        
         String username = null;
         String password = null;
-        if( args.length > 2 ) { username = args[2]; } else { username = readInputStringWithPrompt("Username"); }
-        if( args.length > 3 ) { password = args[3]; } else { password = readInputStringWithPrompt("Password"); }
+        if( args.length > 0 ) { username = args[0]; } else { username = readInputStringWithPrompt("Username"); }
+        if( args.length > 1 ) { password = args[1]; } else { password = readInputStringWithPrompt("Password"); }
         if( password != null && password.startsWith("env:") && password.length() > 4 ) {
             password = System.getenv(password.substring(4)); 
         }
@@ -76,8 +80,8 @@ public class BootstrapUser implements Command {
         SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // register user
-        System.out.println(String.format("Registering %s with service at %s", username, url));
-        com.intel.mtwilson.client.TextConsole.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), url, "Attestation,Whitelist,Security", password });
+        System.out.println(String.format("Registering %s with service at %s", username, baseurl));
+        com.intel.mtwilson.client.TextConsole.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), baseurl, "Attestation,Whitelist,Security", password });
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();
 //        ApiClientInfo apiClientRecord = bo.find(rsaCredentialX509.identity());

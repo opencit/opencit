@@ -68,15 +68,29 @@ public class AuditConfig extends ConfigBase {
 //        }
     }
 
+
     public static Properties getJpaProperties() {
         Configuration config = getConfiguration();
         Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", config.getString("mountwilson.audit.db.driver", "com.mysql.jdbc.Driver"));
-        prop.put("javax.persistence.jdbc.url", String.format("jdbc:mysql://%s:3306/%s?autoReconnect=true",
-                config.getString("mountwilson.audit.db.host", "localhost"),
-                config.getString("mountwilson.audit.db.schema", "mw_audit")));
-        prop.put("javax.persistence.jdbc.user", config.getString("mountwilson.audit.db.user", "root"));
-        prop.put("javax.persistence.jdbc.password", config.getString("mountwilson.audit.db.password", "password"));
+        prop.put("javax.persistence.jdbc.driver", 
+                config.getString("mountwilson.audit.db.driver", 
+                config.getString("mtwilson.db.driver",
+                "com.mysql.jdbc.Driver")));
+        prop.put("javax.persistence.jdbc.url" , 
+                config.getString("mountwilson.audit.db.url",
+                config.getString("mtwilson.db.url",
+                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                    config.getString("mountwilson.audit.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.audit.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.audit.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        prop.put("javax.persistence.jdbc.user",
+                config.getString("mountwilson.audit.db.user",
+                config.getString("mtwilson.db.user",
+                "root")));
+        prop.put("javax.persistence.jdbc.password", 
+                config.getString("mountwilson.audit.db.password", 
+                config.getString("mtwilson.db.password", 
+                "password")));
         return prop;
     }
     

@@ -56,10 +56,10 @@ configure_api_baseurl() {
 bootstrap_first_user() {
   echo "Configuring Management Console administrator username and password..."
 
-  local configured_keystore_dir=`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
-  package_keystore_users_dir=${package_keystore_users_dir:-"${configured_keystore_dir}"}
-  local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-  local mtwilson_api_baseurl=${MTWILSON_API_BASEURL:-"${configured_api_baseurl}"}
+#  local configured_keystore_dir=`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
+#  package_keystore_users_dir=${package_keystore_users_dir:-"${configured_keystore_dir}"}
+#  local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+#  local mtwilson_api_baseurl=${MTWILSON_API_BASEURL:-"${configured_api_baseurl}"}
 
   # run the bootstrap command
   mtwilson=`which mtwilson 2>/dev/null`
@@ -73,7 +73,8 @@ bootstrap_first_user() {
 #  export MC_FIRST_USERNAME MC_FIRST_PASSWORD
   prompt_with_default MC_FIRST_USERNAME "Username:" "admin"
   prompt_with_default_password MC_FIRST_PASSWORD
-  $mtwilson setup BootstrapUser ${package_keystore_users_dir} ${mtwilson_api_baseurl} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
+  $mtwilson setup BootstrapUser "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
+  #$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
 }
 
@@ -237,6 +238,9 @@ case "$1" in
         ;;
   setup)
         setup
+        ;;
+  setup-admin-user)
+        bootstrap_first_user
         ;;
   setup-env)
   # for sysadmin convenience

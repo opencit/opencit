@@ -111,27 +111,27 @@
 		<relocations>
 		    <relocation>
 			<pattern>org</pattern>
-			<shadedPattern>intel.apiclient.org</shadedPattern>
+			<shadedPattern>com.intel.shaded.org</shadedPattern>
 		    </relocation>
 		    <relocation>
 			<pattern>net</pattern>
-			<shadedPattern>intel.apiclient.net</shadedPattern>
+			<shadedPattern>com.intel.shaded.net</shadedPattern>
 		    </relocation>
 		    <relocation>
 			<pattern>javax.activation</pattern>
-			<shadedPattern>intel.apiclient.javax.activation</shadedPattern>
+			<shadedPattern>com.intel.shaded.javax.activation</shadedPattern>
 		    </relocation>
 		    <relocation>
 			<pattern>javax.ws</pattern>
-			<shadedPattern>intel.apiclient.javax.ws</shadedPattern>
+			<shadedPattern>com.intel.shaded.javax.ws</shadedPattern>
 		    </relocation>
 		    <relocation>
 			<pattern>javax.xml</pattern>
-			<shadedPattern>intel.apiclient.javax.xml</shadedPattern>
+			<shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
 		    </relocation>
 		    <relocation>
 			<pattern>com.sun</pattern>
-			<shadedPattern>intel.apiclient.com.sun</shadedPattern>
+			<shadedPattern>com.intel.shaded.com.sun</shadedPattern>
 		    </relocation>
 		</relocations>
             </configuration>
