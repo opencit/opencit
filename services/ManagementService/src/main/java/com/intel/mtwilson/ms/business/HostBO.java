@@ -33,6 +33,7 @@ import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.io.Filename;
+import com.intel.mtwilson.util.MWException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -606,9 +607,12 @@ public class HostBO extends BaseBO {
             try {
                 
                 gkvHost = vmmHelperObj.getHostDetails(gkvHost);
-                
-            } catch (Throwable te) {
-                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+            } catch(MWException e) {
+                log.error("Mt Wilson error: "+e.toString());
+                throw new MSException(e, ErrorCode.MS_HOST_COMMUNICATION_ERROR, e.toString());
+            } catch (Throwable e) {
+                log.error("Unknown error: "+e.toString());
+                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, e.getMessage());
             }
 
             // Let us verify if we got all the data back correctly or not (Bug: 442)
