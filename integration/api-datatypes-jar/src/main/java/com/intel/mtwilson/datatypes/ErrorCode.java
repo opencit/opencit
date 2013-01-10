@@ -17,7 +17,7 @@ public enum ErrorCode {
     SYSTEM_ERROR(1,"System error: %s"), 
 //    AUTH_FAILED(1000,"Authentication Failed"), 
 //    SQL_ERROR(1001, "SQL Error"), 
-    UNKNOWN_ERROR(1002,"Error"),  // Used in APIClient
+    UNKNOWN_ERROR(2,"Error"),  // Used in APIClient
 //    GENERAL_ERROR(1003,"Error in attestation service"), 
 //    DUPLICATE_HOST_NAME(1004,"Duplicate Host Name"), 
 //    TA_ERROR (1005, "TrustAgent Error"), 
@@ -50,7 +50,7 @@ public enum ErrorCode {
     AS_MISSING_INPUT(1008,"Missing or invalid input '%s'."),
     AS_OPERATION_NOT_SUPPORTED(1009,"Operation not supported.%s" ),
     AS_QUOTE_VERIFY_COMMAND_FAILED(1010,"TPM quote verification failed.Command error code %d"),
-    AS_HOST_COMMUNICATION_ERROR(1011,"Unable to communicate to host %s"),
+    AS_HOST_COMMUNICATION_ERROR(1011,"Unable to communicate to host '%s'"),
     AS_TRUST_AGENT_ERROR(1012,"Trust Agent failed with code '%d' and message '%s'"),
     AS_ENCRYPTION_ERROR(1013,"Encryption of data failed due to error %s"),
     AS_VMW_TPM_NOT_SUPPORTED(1014,"VMWare - Host '%s' does not support TXT"),
@@ -64,7 +64,8 @@ public enum ErrorCode {
     AS_HOST_NOT_FOUND_IN_VCENTER(1022,"Host '%s' is not found in VCenter."),
     AS_PCR_MANIFEST_MISSING(1023,"Pcr Manifest for PCR '%s' is missing in MLE Id '%d' associated to host '%s"),
     AS_TRUST_AGENT_CONNNECT_TIMED_OUT(1024,"Unable to connect to Trust Agent on '%s:%d'. Timed out after %d seconds"),
-    
+    AS_TRUST_AGENT_INVALID_RESPONSE(1025, "Invalid response from host: %s"),
+
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),
     WS_OEM_ALREADY_EXISTS(2002, "OEM '%s' is already configured in the system."),
@@ -116,7 +117,9 @@ public enum ErrorCode {
     MS_VMM_MLE_NOT_FOUND(3207, "VMM MLE %s' is not configured in the system. Please verify if the white list is properly configured."),
     MS_API_EXCEPTION(3208, "API Call failed with error '%s'."),
     MS_INVALID_ATTESTATION_REPORT(3209, "Unable to retrieve the TPM values from the host. Verify the host TXT configuration."),
-    MS_HOST_CONFIGURATION_ERROR(3210, "Unable to retrieve the host configuration details. Please verify the host information.");
+    MS_HOST_CONFIGURATION_ERROR(3210, "Unable to retrieve the host configuration details. Please verify the host information."),
+    
+    TLS_COMMMUNICATION_ERROR(4001, "Cannot establish secure connection to '%s': %s");
    
     
     

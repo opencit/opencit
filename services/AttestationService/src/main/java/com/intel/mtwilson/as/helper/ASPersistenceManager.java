@@ -6,9 +6,8 @@ package com.intel.mtwilson.as.helper;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.audit.helper.AuditConfig;
-
-import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.ms.common.MSConfig;
 
 /**
  *

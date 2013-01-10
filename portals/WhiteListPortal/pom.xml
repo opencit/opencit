@@ -114,6 +114,14 @@
             <version>1.8.3</version>
             <type>jar</type>
         </dependency>
+        
+
+        <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>MSData</artifactId>
+			<version>${project.version}</version>
+		</dependency>
     </dependencies>
 
     <properties />

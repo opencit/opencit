@@ -41,7 +41,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
     @Override
 	public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj, HostConfigData hostConfig, ApiClient apiObj)throws ManagementConsolePortalException {           
             logger.info("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");
-            logger.info("Data to save > "+hostDetailsObj);
+//            logger.info("Data to save > "+hostDetailsObj);
             
             boolean result = false;
                             

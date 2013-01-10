@@ -38,6 +38,7 @@ import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 
 import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
@@ -267,9 +268,19 @@ public class TrustAgentSecureClient {
 					new String(buf).trim()));
         }catch(UnknownHostException e) {
             throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
-        }catch(Exception e) {
+        }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
+        }catch(IOException e) {
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
+        }catch(NoSuchAlgorithmException e) {
+            throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
+        }catch(KeyManagementException e) {
+            throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
+        } catch(JAXBException e) {
+            throw new ASException(e,ErrorCode.AS_TRUST_AGENT_INVALID_RESPONSE, e.toString());
+        }/*catch(Exception e) {
             throw new ASException(e);
-        }
+        }*/
        
         int errorCode = response.getErrorCode();
         log.warn(String.format("Trust Agent Error %d [%s]: %s", response.getErrorCode(), response.getClientIp(), response.getErrorMessage()));

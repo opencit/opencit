@@ -592,11 +592,13 @@ public class HostBO extends BaseBO {
             
             TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
             TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
-            // Create the appropriate interface object based on the type of the host
-            if (gkvHost.AddOn_Connection_String == null || gkvHost.AddOn_Connection_String.isEmpty())
+            // Create the appropriate interface object based on the type of the host   // BUG #497  this should be replaced with HostAgentFactory.getHostAgent()
+            if (gkvHost.AddOn_Connection_String == null || gkvHost.AddOn_Connection_String.isEmpty()) {
                 vmmHelperObj = (HostInfoInterface) new OpenSourceVMMHelper();
-            else
+            }
+            else {
                 vmmHelperObj = (HostInfoInterface) new VMWareHelper();
+            }
             
             log.info("Starting to process the white list configuration from host: " + gkvHost.HostName);                    
             ApiClient apiClient = createAPIObject();
@@ -610,8 +612,9 @@ public class HostBO extends BaseBO {
             }
 
             // Let us verify if we got all the data back correctly or not (Bug: 442)
-            if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null)
+            if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null) {
                 throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
+            }
             
             hostConfigObj.setTxtHostRecord(gkvHost);
             log.info("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":" + 

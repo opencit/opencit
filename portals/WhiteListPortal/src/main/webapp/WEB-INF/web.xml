@@ -31,4 +31,8 @@
   <welcome-file-list>
   	<welcome-file>index.htm</welcome-file>
   </welcome-file-list>
+    <listener>
+        <description>Cleans up Persistence factory.</description>
+        <listener-class>com.intel.mountwilson.common.WLMPPersistenceManager</listener-class>
+    </listener>
 </web-app>

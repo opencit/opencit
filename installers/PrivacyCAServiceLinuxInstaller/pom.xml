@@ -181,7 +181,7 @@
                     <configuration>
                         <artifacts>
                             <artifact>
-                                <file>${project.build.directory}/${artifactId}-${version}.bin</file>
+                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                 <type>bin</type>
 				<!-- this is the combined debian and redhat installer -->
                             </artifact>

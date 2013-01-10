@@ -377,7 +377,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             List<String> classList = listNodeValues(classListNodeset);
             */
             
-            NodeList persistenceUnitNodes = document.getElementsByTagName("persistence-unit");
+            NodeList persistenceUnitNodes = document.getElementsByTagName("persistence-unit"); // XXX TODO there could be more than one in a file;  we may need to return a List<CustomPersistenceUnitInfoImpl> from this function instead of just one
             String unitName = persistenceUnitNodes.item(0).getAttributes().getNamedItem("name").getTextContent();
             String transactionType = persistenceUnitNodes.item(0).getAttributes().getNamedItem("transaction-type").getTextContent();
             
