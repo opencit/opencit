@@ -86,8 +86,8 @@ public abstract class ConfigBase {
 					+ "CloudSecurity" + File.separator + propertiesFilename));
 			files.add(new File(System.getProperty("user.home") + File.separator
 					+ propertiesFilename));
-                        
-			files.add(new File("C:" + File.separator + "Intel" + File.separator
+
+                        files.add(new File("C:" + File.separator + "Intel" + File.separator
 					+ "CloudSecurity" + File.separator + "mtwilson.properties"));
                         
 		}
@@ -100,6 +100,7 @@ public abstract class ConfigBase {
 		}
 		// add all the files we found
 		for (File f : files) {
+                        System.out.println("Looking for "+f.getAbsolutePath());
 			try {
 				if (f.exists() && f.canRead()) {
 					PropertiesConfiguration standard = new PropertiesConfiguration(

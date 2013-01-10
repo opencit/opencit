@@ -59,7 +59,7 @@ public enum ErrorCode {
     AS_CONFIGURATION_ERROR(1017,"Configuration Error: %s "),
     AS_TRUST_AGENT_DAA_ERROR(1018,"DAA Error: %s "),
     AS_MISSING_MLE_REQD_MANIFEST_LIST(1019,"Missing reqired manifest list for MLE '%s' Version '%s'"),
-    AS_HOST_MANIFEST_MISSING_PCRS (1020,"Host Manifest is missing required PCRS."),
+    AS_HOST_MANIFEST_MISSING_PCRS (1020,"Host Manifest is missing required PCRs."),
     AS_VMWARE_INVALID_CONNECT_STRING(1021,"Input VMWare connect string '%s' is invalid."),
     AS_HOST_NOT_FOUND_IN_VCENTER(1022,"Host '%s' is not found in VCenter."),
     AS_PCR_MANIFEST_MISSING(1023,"Pcr Manifest for PCR '%s' is missing in MLE Id '%d' associated to host '%s"),
