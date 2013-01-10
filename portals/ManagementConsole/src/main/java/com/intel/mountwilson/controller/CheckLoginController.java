@@ -9,7 +9,6 @@ import com.intel.mtwilson.ClientException;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.Filename;
-import com.mysql.jdbc.StringUtils;
 import java.io.File;
 import java.net.URL;
 import java.util.Properties;
@@ -32,6 +31,8 @@ public class CheckLoginController extends AbstractController {
 	// variable declaration used during Processing data. 
         private static final Logger logger = Logger.getLogger(CheckLoginController.class.getName());       
 	
+        private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
+
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
             logger.info("CheckLoginController >>");
@@ -40,7 +41,7 @@ public class CheckLoginController extends AbstractController {
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
 
-            if (StringUtils.isNullOrEmpty(keyAliasName) || StringUtils.isNullOrEmpty(keyPassword)) {
+            if (isNullOrEmpty(keyAliasName) || isNullOrEmpty(keyPassword)) {
                 view.addObject("result", false);
                 view.addObject("message", "User Name and Password cannot be empty");
                 return view;

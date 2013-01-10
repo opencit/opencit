@@ -18,7 +18,7 @@ import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author yuvrajsx
@@ -30,6 +30,8 @@ public class RegisterUserController extends AbstractController {
 	// variable declaration used for logging. 
 	private static final Logger logger = Logger.getLogger(RegisterUserController.class.getName());
 	
+        private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
+        
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
 		logger.info("RegisterUserController >>");
@@ -41,7 +43,7 @@ public class RegisterUserController extends AbstractController {
         final String dirName = WLMPConfig.getConfiguration().getString("mtwilson.wlmp.keystore.dir");
         final String baseURL = WLMPConfig.getConfiguration().getString("mtwilson.api.baseurl");
 		
-		if (StringUtils.isNullOrEmpty(req.getParameter("userNameTXT")) || StringUtils.isNullOrEmpty(req.getParameter("passwordTXT"))) {
+		if (isNullOrEmpty(req.getParameter("userNameTXT")) || isNullOrEmpty(req.getParameter("passwordTXT"))) {
 			view.addObject("result",false);
 			view.addObject("message", "username and password can't be Blank.");
 			return view;

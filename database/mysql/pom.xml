@@ -21,7 +21,6 @@ Java code might be a Repository implementation backed by JPA/Hibernate/etc.
 	<dependency>
 		<groupId>mysql</groupId>
 		<artifactId>mysql-connector-java</artifactId>
-		<version>5.1.6</version>
 	</dependency>
   </dependencies>
 
