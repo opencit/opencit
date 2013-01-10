@@ -61,10 +61,8 @@ public class BootstrapUser implements Command {
         String password = null;
         if( args.length > 0 ) { username = args[0]; } else { username = readInputStringWithPrompt("Username"); }
         if( args.length > 1 ) { password = args[1]; } else { password = readInputStringWithPrompt("Password"); }
-        System.out.println("password is "+password);
         if( password != null && password.startsWith("env:") && password.length() > 4 ) {
             password = System.getenv(password.substring(4)); 
-            System.out.println("env password is "+password);
         }
         if( password ==  null || password.isEmpty() ) {
             System.out.println("Password is required");

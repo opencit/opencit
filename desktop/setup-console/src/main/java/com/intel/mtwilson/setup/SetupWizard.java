@@ -42,11 +42,11 @@ public class SetupWizard {
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
                     String.format("jdbc:mysql://%s:%d/%s",
-                        conf.getString("mountwilson.as.db.host"),
-                        conf.getInteger("mountwilson.as.db.port", 3306),
-                        conf.getString("mountwilson.as.db.schema")),
-                    conf.getString("mountwilson.as.db.user"),
-                    conf.getString("mountwilson.as.db.password"));
+                        conf.getString("mountwilson.as.db.host", conf.getString("mtwilson.db.host", "127.0.0.1")),
+                        conf.getInteger("mountwilson.as.db.port", conf.getInteger("mtwilson.db.port", 3306)),
+                        conf.getString("mountwilson.as.db.schema", conf.getString("mtwilson.db.schema"))),
+                    conf.getString("mountwilson.as.db.user", conf.getString("mtwilson.db.user")),
+                    conf.getString("mountwilson.as.db.password", conf.getString("mtwilson.db.password")));
             return conn;
         }
         catch (ClassNotFoundException e) {
@@ -62,11 +62,11 @@ public class SetupWizard {
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
                     String.format("jdbc:mysql://%s:%d/%s",
-                        conf.getString("mountwilson.ms.db.host"),
-                        conf.getInteger("mountwilson.ms.db.port", 3306),
-                        conf.getString("mountwilson.ms.db.schema")),
-                    conf.getString("mountwilson.ms.db.user"),
-                    conf.getString("mountwilson.ms.db.password"));
+                        conf.getString("mountwilson.ms.db.host", conf.getString("mtwilson.db.host", "127.0.0.1")),
+                        conf.getInteger("mountwilson.ms.db.port", conf.getInteger("mtwilson.db.port", 3306)),
+                        conf.getString("mountwilson.ms.db.schema", conf.getString("mtwilson.db.schema"))),
+                    conf.getString("mountwilson.ms.db.user", conf.getString("mtwilson.db.user")),
+                    conf.getString("mountwilson.ms.db.password", conf.getString("mtwilson.db.password")));
             return conn;
         }
         catch (ClassNotFoundException e) {
