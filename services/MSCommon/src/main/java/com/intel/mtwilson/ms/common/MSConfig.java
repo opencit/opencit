@@ -64,7 +64,7 @@ public class MSConfig extends ConfigBase {
         String keys[] = new String[] { "mtwilson.api.baseurl", "mountwilson.ms.db.host", "mountwilson.ms.db.schema", "mountwilson.ms.db.user", "mtwilson.db.host", "mtwilson.db.schema", "mtwilson.db.user" };
         for(String key : keys) {
             String value = c.getString(key);
-            log.info(String.format("MSConfig [%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
+            System.out.println(String.format("MSConfig [%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
         }
     }
     
