@@ -63,6 +63,7 @@ public class TrustAgentSecureClient {
     public TrustAgentSecureClient(String hostName, int port) {
         this.serverHostname = hostName;
         this.serverPort = port;
+        log.info("Connecting to Trust Agent at '{}'", hostName+":"+port);
     }
 
     public TrustAgentSecureClient(IPAddress serverIPAddress, int serverPort, byte[] data) { // datatype.IPAddress
