@@ -142,7 +142,7 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.privca.certificate.file");
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.cert.file");
             File privacyCaPemFile = new File(certFile); 
             FileInputStream in = new FileInputStream(privacyCaPemFile);
             String content = IOUtils.toString(in);

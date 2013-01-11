@@ -50,7 +50,7 @@ public enum ErrorCode {
     AS_MISSING_INPUT(1008,"Missing or invalid input '%s'."),
     AS_OPERATION_NOT_SUPPORTED(1009,"Operation not supported.%s" ),
     AS_QUOTE_VERIFY_COMMAND_FAILED(1010,"TPM quote verification failed.Command error code %d"),
-    AS_HOST_COMMUNICATION_ERROR(1011,"Unable to communicate to host '%s'"),
+    AS_HOST_COMMUNICATION_ERROR(1011,"Unable to communicate with host: %s"), // error message
     AS_TRUST_AGENT_ERROR(1012,"Trust Agent failed with code '%d' and message '%s'"),
     AS_ENCRYPTION_ERROR(1013,"Encryption of data failed due to error %s"),
     AS_VMW_TPM_NOT_SUPPORTED(1014,"VMWare - Host '%s' does not support TXT"),

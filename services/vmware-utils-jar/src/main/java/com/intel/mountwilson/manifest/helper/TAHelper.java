@@ -97,7 +97,14 @@ public class TAHelper {
 //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 TODO need to replace with use of HostAgentFactory
               HostAgentFactory factory = new HostAgentFactory();
               TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts);
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(tblHosts.getAddOnConnectionInfo(), tlsPolicy));
+        String connectionString = tblHosts.getAddOnConnectionInfo();
+        if( connectionString == null || connectionString.isEmpty() ) {
+            if( tblHosts.getIPAddress() != null  ) {
+                connectionString = String.format("https://%s:%d", tblHosts.getIPAddress(), tblHosts.getPort()); // without vendor scheme because we are passing directly to TrustAgentSEcureClient  (instead of to HOstAgentFactory)
+            }
+        }
+              
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
             
             String sessionId = generateSessionId();
 
@@ -167,7 +174,16 @@ public class TAHelper {
               ByteArrayResource resource = new ByteArrayResource(tblHosts.getSSLCertificate());
               TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getSSLPolicy(), resource);
               
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(tblHosts.getAddOnConnectionInfo(), tlsPolicy));
+        String connectionString = tblHosts.getAddOnConnectionInfo();
+        if( connectionString == null || connectionString.isEmpty() ) {
+            if( tblHosts.getIPAddress() != null  ) {
+                connectionString = String.format("https://%s:%d", tblHosts.getIPAddress(), tblHosts.getPort()); // without vendor scheme because we are passing directly to TrustAgentSEcureClient  (instead of to HOstAgentFactory)
+            }
+        }
+                
+              
+              
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
 //                IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
                 
                 
@@ -211,7 +227,7 @@ public class TAHelper {
         } catch (ASException e) {
             throw e;
         } catch(UnknownHostException e) {
-            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, tblHosts.getIPAddress().toString());
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, "Unknown host: "+(tblHosts.getIPAddress()==null?"missing IP Address":tblHosts.getIPAddress().toString()));
         }  catch (Exception e) {
             throw new ASException(e);
         }

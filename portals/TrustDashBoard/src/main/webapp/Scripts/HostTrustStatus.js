@@ -20,7 +20,11 @@ function populateHostTrustDetails(responsJSON) {
 		//This statement will create pagination div based on the no_of_pages
 		applyPagination('hostTrustPaginationDiv',responsJSON.noOfPages,fngetHostTrustNextPage,1);
 	}else {
-		$('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
+                if(responsJSON.noHosts) {
+                    $('#hostTrustPaginationDiv').html('<span>'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
+                }else{
+                    $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
+                }
 	}
 }
 

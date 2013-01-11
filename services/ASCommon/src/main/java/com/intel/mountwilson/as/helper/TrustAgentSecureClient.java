@@ -81,7 +81,7 @@ public class TrustAgentSecureClient {
 
     // XXX the ipaddress:port format is also parsed somewhere else in the codebase... need to consolidate here.
     private void parseConnectionString(String connectionString) {
-        if( connectionString.startsWith("https") ) {  // format  https://ipAddressOrHostname:port
+        if( connectionString.startsWith("https") ) {  // new format used starting with version 1.1 is URL:   https://ipAddressOrHostname:port
             try {
                 URL url = new URL(connectionString);
                 serverHostname = url.getHost();
@@ -95,7 +95,7 @@ public class TrustAgentSecureClient {
                 throw new IllegalArgumentException("Invalid Trust Agent connection string: "+connectionString, e);
             }
         }
-        if( connectionString.contains(":") ) {
+        if( connectionString.contains(":") ) { // format used from 0.5 Alpha to 1.0-RC2 
             try {
                 String[] parts = connectionString.split(":");
                 serverHostname = parts[0];

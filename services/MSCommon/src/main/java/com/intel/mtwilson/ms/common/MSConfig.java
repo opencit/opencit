@@ -58,7 +58,7 @@ public class MSConfig extends ConfigBase {
         // default props used by CA rest service
         // XXX-TODO generate the ssl file name based on ip address during install
         defaults.setProperty("mtwilson.tls.certificate.file", "/usr/share/glassfish3/glassfish/domains/domain1/config/ssl.10.1.71.97.crt.pem");
-        defaults.setProperty("mtwilson.privca.certificate.file", "/etc/intel/cloudsecurity/PrivacyCA.p12.pem");
+        defaults.setProperty("mtwilson.privacyca.cert.file", "/etc/intel/cloudsecurity/PrivacyCA.p12.pem");
         defaults.setProperty("mtwilson.rootca.certficate.file", "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); 
         defaults.setProperty("mtwilson.saml.certificate.file", "/etc/intel/cloudsecurity/saml.cer.pem");
         

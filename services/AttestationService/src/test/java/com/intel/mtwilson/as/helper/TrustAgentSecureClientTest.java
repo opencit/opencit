@@ -30,7 +30,7 @@ public class TrustAgentSecureClientTest {
         byte[] data = "<identity_request></identity_request>".getBytes();
         HostAgentFactory factory = new HostAgentFactory();
         TlsPolicy tlsPolicy = factory.getTlsPolicy("INSECURE", new ByteArrayResource());
-        TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(String.format("http://%s:%d",hostname,port), tlsPolicy));
+        TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(String.format("https://%s:%d",hostname,port), tlsPolicy));
 //        TrustAgentSecureClient client = new TrustAgentSecureClient(hostname, port, data);
  // TODO ... need client.setData(data)
                 client.sendQuoteRequest();
@@ -42,7 +42,7 @@ public class TrustAgentSecureClientTest {
         //             data = "<quote_request><nonce>+nao5lHKxcMoqIGY3LuAYQ==</nonce><pcr_list>3-5,4-8</pcr_list></quote_request>".getBytes();
         HostAgentFactory factory = new HostAgentFactory();
         TlsPolicy tlsPolicy = factory.getTlsPolicy("INSECURE", new ByteArrayResource());
-        TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(String.format("http://%s:%d",hostname,port), tlsPolicy));
+        TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(String.format("https://%s:%d",hostname,port), tlsPolicy));
 //        TrustAgentSecureClient client = new TrustAgentSecureClient(hostname, port, data);
  // TODO ... need client.setData(data)
         client.sendQuoteRequest();       
@@ -93,7 +93,7 @@ public class TrustAgentSecureClientTest {
              data = "<quote_request><nonce>Iamnonce</nonce><pcr_list>3,19</pcr_list></quote_request>".getBytes();
         HostAgentFactory factory = new HostAgentFactory();
         TlsPolicy tlsPolicy = factory.getTlsPolicy("INSECURE", new ByteArrayResource());
-        TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(String.format("http://%s:%d",hostname,port), tlsPolicy));
+        TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(String.format("https://%s:%d",hostname,port), tlsPolicy));
 //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostname, port, data);
         // TODO ... need client.setData(data)
             client.sendQuoteRequest();

@@ -30,6 +30,7 @@ public class TrustAgentStrategy extends TAHelper implements IManifestStrategy {
 		
 		
 		String pcrList = getPcrList(tblHosts);
+                
 		
 		return getQuoteInformationForHost(tblHosts, pcrList); // tblHosts.getIPAddress(), pcrList, tblHosts.getName(), tblHosts.getPort());
 		

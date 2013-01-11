@@ -76,6 +76,9 @@ public class DemoPortalDataController extends MultiActionController {
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
 			responseView.addObject("message", e.getMessage());
+                        if(e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
+                            responseView.addObject("noHosts",true);
+                        }
 			return responseView;
 		}
 		responseView.addObject("result", true);

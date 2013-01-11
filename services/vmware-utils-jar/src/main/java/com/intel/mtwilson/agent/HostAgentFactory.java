@@ -18,6 +18,7 @@ import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
@@ -105,6 +106,7 @@ public class HostAgentFactory {
         }
     }
     
+    // given a host, it returns the complete connection string starting with vendor scheme
     public String getConnectionString(TblHosts host) {
         String connectionString = host.getAddOnConnectionInfo();
         if( connectionString == null || connectionString.isEmpty() ) {
