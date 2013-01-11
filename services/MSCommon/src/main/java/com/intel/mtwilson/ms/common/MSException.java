@@ -18,11 +18,11 @@ public class MSException extends MWException {
     public MSException(ErrorCode errorCode, Object... params) {
     	super(errorCode,params);
     }
-    public MSException(Exception e,ErrorCode code,Object... msg  ){
+    public MSException(Throwable e,ErrorCode code,Object... msg  ){
         super(e,code,msg);
     }
     
-    public MSException(Exception e){
+    public MSException(Throwable e){
         super(e);
     }
     

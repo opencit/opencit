@@ -135,5 +135,10 @@ public class IntelHostAgent implements HostAgent {
         host.VMM_OSVersion = hostInfo.getOsVersion().trim();
         return host;
     }
+
+    @Override
+    public String getHostAttestationReport(String pcrList) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
 }

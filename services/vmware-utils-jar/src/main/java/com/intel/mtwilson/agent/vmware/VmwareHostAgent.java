@@ -270,4 +270,13 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
         
     }
     
+
+    public String getHostAttestationReport(String pcrList) throws IOException {
+        try {
+            return vmware.getHostAttestationReport(hostMOR, hostname, pcrList);        
+        }
+        catch(VMwareConnectionException e) {
+            throw new IOException(String.format("Cannot get attestation report from host '%s': %s", hostname, e.toString()), e);
+        }
+    }
 }

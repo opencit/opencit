@@ -27,7 +27,7 @@ public class MWException extends WebApplicationException {
         authResponse = new AuthResponse(code, params);
     }
 
-    public MWException(Exception e,ErrorCode code, Object... params) {
+    public MWException(Throwable e,ErrorCode code, Object... params) {
         super(e,Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(code, params);
     }
@@ -39,7 +39,7 @@ public class MWException extends WebApplicationException {
 
     }
     
-    public MWException(Exception e){
+    public MWException(Throwable e){
         super(e,Response.status(400).entity(new AuthResponse(ErrorCode.SYSTEM_ERROR, e.getMessage())).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(ErrorCode.SYSTEM_ERROR, e.getMessage());
     }

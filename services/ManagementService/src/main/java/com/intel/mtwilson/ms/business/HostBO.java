@@ -215,7 +215,7 @@ public class HostBO extends BaseBO {
             } catch (Throwable te) {
                 log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
                 te.printStackTrace();
-                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
             
             /*
@@ -588,7 +588,7 @@ public class HostBO extends BaseBO {
         String errorMessage = "";
         boolean configStatus = false;
         String attestationReport;
-        HostInfoInterface vmmHelperObj = null;
+//        HostInfoInterface vmmHelperObj = null;
         boolean hostAlreadyConfigured = false;
         boolean biosMLEAlreadyExists = false;
         boolean vmmMLEAlreadyExists = false;
@@ -649,7 +649,7 @@ public class HostBO extends BaseBO {
             } catch (Throwable te) {
                 log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.toString());
                 te.printStackTrace();
-                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
             
             /*
@@ -729,7 +729,8 @@ public class HostBO extends BaseBO {
                 try {
 
                     // Retrieve the attestation report from the host
-                    attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
+//                    attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
+                    attestationReport = agent.getHostAttestationReport(reqdManifestList);  // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
                 } catch (Throwable te) {
                     
                     // Bug# 467: We have seen cases where in because of an error with TrustAgent we may not
@@ -756,7 +757,7 @@ public class HostBO extends BaseBO {
                     // want to lose the original error                    
                     log.error("Unexpected error while deleting MLE in registerHostFromCustomData: {}", te.toString());
                     te.printStackTrace();
-                    throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                    throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
 
                 if (attestationReport != null && !attestationReport.isEmpty()) {
@@ -825,12 +826,13 @@ public class HostBO extends BaseBO {
                 try {
 
                     // Retrieve the attestation report from the host
-                    attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
+//                    attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
+                    attestationReport = agent.getHostAttestationReport(reqdManifestList);   // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
                     log.info("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
                 } catch (Throwable te) {
                     log.error("Unexpected error from getHostAttestationReport in registerHostFromCustomData: {}", te.toString());
                     te.printStackTrace();
-                    throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                    throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
                                                     
                 if (attestationReport != null && !attestationReport.isEmpty()) {

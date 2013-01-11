@@ -958,6 +958,21 @@ public class VMwareClient implements TlsClient {
         return biosPCRHash;
     } 
     
+    /**
+     * @deprecated   just an adapter for now ;  VmwareHostAgent uses getHostAttestationReport(MOR,HostName,PcrList)
+     * @param hostObj
+     * @param pcrList
+     * @return
+     * @throws VMwareConnectionException 
+     */
+    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws VMwareConnectionException {
+            ManagedObjectReference hostMOR = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
+            if(hostMOR == null)
+            {
+                throw new VMwareConnectionException("Host specified does not exist in the vCenter.");
+            }
+            return getHostAttestationReport(hostMOR, hostObj.HostName, pcrList);
+    }
 
     /**
      * Added By: Sudhir on June 18, 2012
@@ -969,10 +984,9 @@ public class VMwareClient implements TlsClient {
      * @return : XML string equivalent of the attestation report.
      * @throws Exception 
      */
-    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws VMwareConnectionException {
-        ManagedObjectReference hostMOR;
+    public String getHostAttestationReport(ManagedObjectReference hostMOR, String hostName, String pcrList) throws VMwareConnectionException {
        
-        boolean doNotDisconnect;
+//        boolean doNotDisconnect;
 
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw;
@@ -993,12 +1007,6 @@ public class VMwareClient implements TlsClient {
             else
                 doNotDisconnect = true;
                 */
-
-            hostMOR = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
-            if(hostMOR == null)
-            {
-                throw new Exception("Host specified does not exist in the vCenter.");
-            }
             
             Boolean tpmSupport = Boolean.parseBoolean(getMORProperty(hostMOR, "capability.tpmSupported").toString());
             
@@ -1007,7 +1015,7 @@ public class VMwareClient implements TlsClient {
             xtw = xof.createXMLStreamWriter(sw);
             xtw.writeStartDocument();
             xtw.writeStartElement("Host_Attestation_Report");
-            xtw.writeAttribute("Host_Name", hostObj.HostName);
+            xtw.writeAttribute("Host_Name", hostName);
             xtw.writeAttribute("vCenterVersion", serviceContent.getAbout().getVersion());
             xtw.writeAttribute("HostVersion", getMORProperty(hostMOR, "config.product.version").toString());
             xtw.writeAttribute("TXT_Support", tpmSupport.toString());
@@ -1094,7 +1102,7 @@ public class VMwareClient implements TlsClient {
                                     xtw.writeAttribute("PackageVendor", "");
                                     xtw.writeAttribute("PackageVersion", "");
                                     xtw.writeAttribute("UseHostSpecificDigest", "True");
-                                    xtw.writeAttribute("HostName", hostObj.HostName);
+                                    xtw.writeAttribute("HostName", hostName);
                                     xtw.writeEndElement();
                                 }                                    
                                 break;

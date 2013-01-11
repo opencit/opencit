@@ -190,4 +190,13 @@ public interface HostAgent {
      * 
      */
     TxtHostRecord getHostDetails() throws IOException; // original interface passed TxtHostRecord even though all the method REALLY needs is the connection string (hostname and url for vcenter,  ip adderss and port for intel but can be in the form of a connection string);  but since the hostagent interface is for a host already selected... we don't need any arguments here!!    the IOException is to wrap any client-specific error, could be changed to be soemthing more specific to trust utils library 
+
+
+    /**
+     * Another adapter for existing code.  Each vendor returns a string in their own format.
+     * @param pcrList
+     * @return
+     * @throws IOException 
+     */
+    String getHostAttestationReport(String pcrList) throws IOException;
 }
