@@ -434,9 +434,6 @@ public class HostBO extends BaseBO {
                 }
             }
             return null;
-            // TODO: should use TA Helper insetad of TrustAgentSecureClient directly
-//		return new TrustAgentSecureClient(host.getIPAddress().toString(), host.getPort())
-//				.getAIKCertificate();
 	}
 
 	/**

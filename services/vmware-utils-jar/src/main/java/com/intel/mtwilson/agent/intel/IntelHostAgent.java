@@ -9,6 +9,7 @@ import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.vmware.VCenterHost;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.Aik;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.datatypes.Nonce;
@@ -77,8 +78,16 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public X509Certificate getAikCertificate() {
-        throw new UnsupportedOperationException("Not supporetd yet.");
-//        return null;  // XXX TODO throw exception or return null? call should first check isAikAvailable // vmware does not make the AIK available through its API
+        String pem = trustAgentClient.getAIKCertificate();
+        try {
+            X509Certificate aikCert = X509Util.decodePemCertificate(pem);
+            return aikCert;
+        }
+        catch(Exception e) {
+            log.error("Cannot decode AIK certificate: {}", e.toString());
+            log.debug(pem);
+            return null;
+        }
     }
 
     @Override
