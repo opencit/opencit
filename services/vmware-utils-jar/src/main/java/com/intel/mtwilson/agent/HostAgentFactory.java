@@ -115,12 +115,12 @@ public class HostAgentFactory {
         if( connectionString == null || connectionString.isEmpty() ) {
             if( host.getIPAddress() != null  ) {
                 connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
-                log.warn("Assuming Intel connection string %s for host %s", connectionString, host.getName());
+                log.warn("Assuming Intel connection string {} for host {}", connectionString, host.getName());
             }
         }
         else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
             connectionString = String.format("vmware:%s", connectionString);
-            log.warn("Assuming Vmware connection string %s for host %s", connectionString, host.getName());
+            log.warn("Assuming Vmware connection string {} for host {}", connectionString, host.getName());
         }        
         return connectionString;
     }

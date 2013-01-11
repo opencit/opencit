@@ -635,7 +635,7 @@ public class HostBO extends BaseBO {
             tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
             tblHosts.setIPAddress(gkvHost.IPAddress);
             if( gkvHost.Port != null ) { tblHosts.setPort(gkvHost.Port); }
-                        
+
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
             try {

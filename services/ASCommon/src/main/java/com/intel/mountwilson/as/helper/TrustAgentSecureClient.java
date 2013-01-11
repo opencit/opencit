@@ -77,7 +77,7 @@ public class TrustAgentSecureClient {
     public TrustAgentSecureClient(TlsConnection tlsConnection) {
         tlsPolicy = tlsConnection.getTlsPolicy();
         parseConnectionString(tlsConnection.getConnectionString());
-        log.info("TrustAgentSecureClient url(%s) hostname(%s) port(%d)", new Object[] { tlsConnection.getConnectionString(), serverHostname, serverPort });
+        log.info("TrustAgentSecureClient url({}) hostname({}) port({})", new Object[] { tlsConnection.getConnectionString(), serverHostname, serverPort });
     }
 
     // XXX the ipaddress:port format is also parsed somewhere else in the codebase... need to consolidate here.
