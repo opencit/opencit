@@ -26,10 +26,10 @@ public interface VendorHostAgentFactory {
      * connection in the pool but the tlspolicy is different, a new connection
      * will be created with the given tlspolicy.
      * 
+     * @param hostAddress the IP Address or Hostname of the Intel TXT-enabled host for which the caller wants a HostAgent instance
      * @param vendorConnectionString a vendor-specific URL or other string that specifies how to connect to the host
      * @param tlsPolicy the TLS Policy for the connection, specifying what are trusted certificates and whether or which self-signed certificates are accepted, etc.
-     * @param hostAddress the IP Address or Hostname of the Intel TXT-enabled host for which the caller wants a HostAgent instance
      * @return 
      */
-    HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException;
+    HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException;
 }

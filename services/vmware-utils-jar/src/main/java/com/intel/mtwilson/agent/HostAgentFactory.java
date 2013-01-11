@@ -7,6 +7,7 @@ package com.intel.mtwilson.agent;
 import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.strategy.TrustAgentStrategy;
 import com.intel.mountwilson.manifest.strategy.VMWareManifestStrategy;
+import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -40,7 +41,7 @@ public class HostAgentFactory {
     
     public HostAgentFactory() {
         // we initialize the map with the known vendors; but this could also be done through IoC
-        vendorFactoryMap.put(Vendor.INTEL, null);
+        vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());
         vendorFactoryMap.put(Vendor.CITRIX, null);
         vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostAgentFactory());
     }
@@ -163,7 +164,7 @@ public class HostAgentFactory {
                 String urlpart = connectionString.substring(prefix.length());
                 VendorHostAgentFactory factory = vendorFactoryMap.get(vendor);
                 if( factory != null ) {
-                    return factory.getHostAgent(urlpart, tlsPolicy, hostAddress);
+                    return factory.getHostAgent(hostAddress, urlpart, tlsPolicy);
                 }
             }
         }

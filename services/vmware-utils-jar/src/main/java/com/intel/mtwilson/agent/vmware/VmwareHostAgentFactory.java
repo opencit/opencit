@@ -22,7 +22,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     protected static VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory()); 
     
     @Override
-    public VmwareHostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
+    public VmwareHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
             return new VmwareHostAgent(client, hostAddress.toString());

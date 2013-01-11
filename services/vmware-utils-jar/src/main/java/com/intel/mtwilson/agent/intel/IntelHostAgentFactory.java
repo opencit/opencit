@@ -23,7 +23,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
     
     @Override
-    public IntelHostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
+    public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
 //            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));

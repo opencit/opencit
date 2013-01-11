@@ -555,6 +555,15 @@
             <version>${project.version}</version>
         </dependency>
                         
+<!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
+<!--
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-spring</artifactId>
+            <version>1.16</version>
+        </dependency>
+-->
+                        
     </dependencies>
     <properties />
 </project>
