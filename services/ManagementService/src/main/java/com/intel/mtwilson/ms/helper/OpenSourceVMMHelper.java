@@ -15,7 +15,7 @@ import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
 
 /**
- *
+ * Bug #497  this class needs to be merged into the IntelHostAgent class.
  * @author ssbangal
  */
 public class OpenSourceVMMHelper implements HostInfoInterface {
@@ -38,6 +38,8 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
      */
     @Override
     public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws Exception {
+        throw new UnsupportedOperationException("OpenSourceVMMHelper.getHostDetails");
+        /*
         HostInfo hostInfo = new TrustAgentSecureClient(hostObj.IPAddress, hostObj.Port).getHostInfo();
         
         hostObj.BIOS_Oem = hostInfo.getBiosOem().trim();
@@ -47,7 +49,7 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
         hostObj.VMM_OSName = hostInfo.getOsName().trim();
         hostObj.VMM_OSVersion = hostInfo.getOsVersion().trim();
         
-        return hostObj;
+        return hostObj;*/
         
     }
 

@@ -179,6 +179,15 @@ public interface HostAgent {
     
     /**
      * XXX TODO adapter for existing interface
+     * 
+     * SAMPLE OUTPUT FROM VMWare Host:
+     * BIOS - OEM:Intel Corporation
+     * BIOS - Version:S5500.86B.01.00.0060.090920111354
+     * OS Name:VMware ESXi
+     * OS Version:5.1.0
+     * VMM Name: VMware ESXi
+     * VMM Version:5.1.0-613838 (Build Number)
+     * 
      */
     TxtHostRecord getHostDetails() throws IOException; // original interface passed TxtHostRecord even though all the method REALLY needs is the connection string (hostname and url for vcenter,  ip adderss and port for intel but can be in the form of a connection string);  but since the hostagent interface is for a host already selected... we don't need any arguments here!!    the IOException is to wrap any client-specific error, could be changed to be soemthing more specific to trust utils library 
 }

@@ -192,19 +192,26 @@ public class HostBO extends BaseBO {
                 return updateHostStatus;
             }
                 
-                        // bug #497   this should be a different object than TblHosts  
-                        TblHosts tblHosts = new TblHosts();
-                        tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
-                        tblHosts.setSSLCertificate(new byte[0]); 
-                        tblHosts.setName(hostObj.HostName);
-                        tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            // bug #497   this should be a different object than TblHosts  
+            TblHosts tblHosts = new TblHosts();
+            tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
+            tblHosts.setSSLCertificate(new byte[0]); 
+            tblHosts.setName(hostObj.HostName);
+            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setIPAddress(hostObj.IPAddress);
+            tblHosts.setPort(hostObj.Port);
             
                         
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
-            TxtHostRecord hostDetails;
             try {
-                hostDetails = agent.getHostDetails();
+                TxtHostRecord hostDetails = agent.getHostDetails();
+                hostObj.BIOS_Oem = hostDetails.BIOS_Oem;
+                hostObj.BIOS_Version = hostDetails.BIOS_Version;
+                hostObj.VMM_Name = hostDetails.VMM_Name;
+                hostObj.VMM_Version = hostDetails.VMM_Version;
+                hostObj.VMM_OSName = hostDetails.VMM_OSName;
+                hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
             } catch (Throwable te) {
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
@@ -228,14 +235,14 @@ public class HostBO extends BaseBO {
             * */
             
             // Let us verify if we got all the data back correctly or not (Bug: 442)
-            if (hostDetails.BIOS_Oem == null || hostDetails.BIOS_Version == null || hostDetails.VMM_OSName == null || hostDetails.VMM_OSVersion == null || hostDetails.VMM_Version == null) {
+            if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
                 throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
             }
             
-            hostConfigObj.setTxtHostRecord(hostDetails);
-            log.info("Successfully retrieved the host information. Details: " + hostDetails.BIOS_Oem + ":" + 
-                    hostDetails.BIOS_Version  + ":" + hostDetails.VMM_OSName + ":" + hostDetails.VMM_OSVersion + 
-                    ":" + hostDetails.VMM_Version);
+            hostConfigObj.setTxtHostRecord(hostObj);
+            log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + 
+                    hostObj.BIOS_Version  + ":" + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + 
+                    ":" + hostObj.VMM_Version);
 
             // Let us first verify if all the configuration details required for host registration already exists 
             boolean verifyStatus = verifyMLEForHost(hostConfigObj);
@@ -243,13 +250,13 @@ public class HostBO extends BaseBO {
             if (verifyStatus == true) {
              
                 // Finally register the host.
-                txtHost = new TxtHost(hostDetails);
+                txtHost = new TxtHost(hostObj);
                 apiClient.addHost(txtHost); 
             }
                        
             // If everything is successful, set the status flag to true
             registerStatus = true;
-            log.debug("Successfully registered the host: " + hostDetails.HostName);
+            log.debug("Successfully registered the host: " + hostObj.HostName);
             
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -613,8 +620,34 @@ public class HostBO extends BaseBO {
                 }                 
             }
             
-            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+            
             TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
+            
+            
+            // bug #497   this should be a different object than TblHosts  
+            TblHosts tblHosts = new TblHosts();
+            tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
+            tblHosts.setSSLCertificate(new byte[0]); 
+            tblHosts.setName(gkvHost.HostName);
+            tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
+            tblHosts.setIPAddress(gkvHost.IPAddress);
+            tblHosts.setPort(gkvHost.Port);
+                        
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            try {
+                TxtHostRecord gkvHostDetails = agent.getHostDetails();
+                gkvHost.BIOS_Oem = gkvHostDetails.BIOS_Oem;
+                gkvHost.BIOS_Version = gkvHostDetails.BIOS_Version;
+                gkvHost.VMM_Name = gkvHostDetails.VMM_Name;
+                gkvHost.VMM_Version = gkvHostDetails.VMM_Version;
+                gkvHost.VMM_OSName = gkvHostDetails.VMM_OSName;
+                gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
+            } catch (Throwable te) {
+                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+            }
+            
+            /*
             // Create the appropriate interface object based on the type of the host   // BUG #497  this should be replaced with HostAgentFactory.getHostAgent()
             if (gkvHost.AddOn_Connection_String == null || gkvHost.AddOn_Connection_String.isEmpty()) {
                 vmmHelperObj = (HostInfoInterface) new OpenSourceVMMHelper();
@@ -622,9 +655,6 @@ public class HostBO extends BaseBO {
             else {
                 vmmHelperObj = (HostInfoInterface) new VMWareHelper();
             }
-            
-            log.info("Starting to process the white list configuration from host: " + gkvHost.HostName);                    
-            ApiClient apiClient = createAPIObject();
             
             try {
                 
@@ -636,6 +666,9 @@ public class HostBO extends BaseBO {
                 log.error("Unknown error: "+e.toString());
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, e.getMessage());
             }
+            */ 
+            log.info("Starting to process the white list configuration from host: " + gkvHost.HostName);                    
+            
 
             // Let us verify if we got all the data back correctly or not (Bug: 442)
             if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null) {
@@ -648,7 +681,10 @@ public class HostBO extends BaseBO {
                     ":" + gkvHost.VMM_Version);
 
             String reqdManifestList = "";
-                                  
+
+            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+            ApiClient apiClient = createAPIObject();
+            
             // For OpenSource hosts, the host has to be registered first before we can extract the
             // white list measurements by taking the TPM ownership. But for VMware host there is no 
             // such constraint. But for VMware ESXi 5.1 hosts we cannot register the host without

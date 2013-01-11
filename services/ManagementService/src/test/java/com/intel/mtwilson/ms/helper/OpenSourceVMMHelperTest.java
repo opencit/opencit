@@ -57,13 +57,13 @@ public class OpenSourceVMMHelperTest {
         hostObj.IPAddress = "10.1.71.145";
         hostObj.Port = 9999;
         
-        
+        /*
         OpenSourceVMMHelper instance = new OpenSourceVMMHelper();
         try{
         TxtHostRecord result = instance.getHostDetails(hostObj);
         }catch(Exception e){
             e.printStackTrace();
-        }
+        }*/
 //        assertNotNull(result.VMM_Name);
 //        assertNotNull(result.VMM_Version);
 //        assertNotNull(result.VMM_OSName);
