@@ -16,11 +16,11 @@ public class ASException extends MWException {
     public ASException(ErrorCode errorCode, Object... params) {
     	super(errorCode,params);
     }
-    public ASException(Exception e,ErrorCode code,Object... msg  ){
+    public ASException(Throwable e,ErrorCode code,Object... msg  ){
         super(e,code,msg);
     }
     
-    public ASException(Exception e){
+    public ASException(Throwable e){
         super(e);
     }
     
