@@ -26,6 +26,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
+            log.debug("Creating IntelHostAgent for host %s with connection string ", hostAddress, vendorConnectionString);
             return new IntelHostAgent(client, hostAddress);
         }
         catch(Exception e) {

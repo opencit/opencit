@@ -77,6 +77,7 @@ public class TrustAgentSecureClient {
     public TrustAgentSecureClient(TlsConnection tlsConnection) {
         tlsPolicy = tlsConnection.getTlsPolicy();
         parseConnectionString(tlsConnection.getConnectionString());
+        log.info("TrustAgentSecureClient url(%s) hostname(%s) port(%d)", new Object[] { tlsConnection.getConnectionString(), serverHostname, serverPort });
     }
 
     // XXX the ipaddress:port format is also parsed somewhere else in the codebase... need to consolidate here.
@@ -100,6 +101,7 @@ public class TrustAgentSecureClient {
                 String[] parts = connectionString.split(":");
                 serverHostname = parts[0];
                 serverPort = Integer.valueOf(parts[1]);
+                return;
             }
             catch(Exception e) {
                 throw new IllegalArgumentException("Invalid Trust Agent connection string: "+connectionString, e);

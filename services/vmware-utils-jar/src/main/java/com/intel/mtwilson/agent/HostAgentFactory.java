@@ -30,6 +30,8 @@ import java.security.KeyManagementException;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Use this class to instantiate the appropriate agent or client for a given
@@ -38,6 +40,7 @@ import java.util.Map;
  * @author jbuhacoff
  */
 public class HostAgentFactory {
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<Vendor,VendorHostAgentFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostAgentFactory>(Vendor.class);
     
     public HostAgentFactory() {
@@ -112,10 +115,12 @@ public class HostAgentFactory {
         if( connectionString == null || connectionString.isEmpty() ) {
             if( host.getIPAddress() != null  ) {
                 connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
+                log.warn("Assuming Intel connection string %s for host %s", connectionString, host.getName());
             }
         }
         else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
             connectionString = String.format("vmware:%s", connectionString);
+            log.warn("Assuming Vmware connection string %s for host %s", connectionString, host.getName());
         }        
         return connectionString;
     }
