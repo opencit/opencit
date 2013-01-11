@@ -35,6 +35,20 @@ public class OpenSourceVMMHelperTest {
 
     /**
      * Test of getHostDetails method, of class OpenSourceVMMHelper.
+     * 
+     * Sample output:
+     * <host_info>
+     *  <timeStamp>Thu Jan 10 13:39:31 PST 2013</timeStamp>
+     *  <clientIp>fe80:0:0:0:21b:21ff:fe91:3950%2</clientIp>
+     *  <errorCode>0</errorCode>
+     *  <errorMessage>OK</errorMessage>
+     *  <osName>Ubuntu</osName>
+     *  <osVersion> 11.10</osVersion>
+     *  <biosOem>Intel Corp.</biosOem>
+     *  <biosVersion> S5500.86B.01.00.0060.090920111354</biosVersion>
+     *  <vmmName>QEMU</vmmName>
+     *  <vmmVersion>0.14.1</vmmVersion>
+     * </host_info>
      */
     @Test
     public void testGetHostDetails() throws Exception {

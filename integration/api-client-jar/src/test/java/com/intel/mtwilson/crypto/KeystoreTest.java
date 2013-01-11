@@ -9,6 +9,8 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ClientException;
 import com.intel.mtwilson.datatypes.OsData;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.Resource;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -244,6 +246,16 @@ mtwilson.api.secretKey=
         System.out.print("Root password: ");
          * 
          */
+    }
+    
+    @Test
+    public void testCreateUserInResource() throws MalformedURLException, IOException, ApiException, CryptographyException, ClientException, KeyStoreException {
+        ByteArrayResource resource = new ByteArrayResource();
+        URL server = new URL("https://10.1.71.80:8181");
+        SimpleKeystore keystore = KeystoreUtil.createUserInResource(resource, "testuser1", "password", server, new String[] { "Attestation" });        
+        for(String alias : keystore.aliases()) {
+            System.out.println("Keystore now has alias: "+alias);
+        }
     }
     
 }

@@ -559,6 +559,9 @@ public class VMWareHelper implements HostInfoInterface {
      * @param hostName : Name of the host for which the details need to be retrieved
      * @param vCenterConnectionString : Connection string to the vCenter server where the
      * host is configured.
+     * 
+     * @deprecated use VmwareHostAgent.getHostDetails()
+     * 
      * @return : Host object containing all the details.
      * @throws Exception 
      */

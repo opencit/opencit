@@ -20,12 +20,14 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Properties;
 import java.util.Set;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.MapConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -327,7 +329,7 @@ public class KeystoreUtil {
      * @param password arbitrary
      * @param server URL to the Mt Wilson server like https://mtwilson.example.com:443
      * @param roles like new String[] { Role.Attestation.toString(), Role.Whitelist.toString() }
-     * @return the new keystore
+     * @return the new keystore, which is also saved in the resource
      * @throws Exception 
      * @since 0.5.4
      */
@@ -339,9 +341,12 @@ public class KeystoreUtil {
         ApiClient c = null;
         try {
             // download server's ssl certificates and add them to the keystore
+            Properties p = new Properties();
+            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE");
+            Configuration config = new MapConfiguration(p);
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
-            c = new ApiClient(server, rsaCredential, keystore, null); //ClientException
+            c = new ApiClient(server, rsaCredential, keystore, config); //ClientException
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded()); //CertificateEncodingException
             user.setRoles(roles);
@@ -411,7 +416,13 @@ public class KeystoreUtil {
             log.error(e.toString());
         }
         
-        return keystore;
+        try {
+            keystore.save();
+            return keystore;
+        }
+        catch(Exception e) {
+            throw new CryptographyException("Cannot save keystore to resource: "+e.toString(), e);
+        }
     }
     
     /**

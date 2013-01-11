@@ -15,7 +15,10 @@ import java.util.regex.Pattern;
 
 import javax.persistence.EntityManagerFactory;
 import javax.xml.bind.JAXBException;
-
+import com.intel.mtwilson.agent.intel.*;
+import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.tls.*;
+import com.intel.mtwilson.datatypes.InternetAddress;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
@@ -27,7 +30,9 @@ import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.io.ByteArrayResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,10 +91,14 @@ public class TAHelper {
     }
 
     // DAA challenge
-    public void verifyAikWithDaa(String hostIpAddress, int port) {
-        
+//    public void verifyAikWithDaa(String hostIpAddress, int port) {
+    public void verifyAikWithDaa(TblHosts tblHosts) {
         try {
-            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port);
+//            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 TODO need to replace with use of HostAgentFactory
+              HostAgentFactory factory = new HostAgentFactory();
+              TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(tblHosts.getAddOnConnectionInfo(), tlsPolicy));
+            
             String sessionId = generateSessionId();
 
             // request AIK certificate and CA chain (the AIK Proof File)
@@ -148,18 +157,26 @@ public class TAHelper {
         }
     }
     
-    // BUG #497 need to return 
-    public HashMap<String, PcrManifest> getQuoteInformationForHost(String hostIpAddress, String pcrList, String name, int port) {
-
+    // BUG #497 need to use HostAgentFactory
+//    public HashMap<String, PcrManifest> getQuoteInformationForHost(String hostIpAddress, String pcrList, String name, int port) {
+    public HashMap<String, PcrManifest> getQuoteInformationForHost(TblHosts tblHosts, String pcrList) {
+            
           try {
-            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port);
-
+              // going to IntelHostAgent directly because 1) we are TAHelper so we know we need intel trust agents,  2) the HostAgent interface isn't ready yet for full generic usage,  3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
+              HostAgentFactory factory = new HostAgentFactory();
+              ByteArrayResource resource = new ByteArrayResource(tblHosts.getSSLCertificate());
+              TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getSSLPolicy(), resource);
+              
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(tblHosts.getAddOnConnectionInfo(), tlsPolicy));
+//                IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
+                
+                
             String nonce = generateNonce();
 
             String sessionId = generateSessionId();
 
             ClientRequestType clientRequestType = client.getQuote(nonce, pcrList);
-            log.info( "got response from server ["+hostIpAddress+"] "+clientRequestType);
+            log.info( "got response from server ["+tblHosts.getIPAddress().toString()+"] "+clientRequestType);
             String aikCertificate = clientRequestType.getAikcert();
             
             log.info( "extracted aik cert from response: "+aikCertificate);
@@ -188,12 +205,13 @@ public class TAHelper {
             log.info( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             
+            tblHosts.setSSLCertificate(resource.toByteArray()); // bug #497 save the server cert in case this is a trust-first-certificate policy XXX TODO needs to move somewhere else !!!
             return pcrMap;
             
         } catch (ASException e) {
             throw e;
         } catch(UnknownHostException e) {
-            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, tblHosts.getIPAddress().toString());
         }  catch (Exception e) {
             throw new ASException(e);
         }

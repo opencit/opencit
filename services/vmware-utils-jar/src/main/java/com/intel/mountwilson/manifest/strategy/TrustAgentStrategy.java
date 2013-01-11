@@ -24,14 +24,14 @@ public class TrustAgentStrategy extends TAHelper implements IManifestStrategy {
 		super(entityManagerFactory);
 	}
 
-        // BUG #497 the Map<String,? extends IManifest> needs to be replaced with the new PcrManifest model object.
+        // BUG #497 the Map<String,? extends IManifest> needs to be replaced with the new PcrManifest model object.  (do not confuse:  there is an implementation of IManifest called PcrManiest - NOT the same one)
 	@Override
 	public HashMap<String, ? extends IManifest> getManifest(TblHosts tblHosts) {
 		
 		
 		String pcrList = getPcrList(tblHosts);
 		
-		return getQuoteInformationForHost(tblHosts.getIPAddress(), pcrList, tblHosts.getName(), tblHosts.getPort());
+		return getQuoteInformationForHost(tblHosts, pcrList); // tblHosts.getIPAddress(), pcrList, tblHosts.getName(), tblHosts.getPort());
 		
 		
 	}

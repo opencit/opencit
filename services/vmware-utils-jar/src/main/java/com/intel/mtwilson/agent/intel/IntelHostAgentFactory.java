@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.datatypes.InternetAddress;
@@ -22,14 +23,14 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
     
     @Override
-    public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
+    public IntelHostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
         try {
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
 //            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
-//            return new IntelHostAgent(client, hostAddress.toString());
-            return null;
+            return new IntelHostAgent(client, hostAddress);
         }
         catch(Exception e) {
-            throw new IOException("Cannot get vmware client for host: "+hostAddress.toString()+": "+e.toString());
+            throw new IOException("Cannot get trust agent client for host: "+hostAddress.toString()+": "+e.toString());
         }
     }
 }

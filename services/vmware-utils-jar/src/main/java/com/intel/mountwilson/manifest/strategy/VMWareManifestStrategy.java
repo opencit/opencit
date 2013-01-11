@@ -126,6 +126,8 @@ public class VMWareManifestStrategy implements
 
             }            
         };
+        
+        // Bug #497  kludge   TODO  need to put all this code in the VmwareHostAgent / VmwareClient.  
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         HashMap<String, ? extends IManifest> manifestMap = hostAgentFactory.getManifest(host, postProcessing);
         

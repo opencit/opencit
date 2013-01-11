@@ -6,6 +6,7 @@ import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.data.ModuleManifest;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.manifest.data.PcrModuleManifest;
+import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.HostAgentFactory;
@@ -26,11 +27,13 @@ import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmCommandEventDetails;
 import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.HostTpmEventLogEntry;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -72,7 +75,7 @@ public class HostBO extends BaseBO {
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
-				certificate = getAIKCertificateForHost(host);
+				certificate = getAIKCertificateForHost(tblHosts, host);
                         }
 			else { // ESX host so get the location for the host and store in the
 					// table
@@ -258,6 +261,7 @@ public class HostBO extends BaseBO {
             return pcrMap;
 	}
 
+        // XXX TODO need to replace with a call to HostAgent.isAikSupported() or HostAgent.isAikAvailable() and rely on the HostAgent implementations
 	private boolean canFetchAIKCertificateForHost(String vmmName) {
 		return (!vmmName.contains("ESX"));
 	}
@@ -267,16 +271,21 @@ public class HostBO extends BaseBO {
 		try {
 
 			TblHosts tblHosts = getHostByName(host.getHostName()); // datatype.Hostname
-
-			getBiosAndVMM(host);
-
 			if (tblHosts == null) {
 				throw new ASException(ErrorCode.AS_HOST_NOT_FOUND,host.getHostName().toString());
 			}
 
+			getBiosAndVMM(host);
+
+                        // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
+                        tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
+                        tblHosts.setSSLCertificate(new byte[0]);  // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
+			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+			tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
+
 			log.info("Getting identity.");
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
-				String certificate = getAIKCertificateForHost(host);
+				String certificate = getAIKCertificateForHost(tblHosts, host);
 				tblHosts.setAIKCertificate(certificate);
 			}else { // ESX host so get the location for the host and store in the
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
@@ -289,7 +298,6 @@ public class HostBO extends BaseBO {
                         }
                         
                         log.info("Saving Host in database");
-			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 			tblHosts.setBiosMleId(biosMleId);
                         // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
 			// tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
@@ -297,7 +305,6 @@ public class HostBO extends BaseBO {
 			tblHosts.setEmail(host.getEmail());
 			if (host.getIPAddress() != null)
 				tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
-			tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
 			tblHosts.setPort(host.getPort());
 			tblHosts.setVmmMleId(vmmMleId);
 
@@ -408,10 +415,23 @@ public class HostBO extends BaseBO {
             }	
 	}
 
-	private String getAIKCertificateForHost(TxtHost host) {
+	private String getAIKCertificateForHost(TblHosts tblHosts, TxtHost host) {
+            HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            if( agent.isAikAvailable() ) {
+                X509Certificate cert = agent.getAikCertificate();
+                try {
+                    return X509Util.encodePemCertificate(cert);
+                }
+                catch(Exception e) {
+                    log.error("Cannot encode AIK certificate: "+e.toString(), e);
+                    return null;
+                }
+            }
+            return null;
             // TODO: should use TA Helper insetad of TrustAgentSecureClient directly
-		return new TrustAgentSecureClient(host.getIPAddress(), host.getPort())
-				.getAIKCertificate();
+//		return new TrustAgentSecureClient(host.getIPAddress().toString(), host.getPort())
+//				.getAIKCertificate();
 	}
 
 	/**
@@ -506,7 +526,7 @@ public class HostBO extends BaseBO {
 			tblHosts.setPort(host.getPort());
                 }
 		tblHosts.setVmmMleId(vmmMleId);
-		tblHosts.setAIKCertificate(certificate);
+		tblHosts.setAIKCertificate(certificate); // null is ok;  vmware servers do not have aik's.
 		tblHosts.setLocation(location);
 		// create the host
 		hostController.create(tblHosts);

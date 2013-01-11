@@ -36,23 +36,31 @@ import java.util.Arrays;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
+import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.mtwilson.tls.TlsPolicy;
 
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.net.UnknownHostException;
 
 public class TrustAgentSecureClient {
-
+    public static final int DEFAULT_TRUST_AGENT_PORT = 9999;
     public static final String TA_ERROR_CODE = "error_code";
     public static final String TA_ERROR_MESSAGE = "error_message";
     private final Logger log = LoggerFactory.getLogger(getClass());
     private String serverHostname = null;
     private int serverPort = 0;
     private byte[] data;
+    private TlsPolicy tlsPolicy;
     
     private static int TIME_OUT = ASConfig.getTrustAgentTimeOutinMilliSecs();
 
+    // Bug #497 commenting out  these two constructors because now Tls Policy is a required argument.
+    // XXX this constructor is only used from the unit test class, that's why it allows setting data -  so unit test can mock response from trust agent
+    /*
     public TrustAgentSecureClient(String serverHostname, int serverPort, byte[] data) {
         this(serverHostname, serverPort);
         if( data != null ) {
@@ -64,8 +72,44 @@ public class TrustAgentSecureClient {
         this.serverHostname = hostName;
         this.serverPort = port;
         log.info("Connecting to Trust Agent at '{}'", hostName+":"+port);
+    } */
+    
+    public TrustAgentSecureClient(TlsConnection tlsConnection) {
+        tlsPolicy = tlsConnection.getTlsPolicy();
+        parseConnectionString(tlsConnection.getConnectionString());
     }
 
+    // XXX the ipaddress:port format is also parsed somewhere else in the codebase... need to consolidate here.
+    private void parseConnectionString(String connectionString) {
+        if( connectionString.startsWith("https") ) {  // format  https://ipAddressOrHostname:port
+            try {
+                URL url = new URL(connectionString);
+                serverHostname = url.getHost();
+                serverPort = url.getPort();
+                if( serverPort == -1 ) {
+                    serverPort = DEFAULT_TRUST_AGENT_PORT;
+                }
+                return;
+            }
+            catch(MalformedURLException e) {
+                throw new IllegalArgumentException("Invalid Trust Agent connection string: "+connectionString, e);
+            }
+        }
+        if( connectionString.contains(":") ) {
+            try {
+                String[] parts = connectionString.split(":");
+                serverHostname = parts[0];
+                serverPort = Integer.valueOf(parts[1]);
+            }
+            catch(Exception e) {
+                throw new IllegalArgumentException("Invalid Trust Agent connection string: "+connectionString, e);
+            }
+        }
+        throw new IllegalArgumentException("Unrecognized Trust Agent connection string format: "+connectionString);
+    }
+    
+    /*
+    // XXX this constructor is not used anywhere
     public TrustAgentSecureClient(IPAddress serverIPAddress, int serverPort, byte[] data) { // datatype.IPAddress
         this(serverIPAddress, serverPort);
         if( data != null ) {
@@ -73,9 +117,11 @@ public class TrustAgentSecureClient {
         }
     }
 
+    // XXX this constructor is not used anywhere
     public TrustAgentSecureClient(IPAddress serverIPAddress, int serverPort) { // datatype.IPAddress
         this(serverIPAddress.toString(), serverPort);
     }
+    */
 
     
     private byte[] sendRequestWithSSLSocket() throws NoSuchAlgorithmException, NoSuchAlgorithmException, KeyManagementException, UnknownHostException, IOException {
@@ -161,6 +207,7 @@ public class TrustAgentSecureClient {
     }
 
     private SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
+        /*
         javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {
 
             @Override
@@ -196,9 +243,13 @@ public class TrustAgentSecureClient {
 
     	SSLContext ctx = SSLContext.getInstance("SSL");
         ctx.init(null, new javax.net.ssl.TrustManager[]{x509}, null);
+        */
+    	SSLContext ctx = SSLContext.getInstance("SSL");
+        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null);
         return ctx;
     }
 
+    // XXX TODO  we need to return an X509Certificate here;   if the caller wants it in PEM format they can encode it.  returning a String is ambiguous and leaves open possibiility of parsing errors later. we should catch them here.
     public String getAIKCertificate() {
         try {
 

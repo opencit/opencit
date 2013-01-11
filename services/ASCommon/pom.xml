@@ -31,7 +31,13 @@
 
 
   <dependencies>
-	<dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>http-authorization</artifactId>
+      <version>0.5.4-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
 		<groupId>javax</groupId>
 		<artifactId>javaee-web-api</artifactId>
 		<version>6.0</version>

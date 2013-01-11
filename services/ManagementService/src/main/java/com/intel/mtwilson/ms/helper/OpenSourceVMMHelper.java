@@ -33,6 +33,8 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
      * OS Version:5.1.0
      * VMM Name: VMware ESXi
      * VMM Version:5.1.0-613838 (Build Number)
+     * 
+     * @deprecated use IntelHostAgent.getHostDetails()
      */
     @Override
     public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws Exception {

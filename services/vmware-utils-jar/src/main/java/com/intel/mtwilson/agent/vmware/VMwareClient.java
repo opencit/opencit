@@ -673,6 +673,12 @@ public class VMwareClient implements TlsClient {
      * @param hostName : Name of the host for which the details need to be retrieved
      * @param vCenterConnectionString : Connection string to the vCenter server where the
      * host is configured.
+     * 
+     * NOTE: this method modifies the input object and then returns the same object;  it does NOT return a new object or a copy
+     * 
+     * @deprecated use VmwareHostAgent.getHostDetails()
+     * 
+     * 
      * @return : Host object containing all the details.
      * @throws Exception 
      */

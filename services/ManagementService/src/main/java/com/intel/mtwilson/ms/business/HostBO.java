@@ -20,7 +20,7 @@ import com.intel.mtwilson.as.data.TblEventType;
 import com.intel.mtwilson.as.data.TblMle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.ms.helper.BaseBO;
 import com.intel.mtwilson.ms.helper.HostInfoInterface;
 import com.intel.mtwilson.ms.helper.OpenSourceVMMHelper;
@@ -191,12 +191,32 @@ public class HostBO extends BaseBO {
                 boolean updateHostStatus = updateHost(apiClient, hostSearchObj, hostConfigObj);
                 return updateHostStatus;
             }
+                
+                        // bug #497   this should be a different object than TblHosts  
+                        TblHosts tblHosts = new TblHosts();
+                        tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
+                        tblHosts.setSSLCertificate(new byte[0]); 
+                        tblHosts.setName(hostObj.HostName);
+                        tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             
+                        
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            TxtHostRecord hostDetails;
+            try {
+                hostDetails = agent.getHostDetails();
+            } catch (Throwable te) {
+                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+            }
+            
+            /*
             // Create the appropriate interface object based on the type of the host
-            if (hostObj.AddOn_Connection_String == null || hostObj.AddOn_Connection_String.isEmpty())
+            if (hostObj.AddOn_Connection_String == null || hostObj.AddOn_Connection_String.isEmpty()) {
                 vmmHelperObj = (HostInfoInterface) new OpenSourceVMMHelper();
-            else
+            }
+            else {
                 vmmHelperObj = (HostInfoInterface) new VMWareHelper();
+            }
                         
             try {
                 
@@ -205,15 +225,17 @@ public class HostBO extends BaseBO {
             } catch (Throwable te) {
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
+            * */
             
             // Let us verify if we got all the data back correctly or not (Bug: 442)
-            if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null)
+            if (hostDetails.BIOS_Oem == null || hostDetails.BIOS_Version == null || hostDetails.VMM_OSName == null || hostDetails.VMM_OSVersion == null || hostDetails.VMM_Version == null) {
                 throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
+            }
             
-            hostConfigObj.setTxtHostRecord(hostObj);
-            log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + 
-                    hostObj.BIOS_Version  + ":" + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + 
-                    ":" + hostObj.VMM_Version);
+            hostConfigObj.setTxtHostRecord(hostDetails);
+            log.info("Successfully retrieved the host information. Details: " + hostDetails.BIOS_Oem + ":" + 
+                    hostDetails.BIOS_Version  + ":" + hostDetails.VMM_OSName + ":" + hostDetails.VMM_OSVersion + 
+                    ":" + hostDetails.VMM_Version);
 
             // Let us first verify if all the configuration details required for host registration already exists 
             boolean verifyStatus = verifyMLEForHost(hostConfigObj);
@@ -221,13 +243,13 @@ public class HostBO extends BaseBO {
             if (verifyStatus == true) {
              
                 // Finally register the host.
-                txtHost = new TxtHost(hostObj);
+                txtHost = new TxtHost(hostDetails);
                 apiClient.addHost(txtHost); 
             }
                        
             // If everything is successful, set the status flag to true
             registerStatus = true;
-            log.debug("Successfully registered the host: " + hostObj.HostName);
+            log.debug("Successfully registered the host: " + hostDetails.HostName);
             
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());

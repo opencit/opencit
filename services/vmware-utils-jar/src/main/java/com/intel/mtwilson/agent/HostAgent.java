@@ -12,6 +12,8 @@ import com.intel.mtwilson.datatypes.Nonce;
 import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.datatypes.Pcr;
 import com.intel.mtwilson.datatypes.TpmQuote;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
@@ -86,13 +88,13 @@ public interface HostAgent {
      * XXX draft - maybe it should return an X509Certificate object
      * @return 
      */
-    byte[] getAikCertificate();
+    X509Certificate getAikCertificate();
     
     /**
      * XXX draft - maybe it should return an X509Certificate object
      * @return the Privacy CA certificate that is mentioned in the AIK Certificate
      */
-    byte[] getAikCaCertificate(); 
+    X509Certificate getAikCaCertificate(); 
     
     /**
      * XXX draft to approximate getting the bios/os/vmm details from the host...
@@ -174,4 +176,9 @@ public interface HostAgent {
      * @return 
      */
     HashMap<String, ? extends IManifest> getManifest(VCenterHost postProcessing);
+    
+    /**
+     * XXX TODO adapter for existing interface
+     */
+    TxtHostRecord getHostDetails() throws IOException; // original interface passed TxtHostRecord even though all the method REALLY needs is the connection string (hostname and url for vcenter,  ip adderss and port for intel but can be in the form of a connection string);  but since the hostagent interface is for a host already selected... we don't need any arguments here!!    the IOException is to wrap any client-specific error, could be changed to be soemthing more specific to trust utils library 
 }

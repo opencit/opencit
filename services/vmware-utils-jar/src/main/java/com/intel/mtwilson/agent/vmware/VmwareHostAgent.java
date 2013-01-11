@@ -13,13 +13,16 @@ import com.intel.mtwilson.datatypes.Nonce;
 import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.datatypes.Pcr;
 import com.intel.mtwilson.datatypes.TpmQuote;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.RuntimeFaultFaultMsg;
+import java.io.IOException;
 import java.io.StringWriter;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -39,20 +42,20 @@ public class VmwareHostAgent implements HostAgent {
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient final VMwareClient vmware;
     private final String hostname;
-    private transient ManagedObjectReference hostObj = null;
+    private transient ManagedObjectReference hostMOR = null;
     private String vCenterVersion = null;
     private String esxVersion = null;
     private Boolean isTpmAvailable = null;
     private String vendorHostReport = null;
     private HashMap<String, ? extends IManifest> manifestMap = null; // XXX TODO needs to change, it's not a clear programming interface
     
-    public VmwareHostAgent(VMwareClient vmware, String hostname) throws Exception {
-        this.vmware = vmware;
+    public VmwareHostAgent(VMwareClient vmwareClient, String hostname) throws Exception {
+        vmware = vmwareClient;
         this.hostname = hostname;
-        hostObj = vmware.getManagedObjectReference(hostname);
-        vCenterVersion = vmware.getVCenterVersion(); //serviceContent.getAbout().getVersion(); // required so we can choose implementations
+        hostMOR = vmwareClient.getManagedObjectReference(hostname);
+        vCenterVersion = vmwareClient.getVCenterVersion(); //serviceContent.getAbout().getVersion(); // required so we can choose implementations
         log.info("VCenter version is {}", vCenterVersion);
-        esxVersion = vmware.getMORProperty(hostObj, "config.product.version").toString(); // required so we can choose implementations and report on host info
+        esxVersion = vmwareClient.getMORProperty(hostMOR, "config.product.version").toString(); // required so we can choose implementations and report on host info
     }
     
     
@@ -61,7 +64,7 @@ public class VmwareHostAgent implements HostAgent {
     public boolean isTpmAvailable() {
             try {
                 if( isTpmAvailable == null ) {
-                    isTpmAvailable = (Boolean)vmware.getMORProperty(hostObj,
+                    isTpmAvailable = (Boolean)vmware.getMORProperty(hostMOR,
                                 "capability.tpmSupported");
                 }
                 return isTpmAvailable;
@@ -100,13 +103,13 @@ public class VmwareHostAgent implements HostAgent {
     }
 
     @Override
-    public byte[] getAikCertificate() {
+    public X509Certificate getAikCertificate() {
         throw new UnsupportedOperationException("Vmware does not provide an AIK Certificate");
 //        return null;  // XXX TODO throw exception or return null? call should first check isAikAvailable // vmware does not make the AIK available through its API
     }
 
     @Override
-    public byte[] getAikCaCertificate() {
+    public X509Certificate getAikCaCertificate() {
         throw new UnsupportedOperationException("Vmware does not provide a Privacy CA Certificate");
 //        return null; // XXX TODO throw exception or return null? call should first check isAikCaAvailable  // vmware does not make the Privacy CA Certificate available through its API, if it even uses a Privacy CA
     }
@@ -216,7 +219,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
         try {
             if( isTpmAvailable() ) {
 				if (vCenterVersion.contains("5.1")) {
-					HostTpmAttestationReport report = vmware.getAttestationReport(hostObj);
+					HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
                                         vendorHostReport = toXml(HostTpmAttestationReport.class, report);
@@ -224,7 +227,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 					manifestMap = postProcessing.processReport(esxVersion,report);
 				}else{
 					
-					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMORProperty(hostObj, "runtime");
+					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMORProperty(hostMOR, "runtime");
                                         vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
 					// Now process the digest information
 					List<HostTpmDigestInfo> htdis = runtimeInfo
@@ -238,6 +241,33 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             log.error("error during getManifest: "+e.toString(), e);
         }
         return manifestMap;
+    }
+
+    /**
+     * Content of this method is same as getHostDetails() in VMwareHelper in Management Service and
+     * VMwareClient in trust utils library.
+     * @return 
+     */
+    @Override
+    public TxtHostRecord getHostDetails() throws IOException {
+        try {
+            TxtHostRecord host = new TxtHostRecord();
+            host.HostName = vmware.getMORProperty(hostMOR, "name").toString();
+            // hostObj.Description = serviceContent.getAbout().getVersion();
+            host.VMM_OSName = vmware.getMORProperty(hostMOR, "config.product.name").toString();
+            host.VMM_OSVersion = vmware.getMORProperty(hostMOR, "config.product.version").toString();
+            host.VMM_Version = vmware.getMORProperty(hostMOR, "config.product.build").toString();
+            host.BIOS_Oem = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString();
+            host.BIOS_Version = vmware.getMORProperty(hostMOR, "hardware.biosInfo.biosVersion").toString();
+            return host;
+        } catch (InvalidPropertyFaultMsg ex) {
+            log.error("VCenter host does not support host details property: {}", ex.getLocalizedMessage());
+            throw new IOException(ex);
+        } catch (RuntimeFaultFaultMsg ex) {
+            log.error("Runtime fault while fetching host details: {}", ex.getLocalizedMessage());
+            throw new IOException(ex);
+        }
+        
     }
     
 }

@@ -233,6 +233,23 @@
             <artifactId>mtwilson-io</artifactId>
             <version>${project.version}</version>
         </dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-mapper-asl</artifactId>
+	<version>1.9.11</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-core-asl</artifactId>
+	<version>1.9.11</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-xc</artifactId>
+	<version>1.9.11</version>
+</dependency>
+
+                
 	<!--
 	<dependency>
 		<groupId>org.glassfish</groupId>
@@ -259,12 +276,25 @@
 		<scope>provided</scope>
     </dependency>
     -->
-    <dependency>
+    <!-- <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-jdk14</artifactId>
 		<version>1.6.4</version>
 		<scope>test</scope>
-    </dependency>
+    </dependency> -->
+	
+	        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+
     <!--
     <dependency>
 		<groupId>commons-logging</groupId>

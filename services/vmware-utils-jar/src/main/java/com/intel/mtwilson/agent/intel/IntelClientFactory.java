@@ -4,28 +4,25 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mtwilson.agent.vmware.*;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
+import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mtwilson.tls.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
 /**
- * The VmwareClientFactory creates VmwareClient instances. After an instance
- * is created the factory calls connect() so the object you get back is already
- * connected to its vCenter and ready to use. These objects can be used
- * directly or put in a connection pool.
+ * The IntelClientFactory creates TrustAgentSecureClient instances. The 
+ * TrustAgentSecureClient does not have a connect() or disconnect() method.
+ * It creates a new connection for every call. This may be changed in a
+ * future release.
  * 
  * See also KeyedPoolableObjectFactory in Apache Commons Pool
  * 
  * @author jbuhacoff
  */
-public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,VMwareClient> {
+public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,TrustAgentSecureClient> {
     
     @Override
-    public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {
-        VMwareClient client = new VMwareClient();
-        client.setTlsPolicy(tlsConnection.getTlsPolicy());
-        client.connect(tlsConnection.getConnectionString());        
+    public TrustAgentSecureClient makeObject(TlsConnection tlsConnection) throws Exception {
+        TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection); // client has to parse the string to get ip address and port for trust agent. 
         return client;
     }
     
@@ -39,7 +36,7 @@ public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnec
      * @throws Exception 
      */
     @Override
-    public void activateObject(TlsConnection tlsConnection, VMwareClient client) throws Exception {
+    public void activateObject(TlsConnection tlsConnection, TrustAgentSecureClient client) throws Exception {
     }
     
     /**
@@ -53,8 +50,9 @@ public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnec
      * @return 
      */
     @Override
-    public boolean validateObject(TlsConnection tlsConnection, VMwareClient client) {
-        return client.isConnected(); //return true;
+    public boolean validateObject(TlsConnection tlsConnection, TrustAgentSecureClient client) {
+//        return client.isConnected(); 
+        return true; // XXX TODO is there a way to validate the trust agent client connection? maybe try sending a request for host info? or something else lightweight, with a really small timeout
     }
     
     /**
@@ -66,7 +64,7 @@ public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnec
      * @throws Exception 
      */
     @Override
-    public void destroyObject(TlsConnection tlsConnection, VMwareClient client) throws Exception {
-        client.disconnect();
+    public void destroyObject(TlsConnection tlsConnection, TrustAgentSecureClient client) throws Exception {
+//        client.disconnect();
     }
 }

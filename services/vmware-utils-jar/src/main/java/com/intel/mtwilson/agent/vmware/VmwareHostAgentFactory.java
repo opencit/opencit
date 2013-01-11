@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
-import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.tls.TlsConnection;
@@ -23,7 +22,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     protected static VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory()); 
     
     @Override
-    public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
+    public VmwareHostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy, InternetAddress hostAddress) throws IOException {
         try {
             VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
             return new VmwareHostAgent(client, hostAddress.toString());
