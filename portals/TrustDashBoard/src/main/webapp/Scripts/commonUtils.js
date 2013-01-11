@@ -1,6 +1,6 @@
 var disabledDiv = '<div id="disabledDiv" class="disabledDiv"><img class="loadingImageClass" src="images/loading.gif" /></div>';
-var validationDiv = '<span class="errorMessage validationErrorDiv" style="float:none;"> Value Can\'t be Empty.</span>';
-var validationSpecialDiv = '<span class="errorMessage validationErrorDiv" style="float:none;"> Special Characters are not allowed.</span>';
+var validationDiv = '<span class="errorMessage validationErrorDiv" style="float:none;"> Value can\'t be empty.</span>';
+var validationSpecialDiv = '<span class="errorMessage validationErrorDiv" style="float:none;"> Special characters are not allowed.</span>';
 var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var regIPAddress = new RegExp();
 var regVcenterAddress = new RegExp();
@@ -136,7 +136,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 
 //Function to show dialog box to show message to user if session is expired or request return Login Page.
 function fnSessionExpireLoginAgain() {
-	var str = 'Your Login Session is Expired. <a href="login.htm">Click here</a> to Login again.';
+	var str = 'Your login session has expired. <a href="login.htm">Click here</a> to login again.';
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 

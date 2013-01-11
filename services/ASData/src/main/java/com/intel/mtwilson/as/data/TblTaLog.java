@@ -4,18 +4,21 @@
  */
 package com.intel.mtwilson.as.data;
 
+import com.intel.mtwilson.audit.handler.AuditEventHandler;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import org.eclipse.persistence.annotations.Customizer;
 
 /**
  *
  * @author dsmagadx
  */
 @Entity
+@Customizer(AuditEventHandler.class) 
 @Table(name = "mw_ta_log")
 @XmlRootElement
 @NamedQueries({

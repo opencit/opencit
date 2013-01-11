@@ -52,9 +52,16 @@ function getCAStatus() {
 /*--Begin Added by Soni on 18/10/12 for New Screen for SAML downlaod */
 function downloadSAML() {
 	$('#mainContainer').html('<div id="getSAML"></div>');
-		setLoadImage('getSAML', '40px', '500px');
+	setLoadImage('getSAML', '40px', '500px');
 	sendHTMLAjaxRequest(false, 'getView/getSAMLCertificatePage.html', null, fnDisplayContent, null,'getSAML');
 }
+/*--Begin Added by stdale on 1/8/13 for New Screen for view cert */
+function viewCert() {
+	$('#mainContainer').html('<div id="getViewCert"></div>');
+	setLoadImage('getViewCert', '40px', '500px');
+	sendHTMLAjaxRequest(false, 'getView/getViewCertPage.html', null, fnDisplayContent, null,'getViewCert');
+}
+/*--End Added by stdale on 1/8/13 for New Screen for view cert */
 
 /*--Begin Added by Soni on 18/10/12 for New Screen for SAML downlaod */
 function fnDisplayContent(response,elementIDToBePublised) {

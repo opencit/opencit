@@ -40,6 +40,9 @@ import com.intel.mountwilson.manifest.factory.DefaultManifestStrategyFactory;
 import com.intel.mountwilson.manifest.factory.VMWareManifestStategyFactory;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.audit.api.AuditLogger;
+import com.intel.mtwilson.audit.data.AuditLog;
+import com.intel.mtwilson.audit.helper.AuditHandlerException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.SimpleKeystore;
@@ -52,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.security.KeyManagementException;
 import org.apache.commons.configuration.Configuration;
 import org.joda.time.DateTime;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  *
@@ -60,6 +65,8 @@ import org.joda.time.DateTime;
 public class HostTrustBO extends BaseBO {
     public static final String SAML_KEYSTORE_NAME = "SAML";
     private static final Logger log = LoggerFactory.getLogger(HostTrustBO.class);
+    Marker sysLogMarker = MarkerFactory.getMarker("APPEND_SYSLOG");
+    
     private final Date today = new Date(System.currentTimeMillis());
 
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
@@ -95,8 +102,7 @@ public class HostTrustBO extends BaseBO {
             log.error("Cannot find SAML keystore");
         }
     }
-    
-    
+        
     public HostTrustStatus getTrustStatus(Hostname hostName) {
         HashMap<String, ? extends IManifest> pcrManifestMap;
         HashMap<String, ? extends IManifest> gkvBiosPcrManifestMap, gkvVmmPcrManifestMap;
@@ -130,7 +136,7 @@ public class HostTrustBO extends BaseBO {
             pcrManifestMap = manifestStrategy.getManifest(tblHosts);
             
             log.info("Manifest Time {}", (System.currentTimeMillis() - start));
-
+            
         } catch (ASException e) {
             throw e;
         } catch (Exception e) {
@@ -159,6 +165,9 @@ public class HostTrustBO extends BaseBO {
         HostTrustStatus trust = verifyTrust(tblHosts, pcrManifestMap,
                 gkvBiosPcrManifestMap, gkvVmmPcrManifestMap);
 
+        Object[] paramArray = {hostName, trust.bios, trust.vmm};
+        log.info(sysLogMarker, "Host_Name:{} BIOS_Trust:{} VMM_Trust:{}.", paramArray);
+        
         log.info( "Verfication Time {}", (System.currentTimeMillis() - start));
 
         return trust;

@@ -668,6 +668,18 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }*/
     
     @Override
+    public X509Certificate getSamlCertificate() throws IOException, ApiException, SignatureException {
+        byte[] certificateBytes = binary(httpGet(msurl("/saml/certificate")));
+        X509Certificate certificate;
+        try {
+            certificate = X509Util.decodeDerCertificate(certificateBytes);
+        } catch (CertificateException ex) {
+            throw new ApiException("Cannot read certificate from response", ex);
+        }
+        return certificate;
+    }
+    
+    @Override
     public Set<X509Certificate> getRootCaCertificates() throws IOException, ApiException, SignatureException {
        String rootca = text(httpGet(msurl("/ca/certificate/rootca/current")));
         try {
@@ -820,18 +832,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         return report;
     }
     
-    @Override
-    public X509Certificate getSamlCertificate() throws IOException, ApiException, SignatureException {
-        byte[] certificateBytes = binary(httpGet(msurl("/saml/certificate")));
-        X509Certificate certificate;
-        try {
-            certificate = X509Util.decodeDerCertificate(certificateBytes);
-        } catch (CertificateException ex) {
-            throw new ApiException("Cannot read certificate from response", ex);
-        }
-        return certificate;
-    }
-    
+
 
     /**
      * application/samlassertion+xml

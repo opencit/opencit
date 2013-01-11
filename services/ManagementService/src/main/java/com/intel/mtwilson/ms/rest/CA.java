@@ -8,6 +8,7 @@ import com.intel.mtwilson.as.data.MwCertificateX509;
 import com.intel.mtwilson.crypto.Password;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.ms.business.CertificateAuthorityBO;
+import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
@@ -21,6 +22,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +94,8 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getRootCaCertificateChain() {
         try {
-            File rootCaPemFile = new File("/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); // XXX TODO needs to be obtained from configuration object
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certficate.file");
+            File rootCaPemFile = new File(certFile); 
             FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
             String content = IOUtils.toString(in); // IOException
             IOUtils.closeQuietly(in);
@@ -115,7 +118,8 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getSamlCertificateChain() {
         try {
-            File samlPemFile = new File("/etc/intel/cloudsecurity/saml.cer.pem"); // XXX TODO needs to be obtained from configuration object
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file");
+            File samlPemFile = new File(certFile);
             FileInputStream in = new FileInputStream(samlPemFile);
             String content = IOUtils.toString(in);
             IOUtils.closeQuietly(in);
@@ -138,7 +142,8 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChain() {
         try {
-            File privacyCaPemFile = new File("/etc/intel/cloudsecurity/PrivacyCA.p12.pem"); // XXX TODO needs to be obtained from configuration object
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.privca.certificate.file");
+            File privacyCaPemFile = new File(certFile); 
             FileInputStream in = new FileInputStream(privacyCaPemFile);
             String content = IOUtils.toString(in);
             IOUtils.closeQuietly(in);
@@ -161,7 +166,8 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getTlsCertificateChain() {
         try {
-            File tlsPemFile = new File("/usr/share/glassfish3/glassfish/domains/domain1/config/ssl.10.1.71.80.crt.pem"); // XXX TODO needs to be obtained from configuration object
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
+            File tlsPemFile = new File(certFile);
             FileInputStream in = new FileInputStream(tlsPemFile);
             String content = IOUtils.toString(in);
             IOUtils.closeQuietly(in);
@@ -175,8 +181,6 @@ public class CA {
         }
         catch (Exception e) {
             throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
-        }
-        
+        }   
     }
-    
 }

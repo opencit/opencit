@@ -128,6 +128,14 @@ public class ManagementConsoleViewController extends MultiActionController{
     
     /*--End Added by Soni on 18/10/12 for New Screen for CA */
     
+    /*--Begin Added by stdalex on 1/8/13 mc fingerprint */
+    public ModelAndView getViewCertPage(HttpServletRequest req,HttpServletResponse res ) {
+    	logger.info("MGViewController.getViewCertPage >>");
+        return new ModelAndView("CertDownload");
+    }
+    
+    /*--End Added by stdale MC fingerprint 1/8/13 */
+    
     /*public ModelAndView getDefineWhiteListConfig(HttpServletRequest req,HttpServletResponse res) {
     	logger.info("WLMViewController.getDefineWhiteListConfig >>");
     	return new ModelAndView("DefineWhiteListConfig");

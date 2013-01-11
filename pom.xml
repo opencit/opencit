@@ -80,6 +80,15 @@
     </issueManagement>
 
     <repositories>
+	<repository>
+		<id>cloudsecurityportal.intel.com</id>
+		<name>Cloud Security - Intel Architecture Systems Integration</name>
+		<url>http://cloudsecurityportal.intel.com/maven</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>true</enabled>
+                </snapshots>
+        </repository>
 
 	<repository>
 		<id>glassfish.java.net</id>
@@ -131,15 +140,6 @@
     <url>http://oss.sonatype.org/content/groups/public/</url>
   </repository>
 
-	<repository>
-		<id>cloudsecurityportal.intel.com</id>
-		<name>Cloud Security - Intel Architecture Systems Integration</name>
-		<url>http://cloudsecurityportal.intel.com/maven</url>
-		<layout>default</layout>
-                <snapshots>
-                  <enabled>true</enabled>
-                </snapshots>
-        </repository>
     </repositories>
 
     <pluginRepositories>

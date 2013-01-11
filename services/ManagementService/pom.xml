@@ -263,11 +263,23 @@
                         <artifactId>slf4j-api</artifactId>
                         <version>1.6.4</version>
                 </dependency>
-                <dependency>
+                <!-- <dependency>
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-jdk14</artifactId>
                         <version>1.6.4</version>
-                </dependency>
+                </dependency> -->
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+				
 		<dependency>
 			<groupId>com.vmware</groupId>
 			<artifactId>VSphere5.1</artifactId>

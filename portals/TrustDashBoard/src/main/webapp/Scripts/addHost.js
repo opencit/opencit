@@ -175,29 +175,10 @@ function chechAddHostValidation() {
 		valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
 		/* Soni_Begin_27/09/2012_for_validating IP address */
 		valid4 = isValidIPAddress('MainContent_tbHostIP');
-		if (!valid4){$('#MainContent_tbHostIP').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Enter Valid IP Address.</span>');
+		if (!valid4){$('#MainContent_tbHostIP').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Enter valid IP address.</span>');
 		valid =false;
 		return false;}
-		/* Soni_End_27/09/2012_for_validating IP address */
-		/* Soni Begin_1/10/2012_for_validating descriptionnot allowing & and % Bug 436*/
-		if($('#MainContent_tbDesc').val()){
-			
-			if(!(fnValidateDescription('MainContent_tbDesc')))
-			{$('#MainContent_tbDesc').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Special charaters % and & is not allowed.</span>');
-			valid5=false;
-			return false;
-			}
-			
-		}
-		/* Soni End_1/10/2012_for_validating description not allowing & and % Bug 436*/
-		if($('#MainContent_tbEmailAddress').val()){
-			if(!(fnvalidateEmailAddress('MainContent_tbEmailAddress')))
-			{$('#MainContent_tbEmailAddress').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Enter a valid email address.</span>');
-			valid6 = false;
-			return false;}
-			
-		}
-		
+		/* Soni_End_27/09/2012_for_validating IP address */		
 		
 	}else {
 		valid3 =  fnTestValidation('MainContent_tbVCenterAddress',new RegExp());
@@ -205,15 +186,35 @@ function chechAddHostValidation() {
 		valid3 =  fnTestValidation('MainContent_tbVCenterPass',new RegExp());
 	}
 	
-	if (valid1 && valid2 && valid3 && valid5 && valid6) {
+        // Description and email field were not getting validated for VMware hosts. So, moved it outside the if/else statement
+        /* Soni Begin_1/10/2012_for_validating descriptionnot allowing & and % Bug 436*/
+        if($('#MainContent_tbDesc').val()){
+
+                if(!(fnValidateDescription('MainContent_tbDesc')))
+                {$('#MainContent_tbDesc').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Special characters % and & are not allowed.</span>');
+                valid5=false;
+                return false;
+                }
+
+        }
+        /* Soni End_1/10/2012_for_validating description not allowing & and % Bug 436*/
+        if($('#MainContent_tbEmailAddress').val()){
+                if(!(fnvalidateEmailAddress('MainContent_tbEmailAddress')))
+                {$('#MainContent_tbEmailAddress').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Enter a valid email address.</span>');
+                valid6 = false;
+                return false;}
+
+        }
+        
+	if (valid1 && valid2 && valid3) {
 		
 		if(isVmware == 'false'){
 			if (!regPortNo.test($('#MainContent_tbHostPort').val())) {
-				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">only Numeric values are allowed.</span>');
+				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Only numeric values are allowed.</span>');
 				return false;
 			}
-			if ($('#MainContent_tbHostPort').val().length > 4 ) {
-				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Port NO length should not be greater 4.</span>');
+			if ($('#MainContent_tbHostPort').val().length > 5 ) {
+				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Length should not be greater 5.</span>');
 				return false;
 			}
 		}

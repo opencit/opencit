@@ -4,16 +4,19 @@
  */
 package com.intel.mtwilson.as.data;
 
+import com.intel.mtwilson.audit.handler.AuditEventHandler;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.eclipse.persistence.annotations.Customizer;
 
 /**
  *
  * @author dsmagadX
  */
 @Entity
+@Customizer(AuditEventHandler.class) 
 @Table(name = "mw_saml_assertion")
 @XmlRootElement
 @NamedQueries({

@@ -22,12 +22,25 @@
       <version>${project.parent.version}</version>
       <type>jar</type>
     </dependency>
-    <dependency>
+	
+   <!-- <dependency>
 	<groupId>org.slf4j</groupId>
 	<artifactId>slf4j-jdk14</artifactId>
 	<version>1.6.4</version>
-    </dependency>
+    </dependency> -->
     
+	<dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+
         <!-- XXX the following dependencies are declared so the java code will compile in the IDE - but they are included separately by the ant build for now; when we fully mavenize, we can use them directly -->
 		<dependency>
 			<groupId>org.glassfish</groupId>

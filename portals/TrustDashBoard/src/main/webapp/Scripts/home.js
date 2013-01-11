@@ -107,13 +107,13 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
  
 function updateHostInfo() {
 	if (chechAddHostValidation()) {
-		if (confirm("Are you Sure you want to Update this Host ?")) {
+		if (confirm("Are you sure you want to update this Host ?")) {
 			var dataToSend = fnGetNewHostData();
 			dataToSend.hostId = selectedHostID;
 			dataToSend = $.toJSON(dataToSend);
 			$('#mainAddHostContainer').prepend(disabledDiv);
 			$('#mleMessage').html('');
-			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+dataToSend+"&newhost=false", fnSaveNewHostInfoSuccess, null,"Host has been successfully Updated.");
+			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+dataToSend+"&newhost=false", fnSaveNewHostInfoSuccess, null,"Host has been successfully updated.");
 		}
 	}
 }
@@ -142,7 +142,7 @@ function fnDeleteHostInfoSuccess(response,element) {
 		populateEditHostDataIntoTable(response.hostVo);
 		applyPagination('editHostPaginationDiv',response.noOfPages,fngetEditHostNextPage,selectedPageNo);
 		//$(element).parent().parent().remove();
-		$('#mleMessage').html('<div class="successMessage">Host has been successfully Deleted.</div>');
+		$('#mleMessage').html('<div class="successMessage">Host has been successfully deleted.</div>');
 	}else {
 		$('#mleMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(response.message)+'</div>');
 	}
