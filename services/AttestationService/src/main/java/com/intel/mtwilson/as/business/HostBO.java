@@ -73,6 +73,9 @@ public class HostBO extends BaseBO {
                         tblHosts.setSSLCertificate(new byte[0]);
                         tblHosts.setName(host.getHostName().toString());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        tblHosts.setIPAddress(host.getIPAddress().toString());
+                        tblHosts.setPort(host.getPort());
+
 
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
 				certificate = getAIKCertificateForHost(tblHosts, host);
@@ -282,6 +285,8 @@ public class HostBO extends BaseBO {
                         tblHosts.setSSLCertificate(new byte[0]);  // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
 			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 			tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
+                        tblHosts.setIPAddress(host.getIPAddress().toString());
+                        tblHosts.setPort(host.getPort());
 
 			log.info("Getting identity.");
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm

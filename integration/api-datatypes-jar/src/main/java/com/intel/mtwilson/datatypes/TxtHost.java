@@ -56,10 +56,10 @@ public class TxtHost {
         trustStatus = new HostTrustStatus(); //defaults to all false
         aikCertificate = host.AIK_Certificate; // may be null
 
-        // BUG #497  now all hosts require a connection string
-        if (connectionString == null || connectionString.isEmpty()) {
-            throw new IllegalArgumentException(String.format("Connection string for host or its vCenter (for ESX hosts) is required: %s", hostname));
-        }
+        // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory
+//        if (connectionString == null || connectionString.isEmpty()) {
+//            throw new IllegalArgumentException(String.format("Connection string for host or its vCenter (for ESX hosts) is required: %s", hostname));
+//        }
         /*
         if (requiresConnectionString()) {
             if (connectionString == null || connectionString.isEmpty()) {
