@@ -71,9 +71,9 @@ public class HostBO extends BaseBO {
                         TblHosts tblHosts = new TblHosts();
                         tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");
                         tblHosts.setSSLCertificate(new byte[0]);
-                        tblHosts.setName(host.getHostName().toString());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
-                        tblHosts.setIPAddress(host.getIPAddress().toString());
+                        if( host.getHostName() != null ) { tblHosts.setName(host.getHostName().toString()); }
+                        if( host.getIPAddress() != null ) { tblHosts.setIPAddress(host.getIPAddress().toString()); }
                         if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }
 
 
@@ -284,8 +284,8 @@ public class HostBO extends BaseBO {
                         tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
                         tblHosts.setSSLCertificate(new byte[0]);  // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
 			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
-			tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
-                        tblHosts.setIPAddress(host.getIPAddress().toString());
+			if( host.getHostName() != null ) { tblHosts.setName(host.getHostName().toString()); }
+                        if( host.getIPAddress() != null ) { tblHosts.setIPAddress(host.getIPAddress().toString()); }
                         if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }
 
 			log.info("Getting identity.");
