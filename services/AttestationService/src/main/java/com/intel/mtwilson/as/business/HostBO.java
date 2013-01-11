@@ -74,7 +74,7 @@ public class HostBO extends BaseBO {
                         tblHosts.setName(host.getHostName().toString());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         tblHosts.setIPAddress(host.getIPAddress().toString());
-                        tblHosts.setPort(host.getPort());
+                        if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }
 
 
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
@@ -286,7 +286,7 @@ public class HostBO extends BaseBO {
 			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 			tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
                         tblHosts.setIPAddress(host.getIPAddress().toString());
-                        tblHosts.setPort(host.getPort());
+                        if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }
 
 			log.info("Getting identity.");
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm

@@ -199,7 +199,7 @@ public class HostBO extends BaseBO {
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setIPAddress(hostObj.IPAddress);
-            tblHosts.setPort(hostObj.Port);
+            if( hostObj.Port != null ) { tblHosts.setPort(hostObj.Port); }
             
                         
             HostAgentFactory factory = new HostAgentFactory();
@@ -213,6 +213,8 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_OSName = hostDetails.VMM_OSName;
                 hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
             } catch (Throwable te) {
+                log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
+                te.printStackTrace();
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
             
@@ -632,7 +634,7 @@ public class HostBO extends BaseBO {
             tblHosts.setName(gkvHost.HostName);
             tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
             tblHosts.setIPAddress(gkvHost.IPAddress);
-            tblHosts.setPort(gkvHost.Port);
+            if( gkvHost.Port != null ) { tblHosts.setPort(gkvHost.Port); }
                         
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
@@ -645,6 +647,8 @@ public class HostBO extends BaseBO {
                 gkvHost.VMM_OSName = gkvHostDetails.VMM_OSName;
                 gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
             } catch (Throwable te) {
+                log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.toString());
+                te.printStackTrace();
                 throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
             
@@ -750,6 +754,8 @@ public class HostBO extends BaseBO {
 
                     // Also note that we are ignoring any exception coming from the deleteMLE call as we do not
                     // want to lose the original error                    
+                    log.error("Unexpected error while deleting MLE in registerHostFromCustomData: {}", te.toString());
+                    te.printStackTrace();
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
 
@@ -822,6 +828,8 @@ public class HostBO extends BaseBO {
                     attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
                     log.info("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
                 } catch (Throwable te) {
+                    log.error("Unexpected error from getHostAttestationReport in registerHostFromCustomData: {}", te.toString());
+                    te.printStackTrace();
                     throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
                                                     
