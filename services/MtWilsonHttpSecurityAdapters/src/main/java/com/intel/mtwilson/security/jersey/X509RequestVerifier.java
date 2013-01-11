@@ -167,7 +167,7 @@ public class X509RequestVerifier {
             if( isValid ) {
                 log.info("Request is authenticated");
                 
-                return new User(a.fingerprintBase64, userInfo.roles);
+                return new User(a.fingerprintBase64, userInfo.roles, userInfo.loginName);
             }
             /*
         }

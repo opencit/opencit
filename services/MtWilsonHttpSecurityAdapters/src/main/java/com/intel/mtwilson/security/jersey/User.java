@@ -17,6 +17,7 @@ public class User implements Principal {
     
     private String name;
     private Role[] roles;
+    private String loginName;
 
     /**
      * Initializes a User object with the given name.
@@ -30,6 +31,7 @@ public class User implements Principal {
     protected User(String name) {
         this.name = name;
         this.roles = new Role[] { };
+        this.loginName = "";
     }
     
     /**
@@ -41,6 +43,21 @@ public class User implements Principal {
     protected User(String name, Role[] roles) {
         this.name = name;
         this.roles = roles;
+        this.loginName = "";
+    }
+    
+    /**
+     * Initializes a User object with the given name, authorized roles and login Name. The name would be the fingerprint. Since
+     * we need to store the log in name of the user also, we are storing the same.
+     * @since MW 1.1 Release
+     * @param name
+     * @param roles 
+     * @param loginName
+     */
+    protected User(String name, Role[] roles, String loginName) {
+        this.name = name;
+        this.roles = roles;
+        this.loginName = loginName;
     }
     
     @Override
@@ -51,7 +68,15 @@ public class User implements Principal {
     public Role[] getRoles() {
         return roles;
     }
-        
+
+    public String getLoginName() {
+        return loginName;
+    }
+
+    public void setLoginName(String loginName) {
+        this.loginName = loginName;
+    }
+    
     @Override
     public String toString() { return name; }
     

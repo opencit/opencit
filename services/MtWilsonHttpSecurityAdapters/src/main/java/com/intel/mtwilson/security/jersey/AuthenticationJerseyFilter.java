@@ -110,6 +110,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
                     user = hmacAuthorization.getUserForRequest(request.getMethod(), request.getRequestUri().toString(), request.getRequestHeaders(), requestBody);                
                 }
                 if( user != null ) {
+                    log.info("User {} with roles {} is authenticated. Security context is being set.", user.getLoginName(), user.getRoles());
                     log.debug("AuthenticationJerseyFilter: Got user, setting security context");
                     request.setSecurityContext(new MtWilsonSecurityContext(user, request.isSecure()));
                     log.debug("AuthenticationJerseyFilter: Set security context");

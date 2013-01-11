@@ -144,7 +144,7 @@ public class HmacRequestVerifier {
             
             if( signature.equals(a.signature) ) {
                 log.info("Request is authenticated");
-                return new User(username, new Role[] { Role.Attestation, Role.Whitelist }); // XXX default permissions for secretkey clients... TODO should create a role table for secret key clients and manage that like rsa clients... 
+                return new User(username, new Role[] { Role.Attestation, Role.Whitelist }, username); // XXX default permissions for secretkey clients... TODO should create a role table for secret key clients and manage that like rsa clients... 
             }
     /*
         }

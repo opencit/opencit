@@ -15,4 +15,5 @@ public class X509UserInfo {
     public byte[] fingerprint;
     public Certificate certificate;
     public Role[] roles;
+    public String loginName;
 }
