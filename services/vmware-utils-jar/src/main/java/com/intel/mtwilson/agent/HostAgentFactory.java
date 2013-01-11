@@ -67,7 +67,7 @@ public class HostAgentFactory {
     public HashMap<String, ? extends IManifest> getManifest(TblHosts host, VCenterHost postProcessing) {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName());
-            String connectionString = host.getAddOnConnectionInfo();
+            String connectionString = getConnectionString(host);
             String tlsPolicyName = host.getSSLPolicy() == null ? "TRUST_FIRST_CERTIFICATE" : host.getSSLPolicy(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
             ByteArrayResource resource = new ByteArrayResource(host.getSSLCertificate()); // XXX TODO it's the responsibility of the caller to save the TblHosts record after calling this method if the policy is trust first certificate ; we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
             String password = "password"; // XXX TODO uh oh... opening a keystore requires a password, so we can verify its signed contents, which is important. putting the password in the txthost record won't be secure.  password needs to  come from attestation service configuration - or from the user.  this isn't an issue for the factory because the factory is supposed to get the keystore AFTER it has been opened with the password.  but when this code moves to the JPA/DAO/Repository layer, we'll need to have a password from somewhere.         
@@ -95,22 +95,27 @@ public class HostAgentFactory {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName()); // switching from Hostname to InternetAddress (better support for both hostname and ip address)
             // here we figure out if it's vmware or intel  and ensure we have a valid connection string starting with the vendor scheme.  XXX TODO should not be here, everyone should have valid connection strings like vmware:*, intel:*, citrix:*, etc. 
-            String connectionString = host.getAddOnConnectionInfo();
-            if( connectionString == null || connectionString.isEmpty() ) {
-                if( host.getIPAddress() != null  ) {
-                    connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
-                }
-            }
-            else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
-                connectionString = String.format("vmware:%s", connectionString);
-            }
             // no special case for citrix, since that support was added recently they should always come with citrix: prepended.
+            String connectionString = getConnectionString(host);
             TlsPolicy tlsPolicy = getTlsPolicy(host);
             return getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
         }
         catch(Exception e) {
             throw new IllegalArgumentException("Cannot create Host Agent for "+host.getName()+": "+e.toString(), e);
         }
+    }
+    
+    public String getConnectionString(TblHosts host) {
+        String connectionString = host.getAddOnConnectionInfo();
+        if( connectionString == null || connectionString.isEmpty() ) {
+            if( host.getIPAddress() != null  ) {
+                connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
+            }
+        }
+        else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
+            connectionString = String.format("vmware:%s", connectionString);
+        }        
+        return connectionString;
     }
     
     public TlsPolicy getTlsPolicy(TblHosts host) throws KeyManagementException {
