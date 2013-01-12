@@ -730,7 +730,7 @@ public class HostBO extends BaseBO {
 
                     // Retrieve the attestation report from the host
 //                    attestationReport = vmmHelperObj.getHostAttestationReport(gkvHost, reqdManifestList);
-                    attestationReport = agent.getHostAttestationReport(reqdManifestList);  // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
+                    attestationReport = agent.getHostAttestationReport(reqdManifestList);  // generic HostAgent interface but we know we are talking to a trust agent host and we expect that format
                 } catch (Throwable te) {
                     
                     // Bug# 467: We have seen cases where in because of an error with TrustAgent we may not

@@ -53,6 +53,13 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
         
     }
 
+    /**
+     * @deprecated use IntelHostAgent.getHostAttestationReport
+     * @param hostObj
+     * @param pcrList
+     * @return
+     * @throws Exception 
+     */
     @Override
     public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws Exception {
         String attestationReport = "";

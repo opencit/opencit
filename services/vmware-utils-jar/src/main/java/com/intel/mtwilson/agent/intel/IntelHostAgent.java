@@ -6,6 +6,8 @@ package com.intel.mtwilson.agent.intel;
 
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.manifest.data.IManifest;
+import com.intel.mountwilson.manifest.data.PcrManifest;
+import com.intel.mountwilson.manifest.helper.TAHelper;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.vmware.VCenterHost;
@@ -36,6 +38,7 @@ public class IntelHostAgent implements HostAgent {
     private InternetAddress hostAddress;
     private Boolean isTpmAvailable = null;
     private String vendorHostReport = null;
+    private String vmmName = null;
     private HashMap<String, ? extends IManifest> manifestMap = null; // XXX TODO needs to change, it's not a clear programming interface
     
     public IntelHostAgent(TrustAgentSecureClient client, InternetAddress hostAddress) throws Exception {
@@ -81,6 +84,7 @@ public class IntelHostAgent implements HostAgent {
         String pem = trustAgentClient.getAIKCertificate();
         try {
             X509Certificate aikCert = X509Util.decodePemCertificate(pem);
+            isTpmAvailable = true;
             return aikCert;
         }
         catch(Exception e) {
@@ -142,12 +146,30 @@ public class IntelHostAgent implements HostAgent {
         host.VMM_Version = hostInfo.getVmmVersion().trim();
         host.VMM_OSName = hostInfo.getOsName().trim();
         host.VMM_OSVersion = hostInfo.getOsVersion().trim();
+        // now set some state we need for getHostAttestationReport
+        vmmName = host.VMM_Name; // XXX maybe we should maintain the entire TxtHostRecord or something similar
         return host;
     }
 
     @Override
     public String getHostAttestationReport(String pcrList) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if( vendorHostReport != null ) { return vendorHostReport; }
+        if( vmmName == null ) { getHostDetails(); }
+//        throw new UnsupportedOperationException("Not supported yet.");
+        // XXX TODO huge kludge, we are relying on the OpenSourceVMMHelper for this, which uses API Client to call Attestation Service, which then creates a TrustAgentSecureClient to get some information from the host but also grabs some from the database and then generates the XML format we need
+//        OpenSourceVMMHelper helper = new OpenSourceVMMHelper();
+//        return help.getHostAttestationReport(hostAddress);
+        try {
+            TAHelper helper = new TAHelper();
+            HashMap<String, PcrManifest> pcrMap = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient, pcrList);
+            vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrMap, vmmName);
+            log.debug("Host attestation report for {}", hostAddress);
+            log.debug(vendorHostReport);
+            return vendorHostReport;
+        }
+        catch(Exception e) {
+            throw new IOException(e);
+        }
     }
     
 }

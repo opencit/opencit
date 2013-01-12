@@ -891,7 +891,14 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         return list.getHost(); // get the list of <Host> elements inside the root <Hosts> element... it's an automatically generated method name. would have been nice if they named it getHostList()
     }
     
-    
+    /**
+     * @deprecated this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
+     * @param hostname
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
     @Override
     public String getHostAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();

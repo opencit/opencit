@@ -193,7 +193,7 @@ public class ReportsBO extends BaseBO {
             strategyFactory = new DefaultManifestStrategyFactory();
 
             manifestStrategy = strategyFactory.getManifestStategy(tblHosts, getEntityManagerFactory());
-            pcrManifestMap = manifestStrategy.getManifest(tblHosts);
+            pcrManifestMap = manifestStrategy.getManifest(tblHosts); // BUG #497  this is now obtained by IntelHostAgent using TAHelper's getQuoteInformationForHost which is what was called by TrustAgentManifestStrategy.getManifest()
 
         } catch (ASException aex) {
 
@@ -208,7 +208,8 @@ public class ReportsBO extends BaseBO {
         }
 
         try {
-
+            // XXX BUG #497 this entire section in try{}catch{} has  moved to TAHelper and used by IntelHostAgent
+            
             // We need to check if the host supports TPM or not. Only way we can do it
             // using the host table contents is by looking at the AIK Certificate. Based
             // on this flag we generate the attestation report.

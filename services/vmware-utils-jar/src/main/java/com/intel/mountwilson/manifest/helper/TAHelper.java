@@ -27,12 +27,17 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
+import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.io.ByteArrayResource;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +60,9 @@ public class TAHelper {
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
-	private EntityManagerFactory entityManagerFactory;
+//	private EntityManagerFactory entityManagerFactory;
     
-    private TAHelper(){
-    	
-    }
-    public TAHelper(EntityManagerFactory entityManagerFactory) {
+    public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
         aikverifyhomeData = aikverifyhome+File.separator+"data";
@@ -87,7 +89,7 @@ public class TAHelper {
             throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));            
         }
         
-        this.setEntityManagerFactory(entityManagerFactory);
+//        this.setEntityManagerFactory(entityManagerFactory);
     }
 
     // DAA challenge
@@ -164,7 +166,7 @@ public class TAHelper {
         }
     }
     
-    // BUG #497 need to use HostAgentFactory
+    // BUG #497 see  the other getQuoteInformationForHost which is called from IntelHostAgent
 //    public HashMap<String, PcrManifest> getQuoteInformationForHost(String hostIpAddress, String pcrList, String name, int port) {
     public HashMap<String, PcrManifest> getQuoteInformationForHost(TblHosts tblHosts, String pcrList) {
             
@@ -186,13 +188,29 @@ public class TAHelper {
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
 //                IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
                 
-                
+            
+            HashMap<String, PcrManifest> pcrMap = getQuoteInformationForHost( tblHosts.getIPAddress(), client,  pcrList);
+
+            tblHosts.setSSLCertificate(resource.toByteArray()); // bug #497 save the server cert in case this is a trust-first-certificate policy XXX TODO needs to move somewhere else !!!
+            return pcrMap;
+            
+        } catch (ASException e) {
+            throw e;
+        } catch(UnknownHostException e) {
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, "Unknown host: "+(tblHosts.getIPAddress()==null?"missing IP Address":tblHosts.getIPAddress().toString()));
+        }  catch (Exception e) {
+            throw new ASException(e);
+        }
+    }
+    
+    public HashMap<String, PcrManifest> getQuoteInformationForHost(String hostname, TrustAgentSecureClient client, String pcrList) throws Exception {
+              //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT   
             String nonce = generateNonce();
 
             String sessionId = generateSessionId();
 
             ClientRequestType clientRequestType = client.getQuote(nonce, pcrList);
-            log.info( "got response from server ["+tblHosts.getIPAddress().toString()+"] "+clientRequestType);
+            log.info( "got response from server ["+hostname+"] "+clientRequestType);
             String aikCertificate = clientRequestType.getAikcert();
             
             log.info( "extracted aik cert from response: "+aikCertificate);
@@ -221,18 +239,65 @@ public class TAHelper {
             log.info( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             
-            tblHosts.setSSLCertificate(resource.toByteArray()); // bug #497 save the server cert in case this is a trust-first-certificate policy XXX TODO needs to move somewhere else !!!
             return pcrMap;
-            
-        } catch (ASException e) {
-            throw e;
-        } catch(UnknownHostException e) {
-            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, "Unknown host: "+(tblHosts.getIPAddress()==null?"missing IP Address":tblHosts.getIPAddress().toString()));
-        }  catch (Exception e) {
-            throw new ASException(e);
-        }
+        
     }
 
+    // hostName == internetAddress.toString() or Hostname.toString() or IPAddress.toString()
+    // vmmName == tblHosts.getVmmMleId().getName()
+    public String getHostAttestationReport(String hostName, HashMap<String, PcrManifest> pcrManifestMap, String vmmName) throws Exception {
+        XMLOutputFactory xof = XMLOutputFactory.newInstance();
+        XMLStreamWriter xtw;
+        StringWriter sw = new StringWriter();
+        
+        /*
+            // We need to check if the host supports TPM or not. Only way we can do it
+            // using the host table contents is by looking at the AIK Certificate. Based
+            // on this flag we generate the attestation report.
+            boolean tpmSupport = true;
+            String hostType = "";
+
+            if (tblHosts.getAIKCertificate() == null || tblHosts.getAIKCertificate().isEmpty()) {
+                tpmSupport = false;
+            }
+            * */
+        boolean tpmSupport = true;  // XXX   assuming it supports TPM since it's trust agent and we got a pcr manifest (which we only get from getQuoteInformationFromHost if the tpm quote was verified, which means we saved the AIK certificate when we did that)
+
+
+            // xtw = xof.createXMLStreamWriter(new FileWriter("c:\\temp\\nb_xml.xml"));
+            xtw = xof.createXMLStreamWriter(sw);
+            xtw.writeStartDocument();
+            xtw.writeStartElement("Host_Attestation_Report");
+            xtw.writeAttribute("Host_Name", hostName);
+            xtw.writeAttribute("Host_VMM", vmmName);
+            xtw.writeAttribute("TXT_Support", String.valueOf(tpmSupport));
+
+            if (tpmSupport == true) {
+                ArrayList<IManifest> pcrMFList = new ArrayList<IManifest>();
+                pcrMFList.addAll(pcrManifestMap.values());
+
+                for (IManifest pcrInfo : pcrMFList) {
+                    PcrManifest pInfo = (PcrManifest) pcrInfo;
+                    xtw.writeStartElement("PCRInfo");
+                    xtw.writeAttribute("ComponentName", String.valueOf(pInfo.getPcrNumber()));
+                    xtw.writeAttribute("DigestValue", pInfo.getPcrValue().toUpperCase());
+                    xtw.writeEndElement();
+                }
+            } else {
+                xtw.writeStartElement("PCRInfo");
+                xtw.writeAttribute("Error", "Host does not support TPM.");
+                xtw.writeEndElement();
+            }
+
+            xtw.writeEndElement();
+            xtw.writeEndDocument();
+            xtw.flush();
+            xtw.close();
+            
+            String attestationReport = sw.toString();        
+            return attestationReport;
+    }
+    
     public String generateNonce() {
         try {
             // Create a secure random number generator
@@ -413,13 +478,14 @@ public class TAHelper {
         
     }
     
+    /*
 	public EntityManagerFactory getEntityManagerFactory() {
 		return entityManagerFactory;
 	}
 	
 	public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
 		this.entityManagerFactory = entityManagerFactory;
-	}
+	}*/
 
     /*
 	private List<String> getPcrsList() {
