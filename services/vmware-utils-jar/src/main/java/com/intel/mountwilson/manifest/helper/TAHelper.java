@@ -180,9 +180,13 @@ public class TAHelper {
         if( connectionString == null || connectionString.isEmpty() ) {
             if( tblHosts.getIPAddress() != null  ) {
                 connectionString = String.format("https://%s:%d", tblHosts.getIPAddress(), tblHosts.getPort()); // without vendor scheme because we are passing directly to TrustAgentSEcureClient  (instead of to HOstAgentFactory)
+                log.debug("getQuoteInformationForHost called with ip address and port {}", connectionString);
             }
         }
-                
+        else if( connectionString.startsWith("intel:") ) {
+            log.debug("getQuoteInformationForHost called with intel connection string: {}", connectionString);
+            connectionString = connectionString.substring(6);
+        }        
               
               
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
