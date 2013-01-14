@@ -42,7 +42,9 @@ public class ExtendedOptions {
                 String arg = args[i].substring(2);
                 if( arg.contains("=") ) {
                     String[] parts = arg.split("=");
-                    opts.setProperty(parts[0], parts[1]);
+                    if( parts[0] == null || parts[0].isEmpty() ) { continue; }
+                    if( parts[1] == null || parts[1].isEmpty() ) { opts.setProperty(parts[0], ""); }
+                    else { opts.setProperty(parts[0], parts[1]==null?"":parts[1]); }
                 }
                 else if( arg.startsWith("no-") && arg.length() > 3 ) {
                     String argName = arg.substring(3);
