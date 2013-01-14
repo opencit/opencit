@@ -7,6 +7,7 @@ package com.intel.mtwilson.setup;
 import java.io.Console;
 import java.util.Arrays;
 import java.util.logging.LogManager;
+import org.apache.commons.configuration.Configuration;
 
 /**
  * TODO:  should deprecate this in favor of com.intel.mtwilson.setup.ui.console.Main
@@ -36,7 +37,11 @@ public class TextConsole {
                 Object commandObject = commandClass.newInstance();
                 Command command = (Command)commandObject;
                 String[] subargs = Arrays.copyOfRange(args, 1, args.length);
+                ExtendedOptions getopt = new ExtendedOptions(subargs);
+                Configuration options = getopt.getOptions();
+                subargs = getopt.getArguments();
                 command.setContext(ctx);
+                command.setOptions(options);
                 command.execute(subargs);
             }
         }

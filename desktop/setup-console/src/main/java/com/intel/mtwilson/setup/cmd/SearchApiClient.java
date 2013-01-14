@@ -37,6 +37,12 @@ public class SearchApiClient implements Command {
         this.ctx = ctx;
     }
 
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+
     /**
      * Creates a new API Client in current directory, registers it with Mt Wilson (on localhost or as configured), and then checks the database for the expected record to validate that it's being created.
      * @param args

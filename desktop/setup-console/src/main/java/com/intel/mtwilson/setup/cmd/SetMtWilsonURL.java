@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Enumeration;
+import org.apache.commons.configuration.Configuration;
 /**
  *
  * @author jbuhacoff
@@ -27,6 +28,12 @@ public class SetMtWilsonURL implements Command {
     }
 
     
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+
     
     @Override
     public void execute(String[] args) throws Exception {

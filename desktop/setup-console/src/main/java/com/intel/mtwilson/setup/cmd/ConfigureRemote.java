@@ -50,6 +50,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import net.schmizz.sshj.common.SecurityUtils;
 import net.schmizz.sshj.userauth.UserAuthException;
+import org.apache.commons.configuration.Configuration;
 
 /**
  *
@@ -72,6 +73,12 @@ public class ConfigureRemote implements Command {
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
+    }
+
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
     }
 
     @Override

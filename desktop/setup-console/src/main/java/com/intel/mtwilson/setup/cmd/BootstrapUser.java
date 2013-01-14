@@ -37,6 +37,13 @@ public class BootstrapUser implements Command {
         this.ctx = ctx;
     }
     
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+
+    
     /**
      * Creates a new API Client in current directory, registers it with Mt Wilson (on localhost or as configured), and then checks the database for the expected record to validate that it's being created.
      * @param args
@@ -46,16 +53,22 @@ public class BootstrapUser implements Command {
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
         
-        String directoryPath = serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
-        File directory = new File(directoryPath);
-        if( !directory.exists() || !directory.isDirectory() ) {
-            directory = new File(".");
+        File directory;
+        String directoryPath = options.getString("keystore.users.dir", "/var/opt/intel/management-console/users"); //serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
+        if( directoryPath == null || directoryPath.isEmpty() ) {
+            directory = new File(directoryPath);
+            if( !directory.exists() || !directory.isDirectory() ) {
+                directory = new File(".");
+            }
+            directoryPath = readInputStringWithPromptAndDefault("Keystore directory", directory.getAbsolutePath());
         }
-        directoryPath = readInputStringWithPromptAndDefault("Keystore directory", directory.getAbsolutePath());
         directory = new File(directoryPath);
         
-        String baseurl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), System.getenv("MTWILSON_API_BASEURL"), "https://"+getLocalHostAddress()+":8181" });
-        baseurl = readInputStringWithPromptAndDefault("Mt Wilson URL", baseurl);
+        String baseurl = options.getString("mtwilson.api.baseurl");
+        if( baseurl == null || baseurl.isEmpty() ) { 
+            baseurl = firstNonEmpty(new String[] { serviceConf.getString("mtwilson.api.baseurl"), System.getenv("MTWILSON_API_BASEURL"), "https://"+getLocalHostAddress()+":8181" }); 
+            baseurl = readInputStringWithPromptAndDefault("Mt Wilson URL", baseurl);
+        }
         
         String username = null;
         String password = null;

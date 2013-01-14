@@ -44,6 +44,7 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.SecurityUtils;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 import net.schmizz.sshj.userauth.UserAuthException;
+import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -111,6 +112,11 @@ public class Main {
             Command command = (Command)commandObject;
             String[] subargs = Arrays.copyOfRange(args, 1, args.length);
             command.setContext(ctx);
+            ExtendedOptions getopt = new ExtendedOptions(subargs);
+            Configuration options = getopt.getOptions();
+            subargs = getopt.getArguments();
+            command.setContext(ctx);
+            command.setOptions(options);
             command.execute(subargs);
         }
         catch(ClassNotFoundException e) {

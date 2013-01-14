@@ -61,6 +61,12 @@ public class InitDatabase implements Command {
         this.ctx = ctx;
     }
 
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+
     @Override
     public void execute(String[] args) throws SetupException {
         // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)

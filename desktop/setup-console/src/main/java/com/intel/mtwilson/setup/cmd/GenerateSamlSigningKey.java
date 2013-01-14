@@ -64,6 +64,12 @@ public class GenerateSamlSigningKey implements Command {
         this.ctx = ctx;
     }
     
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+
     @Override
     public void execute(String[] args) throws Exception {
         setupConfiguration();

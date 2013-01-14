@@ -12,6 +12,7 @@ import com.intel.mtwilson.validation.InvalidModelException;
 import com.intel.mtwilson.validation.Model;
 import com.intel.mtwilson.validation.Unchecked;
 import java.util.List;
+import org.apache.commons.configuration.Configuration;
 
 /**
  *
@@ -24,6 +25,13 @@ public class TestDataValidation implements Command {
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
     }
+    
+    private Configuration options = null;
+    @Override
+    public void setOptions(Configuration options) {
+        this.options = options;
+    }
+
 
     @Override
     public void execute(String[] args) throws Exception {
