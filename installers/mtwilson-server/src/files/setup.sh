@@ -35,16 +35,15 @@ export MTWILSON_SETUP_NODEPLOY=
 
 # Gather default configuration
 MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
-MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
 
 # Prompt for installation settings
 echo "Configuring Mt Wilson Server Name..."
 echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
-This address will be used in the server SSL certificate and in all Mt Wilson URLs,
-such as https://${MTWILSON_SERVER:-127.0.0.1}.
+This address will be used in the server SSL certificate and in all Mt Wilson URLs.
+For example, if you enter localhost then the Mt Wilson URL is https://localhost:8181
 Detected the following options on this server:"
 IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
-prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
+prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
 export MTWILSON_SERVER
 echo
 
