@@ -76,8 +76,9 @@ public class CheckLoginController extends AbstractController {
 		
 		try {
 	        Properties p = new Properties();
-	        p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true"); // must be secure out of the box!
-	        p.setProperty("mtwilson.api.ssl.verifyHostname", "true"); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.policy", WLMPConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", WLMPConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.verifyHostname", WLMPConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
 	 
 	        // Instantiate the API Client object and store it in the session. Otherwise either we need
 	        // to store the password in the session or the decrypted RSA key

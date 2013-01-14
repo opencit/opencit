@@ -87,8 +87,9 @@ public class CheckLoginController extends AbstractController {
                 Properties p = new Properties();
 //                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "false");
 //                p.setProperty("mtwilson.api.ssl.verifyHostname", "false");
-                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true"); // must be secure out of the box!
-                p.setProperty("mtwilson.api.ssl.verifyHostname", "true"); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.policy", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.verifyHostname", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
 
                 ApiClient rsaApiClient = null;
                 // Instantiate the API Client object and store it in the session. Otherwise either we need

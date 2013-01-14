@@ -75,8 +75,9 @@ public class CheckLoginController extends AbstractController {
 		
 		try {
 			Properties p = new Properties();
-	        p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true"); // must be secure out of the box!
-	        p.setProperty("mtwilson.api.ssl.verifyHostname", "true"); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.policy", TDPConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", TDPConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.verifyHostname", TDPConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
 	     
 	        ApiClient rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
 	        X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
