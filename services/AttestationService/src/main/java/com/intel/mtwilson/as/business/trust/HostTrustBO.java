@@ -65,7 +65,7 @@ import org.slf4j.MarkerFactory;
 public class HostTrustBO extends BaseBO {
     public static final String SAML_KEYSTORE_NAME = "SAML";
     private static final Logger log = LoggerFactory.getLogger(HostTrustBO.class);
-    Marker sysLogMarker = MarkerFactory.getMarker("APPEND_SYSLOG");
+    Marker sysLogMarker = MarkerFactory.getMarker("SYSLOG"); // TODO we should create a single class to contain all the markers we want to use throughout the code
     
     private final Date today = new Date(System.currentTimeMillis());
 

@@ -25,28 +25,6 @@ if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_w
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 
 
-#list_mysql_install_scripts() {
-#    echo ${mysql_script_dir}/bootstrap.sql
-#    echo ${mysql_script_dir}/20120829_audit_log.sql
-#    echo ${mysql_script_dir}/20120831_patch_rc2.sql
-#    echo ${mysql_script_dir}/20120920090600_patch_rc3.sql
-#}
-
-# STDALEX_TODO remove this completly
-# XXX TODO deprecated;   cloudportal database has been dropped as of 1.0-RC2
-#configure_cloudportal_database() {
-#  echo "Configuring Trust Dashboard Database..."
-#  # mtwilson.ms.portalDBConnectionString=jdbc:mysql://10.1.71.90:3306/cloudportal
-#  local portal_db_server portal_db_host portal_db_port
-#  if [ -n "${mysql_hostname}" ]; then
-#    portal_db_server="${mysql_hostname}:${mysql_portnum:-3306}"
-#  else
-#    prompt_with_default portal_db_host "Trust Dashboard Database Server:" "127.0.0.1"
-#    prompt_with_default portal_db_port "Trust Dashboard Database Port:" "3306"
-#    portal_db_server="${portal_db_host}:${portal_db_port}"
-#  fi
-#  update_property_in_file mtwilson.ms.portalDBConnectionString "${package_config_filename}" jdbc:mysql://${portal_db_server}/cloudportal
-#}
 
 configure_keystore_dir() {
   # setup mtwilson.mc.keystore.dir

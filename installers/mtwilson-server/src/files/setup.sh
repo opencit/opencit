@@ -52,7 +52,6 @@ echo
 # XXX TODO ask about glassfish vs tomcat
 
 mysql_userinput_connection_properties
-#export mysql_hostname mysql_portnum mysql_database mysql_username mysql_password
 export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
 
 # Attestation service auto-configuration
