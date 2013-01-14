@@ -1,43 +1,49 @@
-## Monit Process Monitor COnfig File
+## Monit Process Monitor Config File
 ## Configuration options and examples can be found here:
 ## http://mmonit.com/monit/documentation/monit.html
 
+# Start monit in background (run as daemon) and check the services at x-second
+# intervals.  This defines the length of time of a single 'cycle' as used in 
+# the process monitor triggers
 
-## Start monit in background (run as daemon) and check the services at x-second
-## intervals.
-#
 set daemon 120
 
-#Set path to log file
+# Set path to log file
 set logfile /var/log/monit.log
 
-## Monit has an embedded webserver, which can be used to view the
-## configuration, actual services parameters or manage the services using the
-## web interface.  This is disabled, but can be enabled for troubleshooting.
-#
-#set httpd port 8087  #Set desired port number
-#use address <IP address> # Set with server IP address
-#allow localhost # allow localhost to connect to the server 
-#allow <IP network>/<subnet mask> #allows connections to web interfeace only from specified IP range 
-#allow admin:monit #require user 'admin' with password 'monit'
-#
-#ssl enable #enables SSL
-#pemfile <pemfile>.pem #path to .PEM certificate
-#clientpemfile <pemfile>.pem
+# Monit has an embedded webserver, which can be used to view the
+# configuration, actual services parameters or manage the services using the
+# web interface.  This is disabled by default.
+
+# set httpd port <port number>  
+# use address <IP address of monit server> 
+# allow localhost # allow localhost to connect to the server 
+# allow <IP network>/<subnet mask> #allows connections only from specified IP ranges
+# allow <username>:<password> # require username and password for authentication
+
+# ssl enable
+# pemfile <pemfile>.pem
+# clientpemfile <pemfile>.pem
 
 
 # Monitoring the glassfish java service
-#
+
 check process glassfish matching "glassfish.jar"
 start program = "/usr/local/bin/mtwilson glassfish-start"
 stop program = "/usr/local/bin/mtwilson glassfish-stop"
-#
-#the below triggers can be configured for different values or disabled
+
+# Below are the specific triggers and responses used when 
+# checking the above process.  By default, Intel configures 
+# Monit to detect likely process hangs or nonresponsive portals, 
+# and automatically restarts the relevant services.  This does 
+# not require user interaction.  Monit will also automatically 
+# start any monitored process that has been shut down.
+
 if cpu > 80% for 5 cycles then restart
 if totalmem > 2000.0 MB for 5 cycles then restart
 group server
 
-#Monitoring Mysql Service
+# Monitoring Mysql Service
 
 check process mysql matching "mysql"
 group database
@@ -46,38 +52,40 @@ stop program = "/usr/sbin/service mysql stop"
 if failed host 127.0.0.1 port 3306 then restart
 if 5 restarts within 5 cycles then timeout
 
-#Monitoring Mt Wilson portals
+# Monitoring Mt Wilson portals
+# REMOVE the below sections if not using 
+# the default Mt Wilson portals provided 
+# by Intel
 
-# The below settings monitor each of the Mt WIlson portals 
-# to verify that the glassfish process is still responding.  
-# They should be removed if the Intel portals are not being used.
-
-#Management Console
+# Management Console
 check host ManagementConsole with address 127.0.0.1
 start program = "/usr/local/bin/mtwilson glassfish-start"
 stop program = "/usr/local/bin/mtwilson glassfish-stop"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
 		and request "/ManagementConsole/" for 3 cycles
 	then restart
-	
-#Trust Dashboard
+	if 3 restarts within 10 cycles then timeout
+
+# Trust Dashboard
 check host TrustDashboard with address 127.0.0.1
 start program = "/usr/local/bin/mtwilson glassfish-start"
 stop program = "/usr/local/bin/mtwilson glassfish-stop"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request "/TrustDashBoard/" for 7 cycles
+		and request "/TrustDashBoard/" for 3 cycles
 	then restart
-	
+	if 3 restarts within 10 cycles then timeout
 
-#Whitelist Portal
+# Whitelist Portal
 check host WhitelistPortal with address 127.0.0.1
 start program = "/usr/local/bin/mtwilson glassfish-start"
 stop program = "/usr/local/bin/mtwilson glassfish-stop"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request "/WhiteListPortal/" for 11 cycles
+		and request "/WhiteListPortal/" for 3 cycles
 	then restart
-	
-#You can also include other configuration files via include directives:
+	if 3 restarts within 10 cycles then timeout
 
-#include /etc/monit/default.monitrc
-#include /etc/monit/mysql.monitrc
+
+# You can also include other configuration files via include directives:
+
+# include /etc/monit/default.monitrc
+# include /etc/monit/mysql.monitrc

@@ -11,14 +11,6 @@ MONIT_PACKAGE=`ls -1 monit-*.tar.gz 2>/dev/null | tail -n 1`
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
-chmod 700 monitrc
-if [ -f /etc/monitrc ]; then
-    echo_warning "Monit configuration already exists in /etc/monitrc; creating /etc/monitrc.mtwilson"
-    cp monitrc /etc/monitrc.mtwilson
-else
-    cp monitrc /etc/monitrc
-fi
-
 # SCRIPT EXECUTION
 
 monit_clear() {
@@ -97,3 +89,9 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
+chmod 700 monitrc
+if [ -f /etc/monit/monitrc ]; then
+    echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
+    backup_file /etc/monit/monitrc
+fi
+cp monitrc /etc/monit/monitrc
