@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.rest;
 
+import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
@@ -14,6 +15,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Web Service
@@ -27,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 @Stateless
 @Path("/hosts/bulk")
 public class BulkHostTrust {
-
+        private Logger log = LoggerFactory.getLogger(getClass());
         /**
 	 * REST Web Service Example: GET
 	 * /hosts/trust?hosts=host_name_1
@@ -46,15 +49,23 @@ public class BulkHostTrust {
 			@QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
 //                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                         @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
-
+                Integer myTimeOut = timeout;
+                // if no timeout value is passed to function, check config for default, 
+                // if not in config, go with default value
+                if(timeout == 600) {
+                    log.info("getTrustSaml called with default timeout, checking config");
+                    myTimeOut = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.attestation.hostTimeout", 30);
+                    log.info("getTrustSaml config returned back" + myTimeOut);
+                }
 		if (hosts == null || hosts.length() == 0) {
+                    
 			throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
 					"hosts"  );
 		}
                 
             Set<String> hostSet = new HashSet<String>();
             hostSet.addAll(Arrays.asList(hosts.split(",")));
-                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */timeout);
+                BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */myTimeOut);
 		return bulkHostTrustBO.getBulkTrustSaml(hostSet,forceVerify);
 
 

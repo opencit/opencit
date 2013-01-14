@@ -251,7 +251,7 @@ mtwilson.api.secretKey=
     @Test
     public void testCreateUserInResource() throws MalformedURLException, IOException, ApiException, CryptographyException, ClientException, KeyStoreException {
         ByteArrayResource resource = new ByteArrayResource();
-        URL server = new URL("https://10.1.71.80:8181");
+        URL server = new URL("https://10.1.71.88:8181");
         SimpleKeystore keystore = KeystoreUtil.createUserInResource(resource, "testuser1", "password", server, new String[] { "Attestation" });        
         for(String alias : keystore.aliases()) {
             System.out.println("Keystore now has alias: "+alias);

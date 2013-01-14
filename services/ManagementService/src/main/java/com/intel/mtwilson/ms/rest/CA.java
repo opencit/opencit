@@ -94,7 +94,10 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getRootCaCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certficate.file");
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
+            if( certFile != null && !certFile.startsWith(File.separator) ) {
+                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+            }
             File rootCaPemFile = new File(certFile); 
             FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
             String content = IOUtils.toString(in); // IOException
@@ -118,7 +121,10 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getSamlCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file");
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); // PEM format file with possible CA certificate chain; not the same as mtwilson.saml.certificate which is the DER format file mtwilson.saml.certificate that we configured in mtwilson 1.0-RC2 
+            if( certFile != null && !certFile.startsWith(File.separator) ) {
+                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+            }
             File samlPemFile = new File(certFile);
             FileInputStream in = new FileInputStream(samlPemFile);
             String content = IOUtils.toString(in);
@@ -142,8 +148,11 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.cert.file");
-            File privacyCaPemFile = new File(certFile); 
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.file");
+             if( certFile != null && !certFile.startsWith(File.separator) ) {
+                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+            }
+           File privacyCaPemFile = new File(certFile); 
             FileInputStream in = new FileInputStream(privacyCaPemFile);
             String content = IOUtils.toString(in);
             IOUtils.closeQuietly(in);
@@ -167,6 +176,9 @@ public class CA {
     public String getTlsCertificateChain() {
         try {
             String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
+            if( certFile != null && !certFile.startsWith(File.separator) ) {
+                certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+            }
             File tlsPemFile = new File(certFile);
             FileInputStream in = new FileInputStream(tlsPemFile);
             String content = IOUtils.toString(in);

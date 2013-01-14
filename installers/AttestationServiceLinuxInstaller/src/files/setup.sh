@@ -57,6 +57,9 @@ else
   cp "audit-handler.properties" "${intel_conf_dir}/audit-handler.properties"
 fi
 
+# copy default logging settings to /etc
+chmod 700 logback.xml
+cp logback.xml "${intel_conf_dir}"
 
 # SCRIPT EXECUTION
 mysql_server_install

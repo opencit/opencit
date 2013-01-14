@@ -1253,13 +1253,18 @@ public class HostBO extends BaseBO {
             // will not be used during the creation of MleSource mapping.
             mleDataObj.setAttestationType(MleData.AttestationType.PCR.toString());            
             mleSourceObj.setMleData(mleDataObj);
-            mleSourceObj.setHostName(hostObj.HostName);
+            if (hostObj.HostName != null && !hostObj.HostName.isEmpty())
+                mleSourceObj.setHostName(hostObj.HostName);
+            else
+                mleSourceObj.setHostName(hostObj.IPAddress);
             
+            log.info("Host details for MLE white list host mapping are: " + hostObj.HostName + ":" + hostObj.IPAddress);
             // Since this function would be called during both creation and updation, we need to handle both the scenarios.
             try {
                 apiClientObj.addMleSource(mleSourceObj);
             } catch (ApiException iae) {
                 if (iae.getErrorCode() == ErrorCode.WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS.getErrorCode()) {
+                    log.error("Mapping already exists for the MLE white list host for MLE: " + mleSourceObj.getHostName());
                     // Since the mapping already exists, it means that the user is updating the white list. So, let us call the update method
                     apiClientObj.updateMleSource(mleSourceObj);
                 }
@@ -1270,12 +1275,12 @@ public class HostBO extends BaseBO {
             }
                         
         } catch (ApiException ae) {
-            log.error("API Client error during deletion of MLE. " + ae.getErrorCode() + " :" + ae.getMessage());
+            log.error("API Client error during MLE white list host mapping. " + ae.getErrorCode() + " :" + ae.getMessage());
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() +
                     ": Error during MLE white list host mapping. " + ae.getMessage());
             
         } catch (Exception ex) {
-            log.error("Error during MLE deletion. " + ex.getMessage());
+            log.error("Error during MLE white list host mapping. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE white list host mapping. " + ex.getMessage());
             
         }

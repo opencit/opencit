@@ -45,6 +45,7 @@ public class ASConfig extends ConfigBase{
         defaults.setProperty("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe"); // used by TAHelper
         defaults.setProperty("daa.enabled", "false");
         defaults.setProperty("com.intel.mountwilson.as.trustagent.timeout", "3"); // seconds
+        defaults.setProperty("com.intel.mountwilson.as.attestation.hostTimeout","30");  // seconds
         // mtwilson.as.dek = base64-encoded AES key used by HostBO
         // mtwilson.taca.keystore.password
         // mtwilson.taca.key.alias

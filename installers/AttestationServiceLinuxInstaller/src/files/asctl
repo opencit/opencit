@@ -152,8 +152,9 @@ create_saml_key() {
   fi
   chmod 600 ${saml_keystore_file}
   # export the SAML certificate so it can be easily provided to API clients
-  $keytool -export -alias ${saml_key_alias} -keystore ${saml_keystore_file}  -storepass ${saml_keystore_password} -file ${intel_conf_dir}/saml.cer
-  chmod 600 ${intel_conf_dir}/saml.cer
+  $keytool -export -alias ${saml_key_alias} -keystore ${saml_keystore_file}  -storepass ${saml_keystore_password} -file ${intel_conf_dir}/saml.crt
+  openssl x509 -in ${intel_conf_dir}/saml.crt -inform der -out ${intel_conf_dir}/saml.crt.pem -outform pem
+  chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
 
   #saml.issuer=https://localhost:8181
   local saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"

@@ -1052,7 +1052,10 @@ public class VMwareClient implements TlsClient {
                                     HostTpmSoftwareComponentEventDetails swEventLog = (HostTpmSoftwareComponentEventDetails)eventInfo.getEventDetails();
                                     xtw.writeStartElement("EventDetails");
                                     xtw.writeAttribute("EventName", "Vim25Api.HostTpmSoftwareComponentEventDetails");
-                                    xtw.writeAttribute("ComponentName", swEventLog.getComponentName());
+                                    //xtw.writeAttribute("ComponentName", swEventLog.getComponentName());
+                                    // Bug Fix #491 set componentName == to packageName - packageVersion
+                                    //              instead of componentName
+                                    xtw.writeAttribute("ComponentName", swEventLog.getVibName()+"-"+swEventLog.getVibVersion());
                                     xtw.writeAttribute("DigestValue", byteArrayToHexString(swEventLog.getDataHash()));
                                     xtw.writeAttribute("ExtendedToPCR", String.valueOf(eventInfo.getPcrIndex()));
                                     xtw.writeAttribute("PackageName", swEventLog.getVibName());

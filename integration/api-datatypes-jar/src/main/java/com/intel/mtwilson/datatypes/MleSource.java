@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.datatypes;
 
-import org.codehaus.jackson.annotate.JsonProperty;
 /**
  *
  * @author ssbangal
@@ -14,7 +13,6 @@ public class MleSource {
     private MleData mleData;
     private String hostName;
 
-    @JsonProperty("HostName")
     public String getHostName() {
         return hostName;
     }
@@ -23,7 +21,6 @@ public class MleSource {
         this.hostName = hostName;
     }
 
-    @JsonProperty("MleData")
     public MleData getMleData() {
         return mleData;
     }

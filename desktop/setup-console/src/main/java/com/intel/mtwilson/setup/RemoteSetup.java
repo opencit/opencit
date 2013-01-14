@@ -330,8 +330,9 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      */
     public void deployRootCACertToServer() throws IOException, CertificateEncodingException {
 //        MemorySrcFile caCertDer = new MemorySrcFile();
-        uploadLocalFile(ctx.rootCa.getCertificate().getEncoded(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt");
+        uploadLocalFile(ctx.rootCa.getCertificate().getEncoded(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt"); // XXX probably don't need this,  server only uses the .pem version
          String pem = X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
+         // XXX should get the ca file name from server's management-service.properties
         uploadLocalFile(pem.getBytes(), "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); // we also do a PEM version because if customer wants to bring our entire certificate hierarchy under theirs they need to sign our root ca with their certificate - and then append their certificate to this PEM file.
    }
     
@@ -349,10 +350,10 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         MemoryDstFile file = downloadRemoteFile(ctx.samlCertificateFile);
         InputStream in = file.getInputStream();
-        byte[] fileContent = IOUtils.toByteArray(in);
+        String fileContent = IOUtils.toString(in);
         IOUtils.closeQuietly(in);
         try {
-            ctx.samlCertificate = X509Util.decodeDerCertificate(fileContent);
+            ctx.samlCertificate = X509Util.decodePemCertificate(fileContent); // XXX TODO assuming only one right now -  could be a chain, in which case we need to decide (or ask the user) if we want to sign the first one (end certificate) or the last one (top-most CA)
         }
         catch(CertificateException e) {
             fault(e, "Cannot read SAML certificate");
@@ -384,9 +385,9 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     }
     
     public void uploadSamlCertToServer() throws CertificateEncodingException, IOException {
-        uploadLocalFile(ctx.samlCertificate.getEncoded(), ctx.samlCertificateFile);   
+//        uploadLocalFile(ctx.samlCertificate.getEncoded(), ctx.samlCertificateFile);   // not needed 
         String pem = X509Util.encodePemCertificate(ctx.samlCertificate)+X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
-        uploadLocalFile(pem.getBytes(), ctx.samlCertificateFile+".pem");
+        uploadLocalFile(pem.getBytes(), ctx.samlCertificateFile);
     }
 
     
@@ -409,10 +410,11 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         MemoryDstFile file = downloadRemoteFile(ctx.tlsCertificateFile);
         InputStream in = file.getInputStream();
-        byte[] fileContent = IOUtils.toByteArray(in);
+//        byte[] fileContent = IOUtils.toByteArray(in);
+        String fileContent = IOUtils.toString(in);
         IOUtils.closeQuietly(in);
         try {
-            ctx.tlsCertificate = X509Util.decodeDerCertificate(fileContent);
+            ctx.tlsCertificate = X509Util.decodePemCertificate(fileContent);
         }
         catch(CertificateException e) {
             fault(e, "Cannot read TLS certificate");
@@ -505,9 +507,9 @@ public class RemoteSetup extends BuilderModel implements Closeable {
      * @throws IOException 
      */
     public void uploadTlsCertToServer() throws CertificateEncodingException, IOException {
-        uploadLocalFile(ctx.tlsCertificate.getEncoded(), ctx.tlsCertificateFile);        
+//        uploadLocalFile(ctx.tlsCertificate.getEncoded(), ctx.tlsCertificateFile);  // not needed,  see uploadTlsKeystoreToServer  instead because the cert in the keystore is what the web application server reads
         String pem = X509Util.encodePemCertificate(ctx.tlsCertificate)+X509Util.encodePemCertificate(ctx.rootCa.getCertificate());
-        uploadLocalFile(pem.getBytes(), ctx.tlsCertificateFile+".pem");
+        uploadLocalFile(pem.getBytes(), ctx.tlsCertificateFile); // tlsCertificateFile should point to the .pem version anyway
     }
     
     
@@ -692,22 +694,22 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     }
     
     
-    private void importManagementServiceProperties(Properties asprops, Properties mwprops) {
+    private void importManagementServiceProperties(Properties msprops, Properties mwprops) {
         ctx.managementServiceDatabase = new Database();
         // XXX TODO should use a differnent class that handles all the defaults etc. that is also used by attestation service.  thought of ASConfig get defaults but even that needs to be rewritten to look for mountwilson.ms.db.driver, then mtwilson.db.driver, etc. 
-        ctx.managementServiceDatabase.driver = asprops.getProperty("mountwilson.ms.db.driver", asprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
-        ctx.managementServiceDatabase.username = asprops.getProperty("mountwilson.ms.db.user", asprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
-        ctx.managementServiceDatabase.password = asprops.getProperty("mountwilson.ms.db.password", asprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
-        ctx.managementServiceDatabase.schema = asprops.getProperty("mountwilson.ms.db.schema", asprops.getProperty("mtwilson.db.schema", mwprops.getProperty("mtwilson.db.schema", "mw_as")));
-        if( asprops.getProperty("mountwilson.ms.db.host", asprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host"))) != null ) {
-            ctx.managementServiceDatabase.hostname = new InternetAddress(asprops.getProperty("mountwilson.ms.db.host", asprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host")))); 
+        ctx.managementServiceDatabase.driver = msprops.getProperty("mountwilson.ms.db.driver", msprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
+        ctx.managementServiceDatabase.username = msprops.getProperty("mountwilson.ms.db.user", msprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
+        ctx.managementServiceDatabase.password = msprops.getProperty("mountwilson.ms.db.password", msprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
+        ctx.managementServiceDatabase.schema = msprops.getProperty("mountwilson.ms.db.schema", msprops.getProperty("mtwilson.db.schema", mwprops.getProperty("mtwilson.db.schema", "mw_as")));
+        if( msprops.getProperty("mountwilson.ms.db.host", msprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host"))) != null ) {
+            ctx.managementServiceDatabase.hostname = new InternetAddress(msprops.getProperty("mountwilson.ms.db.host", msprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host")))); 
             // If database hostname is 127.0.0.1 or localhost, we need to rewrite it as target server address in order to access it
             if( ctx.managementServiceDatabase.hostname.toString().equals("127.0.0.1") ||  ctx.managementServiceDatabase.hostname.toString().equals("localhost") ) {
                 ctx.managementServiceDatabase.hostname = new InternetAddress(ctx.serverAddress.toString());
             }
         }                    
-        if(asprops.getProperty("mountwilson.ms.db.port", asprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port")))!=null) {
-            ctx.managementServiceDatabase.port = Integer.valueOf(asprops.getProperty("mountwilson.ms.db.port", asprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port"))));
+        if(msprops.getProperty("mountwilson.ms.db.port", msprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port")))!=null) {
+            ctx.managementServiceDatabase.port = Integer.valueOf(msprops.getProperty("mountwilson.ms.db.port", msprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port"))));
         }
         if( ctx.managementServiceDatabase.type == null && ctx.managementServiceDatabase.driver != null ) {
             ctx.managementServiceDatabase.type = DatabaseType.fromDriver(ctx.managementServiceDatabase.driver); 
@@ -716,22 +718,22 @@ public class RemoteSetup extends BuilderModel implements Closeable {
             ctx.managementServiceDatabase.type = DatabaseType.fromPort(ctx.managementServiceDatabase.port); 
         }
 
-        if( asprops.getProperty("mtwilson.api.baseurl", mwprops.getProperty("mtwilson.api.baseurl")) != null ) {
+        if( msprops.getProperty("mtwilson.api.baseurl", mwprops.getProperty("mtwilson.api.baseurl")) != null ) {
             try {
-                ctx.serverUrl = new URL(asprops.getProperty("mtwilson.api.baseurl", mwprops.getProperty("mtwilson.api.baseurl")));
+                ctx.serverUrl = new URL(msprops.getProperty("mtwilson.api.baseurl", mwprops.getProperty("mtwilson.api.baseurl")));
             }
             catch(MalformedURLException e) {
                 // XXX TODO: we need to extend ObjectModel so we can log all the faults with the configuration!!!  or maybe this belongs in SetupContext which should extend ObjectModel?  but this means all the interpretation of the prpoerties (converting from string to whatever other datataypes) must havppen inside the validate() method of that object.  which actually sounds just fine.
             }
         }
         
-        ctx.automationKeyAlias = asprops.getProperty("mtwilson.api.key.alias");
-        ctx.automationKeyPassword = asprops.getProperty("mtwilson.api.key.password");
-        ctx.automationKeystoreFile = asprops.getProperty("mtwilson.api.keystore");
+        ctx.automationKeyAlias = msprops.getProperty("mtwilson.api.key.alias");
+        ctx.automationKeyPassword = msprops.getProperty("mtwilson.api.key.password");
+        ctx.automationKeystoreFile = msprops.getProperty("mtwilson.api.keystore");
         
         // here we are mapping the old ssl policy implementation to the new one. the mapping is not perfect but we try to capture the best intent.  specifically, "requireTrustedCertificate" can either mean a CA or a specific self-signed host certificate. we assume a CA.
-        boolean automationVerifyHostname = Boolean.valueOf(asprops.getProperty("mtwilson.api.ssl.verifyHostname", mwprops.getProperty("mtwilson.api.ssl.verifyHostname", "true")));
-        boolean automationRequireTrustedCertificate = Boolean.valueOf(asprops.getProperty("mtwilson.api.ssl.requireTrustedCertificate", mwprops.getProperty("mtwilson.api.ssl.requireTrustedCertificate", "true")));
+        boolean automationVerifyHostname = Boolean.valueOf(msprops.getProperty("mtwilson.api.ssl.verifyHostname", mwprops.getProperty("mtwilson.api.ssl.verifyHostname", "true")));
+        boolean automationRequireTrustedCertificate = Boolean.valueOf(msprops.getProperty("mtwilson.api.ssl.requireTrustedCertificate", mwprops.getProperty("mtwilson.api.ssl.requireTrustedCertificate", "true")));
         if( automationVerifyHostname && automationRequireTrustedCertificate) {
             ctx.automationTlsPolicy = TLSPolicy.TRUST_CA_VERIFY_HOSTNAME;
         }
@@ -744,15 +746,15 @@ public class RemoteSetup extends BuilderModel implements Closeable {
             
         // these security parameters actually apply to all services
         ctx.securityPolicy = new WebServiceSecurityPolicy();
-        ctx.securityPolicy.isTlsRequired = Boolean.valueOf(asprops.getProperty("mtwilson.ssl.required", mwprops.getProperty("mtwilson.ssl.required", "true")));
-        ctx.securityPolicy.trustedClients = StringUtils.split(asprops.getProperty("mtwilson.api.trust", mwprops.getProperty("mtwilson.api.trust", "")), ',');
+        ctx.securityPolicy.isTlsRequired = Boolean.valueOf(msprops.getProperty("mtwilson.ssl.required", mwprops.getProperty("mtwilson.ssl.required", "true")));
+        ctx.securityPolicy.trustedClients = StringUtils.split(msprops.getProperty("mtwilson.api.trust", mwprops.getProperty("mtwilson.api.trust", "")), ',');
         
-        ctx.managementServiceKeystoreDir = asprops.getProperty("mtwilson.ms.keystore.dir");
+        ctx.managementServiceKeystoreDir = msprops.getProperty("mtwilson.ms.keystore.dir");
 
-        ctx.biosPCRs = asprops.getProperty("mtwilson.ms.biosPCRs", "0");
-        ctx.vmmPCRs = asprops.getProperty("mtwilson.ms.vmmPCRs", "18;19;20");
+        ctx.biosPCRs = msprops.getProperty("mtwilson.ms.biosPCRs", "0");
+        ctx.vmmPCRs = msprops.getProperty("mtwilson.ms.vmmPCRs", "18;19;20");
         
-        ctx.samlCertificateFile = asprops.getProperty("mtwilson.saml.certificate", mwprops.getProperty("mtwilson.saml.certificate") );
+        ctx.samlCertificateFile = msprops.getProperty("mtwilson.saml.certificate.file", mwprops.getProperty("mtwilson.saml.certificate.file") ); // dropping support for   mtwilson.saml.certificate (DER format) that was in management-service.properties
         if( !ctx.samlCertificateFile.startsWith("/") ) {
             ctx.samlCertificateFile = String.format("/etc/intel/cloudsecurity/%s", ctx.samlCertificateFile);
         }
@@ -760,22 +762,22 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         
     }
     
-    private void importAuditHandlerProperties(Properties asprops, Properties mwprops) {
+    private void importAuditHandlerProperties(Properties ahprops, Properties mwprops) {
         ctx.auditDatabase = new Database();
         // XXX TODO should use a differnent class that handles all the defaults etc. that is also used by attestation service.  thought of ASConfig get defaults but even that needs to be rewritten to look for mountwilson.audit.db.driver, then mtwilson.db.driver, etc. 
-        ctx.auditDatabase.driver = asprops.getProperty("mountwilson.audit.db.driver", asprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
-        ctx.auditDatabase.username = asprops.getProperty("mountwilson.audit.db.user", asprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
-        ctx.auditDatabase.password = asprops.getProperty("mountwilson.audit.db.password", asprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
-        ctx.auditDatabase.schema = asprops.getProperty("mountwilson.audit.db.schema", asprops.getProperty("mtwilson.db.schema", mwprops.getProperty("mtwilson.db.schema", "mw_as")));
-        if( asprops.getProperty("mountwilson.audit.db.host", asprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host"))) != null ) {
-            ctx.auditDatabase.hostname = new InternetAddress(asprops.getProperty("mountwilson.audit.db.host", asprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host")))); 
+        ctx.auditDatabase.driver = ahprops.getProperty("mountwilson.audit.db.driver", ahprops.getProperty("mtwilson.db.driver", mwprops.getProperty("mtwilson.db.driver"))); 
+        ctx.auditDatabase.username = ahprops.getProperty("mountwilson.audit.db.user", ahprops.getProperty("mtwilson.db.user", mwprops.getProperty("mtwilson.db.user")));
+        ctx.auditDatabase.password = ahprops.getProperty("mountwilson.audit.db.password", ahprops.getProperty("mtwilson.db.password", mwprops.getProperty("mtwilson.db.password")));
+        ctx.auditDatabase.schema = ahprops.getProperty("mountwilson.audit.db.schema", ahprops.getProperty("mtwilson.db.schema", mwprops.getProperty("mtwilson.db.schema", "mw_as")));
+        if( ahprops.getProperty("mountwilson.audit.db.host", ahprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host"))) != null ) {
+            ctx.auditDatabase.hostname = new InternetAddress(ahprops.getProperty("mountwilson.audit.db.host", ahprops.getProperty("mtwilson.db.host", mwprops.getProperty("mtwilson.db.host")))); 
             // If database hostname is 127.0.0.1 or localhost, we need to rewrite it as target server address in order to access it
             if( ctx.auditDatabase.hostname.toString().equals("127.0.0.1") ||  ctx.auditDatabase.hostname.toString().equals("localhost") ) {
                 ctx.auditDatabase.hostname = new InternetAddress(ctx.serverAddress.toString());
             }
         }                    
-        if(asprops.getProperty("mountwilson.audit.db.port", asprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port")))!=null) {
-            ctx.auditDatabase.port = Integer.valueOf(asprops.getProperty("mountwilson.audit.db.port", asprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port"))));
+        if(ahprops.getProperty("mountwilson.audit.db.port", ahprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port")))!=null) {
+            ctx.auditDatabase.port = Integer.valueOf(ahprops.getProperty("mountwilson.audit.db.port", ahprops.getProperty("mtwilson.db.port", mwprops.getProperty("mtwilson.db.port"))));
         }
         if( ctx.auditDatabase.type == null && ctx.auditDatabase.driver != null ) {
             ctx.auditDatabase.type = DatabaseType.fromDriver(ctx.auditDatabase.driver); 
@@ -784,9 +786,9 @@ public class RemoteSetup extends BuilderModel implements Closeable {
             ctx.auditDatabase.type = DatabaseType.fromPort(ctx.auditDatabase.port); 
         }
         
-        ctx.auditEnabled = Boolean.valueOf(asprops.getProperty("mountwilson.audit.enabled", "true"));
-        ctx.auditLogUnchangedColumns = Boolean.valueOf(asprops.getProperty("mountwilson.audit.logunchangedcolumns", "false"));
-        ctx.auditAsync = Boolean.valueOf(asprops.getProperty("mountwilson.audit.async", "true"));
+        ctx.auditEnabled = Boolean.valueOf(ahprops.getProperty("mountwilson.audit.enabled", "true"));
+        ctx.auditLogUnchangedColumns = Boolean.valueOf(ahprops.getProperty("mountwilson.audit.logunchangedcolumns", "false"));
+        ctx.auditAsync = Boolean.valueOf(ahprops.getProperty("mountwilson.audit.async", "true"));
     }
     
     private void importManagementConsoleProperties(Properties asprops, Properties mwprops) {
@@ -799,19 +801,19 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     
     // XXX TODO:  what about trust-dashboard.properties and whitelist-portal.properies?   they are either same as management console (keystore dir, session timeout) or they are so UI-specific that maybe we don't care, and it's ok for them to be in separate files.... 
 
-    private void importPrivacyCAProperties(Properties asprops, Properties mwprops) {
+    private void importPrivacyCAProperties(Properties pcaprops, Properties mwprops) {
         if( ctx.privacyCA == null ) { // importAttestationServiceProperties may have already created it
             ctx.privacyCA = new PrivacyCA();
         }
         
-        ctx.privacyCA.ekSigningKeyFilename = asprops.getProperty("P12filename", "PrivacyCA.p12"); // probably should not be configurable... should have a specific location.
+        ctx.privacyCA.ekSigningKeyFilename = pcaprops.getProperty("P12filename", "PrivacyCA.p12"); // probably should not be configurable... should have a specific location.
         if( !ctx.privacyCA.ekSigningKeyFilename.startsWith("/") ) {
             ctx.privacyCA.ekSigningKeyFilename = String.format("/etc/intel/cloudsecurity/%s", ctx.privacyCA.ekSigningKeyFilename);
         }
-        ctx.privacyCA.ekSigningKeyPassword = asprops.getProperty("P12password");
-        ctx.privacyCA.ekSigningKeyDownloadUsername = asprops.getProperty("ClientFilesDownloadUsername");
-        ctx.privacyCA.ekSigningKeyDownloadPassword = asprops.getProperty("ClientFilesDownloadPassword");
-        ctx.privacyCA.pcaCertificateValidity = new Timeout(Integer.valueOf(asprops.getProperty("PrivCaCertValiditydays", "3652")), TimeUnit.DAYS);
+        ctx.privacyCA.ekSigningKeyPassword = pcaprops.getProperty("P12password");
+        ctx.privacyCA.ekSigningKeyDownloadUsername = pcaprops.getProperty("ClientFilesDownloadUsername");
+        ctx.privacyCA.ekSigningKeyDownloadPassword = pcaprops.getProperty("ClientFilesDownloadPassword");
+        ctx.privacyCA.pcaCertificateValidity = new Timeout(Integer.valueOf(pcaprops.getProperty("PrivCaCertValiditydays", "3652")), TimeUnit.DAYS);
     }
     
     private void importGlassfishProperties() {

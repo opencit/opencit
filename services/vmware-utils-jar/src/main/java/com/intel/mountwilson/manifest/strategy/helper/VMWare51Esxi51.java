@@ -70,30 +70,20 @@ public class VMWare51Esxi51   {
 					HostTpmSoftwareComponentEventDetails componentEventDetails = (HostTpmSoftwareComponentEventDetails) logEntry
 							.getEventDetails();
 
-					moduleManifest
-							.setEventName("Vim25Api.HostTpmSoftwareComponentEventDetails");
-					moduleManifest.setComponentName("componentName."
-							+ componentEventDetails.getComponentName());
-					moduleManifest
-							.setDigestValue(VMwareClient.byteArrayToHexString(componentEventDetails
-									.getDataHash()));
-					moduleManifest.setPackageName(componentEventDetails
-							.getVibName());
-					moduleManifest.setPackageVendor(componentEventDetails
-							.getVibVendor());
-					moduleManifest.setPackageVersion(componentEventDetails
-							.getVibVersion());
-
+					moduleManifest.setEventName("Vim25Api.HostTpmSoftwareComponentEventDetails");
+					moduleManifest.setComponentName("componentName." + componentEventDetails.getComponentName());
+					moduleManifest.setDigestValue(VMwareClient.byteArrayToHexString(componentEventDetails.getDataHash()));
+					moduleManifest.setPackageName(componentEventDetails.getVibName());
+					moduleManifest.setPackageVendor(componentEventDetails.getVibVendor());
+					moduleManifest.setPackageVersion(componentEventDetails.getVibVersion());
 				} else if (logEntry.getEventDetails() instanceof HostTpmCommandEventDetails) {
 					HostTpmCommandEventDetails commandEventDetails = (HostTpmCommandEventDetails) logEntry
 							.getEventDetails();
 
-					moduleManifest
-							.setEventName("Vim25Api.HostTpmCommandEventDetails");
+					moduleManifest.setEventName("Vim25Api.HostTpmCommandEventDetails");
 					moduleManifest.setComponentName("commandLine."
 							+ getCommandLine(commandEventDetails));
-					moduleManifest
-							.setDigestValue(VMwareClient.byteArrayToHexString(commandEventDetails
+					moduleManifest.setDigestValue(VMwareClient.byteArrayToHexString(commandEventDetails
 									.getDataHash()));
 
 					// Add to the module manifest map of the pcr
@@ -104,23 +94,19 @@ public class VMWare51Esxi51   {
 					HostTpmOptionEventDetails optionEventDetails = (HostTpmOptionEventDetails) logEntry
 							.getEventDetails();
 
-					moduleManifest
-							.setEventName("Vim25Api.HostTpmOptionEventDetails");
+					moduleManifest.setEventName("Vim25Api.HostTpmOptionEventDetails");
 					moduleManifest.setComponentName("bootOptions."
 							+ optionEventDetails.getOptionsFileName());
-					moduleManifest
-							.setDigestValue(VMwareClient.byteArrayToHexString(optionEventDetails
+					moduleManifest.setDigestValue(VMwareClient.byteArrayToHexString(optionEventDetails
 									.getDataHash()));
 				} else if (logEntry.getEventDetails() instanceof HostTpmBootSecurityOptionEventDetails) {
 					HostTpmBootSecurityOptionEventDetails optionEventDetails = (HostTpmBootSecurityOptionEventDetails) logEntry
 							.getEventDetails();
 
-					moduleManifest
-							.setEventName("Vim25Api.HostTpmBootSecurityOptionEventDetails");
+					moduleManifest.setEventName("Vim25Api.HostTpmBootSecurityOptionEventDetails");
 					moduleManifest.setComponentName("bootSecurityOption."
 							+ optionEventDetails.getBootSecurityOption());
-					moduleManifest
-							.setDigestValue(VMwareClient.byteArrayToHexString(optionEventDetails
+					moduleManifest.setDigestValue(VMwareClient.byteArrayToHexString(optionEventDetails
 									.getDataHash()));
 
 				} else {

@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<Vendor,VendorHostAgentFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostAgentFactory>(Vendor.class);
-    
+    //private Logger log = LoggerFactory.getLogger(getClass());
     public HostAgentFactory() {
         // we initialize the map with the known vendors; but this could also be done through IoC
         vendorFactoryMap.put(Vendor.INTEL, new IntelHostAgentFactory());

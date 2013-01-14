@@ -11,6 +11,10 @@ function registerUser(){
     $('.validationErrorDiv').each(function() {
             $(this).remove();
     });
+    
+    // Bug#514: We need to clear the previous error message if it exists
+    $('#errorMessage').html('<div class="errorMessage">'+""+'</div>');
+    
     if (!(validateValue('userNameValue'))) {
 		return false;
 	}

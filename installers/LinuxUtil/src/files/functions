@@ -1181,13 +1181,13 @@ glassfish_permissions() {
 # sets a system property for logback configuration file location
 glassfish_logback() {
   # see if it's already set
-  local prev_logback=`$glassfish list-system-properties | grep "logback.configurationFile" | head -n 1`
+  local prev_logback=`$glassfish list-system-properties 2>/dev/null | grep "logback.configurationFile" | head -n 1`
   # loop just in case there is more than one defined
   while [ -n "${prev_logback}" ]
   do
     echo "Deleting existing system property ${prev_logback}"
-    $glassfish delete-system-properties "${prev_logback}"
-    prev_logback=`$glassfish list-system-properties | grep "logback.configurationFile" | head -n 1`
+    $glassfish delete-system-property "${prev_logback}"
+    prev_logback=`$glassfish list-system-properties 2>/dev/null | grep "logback.configurationFile" | head -n 1`
   done
   $glassfish create-system-properties logback.configurationFile=/etc/intel/cloudsecurity/logback.xml
 }
