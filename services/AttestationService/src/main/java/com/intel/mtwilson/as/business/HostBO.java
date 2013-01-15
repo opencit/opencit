@@ -139,7 +139,7 @@ public class HostBO extends BaseBO {
 			return pcrMap;
                     }
                     else {
-                        throw new ASException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED);
+                        throw new ASException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                     }
 			
 		} catch (ASException e) {

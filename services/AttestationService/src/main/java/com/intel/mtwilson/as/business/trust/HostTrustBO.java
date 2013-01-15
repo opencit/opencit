@@ -57,6 +57,7 @@ import org.apache.commons.configuration.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
+import com.intel.mtwilson.agent.*;
 
 /**
  *
@@ -117,6 +118,13 @@ public class HostTrustBO extends BaseBO {
         log.info( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
         log.info( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
+        // bug #538 first check if the host supports tpm
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(tblHosts);
+        if( !agent.isTpmAvailable() ) {
+            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostName.toString());
+        }
+        
         IManifestStrategy manifestStrategy;
         IManifestStrategyFactory strategyFactory;
 
