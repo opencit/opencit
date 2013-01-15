@@ -24,7 +24,7 @@
       <artifactId>api-client</artifactId>
       <version>${project.parent.version}</version>
       <type>jar</type>
-      <!--<classifier>with-dependencies</classifier>-->
+      <classifier>with-dependencies</classifier>
     </dependency>
     
  <!-- this is the setup console -->
@@ -101,10 +101,8 @@
 			</goals>
 			<configuration>
                             <excludeArtifactIds>setup-console</excludeArtifactIds>
-                            <!--
                             <includeArtifactIds>api-client</includeArtifactIds>
                             <includeClassifiers>with-dependencies</includeClassifiers>
-                            -->
 			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
 			</configuration>
 		    </execution>
