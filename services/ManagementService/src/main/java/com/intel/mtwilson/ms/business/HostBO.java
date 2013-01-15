@@ -92,8 +92,9 @@ public class HostBO extends BaseBO {
             RsaCredential credential = keystore.getRsaCredentialX509(keyAliasName, keyPassword);            
 
             Properties prop = new Properties();
-            prop.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true"); // must be secure out of the box!
-            prop.setProperty("mtwilson.api.ssl.verifyHostname", "true"); // must be secure out of the box!            
+            prop.setProperty("mtwilson.api.ssl.policy", MSConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
+            prop.setProperty("mtwilson.api.ssl.requireTrustedCertificate", MSConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
+            prop.setProperty("mtwilson.api.ssl.verifyHostname", MSConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
 
             rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(prop));
             log.info("Successfully created the API object for Management Service");
