@@ -41,6 +41,7 @@ public class ExtendedOptions {
             else if( args[i].startsWith("--") && args[i].length() > 2 ) {
                 String arg = args[i].substring(2);
                 if( arg.contains("=") ) {
+                    System.out.println("ARG "+i+" is '"+arg+"'");
                     String[] parts = arg.split("=");
                     if( parts[0] == null || parts[0].isEmpty() ) { continue; }
                     if( parts[1] == null || parts[1].isEmpty() ) { opts.setProperty(parts[0], ""); }

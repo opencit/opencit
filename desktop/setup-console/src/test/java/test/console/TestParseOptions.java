@@ -37,4 +37,23 @@ public class TestParseOptions {
             assertEquals(expectedOpts.get(optName), actualOpts.getString(optName));
         }
     }
+    
+    @Test
+    public void testParseExtendedOptionsErrors() {
+        String[] args = new String[] { "arg1", "--option1=", "--=value1", "--=", "arg2" };
+        ExtendedOptions getopt = new ExtendedOptions(args);
+        String[] expectedArgs = new String[] { "arg1", "arg2" };
+        HashMap<String,String> expectedOpts = new HashMap<String,String>();
+        expectedOpts.put("option1", "");
+        String[] actualArgs = getopt.getArguments();
+        assertEquals(expectedArgs.length, actualArgs.length);
+        for(int i=0; i<expectedArgs.length; i++) {
+            assertEquals(expectedArgs[i], actualArgs[i]);
+        }
+        Set<String> optNames = expectedOpts.keySet(); 
+        Configuration actualOpts = getopt.getOptions();
+        for(String optName : optNames) {
+            assertEquals(expectedOpts.get(optName), actualOpts.getString(optName));
+        }
+    }
 }
