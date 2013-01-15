@@ -41,10 +41,9 @@ public class ExtendedOptions {
             else if( args[i].startsWith("--") && args[i].length() > 2 ) {
                 String arg = args[i].substring(2);
                 if( arg.contains("=") ) {
-                    System.out.println("ARG "+i+" is '"+arg+"'");
                     String[] parts = arg.split("=");
-                    if( parts[0] == null || parts[0].isEmpty() ) { continue; }
-                    if( parts[1] == null || parts[1].isEmpty() ) { opts.setProperty(parts[0], ""); }
+                    if( parts.length < 1 || parts[0] == null || parts[0].isEmpty() ) { continue; }
+                    if( parts.length < 2 || parts[1] == null || parts[1].isEmpty() ) { opts.setProperty(parts[0], ""); }
                     else { opts.setProperty(parts[0], parts[1]==null?"":parts[1]); }
                 }
                 else if( arg.startsWith("no-") && arg.length() > 3 ) {

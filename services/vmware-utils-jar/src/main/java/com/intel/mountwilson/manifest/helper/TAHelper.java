@@ -173,7 +173,7 @@ public class TAHelper {
           try {
               // going to IntelHostAgent directly because 1) we are TAHelper so we know we need intel trust agents,  2) the HostAgent interface isn't ready yet for full generic usage,  3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
               HostAgentFactory factory = new HostAgentFactory();
-              ByteArrayResource resource = new ByteArrayResource(tblHosts.getSSLCertificate());
+              ByteArrayResource resource = new ByteArrayResource(tblHosts.getSSLCertificate() == null ? new byte[0] : tblHosts.getSSLCertificate());
               TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getSSLPolicy(), resource);
               
         String connectionString = tblHosts.getAddOnConnectionInfo();
