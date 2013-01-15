@@ -120,7 +120,8 @@ public class VmwareHostAgent implements HostAgent {
     }
 
     @Override
-    public String getVendorHostReport() {
+    public String getVendorHostReport() throws IOException {
+        /*
         try {
             getAllPcrAndModuleInformationFromHost();
             return vendorHostReport;
@@ -128,6 +129,12 @@ public class VmwareHostAgent implements HostAgent {
         catch(Exception e) {
             log.error("Cannot get vendor report", e);
             return null;
+        }*/
+        try {
+            return vmware.getHostAttestationReport(hostMOR, hostname, null);         // will get default pcr list
+        }
+        catch(VMwareConnectionException e) {
+            throw new IOException(String.format("Cannot get attestation report from host '%s': %s", hostname, e.toString()), e);
         }
     }
     

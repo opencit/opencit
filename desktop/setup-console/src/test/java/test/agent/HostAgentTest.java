@@ -7,13 +7,14 @@ package test.agent;
 import org.junit.Test;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.data.*;
+import java.io.IOException;
 /**
  *
  * @author jbuhacoff
  */
 public class HostAgentTest {
     @Test
-    public void testEsxWithoutTpm() {
+    public void testEsxWithoutTpm() throws IOException {
         HostAgentFactory factory = new HostAgentFactory();
         TblHosts host = new TblHosts();
         host.setName("10.1.71.176");

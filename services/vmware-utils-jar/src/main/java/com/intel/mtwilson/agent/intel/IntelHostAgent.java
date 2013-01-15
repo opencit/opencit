@@ -51,7 +51,9 @@ public class IntelHostAgent implements HostAgent {
     
     @Override
     public boolean isTpmAvailable() {
-        throw new UnsupportedOperationException("Not supported yet.");
+//        throw new UnsupportedOperationException("Not supported yet.");
+        // bug #538  for now assuming all trust-agent hosts have tpm since we don't have a separate capabilities call
+        return true; //  XXX TODO need to have a separate call to trust agent to get host capabilities  ... see bug #540
     }
 
     @Override
@@ -106,7 +108,7 @@ public class IntelHostAgent implements HostAgent {
     }
 
     @Override
-    public String getVendorHostReport() {
+    public String getVendorHostReport()  throws IOException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     

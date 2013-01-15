@@ -130,8 +130,17 @@ public class HostBO extends BaseBO {
 	private HashMap<String, ? extends IManifest> getHostPcrManifest(TblHosts tblHosts, TxtHost host) {
 		try {
 
+                    // bug #538 check the host capability before we try to get a manifest
+                    HostAgentFactory factory = new HostAgentFactory();
+                    HostAgent agent = factory.getHostAgent(tblHosts);
+                    if( agent.isTpmAvailable() ) {
+                    
 			HashMap<String, ? extends IManifest> pcrMap = getPcrModuleManifestMap(tblHosts, host);
 			return pcrMap;
+                    }
+                    else {
+                        throw new ASException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED);
+                    }
 			
 		} catch (ASException e) {
 			if (!e.getErrorCode().equals(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED)) {

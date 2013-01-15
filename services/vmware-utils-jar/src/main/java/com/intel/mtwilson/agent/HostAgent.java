@@ -116,7 +116,7 @@ public interface HostAgent {
      * other information. 
      * @return 
      */
-    String getVendorHostReport();
+    String getVendorHostReport()  throws IOException;
     
     /**
      * XXX this is a draft - need to check it against linux & citrix requirements
