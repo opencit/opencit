@@ -808,6 +808,11 @@ public class HostBO extends BaseBO {
                                     
             } else {
                 // Handle the VMware host
+                
+                // check if it has a TPM first  (should be at the beginning of this method but currently trust agent doesn't support a real is-tpm-available capability)   bug #540
+                if( !agent.isTpmAvailable()  ) {
+                    throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED);
+                }
 
                 // Now that we have retrieved the details of the host, let us configure the BIOS MLE if needed
                 if (hostConfigObj.addBiosWhiteList()) {
