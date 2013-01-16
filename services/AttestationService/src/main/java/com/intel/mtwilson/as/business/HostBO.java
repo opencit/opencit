@@ -93,6 +93,7 @@ public class HostBO extends BaseBO {
                         }
                         log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore().length);
 
+            log.error("HOST BO CALLING SAVEHOSTINDATABASE");
                         saveHostInDatabase(tblHosts, host, certificate, location, pcrMap);
 
 		} catch (ASException ase) {
@@ -521,6 +522,7 @@ public class HostBO extends BaseBO {
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
 		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+		log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
 		TblHostsJpaController hostController = new TblHostsJpaController(
 				getEntityManagerFactory(), dataEncryptionKey);
@@ -543,6 +545,7 @@ public class HostBO extends BaseBO {
 		tblHosts.setAIKCertificate(certificate); // null is ok;  vmware servers do not have aik's.
 		tblHosts.setLocation(location);
 		// create the host
+                log.error("COMMITING NEW HOST DO DATABASE");
 		hostController.create(tblHosts);
 
 		log.info("Save host specific manifest if any.");
