@@ -19,6 +19,14 @@ import java.io.OutputStream;
  * @author jbuhacoff
  */
 public interface Resource {
+    /**
+     * If the resource does not have any data, this method may return null or
+     * it may throw an EOFException.
+     * If the resource represents a file and the file is not found, calling
+     * this method may throw a FileNotFoundException.  
+     * @return
+     * @throws IOException 
+     */
     InputStream getInputStream() throws IOException;
     
     /**

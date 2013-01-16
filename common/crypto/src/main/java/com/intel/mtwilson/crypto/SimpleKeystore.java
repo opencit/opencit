@@ -59,21 +59,16 @@ public class SimpleKeystore {
             InputStream in = null;
             try {
                 in = resource.getInputStream();
-                try {
-                    keystore.load(in, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
+                if( in == null ) {
+                    keystore.load(null, keystorePassword.toCharArray());                            
                 }
-                catch(NullPointerException e) {
-                    // means file (or database field) was empty or non-existent... even if we "canRead"
-                    log.warn("Failed to read keystore", e);
-                    keystore.load(null, keystorePassword.toCharArray());            
-                }
-                catch(EOFException e) {
-                    // means file was empty or non-existent... even if we "canRead"
-                    log.warn("Failed to read keystore", e);
-                    keystore.load(null, keystorePassword.toCharArray());            
+                else {
+                    keystore.load(in, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException                
                 }
             }
-            catch(FileNotFoundException e) {
+            catch(Exception e) {
+                log.warn("Cannot load keystore: {}", e.toString());
+                log.warn("Creating new keystore");
                 keystore.load(null, keystorePassword.toCharArray());
             }
             finally {
@@ -87,6 +82,20 @@ public class SimpleKeystore {
                 }
             }
         }
+        catch(Exception e) {
+            throw new KeyManagementException("Cannot load keystore", e);                    
+        }
+        /*
+        catch(NullPointerException e) {
+//             means file (or database field) was empty or non-existent... even if we "canRead"
+//            log.warn("Failed to read keystore", e);
+            throw new KeyManagementException("Cannot read keystore", e);
+        }
+        catch(EOFException e) {
+            // means file was empty or non-existent... even if we "canRead"
+//            log.warn("Failed to read keystore", e);
+            throw new KeyManagementException("Cannot read keystore", e);
+        }
         catch (KeyStoreException e) {
             throw new KeyManagementException("Cannot create a keystore of type "+KeyStore.getDefaultType(), e);
         }
@@ -98,7 +107,7 @@ public class SimpleKeystore {
         }
         catch(CertificateException e) {
             throw new KeyManagementException("Cannot load keystore", e);                    
-        }
+        }*/
     }
 
     /**

@@ -15,10 +15,10 @@ import java.io.OutputStream;
  */
 public class ByteArrayResource implements Resource {
     private byte[] array;
-    private boolean isChanged = false;
+    private transient boolean isChanged = false;
     
     public ByteArrayResource() {
-        this.array = new byte[0];
+        this.array = null;
     }
     
     public ByteArrayResource(byte[] array) {
@@ -27,7 +27,8 @@ public class ByteArrayResource implements Resource {
     
     @Override
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(array == null ? new byte[0] : array);
+        if( array == null || array.length == 0 ) { return null; }
+        return new ByteArrayInputStream(array);
     }
 
     @Override

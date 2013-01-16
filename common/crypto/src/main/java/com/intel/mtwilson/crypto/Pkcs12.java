@@ -48,22 +48,35 @@ public class Pkcs12 {
     public Pkcs12(Resource resource, String password) throws IOException, KeyStoreException {
         keystoreResource = resource;
         keystorePassword = password;
-        InputStream in = keystoreResource.getInputStream();
+        InputStream in = null; 
         keystore = KeyStore.getInstance("PKCS12"); // throws KeyStoreException if this keystore type is not available
         try {
+            in = keystoreResource.getInputStream();
             try {
-                keystore.load(in, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
+                if( in == null ) {
+                    keystore.load(null, keystorePassword.toCharArray());     // before a keystore may be accessed, it MUST be loaded;  passing null creates a new keystore.  see http://docs.oracle.com/javase/6/docs/api/java/io/InputStream.html                        
+                }
+                else {
+                    keystore.load(in, keystorePassword.toCharArray()); // IOException, NoSuchAlgorithmException, CertificateException
+                }
             }
-            catch(EOFException e) {
-                // means file was empty or non-existent... even if we "canRead"
-                log.warn("Failed to read keystore", e);
-                keystore.load(null, keystorePassword.toCharArray());            
+            catch(Exception e) {
+                log.warn("Cannot load keystore: {}", e.toString());
+                log.warn("Creating new keystore");
+                keystore.load(null, keystorePassword.toCharArray());
+            }
+            finally {
+                try {
+                    if( in != null ) {
+                        in.close();
+                    }
+                }
+                catch (IOException e) {
+                    log.warn("Failed to close keystore after reading", e);
+                }
             }
         }
-        catch(NoSuchAlgorithmException e) { // if the algorithm used to check the integrity of the keystore cannot be found
-            throw new KeyStoreException(e); 
-        }
-        catch(CertificateException e) { // if any certificates in the keystore could not be loaded
+        catch(Exception e) {
             throw new KeyStoreException(e);
         }
     }

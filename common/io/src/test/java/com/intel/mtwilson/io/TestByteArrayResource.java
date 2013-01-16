@@ -19,20 +19,26 @@ import static org.junit.Assert.*;
  */
 public class TestByteArrayResource {
     
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testReadFromNullResource() throws IOException {
         ByteArrayResource resource = new ByteArrayResource(null);
-        InputStream in = resource.getInputStream(); // throws NullPointerException
-        in.close();
+        InputStream in = resource.getInputStream();
+        assertNull(in);
+        if( in != null ) {
+            in.close();
+        }
     }
     
     @Test
     public void testReadFromEmptyResource() throws IOException {
         ByteArrayResource resource = new ByteArrayResource(); // can also pass new byte[] { }  or new byte[0] which is the same as what the no-arg constructor does
         InputStream in = resource.getInputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-        System.out.println(reader.readLine()); // immediate EOF, should display "null"
-        reader.close();
+        assertNull(in);
+        if( in != null ) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            System.out.println(reader.readLine()); // immediate EOF, would display "null"
+            reader.close();
+        }
     }
 
     @Test
