@@ -25,22 +25,21 @@ import org.slf4j.LoggerFactory;
 public class AuditLogger {
     private static Logger logger = LoggerFactory.getLogger(AuditLogger.class);
     private static boolean isAsyncEnabled = AuditConfig.isAsyncEnabled();
-
     
     
-    private static String AUDIT_LOGGER_JNDI= "";
-    static{
-        try {
-        	
-        	
-            AUDIT_LOGGER_JNDI = String.format("java:global/%s/AuditAsyncWorker", (String) new InitialContext().lookup("java:app/AppName"));
-            logger.debug("JNDI Name for look up : {}", AUDIT_LOGGER_JNDI);
-            logger.debug("Async Mode -" + isAsyncEnabled);
-            
-        } catch (NamingException ex) {
-            logger.error("Error while setting JNDI name for AuditLogger.", ex);
-        }
-    }
+//    private static String AUDIT_LOGGER_JNDI= "";
+//    static{
+//        try {
+//        	
+//            logger.info("Before the JNDILookup");
+//            AUDIT_LOGGER_JNDI = String.format("java:global/%s/AuditAsyncWorker", (String) new InitialContext().lookup("java:app/AppName"));
+//            logger.info("JNDI Name for look up : {}", AUDIT_LOGGER_JNDI);
+//            logger.info("Async Mode -" + isAsyncEnabled);
+//            
+//        } catch (NamingException ex) {
+//            logger.error("Error while setting JNDI name for AuditLogger.", ex);
+//        }
+//    }
 
 
 
@@ -84,17 +83,16 @@ public class AuditLogger {
         }
     }
 
-    private static AuditAsyncWorker asyncWorker = new AuditAsyncWorker();
     private AuditWorker getAuditWorker() throws NamingException {
-        /*
-        if(isAsyncEnabled){
-        	
-            return (AuditWorker) new InitialContext().lookup(AUDIT_LOGGER_JNDI);
-        }else{
-            return new AuditAsyncWorker();
-        }
-        */
-        return asyncWorker;
+        
+        return new AuditAsyncWorker();
+//        if(isAsyncEnabled){
+//        	
+//            return (AuditWorker) new InitialContext().lookup(AUDIT_LOGGER_JNDI);
+//        }else{
+//            return new AuditAsyncWorker();
+//        }
+        
     }
     
     

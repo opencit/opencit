@@ -111,6 +111,11 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>http-authorization</artifactId>
+			<version>${project.version}</version>
+		</dependency>
     
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
