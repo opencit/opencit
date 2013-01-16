@@ -486,6 +486,8 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 .subjectPublicKey(ctx.tlsCertificate.getPublicKey())
                 .expires(3650, TimeUnit.DAYS)
                 .issuer(ctx.rootCa)
+                .keyUsageKeyEncipherment()
+                .keyUsageDataEncipherment()
                 .keyUsageDigitalSignature();
         if( ctx.serverAddress.isHostname() ) {
             x509.dnsAlternativeName(ctx.serverAddress.toString());

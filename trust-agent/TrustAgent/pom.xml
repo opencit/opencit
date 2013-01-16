@@ -178,10 +178,22 @@
                         <artifactId>webservice-util</artifactId>
                         <version>${project.parent.version}</version>
                 </dependency>
+                <!--
            	<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
 			<version>1.41</version>
+		</dependency>
+           	<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.47</version>
+		</dependency>
+                -->
+           	<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-ext-jdk15on</artifactId>
+			<version>1.47</version>
 		</dependency>
     </dependencies>
 </project>

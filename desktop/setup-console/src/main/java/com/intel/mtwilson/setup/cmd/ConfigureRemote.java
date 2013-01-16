@@ -175,11 +175,14 @@ public class ConfigureRemote implements Command {
     
     public void displaySummary() {
         System.out.println("Mt Wilson URL: "+ctx.serverUrl.toExternalForm());
-        System.out.println("Mt Wilson Database: "+(ctx.attestationServiceDatabase.type==null?"unknown vendor":ctx.attestationServiceDatabase.type.displayName()));
-        System.out.println("          hostname: "+ctx.attestationServiceDatabase.hostname.toString());
-        System.out.println("              port: "+ctx.attestationServiceDatabase.port);
-        System.out.println("          username: "+ctx.attestationServiceDatabase.username);
-        System.out.println("          password: "+ctx.attestationServiceDatabase.password);
+        if( ctx.attestationServiceDatabase != null ) {
+            System.out.println("Mt Wilson Database: "+(ctx.attestationServiceDatabase.type==null?"unknown vendor":ctx.attestationServiceDatabase.type.displayName()));
+            System.out.println("          hostname: "+(ctx.attestationServiceDatabase.hostname==null?"unknown hostname":ctx.attestationServiceDatabase.hostname.toString()));
+            System.out.println("              port: "+ctx.attestationServiceDatabase.port);
+            System.out.println("          username: "+ctx.attestationServiceDatabase.username);
+            System.out.println("          password: "+ctx.attestationServiceDatabase.password);
+            
+        }
     }
     
     public void collectUserInput() {
