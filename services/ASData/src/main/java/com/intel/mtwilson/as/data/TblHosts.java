@@ -14,6 +14,8 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.eclipse.persistence.annotations.Customizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,6 +41,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblHosts.findByErrorDescription", query = "SELECT t FROM TblHosts t WHERE t.errorDescription = :errorDescription"),
     @NamedQuery(name = "TblHosts.findByNameSearchCriteria", query = "SELECT t FROM TblHosts t WHERE t.name like :search")})
 public class TblHosts implements Serializable {
+    @Transient
+    private transient Logger log = LoggerFactory.getLogger(getClass());
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
     @Basic(optional =     false)
@@ -80,8 +84,7 @@ public class TblHosts implements Serializable {
 
     
     @Column(name = "TlsPolicy")
-    private String tlsPolicy;
-    
+    private String tlsPolicyName;
     
     @Lob
     @Column(name = "TlsKeystore")
@@ -110,18 +113,20 @@ public class TblHosts implements Serializable {
         this.id = id;
     }
 
+    /*
     public TblHosts(Integer id, String name, String iPAddress, int port, Date createdOn, Date updatedOn) {
         this.id = id;
         this.name = name;
         this.iPAddress = iPAddress;
         this.port = port;
+    }
+    */
         // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
         /*
         this.createdOn = createdOn;
         this.updatedOn = updatedOn;
         * 
         */
-    }
 
     public Integer getId() {
         return id;
@@ -151,7 +156,7 @@ public class TblHosts implements Serializable {
      * XXX TODO the port field is only used for Linux hosts running Trust Agent
      * and needs to be removed;  all agent connection information should be
      * stored in the "AddOn_Connection_String" in a URI format. For Linux hosts
-     * with Trust Agent that format might be "linux:https://hostname:9999"
+     * with Trust Agent that format might be "intel:https://hostname:9999"
      * @return 
      */
     public int getPort() {
@@ -186,16 +191,14 @@ public class TblHosts implements Serializable {
         this.aIKCertificate = aIKCertificate;
     }
     
-    public String getTlsPolicyName() { return tlsPolicy; }
+    public String getTlsPolicyName() { return tlsPolicyName; }
     public void setTlsPolicyName(String sslPolicy) { 
-        this.tlsPolicy = sslPolicy; 
+        this.tlsPolicyName = sslPolicy; 
     }
 
     
     public byte[] getTlsKeystore() { 
-        if( tlsKeystoreResource != null && tlsKeystoreResource.isChanged() ) {
-            return tlsKeystoreResource.toByteArray();
-        }
+        log.debug("getTlsKeystore called on TblHosts for hostname: {}", name);
         return tlsKeystore; 
     }
     public void setTlsKeystore(byte[] tlsKeystoreBytes) {        
@@ -205,7 +208,12 @@ public class TblHosts implements Serializable {
 
     public Resource getTlsKeystoreResource() { 
         if( tlsKeystoreResource == null ) {
-            tlsKeystoreResource = new ByteArrayResource(tlsKeystore);
+            tlsKeystoreResource = new ByteArrayResource(tlsKeystore) {
+                @Override
+                protected void onClose() {
+                    tlsKeystore = array; // array is a protected member of ByteArrayResource
+                }
+            };
         }
         return tlsKeystoreResource; 
     }

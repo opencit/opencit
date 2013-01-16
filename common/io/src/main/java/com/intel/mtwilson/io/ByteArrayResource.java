@@ -10,12 +10,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * A thin wrapper for Java's File class
+ * A simple implementation of Resource using a byte[] as the storage.
+ * 
+ * You can extend this class to implement custom actions when the
+ * resource is updated by overriding the onClose() method. The default
+ * implementation of onClose() is a no-op. 
+ * 
  * @author jbuhacoff
  */
 public class ByteArrayResource implements Resource {
-    private byte[] array;
-    private transient boolean isChanged = false;
+    protected byte[] array;
     
     public ByteArrayResource() {
         this.array = null;
@@ -36,14 +40,14 @@ public class ByteArrayResource implements Resource {
         return new ByteArrayOutputStream() {
             @Override
             public void close() {
-                array = toByteArray();
-                isChanged = true;
+                array = toByteArray(); // calls toByteArray() in ByteArrayOutputStream
+                onClose();
             }
         };
     }
     
     public byte[] toByteArray() { return array; }
     
-    public boolean isChanged() { return isChanged; }
+    protected void onClose() { }
     
 }
