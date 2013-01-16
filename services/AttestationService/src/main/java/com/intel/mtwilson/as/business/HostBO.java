@@ -517,7 +517,7 @@ public class HostBO extends BaseBO {
 		
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.debug("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getSSLPolicy(), tblHosts.getSSLCertificate() == null ? "null" : tblHosts.getSSLCertificate().length);
+		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getSSLPolicy(), tblHosts.getSSLCertificate() == null ? "null" : tblHosts.getSSLCertificate().length);
 
 		TblHostsJpaController hostController = new TblHostsJpaController(
 				getEntityManagerFactory(), dataEncryptionKey);
