@@ -217,6 +217,16 @@ public class HostBOTest {
         assertTrue( sampleGoodCert.indexOf("\n-----END CERTIFICATE-----\n") >= 0 );
     }
     
+    @Test
+    public void testAddHost146() {
+        TxtHostRecord hostinfo = new TxtHostRecord();
+        hostinfo.HostName = "10.1.71.146";
+        hostinfo.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+        TxtHost host = new TxtHost(hostinfo);
+        hostBO.addHost(host);
+    }
+    
+    
     private static ObjectMapper mapper = new ObjectMapper();
     
     @Test
