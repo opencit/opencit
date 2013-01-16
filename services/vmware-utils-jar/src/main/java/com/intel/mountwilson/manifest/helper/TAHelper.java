@@ -173,8 +173,7 @@ public class TAHelper {
           try {
               // going to IntelHostAgent directly because 1) we are TAHelper so we know we need intel trust agents,  2) the HostAgent interface isn't ready yet for full generic usage,  3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
               HostAgentFactory factory = new HostAgentFactory();
-              ByteArrayResource resource = new ByteArrayResource(tblHosts.getTlsKeystore() == null ? new byte[0] : tblHosts.getTlsKeystore());
-              TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getTlsPolicyName(), resource);
+              TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
               
         String connectionString = tblHosts.getAddOnConnectionInfo();
         if( connectionString == null || connectionString.isEmpty() ) {
@@ -195,7 +194,6 @@ public class TAHelper {
             
             HashMap<String, PcrManifest> pcrMap = getQuoteInformationForHost( tblHosts.getIPAddress(), client,  pcrList);
 
-            tblHosts.setTlsKeystore(resource.toByteArray()); // bug #497 save the server cert in case this is a trust-first-certificate policy XXX TODO needs to move somewhere else !!!
             return pcrMap;
             
         } catch (ASException e) {
