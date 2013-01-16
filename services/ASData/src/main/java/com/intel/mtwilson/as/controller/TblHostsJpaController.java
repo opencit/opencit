@@ -51,6 +51,7 @@ public class TblHostsJpaController implements Serializable {
     }
 
     public void create(TblHosts tblHosts) throws CryptographyException {
+        log.debug("create tblHosts with policy {} and keystore length {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
         if (tblHosts.getTblSamlAssertionCollection() == null) {
             tblHosts.setTblSamlAssertionCollection(new ArrayList<TblSamlAssertion>());
         }
@@ -77,11 +78,13 @@ public class TblHostsJpaController implements Serializable {
             // encrypt addon connection string, persist, then restore the plaintext
             String addOnConnectionString = tblHosts.getAddOnConnectionInfo();
             if( addOnConnectionString != null ) {
+                log.debug("saving with encrypted connection string");
                 tblHosts.setAddOnConnectionInfo(cipher.encryptString(addOnConnectionString));
                 em.persist(tblHosts);
                 tblHosts.setAddOnConnectionInfo(addOnConnectionString);
             }
             else {
+                log.debug("saving without encrypting connection string");
                 em.persist(tblHosts);
             }
             
