@@ -44,6 +44,7 @@
       </plugin>
 
 <!-- need this to include the commons-configuration, commons-lang, and commons-codec dependencies into the trustagent.jar -->	
+<!--
 <plugin>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>maven-assembly-plugin</artifactId>
@@ -62,7 +63,28 @@
     </execution>
   </executions>
 </plugin>
-
+-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>regular-jar-with-dependencies</id>
+                <phase>package</phase>
+                <goals><goal>shade</goal></goals>
+                <configuration>
+        		<shadedArtifactAttached>true</shadedArtifactAttached>
+                	<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                        <artifactSet>
+                            <excludes>
+                                <exclude>org.bouncycastle:bcprov-jdk15</exclude>
+                            </excludes>
+                        </artifactSet>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+      
       <!-- begin copy dependencies plugin -->
 	<plugin>
 	    <artifactId>maven-dependency-plugin</artifactId>
