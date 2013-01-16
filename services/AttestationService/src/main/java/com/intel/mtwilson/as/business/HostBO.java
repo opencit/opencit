@@ -88,7 +88,7 @@ public class HostBO extends BaseBO {
                             log.info("Getting location for host from VCenter");
                             location = getLocation(pcrMap);
                         }
-                        log.info("Saving Host in database");
+                        log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore().length);
 
                         saveHostInDatabase(tblHosts, host, certificate, location, pcrMap);
 

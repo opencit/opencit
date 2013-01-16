@@ -198,8 +198,9 @@ public class TblHosts implements Serializable {
         }
         return tlsKeystore; 
     }
-    public void setTlsKeystore(byte[] tlsKeystoreBytes) {
+    public void setTlsKeystore(byte[] tlsKeystoreBytes) {        
         tlsKeystore = tlsKeystoreBytes;
+        tlsKeystoreResource = null;
     }
 
     public Resource getTlsKeystoreResource() { 

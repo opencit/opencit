@@ -119,6 +119,12 @@ public class VmwareHostAgent implements HostAgent {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * Example ESXi report for a host that does NOT have a TPM:
+     * <?xml version="1.0" ?><Host_Attestation_Report Host_Name="10.1.71.176" vCenterVersion="5.1.0" HostVersion="5.1.0" TXT_Support="false"><PCRInfo Error="Host does not support TPM."></PCRInfo></Host_Attestation_Report>
+     * @return
+     * @throws IOException E
+     */
     @Override
     public String getVendorHostReport() throws IOException {
         /*

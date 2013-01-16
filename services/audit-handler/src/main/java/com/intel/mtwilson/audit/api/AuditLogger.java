@@ -84,15 +84,17 @@ public class AuditLogger {
         }
     }
 
+    private static AuditAsyncWorker asyncWorker = new AuditAsyncWorker();
     private AuditWorker getAuditWorker() throws NamingException {
-        
+        /*
         if(isAsyncEnabled){
         	
             return (AuditWorker) new InitialContext().lookup(AUDIT_LOGGER_JNDI);
         }else{
             return new AuditAsyncWorker();
         }
-        
+        */
+        return asyncWorker;
     }
     
     
