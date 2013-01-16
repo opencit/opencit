@@ -5,6 +5,8 @@
 package com.intel.mtwilson.as.data;
 
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.Resource;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -75,14 +77,18 @@ public class TblHosts implements Serializable {
     @Lob
     @Column(name = "AIK_Certificate")
     private String aIKCertificate;
+
+    
+    @Column(name = "TlsPolicy")
+    private String tlsPolicy;
+    
     
     @Lob
     @Column(name = "TlsKeystore")
     private byte[] tlsKeystore;
     
-    @Column(name = "TlsPolicy")
-    private String tlsPolicy;
-    
+    @Transient
+    private ByteArrayResource tlsKeystoreResource;
     
     @Column(name = "Email")
     private String email;
@@ -180,16 +186,30 @@ public class TblHosts implements Serializable {
         this.aIKCertificate = aIKCertificate;
     }
     
-    public byte[] getSSLCertificate() { return tlsKeystore; }
-    public void setSSLCertificate(byte[] encodedSslCertificate) {
-        tlsKeystore = encodedSslCertificate;
-    }
-    
-    public String getSSLPolicy() { return tlsPolicy; }
-    public void setSSLPolicy(String sslPolicy) { 
+    public String getTlsPolicyName() { return tlsPolicy; }
+    public void setTlsPolicyName(String sslPolicy) { 
         this.tlsPolicy = sslPolicy; 
     }
 
+    
+    public byte[] getTlsKeystore() { 
+        if( tlsKeystoreResource != null && tlsKeystoreResource.isChanged() ) {
+            return tlsKeystoreResource.toByteArray();
+        }
+        return tlsKeystore; 
+    }
+    public void setTlsKeystore(byte[] tlsKeystoreBytes) {
+        tlsKeystore = tlsKeystoreBytes;
+    }
+
+    public Resource getTlsKeystoreResource() { 
+        if( tlsKeystoreResource == null ) {
+            tlsKeystoreResource = new ByteArrayResource(tlsKeystore);
+        }
+        return tlsKeystoreResource; 
+    }
+    
+    
     public String getEmail() {
         return email;
     }

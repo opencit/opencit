@@ -208,6 +208,7 @@ public class TrustAgentSecureClient {
 
     }
 
+    // XXX TODO  bug #497  currently this is not using the hostname verifier in the tls policy... it should be.
     private SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
         /*
         javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {

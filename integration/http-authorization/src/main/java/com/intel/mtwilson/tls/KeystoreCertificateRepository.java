@@ -93,6 +93,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
     public void addCertificate(X509Certificate certificate) throws KeyManagementException {
         keystore.addTrustedSslCertificate(certificate, certificate.getSubjectX500Principal().getName());
         try {
+            log.debug("Saving keystore");
             keystore.save();
         }
         catch(KeyStoreException e) {

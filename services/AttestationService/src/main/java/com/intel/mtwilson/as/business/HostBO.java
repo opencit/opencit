@@ -69,8 +69,8 @@ public class HostBO extends BaseBO {
             
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-                        tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE");
-                        tblHosts.setSSLCertificate(new byte[0]);
+                        tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+                        tblHosts.setTlsKeystore(new byte[0]);
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         if( host.getHostName() != null ) { tblHosts.setName(host.getHostName().toString()); }
                         if( host.getIPAddress() != null ) { tblHosts.setIPAddress(host.getIPAddress().toString()); }
@@ -290,8 +290,8 @@ public class HostBO extends BaseBO {
 			getBiosAndVMM(host);
 
                         // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
-                        tblHosts.setSSLPolicy("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
-                        tblHosts.setSSLCertificate(new byte[0]);  // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
+                        tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
+                        tblHosts.setTlsKeystore(new byte[0]);  // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
 			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 			if( host.getHostName() != null ) { tblHosts.setName(host.getHostName().toString()); }
                         if( host.getIPAddress() != null ) { tblHosts.setIPAddress(host.getIPAddress().toString()); }
@@ -517,7 +517,7 @@ public class HostBO extends BaseBO {
 		
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getSSLPolicy(), tblHosts.getSSLCertificate() == null ? "null" : tblHosts.getSSLCertificate().length);
+		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
 		TblHostsJpaController hostController = new TblHostsJpaController(
 				getEntityManagerFactory(), dataEncryptionKey);

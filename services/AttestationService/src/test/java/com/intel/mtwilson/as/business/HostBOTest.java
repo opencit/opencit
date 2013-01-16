@@ -7,6 +7,7 @@ import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.*;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
@@ -28,6 +29,7 @@ public class HostBOTest {
     @BeforeClass
     public static void createBusinessObject()  {
         hostBO = new HostBO();
+        hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
     }
 
     @AfterClass
@@ -226,6 +228,22 @@ public class HostBOTest {
         hostBO.addHost(host);
     }
     
+    @Test
+    public void testAddHost176() {
+        TxtHostRecord hostinfo = new TxtHostRecord();
+        hostinfo.HostName = "10.1.71.176";
+        hostinfo.BIOS_Oem = "Intel Corporation";
+        hostinfo.BIOS_Name = "Intel_VMware";
+        hostinfo.BIOS_Version = "0060";
+        hostinfo.VMM_OSName = "VMware_ESXi";
+        hostinfo.VMM_OSVersion = "5.1.0";
+        hostinfo.VMM_Name = "Intel_VMware_ESXi";
+        hostinfo.VMM_Version = "5.1.0-7";
+        hostinfo.AddOn_Connection_String = "vmware:https://10.1.71.162:443/sdk;administrator;intel123!";
+        TxtHost host = new TxtHost(hostinfo);
+        hostBO.addHost(host);
+    }
+
     
     private static ObjectMapper mapper = new ObjectMapper();
     

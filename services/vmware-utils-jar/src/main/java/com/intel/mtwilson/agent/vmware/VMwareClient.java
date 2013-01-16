@@ -53,8 +53,8 @@ public class VMwareClient implements TlsClient {
 	UserSession session = null;
         private String vcenterEndpoint = null;
         private TlsPolicy tlsPolicy = null;
-	private HostnameVerifier hostnameVerifier = null;
-        private X509TrustManager trustManager = null;
+//	private HostnameVerifier hostnameVerifier = null;
+//        private X509TrustManager trustManager = null;
         
 	private boolean isConnected = false;
 
@@ -84,6 +84,7 @@ public class VMwareClient implements TlsClient {
             
         }
         
+        /*
         public void setSslHostnameVerifier(HostnameVerifier hostnameVerifier) {
             this.hostnameVerifier = hostnameVerifier;
         }
@@ -91,7 +92,7 @@ public class VMwareClient implements TlsClient {
         public void setSslCertificateTrustManager(X509TrustManager trustManager) {
             this.trustManager = trustManager;
         }
-        
+        */
         
 	/**
 	 * Disconnects the user session.
@@ -123,13 +124,15 @@ public class VMwareClient implements TlsClient {
 	public void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
                 vcenterEndpoint = url;
                 
+                /*
                 if( hostnameVerifier == null ) {
                     log.warn("SSL Hostname Verifier not set; will accept any remote hostname");
                     HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier());
                 }
                 else {
                     HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-                }
+                }*/
+                HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
                 
                 setupSslCertificateTrustManager();
                 
@@ -539,7 +542,7 @@ public class VMwareClient implements TlsClient {
     public void setTlsPolicy(TlsPolicy tlsPolicy) {
         this.tlsPolicy = tlsPolicy;
     }
-
+/*
 	private class TrustAllTrustManager implements javax.net.ssl.TrustManager,
 			javax.net.ssl.X509TrustManager {
 
@@ -568,12 +571,13 @@ public class VMwareClient implements TlsClient {
 			}
 			return;
 		}
-	}
+	} */
 
 	private void setupSslCertificateTrustManager() throws NoSuchAlgorithmException, KeyManagementException {
 		// Create a trust manager that does not validate certificate chains:
 		javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[1];
                 javax.net.ssl.TrustManager tm;
+                /*
                 if( trustManager == null ) {
                     log.warn("SSL Trusted Certificates not set; will accept any certificate");
                     tm = new TrustAllTrustManager();
@@ -582,6 +586,8 @@ public class VMwareClient implements TlsClient {
                     tm = trustManager;
                 }
 		trustAllCerts[0] = tm;
+                */
+                trustAllCerts[0] = tlsPolicy.getTrustManager(); // bug #497
 		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
 				.getInstance("SSL");
 		javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();

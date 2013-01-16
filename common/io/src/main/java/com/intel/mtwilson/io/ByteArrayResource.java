@@ -15,6 +15,7 @@ import java.io.OutputStream;
  */
 public class ByteArrayResource implements Resource {
     private byte[] array;
+    private boolean isChanged = false;
     
     public ByteArrayResource() {
         this.array = new byte[0];
@@ -26,7 +27,7 @@ public class ByteArrayResource implements Resource {
     
     @Override
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(array);
+        return new ByteArrayInputStream(array == null ? new byte[0] : array);
     }
 
     @Override
@@ -35,10 +36,13 @@ public class ByteArrayResource implements Resource {
             @Override
             public void close() {
                 array = toByteArray();
+                isChanged = true;
             }
         };
     }
     
     public byte[] toByteArray() { return array; }
+    
+    public boolean isChanged() { return isChanged; }
     
 }
