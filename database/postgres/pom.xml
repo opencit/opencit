@@ -3,7 +3,7 @@
 
   <artifactId>mtwilson-postgres</artifactId>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <name>Postgres Support</name>
   <description>SQL and Java code to support Postgres storage</description>
 
@@ -23,12 +23,5 @@
 
   </dependencies>
 
-  <build>
-      <resources>
-          <resource>
-              <directory>src/sql</directory>
-          </resource>
-      </resources>
-  </build>
 
 </project>
