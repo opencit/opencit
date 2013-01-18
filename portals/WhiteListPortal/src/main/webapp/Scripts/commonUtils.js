@@ -6,7 +6,7 @@ var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 
 
-// hack
+/*
 var JSON = JSON || {};
 JSON.stringify = JSON.stringify || function (obj) {
 	var t = typeof (obj);
@@ -27,7 +27,7 @@ JSON.stringify = JSON.stringify || function (obj) {
 		return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
 	}
 };
-
+*/
 
 
 /**
@@ -57,7 +57,7 @@ function createMenubar(divID) {
  */
 
 function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, callbackErrorFunction){
-        alert("sendJSONAjaxRequest: isGet="+isGet+"  url="+url+"  requestData="+requestData+"    sucesssFn="+callbackSuccessFunction+"  errorFn="+callbackErrorFunction);
+        //alert("sendJSONAjaxRequest: isGet="+isGet+"  url="+url+"  requestData="+requestData+"    sucesssFn="+callbackSuccessFunction+"  errorFn="+callbackErrorFunction);
 	var argLength = arguments.length;
 	var requestArgumets = arguments;
 	$.ajax({
@@ -68,12 +68,12 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		success: function (responseJSON,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
-                                alert("sendJSONAjaxRequest: getResponseHeader(loginPage)==true");
+                                //alert("sendJSONAjaxRequest: getResponseHeader(loginPage)==true");
 				fnSessionExpireLoginAgain();
 				return false;
 			}
 			if(responseJSON == null){
-                                alert("sendJSONAjaxRequest: responseJSON==true");
+                                //alert("sendJSONAjaxRequest: responseJSON==true");
 				fnSessionExpireLoginAgain();
 			}else{
 				var args = []; 
@@ -87,7 +87,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -97,7 +97,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
-                                alert("sendJSONAjaxRequest: error: callbackErrorFunction==null");
+                                //alert("sendJSONAjaxRequest: error: callbackErrorFunction==null");
 				fnSessionExpireLoginAgain();
 			}
 		}
@@ -124,7 +124,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		success: function (response,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
-                                alert("sendHTMLAjaxRequest: getResponseHeader(loginPage)==true");
+                                //alert("sendHTMLAjaxRequest: getResponseHeader(loginPage)==true");
 				fnSessionExpireLoginAgain();
 				return false;
 			}
@@ -139,7 +139,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    //Call to success function by passing response and other extra parameter.
 				callbackSuccessFunction.apply(null,args);
 			}else{
-                                alert("sendHTMLAjaxRequest: response==empty");
+                                //alert("sendHTMLAjaxRequest: response==empty");
 				fnSessionExpireLoginAgain();
 			}
 		},
@@ -153,7 +153,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
-                                alert("sendHTMLAjaxRequest: error: callbackErrorFunction==null");
+                                //alert("sendHTMLAjaxRequest: error: callbackErrorFunction==null");
 				fnSessionExpireLoginAgain();
 			}
 		}
