@@ -63,6 +63,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
+                        alert(errorMessage);
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
