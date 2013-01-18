@@ -43,10 +43,12 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		success: function (responseJSON,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
+                                alert("sendJSONAjaxRequest: getResponseHeader(loginPage)==true");
 				fnSessionExpireLoginAgain();
 				return false;
 			}
 			if(responseJSON == null){
+                                alert("sendJSONAjaxRequest: responseJSON==true");
 				fnSessionExpireLoginAgain();
 			}else{
 				var args = []; 
@@ -69,6 +71,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
+                                alert("sendJSONAjaxRequest: error: callbackErrorFunction==null");
 				fnSessionExpireLoginAgain();
 			}
 		}
@@ -95,6 +98,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		success: function (response,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
+                                alert("sendHTMLAjaxRequest: getResponseHeader(loginPage)==true");
 				fnSessionExpireLoginAgain();
 				return false;
 			}
@@ -109,6 +113,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    //Call to success function by passing response and other extra parameter.
 				callbackSuccessFunction.apply(null,args);
 			}else{
+                                alert("sendHTMLAjaxRequest: response==empty");
 				fnSessionExpireLoginAgain();
 			}
 		},
@@ -122,6 +127,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
+                                alert("sendHTMLAjaxRequest: error: callbackErrorFunction==null");
 				fnSessionExpireLoginAgain();
 			}
 		}

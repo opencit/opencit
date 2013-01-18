@@ -9,7 +9,7 @@
 <body>
 	<div style="text-align: center;width: 90%;height: 90%;font-weight: bolder;font-size: x-large;padding-top: 50px;">
 		<div>WLM Portal</div>
-		<div>Ver : 1.0.5</div>
+		<div>Ver : 1.1</div>
 		<div>Intel Corp @ 2012</div>  
 	</div>
 </body>
