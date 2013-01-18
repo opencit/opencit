@@ -104,10 +104,16 @@ public class HostTrustBO extends BaseBO {
         }
     }
         
+    /**
+     * 
+     * @param hostName must not be null
+     * @return 
+     */
     public HostTrustStatus getTrustStatus(Hostname hostName) {
         HashMap<String, ? extends IManifest> pcrManifestMap;
         HashMap<String, ? extends IManifest> gkvBiosPcrManifestMap, gkvVmmPcrManifestMap;
-
+        if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
+        
         TblHosts tblHosts = getHostByName(hostName);
 
         if (tblHosts == null) {
@@ -181,6 +187,12 @@ public class HostTrustBO extends BaseBO {
         return trust;
     }
 
+    /**
+     * 
+     * @param hostName must not be null
+     * @param tblSamlAssertion must not be null
+     * @return 
+     */
     public TxtHost getHostWithTrust(Hostname hostName, TblSamlAssertion tblSamlAssertion) {
         TblHosts record = getHostByName(hostName);
         HostTrustStatus trust = getTrustStatus(hostName);
@@ -213,7 +225,7 @@ public class HostTrustBO extends BaseBO {
     /**
      * Gets the host trust status from trust agent
      *
-     * @param hostName
+     * @param hostName must not be null
      * @return {@link String}
      */
     public String getTrustStatusString(Hostname hostName) { // datatype.Hostname

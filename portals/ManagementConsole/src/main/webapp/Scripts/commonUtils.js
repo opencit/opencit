@@ -311,7 +311,7 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
 		dataType: "json",
 		success: function (responseJSON) {
 			if(responseJSON == null){
-				fnSessionExpireLoginAgain();
+				fnSessionExpireLoginAgain(); // XXX TODO no response from server is an ERROR not an indicator of expired session.  we should display an appropriate message, NOT kick out the user.    this needs to be fixed also in other uses of fnSessionExpireLoginAgain that do not involve the session actually expiring.
 			}else{
 				var args = []; 
 				args.push(responseJSON);

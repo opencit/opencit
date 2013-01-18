@@ -7,13 +7,16 @@ package com.intel.mtwilson.crypto;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -42,6 +45,27 @@ import org.slf4j.LoggerFactory;
 public class SslUtil {
     private static final Logger log = LoggerFactory.getLogger(SslUtil.class);
     
+    /**
+     * Creates an RSA Keypair with the default key size and expiration date.
+     * @param distinguishedName
+     * @return 
+     */
+    public static RsaCredentialX509 createSelfSignedTlsCredential(String distinguishedName, String hostnameOrIpAddress) throws GeneralSecurityException {
+        KeyPair keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
+        X509Builder x509 = X509Builder.factory()
+                .subjectName(distinguishedName) // X500Name.asX500Name(ctx.tlsCertificate.getSubjectX500Principal()))
+                .subjectPublicKey(keyPair.getPublic())
+                .expires(3650, TimeUnit.DAYS)
+                .issuerName(distinguishedName)
+                .issuerPrivateKey(keyPair.getPrivate())
+                .keyUsageKeyEncipherment()
+                .keyUsageDataEncipherment()
+                .alternativeName(hostnameOrIpAddress);
+        X509Certificate newTlsCert = x509.build();
+        return new RsaCredentialX509(keyPair.getPrivate(), newTlsCert);
+    }
+    
+    // just a convenience function for extracting trusted certs from a simplekeystore into a java keystore
     public static KeyStore createTrustedSslKeystore(SimpleKeystore keystore) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
         String[] aliases = keystore.listTrustedSslCertificates();
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -52,6 +76,7 @@ public class SslUtil {
         return ks;
     }
 
+    // just a convenience function for importing an array of certs into a java keystore
     public static KeyStore createTrustedSslKeystore(X509Certificate[] certificates) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         ks.load(null, null);
