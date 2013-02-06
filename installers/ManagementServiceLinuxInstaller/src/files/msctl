@@ -117,25 +117,6 @@ bootstrap_ms_approve_user() {
   mysql_install_scripts ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
 }
 
-setup_print_summary() {
-  echo "Requirements summary:"
-  if [ -n "$MYSQL_HOME" ]; then
-    echo "Mysql: $MYSQL_CLIENT_VERSION"
-  else
-    echo "Mysql: not found"
-  fi
-  if [ -n "$JAVA_HOME" ]; then
-    echo "Java: $JAVA_VERSION"
-  else
-    echo "Java: not found"
-  fi
-  if [ -n "$GLASSFISH_HOME" ]; then
-    echo "Glassfish: $GLASSFISH_VERSION"
-  else
-    echo "Glassfish: not found"
-  fi
-}
-
 setup_interactive_install() {
   if [ -n "$mysql" ]; then
     mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
@@ -170,7 +151,7 @@ setup() {
   mtwilson setup-env > "${package_env_filename}"
   if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
       echo_warning "Missing one or more required packages"
-      setup_print_summary
+      print_env_summary_report
       exit 1
   fi
   setup_interactive_install

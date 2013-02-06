@@ -285,6 +285,13 @@ prompt_with_default_password() {
   eval $resultvarname=${userinput:-$default_value}
 }
 
+### FUNCTION LIBRARY: environment information functions
+
+# Usage example:   if using_glassfish; then echo "Using glassfish"; fi
+using_glassfish() { if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then return 0; else return 1; fi }
+using_tomcat() { if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then return 0; else return 1; fi }
+using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
+using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
 
 ### FUNCTION LIBARRY: conditional execution functions
 
@@ -1791,6 +1798,45 @@ java_keystore_cert_report() {
   echo "$owner_expires"
   local fingerprints=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "MD5:|SHA1:"`
   echo "$fingerprints"
+}
+
+
+### FUNCTION LIBARARY: prerequisites reporting
+
+
+# environment dependencies report
+print_env_summary_report() {
+  echo "Requirements summary:"
+  local error=0
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo_failure "Java: not found"
+    error=1
+  fi
+  if using_mysql; then
+    if [ -n "$MYSQL_HOME" ]; then
+      echo "Mysql: $MYSQL_CLIENT_VERSION"
+    else
+      echo_failure "Mysql: not found"
+      error=1
+    fi
+  fi
+  if using_postgres; then
+    echo_warning "Postgres: relying on existing install"
+  fi
+  if using_glassfish; then
+    if [ -n "$GLASSFISH_HOME" ]; then
+      echo "Glassfish: $GLASSFISH_VERSION"
+    else
+      echo_failure "Glassfish: not found"
+      error=1
+    fi
+  fi
+  if using_tomcat; then
+    echo_warning "Tomcat: relying on existing install"
+  fi
+  return $error
 }
 
 

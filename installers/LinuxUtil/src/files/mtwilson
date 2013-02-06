@@ -26,14 +26,14 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
-if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
-elif [[ "${DATABASE_VENDOR}" -eq "postgres" ]]; then
+elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
-if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+if using_glassfish; then
     export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
-elif [[ "${WEBSERVER_VENDOR}" -eq "tomcat" ]]; then
+elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
 fi
 export java_required_version=${JAVA_REQUIRED_VERSION:-1.6.0_29}
@@ -171,11 +171,11 @@ setup_env() {
   echo "JAVA_HOME=$JAVA_HOME"
   echo "java_bindir=$java_bindir"
   echo "java=$java"
-  if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+  if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then
     mysql_detect > /dev/null
     echo "mysql=$mysql"
   fi
-  if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+  if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then
     glassfish_detect > /dev/null
     echo "GLASSFISH_HOME=$GLASSFISH_HOME"
     echo "glassfish_bin=$glassfish_bin"

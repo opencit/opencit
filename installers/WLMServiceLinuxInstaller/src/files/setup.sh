@@ -54,7 +54,7 @@ fi
 
 
 # SCRIPT EXECUTION
-if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+if using_mysql; then
   mysql_server_install
   mysql_install
 fi
@@ -69,7 +69,7 @@ cp wlmctl /usr/local/bin
 /usr/local/bin/wlmctl setup
 register_startup_script /usr/local/bin/wlmctl wlmctl
 
-if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
 fi

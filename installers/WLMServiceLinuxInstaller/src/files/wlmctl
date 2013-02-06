@@ -31,41 +31,13 @@ if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_w
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 
 
-list_mysql_install_scripts() {
-    echo ${mysql_script_dir}/bootstrap.sql
-    echo ${mysql_script_dir}/20120829_audit_log.sql
-    echo ${mysql_script_dir}/20120831_patch_rc2.sql
-    echo ${mysql_script_dir}/20120920091400_patch_rc3.sql
-}
-
-
-setup_print_summary() {
-  echo "Requirements summary:"
-  if [ -n "$MYSQL_HOME" ]; then
-    echo "Mysql: $MYSQL_CLIENT_VERSION"
-  else
-    echo "Mysql: not found"
-  fi
-  if [ -n "$JAVA_HOME" ]; then
-    echo "Java: $JAVA_VERSION"
-  else
-    echo "Java: not found"
-  fi
-  if [ -n "$GLASSFISH_HOME" ]; then
-    echo "Glassfish: $GLASSFISH_VERSION"
-  else
-    echo "Glassfish: not found"
-  fi
-}
 
 setup_interactive_install() {
-  if [ -n "$mysql" ]; then
+  if using_mysql; then
     mysql_configure_connection "${package_config_filename}" mountwilson.as.db
     mysql_create_database
-    mysql_scripts=`list_mysql_install_scripts`
-    mysql_install_scripts ${mysql_scripts}
   fi
-  if [ -n "$GLASSFISH_HOME" ]; then
+  if using_glassfish; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
@@ -84,9 +56,19 @@ setup_interactive_install() {
 setup() {
   mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
-      echo_warning "Missing one or more required packages"
-      setup_print_summary
+  if [[ -z "$JAVA_HOME" ]]; then
+      echo_failure "Cannot find Java"
+      print_env_summary_report
+      exit 1
+  fi
+  if [[ using_glassfish && -z "$GLASSFISH_HOME" ]]; then
+      echo_failure "Cannot find Glassfish"
+      print_env_summary_report
+      exit 1
+  fi
+  if [[ using_mysql && -z "$MYSQL_HOME" ]]; then
+      echo_failure "Cannot find Mysql"
+      print_env_summary_report
       exit 1
   fi
   setup_interactive_install

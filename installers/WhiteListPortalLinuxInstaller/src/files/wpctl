@@ -58,10 +58,12 @@ setup_print_summary() {
   else
     echo "Java: not found"
   fi
-  if [ -n "$GLASSFISH_HOME" ]; then
-    echo "Glassfish: $GLASSFISH_VERSION"
-  else
-    echo "Glassfish: not found"
+  if using_glassfish; then
+    if [ -n "$GLASSFISH_HOME" ]; then
+      echo "Glassfish: $GLASSFISH_VERSION"
+    else
+      echo "Glassfish: not found"
+    fi
   fi
 }
 

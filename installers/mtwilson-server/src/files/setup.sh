@@ -12,14 +12,14 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
-if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
-elif [[ "${DATABASE_VENDOR}" -eq "postgres" ]]; then
+elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
-if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+if using_glassfish; then
     export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
-elif [[ "${WEBSERVER_VENDOR}" -eq "tomcat" ]]; then
+elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
 fi
 export java_required_version=${JAVA_REQUIRED_VERSION:-1.6.0_29}
@@ -64,7 +64,7 @@ echo
 # XXX TODO ask about mysql vs postgres
 # XXX TODO ask about glassfish vs tomcat
 
-if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+if using_mysql; then
   mysql_userinput_connection_properties
   export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
 
@@ -88,7 +88,7 @@ if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
   echo_warning "Installation of mysql client complete..."
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
-elif [[ "${DATABASE_VENDOR}" -eq "postgres" ]]; then
+elif using_postgres; then
   echo_warning "Relying on an existing Postgres installation"
 fi
 
@@ -107,12 +107,12 @@ echo_warning "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo_warning "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
-if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+if using_glassfish; then
   glassfish_installer=`find_installer glassfish`
   echo_warning "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
   ./$glassfish_installer  >> $INSTALL_LOG_FILE
   echo_warning "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
-elif [[ "${WEBSERVER_VENDOR}" -eq "tomcat" ]]; then
+elif using_tomcat; then
   echo_warning "Relying on an existing Tomcat installation"
 fi
 
