@@ -78,6 +78,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+                <!-- <forceCreation>true</forceCreation> --> <!-- should prevent "we have a duplicate class" warnings because classes are already in the jar built from last time, but does not work, we still get the warnings, probably because several dependencies share the same dependencies and it's trying to do each one instead of consolidating first like dependency-tree and picking just one to include -->
 		<shadedArtifactAttached>true</shadedArtifactAttached>
 		<shadedClassifierName>with-dependencies</shadedClassifierName> <!-- Any name that makes sense -->
               <transformers>
@@ -143,13 +144,13 @@
 		<artifactId>mtwilson-mysql</artifactId>
 		<version>${project.version}</version>
 	</dependency>
-        
+    <!--
 	<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-postgres</artifactId>
 		<version>${project.version}</version>
 	</dependency>
-        
+    -->    
 	<dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>vmware-util-jar</artifactId>

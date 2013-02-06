@@ -10,10 +10,12 @@ $(function() {
                 // We do not want to display the host name associated with the MLE in Add MLE page.
                 // It will be displayed only during the EDIT LE page.
                 $('#mleSourceHost').hide();
+                $('#updateMleButton').hide();
 	}else {
 		$('.requiredField').each(function() {
 			$(this).remove();
 		});
+                $('#addMleButton').hide();
                 $('#mleSourceHost').show();
 	}
 });
@@ -140,7 +142,7 @@ function fnuploadSuccess(responseHTML) {
 	}
 	
 	if (validResponse == 'true') {
-		$('#successMessage').html('<div class="successMessage">* File is uploaded Successfully.</div>');
+		$('#successMessage').html('<div class="successMessage">* File is uploaded successfully.</div>');
 		sendJSONAjaxRequest(false, 'getData/getUploadedMenifestFile.html', null, updateManifestList, null);
 	}else {
 		$('#successMessage').html('<div class="errorMessage">* File is not processed properly. Please check file format.</div>');
@@ -163,7 +165,7 @@ function updateManifestList(responsJson) {
 function addNewMle() {
 	var dataToSent = fnGetMleData(true);
 	if (dataToSent != "") {
-		if (confirm("Are you Sure you want to Add this MLE ?")) {
+		if (confirm("Are you sure you want to add this MLE ?")) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=true", addNewMleSuccess, null);
 		}
@@ -178,10 +180,10 @@ function addNewMleSuccess(response) {
 	$('#disabledDiv').remove();
 	
 	if (response.result) {
-		$('#mleMessage').html('<div class="successMessage">* Mle has been Successfully Added.</div>');
+		$('#mleMessage').html('<div class="successMessage">* Mle has been successfully added.</div>');
 		clearAllFiled("mainDataTableMle");
 	}else{
-		$('#mleMessage').html('<div class="errorMessage" style="float:left;">* MLE is not Added, Server Error. '+response.message+'</div>');
+		$('#mleMessage').html('<div class="errorMessage" style="float:left;">* MLE is not added, Server Error. '+response.message+'</div>');
 	}
 }
 

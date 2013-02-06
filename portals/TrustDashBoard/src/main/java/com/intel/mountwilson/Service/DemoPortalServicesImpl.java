@@ -263,7 +263,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 					list.add(oemInfo);
 				}
 			}else {
-				throw new DemoPortalException("No OEM & OS Information is present in Database. Please check Database Configuration.");
+				// throw new DemoPortalException("No OEM & OS Information is present in Database. Please check Database Configuration.");
+                                // Bug:575. Providing a better error message for the user.
+				throw new DemoPortalException("Currently no MLEs are configured in the system.");                                
 			}
 		}catch (Exception e) {
 			/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */

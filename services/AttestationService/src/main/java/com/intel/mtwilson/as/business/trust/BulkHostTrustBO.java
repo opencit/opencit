@@ -61,8 +61,16 @@ public class BulkHostTrustBO {
                 taskStatus.add(status);
             }
             
-            for(Future<?> status : taskStatus) {
-                status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
+            // Bug:547 - Since the comment mentioned that the return value will not be used and the java.util.concurrent.TimeoutException was being thrown
+            // by the get statement, we are ignoring the exception and continuing.
+            // TODO: Review the change with Jonathan
+            try {
+                for(Future<?> status : taskStatus) {
+                    status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
+                }
+            } catch (Exception ex) {
+                // we will log the exception and ignore the error.
+                log.error("Exception while retrieving the status of the tasks. {}", ex.getMessage());
             }
 //            scheduler.shutdown(); //  bug #503 remove this and replace with calls to Future.get() to get all our results
             

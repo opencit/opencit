@@ -17,7 +17,6 @@ function registerUser(){
     // Bug#514: We need to clear the previous error message if it exists
     $('#errorMessage').html('<div class="errorMessage">'+""+'</div>');
     
-    alert("Check the removal of error message");
     //checking for empty username.
     if (!(validateValue('userNameValue'))) {
 		return false;

@@ -5,6 +5,28 @@ var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 
 var isVMWare = false;
 
+var JSON = JSON || {};
+JSON.stringify = JSON.stringify || function (obj) {
+	var t = typeof (obj);
+	if (t != "object" || obj === null) {
+		// simple data type
+		if (t == "string") obj = '"'+obj+'"';
+		return String(obj);
+	}
+	else {
+		// recurse array or object
+		var n, v, json = [], arr = (obj && obj.constructor == Array);
+		for (n in obj) {
+			v = obj[n]; t = typeof(v);
+			if (t == "string") v = '"'+v+'"';
+			else if (t == "object" && v !== null) v = JSON.stringify(v);
+			json.push((arr ? "" : '"' + n + '":') + String(v));
+		}
+		return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+	}
+};
+
+
 /**
  * Method to create a menu using jquery Menubar plugin using file jquery.ui.menubar.js and jquery.ui.menu.js
  * For more clarification, check http://wiki.jqueryui.com/w/page/38666403/Menubar
@@ -60,6 +82,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
+                        alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -108,11 +131,12 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 				callbackSuccessFunction.apply(null,args);
 			}else{
+				alert("Response from Server is null.");
 				fnSessionExpireLoginAgain();
-				//alert("Response from Server is null.");
 			}
 		},
 		error: function(errorMessage){
+                        alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -122,8 +146,8 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			    }
 			    callbackErrorFunction.apply(null,args);
 			}else{
+				alert("Error While Serving request. Please try again later.");
 				fnSessionExpireLoginAgain();
-				//alert("Error While Serving request. Please try again later.");
 			}
 		}
 	});

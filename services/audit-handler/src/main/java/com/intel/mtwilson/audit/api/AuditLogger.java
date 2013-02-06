@@ -95,6 +95,20 @@ public class AuditLogger {
         
     }
     
-    
+    public String getAuditUserName() {
+        String userName = "";
+        try {
+            AuditContext auditContext =  MtWilsonThreadLocal.get();
+            if(auditContext != null){
+                userName = auditContext.getName();
+            }else{
+                userName = "Unknown";
+            } 
+        } catch (Exception ex) {
+            logger.info("Error during retrieval of user name from the audit context. " + ex.getMessage());
+            userName = "Unknown";
+        }
+        return userName;
+    }
     
 }

@@ -1390,10 +1390,14 @@ public class HostBO extends BaseBO {
                         
                         // Event Details will be available only for ESXi 5.1 hosts. 
                         ModuleWhiteList moduleObj = new ModuleWhiteList();
-                        if (reader.getAttributeValue("", "ComponentName").isEmpty())
+                        // bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
+                        if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                             moduleObj.setComponentName(" ");
-                        else
+                            log.debug("uploadToDB: component name set to single-space");
+                        }
+                        else {
                             moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName"));
+                        }
                         moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
                         moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
                         moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
@@ -1411,8 +1415,10 @@ public class HostBO extends BaseBO {
                         // System.out.println(moduleObj.getComponentName() + ":::" + moduleObj.getDigestValue());
                         TblEventType eventSearchObj = eventJpa.findEventTypeByName(moduleObj.getEventName());
                         String fullComponentName = "";
-                        if (eventSearchObj != null)
+                        if (eventSearchObj != null) {
                             fullComponentName = eventSearchObj.getFieldName() + "." + moduleObj.getComponentName();
+                        }
+                        log.debug("uploadToDB searching for module manifest with fullComponentName '"+fullComponentName+"'");
                         TblModuleManifest moduleSearchObj = moduleJpa.findByMleNameEventName(mleSearchObj.getId(), 
                                 fullComponentName, moduleObj.getEventName());
                         if (moduleSearchObj == null) {

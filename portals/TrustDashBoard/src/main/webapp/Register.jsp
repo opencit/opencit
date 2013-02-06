@@ -59,7 +59,7 @@
         	</div>
         </div>
         <div class="footer">
-        	<h4>@ Intel Corp | 2012</h4>
+        	<h4>@ Intel Corp | 2013</h4>
         </div>
         
         

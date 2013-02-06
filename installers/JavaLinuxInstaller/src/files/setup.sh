@@ -3,6 +3,8 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+
 java_required_version=1.6.0_29
 
 # detect the packages we have to install

@@ -101,6 +101,7 @@
 					<table style="padding-top:20px;padding-bottom: 10px;">
 						<tr>
 							<td><input type="button" class="button" value="Add Host" id="addHostButton" onclick="addNewHost()"/></td>
+                                                        <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()"/></td>
 							<td><input type="button" class="button" value="Cancel" onclick="getDashBoardPage()"/></td>
 							<td><input type="button" value="Clear" class="button" onclick="clearAllFiled('mainAddHostContainer')"/></td>
 						</tr>

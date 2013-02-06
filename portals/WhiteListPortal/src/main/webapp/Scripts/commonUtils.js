@@ -6,7 +6,6 @@ var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 
 
-/*
 var JSON = JSON || {};
 JSON.stringify = JSON.stringify || function (obj) {
 	var t = typeof (obj);
@@ -27,7 +26,6 @@ JSON.stringify = JSON.stringify || function (obj) {
 		return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
 	}
 };
-*/
 
 
 /**
@@ -57,7 +55,7 @@ function createMenubar(divID) {
  */
 
 function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, callbackErrorFunction){
-        //alert("sendJSONAjaxRequest: isGet="+isGet+"  url="+url+"  requestData="+requestData+"    sucesssFn="+callbackSuccessFunction+"  errorFn="+callbackErrorFunction);
+        alert("sendJSONAjaxRequest: isGet="+isGet+"  url="+url+"  requestData="+requestData+"    sucesssFn="+callbackSuccessFunction+"  errorFn="+callbackErrorFunction);
 	var argLength = arguments.length;
 	var requestArgumets = arguments;
 	$.ajax({
@@ -87,7 +85,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        //alert(JSON.stringify(errorMessage));
+                        alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);

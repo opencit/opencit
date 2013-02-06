@@ -120,10 +120,11 @@ public class InitDatabase implements Command {
         Collections.sort(changesToApplyInOrder);
         
         ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
-        
-        System.out.println("Available database updates:");
+        // removing unneeded output as user can't choice what updates to apply
+        // XXX-TODO stdalex this should all be log.info
+        //System.out.println("Available database updates:");
         for(Long id : changesToApplyInOrder) {
-            System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));
+            //System.out.println(String.format("%d %s", id, basename(sql.get(id).getURL())));
             rdp.addScript(sql.get(id)); // new ClassPathResource("/com/intel/mtwilson/database/mysql/bootstrap.sql")); // must specify full path to resource
         }
         

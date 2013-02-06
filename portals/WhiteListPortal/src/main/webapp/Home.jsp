@@ -68,7 +68,9 @@
 						<li><a href="javascript:;" onclick="fnViewAllOEM()">View OEM</a></li>
 					</ul>
 				</li>
-				<li><a href="javascript:;" onclick="getAboutWlm()">About</a><ul></ul></li>
+                                <!-- bug #553 remove about tab 
+                                    <li><a href="javascript:;" onclick="getAboutWlm()">About</a><ul></ul></li>
+                                -->
 			</ul>
 
 		</div>
@@ -81,7 +83,7 @@
        </div>
        
        <div class="footer">
-       	<h4>@ Intel Corp | 2012</h4>
+       	<h4>@ Intel Corp | 2013</h4>
        </div>
         
         

@@ -23,6 +23,21 @@ shell_include_files ${env_dir}/*
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 #if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
 
+# ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
+export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+    export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
+elif [[ "${DATABASE_VENDOR}" -eq "postgres" ]]; then
+    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
+fi
+if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
+elif [[ "${WEBSERVER_VENDOR}" -eq "tomcat" ]]; then
+    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
+fi
+export java_required_version=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+
 call_apiclient() {
   java_require
   APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
@@ -67,6 +82,23 @@ erase_data_with_user_confirmation() {
     else
       echo_failure "${mysql_connection_error}"
     fi
+  fi
+  
+  CONFIRM_ERASE_DATA=
+
+  echo_warning "You are about to delete the Mt Wilson user accounts."
+  prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
+  if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
+   if [ -d /var/opt/intel/management-console/users ]; then
+     for i in `ls -1 /var/opt/intel/management-console/users`; do
+      usr=`echo $i | sed -e s/.jks//g`
+      echo_warning "deleting $usr jks file"
+      rm  /var/opt/intel/management-console/users/$i;
+     done
+     echo_warning "Mt Wilson user accounts deleted."
+   else
+     echo_warning "No Mt Wilson user accounts to delete."
+   fi
   fi
 }
 
@@ -131,6 +163,26 @@ all_status() {
   if [ -n "$tdctl" ]; then $tdctl status; fi
 }
 
+
+setup_env() {
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  java_detect > /dev/null
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  if [[ "${DATABASE_VENDOR}" -eq "mysql" ]]; then
+    mysql_detect > /dev/null
+    echo "mysql=$mysql"
+  fi
+  if [[ "${WEBSERVER_VENDOR}" -eq "glassfish" ]]; then
+    glassfish_detect > /dev/null
+    echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+    echo "glassfish_bin=$glassfish_bin"
+    echo "glassfish=\"$glassfish\""
+  fi
+}
+
 RETVAL=0
 
 # See how we were called.
@@ -139,6 +191,9 @@ case "$1" in
         echo "MtWilson Linux Utility"
 	echo "Version ${VERSION}"
 	echo "Build ${BUILD}"
+        ;;
+  setup-env)
+        setup_env
         ;;
   glassfish-detect)
         java_require
@@ -233,14 +288,23 @@ case "$1" in
         # control scripts
         echo "Removing Mt Wilson control scripts..."
         echo asctl wlmctl msctl pcactl mcctl wpctl tdctl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+		echo "Stopping Monit service..."
+		service monit stop &> /dev/null
+		if [ -f /etc/monit/monitrc ]; then
+		 #remove monit config so when it starts back up it has nothing to monitor
+		 # idealy here we should be uninstalling instead
+		 rm -fr /etc/monit/monitrc
+		fi
         # java:  rm -rf /usr/share/jdk1.6.0_29
         echo_success "Done"
         ;;
   help)
-        echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
+             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-decect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         ;;
   *)
-        echo $"Usage: ${script_name} {setup|start|stop|status|uninstall}"
+        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
+             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-decect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         exit 1
 esac
 

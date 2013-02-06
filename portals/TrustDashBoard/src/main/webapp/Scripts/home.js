@@ -59,8 +59,10 @@ function fnEditHostInfo(element) {
 function fnEditGetAddHostSuccess(response,element) {
 	$('#mainContainer').html(response);
 	$('#mainHeader').text("Update Host Configuration");
-	$('#addHostButton').attr('value','Update Host');
-	$('#addHostButton').attr('onclick','updateHostInfo()');
+	//$('#addHostButton').attr('value','Update Host');
+	//$('#addHostButton').attr('onclick','updateHostInfo()');
+        $('#updateHostButton').show();
+        $('#addHostButton').hide();
 }
 
 function fnFillAddHostPageDataForEdit(responseJSON) {

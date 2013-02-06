@@ -58,21 +58,6 @@ setup_print_summary() {
   fi
 }
 
-setup_env() {
-  mysql_detect > /dev/null
-  java_detect > /dev/null
-  glassfish_detect > /dev/null
-  local datestr=`date +%Y-%m-%d.%H%M`
-  echo "# environment on ${datestr}"
-  echo "mysql=$mysql"
-  echo "JAVA_HOME=$JAVA_HOME"
-  echo "java_bindir=$java_bindir"
-  echo "java=$java"
-  echo "GLASSFISH_HOME=$GLASSFISH_HOME"
-  echo "glassfish_bin=$glassfish_bin"
-  echo "glassfish=\"$glassfish\""
-}
-
 setup_interactive_install() {
   if [ -n "$mysql" ]; then
     mysql_configure_connection "${package_config_filename}" mountwilson.as.db
@@ -98,7 +83,7 @@ setup_interactive_install() {
 
 setup() {
   mysql_clear; java_clear; glassfish_clear;
-  setup_env > "${package_env_filename}"
+  mtwilson setup-env > "${package_env_filename}"
   if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$MYSQL_HOME" ]]; then
       echo_warning "Missing one or more required packages"
       setup_print_summary
@@ -143,11 +128,11 @@ case "$1" in
         ;;
   setup-env)
   # for sysadmin convenience
-        setup_env
+        mtwilson setup-env
         ;;
   setup-env-write)
   # for sysadmin convenience
-        setup_env > "${package_env_filename}"
+        mtwilson setup-env > "${package_env_filename}"
   #echo "Saved environment in ${myenvdir}/${package_env_filename}"
         ;;
   edit)

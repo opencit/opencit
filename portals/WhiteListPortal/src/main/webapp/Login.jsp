@@ -52,7 +52,7 @@
         	</div>
         </div>
         <div class="footer">
-        	<h4>@ Intel Corp | 2012</h4><!-- For customer Customized page, will be provided by customer -->
+        	<h4>@ Intel Corp | 2013</h4><!-- For customer Customized page, will be provided by customer -->
         </div>
         
         

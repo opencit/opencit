@@ -55,13 +55,16 @@ public class ASConfig extends ConfigBase{
 
     // for troubleshooting
 	@Override
+    // for troubleshooting
     public void dumpConfiguration(Configuration c, String label) {
-            /*
-        String keys[] = new String[] { "mountwilson.as.db.host", "mountwilson.as.db.schema", "mountwilson.as.db.user" };
-        for(String key : keys) {
+        String keys[] = new String[]{"mtwilson.api.baseurl",
+            "mtwilson.api.ssl.verifyHostname", 
+            "mtwilson.db.driver", "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.schema", "mtwilson.db.user", "mtwilson.db.password", 
+            "mountwilson.as.db.driver", "mountwilson.as.db.host", "mountwilson.as.db.port", "mountwilson.as.db.schema", "mountwilson.as.db.user", "mountwilson.as.db.password"  };
+        for (String key : keys) {
             String value = c.getString(key);
-            log.info(String.format("ASConfig [%s]: %s=%s", label, key, value)); // XXX getting NullPointerException on the "log" object. 20120626 
-        }*/
+            System.out.println(String.format("[%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
+        }
     }
 
         

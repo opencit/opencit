@@ -66,15 +66,17 @@
 						</ul>
 					</li> -->
 					<!--End Added by Soni on 18/10/12 for New Screen for CA-->
+                                        <!-- stdalex 1/18 this functionality is now duplicated in Certificates tab
+                                             TODO-stdalex this will be offically removed in 1.2
 					<li >
-					<!--Begin Added by Soni on 18/10/12 for New Screen for SAML -->
+					
 						<a>SAML</a>
 						<ul>
 							<li><a href="javascript:downloadSAML();">Download SAML</a></li>
 							
 						</ul>
 					</li>
-					<!--End Added by Soni on 18/10/12 for New Screen for SAML-->
+					-->
                                         <li >
 					<!--Begin Added by stdale on 1/8/13 for New Screen for MC fingerprint -->
 						<a>Certificates</a>
@@ -93,7 +95,7 @@
 	   <div class="main" id="mainContainer">
 	   </div>
 	   <div class="footer">
-		   	<h4>@ Intel Corp | 2012</h4>
+		   	<h4>@ Intel Corp | 2013</h4>
 	   </div>
 </body>
 </html>

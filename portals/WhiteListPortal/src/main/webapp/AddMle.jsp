@@ -170,6 +170,7 @@
 						<table>
 							<tr>
 								<td><input type="button" class="button" value="Add Mle" id="addMleButton" onclick="addNewMle()"/></td>
+      								<td><input type="button" class="button" value="Update Mle" id="updateMleButton" onclick="updateMleInfo()"/></td>
 								<td><input type="button" value="Clear" class="button" onclick="clearAllFiled('mainDataTableMle')"/></td>
 							</tr>
 						</table>

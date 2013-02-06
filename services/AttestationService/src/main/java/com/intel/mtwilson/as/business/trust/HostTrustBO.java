@@ -87,7 +87,7 @@ public class HostTrustBO extends BaseBO {
     }
     
     public void setHostBO(HostBO hostBO) { this.hostBO = hostBO; }
-
+    
     private void loadSamlSigningKey() {
         // XXX was going to store saml keys in the database but a better way is for each server to have its own and to make a CA sign all of them
         /*
@@ -179,8 +179,9 @@ public class HostTrustBO extends BaseBO {
         HostTrustStatus trust = verifyTrust(tblHosts, pcrManifestMap,
                 gkvBiosPcrManifestMap, gkvVmmPcrManifestMap);
 
-        Object[] paramArray = {hostName, trust.bios, trust.vmm};
-        log.info(sysLogMarker, "Host_Name:{} BIOS_Trust:{} VMM_Trust:{}.", paramArray);
+        String userName = new AuditLogger().getAuditUserName();
+        Object[] paramArray = {userName, hostName, trust.bios, trust.vmm};
+        log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
         
         log.info( "Verfication Time {}", (System.currentTimeMillis() - start));
 

@@ -2,13 +2,13 @@
 <configuration>
     
     <property name="USER_HOME" value="/usr/share/glassfish3/glassfish/domains/domain1/logs" />
-        
+            
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
         <encoder>
             <pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</pattern>
         </encoder>
     </appender>
-            
+         
     <appender name="AUDIT_FILE" class="ch.qos.logback.core.FileAppender">        
         <!-- the filter element -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">   
@@ -25,7 +25,7 @@
     </appender>
     
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
+        <!-- <appender-ref ref="STDOUT" /> -->
         <appender-ref ref="AUDIT_FILE" />
     </root>
     

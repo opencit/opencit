@@ -24,6 +24,7 @@ import com.intel.mtwilson.tls.TlsPolicy;
 import com.vmware.vim25.*;
 import java.io.StringWriter;
 import java.util.*;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -83,6 +84,90 @@ public class VMwareClient implements TlsClient {
         public VMwareClient() {
             
         }
+        
+	private static class TrustAllTrustManager implements javax.net.ssl.TrustManager,
+			javax.net.ssl.X509TrustManager {
+
+		@Override
+		public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+			return null;
+		}
+
+		@Override
+		public void checkServerTrusted(
+				java.security.cert.X509Certificate[] certs, String authType)
+				throws java.security.cert.CertificateException {
+			for (java.security.cert.X509Certificate cert : certs) {
+				cert.checkValidity();
+			}
+
+			return;
+		}
+
+		@Override
+		public void checkClientTrusted(
+				java.security.cert.X509Certificate[] certs, String authType)
+				throws java.security.cert.CertificateException {
+			for (java.security.cert.X509Certificate cert : certs) {
+				cert.checkValidity();
+			}
+			return;
+		}
+	}
+        
+	private static void trustAllHttpsCertificates() throws NoSuchAlgorithmException, KeyManagementException {
+		// Create a trust manager that does not validate certificate chains:
+		javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[1];
+		javax.net.ssl.TrustManager tm = new TrustAllTrustManager();
+		trustAllCerts[0] = tm;
+		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
+				.getInstance("SSL");
+		javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
+		sslsc.setSessionTimeout(0);
+		sc.init(null, trustAllCerts, null);
+		javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc
+				.getSocketFactory());
+	}
+        
+        // Bug: 579 - This method is added so that we can connect to the vCenter without any TLS policy settings and connection pooling options.
+        // This would be needed by the Management Console to retrive the list of hosts from the cluster.
+	protected void connect2(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
+
+		HostnameVerifier hostNameVerifier = new HostnameVerifier() {
+
+			@Override
+			public boolean verify(String urlHostName, SSLSession session) {
+				return true;
+			}
+		};
+
+		trustAllHttpsCertificates();
+
+		HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
+
+		SVC_INST_REF.setType(SVC_INST_NAME);
+		SVC_INST_REF.setValue(SVC_INST_NAME);
+
+		vimService = new VimService();
+		vimPort = vimService.getVimPort();
+		Map<String, Object> ctxt = ((BindingProvider) vimPort)
+				.getRequestContext();
+
+		ctxt.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
+		ctxt.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+
+		serviceContent = vimPort.retrieveServiceContent(SVC_INST_REF);
+		
+		session = vimPort.login(serviceContent.getSessionManager(), userName, password,
+				null);
+		
+		printSessionDetails();
+		
+		isConnected = true;
+
+		propCollectorRef = serviceContent.getPropertyCollector();
+		rootRef = serviceContent.getRootFolder();
+	}
         
         /*
         public void setSslHostnameVerifier(HostnameVerifier hostnameVerifier) {
@@ -744,7 +829,13 @@ public class VMwareClient implements TlsClient {
         ManagedObjectReference clusterMOR = null;
         try
         {
-            connect(connectionString);
+            String[] vcenterConn = connectionString.split(";");
+		if (vcenterConn.length != 3) {
+			throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING,
+					connectionString);
+		}
+		// Connect to the vCenter server with the passed in parameters
+		connect2(vcenterConn[0], vcenterConn[1], vcenterConn[2]);            
 
             if(clusterName != null) 
             {

@@ -23,9 +23,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import org.eclipse.persistence.annotations.Customizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -47,6 +50,9 @@ import org.eclipse.persistence.annotations.Customizer;
 
 
 public class TblModuleManifest implements Serializable {
+    @Transient
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+        
     @Basic(optional = false)
     @Column(name = "ComponentName")
     private String componentName;
@@ -216,6 +222,12 @@ public class TblModuleManifest implements Serializable {
 
     public void setComponentName(String componentName) {
         this.componentName = componentName;
+        
+        // fix for bug 2013-02-04 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+        if( this.componentName != null ) {
+            log.debug("trimming componentName");
+            this.componentName = this.componentName.trim(); 
+        }
     }
 
     public String getDigestValue() {

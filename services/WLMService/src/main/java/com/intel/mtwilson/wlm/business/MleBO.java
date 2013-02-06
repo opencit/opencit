@@ -807,6 +807,7 @@ public class MleBO extends BaseBO {
                     // we need to ask the user to use the Update option instead of create
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
+                    log.debug("addModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
                     tblModule = moduleManifestJpaController.findByMleNameEventName(
                             tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
                             moduleData.getEventName());
@@ -832,6 +833,7 @@ public class MleBO extends BaseBO {
                 newModuleRecord.setMleId(tblMle);
                 newModuleRecord.setEventID(tblEvent);
                 newModuleRecord.setNameSpaceID(nsPackNS);
+                log.debug("MleBO addModuleWhiteList setComponentName {}", tblEvent.getFieldName() + "." + moduleData.getComponentName());
                 newModuleRecord.setComponentName(tblEvent.getFieldName() + "." + moduleData.getComponentName());
                 newModuleRecord.setDigestValue(moduleData.getDigestValue());
                 newModuleRecord.setPackageName(moduleData.getPackageName());
@@ -897,6 +899,7 @@ public class MleBO extends BaseBO {
                     // we need to ask the user to use the Update option instead of create
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
+                    log.debug("updateModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
                     tblModule = moduleManifestJpaController.findByMleNameEventName(
                             tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
                             moduleData.getEventName());
@@ -983,6 +986,7 @@ public class MleBO extends BaseBO {
                     // we need to ask the user to use the Update option instead of create
                     validateNull("ComponentName", componentName);
                     validateNull("EventName", eventName);
+                    log.debug("deleteModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+componentName+"' event name '"+eventName+"'");
                     tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), 
                             tblEvent.getFieldName() + "." + componentName, eventName);
                     

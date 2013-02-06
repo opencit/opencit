@@ -13,6 +13,8 @@ mysql_required_version=5.0
 glassfish_required_version=3.0
 java_required_version=1.6.0_29
 
+export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
@@ -47,12 +49,12 @@ cp "audit-handler.properties" "${package_dir}/audit-handler.properties.example"
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
 if [ -f "${package_config_filename}" ]; then
-  echo_warning "Configuration file ${package_name}.properties already exists"
+  echo_warning "Configuration file ${package_name}.properties already exists"  >> $INSTALL_LOG_FILE
 else
   cp "${package_name}.properties" "${package_config_filename}"
 fi
 if [ -f "${package_dir}/audit-handler.properties" ]; then
-  echo_warning "Configuration file audit-handler.properties already exists"
+  echo_warning "Configuration file audit-handler.properties already exists" >> $INSTALL_LOG_FILE
 else
   cp "audit-handler.properties" "${intel_conf_dir}/audit-handler.properties"
 fi
@@ -73,14 +75,13 @@ chmod +x asctl
 mkdir -p /usr/local/bin
 cp asctl /usr/local/bin
 /usr/local/bin/asctl setup
-register_startup_script /usr/local/bin/asctl asctl
-
+register_startup_script /usr/local/bin/asctl asctl  & >> $INSTALL_LOG_FILE
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
 compile_aikqverify() {
   DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev "
   DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
-  auto_install "Developer tools" "DEVELOPER"
+  auto_install "Developer tools" "DEVELOPER" 
   AIKQVERIFY_OK=''
   cd /var/opt/intel/aikverifyhome/bin
   make  2>&1 > /dev/null
@@ -95,12 +96,12 @@ mkdir -p ${package_var_dir}/bin
 mkdir -p ${package_var_dir}/data
 chmod +x aikqverify/openssl.sh
 cp aikqverify/* ${package_var_dir}/bin/
-echo -n "Compiling aikqverify (may take a long time)... "
-compile_aikqverify
+echo "Compiling aikqverify (may take a long time)... " >> $INSTALL_LOG_FILE
+compile_aikqverify >> $INSTALL_LOG_FILE
 if [ -n "$AIKQVERIFY_OK" ]; then
-  echo "OK"
+  echo "Compile OK"   >> $INSTALL_LOG_FILE
 else
-  echo "FAILED"
+  echo "Compile FAILED" >> $INSTALL_LOG_FILE
 fi
 
 

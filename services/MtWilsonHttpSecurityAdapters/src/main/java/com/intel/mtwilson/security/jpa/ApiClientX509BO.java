@@ -101,7 +101,7 @@ public class ApiClientX509BO implements X509UserFinder, PublicKeyUserFinder {
         // Let us add the display name of the user       too
         String tempUserName = apiClient.getName();
         // Since we need to ignore the comma character before the OU, the to index is being subtracted by 2
-        userInfo.loginName = tempUserName.substring(tempUserName.indexOf("CN=") + 3, tempUserName.indexOf("OU=")-2);
+        userInfo.loginName = tempUserName.substring(tempUserName.indexOf("CN=") + 3, tempUserName.indexOf("OU=")-1);
 //        userInfo.publicKey = userInfo.certificate.getPublicKey(); // apiClient.getCertificate().getPublicKey();
         userInfo.fingerprint = fingerprint; // XXX: cheating by using the input fingerprint instead of what was found... they SHOULD be the same.
         Collection<ApiRoleX509> roles = apiClient.getApiRoleX509Collection();

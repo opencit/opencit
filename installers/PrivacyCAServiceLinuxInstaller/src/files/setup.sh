@@ -117,7 +117,7 @@ chmod 700 pcactl
 mkdir -p /usr/local/bin
 cp pcactl /usr/local/bin
 /usr/local/bin/pcactl setup
-register_startup_script /usr/local/bin/pcactl pcactl
+register_startup_script /usr/local/bin/pcactl pcactl & >> $INSTALL_LOG_FILE
 
 
 

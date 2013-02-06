@@ -155,9 +155,14 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 				$('#MainContent_tb'+response.manifestList[pcr].Name).attr('value',response.manifestList[pcr].Value);
 			}
 		}
-		
-		$('#addMleButton').attr('Value','Update MLE');
-		$('#addMleButton').attr('onclick','updateMleInfo()');
+                
+                // Bug: 565 : For some reason dynamically changing the attribute of the button to call the UpdateMLE function 
+                // is not working. As a workaround, we will create 2 buttons to start with, one button for adding the MLE and 
+                // the second one for updating. If the Add MLE page, we will hide the "Update MLE" button and vice versa.
+                
+//              $('#addMleButton').attr("value", "Update MLE");
+//		$('#addMleButton').attr("onclick", "updateMleInfo()");
+                
 	}else {
 		$('#disabledDiv').remove();
 		/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */
@@ -165,7 +170,6 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 		/* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
 		//$('#mleMessage').html('<div class="errorMessage">* Server Error. '+responseJson.message+'</div>');
 	}
-	
 }
 
 
@@ -226,7 +230,7 @@ function getModuleTypeMleListSuccess(responseJSON){
 function updateMleInfo() {
 	var dataToSent = fnGetMleData(false);
 	if (dataToSent != "") {
-		if (confirm("Are you Sure you want to Update this MLE ?")) {
+		if (confirm("Are you Sure you want to update this MLE ?")) {
 			$('#mainDataTableMle').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/getAddMle.html', "mleObject="+dataToSent+"&newMle=false", updateMleSuccess, null);
 		}

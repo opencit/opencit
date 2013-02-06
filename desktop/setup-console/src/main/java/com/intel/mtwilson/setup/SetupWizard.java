@@ -39,6 +39,7 @@ public class SetupWizard {
     
     public Connection getDatabaseConnection() throws SetupException {
         try {
+            // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
             Class.forName("com.mysql.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
                     String.format("jdbc:mysql://%s:%d/%s",

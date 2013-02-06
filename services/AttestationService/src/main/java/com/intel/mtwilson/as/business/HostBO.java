@@ -91,9 +91,12 @@ public class HostBO extends BaseBO {
                             log.info("Getting location for host from VCenter");
                             location = getLocation(pcrMap);
                         }
-                        log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore().length);
+                        
+                        //Bug: 597, 594 & 583. Here we were trying to get the length of the TlsKeystore without checking if it is NULL or not. 
+                        // If in case it is NULL, it would throw NullPointerException                        
+                        log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
-            log.error("HOST BO CALLING SAVEHOSTINDATABASE");
+                        log.error("HOST BO CALLING SAVEHOSTINDATABASE");
                         saveHostInDatabase(tblHosts, host, certificate, location, pcrMap);
 
 		} catch (ASException ase) {
@@ -247,6 +250,7 @@ public class HostBO extends BaseBO {
 										.setDigestValue(VMwareClient.byteArrayToHexString(commandEventDetails
 												.getDataHash()));
 
+                                                                log.debug("getModuleManifest HostTpmCommandEventDetails componentName is '"+moduleManifest.getComponentName()+"'");
 								// Add to the module manifest map of the pcr
 								pcrModuleManifest.getModuleManifests().put(
 										moduleManifest.getMFKey(),
@@ -265,8 +269,9 @@ public class HostBO extends BaseBO {
 				if (commandLine != null
 						&& commandLine.contains("no-auto-partition")) {
 					commandLine = "";
+                                        log.debug("commandLine contains no-auto-partition so setting to empty value");
 				}
-
+                                log.debug("getCommandLine returns '"+commandLine+"'");
 				return commandLine;
 			}
 
@@ -543,7 +548,13 @@ public class HostBO extends BaseBO {
                 }
 		tblHosts.setVmmMleId(vmmMleId);
 		tblHosts.setAIKCertificate(certificate); // null is ok;  vmware servers do not have aik's.
-		tblHosts.setLocation(location);
+                
+                // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
+                // before setting the location value.
+                if (location != null) {
+                    tblHosts.setLocation(location);
+                }
+                
 		// create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
 		hostController.create(tblHosts);
@@ -564,8 +575,8 @@ public class HostBO extends BaseBO {
 			
 				for (ModuleManifest moduleManifest : pcrModuleManifest.getModuleManifests().values()) {
 				
-					log.info("Creating host specific manifest for "
-							+ moduleManifest.getEventName());
+					log.info("getHostSpecificManifest creating host specific manifest for event '"
+							+ moduleManifest.getEventName() +"' field '"+moduleManifest.getFieldName()+"' component '"+moduleManifest.getComponentName()+"'");
 
 					
 					TblModuleManifest tblModuleManifest = new TblModuleManifestJpaController(

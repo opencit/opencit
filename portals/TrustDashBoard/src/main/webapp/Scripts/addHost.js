@@ -3,6 +3,7 @@ var isVmware = false;
 
 $(function() {
 	$('#mainAddHostContainer').prepend(disabledDiv);
+        $('#updateHostButton').hide();
 	sendJSONAjaxRequest(false, 'getData/getAllOemInfo.html', null, fnGetAllOemInfoSuccess, null);
 	/*
 	 * Function to check validation as input loose focus.
@@ -61,6 +62,8 @@ function fnGetAllOemInfoSuccess(responseJSON) {
 	}else {
 		$('#disabledDiv').remove();
 		$('#mleMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(responseJSON.message)+'</div>');
+               	$('#addHostButton').attr('disabled','false');
+
 	}
 }
 
@@ -71,13 +74,18 @@ function fnGetOSVMMInfoSuccess(responsJSON) {
 		for ( var str in responsJSON.osInfo) {
 			options +='<option isvmware="'+responsJSON.osInfo[str]+'" value="'+str+'">'+str+'</option>';
 		}
-		$('#MainContent_LstVmm').html(options);
-		$('#MainContent_LstVmm option:eq(0)').attr('selected', 'selected');
-		$('#MainContent_LstVmm').trigger('change');
+                if (options != "") {
+                    $('#MainContent_LstVmm').html(options);
+                    $('#MainContent_LstVmm option:eq(0)').attr('selected', 'selected');
+                    $('#MainContent_LstVmm').trigger('change');
+                } else {
+                    var errorMsg = "No VMM MLEs are configured in the system."
+                    $('#mleMessage').html('<div class="errorMessage">'+ errorMsg +'</div>');
+                    $('#addHostButton').attr('disabled','false');
+                }
 	}else {
 		$('#mleMessage').html('<div class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</div>');
 	}
-	
 	if (isAddHostPage) {
 		$('#disabledDiv').remove();
 	}else {

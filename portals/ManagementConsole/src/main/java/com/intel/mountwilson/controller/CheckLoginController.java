@@ -37,7 +37,8 @@ public class CheckLoginController extends AbstractController {
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
             logger.info("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
-
+            String keystoreFilename = "";
+            
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
 
@@ -48,17 +49,17 @@ public class CheckLoginController extends AbstractController {
             }
 
 //            String keyStore = MCPConfig.getConfiguration().getString("mtwilson.mc.keyStoreFileName");
-            String keystoreFilename = MCPConfig.getConfiguration().getString("mtwilson.mc.keystore.dir") + File.separator + Filename.encode(keyAliasName) + ".jks";
             URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
             File keyStoreFile = null;
 
             try {
-
+                // Bug 551: Redirect the user to the login page if they browse to the checkLogin page directly
+                keystoreFilename = MCPConfig.getConfiguration().getString("mtwilson.mc.keystore.dir") + File.separator + Filename.encode(keyAliasName) + ".jks";
                 keyStoreFile = new File(keystoreFilename);
-
             } catch (Exception ex) {
+                logger.severe("Keystore for the user not found on the server >> " + keystoreFilename);
+                view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
                 view.addObject("result", false);
-                view.addObject("message", "Key store is not configured/saved correctly in " + keystoreFilename + ".");
                 return view;                    
             }
 

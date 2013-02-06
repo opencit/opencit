@@ -39,8 +39,9 @@ public class CheckLoginController extends AbstractController {
 		//Creating ModelAndView Object with Login page to return to user if Login is not successful.
 		ModelAndView view = new ModelAndView("Login");
 		RsaCredential credential = null;
-        File keystoreFile = null;
-        SimpleKeystore keystore = null;
+                File keystoreFile = null;
+                SimpleKeystore keystore = null;
+                String keystoreFilename = "";
 		
 		String username,password;
 		URL baseURL = new URL(WLMPConfig.getConfiguration().getString("mtwilson.api.baseurl"));  
@@ -50,20 +51,21 @@ public class CheckLoginController extends AbstractController {
 			username = req.getParameter("userNameTXT");
 			password = req.getParameter("passwordTXT");
 		} catch (Exception e) {
-			view.addObject("message", "username and password can't be Blank.");
+			view.addObject("message", "username and password can't be blank.");
 			return view;
 		}
 		
-		final String keystoreFilename = WLMPConfig.getConfiguration().getString("mtwilson.wlmp.keystore.dir") + File.separator + Filename.encode(username) + ".jks";
 		
 		try{
-			//this line will throw exception if file with username is not present in specific dir.
-            keystoreFile = new File(keystoreFilename);
-        }catch(Exception e){
-            logger.severe("File Not found on server >> "+keystoreFilename);
-            view.addObject("message", "Key store is not configured/saved correctly in " + keystoreFilename + ".");
-            return view;
-        }
+                    
+                    // Bug 551: Redirect the user to the login page if they browse to the checkLogin page directly
+                    keystoreFilename = WLMPConfig.getConfiguration().getString("mtwilson.wlmp.keystore.dir") + File.separator + Filename.encode(username) + ".jks";
+                    keystoreFile = new File(keystoreFilename);
+                }catch(Exception e){
+                    logger.severe("Keystore for the user not found on the server >> " + keystoreFilename);
+                    view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");
+                    return view;
+                }
 		
 		try {
             keystore = new SimpleKeystore(keystoreFile, password);

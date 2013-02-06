@@ -38,38 +38,39 @@ public class CheckLoginController extends AbstractController {
 		ModelAndView view = new ModelAndView("Login");
 		RsaCredential credential = null;
 		File keystoreFile = null;
-        SimpleKeystore keystore = null;
+                SimpleKeystore keystore = null;
+                String keystoreFilename = "";
 		
 		String username, password;
         
-        URL baseURL = new URL(TDPConfig.getConfiguration().getString("mtwilson.api.baseurl")); 
+                URL baseURL = new URL(TDPConfig.getConfiguration().getString("mtwilson.api.baseurl")); 
 		
-        try {
-        	//getting username and password from request parameters.
-			username = req.getParameter("userNameTXT");
-			password = req.getParameter("passwordTXT");
-		} catch (Exception e) {
-			view.addObject("message", "username and password can't be Blank.");
-			return view;
-		}
+                try {
+                    //getting username and password from request parameters.
+                        username = req.getParameter("userNameTXT");
+                        password = req.getParameter("passwordTXT");
+                } catch (Exception e) {
+                        view.addObject("message", "username and password can't be blank.");
+                        return view;
+                }
 		
-        final String keystoreFilename = TDPConfig.getConfiguration().getString("mtwilson.tdbp.keystore.dir") + File.separator + Filename.encode(username) + ".jks";
 		
 		try{
-			keystoreFile = new File(keystoreFilename);
-        }catch(Exception e){
-            logger.severe("File Not found on server >> "+keystoreFilename);
-            e.printStackTrace();
-            view.addObject("message", "Private key file is missing on server.");
-            return view;
-        }
+                    // Bug 551: Redirect the user to the login page if they browse to the checkLogin page directly
+                    keystoreFilename = TDPConfig.getConfiguration().getString("mtwilson.tdbp.keystore.dir") + File.separator + Filename.encode(username) + ".jks";
+                    keystoreFile = new File(keystoreFilename);
+                }catch(Exception e){
+                    logger.severe("Keystore for the user not found on the server >> " + keystoreFilename);
+                    view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");
+                    return view;
+                }
 		
 		try {
-            keystore = new SimpleKeystore(keystoreFile, password);
-            credential = keystore.getRsaCredentialX509(username, password);
+                    keystore = new SimpleKeystore(keystoreFile, password);
+                    credential = keystore.getRsaCredentialX509(username, password);
 		} catch (Exception e) {
-			view.addObject("message", "The username or password you entered is incorrect.");
-			return view;
+                    view.addObject("message", "The username or password you entered is incorrect.");
+                    return view;
 		}
 		
 		
