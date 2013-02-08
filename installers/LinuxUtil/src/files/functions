@@ -132,6 +132,7 @@ is_version_at_least() {
 # Parameters:
 # - version to test (of installed software)
 # - minimum required version
+# Return code:  0 (no errors) if the java version given is greater than or equal to the minimum version
 is_java_version_at_least() {
   local testver="${1}"
   local reqver="${2}"
@@ -170,9 +171,11 @@ is_java_version_at_least() {
        && -n "${reqminor3}" && "${hasminor3}" -eq "${reqminor3}"
        && -n "${reqminor4}" && "${hasminor4}" -ge "${reqminor4}" 
      ]]; then
-    echo "yes"
+#    echo "yes"
+    return 0
   else
-    echo "no"
+#    echo "no"
+    return 1
   fi  
 }
 
@@ -1600,35 +1603,28 @@ java_clear() {
   java=""
 }
 
+
 # checks if the version of the currently configured java meets the minimum
 # requirement. if not, then it resets the java variables.
 # Environment:
 # - java_required_version (or pass it as a parameter)
 java_version() {
-  local min_version="${1:-${java_required_version}}"
-  JAVA_VERSION=""
-  JAVA_VERSION_OK=""
   if [ -n "$java" ]; then
     # extract the version number from a string like: java version "1.6.0_29"
     JAVA_VERSION=`$java -version 2>&1 | head -n 1 | sed -e 's/"//g' | awk '{ print $3 }'`
-    JAVA_VERSION_OK=`is_java_version_at_least "$JAVA_VERSION" "${min_version}"`
-  fi
-  if [ "$JAVA_VERSION_OK" != "yes" ]; then
-    JAVA_HOME=''
-    java=""
   fi
 }
 
 # Environment:
 # - java_required_version
 java_version_report() {
+  local min_version="${1:-${java_required_version}}"
   java_version
-  if [ "$JAVA_VERSION_OK" == "yes" ]; then
+  if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
     echo_success "Java version $JAVA_VERSION is ok"
   else
     echo_warning "Java version $JAVA_VERSION is not supported, minimum is ${java_required_version}"
-    JAVA_HOME=''
-    java=""
+    java_clear
   fi
 }
 
