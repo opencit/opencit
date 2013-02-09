@@ -113,14 +113,13 @@ is_version_at_least() {
   local hasminor=`version_minor "${testver}"`
   local reqmajor=`version_major "${reqver}"`
   local reqminor=`version_minor "${reqver}"`
-  if [[
-       -n "${reqmajor}" && "${hasmajor}" -gt "${reqmajor}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -z "${reqminor}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -n "${reqminor}" && "${hasminor}" -ge "${reqminor}"
+  if [[  -n "${reqmajor}" && "${hasmajor}" -gt "${reqmajor}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -z "${reqminor}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -n "${reqminor}" && "${hasminor}" -ge "${reqminor}" \
      ]]; then
     echo "yes"
   else
@@ -145,32 +144,31 @@ is_java_version_at_least() {
   local reqminor=`version_minor "${reqver}"`
   local reqminor3=`version_extract3 "${reqver}"`
   local reqminor4=`version_extract4 "${reqver}"`
-  if [[
-       -n "${reqmajor}" && "${hasmajor}" -gt "${reqmajor}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -z "${reqminor}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -n "${reqminor}" && "${hasminor}" -gt "${reqminor}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}"
-       && -n "${reqminor3}" && "${hasminor3}" -gt "${reqminor3}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}"
-       && -z "${reqminor3}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}"
-       && -n "${reqminor3}" && "${hasminor3}" -eq "${reqminor3}"
-       && -z "${reqminor4}"
-     ||
-       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}"
-       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}"
-       && -n "${reqminor3}" && "${hasminor3}" -eq "${reqminor3}"
-       && -n "${reqminor4}" && "${hasminor4}" -ge "${reqminor4}" 
+  if [[  -n "${reqmajor}" && "${hasmajor}" -gt "${reqmajor}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -z "${reqminor}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -n "${reqminor}" && "${hasminor}" -gt "${reqminor}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}" \
+       && -n "${reqminor3}" && "${hasminor3}" -gt "${reqminor3}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}" \
+       && -z "${reqminor3}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}" \
+       && -n "${reqminor3}" && "${hasminor3}" -eq "${reqminor3}" \
+       && -z "${reqminor4}" \
+     || \
+       -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
+       && -n "${reqminor}"  && "${hasminor}"  -eq "${reqminor}" \
+       && -n "${reqminor3}" && "${hasminor3}" -eq "${reqminor3}" \
+       && -n "${reqminor4}" && "${hasminor4}" -ge "${reqminor4}"  \
      ]]; then
 #    echo "yes"
     return 0
