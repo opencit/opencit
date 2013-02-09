@@ -5,7 +5,7 @@
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
-java_required_version=1.6.0_29
+#java_required_version=1.6.0_29
 
 # detect the packages we have to install
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`

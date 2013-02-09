@@ -22,7 +22,7 @@ mysql_setup_log=/var/log/intel.${package_name}.install.log
 mysql_script_dir=${package_dir}/database
 glassfish_required_version=3.0
 glassfish_application_name=WhiteListPortal
-java_required_version=1.6.0_29
+#java_required_version=1.6.0_29
 
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION

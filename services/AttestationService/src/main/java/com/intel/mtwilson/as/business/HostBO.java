@@ -299,8 +299,10 @@ public class HostBO extends BaseBO {
 			getBiosAndVMM(host);
 
                         // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
-                        tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
-                        tblHosts.setTlsKeystore(null);  // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
+                        if( tblHosts.getTlsPolicyName() == null && tblHosts.getTlsPolicyName().isEmpty() ) { // XXX new code to test
+                            tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
+                        }
+//                        tblHosts.setTlsKeystore(null);  // XXX new code to test: it's either null or it's already set so don't change it // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
 			tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
 			if( host.getHostName() != null ) { tblHosts.setName(host.getHostName().toString()); }
                         if( host.getIPAddress() != null ) { tblHosts.setIPAddress(host.getIPAddress().toString()); }

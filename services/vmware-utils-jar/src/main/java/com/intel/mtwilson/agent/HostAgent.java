@@ -41,6 +41,7 @@ import java.util.Set;
 public interface HostAgent {
     
     /**
+     * Available means the TPM hardware is present.
      * Linux, Citrix, and Vmware agents should contact the host and find out
      * if it has a TPM before determining the return value.
      * @return true if the host has a TPM

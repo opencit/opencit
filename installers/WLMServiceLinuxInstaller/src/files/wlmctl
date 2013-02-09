@@ -23,7 +23,7 @@ mysql_setup_log=/var/log/intel.mw.wlm.install.log
 mysql_script_dir=/opt/intel/cloudsecurity/wlm-service/database
 glassfish_required_version=3.0
 glassfish_application_name=WLMService
-java_required_version=1.6.0_29
+#java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi

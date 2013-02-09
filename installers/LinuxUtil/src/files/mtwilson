@@ -13,7 +13,7 @@ conf_dir=/etc/intel/cloudsecurity
 #apiclient_shell=${apiclient_dir}/shell
 mysql_required_version=5.0
 glassfish_required_version=3.0
-java_required_version=1.6.0_29
+#java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
@@ -36,17 +36,18 @@ if using_glassfish; then
 elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
 fi
-export java_required_version=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export java_required_version=${JAVA_REQUIRED_VERSION}
 
 call_apiclient() {
-  java_require
+  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
   APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.client.TextConsole
   $java -cp "$APICLIENT_JARS" $mainclass $@
 }
 
 call_setupcommand() {
-  java_require
+  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
   $java -cp "$SETUP_CONSOLE_JARS" $mainclass $@
@@ -196,24 +197,28 @@ case "$1" in
         setup_env
         ;;
   glassfish-detect)
-        java_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
         glassfish_detect ${2:-$glassfish_required_version}
         glassfish_env_report
         ;;
   glassfish-start)
-        java_require; glassfish_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
         glassfish_start_report
         ;;
   glassfish-stop)
-        java_require; glassfish_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
         glassfish_shutdown
         ;;
   glassfish-restart)
-        java_require; glassfish_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
         glassfish_restart
         ;;
   glassfish-status)
-        java_require; glassfish_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
         glassfish_running_report
         glassfish_sslcert_report
         ;;
@@ -237,7 +242,7 @@ case "$1" in
         mysql_create_ssl "Trust Dashboard"
         ;;
   java-detect)
-        java_detect ${2:-$java_required_version}
+        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}
         java_env_report
         ;;
   api)
@@ -256,7 +261,8 @@ case "$1" in
         # show server ssh fingerprint, glassfish ssl fingerprint, and saml cert fingerprint
         echo "== SSH HOST KEYS =="
         ssh_fingerprints
-        java_require; glassfish_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
         echo "== GLASSFISH SSL CERTIFICATE =="
         glassfish_sslcert_report
         echo "== MT WILSON SAML CERTIFICATE =="
@@ -269,7 +275,8 @@ case "$1" in
         erase_data_with_user_confirmation
         ;;
   uninstall)
-        java_require; glassfish_require
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
         echo "Stopping Glassfish..."
         glassfish_shutdown
         # application files

@@ -22,7 +22,8 @@ if using_glassfish; then
 elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
 fi
-export java_required_version=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export java_required_version=${JAVA_REQUIRED_VERSION}
 
 
 find_installer() {

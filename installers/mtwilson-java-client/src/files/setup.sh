@@ -5,7 +5,7 @@
 
 export mysql_required_version=5.0
 export glassfish_required_version=3.0
-export java_required_version=1.6.0_29
+#export java_required_version=1.6.0_29
 
 find_installer() {
   local installer="${1}"

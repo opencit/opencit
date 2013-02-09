@@ -132,7 +132,7 @@ function startService {
         setup_env > "${package_env_filename}"
         read_local_config
     fi
-    java_require
+    if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
 
    # make sure we have files from privacy ca
    report_files_exist /etc/intel/cloudsecurity/PrivacyCA.cer /etc/intel/cloudsecurity/hisprovisioner.properties
@@ -175,7 +175,7 @@ function checkServiceStatus {
    
 setup_env() {
   yum_detect > /dev/null
-  java_clear; java_detect > /dev/null
+  java_detect > /dev/null
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
   echo "JAVA_HOME=$JAVA_HOME"
@@ -183,11 +183,11 @@ setup_env() {
 }
 
 setup() {
-  yum_detect
-  java_clear; java_detect
+  yum_detect > /dev/null
+  java_detect > /dev/null
   read_local_config
   if [[ -z "$JAVA_HOME" ]]; then
-      echo "Missing one or more required packages"
+      echo_failure "Cannot find Java"
       setup_print_summary
       exit 1
   fi

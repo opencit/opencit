@@ -11,7 +11,7 @@ package_var_dir=/var/opt/intel/aikverifyhome
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 mysql_required_version=5.0
 glassfish_required_version=3.0
-java_required_version=1.6.0_29
+#java_required_version=1.6.0_29
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
