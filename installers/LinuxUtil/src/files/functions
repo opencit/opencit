@@ -1628,7 +1628,7 @@ java_version() {
 # Environment:
 # - java_required_version
 java_version_report() {
-  local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}"
+  local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   local current_version=`java_version`
   if is_java_version_at_least "$current_version" "${min_version}"; then
     echo_success "Java version $current_version is ok"

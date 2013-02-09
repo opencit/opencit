@@ -242,7 +242,7 @@ case "$1" in
         mysql_create_ssl "Trust Dashboard"
         ;;
   java-detect)
-        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}
+        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
         java_env_report
         ;;
   api)
