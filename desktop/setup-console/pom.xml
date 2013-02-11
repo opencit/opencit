@@ -295,7 +295,7 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>Attestationervice</artifactId>
+      <artifactId>AttestationService</artifactId>
       <version>0.5.4-SNAPSHOT</version>
       <type>jar</type>
       <classifier>classes</classifier>
