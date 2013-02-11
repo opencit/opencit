@@ -286,7 +286,12 @@
 	<artifactId>jackson-xc</artifactId>
 	<version>1.9.11</version>
 </dependency>
-        
+    <dependency>
+      <groupId>com.intel.mtwilson.services</groupId>
+      <artifactId>ManagementService</artifactId>
+      <version>0.5.4-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>  
 
 

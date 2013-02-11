@@ -24,6 +24,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.Configuration;
+import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.data.ApiClientX509;
+import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 
 /**
  *
@@ -108,6 +111,8 @@ public class BootstrapUser implements Command {
     private void approveApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException {
         SetupWizard wizard = new SetupWizard(conf);
         try {
+            // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
+            /*
             Connection c = wizard.getMSDatabaseConnection();        
             PreparedStatement s = c.prepareStatement("UPDATE mw_api_client_x509 SET enabled=b'1',status='Approved' WHERE hex(fingerprint)=?"); // XXX TODO should use repository code for this, not hardcoded query, because table names may change between releases or deployments
             //s.setBytes(1, fingerprint);
@@ -115,9 +120,16 @@ public class BootstrapUser implements Command {
             s.executeUpdate();
             s.close();
             c.close();
+            */
+            MSPersistenceManager persistenceManager = new MSPersistenceManager();
+            ApiClientX509JpaController jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            ApiClientX509 apiClient = jpaController.findApiClientX509ByFingerprint(fingerprint);
+            apiClient.setStatus("Approved");
+            apiClient.setEnabled(true);
+            jpaController.edit(apiClient);
         }
-        catch(SQLException e) {
-            throw new SetupException("Cannot find API Client record: "+e.getMessage(), e);
+        catch(Exception e) {
+            throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
         }        
     }
 

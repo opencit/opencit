@@ -35,7 +35,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ApiClientX509.findByName", query = "SELECT a FROM ApiClientX509 a WHERE a.name = :name"),
     @NamedQuery(name = "ApiClientX509.findByNameLike", query = "SELECT a FROM ApiClientX509 a WHERE a.name LIKE :name"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "ApiClientX509.findByFingerprint", query = "SELECT a FROM ApiClientX509 a WHERE a.fingerprint = :fingerprint"), // added to facilitate authentication filter -jabuhacx 20120621
-    @NamedQuery(name = "ApiClientX509.findByFingerprintEnabled", query = "SELECT a FROM ApiClientX509 a WHERE a.fingerprint = :fingerprint AND a.enabled = 1"), // added to facilitate authentication filter -jabuhacx 20120621
+    @NamedQuery(name = "ApiClientX509.findByFingerprintEnabled", query = "SELECT a FROM ApiClientX509 a WHERE a.fingerprint = :fingerprint AND a.enabled = :enabled"), // XXX UNTESTED: changed enabled=1 to enabled=:enabled to circumvent postgres compatibility issue // added to facilitate authentication filter -jabuhacx 20120621
     @NamedQuery(name = "ApiClientX509.findByIssuer", query = "SELECT a FROM ApiClientX509 a WHERE a.issuer = :issuer"),
     @NamedQuery(name = "ApiClientX509.findBySerialNumber", query = "SELECT a FROM ApiClientX509 a WHERE a.serialNumber = :serialNumber"),
     @NamedQuery(name = "ApiClientX509.findByCommentLike", query = "SELECT a FROM ApiClientX509 a WHERE a.comment LIKE :comment"), // it's the caller's responsibility to add "%" before and/or after the name value

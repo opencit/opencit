@@ -220,7 +220,13 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
     
     //
     public ApiClientX509 findEnabledApiClientX509ByFingerprint(byte[] fingerprint) {
-        List<ApiClientX509> list = searchByNamedQuery("findByFingerprintEnabled", "fingerprint", fingerprint);
+        // XXX UNTESTED modifying to circumvent postgres compatibility issue 
+//        List<ApiClientX509> list = searchByNamedQuery("findByFingerprintEnabled", "fingerprint", fingerprint);
+        HashMap<String,Object> parameters = new HashMap<String,Object>();
+        parameters.put("fingerprint", fingerprint);
+        parameters.put("enabled", true);
+        List<ApiClientX509> list = searchByNamedQuery("findByFingerprintEnabled", parameters);
+        
         if( list != null && !list.isEmpty() ) {
             return list.get(0);
         }
