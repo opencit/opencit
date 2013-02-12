@@ -7,8 +7,10 @@ package com.intel.mtwilson.util.crypto;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.validation.Fault;
 import com.intel.mtwilson.x500.DN;
 import java.io.ByteArrayInputStream;
@@ -17,11 +19,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
@@ -192,4 +197,29 @@ public class SubjectAlternativeNameTest {
             System.out.println("success, saved ccertificate in "+outFilename);
         }
     }
+    
+    
+    @Test
+    public void testBuildSelfSignedTlsCertificateInKeystoreForPrivacyCa() throws FileNotFoundException, CertificateEncodingException, IOException, NoSuchAlgorithmException, KeyManagementException, KeyStoreException, CertificateException {
+        KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
+        X509Builder x509 = new X509Builder();
+        X509Certificate cert = x509.subjectName("CN=privacyca.mtwilson.local")   // in order to use it, you need to define the ip address of privacyca.mtwilson.local in /etc/hosts
+                                    .issuerName("CN=privacyca.mtwilson.local")
+                                    .issuerPrivateKey(keypair.getPrivate())
+                                    .subjectPublicKey(keypair.getPublic())
+                                    // privacy ca client code requires an alternative name:
+                                    .dnsAlternativeName("privacyca.mtwilson.local")
+                                    // these 3 are what TLS certificates do:
+                                    .keyUsageDigitalSignature()
+                                    .keyUsageDataEncipherment()
+                                    .keyUsageKeyEncipherment()
+                                    .build();
+        // assuming glassfish with default key alias "s1as" and default password "changeit"
+        String outFilename = System.getProperty("user.home")+File.separator+"privacyca.jks";
+        FileResource keystoreFile = new FileResource(new File(outFilename));
+        SimpleKeystore keystore = new SimpleKeystore(keystoreFile, "changeit"); 
+        keystore.addKeyPairX509(keypair.getPrivate(), cert, "s1as", "changeit");
+        keystore.save();
+        System.out.println("success, saved ccertificate in "+outFilename);
+    }    
 }

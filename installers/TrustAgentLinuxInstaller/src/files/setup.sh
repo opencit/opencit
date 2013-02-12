@@ -34,7 +34,7 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 # 4. Install Trust Agent files
 
 # if there's already a previous version installed, uninstall it
-tagent=`which tagent`
+tagent=`which tagent 2>/dev/null`
 if [ -f "$tagent" ]; then
   echo "Uninstalling previous version..."
   $tagent uninstall

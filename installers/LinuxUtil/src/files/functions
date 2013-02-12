@@ -1924,11 +1924,13 @@ webservice_stop() {
 
 webservice_start_report() {
     local glassfish_application_name="$1"
-    glassfish_require
-    glassfish_running
-    if [ -z "$GLASSFISH_RUNNING" ]; then
-        glassfish_start_report
-    fi    
+    if using_glassfish; then
+      glassfish_require
+      glassfish_running
+      if [ -z "$GLASSFISH_RUNNING" ]; then
+          glassfish_start_report
+      fi
+    fi
     webservice_running "${glassfish_application_name}"
     if [ -z "$WEBSERVICE_RUNNING" ]; then
           action_condition WEBSERVICE_RUNNING "Starting ${glassfish_application_name}" "webservice_start ${glassfish_application_name} > /dev/null; webservice_running ${glassfish_application_name};"
@@ -1939,9 +1941,12 @@ webservice_start_report() {
 }
 webservice_stop_report() {
     local glassfish_application_name="$1"
-    glassfish_require
-    glassfish_running
+    if using_glassfish; then
+      glassfish_require
+      glassfish_running
+    fi
     webservice_running "${glassfish_application_name}"
+    # XXX TODO need a function like webcontainer_running to handle all supported containers instead of this glassfish-specific check for GLASSFISH_RUNNING
     if [ -n "$GLASSFISH_RUNNING" ]; then
       if [ -n "$WEBSERVICE_RUNNING" ]; then
         inaction_condition WEBSERVICE_RUNNING "Stopping ${glassfish_application_name}" "webservice_stop ${glassfish_application_name} > /dev/null; webservice_running ${glassfish_application_name};"
@@ -1961,18 +1966,24 @@ webservice_stop_report() {
 webservice_install() {
   local glassfish_application_name="$1"
   local webservice_war_file="$2"
-  glassfish_require
+  if using_glassfish; then
+    glassfish_require
+  fi
   #glassfish_create_domain "intel-as" "${ATTESTATION_SERVICE_HOME}/glassfish/domain"
   webservice_running "${glassfish_application_name}"
 #  local WAR_NAME=${ATTESTATION_SERVICE_ID}
 #  local WAR_FILE=${ATTESTATION_SERVICE_ID}.war
   local WAR_FILE="${webservice_war_file}"
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-      echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-      ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
+      if using_glassfish; then
+        echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
+        ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
+      fi
     else
-      echo "Deploying ${glassfish_application_name} to Glassfish..."
-      ${glassfish} deploy --name ${glassfish_application_name} ${WAR_FILE}
+      if using_glassfish; then
+        echo "Deploying ${glassfish_application_name} to Glassfish..."
+        ${glassfish} deploy --name ${glassfish_application_name} ${WAR_FILE}
+      fi
     fi
 }
 
@@ -1982,10 +1993,14 @@ webservice_uninstall() {
 #  local WAR_NAME=${ATTESTATION_SERVICE_ID}
   local WAR_NAME="${glassfish_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
-    ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
+    if using_glassfish; then
+      echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
+      ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
+    fi
   else
-    echo "Application is not deployed on Glassfish; skipping undeploy"
+    if using_glassfish; then
+      echo "Application is not deployed on Glassfish; skipping undeploy"
+    fi
   fi
 }
 

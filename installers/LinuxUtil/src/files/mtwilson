@@ -262,9 +262,11 @@ case "$1" in
         echo "== SSH HOST KEYS =="
         ssh_fingerprints
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        echo "== GLASSFISH SSL CERTIFICATE =="
-        glassfish_sslcert_report
+        if using_glassfish; then
+          glassfish_require
+          echo "== GLASSFISH SSL CERTIFICATE =="
+          glassfish_sslcert_report
+        fi
         echo "== MT WILSON SAML CERTIFICATE =="
         mtwilson_saml_cert_report
         ;;
@@ -276,12 +278,14 @@ case "$1" in
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        echo "Stopping Glassfish..."
-        glassfish_shutdown
-        # application files
-        echo "Removing Glassfish in /usr/share/glassfish3..."
-        rm -rf /usr/share/glassfish3
+        if using_glassfish; then
+          glassfish_require
+          echo "Stopping Glassfish..."
+          glassfish_shutdown
+          # application files
+          echo "Removing Glassfish in /usr/share/glassfish3..."
+          rm -rf /usr/share/glassfish3
+        fi
         echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
         rm -rf /opt/intel/cloudsecurity
         echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."

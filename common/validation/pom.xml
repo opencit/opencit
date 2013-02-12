@@ -12,6 +12,11 @@
     </parent>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/aspect</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

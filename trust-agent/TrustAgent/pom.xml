@@ -75,11 +75,23 @@
                 <configuration>
         		<shadedArtifactAttached>true</shadedArtifactAttached>
                 	<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/*.SF</exclude>
+                                    <exclude>META-INF/*.DSA</exclude>
+                                    <exclude>META-INF/*.RSA</exclude>
+                                </excludes>
+                            </filter>
+                        </filters>
+                        <!--
                         <artifactSet>
                             <excludes>
                                 <exclude>org.bouncycastle:bcprov-jdk15</exclude>
                             </excludes>
                         </artifactSet>
+                        -->
                 </configuration>
             </execution>
         </executions>
@@ -189,11 +201,16 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>1.47</version>
 		</dependency>
-                -->
            	<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-ext-jdk15on</artifactId>
 			<version>1.47</version>
+		</dependency>
+                -->
+           	<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-ext-jdk15on</artifactId>
+			<version>1.46</version>
 		</dependency>
     </dependencies>
 </project>
