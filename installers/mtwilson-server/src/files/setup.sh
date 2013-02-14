@@ -71,7 +71,7 @@ if using_mysql; then
 
   # Install MySQL server (if user selected localhost)
   if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
-    echo_warning "Installing mysql server..."
+    echo "Installing mysql server..."
     # when we install mysql server on ubuntu it prompts us for root pw
     # we preset it so we can send all output to the log
     aptget_detect; dpkg_detect;
@@ -81,9 +81,9 @@ if using_mysql; then
     fi 
     mysql_server_install 
     mysql_start & >> $INSTALL_LOG_FILE
-    echo_warning "Installation of mysql server complete..."
+    echo "Installation of mysql server complete..."
   fi
-  echo_warning "Installing mysql client..."
+  echo "Installing mysql client..."
   mysql_install  
   mysql_create_database 
   echo_warning "Installation of mysql client complete..."
@@ -100,62 +100,62 @@ export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 
 chmod +x *.bin
-echo_warning "Installing Java..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
 ./$java_installer
-echo_warning "Java installation done..." | tee -a  $INSTALL_LOG_FILE
+echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
-echo_warning "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
+echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
 if using_glassfish; then
   glassfish_installer=`find_installer glassfish`
-  echo_warning "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+  echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
   ./$glassfish_installer  >> $INSTALL_LOG_FILE
-  echo_warning "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+  echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
 elif using_tomcat; then
   echo_warning "Relying on an existing Tomcat installation"
 fi
 
 
-echo_warning "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
 ./$privacyca_service 
-echo_warning "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
+echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
+echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
 /usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
-echo_warning "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
+echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
 ./$attestation_service
-echo_warning "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
 ./$management_service
-echo_warning "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
 ./$whitelist_service >> $INSTALL_LOG_FILE
-echo_warning "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
 ./$management_console
-echo_warning "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
-./$whitelist_portal & >> $INSTALL_LOG_FILE
-echo_warning "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
+./$whitelist_portal >> $INSTALL_LOG_FILE
+echo "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
-./$trust_dashboard  & >> $INSTALL_LOG_FILE
-echo_warning "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
+./$trust_dashboard >> $INSTALL_LOG_FILE
+echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
-./$monit_installer  & >> $INSTALL_LOG_FILE
-echo_warning "Monit installed..." | tee -a  $INSTALL_LOG_FILE
+echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
+./$monit_installer  >> $INSTALL_LOG_FILE
+echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-/usr/local/bin/asctl restart & >> $INSTALL_LOG_FILE
-echo_warning "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
+echo "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
+/usr/local/bin/asctl restart >> $INSTALL_LOG_FILE
+echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
 
-echo_warning "Log file for install is located at $INSTALL_LOG_FILE"
+echo "Log file for install is located at $INSTALL_LOG_FILE"
