@@ -1297,11 +1297,11 @@ glassfish_install() {
   fi
 
   # TODO this functionality is moving to the java tool ; completely remove it from here
-  #if [ -n "${MTWILSON_SERVER}" ]; then
-  #  glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-  #else
-  #  glassfish_create_ssl_cert_prompt
-  #fi
+  if [ -n "${MTWILSON_SERVER}" ]; then
+    glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+  else
+    glassfish_create_ssl_cert_prompt
+  fi
 
   glassfish_permissions "${GLASSFISH_HOME}"
   glassfish_start
@@ -1440,8 +1440,8 @@ glassfish_delete_domain() {
 }
 
 glassfish_create_ssl_cert_prompt() {
-    echo_warning "This feature has been disabled: glassfish_create_ssl_cert_prompt"
-    return
+    #echo_warning "This feature has been disabled: glassfish_create_ssl_cert_prompt"
+    #return
     # SSL Certificate setup
     #local should_create_sslcert
     prompt_yes_no GLASSFISH_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Glassfish?"
