@@ -177,7 +177,7 @@
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>PrivacyCA</artifactId>
-            <version>1.0</version>
+            <version>1.0.1-SNAPSHOT</version>
             <!-- classifier>jar-with-dependencies</classifier this causes an error in maven (bug in maven, it should be very straightforward) so instead of this we're going to put the PrivacyCA dependencies here -->
         </dependency>
        		<dependency>

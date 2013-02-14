@@ -34,8 +34,8 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 configure_privacyca_url() {
   # PrivacyCaUrl = https://privacyca.server.com:8181/HisPrivacyCAWebServices2
   local privacyca_server privacyca_url
-  if [ -n "$PRIVACY_SERVER" ]; then
-    privacyca_server="$PRIVACY_SERVER"
+  if [ -n "$PRIVACYCA_SERVER" ]; then
+    privacyca_server="$PRIVACYCA_SERVER"
   elif [ -n "$MTWILSON_SERVER" ]; then
     privacyca_server="$MTWILSON_SERVER"
   else

@@ -252,6 +252,14 @@ function main {
   show)
         read_property_from_file "${2}" "${package_config_filename}"
         ;;
+  fixek)
+        java_detect > /dev/null
+        if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
+        stopService
+        pcakey
+        $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd
+        startService
+        ;;
   tpmstatus)
         tpm_owned=`cat /sys/class/misc/tpm0/device/owned`
         tpm_enabled=`cat /sys/class/misc/tpm0/device/enabled`

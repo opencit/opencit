@@ -78,7 +78,9 @@ public class TpmClient {
 		} catch (TpmModuleException e){
 			if(e.toString().contains(".takeOwnership returned nonzero error: 4")){
 				Logger.getLogger(TpmClient.class.getName()).info("Ownership is already taken : " );
-				return;
+                                if( !System.getProperty("forceCreateEk", "false").equals("true") ) { // feature to help with bug #554 and allow admin to force creating an ek (in case it failed the first time due to a non-tpm error such as java missing classes exception
+                                    return;
+                                }
 			}
 			else
 				throw e;

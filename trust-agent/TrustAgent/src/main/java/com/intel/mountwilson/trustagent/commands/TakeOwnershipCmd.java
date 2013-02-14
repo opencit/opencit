@@ -29,6 +29,12 @@ public class TakeOwnershipCmd implements ICommand {
         this.context = context;
     }
 
+    // precondition:  run the pcakey command to obtain the EK signing key
+    public static void main(String[] args) throws TAException {
+        TakeOwnershipCmd cmd = new TakeOwnershipCmd(null); // this command doesn't use the TADataContext
+        cmd.execute();
+    }
+    
     @Override
     public void execute() throws TAException{
 

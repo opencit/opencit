@@ -228,7 +228,7 @@ public class TpmUtils {
 		certGen.setSubjectDN(new X500Principal(""));
 		certGen.setPublicKey(idProof.getAik().getKey());
 		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, new String(idProof.getIdLableBytes()))));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, new String(idProof.getIdLableBytes()))));
 		X509Certificate cert = certGen.generate(privKey, "BC");
 		return cert;
 	}
@@ -285,10 +285,10 @@ public class TpmUtils {
 		certGen.setSubjectDN(new X500Principal("CN=" + caName));
 		certGen.setPublicKey(pubKey);
 		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
-		certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectKeyIdentifier /*X509Extensions.SubjectKeyIdentifier*/, false, new SubjectKeyIdentifierStructure(pubKey));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.basicConstraints /*X509Extensions.BasicConstraints*/, true, new BasicConstraints(true));
 		X509Certificate caCert = certGen.generate(privKey);
-		certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.authorityKeyIdentifier /*X509Extensions.AuthorityKeyIdentifier*/, false, new AuthorityKeyIdentifierStructure(caCert));
 		caCert = certGen.generate(privKey);
 		FileOutputStream newp12 = new FileOutputStream(p12FileName);
 
@@ -348,9 +348,9 @@ public class TpmUtils {
 		certGen.setSubjectDN(new X500Principal("CN=" + subjectName));
 		certGen.setPublicKey(pubKey);
 		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(X509Extensions.SubjectKeyIdentifier, false, new SubjectKeyIdentifierStructure(pubKey));
-		certGen.addExtension(X509Extensions.AuthorityKeyIdentifier, false, new AuthorityKeyIdentifierStructure(caCert));
-		certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectKeyIdentifier/*X509Extensions.SubjectKeyIdentifier*/, false, new SubjectKeyIdentifierStructure(pubKey));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.authorityKeyIdentifier /* X509Extensions.AuthorityKeyIdentifier*/, false, new AuthorityKeyIdentifierStructure(caCert));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.basicConstraints /* X509Extensions.BasicConstraints*/, true, new BasicConstraints(false));
 		X509Certificate clientCert = certGen.generate(caPrivKey);
 		FileOutputStream newp12 = new FileOutputStream(p12FileName);
 
@@ -412,7 +412,7 @@ public class TpmUtils {
 		RSAPublicKey pubEk = TpmUtils.makePubKey(pubEkMod, pubExp);
 		certGen.setPublicKey(pubEk);
 		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "TPM EK Credential")));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "TPM EK Credential")));
 		X509Certificate cert = certGen.generate(privKey, "BC");
 		return cert;
 	}
