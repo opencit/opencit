@@ -152,6 +152,7 @@ public class ApiCommand {
                 c.register(user);
             }
             catch(javax.net.ssl.SSLException e) {
+                // XXX TODO can this be rewritten to use TlsPolicy settings (we will have to add them to a configuration file for this purpose) 
                 if( e.getMessage().contains("hostname in certificate didn't match")  && !"false".equals(System.getenv("MTWILSON_API_SSL_VERIFY_HOSTNAME")) ) {
                     System.err.println(e.getMessage());
                     System.out.print("Do you want to continue anyway? [Y/N] ");
@@ -260,6 +261,7 @@ public class ApiCommand {
                 c.updateApiClient(update); // ApiException, SignatureException
             }
             catch(javax.net.ssl.SSLException e) {
+                // XXX TODO can this be rewritten to use TlsPolicy settings (we will have to add them to a configuration file for this purpose) 
                 if( e.getMessage().contains("hostname in certificate didn't match")  && !"false".equals(System.getenv("MTWILSON_API_SSL_VERIFY_HOSTNAME")) ) {
                     System.err.println(e.getMessage());
                     System.out.print("Do you want to continue anyway? [Y/N] ");

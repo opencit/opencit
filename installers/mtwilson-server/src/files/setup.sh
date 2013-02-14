@@ -86,7 +86,7 @@ if using_mysql; then
   echo "Installing mysql client..."
   mysql_install  
   mysql_create_database 
-  echo_warning "Installation of mysql client complete..."
+  echo "Installation of mysql client complete..."
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
 elif using_postgres; then
