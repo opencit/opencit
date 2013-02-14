@@ -62,7 +62,7 @@ public class MSCUConfig extends ConfigBase {
         String keys[] = new String[] { "mtwilson.api.baseurl", "mtwilson.api.keystore", "mtwilson.mscu.gkvHostType" };
         for(String key : keys) {
             String value = c.getString(key);
-            log.info(String.format("MSCUConfig [%s]: %s=%s", label, key, value));  
+            log.debug(String.format("MSCUConfig [%s]: %s=%s", label, key, value));  
         }
     }
 

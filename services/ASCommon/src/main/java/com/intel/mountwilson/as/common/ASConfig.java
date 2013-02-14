@@ -63,7 +63,7 @@ public class ASConfig extends ConfigBase{
             "mountwilson.as.db.driver", "mountwilson.as.db.host", "mountwilson.as.db.port", "mountwilson.as.db.schema", "mountwilson.as.db.user", "mountwilson.as.db.password"  };
         for (String key : keys) {
             String value = c.getString(key);
-            System.out.println(String.format("[%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
+            log.debug(String.format("ASConfig [%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
         }
     }
 

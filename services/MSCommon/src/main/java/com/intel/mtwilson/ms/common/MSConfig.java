@@ -68,18 +68,14 @@ public class MSConfig extends ConfigBase {
     // for troubleshooting
 	@Override
     public void dumpConfiguration(Configuration c, String label) {
-        /*
-        String keys[] = new String[] { "mtwilson.api.baseurl", "mountwilson.ms.db.host", "mountwilson.ms.db.schema", "mountwilson.ms.db.user", "mtwilson.db.host", "mtwilson.db.schema", "mtwilson.db.user" };
-        for(String key : keys) {
+        String keys[] = new String[]{"mtwilson.api.baseurl",
+            "mtwilson.api.ssl.verifyHostname", 
+            "mtwilson.db.driver", "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.schema", "mtwilson.db.user", "mtwilson.db.password", 
+            "mountwilson.as.db.driver", "mountwilson.as.db.host", "mountwilson.as.db.port", "mountwilson.as.db.schema", "mountwilson.as.db.user", "mountwilson.as.db.password"  };
+        for (String key : keys) {
             String value = c.getString(key);
-            System.out.print("-");
-            String labelStr = label==null?"null":label;
-            String keyStr = key==null?"null":key;
-            String valueStr = value==null?"null":value;
-            String lineStr = String.format("MSConfig [%s]: %s=%s", labelStr, keyStr, valueStr);
-            System.out.println(lineStr);
+            log.debug(String.format("MSConfig [%s]: %s=%s", label==null?"null":label, key==null?"null":key, value==null?"null":value));
         }
-        */
     }
     
         /** 
