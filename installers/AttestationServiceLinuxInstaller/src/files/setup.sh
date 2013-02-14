@@ -64,8 +64,10 @@ chmod 700 logback.xml
 cp logback.xml "${intel_conf_dir}"
 
 # SCRIPT EXECUTION
-mysql_server_install
-mysql_install
+if using_mysql; then
+  mysql_server_install
+  mysql_install
+fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 
@@ -75,7 +77,7 @@ chmod +x asctl
 mkdir -p /usr/local/bin
 cp asctl /usr/local/bin
 /usr/local/bin/asctl setup
-register_startup_script /usr/local/bin/asctl asctl  & >> $INSTALL_LOG_FILE
+register_startup_script /usr/local/bin/asctl asctl >> $INSTALL_LOG_FILE
 
 # Compile aikqverify .   removed  mysql-client-5.1  from both yum and apt lists
 compile_aikqverify() {
@@ -104,7 +106,8 @@ else
   echo "Compile FAILED" >> $INSTALL_LOG_FILE
 fi
 
-
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
-glassfish_permissions "${package_var_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+  glassfish_permissions "${package_var_dir}"
+fi

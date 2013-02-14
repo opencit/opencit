@@ -117,9 +117,10 @@ chmod 700 pcactl
 mkdir -p /usr/local/bin
 cp pcactl /usr/local/bin
 /usr/local/bin/pcactl setup
-register_startup_script /usr/local/bin/pcactl pcactl & >> $INSTALL_LOG_FILE
+register_startup_script /usr/local/bin/pcactl pcactl >> $INSTALL_LOG_FILE
 
 
-
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+fi

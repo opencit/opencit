@@ -77,7 +77,7 @@ chmod +x mcctl
 mkdir -p /usr/local/bin
 cp mcctl /usr/local/bin
 /usr/local/bin/mcctl setup
-register_startup_script /usr/local/bin/mcctl mcctl & >> $INSTALL_LOG_FILE
+register_startup_script /usr/local/bin/mcctl mcctl >> $INSTALL_LOG_FILE
 
 glassfish_permissions "${intel_conf_dir}"
 glassfish_permissions "${package_dir}"

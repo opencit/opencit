@@ -1789,8 +1789,8 @@ java_install() {
 #  JAVA_YUM_PACKAGES="java-1.6.0-openjdk java-1.6.0-openjdk-devel"
 #  JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
 #  auto_install "Java" "JAVA"
-  java_clear; java_detect >> $INSTALL_LOG_FILE; java_version;
-  if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
+  java_clear; java_detect >> $INSTALL_LOG_FILE
+  if no_java ${java_required_version:-1.6}; then
     if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
       echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
       return 1
