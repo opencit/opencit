@@ -19,7 +19,7 @@ import com.intel.mtwilson.util.ConfigBase;
 
 public class MSConfig extends ConfigBase {
     
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    private static Logger log = LoggerFactory.getLogger(MSConfig.class);
     private static final MSConfig global = new MSConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
        
