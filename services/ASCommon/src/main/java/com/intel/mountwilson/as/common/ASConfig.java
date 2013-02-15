@@ -26,16 +26,12 @@ public class ASConfig extends ConfigBase{
     
     private static final ASConfig global = new ASConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-    private final static Properties defaults = new Properties();
     
-    private static final Logger log = LoggerFactory.getLogger(ASConfig.class);
+    private final Logger log = LoggerFactory.getLogger(getClass());
     
-    private ASConfig() {
-        
-        super("attestation-service.properties", defaults);
-    }
-
-    static {
+    @Override
+    public Properties getDefaults() {
+        Properties defaults = new Properties();
         defaults.setProperty("mountwilson.as.db.password", "");
         defaults.setProperty("mountwilson.as.db.user", "root");
         defaults.setProperty("mountwilson.as.db.host", "localhost");
@@ -50,9 +46,16 @@ public class ASConfig extends ConfigBase{
         // mtwilson.taca.keystore.password
         // mtwilson.taca.key.alias
         // mtwilson.taca.key.password
+        return defaults;
 	}
 
+    
+    private ASConfig() {
         
+        super("attestation-service.properties");
+    }
+
+    
     public static Properties getJpaProperties() {
         Configuration config = getConfiguration();
         Properties prop = new Properties();

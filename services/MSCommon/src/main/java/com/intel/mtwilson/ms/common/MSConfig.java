@@ -22,12 +22,13 @@ public class MSConfig extends ConfigBase {
     private static Logger log = LoggerFactory.getLogger(MSConfig.class);
     private static final MSConfig global = new MSConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-    private final static Properties defaults = new Properties();
     private MSConfig() {
-        super("management-service.properties",defaults);
+        super("management-service.properties");
     }
 
-    static {
+    @Override
+    public Properties getDefaults() {
+        Properties defaults = new Properties();
 
         defaults.setProperty("mountwilson.ms.db.password", "password");
         defaults.setProperty("mountwilson.ms.db.user", "root");
@@ -60,7 +61,7 @@ public class MSConfig extends ConfigBase {
         defaults.setProperty("mtwilson.privacyca.cert.file", "/etc/intel/cloudsecurity/PrivacyCA.p12.pem");
         defaults.setProperty("mtwilson.rootca.certficate.file", "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); 
         defaults.setProperty("mtwilson.saml.certificate.file", "/etc/intel/cloudsecurity/saml.crt.pem");
-        
+        return defaults;
     }
     
         /** 

@@ -18,15 +18,17 @@ public class WLMPConfig extends ConfigBase {
 
     private static final Logger log = LoggerFactory.getLogger(WLMPConfig.class);
     private static final WLMPConfig global = new WLMPConfig();
-        private final static Properties defaults = new Properties();
+//        private final static Properties defaults = new Properties();
 
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private WLMPConfig() {
-        super("whitelist-portal.properties", defaults);
+        super("whitelist-portal.properties");
     }
 
-    static  {
+    @Override
+    public Properties getDefaults() {
+        Properties defaults = new Properties();
         
         // Properties for the API Client
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
@@ -38,17 +40,9 @@ public class WLMPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.wlmp.sessionTimeOut", "1000");
         defaults.setProperty("mtwilson.wlmp.hostTypes", "Xen,KVM,VMWare");
         defaults.setProperty("mtwilson.wlmp.apiKeyExpirationNoticeInMonths", "3");
+        return defaults;
 	}
 
-    // for troubleshooting
-    @Override
-    public void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[] { "mtwilson.api.baseurl", "mtwilson.api.keystore", "mtwilson.mc.sessionTimeOut" };
-        for(String key : keys) {
-            String value = c.getString(key);
-            log.debug(String.format("MCPConfig [%s]: %s=%s", (label==null?"null":label), (key==null?"null":key), (value==null?"null":value)));  
-        }
-    }
 
    
     public static Properties getJpaProperties() {

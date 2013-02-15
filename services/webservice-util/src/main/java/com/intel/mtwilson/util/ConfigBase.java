@@ -6,12 +6,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
+import org.apache.commons.configuration.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.configuration.*;
 
 /**
  * Attempts to use commons-configuration to load the Attestation Service
@@ -28,22 +26,28 @@ public abstract class ConfigBase {
     private Logger log = LoggerFactory.getLogger(getClass());
     private Configuration config = null;
     private final String propertyFileName;
-    private final Properties defaultProperties;
+    private Properties defaultProperties ;//= new Properties();
 
     public Configuration getConfigurationInstance() {
+        if( log == null ) { System.err.println("wtf log is null after constructor"); }
         if( config == null ) {
+            defaultProperties = getDefaults();
             config = gatherConfiguration(propertyFileName, defaultProperties);
         }
         return config;
     }
 
-    public ConfigBase(String propertyFileName, Properties defaultProperties) {
+    public ConfigBase(String propertyFileName/*, Properties defaultProperties*/) {
         this.propertyFileName = propertyFileName;
-        this.defaultProperties = defaultProperties;
+//        this.defaultProperties = defaultProperties;
     }
 
+    public Properties getDefaults()  { return new Properties(); }
+    
     // for troubleshooting
-    public void dumpConfiguration(Configuration c, String label) {
+    private void dumpConfiguration(Configuration c, String label) {
+//        if( defaultProperties == null ) { System.out.println("WTF DEFAULT PROPERTIES IS NULL"); return; }
+//        if( defaultProperties.stringPropertyNames() == null ) { System.out.println("WTF NO STRING PROPERTY NAMES"); return; }
         HashSet<String> keyset = new HashSet<String>(defaultProperties.stringPropertyNames()); // make a copy because we will add to it
         String keys[] = new String[]{"mtwilson.api.baseurl",
             "mtwilson.api.ssl.verifyHostname", 
@@ -120,7 +124,7 @@ public abstract class ConfigBase {
         }
         // add all the files we found
         for (File f : files) {
-            System.out.println("Looking for "+f.getAbsolutePath());
+//            System.out.println("Looking for "+f.getAbsolutePath());
             try {
                 if (f.exists() && f.canRead()) {
                     PropertiesConfiguration standard = new PropertiesConfiguration(

@@ -18,17 +18,17 @@ public class MCPConfig extends ConfigBase {
 
     private static final Logger log = LoggerFactory.getLogger(MCPConfig.class);
     private static final MCPConfig global = new MCPConfig();
-        private final static Properties defaults = new Properties();
 
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private MCPConfig() {
         
-        super("management-console.properties",defaults);
+        super("management-console.properties");
     }
 
-    static {
-        
+    @Override
+    public Properties getDefaults() {
+        Properties defaults = new Properties();
         // Properties for the API Client
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
         //defaults.setProperty("mtwilson.api.keystore", "mw.jks"); // instead of one keystore for the app, we use a directory with one keystore per user:
@@ -42,7 +42,7 @@ public class MCPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.mc.sessionTimeOut", "1800");
         defaults.setProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
         defaults.setProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3");
-	
+        return defaults;
 	}
 
     // for troubleshooting
