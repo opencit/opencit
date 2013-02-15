@@ -183,18 +183,6 @@
                     </goals>
                     <configuration>
                         <artifacts>
-			    <!--
-                            <artifact>
-                                <file>${project.build.directory}/td-0.5.2-debian.bin</file>
-                                <type>bin</type>
-				<classifier>debian</classifier>
-                            </artifact>
-                            <artifact>
-                                <file>${project.build.directory}/td-0.5.2-redhat.bin</file>
-                                <type>bin</type>
-				<classifier>redhat</classifier>
-                            </artifact>
-			    -->
                             <artifact>
                                 <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                 <type>bin</type>

@@ -144,40 +144,6 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
         <executions>
-	    <!--
-          <execution>
-            <id>create-debian-installer</id>
-	    <phase>compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-	    <configuration>
-	    <executable>bash</executable>
-	    <arguments>
-		<argument>makebin-auto.sh</argument>
-		<argument>${project.build.directory}</argument>
-		<argument>ms-0.5.2-debian</argument>
-		<argument>managementservice-0.5.2.deb jdk-1.6.0_29-linux-x64.bin glassfish-3.1.1.zip setup.sh</argument>
-	    </arguments>
-	    </configuration>
-          </execution>
-          <execution>
-            <id>create-redhat-installer</id>
-	    <phase>compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-	    <configuration>
-	    <executable>bash</executable>
-	    <arguments>
-		<argument>makebin-auto.sh</argument>
-		<argument>${project.build.directory}</argument>
-		<argument>ms-0.5.2-redhat</argument>
-		<argument>ManagementService-0.5.2.rpm jdk-1.6.0_29-linux-x64.bin glassfish-3.1.1.zip setup.sh</argument>
-	    </arguments>
-	    </configuration>
-          </execution>
-	  -->
           <execution>
             <id>create-combined-installer</id>
 	    <phase>compile</phase>
@@ -189,12 +155,6 @@
 	    <arguments>
 		<argument>makebin-auto.sh</argument>
 		<argument>${makeself.directory}</argument>
-		<!--
-		<argument>ms-0.5.2</argument>
-		<argument>ManagementService-0.5.2.war management-service.properties *.sql msctl version functions jdk-1.6.0_29-linux-x64.bin glassfish-3.1.1.zip setup.sh</argument> 
-		-->
-		<!-- TODO: for the combined installer we should use .rpm and .deb packages that exclude the .war file, then copy the .war file ourselves... instead of having it twice! -->
-		<!--      ManagementService-0.5.2.rpm managementservice-0.5.2.deb      -->
 	    </arguments>
 	    </configuration>
           </execution>

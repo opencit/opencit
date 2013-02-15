@@ -45,16 +45,6 @@ public class MCPConfig extends ConfigBase {
         return defaults;
 	}
 
-    // for troubleshooting
-    @Override
-    public void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[] { "mtwilson.api.baseurl", "mtwilson.api.keystore", "mtwilson.mc.sessionTimeOut" };
-        for(String key : keys) {
-            String value = c.getString(key);
-            log.debug(String.format("MCPConfig [%s]: %s=%s", (label==null?"null":label), (key==null?"null":key), (value==null?"null":value)));  
-        }
-    }
-
     
     public static Properties getJpaProperties() {
         Configuration config = getConfiguration();

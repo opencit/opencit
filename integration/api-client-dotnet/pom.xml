@@ -7,9 +7,9 @@
   <name>API Client for .NET</name>
   
     <parent>
-		<groupId>com.intel.mountwilson</groupId>
-		<artifactId>mtwilson-services-parent</artifactId>
-		<version>0.5.3-SNAPSHOT</version>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>mtwilson-integration</artifactId>
+		<version>0.5.4-SNAPSHOT</version>
     </parent>
 
     <build>
