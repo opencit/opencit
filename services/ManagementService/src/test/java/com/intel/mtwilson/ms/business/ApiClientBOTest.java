@@ -67,12 +67,11 @@ public class ApiClientBOTest {
                 fStream.read(fileContents);
                 return fileContents;
             }finally{
-            	if(fStream != null)
-    				try {
-    					fStream.close();
-    				} catch (IOException e) {
-    					System.out.println("Error while closing stream" +e.getMessage());
-    				}
+    		try {
+                    fStream.close();
+    		} catch (IOException e) {
+                    System.out.println("Error while closing stream" +e.getMessage());
+    		}
             }
             
             

@@ -36,9 +36,9 @@ public class MwMleSourceJpaController implements Serializable {
     }
 
     public void create(MwMleSource mwMleSource) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             TblMle mleId = mwMleSource.getMleId();
             if (mleId != null) {
@@ -48,20 +48,18 @@ public class MwMleSourceJpaController implements Serializable {
             em.persist(mwMleSource);
             if (mleId != null) {
                 mleId.getMwMleSourceCollection().add(mwMleSource);
-                mleId = em.merge(mleId);
+                em.merge(mleId);
             }
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void edit(MwMleSource mwMleSource) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             MwMleSource persistentMwMleSource = em.find(MwMleSource.class, mwMleSource.getId());
             TblMle mleIdOld = persistentMwMleSource.getMleId();
@@ -77,7 +75,7 @@ public class MwMleSourceJpaController implements Serializable {
             }
             if (mleIdNew != null && !mleIdNew.equals(mleIdOld)) {
                 mleIdNew.getMwMleSourceCollection().add(mwMleSource);
-                mleIdNew = em.merge(mleIdNew);
+                em.merge(mleIdNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -90,16 +88,14 @@ public class MwMleSourceJpaController implements Serializable {
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(Integer id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             MwMleSource mwMleSource;
             try {
@@ -111,14 +107,12 @@ public class MwMleSourceJpaController implements Serializable {
             TblMle mleId = mwMleSource.getMleId();
             if (mleId != null) {
                 mleId.getMwMleSourceCollection().remove(mwMleSource);
-                mleId = em.merge(mleId);
+                em.merge(mleId);
             }
             em.remove(mwMleSource);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
@@ -169,7 +163,7 @@ public class MwMleSourceJpaController implements Serializable {
     }
     
     public MwMleSource findByMleId(Integer id) {
-        MwMleSource mleSourceObj = null;
+        
         EntityManager em = getEntityManager();
         try {
 
@@ -179,7 +173,7 @@ public class MwMleSourceJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 
-            mleSourceObj = (MwMleSource) query.getSingleResult();
+            MwMleSource mleSourceObj = (MwMleSource) query.getSingleResult();
             return mleSourceObj;
 
         } catch(NoResultException e){

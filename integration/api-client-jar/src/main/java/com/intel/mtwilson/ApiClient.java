@@ -766,7 +766,8 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     public void enableCaWithPassword(String newPasswordString) throws IOException, ApiException, SignatureException {
         try {
             Password newPassword = new Password(newPasswordString, new byte[0]); // XXX currently using an empty salt, so the user doesn't need to also copy the salt, but maybe we should use a generated salt and return it to the user to paste when using the password....
-            String result = text(httpPost(msurl("/ca/enable"), toJSON(newPassword.toString())));
+            // String result = 
+            text(httpPost(msurl("/ca/enable"), toJSON(newPassword.toString())));
             //return "true".equals(result);          
         }
         catch(CryptographyException e) {
@@ -782,7 +783,8 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
      */
     @Override
     public void disableCa() throws IOException, ApiException, SignatureException {
-            String result = text(httpPost(msurl("/ca/disable"), null));
+            //String result = 
+            text(httpPost(msurl("/ca/disable"), null));
         // TODO:  an update on the "ca" user in the HMAC users table,  set enabled=false
     }
 

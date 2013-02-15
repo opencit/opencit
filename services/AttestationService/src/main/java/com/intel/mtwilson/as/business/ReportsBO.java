@@ -292,7 +292,8 @@ public class ReportsBO extends BaseBO {
             hostType.setName(hostName.toString()); // datatype.Hostname
             if (logs != null) {
                 for (TblTaLog log : logs) {
-                    if (!failureOnly || (failureOnly && log.getTrustStatus() == false)) {
+                    boolean value = (failureOnly && log.getTrustStatus() == false);
+                    if (!failureOnly || value) {
                         attestationReport.getPcrLogs().add(getPcrManifestLog(tblHosts, log, failureOnly));
                     }
                 }

@@ -402,13 +402,11 @@ public class TAHelper {
             log.info( String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
             throw e;
         } finally {
-            if (fileOutputStream != null) {
-                try {
+                 try {
                     fileOutputStream.close();
                 } catch (IOException ex) {
                     log.error(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()), ex);
                 }
-            }
         }
 
 

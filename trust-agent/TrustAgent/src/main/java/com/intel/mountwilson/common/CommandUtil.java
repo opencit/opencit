@@ -130,13 +130,12 @@ public class CommandUtil {
         } catch (Exception ex) {
             throw new TAException(ErrorCode.ERROR, "Error while reading cert", ex);
         } finally {
-            if (fStream != null) {
+           
                 try {
                     fStream.close();
                 } catch (IOException e) {
                     log.warn("Error while closing stream", e);
                 }
-            }
         }
 
 

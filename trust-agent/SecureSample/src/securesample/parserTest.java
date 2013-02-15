@@ -23,8 +23,8 @@ public class parserTest {
         // Create a matcher with an input string
         Matcher m = p.matcher(input);
         m.find();
-        String s = m.group(1);
-        StringBuffer sb = new StringBuffer();
+        //String s = m.group(1);
+        //StringBuffer sb = new StringBuffer();
 
     }
     

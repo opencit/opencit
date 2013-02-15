@@ -146,9 +146,7 @@ public class TrustAgentSecureClient {
             byte[] buf = new byte[5000];
                 sockOutput.write(data, 0, data.length);
             int bytes_read = sockInput.read(buf);
-            log.info( "Received {} bytes to server and received them back again, msg = {}", 
-                    new Object[]{bytes_read, StringUtils.replace(new String(buf), "\n", "\n  ")});
-
+            log.info( "Received " + bytes_read + " bytes to server and received them back again, msg = " +StringUtils.replace(new String(buf), "\n", "\n  "));
             return buf;
         }
         catch(SocketTimeoutException e){

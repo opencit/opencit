@@ -78,6 +78,7 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
                         return; // XXX TODO   we need to check the entire chain... we can't just accept any ca  , we need t omake sure tehre is a PATH from the server cert to the trusted cert.
                     }
                     catch(Exception e) {
+                        log.trace("TrustFirstCertificateTlsPolicy checkServerTrusted cert was not valid. checking next cert");
                         // don't throw an exception because we need to check the next certificate... throw new CertificateException("Invalid server certificate", e);
                     }
                 }
@@ -102,6 +103,7 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
                 repository.addCertificate(xcs[i]); // KeyManagementException
             }
             catch(Exception e) {
+                log.trace("TrustFirstCertificateTlsPolicy addServerCertificateToRepository cert was not valid. trying to save next cert");
                 // don't throw an exception because we may be able to save other certificates? throw new CertificateException("Unable to save server certificate", e);
             }
         }        

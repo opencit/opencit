@@ -549,9 +549,9 @@ public class X509Builder extends BuilderModel {
             }
         }
         if( certificateIssuerName == null ) {
-            if( certificateSubjectName != null ) { // assume self-signed ?? or check if we have an issuer cert first ??? 
-                // XXX TODO 
-            }
+            //if( certificateSubjectName != null ) { // assume self-signed ?? or check if we have an issuer cert first ??? 
+            // XXX TODO 
+            //}
             if( commonName != null || organizationUnit != null || organizationName != null || country != null ) {
                 try {
                     issuerName(new X500Name(commonName, organizationUnit, organizationName, country));
@@ -570,9 +570,9 @@ public class X509Builder extends BuilderModel {
             algorithm(new AlgorithmId(AlgorithmId.sha256WithRSAEncryption_oid)); // algorithm.getName() == SHA256withRSA
         }
         
-        if( keyUsageExtension != null ) {
-            
-        }
+        //if( keyUsageExtension != null ) {
+        //   
+        //}
         try {
             if( getFaults().isEmpty() ) {
                 // Sign the cert to identify the algorithm that's used.

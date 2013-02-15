@@ -175,8 +175,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
             configData.setTxtHostRecord(hostObj);
             try {
 
-                boolean result = false;
-                result = msAPIObj.registerHost(configData);
+                boolean result = msAPIObj.registerHost(configData);
                 if (result)
                 	hostDetailList.setStatus("Successfully registered the host.");
 

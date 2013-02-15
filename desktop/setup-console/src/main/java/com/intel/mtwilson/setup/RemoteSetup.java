@@ -37,6 +37,7 @@ import net.schmizz.sshj.userauth.UserAuthException;
 import sun.security.rsa.RSAPublicKeyImpl;
 import sun.security.x509.X509Key;
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -96,6 +97,7 @@ import sun.security.x509.X500Name;
  * @author jbuhacoff
  */
 public class RemoteSetup extends BuilderModel implements Closeable {
+    public static final Console console = System.console(); // safe because Main checks that it exists before calling this command
     private final SetupContext ctx;
     private final Properties properties = new Properties();
     private final SSHClient ssh = new SSHClient();
@@ -725,6 +727,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
                 ctx.serverUrl = new URL(msprops.getProperty("mtwilson.api.baseurl", mwprops.getProperty("mtwilson.api.baseurl")));
             }
             catch(MalformedURLException e) {
+                console.printf("Ignoring MalformedURL exception caught during importManagmentServiceProperties");
                 // XXX TODO: we need to extend ObjectModel so we can log all the faults with the configuration!!!  or maybe this belongs in SetupContext which should extend ObjectModel?  but this means all the interpretation of the prpoerties (converting from string to whatever other datataypes) must havppen inside the validate() method of that object.  which actually sounds just fine.
             }
         }
@@ -817,13 +820,14 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         ctx.privacyCA.ekSigningKeyDownloadPassword = pcaprops.getProperty("ClientFilesDownloadPassword");
         ctx.privacyCA.pcaCertificateValidity = new Timeout(Integer.valueOf(pcaprops.getProperty("PrivCaCertValiditydays", "3652")), TimeUnit.DAYS);
     }
-    
-    private void importGlassfishProperties() {
+    // XXX-stdalex commenting out unused function for removal later
+    //private void importGlassfishProperties() {
         // hmm... just need location of keystore and exported certificate to replace with our ca-signed copy
-    }
-    private void importTomcatProperties() {
-        // hmm... just need location of keystore and exported certificate to replace with our ca-signed copy
-    }
+    //}
+    // XXX-stdalex commenting out unused function for removal later
+    //private void importTomcatProperties() {
+    //    // hmm... just need location of keystore and exported certificate to replace with our ca-signed copy
+    //}
     
     private void detectWebContainerType() throws IOException {
         String envFilePath = "/opt/intel/cloudsecurity/attestation-service/attestation-service.env";

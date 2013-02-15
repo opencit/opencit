@@ -213,9 +213,9 @@ public class ApiCommand {
             return; //System.exit(0);
         }
         
-        if( args[0].equals("CreateUser") ) {
-
-        }
+        //if( args[0].equals("CreateUser") ) {
+        //
+        //}
         
         if( args[0].equals("RegisterUser") ) {
             return; //System.exit(0);

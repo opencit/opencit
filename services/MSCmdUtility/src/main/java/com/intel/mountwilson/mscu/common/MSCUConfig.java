@@ -18,16 +18,16 @@ public class MSCUConfig extends ConfigBase {
 
     private static final Logger log = LoggerFactory.getLogger(MSCUConfig.class);
     private static final MSCUConfig global = new MSCUConfig();
+    private final static Properties defaults = new Properties();
     
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private MSCUConfig() {
         
-        super("management-cmdutil.properties", getDefaults());
+        super("management-cmdutil.properties", defaults);
     }
 
-    private static Properties getDefaults() {
-        Properties defaults = new Properties();
+    static {
         
         // Properties for the API Client
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
@@ -51,20 +51,9 @@ public class MSCUConfig extends ConfigBase {
         // Since the users of the command line utiltiy will be the same as the console users, we will use the same keystore directory.
         defaults.setProperty("mtwilson.mscu.keystore.dir", "/var/opt/intel/management-console/users"); // XXX TODO make a linux default and windows default, utiilizing some centralized configuration functions suh as getDataDirectory() which would already provide an os-specific directory that has already been created (or with a function to create it)
 
-	
-        return defaults;
-                
+	        
 	}
 
-    // for troubleshooting
-    @Override
-    public void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[] { "mtwilson.api.baseurl", "mtwilson.api.keystore", "mtwilson.mscu.gkvHostType" };
-        for(String key : keys) {
-            String value = c.getString(key);
-            log.debug(String.format("MSCUConfig [%s]: %s=%s", (label==null?"null":label), (key==null?"null":key), (value==null?"null":value)));  
-        }
-    }
 
     
     // Not required for the utility since it is not doing any DB operations directly.

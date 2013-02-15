@@ -76,8 +76,7 @@ public class Color implements Model {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Color other = (Color) obj;
-        return true;
+       return true;
     }
 
     @Override

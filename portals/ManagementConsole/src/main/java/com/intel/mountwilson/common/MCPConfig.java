@@ -18,16 +18,16 @@ public class MCPConfig extends ConfigBase {
 
     private static final Logger log = LoggerFactory.getLogger(MCPConfig.class);
     private static final MCPConfig global = new MCPConfig();
-    
+        private final static Properties defaults = new Properties();
+
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private MCPConfig() {
         
-        super("management-console.properties", getDefaults());
+        super("management-console.properties",defaults);
     }
 
-    private static Properties getDefaults() {
-        Properties defaults = new Properties();
+    static {
         
         // Properties for the API Client
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
@@ -43,8 +43,6 @@ public class MCPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
         defaults.setProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3");
 	
-        return defaults;
-                
 	}
 
     // for troubleshooting

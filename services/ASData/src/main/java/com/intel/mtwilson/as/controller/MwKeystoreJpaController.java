@@ -35,23 +35,21 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
     }
 
     public void create(MwKeystore mwKeystore) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             em.persist(mwKeystore);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void edit(MwKeystore mwKeystore) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             mwKeystore = em.merge(mwKeystore);
             em.getTransaction().commit();
@@ -65,16 +63,14 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
             }
             throw ex;
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(Integer id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             MwKeystore mwKeystore;
             try {
@@ -86,9 +82,7 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
             em.remove(mwKeystore);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 

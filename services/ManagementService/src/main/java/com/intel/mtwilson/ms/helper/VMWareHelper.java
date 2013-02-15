@@ -23,13 +23,15 @@ import javax.xml.stream.XMLStreamWriter;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.soap.SOAPFaultException;
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  *
  * @author ssbangal
  */
 public class VMWareHelper implements HostInfoInterface {
             //static Logger log = Logger.getLogger(VMWareHelper.class.getName());
-
+            private static Logger log = LoggerFactory.getLogger(VMWareHelper.class);
             private static final ManagedObjectReference SVC_INST_REF = new ManagedObjectReference();
             private static final String SVC_INST_NAME = "ServiceInstance";
             protected ServiceContent serviceContent;
@@ -117,7 +119,7 @@ public class VMWareHelper implements HostInfoInterface {
 			}
 			isConnected = false;
 		} catch (Exception e) {
-			//log.log(Level.SEVERE, "Error while logging out from VCenter Api.", e);
+                    log.trace("Error while logging out from VCenter API",e);
 		}
 	}
 
@@ -1169,10 +1171,10 @@ public class VMWareHelper implements HostInfoInterface {
          return null;
       }
 
-      ManagedObjectReference usecoll = collector;
-      if (usecoll == null) {
-         usecoll = serviceContent.getPropertyCollector();
-      }
+      //ManagedObjectReference usecoll = collector;
+      //if (usecoll == null) {
+      //   usecoll = serviceContent.getPropertyCollector();
+      //}
 
       ManagedObjectReference useroot = root;
       if (useroot == null) {
@@ -1723,12 +1725,12 @@ public class VMWareHelper implements HostInfoInterface {
             }
          }
 
-         Object expctdval = null;
+        
          // Check if the expected values have been reached and exit the loop if done.
          // Also exit the WaitForUpdates loop if this is the case.
          for (int chgi = 0; chgi < endVals.length && !reached; chgi++) {
             for (int vali = 0; vali < expectedVals[chgi].length && !reached; vali++) {
-               expctdval = expectedVals[chgi][vali];
+               Object expctdval = expectedVals[chgi][vali];
                reached = expctdval.equals(endVals[chgi]) || reached;
             }
          }

@@ -57,6 +57,8 @@ public class TrustAgentClient {
         try {
             Thread.sleep(50);
         } catch (Exception e) {
+            System.err.println("ignorning exception [" + e.getMessage() + "] thrown during sleep");
+            
         };
 
         System.err.println("Done reading/writing to/from socket, closing socket.");

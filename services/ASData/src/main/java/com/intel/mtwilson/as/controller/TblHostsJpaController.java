@@ -90,11 +90,11 @@ public class TblHostsJpaController implements Serializable {
             
             if (vmmMleId != null) {
                 vmmMleId.getTblHostsCollection().add(tblHosts);
-                vmmMleId = em.merge(vmmMleId);
+                em.merge(vmmMleId);
             }
             if (biosMleId != null) {
                 biosMleId.getTblHostsCollection().add(tblHosts);
-                biosMleId = em.merge(biosMleId);
+                em.merge(biosMleId);
             }
             for (TblSamlAssertion tblSamlAssertionCollectionTblSamlAssertion : tblHosts.getTblSamlAssertionCollection()) {
                 TblHosts oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion = tblSamlAssertionCollectionTblSamlAssertion.getHostId();
@@ -102,14 +102,12 @@ public class TblHostsJpaController implements Serializable {
                 tblSamlAssertionCollectionTblSamlAssertion = em.merge(tblSamlAssertionCollectionTblSamlAssertion);
                 if (oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion != null) {
                     oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion.getTblSamlAssertionCollection().remove(tblSamlAssertionCollectionTblSamlAssertion);
-                    oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion = em.merge(oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion);
+                    em.merge(oldHostIdOfTblSamlAssertionCollectionTblSamlAssertion);
                 }
             }
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
@@ -169,7 +167,7 @@ public class TblHostsJpaController implements Serializable {
             }
             if (vmmMleIdNew != null && !vmmMleIdNew.equals(vmmMleIdOld)) {
                 vmmMleIdNew.getTblHostsCollection().add(tblHosts);
-                vmmMleIdNew = em.merge(vmmMleIdNew);
+                em.merge(vmmMleIdNew);
             }
             if (biosMleIdOld != null && !biosMleIdOld.equals(biosMleIdNew)) {
                 biosMleIdOld.getTblHostsCollection().remove(tblHosts);
@@ -177,7 +175,7 @@ public class TblHostsJpaController implements Serializable {
             }
             if (biosMleIdNew != null && !biosMleIdNew.equals(biosMleIdOld)) {
                 biosMleIdNew.getTblHostsCollection().add(tblHosts);
-                biosMleIdNew = em.merge(biosMleIdNew);
+                em.merge(biosMleIdNew);
             }
             for (TblSamlAssertion tblSamlAssertionCollectionNewTblSamlAssertion : tblSamlAssertionCollectionNew) {
                 if (!tblSamlAssertionCollectionOld.contains(tblSamlAssertionCollectionNewTblSamlAssertion)) {
@@ -186,7 +184,7 @@ public class TblHostsJpaController implements Serializable {
                     tblSamlAssertionCollectionNewTblSamlAssertion = em.merge(tblSamlAssertionCollectionNewTblSamlAssertion);
                     if (oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion != null && !oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion.equals(tblHosts)) {
                         oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion.getTblSamlAssertionCollection().remove(tblSamlAssertionCollectionNewTblSamlAssertion);
-                        oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion = em.merge(oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion);
+                        em.merge(oldHostIdOfTblSamlAssertionCollectionNewTblSamlAssertion);
                     }
                 }
             }
@@ -201,9 +199,7 @@ public class TblHostsJpaController implements Serializable {
             }
             throw new ASDataException(ex);
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
@@ -232,19 +228,17 @@ public class TblHostsJpaController implements Serializable {
             TblMle vmmMleId = tblHosts.getVmmMleId();
             if (vmmMleId != null) {
                 vmmMleId.getTblHostsCollection().remove(tblHosts);
-                vmmMleId = em.merge(vmmMleId);
+                em.merge(vmmMleId);
             }
             TblMle biosMleId = tblHosts.getBiosMleId();
             if (biosMleId != null) {
                 biosMleId.getTblHostsCollection().remove(tblHosts);
-                biosMleId = em.merge(biosMleId);
+                em.merge(biosMleId);
             }
             em.remove(tblHosts);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
     

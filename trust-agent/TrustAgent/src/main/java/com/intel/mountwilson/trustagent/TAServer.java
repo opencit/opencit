@@ -61,11 +61,10 @@ public class TAServer extends BaseServer {
             } catch (Exception e) {
                 log.error( null, e);
             }finally{
+              
                 try {
-                	if( sock != null ) {
                 		log.info("Closing socket.");
                 		sock.close();
-                	}
                 } catch (IOException ex) {
                     log.error( null, ex);
                 }

@@ -207,8 +207,10 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
      * @throws InvalidPropertyFaultMsg
      * @throws JAXBException 
      */
-    private void getAllPcrAndModuleInformationFromHost() throws RuntimeFaultFaultMsg, InvalidPropertyFaultMsg, JAXBException {
-    }
+    
+    // XXX-stdalex 2/14 commenting out unused function for later removal
+    //private void getAllPcrAndModuleInformationFromHost() throws RuntimeFaultFaultMsg, InvalidPropertyFaultMsg, JAXBException {
+    //}
 
     
     private <T> String toXml(Class<T> clazz, T object) throws JAXBException {

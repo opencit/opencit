@@ -18,15 +18,15 @@ public class WLMPConfig extends ConfigBase {
 
     private static final Logger log = LoggerFactory.getLogger(WLMPConfig.class);
     private static final WLMPConfig global = new WLMPConfig();
-    
+        private final static Properties defaults = new Properties();
+
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private WLMPConfig() {
-        super("whitelist-portal.properties", getDefaults());
+        super("whitelist-portal.properties", defaults);
     }
 
-    private static Properties getDefaults() {
-        Properties defaults = new Properties();
+    static  {
         
         // Properties for the API Client
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
@@ -38,8 +38,6 @@ public class WLMPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.wlmp.sessionTimeOut", "1000");
         defaults.setProperty("mtwilson.wlmp.hostTypes", "Xen,KVM,VMWare");
         defaults.setProperty("mtwilson.wlmp.apiKeyExpirationNoticeInMonths", "3");
-	
-        return defaults;
 	}
 
     // for troubleshooting

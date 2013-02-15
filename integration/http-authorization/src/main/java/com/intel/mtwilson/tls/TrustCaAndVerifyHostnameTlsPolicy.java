@@ -79,6 +79,7 @@ public class TrustCaAndVerifyHostnameTlsPolicy implements TlsPolicy, ApacheTlsPo
                         return;
                     }
                     catch(Exception e) {
+                        log.trace("TrustCaAndVerifyHostnameTlsPolicy checkServerTrusted cert did not pass validity. checking next cert");
                         // this certificate is not a copy of xcs[i], but we continue to check other certificates
                     }
                 }
@@ -93,6 +94,7 @@ public class TrustCaAndVerifyHostnameTlsPolicy implements TlsPolicy, ApacheTlsPo
                     return;// XXX TODO   this works because if any of our trusted certs signed it, we're ok -  but we need to make sure there is a valid certificate PATH from xcs[0] to xcs[i] 
                 }
                 catch(Exception e) {
+                    log.trace("TrustCaAndVerifyHostnameTlsPolicy checkServerTrusted cert was not signed. checking next cert");
                     // this issuer did not sign xcs[i], but we continue checking other issuers
                 }
             }

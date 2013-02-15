@@ -19,8 +19,8 @@ public class JavaAPIClientTest {
 //    @Test
     public void testApacheHttpClientGET() throws IOException {
         String requestURL = "https://10.1.71.81:8181/AttestationService/resources/hosts/trust?hostname=1.2.3.4";
-        String clientId = "new_component@server.com";
-        String secretKey = "secret key 128 bytes long created in previous code snippet";
+        //String clientId = "new_component@server.com";
+        //String secretKey = "secret key 128 bytes long created in previous code snippet";
         // create the request
         HttpGet request = new HttpGet(requestURL);
         // add authorization header
@@ -38,8 +38,8 @@ public class JavaAPIClientTest {
 //    @Test
     public void testApacheHttpClientPUT() throws IOException {
         String requestURL = "https://10.1.71.81:8181/AttestationService/resources/hosts/trust?hostname=1.2.3.4";
-        String clientId = "new_component@server.com";
-        String secretKey = "secret key 128 bytes long created in previous code snippet";
+        //String clientId = "new_component@server.com";
+       // String secretKey = "secret key 128 bytes long created in previous code snippet";
         // create the request
         HttpGet request = new HttpGet(requestURL);
         // add authorization header

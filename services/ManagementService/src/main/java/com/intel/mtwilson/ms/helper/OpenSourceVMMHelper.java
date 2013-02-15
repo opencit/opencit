@@ -62,12 +62,12 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
      */
     @Override
     public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws Exception {
-        String attestationReport = "";
+        
         
 //        AttestationService asClient = (AttestationService) new ApiClient(ResourceFinder.getFile("management-service.properties"));
         AttestationService asClient = (AttestationService) new ApiClient(MSConfig.getConfiguration());
 
-        attestationReport = asClient.getHostAttestationReport(new Hostname(hostObj.HostName));
+        String attestationReport = asClient.getHostAttestationReport(new Hostname(hostObj.HostName));
         return attestationReport;
     }
     

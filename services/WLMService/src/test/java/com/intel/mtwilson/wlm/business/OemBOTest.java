@@ -109,9 +109,9 @@ public class OemBOTest {
         boolean isUpdated = false;
         List<OemData> list2 = instance.getAllOem();
         for(OemData r : list2) {
-            if( r.getName() != null && r.getName().equals(oemData.getName()) && r.getDescription() != null && r.getDescription().equals(updatedDescription) ) {
-                isUpdated = true;
-            }
+            	if(r.getName().equals(oemData.getName()) && r.getDescription().equals(updatedDescription)) {
+            		isUpdated = true;
+            	}
         }        
         assertTrue(isUpdated);
     }

@@ -18,15 +18,15 @@ public class TDPConfig extends ConfigBase {
 
     private static final Logger log = LoggerFactory.getLogger(TDPConfig.class);
     private static final TDPConfig global = new TDPConfig();
-    
+        private final static Properties defaults = new Properties();
+
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private TDPConfig() {
-        super("trust-dashboard.properties", getDefaults());
+        super("trust-dashboard.properties", defaults);
     }
 
-    private static Properties getDefaults() {
-        Properties defaults = new Properties();
+    static {
         
         // Properties for the API Client
         defaults.setProperty("mtwilson.api.baseurl", "https://127.0.0.1:8181");
@@ -39,7 +39,6 @@ public class TDPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.tdbp.paginationRowCount", "10");
         defaults.setProperty("mtwilson.tdbp.keystore.dir", "/var/opt/intel/trust-dashboard/users"); // XXX TODO make a linux default and windows default, utiilizing some centralized configuration functions suh as getDataDirectory() which would already provide an os-specific directory that has already been created (or with a function to create it)
         
-        return defaults;
                 
 	}
 

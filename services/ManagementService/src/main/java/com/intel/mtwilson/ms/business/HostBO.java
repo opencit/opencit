@@ -164,7 +164,7 @@ public class HostBO extends BaseBO {
     public boolean registerHostFromCustomData(HostConfigData hostConfigObj) {
         
         boolean registerStatus = false;
-        HostInfoInterface vmmHelperObj = null;
+        //HostInfoInterface vmmHelperObj = null;
         TxtHost txtHost = null;
         
         try {  
@@ -586,7 +586,7 @@ public class HostBO extends BaseBO {
      * @return : true on success.
      */
     public boolean configureWhiteListFromCustomData(HostConfigData hostConfigObj) {
-        String errorMessage = "";
+        
         boolean configStatus = false;
         String attestationReport;
 //        HostInfoInterface vmmHelperObj = null;
@@ -622,7 +622,7 @@ public class HostBO extends BaseBO {
                     
                     throw new MSException(ErrorCode.MS_INVALID_WHITELIST_TARGET, hostConfigObj.getBiosWLTarget().toString());
                 }                 
-            }
+            
             
             
             TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
@@ -743,7 +743,7 @@ public class HostBO extends BaseBO {
                         if (biosMLEAlreadyExists == false)
                             deleteMLE(apiClient, gkvHost, true);
                     } catch (Exception ex) {
-                        // ignore the error. It is already logged in the function
+                        log.trace("delete bios mle error",ex);
                     }
                     
                     // Delete the VMM MLE
@@ -751,7 +751,7 @@ public class HostBO extends BaseBO {
                         if (vmmMLEAlreadyExists == false)
                             deleteMLE(apiClient, gkvHost, false);
                     } catch (Exception ex) {
-                        // ignore the error. It is already logged in the function
+                        log.trace("delete vmm mle error",ex);
                     }
 
                     // Also note that we are ignoring any exception coming from the deleteMLE call as we do not
@@ -901,7 +901,7 @@ public class HostBO extends BaseBO {
             }            
 
             configStatus = true;
-            
+          }
         } catch (MSException me) {
             log.error("Error during white list configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
@@ -934,7 +934,7 @@ public class HostBO extends BaseBO {
      */
     public boolean verifyMLEForHost(HostConfigData hostConfigObj) {
         boolean verifyStatus = false;
-        String errorMessage = "";
+        
         
         try {
             
@@ -1021,6 +1021,7 @@ public class HostBO extends BaseBO {
 
         try {
             // Extract the host object
+          if(hostConfigObj != null) {
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             
             TblOemJpaController oemJpa = new TblOemJpaController(getASEntityManagerFactory());
@@ -1041,7 +1042,8 @@ public class HostBO extends BaseBO {
             hostObj.BIOS_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + tempVMMOSName.split("_")[0].toString();
 
             // If we are setting host specific MLE, then we need to append the host name to the BIOS Name as well
-            if (hostConfigObj != null && hostConfigObj.getBiosWLTarget() == HostWhiteListTarget.BIOS_HOST)
+            boolean value = (hostConfigObj.getBiosWLTarget() == HostWhiteListTarget.BIOS_HOST);
+            if (hostConfigObj != null && value)
                 hostObj.BIOS_Name = hostObj.HostName + "_" + hostObj.BIOS_Name;
             
             TblOem oemTblObj = oemJpa.findTblOemByName(hostObj.BIOS_Oem);
@@ -1092,7 +1094,7 @@ public class HostBO extends BaseBO {
                 biosMLEAlreadyExists = true;
                 log.info("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
             }
-
+          }
         } catch (MSException me) {
             
             log.error("Error during OEM - BIOS MLE configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -1128,7 +1130,7 @@ public class HostBO extends BaseBO {
         String attestationType = "";
         boolean vmmMLEAlreadyExists = false;
         try {
-            
+          if(hostConfigObj != null) {
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             
             TblOsJpaController osJpa = new TblOsJpaController((getASEntityManagerFactory()));
@@ -1165,11 +1167,13 @@ public class HostBO extends BaseBO {
                 log.info("Database already has the configuration details for the OS : " + hostObj.VMM_OSName);
             
             // If we are setting host specific MLE, then we need to append the host name to the VMM Name as well
-            if (hostConfigObj != null && hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_HOST)
+            boolean value = (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_HOST);
+            boolean value2 = (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM);
+            if (hostConfigObj != null && value) {
                 hostObj.VMM_Name = hostObj.HostName + "_" + hostObj.VMM_Name;
-            else if (hostConfigObj != null && hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM)
+            }else if (hostConfigObj != null && value2){
                 hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + hostObj.VMM_Name;
-            
+            }
             // Create the VMM MLE
             MleData mleVMMObj = new MleData();
             mleVMMObj.setName(hostObj.VMM_Name);
@@ -1204,7 +1208,7 @@ public class HostBO extends BaseBO {
                 vmmMLEAlreadyExists = true;
                 log.info("Database already has the configuration details for VMM MLE : " + hostObj.VMM_Name);
             }
-
+          }
         } catch (MSException me) {
             
             log.error("Error during OS - VMM MLE configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());

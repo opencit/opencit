@@ -44,7 +44,7 @@ public class TblModuleManifestLogJpaController implements Serializable {
             em.persist(tblModuleManifestLog);
             if (taLogId != null) {
                 taLogId.getTblModuleManifestLogCollection().add(tblModuleManifestLog);
-                taLogId = em.merge(taLogId);
+                em.merge(taLogId);
             }
             em.getTransaction().commit();
         } finally {
@@ -70,7 +70,7 @@ public class TblModuleManifestLogJpaController implements Serializable {
             }
             if (taLogIdNew != null && !taLogIdNew.equals(taLogIdOld)) {
                 taLogIdNew.getTblModuleManifestLogCollection().add(tblModuleManifestLog);
-                taLogIdNew = em.merge(taLogIdNew);
+                em.merge(taLogIdNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -101,7 +101,7 @@ public class TblModuleManifestLogJpaController implements Serializable {
             TblTaLog taLogId = tblModuleManifestLog.getTaLogId();
             if (taLogId != null) {
                 taLogId.getTblModuleManifestLogCollection().remove(tblModuleManifestLog);
-                taLogId = em.merge(taLogId);
+                em.merge(taLogId);
             }
             em.remove(tblModuleManifestLog);
             em.getTransaction().commit();

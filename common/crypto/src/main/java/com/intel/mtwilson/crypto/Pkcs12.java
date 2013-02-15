@@ -48,10 +48,9 @@ public class Pkcs12 {
     public Pkcs12(Resource resource, String password) throws IOException, KeyStoreException {
         keystoreResource = resource;
         keystorePassword = password;
-        InputStream in = null; 
         keystore = KeyStore.getInstance("PKCS12"); // throws KeyStoreException if this keystore type is not available
         try {
-            in = keystoreResource.getInputStream();
+            InputStream in = keystoreResource.getInputStream();
             try {
                 if( in == null ) {
                     keystore.load(null, keystorePassword.toCharArray());     // before a keystore may be accessed, it MUST be loaded;  passing null creates a new keystore.  see http://docs.oracle.com/javase/6/docs/api/java/io/InputStream.html                        

@@ -46,8 +46,7 @@ public class Flavor implements Model {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Flavor other = (Flavor) obj;
-        return true;
+       return true;
     }
 
     @Override

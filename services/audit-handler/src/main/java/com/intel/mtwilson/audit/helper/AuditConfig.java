@@ -33,6 +33,7 @@ public class AuditConfig extends ConfigBase {
         return global.getConfigurationInstance();
     }
     private static final Logger log = LoggerFactory.getLogger(AuditConfig.class);
+    private final static Properties defaults = new Properties();
 
     public static boolean isAsyncEnabled() {
         if(getConfiguration().getString("mountwilson.audit.async", "false").equalsIgnoreCase("true") )
@@ -43,11 +44,10 @@ public class AuditConfig extends ConfigBase {
 
     private AuditConfig() {
 
-        super("audit-handler.properties", getDefaults());
+        super("audit-handler.properties", defaults);
     }
 
-    private static Properties getDefaults() {
-        Properties defaults = new Properties();
+    static {
         defaults.setProperty("mountwilson.audit.db.password", "password");
         defaults.setProperty("mountwilson.audit.db.user", "root");
         defaults.setProperty("mountwilson.audit.db.host", "localhost");
@@ -56,16 +56,6 @@ public class AuditConfig extends ConfigBase {
         defaults.setProperty("mountwilson.audit.logunchangedcolumns", "true");
         defaults.setProperty("mountwilson.audit.async", "false");
         
-        return defaults;
-    }
-
-    // for troubleshooting
-    @Override
-    public void dumpConfiguration(Configuration c, String label) {
-//        String keys[] = new String[]{"mountwilson.audit.db.host", "mountwilson.audit.db.schema", "mountwilson.audit.db.user"};
-//        for (String key : keys) {
-//            String value = c.getString(key);
-//        }
     }
 
 

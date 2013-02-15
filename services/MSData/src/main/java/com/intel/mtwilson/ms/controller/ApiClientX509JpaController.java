@@ -57,7 +57,7 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
                 apiRoleX509CollectionApiRoleX509 = em.merge(apiRoleX509CollectionApiRoleX509);
                 if (oldApiClientX509OfApiRoleX509CollectionApiRoleX509 != null) {
                     oldApiClientX509OfApiRoleX509CollectionApiRoleX509.getApiRoleX509Collection().remove(apiRoleX509CollectionApiRoleX509);
-                    oldApiClientX509OfApiRoleX509CollectionApiRoleX509 = em.merge(oldApiClientX509OfApiRoleX509CollectionApiRoleX509);
+                    em.merge(oldApiClientX509OfApiRoleX509CollectionApiRoleX509);
                 }
             }
             em.getTransaction().commit();
@@ -102,7 +102,7 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
                     apiRoleX509CollectionNewApiRoleX509 = em.merge(apiRoleX509CollectionNewApiRoleX509);
                     if (oldApiClientX509OfApiRoleX509CollectionNewApiRoleX509 != null && !oldApiClientX509OfApiRoleX509CollectionNewApiRoleX509.equals(apiClientX509)) {
                         oldApiClientX509OfApiRoleX509CollectionNewApiRoleX509.getApiRoleX509Collection().remove(apiRoleX509CollectionNewApiRoleX509);
-                        oldApiClientX509OfApiRoleX509CollectionNewApiRoleX509 = em.merge(oldApiClientX509OfApiRoleX509CollectionNewApiRoleX509);
+                        em.merge(oldApiClientX509OfApiRoleX509CollectionNewApiRoleX509);
                     }
                 }
             }

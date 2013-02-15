@@ -85,8 +85,9 @@ public class VMwareConnectionPool {
         }
         finally {
             pool.remove(tlsConnection); // remove it from the pool, we'll recreate it later
-            return null;
+            
         }
+        return null;
     }
     
     /**

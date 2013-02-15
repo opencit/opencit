@@ -217,10 +217,13 @@ public class ConfigureRemote implements Command {
             }        
         }
         catch(NoSuchAlgorithmException e) {
+            console.printf("Ignoring NoSuchAlgorith exception thrown during createCertificates");
         }
         catch(CryptographyException e) {
+            console.printf("Ignoring Cryptography exception thrown during createCertificates");
         }
         catch(IOException e) {
+            console.printf("Ignoring IO exception thrown during createCertificates");
         }
     }
     
@@ -464,19 +467,19 @@ public class ConfigureRemote implements Command {
         
         ctx.admin = admin;
     }
-    
-    private void inputDistinguishedNameForCertificates() {
-        System.out.println("The X509 Certificates are customized with your organization's details. All of these fields are optional. Press enter without entering anything to leave them blank.");
-        DistinguishedName dn = new DistinguishedName();
+    // XXX-stdalex 2/14 commenting out unused function for removal later
+    //private void inputDistinguishedNameForCertificates() {
+    //    System.out.println("The X509 Certificates are customized with your organization's details. All of these fields are optional. Press enter without entering anything to leave them blank.");
+    //    DistinguishedName dn = new DistinguishedName();
 //        dn.commonName = getRequiredStringWithPrompt("Common Name (eg. Product Name)");
-        dn.organizationUnit = getRequiredStringWithPrompt("Organization Unit (eg. Product Name)");
-        dn.organization = getRequiredStringWithPrompt("Organization (eg. Your Company)");
-        dn.locality = getRequiredStringWithPrompt("Locality (eg. Your City)");
-        dn.state = getRequiredStringWithPrompt("Locality (eg. Your State or Province)");
-        dn.country = getRequiredStringWithPrompt("Country (eg. US)");
-        
-        ctx.dn = dn;
-    }
+    //    dn.organizationUnit = getRequiredStringWithPrompt("Organization Unit (eg. Product Name)");
+    //    dn.organization = getRequiredStringWithPrompt("Organization (eg. Your Company)");
+    //    dn.locality = getRequiredStringWithPrompt("Locality (eg. Your City)");
+    //    dn.state = getRequiredStringWithPrompt("Locality (eg. Your State or Province)");
+    //    dn.country = getRequiredStringWithPrompt("Country (eg. US)");
+    //    
+    //    ctx.dn = dn;
+    //}
 
     /**
      * TODO:  rewrite using X509Builder

@@ -97,7 +97,7 @@ public class TestTlsPolicyWithServerCaSigned {
         KeyPair caKeys = RsaUtil.generateRsaKeyPair(1024);
         caCert = X509Builder.factory().selfSigned("CN=testca", caKeys).expires(30, TimeUnit.DAYS).keyUsageCertificateAuthority().build();
         System.out.println("Created CA cert with CA flag: "+caCert.getBasicConstraints());
-        RsaCredentialX509 ca = new RsaCredentialX509(caKeys.getPrivate(), caCert);
+        // RsaCredentialX509 ca = new RsaCredentialX509(caKeys.getPrivate(), caCert);
 //        System.out.println("CA CERT PEM:");
 //        System.out.println(X509Util.encodePemCertificate(caCert));  // weird:   getBasicConstraints() above returns -1, when it should return Integer.MAX_VALUE according to the javadoc... writing cert to file as PEM and reading with java keytool shows the CA basic constraint with path length Integer.MAX_VALUE, so we know the certificate is generated correctly... not sure why it's not giving the right value here for getBasicConstraints() ... which is causing X509Util.isCA():booelan to return false incorrectly for the CA cert.
         // create tls cert
@@ -164,8 +164,8 @@ public class TestTlsPolicyWithServerCaSigned {
     @Test
     public void testInsecureClient() throws Exception {
         // prepare an empty keystore
-        ByteArrayResource resource = new ByteArrayResource();
-        SimpleKeystore keystore = new SimpleKeystore(resource, "password");
+        //ByteArrayResource resource = new ByteArrayResource();
+        //SimpleKeystore keystore = new SimpleKeystore(resource, "password");
 
         ApacheTlsPolicy tlsPolicyInsecure = new InsecureTlsPolicy();
         HttpClient httpClient = httpClientFactoryCreateSslClientWithPolicy(tlsPolicyInsecure); //new DefaultHttpClient();

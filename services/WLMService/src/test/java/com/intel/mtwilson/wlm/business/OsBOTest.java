@@ -144,9 +144,11 @@ public class OsBOTest {
         boolean isUpdated = false;
         List<OsData> list2 = instance.getAllOs();
         for(OsData r: list2) {
-            if( r.getName() != null && r.getName().equals(osData.getName()) && r.getDescription() != null && r.getDescription().equals(updatedDescription)) {
-                isUpdated = true;
-            }
+            
+            	if(r.getName().equals(osData.getName()) && r.getDescription().equals(updatedDescription)) {
+            		isUpdated = true;
+            	}
+
         }
         assertTrue(isUpdated);
     }

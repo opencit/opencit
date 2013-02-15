@@ -33,6 +33,7 @@ public class TlsPolicyTest {
         config.setProperty("mtwilson.api.ssl.policy", "TRUST_KNOWN_CERTIFICATE");
         
         ApiClient c = new ApiClient(new MapConfiguration(config));
-        String saml = c.getSamlForHost(new Hostname("1.2.3.4")); // IOException, ApiException, SignatureException
+        //String saml =
+        c.getSamlForHost(new Hostname("1.2.3.4")); // IOException, ApiException, SignatureException
     }
 }

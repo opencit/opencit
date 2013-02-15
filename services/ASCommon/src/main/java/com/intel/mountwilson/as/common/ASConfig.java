@@ -26,16 +26,16 @@ public class ASConfig extends ConfigBase{
     
     private static final ASConfig global = new ASConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
+    private final static Properties defaults = new Properties();
     
     private static final Logger log = LoggerFactory.getLogger(ASConfig.class);
     
     private ASConfig() {
         
-        super("attestation-service.properties", getDefaults());
+        super("attestation-service.properties", defaults);
     }
 
-	private static Properties getDefaults() {
-		Properties defaults = new Properties();
+    static {
         defaults.setProperty("mountwilson.as.db.password", "");
         defaults.setProperty("mountwilson.as.db.user", "root");
         defaults.setProperty("mountwilson.as.db.host", "localhost");
@@ -50,22 +50,7 @@ public class ASConfig extends ConfigBase{
         // mtwilson.taca.keystore.password
         // mtwilson.taca.key.alias
         // mtwilson.taca.key.password
-		return defaults;
 	}
-
-    // for troubleshooting
-	@Override
-    // for troubleshooting
-    public void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[]{"mtwilson.api.baseurl",
-            "mtwilson.api.ssl.verifyHostname", 
-            "mtwilson.db.driver", "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.schema", "mtwilson.db.user", "mtwilson.db.password", 
-            "mountwilson.as.db.driver", "mountwilson.as.db.host", "mountwilson.as.db.port", "mountwilson.as.db.schema", "mountwilson.as.db.user", "mountwilson.as.db.password"  };
-        for (String key : keys) {
-            String value = c.getString(key);
-            log.debug(String.format("ASConfig [%s]: %s=%s", (label==null?"null":label), (key==null?"null":key), (value==null?"null":value)));
-        }
-    }
 
         
     public static Properties getJpaProperties() {

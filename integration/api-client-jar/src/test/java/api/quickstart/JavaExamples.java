@@ -39,12 +39,17 @@ public class JavaExamples {
         ApiClient api = KeystoreUtil.clientForUserInDirectory(directory, username, password, server);
         String saml = api.getSamlForHost(new Hostname("192.168.1.100"));
         TrustAssertion trust = api.verifyTrustAssertion(saml);
-        X509Certificate aik = trust.getAikCertificate();
-        Date issued = trust.getDate();
-        String issuer = trust.getIssuer();
-        String hostname = trust.getSubject();
+        //X509Certificate aik = 
+        trust.getAikCertificate();
+        //Date issued = 
+        trust.getDate();
+        //String issuer = 
+        trust.getIssuer();
+        //String hostname =
+        trust.getSubject();
         for(String attr : trust.getAttributeNames()) {
-            String signedAttribute = trust.getStringAttribute(attr);
+            //String signedAttribute = 
+            trust.getStringAttribute(attr);
         }
     }
 }

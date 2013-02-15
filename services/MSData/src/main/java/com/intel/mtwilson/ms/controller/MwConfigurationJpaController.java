@@ -39,16 +39,13 @@ public class MwConfigurationJpaController extends GenericJpaController<MwConfigu
     }
 
     public void create(MwConfiguration mwConfiguration) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwConfiguration);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
                 em.close();
-            }
         }
     }
 

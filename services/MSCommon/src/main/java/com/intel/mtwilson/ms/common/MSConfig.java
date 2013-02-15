@@ -22,13 +22,12 @@ public class MSConfig extends ConfigBase {
     private static Logger log = LoggerFactory.getLogger(MSConfig.class);
     private static final MSConfig global = new MSConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-       
+    private final static Properties defaults = new Properties();
     private MSConfig() {
-        super("management-service.properties",getDefaults());
+        super("management-service.properties",defaults);
     }
 
-    private static Properties getDefaults() {
-	Properties defaults = new Properties();
+    static {
 
         defaults.setProperty("mountwilson.ms.db.password", "password");
         defaults.setProperty("mountwilson.ms.db.user", "root");
@@ -62,20 +61,6 @@ public class MSConfig extends ConfigBase {
         defaults.setProperty("mtwilson.rootca.certficate.file", "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); 
         defaults.setProperty("mtwilson.saml.certificate.file", "/etc/intel/cloudsecurity/saml.crt.pem");
         
-        return defaults;
-    }
-
-    // for troubleshooting
-	@Override
-    public void dumpConfiguration(Configuration c, String label) {
-        String keys[] = new String[]{"mtwilson.api.baseurl",
-            "mtwilson.api.ssl.verifyHostname", 
-            "mtwilson.db.driver", "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.schema", "mtwilson.db.user", "mtwilson.db.password", 
-            "mountwilson.as.db.driver", "mountwilson.as.db.host", "mountwilson.as.db.port", "mountwilson.as.db.schema", "mountwilson.as.db.user", "mountwilson.as.db.password"  };
-        for (String key : keys) {
-            String value = c.getString(key);
-            log.debug(String.format("MSConfig [%s]: %s=%s", (label==null?"null":label), (key==null?"null":key), (value==null?"null":value)));
-        }
     }
     
         /** 

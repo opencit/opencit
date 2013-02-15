@@ -195,7 +195,7 @@ public class TblPackageNamespaceJpaController implements Serializable {
         }
     }
     
-        public TblPackageNamespace findByName(String name) {
+    public TblPackageNamespace findByName(String name) {
         EntityManager em = getEntityManager();
         try {           
             Query query = em.createNamedQuery("TblPackageNamespace.findByName");
@@ -212,5 +212,22 @@ public class TblPackageNamespaceJpaController implements Serializable {
         }
         
     }
-
+    
+    
+     /**
+     *
+     * @param namespace
+     * @return
+     */
+    public boolean namespaceExists(String namespace) {
+            try {
+                findByName(namespace);
+                return true;
+            }
+            catch(Exception e) { 
+                return false; 
+            }
+    }
 }
+
+

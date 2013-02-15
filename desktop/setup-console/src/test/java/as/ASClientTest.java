@@ -71,6 +71,6 @@ public class ASClientTest {
     public void testSamlAssertion() throws Exception {
         String saml = api.getSamlForHost(new Hostname("1.2.3.4"));
         TrustAssertion assertion = api.verifyTrustAssertion(saml);
-        Date issuedOn = assertion.getAssertion().getIssueInstant().toDate();
+        assertion.getAssertion().getIssueInstant().toDate();
     }
 }

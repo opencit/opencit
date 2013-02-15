@@ -64,11 +64,10 @@ public class TASecureServer extends BaseServer {
             } catch (Exception e) {
                 log.error( null, e);
             } finally {
+              
                 try {
-
                     log.info("Closing socket.");
-                    if(sock!=null)
-                        sock.close();
+                    sock.close();
                 } catch (IOException ex) {
                     log.error(null, ex);
                 }

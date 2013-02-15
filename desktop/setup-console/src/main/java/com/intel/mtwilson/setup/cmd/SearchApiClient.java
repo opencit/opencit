@@ -102,14 +102,15 @@ public class SearchApiClient implements Command {
 
     
     // XXX see also RemoteCommand in com.intel.mtwilson.setup (not used) and com.intel.mtwilson (in api-client)
-    private static String getLocalHostAddress() {
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            return addr.getHostAddress();
-        } catch (UnknownHostException ex) {
-            return "127.0.0.1";
-        }
-    }
+    // XXX-stdalex 2/14 commenting out unused function for removal later
+    //private static String getLocalHostAddress() {
+    //    try {
+    //        InetAddress addr = InetAddress.getLocalHost();
+    //        return addr.getHostAddress();
+    //    } catch (UnknownHostException ex) {
+    //        return "127.0.0.1";
+    //    }
+    //}
     
     private String readInputStringWithPrompt(String prompt) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

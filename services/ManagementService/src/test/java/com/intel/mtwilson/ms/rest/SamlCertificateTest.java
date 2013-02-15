@@ -36,7 +36,7 @@ public class SamlCertificateTest {
         SamlCertificate instance = new SamlCertificate();
         byte[] expResult = null;
         byte[] result = instance.getSamlCertificate();
-     
+        System.err.println("Saml Cert == " + result.toString());
 
     }
 

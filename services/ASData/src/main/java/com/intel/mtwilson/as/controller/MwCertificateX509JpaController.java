@@ -36,23 +36,20 @@ public class MwCertificateX509JpaController extends GenericJpaController<MwCerti
     }
 
     public void create(MwCertificateX509 mwCertificateX509) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwCertificateX509);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
                 em.close();
-            }
         }
     }
 
     public void edit(MwCertificateX509 mwCertificateX509) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             mwCertificateX509 = em.merge(mwCertificateX509);
             em.getTransaction().commit();
@@ -66,16 +63,14 @@ public class MwCertificateX509JpaController extends GenericJpaController<MwCerti
             }
             throw ex;
         } finally {
-            if (em != null) {
                 em.close();
-            }
         }
     }
 
     public void destroy(Integer id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
+            
             em.getTransaction().begin();
             MwCertificateX509 mwCertificateX509;
             try {
@@ -87,9 +82,7 @@ public class MwCertificateX509JpaController extends GenericJpaController<MwCerti
             em.remove(mwCertificateX509);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
                 em.close();
-            }
         }
     }
 

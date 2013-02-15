@@ -451,12 +451,9 @@ public class HostTrustBO extends BaseBO {
     public Boolean addHostLocation(HostLocation hlObj) {
 
         TblLocationPcrJpaController locJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
-        TblLocationPcr locPCR = null;
-        String currentLocation = "";
         try {
-
             if (hlObj != null && !hlObj.white_list_value.isEmpty()) {
-                locPCR = locJpaController.findTblLocationPcrByPcrValueEx(hlObj.white_list_value);
+                TblLocationPcr locPCR = locJpaController.findTblLocationPcrByPcrValueEx(hlObj.white_list_value);
                 if (locPCR != null) {
                     log.info(String.format("An entry already existing in the location table for the white list specified [%s | %s]"
                             , locPCR.getLocation(), hlObj.white_list_value));

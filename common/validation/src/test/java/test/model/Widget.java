@@ -59,7 +59,6 @@ public class Widget implements Model {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Widget other = (Widget) obj;
         return true;
     }
 

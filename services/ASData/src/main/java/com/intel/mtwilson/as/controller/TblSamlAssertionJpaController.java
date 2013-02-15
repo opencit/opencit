@@ -45,7 +45,7 @@ public class TblSamlAssertionJpaController implements Serializable {
             em.persist(tblSamlAssertion);
             if (hostId != null) {
                 hostId.getTblSamlAssertionCollection().add(tblSamlAssertion);
-                hostId = em.merge(hostId);
+                em.merge(hostId);
             }
             em.getTransaction().commit();
         } finally {
@@ -71,7 +71,7 @@ public class TblSamlAssertionJpaController implements Serializable {
             }
             if (hostIdNew != null && !hostIdNew.equals(hostIdOld)) {
                 hostIdNew.getTblSamlAssertionCollection().add(tblSamlAssertion);
-                hostIdNew = em.merge(hostIdNew);
+                em.merge(hostIdNew);
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -102,7 +102,7 @@ public class TblSamlAssertionJpaController implements Serializable {
             TblHosts hostId = tblSamlAssertion.getHostId();
             if (hostId != null) {
                 hostId.getTblSamlAssertionCollection().remove(tblSamlAssertion);
-                hostId = em.merge(hostId);
+                em.merge(hostId);
             }
             em.remove(tblSamlAssertion);
             em.getTransaction().commit();

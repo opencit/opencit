@@ -442,8 +442,7 @@ public class MleBO extends BaseBO {
          * 
          */
 	private void addPcrManifest(TblMle tblMle, List<ManifestData> mleManifests) {
-		Date today = new Date(System.currentTimeMillis());
-
+		
 		tblMle.setTblPcrManifestCollection(new ArrayList<TblPcrManifest>());
 
 		if (mleManifests != null) {
@@ -485,8 +484,6 @@ public class MleBO extends BaseBO {
          * @throws ASDataException 
          */
 	private void updatePcrManifest(TblMle tblMle, MleData mleData) throws NonexistentEntityException, ASDataException {
-		Date today = new Date(System.currentTimeMillis());
-
 		HashMap<String, String> newPCRMap = getPcrMap(mleData);
 
 		if (tblMle.getTblPcrManifestCollection() != null) { // this can be null for MODULE Manifest
@@ -908,16 +905,9 @@ public class MleBO extends BaseBO {
                     throw new ASException(nre,ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());                    
                 }
                 
-                try {
-
-                    // Since there will be only one entry for now, we will just hardcode it for now.
-                    // TO-DO: See if we can change this.
-                    nsPackNS = packageNSJpaController.findByName("Standard_Global_NS");
-
-                } catch (NoResultException nre){
+                if(! packageNSJpaController.namespaceExists("Standard_Global_NS"))
                     throw new ASException(ErrorCode.WS_NAME_SPACE_DOES_NOT_EXIST);
-                }
-                                
+                               
                 tblModule.setDigestValue(moduleData.getDigestValue());
                 tblModule.setDescription(moduleData.getDescription());
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information

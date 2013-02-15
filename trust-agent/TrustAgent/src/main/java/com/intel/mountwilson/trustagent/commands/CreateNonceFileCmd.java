@@ -51,7 +51,7 @@ public class CreateNonceFileCmd implements ICommand {
 		} catch (Exception e) {
 			throw new TAException(ErrorCode.ERROR, "Error while creating the nonce file" ,e);
 		} finally{
-			if(stream != null)
+			
 				try {
 					stream.close();
 				} catch (IOException e) {

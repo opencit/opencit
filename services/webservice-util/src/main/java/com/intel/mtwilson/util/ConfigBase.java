@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.commons.configuration.*;
@@ -40,7 +43,18 @@ public abstract class ConfigBase {
     }
 
     // for troubleshooting
-    public abstract void dumpConfiguration(Configuration c, String label);
+    public void dumpConfiguration(Configuration c, String label) {
+        HashSet<String> keyset = new HashSet<String>(defaultProperties.stringPropertyNames()); // make a copy because we will add to it
+        String keys[] = new String[]{"mtwilson.api.baseurl",
+            "mtwilson.api.ssl.verifyHostname", 
+            "mtwilson.db.driver", "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.schema", "mtwilson.db.user", "mtwilson.db.password" };
+        keyset.addAll(Arrays.asList(keys));
+        for (String key : keyset) {
+            String value = c.getString(key);
+            log.debug(String.format("%s [%s]: %s=%s", getClass().getSimpleName(), label, key, value)); // label==null?"null":label), (key==null?"null":key), (value==null?"null":value)));
+        }
+    }
+            
     // stdalex 1/23 massive remove of println statements to decrese logging to installer
 
     private Configuration gatherConfiguration(String propertiesFilename,

@@ -56,7 +56,7 @@ public class TblTaLogJpaController implements Serializable {
                 tblModuleManifestLogCollectionTblModuleManifestLog = em.merge(tblModuleManifestLogCollectionTblModuleManifestLog);
                 if (oldTaLogIdOfTblModuleManifestLogCollectionTblModuleManifestLog != null) {
                     oldTaLogIdOfTblModuleManifestLogCollectionTblModuleManifestLog.getTblModuleManifestLogCollection().remove(tblModuleManifestLogCollectionTblModuleManifestLog);
-                    oldTaLogIdOfTblModuleManifestLogCollectionTblModuleManifestLog = em.merge(oldTaLogIdOfTblModuleManifestLogCollectionTblModuleManifestLog);
+                    em.merge(oldTaLogIdOfTblModuleManifestLogCollectionTblModuleManifestLog);
                 }
             }
             em.getTransaction().commit();
@@ -99,7 +99,7 @@ public class TblTaLogJpaController implements Serializable {
                     tblModuleManifestLogCollectionNewTblModuleManifestLog = em.merge(tblModuleManifestLogCollectionNewTblModuleManifestLog);
                     if (oldTaLogIdOfTblModuleManifestLogCollectionNewTblModuleManifestLog != null && !oldTaLogIdOfTblModuleManifestLogCollectionNewTblModuleManifestLog.equals(tblTaLog)) {
                         oldTaLogIdOfTblModuleManifestLogCollectionNewTblModuleManifestLog.getTblModuleManifestLogCollection().remove(tblModuleManifestLogCollectionNewTblModuleManifestLog);
-                        oldTaLogIdOfTblModuleManifestLogCollectionNewTblModuleManifestLog = em.merge(oldTaLogIdOfTblModuleManifestLogCollectionNewTblModuleManifestLog);
+                        em.merge(oldTaLogIdOfTblModuleManifestLogCollectionNewTblModuleManifestLog);
                     }
                 }
             }

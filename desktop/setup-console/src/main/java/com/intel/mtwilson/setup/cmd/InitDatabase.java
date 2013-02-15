@@ -147,7 +147,7 @@ public class InitDatabase implements Command {
             System.out.println("Got "+columns+" columns from datbase server");
             System.out.println("First column type: "+rs.getMetaData().getColumnTypeName(1));
             System.out.println("First column: "+rs.getString(1));
-            if( hostname != null ) { hostname = rs.getString(1); }
+            hostname = rs.getString(1); 
         }
         rs.close();
         s.close();

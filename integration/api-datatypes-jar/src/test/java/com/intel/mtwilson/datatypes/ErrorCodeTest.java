@@ -14,26 +14,24 @@ public class ErrorCodeTest {
     
     @Test
     public void testErrorCodeWithFormataAndMultipleConcat(){
-        
-        
         AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_ASSOCIATION_EXISTS,"hello","how",1111);
-        
-        System.out.println(authResponse.getErrorMessage());
+        if(authResponse.getErrorCodeEnum() == ErrorCode.WS_MLE_ASSOCIATION_EXISTS)
+            System.out.println(authResponse.getErrorMessage());
     }
 
     @Test
     public void testErrorCodeWithFormataAndSingleConcat(){
         AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_DATA_MISSING,"MLNAME");
-        
-        System.out.println(authResponse.getErrorMessage());
+        if(authResponse.getErrorCodeEnum() == ErrorCode.WS_MLE_DATA_MISSING)
+            System.out.println(authResponse.getErrorMessage());
     }
 
 
         @Test
     public void testErrorCodeWithNoFormat(){
         AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_DATA_MISSING);
-        
-        System.out.println(authResponse.getErrorMessage());
+         if(authResponse.getErrorCodeEnum() == ErrorCode.WS_MLE_DATA_MISSING)
+            System.out.println(authResponse.getErrorMessage());
     }
 
     
