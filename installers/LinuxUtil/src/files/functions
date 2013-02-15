@@ -1196,7 +1196,7 @@ glassfish_logback() {
 #  while [ -n "${prev_logback}" ]
 #  do
     echo "Deleting existing system property ${prev_logback}"
-    $glassfish delete-system-property "${prev_logback}"
+    $glassfish delete-system-property "${prev_logback}" 2>/dev/null >/dev/null
 #    prev_logback=`$glassfish list-system-properties 2>/dev/null | grep "logback.configurationFile" | head -n 1`
 #  done
   $glassfish create-system-properties logback.configurationFile=/etc/intel/cloudsecurity/logback.xml
