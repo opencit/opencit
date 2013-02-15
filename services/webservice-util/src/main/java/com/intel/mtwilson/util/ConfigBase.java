@@ -22,15 +22,21 @@ import org.apache.commons.configuration.*;
  */
 public abstract class ConfigBase {
 
-    private Logger log = LoggerFactory.getLogger(getClass().getName());
-    private final Configuration config;
+    private Logger log = LoggerFactory.getLogger(getClass());
+    private Configuration config = null;
+    private final String propertyFileName;
+    private final Properties defaultProperties;
 
     public Configuration getConfigurationInstance() {
+        if( config == null ) {
+            config = gatherConfiguration(propertyFileName, defaultProperties);
+        }
         return config;
     }
 
-    public ConfigBase(String propertyFileName, Properties defaults) {
-        config = gatherConfiguration(propertyFileName, defaults);
+    public ConfigBase(String propertyFileName, Properties defaultProperties) {
+        this.propertyFileName = propertyFileName;
+        this.defaultProperties = defaultProperties;
     }
 
     // for troubleshooting
