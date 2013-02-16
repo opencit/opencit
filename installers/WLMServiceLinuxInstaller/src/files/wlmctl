@@ -33,10 +33,10 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 
 
 setup_interactive_install() {
-  if using_mysql; then
-    mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-    mysql_create_database
-  fi
+  #if using_mysql; then
+    #mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+    #mysql_create_database
+  #fi
   if using_glassfish; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
@@ -54,8 +54,9 @@ setup_interactive_install() {
 
 
 setup() {
-  mysql_clear; java_clear; glassfish_clear;
+  #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
+  . "${package_env_filename}"
   if [[ -z "$JAVA_HOME" ]]; then
       echo_failure "Cannot find Java"
       print_env_summary_report
@@ -66,7 +67,7 @@ setup() {
       print_env_summary_report
       exit 1
   fi
-  if [[ using_mysql && -z "$MYSQL_HOME" ]]; then
+  if [[ using_mysql && -z "$mysql" ]]; then
       echo_failure "Cannot find Mysql"
       print_env_summary_report
       exit 1

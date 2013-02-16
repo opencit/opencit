@@ -86,8 +86,9 @@ setup_interactive_install() {
 
 
 setup() {
-  mysql_clear; java_clear; glassfish_clear;
+  #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
+  . "${package_env_filename}"
   if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
       echo_warning "Missing one or more required packages"
       setup_print_summary
