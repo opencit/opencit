@@ -1449,11 +1449,8 @@ glassfish_create_ssl_cert_prompt() {
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
       if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
       glassfish_require
-      local ssl_domain
-      echo -n "Domain name for SSL Certificate [127.0.0.1]: "
-      read ssl_domain
-      ssl_domain=${ssl_domain:-"127.0.0.1"}
-      glassfish_create_ssl_cert "${ssl_domain}"
+      prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
+      glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
     fi
 }
 
@@ -1462,8 +1459,8 @@ glassfish_create_ssl_cert_prompt() {
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
 # XXX this function assumes we're using the first glassfish domain... usually "domain1"
 glassfish_create_ssl_cert() {
-  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
-  return
+#  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
+#  return
   if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"

@@ -95,7 +95,7 @@ public class RegisterUser extends AbstractCommand {
             p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");
             p.setProperty("mtwilson.api.ssl.verifyHostname", "true");            
             */
-            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); // must be secure out of the box!
+            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE");
             ApiClient c = new ApiClient(server, rsaCredential, keystore, new MapConfiguration(p)); //ConfigurationFactory.fromSystemEnvironment());
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded());
