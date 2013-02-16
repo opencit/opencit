@@ -15,6 +15,8 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
 import com.intel.mountwilson.common.Config;
+import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
@@ -81,6 +83,7 @@ public class TASecureServer extends BaseServer {
 
         TASecureServer server;
 		try {
+                    Security.addProvider(new BouncyCastleProvider());
 			server = new TASecureServer(getSecurePort());
 			server.waitForConnections();
 		} catch (Exception e) {
