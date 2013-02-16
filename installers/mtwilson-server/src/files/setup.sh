@@ -112,6 +112,7 @@ if using_glassfish; then
   glassfish_installer=`find_installer glassfish`
   echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
   ./$glassfish_installer  >> $INSTALL_LOG_FILE
+  mtwilson glassfish-sslcert
   echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
 elif using_tomcat; then
   echo_warning "Relying on an existing Tomcat installation"
