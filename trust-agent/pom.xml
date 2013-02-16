@@ -15,6 +15,7 @@
   
 
   <modules>
+    <module>HisPrivacyCAWebServices2</module>
     <module>PrivacyCA</module>
     <module>TrustAgent</module>
   </modules>
