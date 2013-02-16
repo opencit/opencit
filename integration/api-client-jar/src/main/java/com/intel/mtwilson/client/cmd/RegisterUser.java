@@ -90,9 +90,12 @@ public class RegisterUser extends AbstractCommand {
             
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
             Properties p = new Properties();
+            /*
             p.setProperty("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME"); // must be secure out of the box!
             p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");
             p.setProperty("mtwilson.api.ssl.verifyHostname", "true");            
+            */
+            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); // must be secure out of the box!
             ApiClient c = new ApiClient(server, rsaCredential, keystore, new MapConfiguration(p)); //ConfigurationFactory.fromSystemEnvironment());
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded());
