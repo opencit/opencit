@@ -85,13 +85,11 @@
                                 </excludes>
                             </filter>
                         </filters>
-                        <!--
                         <artifactSet>
                             <excludes>
                                 <exclude>org.bouncycastle:bcprov-jdk15</exclude>
                             </excludes>
                         </artifactSet>
-                        -->
                 </configuration>
             </execution>
         </executions>
