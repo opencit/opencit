@@ -5,9 +5,14 @@
 package com.intel.mountwilson.trustagent;
 
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Security;
+import java.security.Signature;
+import java.security.SignatureException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -44,7 +49,7 @@ public class Diagnostic {
     
     public static void checkBouncycastleAlgorithms() {
         tryMacWithPassword("HmacSHA1", "hello world", "xyzzy");        
-        trySha1WithRsaEncryption();
+        trySignature();
     }
     
     private static void tryMacWithPassword(String algorithmName, String message, String password) {
@@ -66,9 +71,33 @@ public class Diagnostic {
         }
     }
     
-    private static void trySha1WithRsaEncryption() {
-        SHA1WithRSAEncryption alg = new SHA1WithRSAEncryption();
-        System.out.println("Constructed algorithm: "+alg.getClass().getName());
+    private static void trySignature() {
+        String algorithmName = "SHA1withRSA";
+        try {
+            // generate keypair
+            KeyPair keyPair = KeyPairGenerator.getInstance("RSA", "BC").generateKeyPair(); // NoSuchAlgorithmException, NoSuchProviderException
+            PrivateKey privateKey = keyPair.getPrivate();
+            String plaintext = "This is the message being signed";
+
+            // generate signature
+            Signature instance = Signature.getInstance("SHA1withRSA", "BC"); // NoSuchAlgorithmException, NoSuchProviderException
+            instance.initSign(privateKey); // InvalidKeyException
+            instance.update((plaintext).getBytes()); // SignatureException
+            byte[] signature = instance.sign();
+
+            System.out.println("Generated SHA1 with RSA signature of length: "+signature.length);
+        }
+        catch(NoSuchProviderException e) {
+            System.err.println("Cannot use provider: BC: "+e.toString());
+        }
+        catch(NoSuchAlgorithmException e) {
+            System.err.println("Cannot use algorithm: "+algorithmName+": "+e.toString());            
+        }
+        catch(InvalidKeyException e) {
+            System.err.println("Cannot use key: "+e.toString());
+        }
+        catch(SignatureException e) {
+            System.err.println("Cannot generate signature: "+e.toString());
+        }
     }
-    
 }
