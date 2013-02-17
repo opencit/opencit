@@ -10,6 +10,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
@@ -48,8 +49,18 @@ public class Diagnostic {
     }
     
     public static void checkBouncycastleAlgorithms() {
+        printAvailableAlgorithms();
         tryMacWithPassword("HmacSHA1", "hello world", "xyzzy");        
         trySignature();
+    }
+    
+    private static void printAvailableAlgorithms() {
+        for (Provider provider: Security.getProviders()) {
+          System.out.println(provider.getName());
+          for (String key: provider.stringPropertyNames()) {
+            System.out.println("\t" + key + "\t" + provider.getProperty(key));
+          }
+        }        
     }
     
     private static void tryMacWithPassword(String algorithmName, String message, String password) {
@@ -80,7 +91,7 @@ public class Diagnostic {
             String plaintext = "This is the message being signed";
 
             // generate signature
-            Signature instance = Signature.getInstance("SHA1withRSA", "BC"); // NoSuchAlgorithmException, NoSuchProviderException
+            Signature instance = Signature.getInstance("SHA1withRSAEncryption", "BC"); // NoSuchAlgorithmException, NoSuchProviderException
             instance.initSign(privateKey); // InvalidKeyException
             instance.update((plaintext).getBytes()); // SignatureException
             byte[] signature = instance.sign();

@@ -24,6 +24,12 @@ public class CreateIdentityCmd implements ICommand {
     Logger log = LoggerFactory.getLogger(getClass().getName());
     private TADataContext context;
 
+    public static void main(String[] args) throws TAException {
+        TADataContext ctx = new TADataContext();
+        CreateIdentityCmd cmd = new CreateIdentityCmd(ctx);
+        cmd.execute();
+    }
+    
     public CreateIdentityCmd(TADataContext context) {
         this.context = context;
     }
