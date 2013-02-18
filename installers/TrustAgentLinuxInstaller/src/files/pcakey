@@ -103,7 +103,8 @@ get_privacyca_ssl() {
   openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
   if [ -f "${package_dir}/cert/privacyca.ssl.crt" ]; then rm ${package_dir}/cert/privacyca.ssl.txt; fi
   echo "Importing Privacy CA SSL Certificate into Trust Agent's Keystore..."
-  $keytool -import -keystore $keystore -storepass "${storepass}" -file ${package_dir}/cert/privacyca.ssl.crt
+  local datestr=`date +%Y%m%d.%H%M`
+  $keytool -import -noprompt -keystore $keystore -storepass "${storepass}" -file ${package_dir}/cert/privacyca.ssl.crt -alias "privacyca-$datestr"
 }
 
 import_privacyca_files() {

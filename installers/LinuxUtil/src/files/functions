@@ -463,7 +463,13 @@ update_property_in_file() {
 # - variable "yum" contains path to yum or empty
 yum_detect() {
   yum=`which yum 2>/dev/null`
+  if [ -n "$yum" ]; then return 0; else return 1; fi
 }
+no_yum() {
+  yum_detect
+  if [ $? -eq 0 ]; then return 1; else return 0; fi
+}
+
 # Output:
 # - variable "rpm" contains path to rpm or empty
 rpm_detect() {

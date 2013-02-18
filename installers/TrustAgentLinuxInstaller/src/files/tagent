@@ -183,14 +183,10 @@ setup_env() {
 }
 
 setup() {
-  yum_detect > /dev/null
-  java_detect > /dev/null
+  # bug #492 if a jdk/jre was already configured, we need to leave it alone because it may have customized security policy to allow bouncycastle
   read_local_config
-  if [[ -z "$JAVA_HOME" ]]; then
-      echo_failure "Cannot find Java"
-      setup_print_summary
-      exit 1
-  fi
+  if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
+  yum_detect > /dev/null
   # create the env file first because pcakey in the interactive install depends on it
   setup_env > "${package_env_filename}"
   setup_interactive_install
