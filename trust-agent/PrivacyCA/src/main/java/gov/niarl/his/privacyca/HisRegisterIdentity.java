@@ -13,8 +13,8 @@
 
 package gov.niarl.his.privacyca;
 
-import gov.niarl.sal.webservices.hisWebService.client.HisWebServicesClientInvoker;
-import gov.niarl.sal.webservices.hisWebServices.clientWsImport.HisEnrollmentWebService;
+//import gov.niarl.sal.webservices.hisWebService.client.HisWebServicesClientInvoker;
+//import gov.niarl.sal.webservices.hisWebServices.clientWsImport.HisEnrollmentWebService;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +40,7 @@ public class HisRegisterIdentity {
 	/**
 	 * Entry point for the class
 	 */
+    /*
 	public static void main(String[] args){
 		final String HIS_REGISTRATION_URL = "HisRegistrationUrl";
 		final String TRUST_STORE = "TrustStore";
@@ -108,5 +109,5 @@ public class HisRegisterIdentity {
 		System.out.println("DONE");
 		System.exit(0);
 		return;
-	}
+	}*/
 }

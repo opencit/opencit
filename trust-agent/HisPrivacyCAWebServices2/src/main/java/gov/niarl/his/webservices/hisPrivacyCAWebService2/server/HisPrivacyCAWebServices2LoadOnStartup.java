@@ -24,8 +24,8 @@ import java.util.StringTokenizer;
 
 import gov.niarl.his.privacyca.HisSetup;
 import gov.niarl.his.privacyca.TpmUtils;
-import gov.niarl.sal.webservices.hisWebService.client.HisWebServicesClientInvoker;
-import gov.niarl.sal.webservices.hisWebServices.clientWsImport.HisEnrollmentWebService;
+//import gov.niarl.sal.webservices.hisWebService.client.HisWebServicesClientInvoker;
+//import gov.niarl.sal.webservices.hisWebServices.clientWsImport.HisEnrollmentWebService;
 
 import java.io.FileNotFoundException;
 import java.util.logging.Level;

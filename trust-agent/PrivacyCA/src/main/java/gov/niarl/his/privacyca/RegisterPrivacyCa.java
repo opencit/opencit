@@ -13,8 +13,8 @@
 
 package gov.niarl.his.privacyca;
 
-import gov.niarl.sal.webservices.hisWebService.client.*;
-import gov.niarl.sal.webservices.hisWebServices.clientWsImport.*;
+//import gov.niarl.sal.webservices.hisWebService.client.*;
+//import gov.niarl.sal.webservices.hisWebServices.clientWsImport.*;
 
 import java.io.*;
 import java.security.cert.X509Certificate;
@@ -37,6 +37,7 @@ public class RegisterPrivacyCa {
 	/**
 	 * Entry point into the program.
 	 */
+    /*
 	public static void main(String[] args) {
 		final String HIS_REGISTRATION_URL = "HisRegistrationUrl";
 		final String TRUST_STORE = "TrustStore";
@@ -107,4 +108,5 @@ public class RegisterPrivacyCa {
 		System.exit(0);
 		return;
 	}
+        */
 }

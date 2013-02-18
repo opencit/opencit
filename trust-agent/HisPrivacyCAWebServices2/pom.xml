@@ -74,19 +74,27 @@
                     <scope>provided</scope>
                 </dependency>
                 -->
+                <!--
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
-            <version>1.0</version>
+            <version>1.0.1-SNAPSHOT</version>
 	    <classifier>HisPrivacyCAWebServices2-client</classifier>
                     <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
-            <version>1.0</version>
+            <version>1.0.1-SNAPSHOT</version>
 	    <classifier>HisWebServices-client</classifier>
                     <scope>provided</scope>
+        </dependency>
+-->
+        <dependency>
+            <groupId>gov.niarl.his.webservices</groupId>
+            <artifactId>his-clients</artifactId>
+            <version>1.0</version>
+	    <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
 
 
@@ -204,6 +212,18 @@
                                 <file>${project.build.directory}/${project.artifactId}.war</file>
                                 <type>war</type>
                             </artifact>
+			      <artifact>
+				  <file>${basedir}/clientlib/HisPrivacyCAWebServices2-client.jar</file>
+				  <type>jar</type>
+				  <classifier>client</classifier>
+			      </artifact>
+                              <!--
+			      <artifact>
+				  <file>HisWebServices-client.jar</file>
+				  <type>jar</type>
+				  <classifier>HisWebServices-client</classifier>
+			      </artifact>
+                              -->
                         </artifacts>
                     </configuration>
                 </execution>

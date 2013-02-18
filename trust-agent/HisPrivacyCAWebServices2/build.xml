@@ -93,7 +93,8 @@
 			keep="true" 
 			destdir="client" 
 			package="gov.niarl.his.webservices.hisPrivacyCAWebServices2.clientWsImport"
-			wsdl="http://localhost:8080/HisPrivacyCAWebServices2/hisPrivacyCAWebService2?wsdl" />
+			wsdl="src/main/resources/hisPrivacyCAWebService2.wsdl" /> <!-- http://localhost:8080/HisPrivacyCAWebServices2/hisPrivacyCAWebService2?wsdl -->
+                        <!--
 		<wsimport 
 			debug="true" 
 			verbose="true" 
@@ -101,6 +102,7 @@
 			destdir="client" 
 			package="gov.niarl.his.webservices.hisPrivacyCAWebServices2.clientWsImport"
 			wsdl="http://localhost:8080/HisPrivacyCAWebServices2/hisPrivacyCAWebService2FactoryService?wsdl" />
+                        -->
 		<apt debug="true" verbose="true" destdir="client" sourcedestdir="client" sourcepath="./src/main/java">
 			<classpath>
 				<path refid="client.compile.classpath" />
@@ -109,7 +111,7 @@
 			<source dir="./src/main/java" includes="**/hisPrivacyCAWebService2/client/**/*.java,**/hisPrivacyCAWebService2/*,Main.java" />
 		</apt>
 		<jar jarfile="clientlib/HisPrivacyCAWebServices2-client.jar" basedir="client" />
-		<delete dir="client" />
+		<!--<delete dir="client" />-->
 	</target>
 
 	<target name="clientInvoker">
