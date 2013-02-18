@@ -137,6 +137,9 @@
           </activation>
   <build>
     <plugins>
+        
+        
+        
        <!-- begin copy artifacts plugin -->
      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -241,13 +244,45 @@
                   <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
-		
+                <!-- setup console --> 
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.desktop</groupId>
+                  <artifactId>setup-console</artifactId>
+                  <classifier>with-dependencies</classifier>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
+                </artifactItem>
+		<!-- api client -->
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.integration</groupId>
+                  <artifactId>api-client</artifactId>
+                  <version>${project.version}</version>
+                  <type>zip</type>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
+                </artifactItem>
+                
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
             </configuration>
           </execution>
+		    <execution>
+                        <id>copy-api-client</id>
+			<phase>generate-resources</phase>
+			<goals>
+			    <goal>copy-dependencies</goal>
+			</goals>
+			<configuration>
+                            <excludeArtifactIds>setup-console</excludeArtifactIds>
+                            <!--
+                            <includeArtifactIds>api-client</includeArtifactIds>
+                            <includeClassifiers>with-dependencies</includeClassifiers>
+                            -->
+			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
+			</configuration>
+		    </execution>
         </executions>
       </plugin>	
       <!-- end copy artifacts plugin -->

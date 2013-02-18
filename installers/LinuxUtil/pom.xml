@@ -69,54 +69,6 @@
         </executions>
       </plugin>
       <!-- end copy other resources plugin -->
-      <!-- begin copy dependencies plugin -->
-	<plugin>
-	    <artifactId>maven-dependency-plugin</artifactId>
-	    <version>2.4</version>
-		<executions>
-		    <execution>
-                        <id>copy-api-client</id>
-			<phase>generate-resources</phase>
-			<goals>
-			    <goal>copy-dependencies</goal>
-			</goals>
-			<configuration>
-                            <excludeArtifactIds>setup-console</excludeArtifactIds>
-                            <!--
-                            <includeArtifactIds>api-client</includeArtifactIds>
-                            <includeClassifiers>with-dependencies</includeClassifiers>
-                            -->
-			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
-			</configuration>
-		    </execution>
-                    <!--
-		    <execution>
-                        <id>copy-slf4j</id>
-			<phase>generate-resources</phase>
-			<goals>
-			    <goal>copy-dependencies</goal>
-			</goals>
-			<configuration>
-                            <includeArtifactIds>slf4j-simple</includeArtifactIds>
-			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
-			</configuration>
-		    </execution>
-                    -->
-		    <execution>
-                        <id>copy-setup-console</id>
-			<phase>generate-resources</phase>
-			<goals>
-			    <goal>copy-dependencies</goal>
-			</goals>
-			<configuration>
-                            <includeArtifactIds>setup-console</includeArtifactIds>
-                            <includeClassifiers>with-dependencies</includeClassifiers>
-			    <outputDirectory>${makeself.directory}</outputDirectory>
-			</configuration>
-		    </execution>
-		</executions>
-	</plugin>
-    <!-- end copy dependencies plugin -->
       <!-- begin create self-extracting installer plugin -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
