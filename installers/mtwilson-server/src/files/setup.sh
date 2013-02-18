@@ -14,7 +14,7 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 # api client: ensure destination exists and clean it before copying
 mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
-unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java
+unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
 
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console

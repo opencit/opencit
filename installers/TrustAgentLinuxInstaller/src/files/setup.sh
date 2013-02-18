@@ -34,12 +34,13 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 # 3. Compile TPM commands
 # 4. Install Trust Agent files
 
+# bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
 # if there's already a previous version installed, uninstall it
-tagent=`which tagent 2>/dev/null`
-if [ -f "$tagent" ]; then
-  echo "Uninstalling previous version..."
-  $tagent uninstall
-fi
+#tagent=`which tagent 2>/dev/null`
+#if [ -f "$tagent" ]; then
+  #echo "Uninstalling previous version..."
+  #$tagent uninstall
+#fi
 
 
 # packages to install must be in current directory
