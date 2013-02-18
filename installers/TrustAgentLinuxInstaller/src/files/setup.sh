@@ -88,7 +88,8 @@ cp tagent pcakey /usr/local/bin
 java_install $JAVA_PACKAGE
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
-  echo "Replacing java.security file"
+  echo "Replacing java.security file, existing file will be backed up"
+  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 

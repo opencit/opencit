@@ -63,7 +63,7 @@
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15</artifactId>
-                    <version>1.41</version>                    
+                    <version>1.46</version>                     <!-- was 1.41 -->
                     <scope>provided</scope>
                 </dependency>
                 <!--

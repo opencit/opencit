@@ -228,7 +228,7 @@ public class TpmUtils {
 		certGen.setSubjectDN(new X500Principal(""));
 		certGen.setPublicKey(idProof.getAik().getKey());
 		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, new String(idProof.getIdLableBytes()))));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, new String(idProof.getIdLableBytes()))));
 		X509Certificate cert = certGen.generate(privKey, "BC");
 		return cert;
 	}
@@ -412,7 +412,7 @@ public class TpmUtils {
 		RSAPublicKey pubEk = TpmUtils.makePubKey(pubEkMod, pubExp);
 		certGen.setPublicKey(pubEk);
 		certGen.setSignatureAlgorithm("SHA1withRSA");
-		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "TPM EK Credential")));
+		certGen.addExtension(org.bouncycastle.asn1.x509.X509Extension.subjectAlternativeName /*org.bouncycastle.asn1.x509.X509Extensions.SubjectAlternativeName*/, true, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "TPM EK Credential")));
 		X509Certificate cert = certGen.generate(privKey, "BC");
 		return cert;
 	}

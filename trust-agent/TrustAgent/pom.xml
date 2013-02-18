@@ -204,13 +204,13 @@
            	<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
-			<version>1.46</version>
+			<version>1.41</version>
 		</dependency>
                 -->
            	<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15</artifactId>
-			<version>1.41</version>
+			<version>1.46</version>
 		</dependency>
     </dependencies>
 </project>
