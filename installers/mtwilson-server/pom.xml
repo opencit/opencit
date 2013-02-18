@@ -268,21 +268,6 @@
               <overWriteSnapshots>true</overWriteSnapshots>
             </configuration>
           </execution>
-		    <execution>
-                        <id>copy-api-client</id>
-			<phase>generate-resources</phase>
-			<goals>
-			    <goal>copy-dependencies</goal>
-			</goals>
-			<configuration>
-                            <excludeArtifactIds>setup-console</excludeArtifactIds>
-                            <!--
-                            <includeArtifactIds>api-client</includeArtifactIds>
-                            <includeClassifiers>with-dependencies</includeClassifiers>
-                            -->
-			    <outputDirectory>${makeself.directory}/lib</outputDirectory>
-			</configuration>
-		    </execution>
         </executions>
       </plugin>	
       <!-- end copy artifacts plugin -->
