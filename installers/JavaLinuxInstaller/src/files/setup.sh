@@ -16,3 +16,7 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # SCRIPT EXECUTION
 java_install $JAVA_PACKAGE
 
+if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
+  echo "Replacing java.security file"
+  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
+fi
