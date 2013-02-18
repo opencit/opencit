@@ -39,6 +39,25 @@
         <version>5.5</version>
         <type>bin</type>
     </dependency>
+    
+ <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>api-client</artifactId>
+      <version>${project.parent.version}</version>
+      <type>jar</type>
+      <!--<classifier>with-dependencies</classifier>-->
+    </dependency>
+    
+ <!-- this is the setup console -->
+    <dependency>
+      <groupId>com.intel.mtwilson.desktop</groupId>
+      <artifactId>setup-console</artifactId>
+      <version>${project.parent.version}</version>
+      <type>jar</type>
+      <classifier>with-dependencies</classifier>
+    </dependency>
+    
     <!-- Web Services -->
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>

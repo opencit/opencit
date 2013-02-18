@@ -11,6 +11,17 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
+# api client: ensure destination exists and clean it before copying
+mkdir -p /usr/local/share/mtwilson/apiclient/java
+rm -rf /usr/local/share/mtwilson/apiclient/java/*
+cp lib/*.jar /usr/local/share/mtwilson/apiclient/java
+
+# setup console: create folder and copy the executable jar
+mkdir -p /opt/intel/cloudsecurity/setup-console
+rm -rf /opt/intel/cloudsecurity/setup-console/*.jar
+cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
+
+
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
