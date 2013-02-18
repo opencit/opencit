@@ -85,11 +85,13 @@
                                 </excludes>
                             </filter>
                         </filters>
+                        <!--
                         <artifactSet>
                             <excludes>
                                 <exclude>org.bouncycastle:*</exclude>
                             </excludes>
                         </artifactSet>
+                        -->
                 </configuration>
             </execution>
         </executions>
