@@ -66,8 +66,11 @@
 		<delete file="./target/HisPrivacyCAWebServices2.war" />
 		<jar jarfile="./target/HisPrivacyCAWebServices2.war">
 			<fileset dir="./">
+                            <!--  removed from build on 2013-02-17 , jar files from ClientFiles/lib/* and properties/clientfiles/lib/* moved to 
 				<include name="ClientFiles/**"/>
+                                -->
                                 <include name="properties/**"/>
+                                
                                 <include name="WEB-INF/**"/>
 				<exclude name="WEB-INF/jars-compile-only/**" />
                                 <include name="wsdl/**"/>
