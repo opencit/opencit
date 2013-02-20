@@ -15,7 +15,7 @@ package_keystore_users_dir=/var/opt/intel/${package_name}/users
 mysql_required_version=5.0
 mysql_setup_log=/var/log/intel.${package_name}.install.log
 mysql_script_dir=${package_dir}/database
-glassfish_required_version=3.0
+#glassfish_required_version=3.0
 glassfish_application_name=ManagementConsole
 #java_required_version=1.6.0_29
 
@@ -157,6 +157,7 @@ setup_print_summary() {
   fi
   if using_glassfish; then
     if [ -n "$GLASSFISH_HOME" ]; then
+      GLASSFISH_VERSION=`glassfish_version`
       echo "Glassfish: $GLASSFISH_VERSION"
     else
       echo "Glassfish: not found"

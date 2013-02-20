@@ -14,7 +14,7 @@ package_install_filename=${package_dir}/${package_name}.install
 #package_name_rpm=AttestationService
 #package_name_deb=attestationservice
 #package_setup_cmd="asctl setup"
-glassfish_required_version=3.0
+#glassfish_required_version=3.0
 glassfish_parent_dir=/usr/share
 #tomcat_required_version=6.0.29
 #tomcat_parent_dir=/usr/lib
@@ -61,6 +61,7 @@ setup_print_summary() {
   fi
   if using_glassfish; then
     if [ -n "$GLASSFISH_HOME" ]; then
+      GLASSFISH_VERSION=`glassfish_version`
       echo "Glassfish: $GLASSFISH_VERSION"
     else
       echo "Glassfish: not found"

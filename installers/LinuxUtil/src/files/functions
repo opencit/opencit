@@ -20,6 +20,7 @@ DEFAULT_MYSQL_USERNAME="root"
 DEFAULT_MYSQL_PASSWORD=""
 DEFAULT_MYSQL_DATABASE="mw_as"
 DEFAULT_JAVA_REQUIRED_VERSION="1.6"
+DEFAULT_GLASSFISH_REQUIRED_VERSION="3.0"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
@@ -85,6 +86,14 @@ shell_include_files() {
 
 ### FUNCTION LIBRARY: information functions
 
+# Runs its argument and negates the error code: 
+# If the argument exits with success (0) then this function exits with error (1).
+# If the argument exits with error (1) then this function exits with success (0).
+# Note: only works with arguments that are executable; any additional parameters will be passed.
+# Example:  if not using_java; then echo "Warning: skipping Java"; fi 
+no() { $* ; if [ $? -eq 0 ]; then return 1; else return 0; fi }
+not() { $* ; if [ $? -eq 0 ]; then return 1; else return 0; fi }
+
 # extracts the major version number (1) out of a string like 1.2.3_4
 version_major() {
   echo "${1}" | awk -F . '{ print $1 }'
@@ -121,9 +130,11 @@ is_version_at_least() {
        -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
        && -n "${reqminor}" && "${hasminor}" -ge "${reqminor}" \
      ]]; then
-    echo "yes"
+#    echo "yes"
+    return 0
   else
-    echo "no"
+#    echo "no"
+    return 1
   fi  
 }
 
@@ -466,8 +477,7 @@ yum_detect() {
   if [ -n "$yum" ]; then return 0; else return 1; fi
 }
 no_yum() {
-  yum_detect
-  if [ $? -eq 0 ]; then return 1; else return 0; fi
+  if yum_detect; then return 1; else return 0; fi
 }
 
 # Output:
@@ -683,7 +693,11 @@ mysql_version() {
   MYSQL_CLIENT_VERSION_OK=""
   if [ -n "$mysql" ]; then
     MYSQL_CLIENT_VERSION=`$mysql --version | sed -e 's/^.*Distrib \([0-9.]*\).*$/\1/g;'`
-    MYSQL_CLIENT_VERSION_OK=`is_version_at_least "$MYSQL_CLIENT_VERSION" "${min_version}"`
+    if is_version_at_least "$MYSQL_CLIENT_VERSION" "${min_version}"; then
+      MYSQL_CLIENT_VERSION_OK=yes
+    else
+      MYSQL_CLIENT_VERSION_OK=no
+    fi
   fi
 }
 
@@ -1072,74 +1086,106 @@ glassfish_clear() {
   glassfish=""
 }
 
-# sets variable GLASSFISH_VERSION and GLASSFISH_VERSION_OK = yes  or  = no
-# Environment:
-# - glassfish_required_version
+glassfish_ready_report() {
+  if [[ -z "$GLASSFISH_HOME" ]]; then echo_warning "GLASSFISH_HOME variable is not set"; return 1; fi
+  if [[ -z "$glassfish_bin" ]]; then echo_warning "Glassfish binary path is not set"; return 1; fi
+  if [[ ! -f "$glassfish_bin" ]]; then echo_warning "Cannot find Glassfish binary at $glassfish_bin"; return 1; fi
+  if [[ -z "$glassfish" ]]; then echo_warning "Glassfish command is not set"; return 1; fi
+  echo_success "Using Glassfish at $GLASSFISH_HOME"
+  return 0
+}
+
+
+glassfish_ready() {
+  glassfish_ready_report > /dev/null
+  return $?
+}
+
+# How to use;   GLASSFISH_VERSION=`glassfish_version`
+# If you pass a parameter, it is the path to a glassfish "asadmin" binary 
+# If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
 glassfish_version() {
-  GLASSFISH_VERSION=""
-  GLASSFISH_VERSION_OK=""
-  # XXX
-  echo "Checking Glassfish version for: $glassfish"
-  if [ -n "$glassfish" ]; then
-    GLASSFISH_VERSION=`$glassfish version 2>&1 | grep -i glassfish | grep -i version | awk '{ print $8 }'`
-    GLASSFISH_VERSION_OK=`is_version_at_least "$GLASSFISH_VERSION" "${glassfish_required_version}"`
+  if [[ -n "$glassfish" ]]; then
+    # extract the version number from a string like: glassfish version "3.0"
+    local current_glassfish_version=`$glassfish version 2>&1 | grep -i glassfish | grep -i version | awk '{ print $8 }'`
+    if [ -n "$current_glassfish_version" ]; then
+      echo $current_glassfish_version
+      return 0
+    fi
+    return 2
   fi
+  return 1
 }
 
 # Environment:
 # - glassfish_required_version
 glassfish_version_report() {
-  glassfish_version
-  if [ "$GLASSFISH_VERSION_OK" == "yes" ]; then
+  local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-$DEFAULT_GLASSFISH_REQUIRED_VERSION}}"
+  GLASSFISH_VERSION=`glassfish_version`
+  if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
     echo_success "Glassfish version $GLASSFISH_VERSION is ok"
+    return 0
   else
-    echo_warning "Glassfish version $GLASSFISH_VERSION is not supported, minimum is ${glassfish_required_version}"
+    echo_warning "Glassfish version $GLASSFISH_VERSION is not supported, minimum is ${min_version}"
+    return 1
   fi
 }
 
 # detects possible glassfish installations
 # does nothing if GLASSFISH_HOME is already set; unset with glassfish_clear before calling to force detection
 # Environment:
-# - glassfish_required_version (or provide it as a parameter)
+# - GLASSFISH_REQUIRED_VERSION (or provide it as a parameter)
 # Parameters:
 # - minimum required version
 glassfish_detect() {
-  local min_version="${1:-${glassfish_required_version}}"
-  # XXX
-  echo "Looking for Glassfish $min_version"
-  if [[ -n "$GLASSFISH_HOME" && -d "$GLASSFISH_HOME" ]]; then
-    return
+  local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
+
+      if [[ -n "$java" ]]; then    
+        local java_bindir=`dirname $java`
+      fi
+  # start with GLASSFISH_HOME if it is already configured
+  if [[ -n "$GLASSFISH_HOME" ]]; then
+    if [[ -z "$glassfish_bin" ]]; then
+      glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
+    fi
+    if [[ -z "$glassfish" ]]; then
+      if [[ -n "$java" ]]; then    
+        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+        glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+      else
+        glassfish="env AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
+      fi
+    fi
+    if [[ -n "$glassfish" ]]; then
+      GLASSFISH_VERSION=`glassfish_version`
+      if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
   fi
+
   GLASSFISH_CANDIDATES=`find / -name domains 2>/dev/null | grep glassfish/domains`
-  GLASSFISH_HOME=''
-  glassfish_bin=""
-  glassfish=""
-  # XXX
-  echo "Candidates: $GLASSFISH_CANDIDATES"
+#  echo "Candidates: $GLASSFISH_CANDIDATES"
   for c in $GLASSFISH_CANDIDATES
   do
-    if [ -z "$GLASSFISH_HOME" ]; then
       local parent=`dirname $c`
-      # XXX
-      echo "Checking Glassfish: $parent"
+ #     echo "Checking Glassfish: $parent"
       if [ -f "$parent/bin/asadmin" ]; then
         GLASSFISH_HOME="$parent"
         glassfish_bin="$GLASSFISH_HOME/bin/asadmin"
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
         glassfish="env PATH=$java_bindir:$PATH AS_ADMIN_READTIMEOUT=900000 $glassfish_bin"
         echo "Found Glassfish: $GLASSFISH_HOME"
-        glassfish_version ${min_version}
-        if [ "$GLASSFISH_VERSION_OK" != "yes" ]; then
-          # XXX
-          echo_warning "Glassfish $parent does not meet version requirement: $min_version"
-          GLASSFISH_HOME=''
-          glassfish_bin=""
-          glassfish=""
+#        echo "Found Glassfish: $glassfish"
+        GLASSFISH_VERSION=`glassfish_version`
+        if is_version_at_least "$GLASSFISH_VERSION" "${min_version}"; then
+          return 0
         fi
       fi
-    fi
   done
-
+  echo_failure "Cannot find Glassfish"
+  glassfish_clear
+  return 1
   # read the admin username and pasword, if present. format of both files is shell  VARIABLE=VALUE
 #  if [ -f /etc/glassfish/admin.user ]; then
 #    export AS_ADMIN_USER=`read_property_from_file AS_ADMIN_USER /etc/glassfish/admin.user`
@@ -1160,14 +1206,19 @@ glassfish_env_report() {
 # Environment:
 # - glassfish_required_version (or provide it as a parameter)
 glassfish_require() {
-  local min_version="${1:-${glassfish_required_version}}"
-  if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
+  local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
+  if not glassfish_ready; then
     glassfish_detect ${min_version} > /dev/null
   fi
-  if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
+  if not glassfish_ready; then
     echo_failure "Cannot find Glassfish server version $min_version or later"
     exit 1
   fi
+}
+
+# usage:  if no_glassfish 3.0; then echo_failure "Cannot find Glassfish"; exit 1; fi
+no_glassfish() {
+  if glassfish_require $1; then return 1; else return 0; fi
 }
 
 # Run this AFTER glassfish_install
@@ -1258,12 +1309,11 @@ glassfish_install() {
   local GLASSFISH_PACKAGE="${1:-glassfish.zip}"
   GLASSFISH_YUM_PACKAGES="unzip"
   GLASSFISH_APT_PACKAGES="unzip"
+  GLASSFISH_YAST_PACKAGES="unzip"
+  GLASSFISH_ZYPPER_PACKAGES="unzip"
   glassfish_detect
 
-  glassfish_running
-  if [[ -n "$GLASSFISH_RUNNING" ]]; then
-    glassfish_stop
-  fi
+  if glassfish_running; then glassfish_stop; fi
 
   if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
     if [ -d /usr/share/glassfish3 ]; then
@@ -1341,20 +1391,27 @@ glassfish_admin_user() {
 
 }
 
+# pre-conditions:   GLASSFISH_HOME  must be set  (find it with glassfish_detect)
+# returns success (0) if glassfish is running, error (1) if it is not running
+# in order to prevent repetitive calls it also sets the GLASSFISH_RUNNING variable.
+# if glassfish is running, it also sets the $GLASSFISH_PID variable to the process id.
+# so you can write  if glassfish_running; echo "ok"; fi
+# and after that also   if [ "$GLASSFISH_RUNNING" == "yes" ]; then echo "ok"; fi
 glassfish_running() {  
   GLASSFISH_RUNNING=''
   if [ -n "$GLASSFISH_HOME" ]; then
     GLASSFISH_PID=`ps gauwxx | grep java | grep -v grep | grep "$GLASSFISH_HOME" | awk '{ print $2 }'`
     if [ -n "$GLASSFISH_PID" ]; then
       GLASSFISH_RUNNING=yes
+      return 0
     fi
   fi
+  return 1
 }
 
 glassfish_running_report() {
   echo -n "Checking Glassfish process... "
-  glassfish_running
-  if [ -n "$GLASSFISH_PID" ]; then
+  if glassfish_running; then
     echo "Running (pid $GLASSFISH_PID)"
   else
     echo "Not running"
@@ -1514,7 +1571,11 @@ tomcat_version() {
   TOMCAT_VERSION_OK=""
   if [ -n "$tomcat" ]; then
     TOMCAT_VERSION=`$tomcat version 2>&1 | grep -i "Server version:" | awk -F / '{ print $2 }'`
-    TOMCAT_VERSION_OK=`is_version_at_least "$TOMCAT_VERSION" "${tomcat_required_version}"`
+    if is_version_at_least "$TOMCAT_VERSION" "${tomcat_required_version}"; then
+      TOMCAT_VERSION_OK=yes
+    else
+      TOMCAT_VERSION_OK=no
+    fi
   fi
 }
 
@@ -1606,6 +1667,29 @@ java_clear() {
   JAVA_VERSION=""
 }
 
+# Returns success (0) if the JAVA_HOME and java variables are set and if the java binary exists.
+# Returns error (1) otherwise and displays the issue as a warning.
+# Quick and repeatable. No side effects.
+# Example:   if not java_ready; then java_ready_report; fi
+# Note: We do NOT check JAVA_VERSION here because if someone has configured a specific Java they want to use,
+# we don't care what version it is as long as it is present.  In contrast, the java_detect function sets JAVA_VERSION
+java_ready_report() {
+  if [[ -z "$JAVA_HOME" ]]; then echo_warning "JAVA_HOME variable is not set"; return 1; fi
+  if [[ -z "$java" ]]; then echo_warning "Java binary path is not set"; return 1; fi
+  if [[ ! -f "$java" ]]; then echo_warning "Cannot find Java binary at $java"; return 1; fi
+  echo_success "Using Java at $java"
+  return 0
+}
+
+# Returns success (0) if the JAVA_HOME and java variables are set and if the java binary exists.
+# Returns error (1) otherwise.
+# Quick and repeatable. No side effects.
+# Example:   if java_ready; then $java -jar start.jar; fi
+java_ready() {
+  java_ready_report > /dev/null
+  return $?
+}
+
 
 # prints the current java version
 # return codes:
@@ -1658,7 +1742,9 @@ java_detect() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   # start with JAVA_HOME if it is already configured
   if [[ -n "$JAVA_HOME" ]]; then
-    java=${JAVA_HOME}/bin/java
+    if [[ -z "$java" ]]; then
+      java=${JAVA_HOME}/bin/java
+    fi
     JAVA_VERSION=`java_version`
     if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
       return 0
@@ -1870,6 +1956,7 @@ print_env_summary_report() {
   fi
   if using_glassfish; then
     if [ -n "$GLASSFISH_HOME" ]; then
+      GLASSFISH_VERSION=`glassfish_version`
       echo "Glassfish: $GLASSFISH_VERSION"
     else
       echo_failure "Glassfish: not found"

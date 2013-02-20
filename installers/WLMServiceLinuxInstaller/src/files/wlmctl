@@ -21,7 +21,7 @@ package_install_filename=${package_dir}/${package_name}.install
 mysql_required_version=5.0
 mysql_setup_log=/var/log/intel.mw.wlm.install.log
 mysql_script_dir=/opt/intel/cloudsecurity/wlm-service/database
-glassfish_required_version=3.0
+#glassfish_required_version=3.0
 glassfish_application_name=WLMService
 #java_required_version=1.6.0_29
 

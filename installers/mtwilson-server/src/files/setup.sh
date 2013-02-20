@@ -11,6 +11,13 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
+
+APICLIENT_YUM_PACKAGES="unzip"
+APICLIENT_APT_PACKAGES="unzip"
+APICLIENT_YAST_PACKAGES="unzip"
+APICLIENT_ZYPPER_PACKAGES="unzip"
+auto_install "Installer requirements" "APICLIENT"
+
 # api client: ensure destination exists and clean it before copying
 mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
