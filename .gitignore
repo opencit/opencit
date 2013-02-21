@@ -2,3 +2,5 @@
 target
 /trust-agent/PrivacyCA/bin
 .settings
+.project
+.classpath
