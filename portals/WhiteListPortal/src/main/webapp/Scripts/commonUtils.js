@@ -55,7 +55,7 @@ function createMenubar(divID) {
  */
 
 function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, callbackErrorFunction){
-        alert("sendJSONAjaxRequest: isGet="+isGet+"  url="+url+"  requestData="+requestData+"    sucesssFn="+callbackSuccessFunction+"  errorFn="+callbackErrorFunction);
+        //alert("sendJSONAjaxRequest: isGet="+isGet+"  url="+url+"  requestData="+requestData+"    sucesssFn="+callbackSuccessFunction+"  errorFn="+callbackErrorFunction);
 	var argLength = arguments.length;
 	var requestArgumets = arguments;
 	$.ajax({

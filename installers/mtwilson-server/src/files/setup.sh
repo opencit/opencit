@@ -173,8 +173,14 @@ echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
 ./$monit_installer  >> $INSTALL_LOG_FILE
 echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 
-echo "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-/usr/local/bin/asctl restart >> $INSTALL_LOG_FILE
-echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
+if using_glassfish; then
+  echo "Restarting Glassfish..." | tee -a  $INSTALL_LOG_FILE
+  mtwilson glassfish-restart >> $INSTALL_LOG_FILE
+  echo "Glassfish restarted..." | tee -a  $INSTALL_LOG_FILE
+else
+  echo "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
+  /usr/local/bin/asctl restart >> $INSTALL_LOG_FILE
+  echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
+fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
