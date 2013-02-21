@@ -11,7 +11,7 @@
     <parent>
 	<groupId>com.intel.mtwilson.linux</groupId>
 	<artifactId>mtwilson-linux</artifactId>
-	<version>0.5.4-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
     </parent>
   
   <properties>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>MtWilsonLinuxUtil</artifactId>
-      <version>${project.parent.version}</version>
+      <version>1.1-SNAPSHOT</version>
       <type>sh</type>
     </dependency>	
     <dependency>
