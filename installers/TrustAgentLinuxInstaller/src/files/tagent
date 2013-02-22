@@ -91,7 +91,7 @@ function startServiceProcess {
    makeFileWritable $pidFile || return 1
    makeFileWritable $serviceLogFile || return 1
    cmd="nohup $javaCommandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
-
+echo ; echo "trust agent command: "; echo "$cmd"; echo
    su -m $serviceUser -s $SHELL -c "$cmd" || return 1
    sleep 0.1
    pid="$(<$pidFile)"
@@ -273,6 +273,7 @@ function main {
         echo "${tpm_pcrs}"
         ;;
   uninstall)
+        stopService
         datestr=`date +%Y-%m-%d.%H%M`
         mkdir -p "${intel_conf_dir}"
         cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
