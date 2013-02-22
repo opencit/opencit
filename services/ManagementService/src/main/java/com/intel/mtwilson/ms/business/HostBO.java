@@ -34,6 +34,10 @@ import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.io.Filename;
 import com.intel.mtwilson.util.MWException;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -65,7 +69,8 @@ public class HostBO extends BaseBO {
     //private static String propertiesFile = "management-service.properties";
     //Configuration config = ConfigurationFactory.loadConfiguration(propertiesFile);
     Logger log = LoggerFactory.getLogger(getClass().getName());
-    
+    MSPersistenceManager mspm = new MSPersistenceManager();
+    private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(mspm.getEntityManagerFactory("ASDataPU"));
     private byte[] dataEncryptionKey;
     
     public void setDataEncryptionKey(byte[] key) {
@@ -84,11 +89,17 @@ public class HostBO extends BaseBO {
             String keyPassword = MSConfig.getConfiguration().getString("mtwilson.api.key.password");
             URL baseURL = new URL(MSConfig.getConfiguration().getString("mtwilson.api.baseurl"));
             
+            /*
             String keystoreFilename = MSConfig.getConfiguration().getString("mtwilson.ms.keystore.dir") + File.separator + Filename.encode(keyAliasName) + ".jks";
-            
             // Open the keystore with the password and retrieve the credentials
             File keyStoreFile = new File(keystoreFilename);
-            SimpleKeystore keystore = new SimpleKeystore(keyStoreFile, keyPassword);
+            
+            */
+            // stdalex 1/15 jks2db!disk
+            
+            MwKeystore keyTable = keystoreJpa.findMwKeystoreByName(keyAliasName);
+            ByteArrayResource keyResource = new ByteArrayResource(keyTable.getKeystore());
+            SimpleKeystore keystore = new SimpleKeystore(keyResource, keyPassword);
             RsaCredential credential = keystore.getRsaCredentialX509(keyAliasName, keyPassword);            
 
             Properties prop = new Properties();

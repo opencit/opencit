@@ -53,7 +53,7 @@ CREATE TABLE `mw_keystore` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `keystore` blob NOT NULL,
-  `provider` varchar(255) NOT NULL,
+  `provider` varchar(255),
   `comment` text,
   PRIMARY KEY (`ID`),
   UNIQUE KEY `name_index` (`name`)

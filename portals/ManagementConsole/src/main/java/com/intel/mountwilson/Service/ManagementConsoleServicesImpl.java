@@ -14,6 +14,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.slf4j.LoggerFactory;
 
 import com.intel.mountwilson.common.MCPConfig;
+import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mountwilson.common.ManagementConsolePortalException;
 import com.intel.mountwilson.constant.HelperConstant;
 import com.intel.mountwilson.datamodel.ApiClientDetails;
@@ -24,13 +25,19 @@ import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ManagementService;
+import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.data.ApiClientX509;
+import java.util.logging.Level;
 
 public class ManagementConsoleServicesImpl implements IManagementConsoleServices {
 
         private static final Logger logger = Logger.getLogger(ManagementConsoleServicesImpl.class.getName());
-	
-		
+	private MCPersistenceManager mcManager = new MCPersistenceManager();
+	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(mcManager.getEntityManagerFactory("ASDataPU"));
+        private ApiClientX509JpaController apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));
         /**
         * 
         * @param hostDetailsObj
@@ -219,6 +226,15 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         }
 
                         result = msAPIObj.deleteApiClient(decodedFP);
+                        ApiClientX509 clientRecord = apiClientJpa.findApiClientX509ByFingerprint(decodedFP);
+                        if(clientRecord != null) {
+                            try {
+                                keystoreJpa.destroy(clientRecord.getId());
+                            } catch (NonexistentEntityException ex) {
+                                logger.info("getApiClients caught exception during destory ApiClientX509 record: " + ex.getMessage());
+                            }
+                        }
+
                 } catch (Exception e) {
                         logger.info(e.getMessage());
                         throw ConnectionUtil.handleException(e);
@@ -305,7 +321,6 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         logger.info(e.getMessage());
                         throw ConnectionUtil.handleException(e);
                 }
-
                 try {
                         for (ApiClientInfo apiClientObj : apiListFromDB) {
                                 ApiClientDetails apiClientDetailObj = new ApiClientDetails();

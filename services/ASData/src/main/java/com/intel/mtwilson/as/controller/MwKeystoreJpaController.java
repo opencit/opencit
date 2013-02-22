@@ -16,6 +16,9 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.HintValues;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -138,12 +141,26 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
      * @return the named MwKeystore, or null if it was not found
      */
     public MwKeystore findMwKeystoreByName(String name) {
-        HashMap<String,Object> parameters = new HashMap<String,Object>();
-        parameters.put("name", name);
-        List<MwKeystore> list = searchByNamedQuery("findByName", parameters);
-        if( list.isEmpty() ) {
-            return null;
+        //HashMap<String,Object> parameters = new HashMap<String,Object>();
+        //parameters.put("name", name);
+        //List<MwKeystore> list = searchByNamedQuery("MwKeystore.findByName", parameters);
+        //if( list.isEmpty() ) {
+        //    return null;
+        //}
+        //return list.get(0);
+        MwKeystore mwKeystoreObj = null;
+        EntityManager em = getEntityManager();
+        Query query = em.createNamedQuery("MwKeystore.findByName");
+        query.setParameter("name", name);
+
+        query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+        query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+        try {
+          mwKeystoreObj = (MwKeystore) query.getSingleResult();
         }
-        return list.get(0);
+        catch(javax.persistence.NoResultException e) {
+          mwKeystoreObj = null;           
+        }       
+        return mwKeystoreObj;
     }
 }

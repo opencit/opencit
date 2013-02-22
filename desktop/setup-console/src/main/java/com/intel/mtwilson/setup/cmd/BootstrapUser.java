@@ -13,11 +13,18 @@ import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.io.Filename;
 import com.intel.mtwilson.setup.SetupContext;
+import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.datatypes.Role;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.setup.helper.SCPersistenceManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +40,8 @@ import com.intel.mtwilson.ms.helper.MSPersistenceManager;
  * @author jbuhacoff
  */
 public class BootstrapUser implements Command {
+    private SCPersistenceManager scManager = new SCPersistenceManager();
+    private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(scManager.getEntityManagerFactory("ASDataPU"));
     private SetupContext ctx = null;
 
     @Override
@@ -56,16 +65,16 @@ public class BootstrapUser implements Command {
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
         
-        File directory;
-        String directoryPath = options.getString("keystore.users.dir", "/var/opt/intel/management-console/users"); //serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
-        if( directoryPath == null || directoryPath.isEmpty() ) {
-            directory = new File(directoryPath);
-            if( !directory.exists() || !directory.isDirectory() ) {
-                directory = new File(".");
-            }
-            directoryPath = readInputStringWithPromptAndDefault("Keystore directory", directory.getAbsolutePath());
-        }
-        directory = new File(directoryPath);
+        //File directory;
+        //String directoryPath = options.getString("keystore.users.dir", "/var/opt/intel/management-console/users"); //serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
+        //if( directoryPath == null || directoryPath.isEmpty() ) {
+        //    directory = new File(directoryPath);
+        //    if( !directory.exists() || !directory.isDirectory() ) {
+        //        directory = new File(".");
+        //    }
+        //    directoryPath = readInputStringWithPromptAndDefault("Keystore directory", directory.getAbsolutePath());
+        //}
+        //directory = new File(directoryPath);
         
         String baseurl = options.getString("mtwilson.api.baseurl");
         if( baseurl == null || baseurl.isEmpty() ) { 
@@ -85,19 +94,28 @@ public class BootstrapUser implements Command {
             return;
         }
         // create user
-        System.out.println(String.format("Creating keystore for %s in %s", username, directory.getAbsolutePath()));        
+        System.out.println(String.format("Creating keystore for %s in db and registering user with service at %s", username,baseurl));        
+        /*
         com.intel.mtwilson.client.TextConsole.main(new String[] { "CreateUser", directory.getAbsolutePath(), username, password });
         File keystoreFile = new File(directory.getAbsolutePath() + File.separator + Filename.encode(username) + ".jks");
         if( !keystoreFile.exists() ) {
             System.out.println("Failed to create keystore "+keystoreFile.getAbsolutePath());
             return;
         }
-        // load the new key
-        SimpleKeystore keystore = new SimpleKeystore(keystoreFile, password);
-        RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
+        
         // register user
         System.out.println(String.format("Registering %s with service at %s", username, baseurl));
         com.intel.mtwilson.client.TextConsole.main(new String[] { "RegisterUser", keystoreFile.getAbsolutePath(), baseurl, "Attestation,Whitelist,Security", password });
+        */
+        // stdalex 1/16 jks2db!disk
+        // load the new key
+         ByteArrayResource certResource = new ByteArrayResource();
+         SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
+         MwKeystore keyTable = new MwKeystore();
+         keyTable.setName(username);
+         keyTable.setKeystore(certResource.toByteArray());
+         keystoreJpa.create(keyTable);
+         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();
 //        ApiClientInfo apiClientRecord = bo.find(rsaCredentialX509.identity());

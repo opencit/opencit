@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.common;
 
+import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.jpa.PersistenceManager;
 
 /**
@@ -15,6 +16,7 @@ public class WLMPPersistenceManager extends PersistenceManager {
     @Override
     public void configure() {
         addPersistenceUnit("MSDataPU", WLMPConfig.getJpaProperties()); // for MwPortalUser
+        addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties());
     }
     
 }

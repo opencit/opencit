@@ -13,11 +13,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 
+import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mountwilson.common.TDPConfig;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
+import com.intel.mountwilson.common.TDPersistenceManager;
+import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.data.MwKeystore;
 
 /**
  * @author yuvrajsx
@@ -26,8 +30,9 @@ import com.intel.mtwilson.datatypes.Role;
 public class RegisterUserController extends AbstractController {
 	
 	// variable declaration used for Logging. 
-    private static final Logger logger = Logger.getLogger(RegisterUserController.class.getName());
-	
+        private static final Logger logger = Logger.getLogger(RegisterUserController.class.getName());
+        private TDPersistenceManager tdpManager = new TDPersistenceManager();
+	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(tdpManager.getEntityManagerFactory("ASDataPU"));
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
     
 	@Override
@@ -36,8 +41,8 @@ public class RegisterUserController extends AbstractController {
 		ModelAndView view = new ModelAndView(new JSONView());
 		
 		String username,password;
-        final String dirName = TDPConfig.getConfiguration().getString("mtwilson.tdbp.keystore.dir");
-        final String baseURL = TDPConfig.getConfiguration().getString("mtwilson.api.baseurl");
+                final String dirName = TDPConfig.getConfiguration().getString("mtwilson.tdbp.keystore.dir");
+                final String baseURL = TDPConfig.getConfiguration().getString("mtwilson.api.baseurl");
 		
 		try {
 			username = req.getParameter("userNameTXT");
@@ -50,12 +55,22 @@ public class RegisterUserController extends AbstractController {
 		
 		//Checking for null value against Username and password. 
 		if (isNullOrEmpty(username) || isNullOrEmpty(password)) {
-            view.addObject("result",false);
-            view.addObject("message", "username and password can't be Blank.");
-            return view;
+                    view.addObject("result",false);
+                    view.addObject("message", "username and password can't be Blank.");
+                    return view;
 		 }
 
-		
+		 //Checking for duplicate user registration by seeing if there is already a cert in table for user
+                 MwKeystore keyTest = keystoreJpa.findMwKeystoreByName(username);
+                
+                if(keyTest != null) {
+                  logger.info("An user already exists with the specified User Name. Please select different User Name.");
+		  view.addObject("result",false);
+		  view.addObject("message","An user already exists with the specified User Name. Please select different User Name.");
+		  return view;      
+                }
+                
+                /*
 		//Taking all files from a Directory using directory name mention in TDPConfig.
 		File[] files = new File(dirName).listFiles();
 		
@@ -72,10 +87,19 @@ public class RegisterUserController extends AbstractController {
 			    }
 			}
 		}
-       
+                */
         try {
         	//calling into REST services to register a user.
-        	SimpleKeystore response = KeystoreUtil.createUserInDirectory(new File(dirName), username, password, new URL(baseURL), new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
+                // stdalex 1/15 jks2db!disk
+                //SimpleKeystore response = KeystoreUtil.createUserInDirectory(new File(dirName), username, password, new URL(baseURL), new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
+                ByteArrayResource certResource = new ByteArrayResource();
+        	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL), new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
+                MwKeystore keyTable = new MwKeystore();
+                keyTable.setName(username);
+                keyTable.setKeystore(certResource.toByteArray());
+                keystoreJpa.create(keyTable);
+                logger.info("RegisterUser cert added to DB");
+                
             if (response == null) {
                 view.addObject("result",false);
                 view.addObject("message", "Server Side Error. Could not register the user. Keystore is null.");

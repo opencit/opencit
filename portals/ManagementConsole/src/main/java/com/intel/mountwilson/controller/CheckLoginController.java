@@ -9,6 +9,10 @@ import com.intel.mtwilson.ClientException;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.Filename;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mountwilson.common.MCPersistenceManager;
+import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.data.MwKeystore;
 import java.io.File;
 import java.net.URL;
 import java.util.Properties;
@@ -30,7 +34,8 @@ public class CheckLoginController extends AbstractController {
 	
 	// variable declaration used during Processing data. 
         private static final Logger logger = Logger.getLogger(CheckLoginController.class.getName());       
-	
+	private MCPersistenceManager mcManager = new MCPersistenceManager();
+	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(mcManager.getEntityManagerFactory("ASDataPU"));
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
@@ -48,27 +53,35 @@ public class CheckLoginController extends AbstractController {
                 return view;
             }
 
-//            String keyStore = MCPConfig.getConfiguration().getString("mtwilson.mc.keyStoreFileName");
-            URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
-            File keyStoreFile = null;
-
-            try {
-                // Bug 551: Redirect the user to the login page if they browse to the checkLogin page directly
-                keystoreFilename = MCPConfig.getConfiguration().getString("mtwilson.mc.keystore.dir") + File.separator + Filename.encode(keyAliasName) + ".jks";
-                keyStoreFile = new File(keystoreFilename);
-            } catch (Exception ex) {
+            // String keyStore = MCPConfig.getConfiguration().getString("mtwilson.mc.keyStoreFileName");
+            //String keystoreFilename = MCPConfig.getConfiguration().getString("mtwilson.mc.keystore.dir") + File.separator + Filename.encode(keyAliasName) + ".jks";
+            
+            //File keyStoreFile = null;
+            //try {
+            // keyStoreFile = new File(keystoreFilename);
+            //} catch (Exception ex) {
+            //    view.addObject("result", false);
+            //    view.addObject("message", "Key store is not configured/saved correctly in " + keystoreFilename + ".");
+            //    return view;                    
+            //}
+            //stdalex 1/15 jks2db!disk
+            MwKeystore tblKeystore = keystoreJpa.findMwKeystoreByName(keyAliasName);
+            if(tblKeystore == null){
                 logger.severe("Keystore for the user not found on the server >> " + keystoreFilename);
                 view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
                 view.addObject("result", false);
-                return view;                    
+                view.addObject("message", "Username or Password does not match. Please try again.");
+                return view; 
             }
-
+            ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
+            URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
             RsaCredential credential = null;
             SimpleKeystore keystore = null;
             try {
 //                KeyStore keystore = KeystoreUtil.open(new FileInputStream(keyStoreFile), keyPassword);
 //                credential = KeystoreUtil.loadX509(keystore, keyAliasName, keyPassword);
-                keystore = new SimpleKeystore(keyStoreFile, keyPassword);
+                keystore = new SimpleKeystore(keyResource, keyPassword);
+                //new SimpleKeystore(keyStoreFile, keyPassword);
                 credential = keystore.getRsaCredentialX509(keyAliasName, keyPassword);
 
             } catch (Exception ex) {
