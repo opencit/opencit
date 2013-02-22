@@ -91,7 +91,7 @@ function startServiceProcess {
    makeFileWritable $pidFile || return 1
    makeFileWritable $serviceLogFile || return 1
    cmd="nohup $javaCommandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
-echo ; echo "trust agent command: "; echo "$cmd"; echo
+
    su -m $serviceUser -s $SHELL -c "$cmd" || return 1
    sleep 0.1
    pid="$(<$pidFile)"
@@ -189,6 +189,7 @@ setup() {
   yum_detect > /dev/null
   # create the env file first because pcakey in the interactive install depends on it
   setup_env > "${package_env_filename}"
+  . "${package_env_filename}"
   setup_interactive_install
 }
    
