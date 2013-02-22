@@ -1380,5 +1380,37 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         String result = text(httpGet(wlmurl("/mles/source", query)));
         return result;                        
     }
+
+    /**
+     * This method support multiple host registration/updates with a single call. Since the user has passed in the simple TxtHostRecord
+     * object, we will use the default values for the white list target (BIOS: OEM and VMM:OEM). If those white lists are not defined then
+     * error messages would be sent back to the caller.
+     * 
+     * @param hostRecords
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    @Override
+    public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList result = fromJSON(httpPost(msurl("/host/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return result;
+    }
+    
+/**
+ * This method similar to the above one is used for multiple host registration/update in a single call. The only difference is that in this the user
+ * would specify which White List the host has to use during registration 
+ * @param hostRecords
+ * @return
+ * @throws IOException
+ * @throws ApiException
+ * @throws SignatureException 
+ */
+    @Override
+    public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPost(msurl("/host/bulk/custom"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;                
+    }
     
 }

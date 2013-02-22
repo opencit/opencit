@@ -7,11 +7,12 @@ package com.intel.mtwilson.ms.rest;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.helper.MSComponentFactory;
 import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.datatypes.HostConfigData;
+import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.ms.common.MSException;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -101,4 +102,74 @@ public class Host {
         boolean result = new MSComponentFactory().getHostBO().configureWhiteListFromCustomData(hostConfigObj);
         return Boolean.toString(result);
     }
+   
+    /**
+     * This new method supports registration/update of multiple hosts with a single call. 
+     * Since the user has passed in the plain TxtHostRecord object we will use the default white list targets for both BIOS and VMM and register/update the host.
+     * 
+     * @param hostRecords
+     * @return : List of HostConfigResponse objects each one having the status of the registration or update of the host passed in.
+     * @throws ApiException 
+     */
+    @RolesAllowed({"Attestation"})
+    @POST
+    @Path("/bulk")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws ApiException {
+        log.error("About to execute the registerhosts function");
+       HostConfigResponseList hostResponses = new HostConfigResponseList();
+        List <HostConfigResponse> hostResList = new ArrayList<HostConfigResponse>();       
+       if (hostRecords != null && !hostRecords.getHostRecords().isEmpty()) {
+            for (TxtHostRecord hostRecord: hostRecords.getHostRecords()) {
+                HostConfigResponse hostResponse = new HostConfigResponse();
+                hostResponse.setHostName(hostRecord.HostName);
+                hostResponse.setStatus(Boolean.toString(false));
+                hostResponse.setErrorMessage("Test");
+                log.error("Processed host {} successfully",hostRecord.HostName );
+                hostResList.add(hostResponse);
+            }           
+       }
+       // boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
+       hostResponses.setHostRecords(hostResList);
+        return hostResponses;
+    }
+
+    /**
+     * This method also supports the registration/update of multiple hosts with a single call. In this case the user has passed in additional details regarding
+     * the white list targets that should be used.
+     * 
+     * @param hostRecords
+     * @return: List of HostConfigResponse objects each one having the status of the registration or update of the host passed in.
+     * @throws ApiException 
+     */
+   @RolesAllowed({"Attestation"})
+    @POST
+    @Path("/bulk/custom")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws ApiException {
+        HostConfigResponseList hostResponses = new HostConfigResponseList();
+        List <HostConfigResponse> hostResList = new ArrayList<HostConfigResponse>();
+        // Process all the hosts one by one.
+        if (hostRecords != null && !hostRecords.getHostRecords().isEmpty()) {
+                for (HostConfigData hostRecord: hostRecords.getHostRecords()) {
+                        HostConfigResponse hostResponse = new HostConfigResponse();
+                        hostResponse.setHostName(hostRecord.getTxtHostRecord().HostName);
+                        // Since we do not want to throw exception for each host separately, we capture the exception details into the error message field, which would be sent back to the caller.
+                        try {
+                                boolean result = new MSComponentFactory().getHostBO().registerHostFromCustomData(hostRecord);
+                                hostResponse.setStatus(Boolean.toString(result));
+                                hostResponse.setErrorMessage("");
+                        } catch (MSException mse) {
+                                hostResponse.setStatus(Boolean.toString(false));
+                                hostResponse.setErrorMessage(mse.getErrorMessage()+ "[" + mse.getErrorCode() + "]");
+                        }
+                        hostResList.add(hostResponse);
+                }           
+       }
+       hostResponses.setHostRecords(hostResList);
+        return hostResponses;
+    }
+
 }

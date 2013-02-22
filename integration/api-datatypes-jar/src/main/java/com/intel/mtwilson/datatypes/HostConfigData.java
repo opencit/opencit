@@ -15,11 +15,12 @@ public class HostConfigData {
     private HostVMMType hostVmmType;
     private TxtHostRecord txtHostRecord;
 
+    // By default we will use the OEM as the white list target for both BIOS and VMM.
     public HostConfigData() {
         this.biosWhiteList = false;
         this.vmmWhiteList = false;
         this.biosWLTarget = HostWhiteListTarget.BIOS_OEM;
-        this.vmmWLTarget = HostWhiteListTarget.VMM_GLOBAL;
+        this.vmmWLTarget = HostWhiteListTarget.VMM_OEM;
         this.biosPCRs = "";
         this.vmmPCRs = "";
         this.hostLocation = "";

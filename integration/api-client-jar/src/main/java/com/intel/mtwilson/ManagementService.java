@@ -55,4 +55,9 @@ public interface ManagementService {
     void enableCaWithPassword(String newPassword) throws IOException, ApiException, SignatureException;
     
     void disableCa() throws IOException, ApiException, SignatureException;
+    
+    // New functions to support multiple host registration/update
+    HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
+    
+    HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws IOException, ApiException, SignatureException;
 }

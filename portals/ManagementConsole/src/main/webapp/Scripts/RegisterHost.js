@@ -193,6 +193,7 @@ function fnRetriveHostSuccess(responsJSON) {
 }
 
 function fnRegisterMultipleHost() {
+                        $('#mainLoadingDiv').prepend(disabledDiv);
 	$('#successMessage').html('');
 	var listOfHost = [];
 	var checked = false;
@@ -220,37 +221,38 @@ function fnRegisterMultipleHost() {
 			listOfHost.push(host);	
 		}
 	});
-	if (checked) {
-            $('#registerHostMainContainer').prepend(disabledDiv);
-            for(var iteam in listOfHost){
-                var host = listOfHost[iteam];
-                var biosConfig = host.biosWLTarget;
-                var VmmConfig = host.vmmWLtarget;
-                host.biosWLTarget = null;
-                host.vmmWLtarget = null;
-                var data = "hostToBeRegister="+$.toJSON(host);
-                sendSynchronousAjaxRequest(false, 'getData/registerMultipleHost.html', data+"&biosWLTarget="+biosConfig+"&vmmWLTarget="+VmmConfig, fnRegisterMultipleHostSuccess, null);
-            }
-            $('#disabledDiv').remove();
-	}else {
-		$('#successMessage').html('<span class="errorMessage">* Please select atleast one host to be registered.</span>');
-	}
+	if (!checked) {
+                                $('#successMessage').html('<span class="errorMessage">* Please select atleast one host to be registered.</span>');
+                        }
+                        // Earlier we used to make host registration calls for each of the selected hosts individually. Now that we have the multi host registration API, we are using the same.
+                        var data = "hostToBeRegister="+$.toJSON(listOfHost);                                 
+                        sendJSONAjaxRequest(false, 'getData/registerMultipleHost.html', data,  fnRegisterMultipleHostSuccess, null);
 }
 
 
 function fnRegisterMultipleHostSuccess(responseJSON) {
-	if(responseJSON.result){
-		var host = responseJSON.hostVOs;
-		$('#registerHostTableContent tr').each(function() {
-			var row = $(this);
-			if ($(row).find('td:eq(0)').text() == host.hostName) {
-				$(row).find('td:eq(6)').find('textarea').val(host.status);
-			}
-		});
-	}else {
-		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
-	}
-	
+       // alert( $.toJSON(responseJSON.hostVOs.hostRecords));
+       if (responseJSON.hostVOs.hostRecords) {
+                var values = responseJSON.hostVOs.hostRecords;        
+                for ( var val in values) {
+                // alert(values[val].hostName);
+                        var hostname = values[val].hostName;
+                        var hoststatus = values[val].status;
+                        var hosterrormessage = values[val].errorMessage;
+                        $('#registerHostTableContent tr').each(function() {
+                                var row = $(this);
+                                if ($(row).find('td:eq(0)').text() == hostname) {
+                                        if (hoststatus == "true")
+                                                $(row).find('td:eq(6)').find('textarea').val("Successfully registered/updated the host.");
+                                        else
+                                                $(row).find('td:eq(6)').find('textarea').val(hosterrormessage);
+                                }
+                        });
+                        $('#disabledDiv').remove();
+                }
+       } else {
+               $('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
+       }
 }
 
 //function to show help for VCenter String in registerHost page

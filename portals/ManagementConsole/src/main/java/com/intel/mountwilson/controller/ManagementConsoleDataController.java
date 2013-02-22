@@ -36,10 +36,7 @@ import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.datatypes.HostConfigData;
-import com.intel.mtwilson.datatypes.HostVMMType;
-import com.intel.mtwilson.datatypes.HostWhiteListTarget;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.datatypes.*;
 import java.math.BigInteger;
 import java.security.cert.X509Certificate;
 import java.util.Set;
@@ -381,55 +378,36 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView registerMultipleHost(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.registerMultipleHost >>");
-		ModelAndView responseView = new ModelAndView(new JSONView());
+                                log.info("ManagementConsoleDataController.registerMultipleHost >>");
+                                ModelAndView responseView = new ModelAndView(new JSONView());	
+                                String hostListString;
+
+                                if(req.getParameter("hostToBeRegister") != null) {
+                                        hostListString = req.getParameter("hostToBeRegister");
+                                } else {
+                                        log.info("hostToBeRegister parameter is Null");
+                                        responseView.addObject("result",false);
+                                        responseView.addObject("message","Input Parameters are NULL.");
+                                        return responseView;
+                                }
+                                
+                                try {
+                                        // Now get the API object from the session
+                                        ApiClient apiObj = getApiClientService(req, ApiClient.class);
+                                        List<HostDetails> hostRecords;
+                                        Type listType = new TypeToken<List<HostDetails>>() {}.getType();
+                                        hostRecords = new Gson().fromJson(hostListString, listType);
+                                        responseView.addObject("hostVOs", services.registerHosts(apiObj, hostRecords));
+                                } catch (Exception e) {
+                                        log.error("Error while registering the hosts. " + e.getMessage());
+                                        responseView.addObject("message",e.getMessage());
+                                        responseView.addObject("result",false);
+                                        return responseView;
+                                }
 		
-		String hostListString;
-		
-		if(req.getParameter("hostToBeRegister") != null){
-			hostListString = req.getParameter("hostToBeRegister");
-		} else {
-            log.info("hostToBeRegister parameter is Null");
-            responseView.addObject("result",false);
-            responseView.addObject("message","Input Parameters are NULL.");
-            return responseView;
-		}
-		
-		HostDetails hostDetailsObj;
-		
-                        
-		try {
-			// Now get the API object from the session
-			ApiClient apiObj = getApiClientService(req, ApiClient.class);
-			@SuppressWarnings("serial")
-			Type hostDetail = new TypeToken<HostDetails>() {}.getType();
-			hostDetailsObj = new Gson().fromJson(hostListString, hostDetail);
-			
-			hostDetailsObj.setBiosWLTarget(getBiosWhiteListTarget(req.getParameter("biosWLTarget")));
-			hostDetailsObj.setVmmWLtarget(getVmmWhiteListTarget(req.getParameter("vmmWLTarget")));
-			
-			//if (hostDetailsObj.isRegistered()) {
-				//If host is already register Update host info
-				//responseView.addObject("hostVOs", services.updateRegisteredHost(hostDetailsObj, apiObj));
-			//}else {
-				// register New host
-				responseView.addObject("hostVOs", services.registerNewHost(hostDetailsObj, apiObj));
-			//}
-                        
-		} catch (Exception e) {
-                    
-			log.error("Error while registering the hosts. " + e.getMessage());
-			/* Soni_Begin_26/09/2012_issue_for_consistent_Error_Message  */
-			responseView.addObject("message",e.getMessage());
-			/* Soni_Begin_26/09/2012_issue_for_consistent_Error_Message  */
-			responseView.addObject("result",false);
-			return responseView;
-		}
-		
-		responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.registerMultipleHost <<<");
-		return responseView;
-		
+                                responseView.addObject("result",true);
+                                log.info("ManagementConsoleDataController.registerMultipleHost <<<");
+                                return responseView;	
 	}
 	
 	/**
@@ -980,5 +958,14 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	}
     //End_Added by stdale-Function to download RootCA certificate
+    
+	public ModelAndView dummyPostbackFunction(HttpServletRequest req,HttpServletResponse res) {
+		log.info("ManagementConsoleDataController.dummyPostbackFunction >>");
+		ModelAndView responseView = new ModelAndView(new JSONView());
+		
+		responseView.addObject("result",true);
+		log.info("ManagementConsoleDataController.dummyPostbackFunction <<<");
+		return responseView;
+	}
     
 }
