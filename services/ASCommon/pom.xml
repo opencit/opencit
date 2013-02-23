@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
       <artifactId>http-authorization</artifactId>
-      <version>0.5.4-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>

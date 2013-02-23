@@ -4,36 +4,30 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.ApiCommand;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.ms.common.MSConfig;
-import com.intel.mtwilson.setup.Command;
-import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.setup.SetupWizard;
-import com.intel.mtwilson.io.Filename;
-import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.ms.common.MSConfig;
+import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.data.ApiClientX509;
+import com.intel.mtwilson.ms.helper.MSPersistenceManager;
+import com.intel.mtwilson.setup.Command;
+import com.intel.mtwilson.setup.SetupContext;
+import com.intel.mtwilson.setup.SetupException;
+import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.setup.helper.SCPersistenceManager;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.Configuration;
-import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
-import com.intel.mtwilson.ms.data.ApiClientX509;
-import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 
 /**
  *

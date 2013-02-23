@@ -42,7 +42,7 @@
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-validation</artifactId>
-        <version>0.5.4-SNAPSHOT</version>
+        <version>${project.version}</version>
       </dependency>
       
     <dependency>

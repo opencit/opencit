@@ -289,14 +289,14 @@
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>ManagementService</artifactId>
-      <version>0.5.4-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>jar</type>
       <classifier>classes</classifier>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>AttestationService</artifactId>
-      <version>0.5.4-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>jar</type>
       <classifier>classes</classifier>
     </dependency>
