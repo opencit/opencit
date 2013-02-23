@@ -44,7 +44,7 @@
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
       <artifactId>api-client</artifactId>
-      <version>${project.parent.version}</version>
+      <version>${project.version}</version>
       <type>jar</type>
       <!--<classifier>with-dependencies</classifier>-->
     </dependency>
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>com.intel.mtwilson.desktop</groupId>
       <artifactId>setup-console</artifactId>
-      <version>${project.parent.version}</version>
+      <version>${project.version}</version>
       <type>jar</type>
       <classifier>with-dependencies</classifier>
     </dependency>
