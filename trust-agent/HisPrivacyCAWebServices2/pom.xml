@@ -73,22 +73,6 @@
                     <scope>provided</scope>
                 </dependency>
                 -->
-                <!--
-        <dependency>
-            <groupId>gov.niarl.his.webservices</groupId>
-            <artifactId>his-clients</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
-	    <classifier>HisPrivacyCAWebServices2-client</classifier>
-                    <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>gov.niarl.his.webservices</groupId>
-            <artifactId>his-clients</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
-	    <classifier>HisWebServices-client</classifier>
-                    <scope>provided</scope>
-        </dependency>
--->
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
@@ -211,8 +195,9 @@
                                 <file>${project.build.directory}/${project.artifactId}.war</file>
                                 <type>war</type>
                             </artifact>
+                            <!--  this artifact created by the ant script build.xml ; should be same code as the specially-created artifact gov.niarl.his.webservices:his-clients:1.0:HisPrivacyCAWebServices2-client .. actually that one was made from this same artifact;   one day we may replace all usages of that one with this file so the build will be more easily repeatable -->
 			      <artifact>
-				  <file>${basedir}/clientlib/HisPrivacyCAWebServices2-client.jar</file>
+				  <file>${project.build.directory}/HisPrivacyCAWebServices2-client.jar</file>
 				  <type>jar</type>
 				  <classifier>client</classifier>
 			      </artifact>

@@ -25,6 +25,10 @@
 			<include name="**/*.jar" />
 			<include name="**/*.zip" />
 		</fileset>
+		<fileset dir="./WEB-INF/lib">
+			<include name="**/*.jar" />
+			<include name="**/*.zip" />
+		</fileset>
 	</path>
 
 	<taskdef name="apt" classname="com.sun.tools.ws.ant.Apt">
@@ -86,7 +90,7 @@
 	<target name="client">
 		<delete dir="client" />
 		<mkdir dir="client" />
-		<delete dir="clientlib/HisPrivacyCAWebServices2-client.jar" />
+		<delete dir="./target/HisPrivacyCAWebServices2-client.jar" />
 		<wsimport 
 			debug="true" 
 			verbose="true" 
@@ -110,8 +114,8 @@
 			</classpath>
 			<source dir="./src/main/java" includes="**/hisPrivacyCAWebService2/client/**/*.java,**/hisPrivacyCAWebService2/*,Main.java" />
 		</apt>
-		<jar jarfile="clientlib/HisPrivacyCAWebServices2-client.jar" basedir="client" />
-		<!--<delete dir="client" />-->
+		<jar jarfile="./target/HisPrivacyCAWebServices2-client.jar" basedir="client" />
+		<delete dir="client" />
 	</target>
 
 	<target name="clientInvoker">
