@@ -48,7 +48,6 @@ CREATE TABLE `mw_certificate_x509` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
--- The keystore table holds SAML signing key so that a cluster of Mt Wilson servers can share the key
 CREATE TABLE `mw_keystore` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
