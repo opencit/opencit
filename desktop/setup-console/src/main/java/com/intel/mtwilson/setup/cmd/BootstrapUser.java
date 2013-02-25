@@ -110,6 +110,7 @@ public class BootstrapUser implements Command {
          MwPortalUser keyTable = new MwPortalUser();
          keyTable.setUsername(username);
          keyTable.setKeystore(certResource.toByteArray());
+         keyTable.setStatus("PENDING");
          keystoreJpa.create(keyTable);
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // check database for record

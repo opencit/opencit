@@ -98,6 +98,7 @@ public class RegisterUserController extends AbstractController {
         	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL), new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
                 MwPortalUser keyTable = new MwPortalUser();
                 keyTable.setUsername(username);
+                keyTable.setStatus("PENDING");
                 keyTable.setKeystore(certResource.toByteArray());
                 keystoreJpa.create(keyTable);
                 logger.info("RegisterUser cert added to DB");
