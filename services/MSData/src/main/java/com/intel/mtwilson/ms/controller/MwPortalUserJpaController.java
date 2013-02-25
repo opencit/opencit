@@ -17,6 +17,9 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import org.eclipse.persistence.config.CacheUsage;
+import org.eclipse.persistence.config.HintValues;
+import org.eclipse.persistence.config.QueryHints;
 
 /**
  *
@@ -142,6 +145,23 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
         parameters.put("username", username);
         parameters.put("enabled", Boolean.TRUE);
         return searchByNamedQuery("findByUsernameEnabled", parameters);
+    }
+    
+     public MwPortalUser findMwPortalUserByUserName(String name) {
+        MwPortalUser mwKeystoreObj = null;
+        EntityManager em = getEntityManager();
+        Query query = em.createNamedQuery("MwPortalUser.findByUsername");
+        query.setParameter("username", name);
+
+        query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+        query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+        try {
+          mwKeystoreObj = (MwPortalUser) query.getSingleResult();
+        }
+        catch(javax.persistence.NoResultException e) {
+          mwKeystoreObj = null;           
+        }       
+        return mwKeystoreObj;
     }
     
 }

@@ -18,7 +18,7 @@ public class SCPersistenceManager extends PersistenceManager {
     public void configure() {
         
         addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties());
-        //addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties());
+        addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties());
         //addPersistenceUnit("AuditDataPU", AuditConfig.getJpaProperties());
     }
 }

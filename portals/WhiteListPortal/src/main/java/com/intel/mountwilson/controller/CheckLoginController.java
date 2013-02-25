@@ -25,6 +25,8 @@ import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mountwilson.common.WLMPPersistenceManager;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 
 /**
  * @author yuvrajsx
@@ -36,7 +38,7 @@ public class CheckLoginController extends AbstractController {
 	// variable declaration used for logging. 
 	private static final Logger logger = Logger.getLogger(CheckLoginController.class.getName());
 	private WLMPPersistenceManager wlmManager = new WLMPPersistenceManager();
-	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(wlmManager.getEntityManagerFactory("ASDataPU"));
+	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(wlmManager.getEntityManagerFactory("MSDataPU"));
         
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
@@ -70,10 +72,10 @@ public class CheckLoginController extends AbstractController {
                 }
                 */
                 //stdalex 1/15 jks2db!disk
-                 MwKeystore tblKeystore = keystoreJpa.findMwKeystoreByName(username);
-                 if(tblKeystore == null){
+                MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(username);
+                if(tblKeystore == null){
+                    view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
                     view.addObject("result", false);
-                    view.addObject("message", "Username or Password does not match. Please try again.");
                     return view; 
                 }
                 ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());		

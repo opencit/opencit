@@ -23,6 +23,8 @@ import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mountwilson.common.WLMPPersistenceManager;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 
 /**
  * @author yuvrajsx
@@ -34,7 +36,7 @@ public class RegisterUserController extends AbstractController {
 	// variable declaration used for logging. 
 	private static final Logger logger = Logger.getLogger(RegisterUserController.class.getName());
 	private WLMPPersistenceManager wlmManager = new WLMPPersistenceManager();
-	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(wlmManager.getEntityManagerFactory("ASDataPU"));
+	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(wlmManager.getEntityManagerFactory("MSDataPU"));
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
         
 	@Override
@@ -59,7 +61,7 @@ public class RegisterUserController extends AbstractController {
 		}
 		
                 //Checking for duplicate user registration by seeing if there is already a cert in table for user
-                MwKeystore keyTest = keystoreJpa.findMwKeystoreByName(username);
+                MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
                 if(keyTest != null) {
                   logger.info("An user already exists with the specified User Name. Please select different User Name.");
 		  view.addObject("result",false);
@@ -90,8 +92,8 @@ public class RegisterUserController extends AbstractController {
                 //SimpleKeystore response = KeystoreUtil.createUserInDirectory(new File(dirName), username, password, new URL(baseURL), new String[] { Role.Whitelist.toString() });
                 ByteArrayResource certResource = new ByteArrayResource();
         	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL), new String[] { Role.Whitelist.toString() });
-                MwKeystore keyTable = new MwKeystore();
-                keyTable.setName(username);
+                MwPortalUser keyTable = new MwPortalUser();
+                keyTable.setUsername(username);
                 keyTable.setKeystore(certResource.toByteArray());
                 keystoreJpa.create(keyTable);
         	

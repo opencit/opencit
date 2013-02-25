@@ -13,7 +13,9 @@ import com.intel.mtwilson.datatypes.Role;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
@@ -35,7 +37,7 @@ import org.apache.commons.configuration.Configuration;
  */
 public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
-    private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(scManager.getEntityManagerFactory("ASDataPU"));
+    private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
     private SetupContext ctx = null;
 
     @Override
@@ -105,8 +107,8 @@ public class BootstrapUser implements Command {
         // load the new key
          ByteArrayResource certResource = new ByteArrayResource();
          SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
-         MwKeystore keyTable = new MwKeystore();
-         keyTable.setName(username);
+         MwPortalUser keyTable = new MwPortalUser();
+         keyTable.setUsername(username);
          keyTable.setKeystore(certResource.toByteArray());
          keystoreJpa.create(keyTable);
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);

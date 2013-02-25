@@ -25,6 +25,8 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
 import com.intel.mountwilson.common.TDPersistenceManager;
 import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 
 /**
  * @author yuvrajsx
@@ -36,7 +38,7 @@ public class CheckLoginController extends AbstractController {
 	// variable declaration used during Processing data. 
 	private static final Logger logger = Logger.getLogger(CheckLoginController.class.getName());
 	private TDPersistenceManager tdpManager = new TDPersistenceManager();
-	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(tdpManager.getEntityManagerFactory("ASDataPU"));
+	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(tdpManager.getEntityManagerFactory("MSDataPU"));
 	
         @Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
@@ -73,10 +75,11 @@ public class CheckLoginController extends AbstractController {
                 }
 		*/
                 //stdalex 1/15 jks2db!disk
-                 MwKeystore tblKeystore = keystoreJpa.findMwKeystoreByName(username);
-                 if(tblKeystore == null){
+                 
+                MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(username);
+                if(tblKeystore == null){
+                    view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
                     view.addObject("result", false);
-                    view.addObject("message", "Username or Password does not match. Please try again.");
                     return view; 
                 }
                 ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());

@@ -13,6 +13,8 @@ import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.File;
 import java.net.URL;
 import java.util.Properties;
@@ -35,7 +37,7 @@ public class CheckLoginController extends AbstractController {
 	// variable declaration used during Processing data. 
         private static final Logger logger = Logger.getLogger(CheckLoginController.class.getName());       
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
-	private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(mcManager.getEntityManagerFactory("ASDataPU"));
+	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU"));
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
@@ -65,12 +67,10 @@ public class CheckLoginController extends AbstractController {
             //    return view;                    
             //}
             //stdalex 1/15 jks2db!disk
-            MwKeystore tblKeystore = keystoreJpa.findMwKeystoreByName(keyAliasName);
+            MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
             if(tblKeystore == null){
-                logger.severe("Keystore for the user not found on the server >> " + keystoreFilename);
                 view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
                 view.addObject("result", false);
-                view.addObject("message", "Username or Password does not match. Please try again.");
                 return view; 
             }
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
