@@ -78,7 +78,7 @@ public class CheckLoginController extends AbstractController {
                  
                 MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(username);
                 if(tblKeystore == null){
-                    view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
+                    view.addObject("message", "The username or password you entered is incorrect.");                
                     view.addObject("result", false);
                     return view; 
                 }

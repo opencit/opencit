@@ -74,7 +74,7 @@ public class CheckLoginController extends AbstractController {
                 //stdalex 1/15 jks2db!disk
                 MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(username);
                 if(tblKeystore == null){
-                    view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
+                    view.addObject("message", "Username or Password does not match. Please try again.");                
                     view.addObject("result", false);
                     return view; 
                 }
