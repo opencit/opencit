@@ -37,6 +37,8 @@ import com.intel.mtwilson.util.MWException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,7 +72,8 @@ public class HostBO extends BaseBO {
     //Configuration config = ConfigurationFactory.loadConfiguration(propertiesFile);
     Logger log = LoggerFactory.getLogger(getClass().getName());
     MSPersistenceManager mspm = new MSPersistenceManager();
-    private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(mspm.getEntityManagerFactory("ASDataPU"));
+    //private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(mspm.getEntityManagerFactory("ASDataPU"));
+    private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mspm.getEntityManagerFactory("MSDataPU"));
     private byte[] dataEncryptionKey;
     
     public void setDataEncryptionKey(byte[] key) {
@@ -97,7 +100,7 @@ public class HostBO extends BaseBO {
             */
             // stdalex 1/15 jks2db!disk
             
-            MwKeystore keyTable = keystoreJpa.findMwKeystoreByName(keyAliasName);
+            MwPortalUser keyTable = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
             ByteArrayResource keyResource = new ByteArrayResource(keyTable.getKeystore());
             SimpleKeystore keystore = new SimpleKeystore(keyResource, keyPassword);
             RsaCredential credential = keystore.getRsaCredentialX509(keyAliasName, keyPassword);            
