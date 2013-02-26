@@ -129,7 +129,10 @@ function stopServiceProcess {
 function startService {
    tcsd
     if [ -z "$java" ]; then
-        setup_env > "${package_env_filename}"
+        if [ ! -f "${package_env_filename}" ]; then
+          setup_env > "${package_env_filename}"
+        fi
+        . "${package_env_filename}"
         read_local_config
     fi
     if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
