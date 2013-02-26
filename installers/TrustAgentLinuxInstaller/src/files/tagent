@@ -193,6 +193,7 @@ setup() {
   # create the env file first because pcakey in the interactive install depends on it
   setup_env > "${package_env_filename}"
   . "${package_env_filename}"
+  read_local_config
   setup_interactive_install
 }
    
