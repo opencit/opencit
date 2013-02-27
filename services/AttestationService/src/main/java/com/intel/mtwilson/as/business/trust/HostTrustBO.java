@@ -68,8 +68,6 @@ public class HostTrustBO extends BaseBO {
     private static final Logger log = LoggerFactory.getLogger(HostTrustBO.class);
     Marker sysLogMarker = MarkerFactory.getMarker("SYSLOG"); // TODO we should create a single class to contain all the markers we want to use throughout the code
     
-    private final Date today = new Date(System.currentTimeMillis());
-
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS;
     private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(getEntityManagerFactory());
@@ -308,7 +306,7 @@ public class HostTrustBO extends BaseBO {
     }
 
     private void logTrustStatus(TblHosts host, TblMle mle, IManifest manifest) {
-
+        Date today = new Date(System.currentTimeMillis());
         PcrManifest pcrManifest = (PcrManifest)manifest;
         
         TblTaLog taLog = new TblTaLog();
@@ -328,7 +326,7 @@ public class HostTrustBO extends BaseBO {
     }
 
     private void logOverallTrustStatus(TblHosts host, String response) {
-
+        Date today = new Date(System.currentTimeMillis());
         TblTaLog taLog = new TblTaLog();
         taLog.setHostID(host.getId());
         taLog.setMleId(0);
