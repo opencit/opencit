@@ -95,6 +95,15 @@
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>HisPrivacyCAWebServices2.war</destFileName>
                 </artifactItem>
+                <artifactItem>
+                    <groupId>com.intel.mtwilson.trustagent</groupId>
+                    <artifactId>HisPrivacyCAWebServices2</artifactId>
+                    <version>${project.parent.version}</version>
+                    <classifier>setup</classifier>
+                    <type>jar</type>                    
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>HisPrivacyCAWebServices2-setup.jar</destFileName>
+                </artifactItem>
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
               <overWriteReleases>false</overWriteReleases>
