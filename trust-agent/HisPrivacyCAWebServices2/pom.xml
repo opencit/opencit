@@ -243,6 +243,11 @@
 				  <classifier>HisWebServices-client</classifier>
 			      </artifact>
                               -->
+			      <artifact>
+				  <file>${project.build.directory}/${project.artifactId}-setup.jar</file>
+				  <type>jar</type>
+				  <classifier>setup</classifier>
+			      </artifact>
                         </artifacts>
                     </configuration>
                 </execution>
