@@ -1977,7 +1977,7 @@ webservice_running() {
   local glassfish_application_name="$1"
   glassfish_running
   WEBSERVICE_RUNNING=""
-  if [ -n "$GLASSFISH_RUNNING" ]; then
+  if glassfish_running; then
     # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
     WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${glassfish_application_name}" | head -n 1 | awk '{ print $1 }'`
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then

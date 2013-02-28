@@ -8,7 +8,14 @@
   <description>
 SQL and Java code to support MySQL storage. SQL should be MySQL-specific.
 Java code might be a Repository implementation backed by JPA/Hibernate/etc. 
-  </description>
+      
+The files are organized by date, and each file adds a record into a mw_changelog
+table so that it's possible to know the "version" of the schema by examining
+that table.
+
+To dump all the tables into one script, you can use this command:
+      mysqldump --no-data --skip-comments -p mw_as > mw.sql
+</description>
 
     <parent>
 	<groupId>com.intel.mtwilson.database</groupId>

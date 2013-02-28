@@ -181,6 +181,7 @@ setup_env() {
     #export mysql
   fi
   echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
+  echo "DATABASE_VENDOR=$DATABASE_VENDOR"
   if using_glassfish; then
     glassfish_detect > /dev/null
     echo "GLASSFISH_HOME=$GLASSFISH_HOME"
