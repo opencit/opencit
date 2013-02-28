@@ -3,7 +3,7 @@
 
   <artifactId>HisPrivacyCAWebServices2</artifactId>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <name>Privacy CA Web Service - HisPrivacyCAWebServices2</name>
   <description>Installs MySQL, Java, Glassfish, Web Services, and UI Portals</description>
 
@@ -63,7 +63,7 @@
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15</artifactId>
                     <version>1.46</version>                     <!-- was 1.41 -->
-                    <scope>provided</scope>
+                  <!--  <scope>provided</scope>--> <!-- need to include it for the -setup.jar  -->
                 </dependency>
                 <!--
                 <dependency>
@@ -166,6 +166,41 @@
       </plugin>
 
       <!-- end build .war file -->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>regular-jar-with-dependencies</id>
+                <phase>package</phase>
+                <goals><goal>shade</goal></goals>
+                <configuration>
+        		<shadedArtifactAttached>true</shadedArtifactAttached>
+                	<shadedClassifierName>setup</shadedClassifierName>
+                        <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                          <manifestEntries>
+                            <Main-Class>gov.niarl.his.privacyca.HisSetup</Main-Class>
+                          </manifestEntries>
+                        </transformer>
+                        </transformers>                        
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <includes>
+                                    <include>gov/niarl/his/privacyca/**</include>
+                                    <include>com/intel/mtwilson/util/**</include>
+                                    <include>org/slf4j/**</include>
+                                    <include>ch/qos/logback/**</include>
+                                    <include>org/bouncycastle/**</include>
+                                </includes>
+                            </filter>
+                        </filters>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
 
 
       <!-- begin deploy artifact to repository -->

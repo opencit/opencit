@@ -71,6 +71,8 @@ setup_print_summary() {
 
 setup_interactive_install() {
   configure_privacyca_url
+  create_privacyca_keys
+  protect_privacyca_files
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
@@ -83,7 +85,6 @@ setup_interactive_install() {
       webservice_install "${glassfish_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
       webservice_running_report "${glassfish_application_name}"
     fi
-    protect_privacyca_files
   fi
 }
 
@@ -98,6 +99,30 @@ setup() {
       exit 1
   fi
   setup_interactive_install
+}
+
+# This function temporarily replaces /dev/random with /dev/urandom and 
+# watches for the specified file... when the file exists then /dev/random
+# is restored.
+replace_random_until_exists() {
+  markerfile=$1
+  mv /dev/random /dev/random.old
+  ln -s /dev/urandom /dev/random
+  while [ ! -f "$markerfile" ]; do sleep 1; done
+  rm /dev/random
+  mv /dev/random.old /dev/random
+  if [ ! -e /dev/random ]; then mknod -m 644 /dev/random c 1 8; chown root:root /dev/random; fi
+  if [ ! -e /dev/urandom ]; then mknod -m 644 /dev/urandom c 1 9; chown root:root /dev/urandom; fi
+}
+
+create_privacyca_keys() {
+  # workaround for bug #568 - privacy ca takes 10-15 minutes to start first time, which is caused by key generation blocked due to not enough entropy in /dev/random
+  # for production, you just need to wait the 10-15 minutes because you want secure keys. but for automated testing we benefit by getting this done in 1 second instead of 900 seconds
+  if [[ "$PRIVACYCA_KEYGEN_URANDOM" == "yes" ]]; then
+    replace_random_until_exists "${intel_conf_dir}/PrivacyCA.p12" &
+  fi
+  # creates PrivacyCA.p12 and endorsement.p12  (also creates the cacerts and clientfiles dirs)
+  java -jar ${package_dir}/HisPrivacyCAWebServices2-setup.jar
 }
 
 # The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
