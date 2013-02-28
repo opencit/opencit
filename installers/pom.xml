@@ -26,7 +26,6 @@
     <module>WhiteListPortalLinuxInstaller</module>
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-server</module>
-	<module>mtwilson-server-with-jdk_glassfish_monit</module>
   </modules>
 
 <build>
