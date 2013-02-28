@@ -122,7 +122,10 @@ create_privacyca_keys() {
     replace_random_until_exists "${intel_conf_dir}/PrivacyCA.p12" &
   fi
   # creates PrivacyCA.p12 and endorsement.p12  (also creates the cacerts and clientfiles dirs)
+  local oldpwd=`pwd`
+  cd "${intel_conf_dir}"
   java -jar ${package_dir}/HisPrivacyCAWebServices2-setup.jar
+  cd "${oldpwd}"  
 }
 
 # The PrivacyCA creates PrivacyCA.p12 on start-up if it's missing; so we ensure it has safe permissions
