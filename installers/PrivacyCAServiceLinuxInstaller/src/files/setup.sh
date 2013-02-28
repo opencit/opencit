@@ -34,7 +34,7 @@ fi
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
 WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
-SETUP_PACKAGE=`ls -l *-setup.jar 2>/dev/null | tail -n 1`
+SETUP_PACKAGE=`ls -1 *-setup.jar 2>/dev/null | tail -n 1`
 
 # copy application files to /opt
 mkdir -p "${package_dir}"
