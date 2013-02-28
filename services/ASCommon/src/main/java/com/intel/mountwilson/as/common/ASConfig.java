@@ -32,10 +32,6 @@ public class ASConfig extends ConfigBase{
     @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
-        defaults.setProperty("mountwilson.as.db.password", "");
-        defaults.setProperty("mountwilson.as.db.user", "root");
-        defaults.setProperty("mountwilson.as.db.host", "localhost");
-        defaults.setProperty("mountwilson.as.db.schema", "mw_as");
         defaults.setProperty("com.intel.mountwilson.as.home", "C:/work/aikverifyhome"); // used by TAHelper
         defaults.setProperty("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"); // used by TAHelper
         defaults.setProperty("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe"); // used by TAHelper

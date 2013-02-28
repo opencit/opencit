@@ -1,5 +1,6 @@
 package com.intel.mountwilson.as.common;
 
+import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.DefaultConfigurationBuilder;
 import org.apache.commons.configuration.ConfigurationException;
@@ -31,8 +32,12 @@ public class AttestationServiceConfigTest {
     @Test
     public void testLoadASConfig() {
         Configuration config = ASConfig.getConfiguration();
-        assertTrue(config.containsKey("mountwilson.as.db.user"));
+        assertTrue(config.containsKey("com.intel.mountwilson.as.trustagent.timeout"));
         
+        Properties p = ASConfig.getJpaProperties();
+        System.out.println("javax.persistence.jdbc.url="+p.getProperty("javax.persistence.jdbc.url"));
+        System.out.println("javax.persistence.jdbc.user="+p.getProperty("javax.persistence.jdbc.user"));
+        System.out.println("javax.persistence.jdbc.password="+p.getProperty("javax.persistence.jdbc.password"));
         // NOTE: you do NOT want to test for specific configuration settings because they may be different on various development machines!
 //        assertTrue("root".equals(config.getString("mountwilson.as.db.user")));
 //        assertTrue("as_root".equals(config.getString("mountwilson.as.db.user")));

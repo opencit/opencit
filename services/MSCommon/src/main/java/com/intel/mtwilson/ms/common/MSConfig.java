@@ -30,11 +30,6 @@ public class MSConfig extends ConfigBase {
     public Properties getDefaults() {
         Properties defaults = new Properties();
 
-        defaults.setProperty("mountwilson.ms.db.password", "password");
-        defaults.setProperty("mountwilson.ms.db.user", "root");
-        defaults.setProperty("mountwilson.ms.db.host", "localhost");
-        defaults.setProperty("mountwilson.ms.db.schema", "mw_as");
-
 //        defaults.setProperty("mtwilson.saml.certificate", "saml.cer");// XXX TODO remove this; deprecated in mtwilson-1.1  in favor of mtwilson.saml.certificate.file (PEM format)
         
         defaults.setProperty("mtwilson.ms.biosPCRs", "0");
