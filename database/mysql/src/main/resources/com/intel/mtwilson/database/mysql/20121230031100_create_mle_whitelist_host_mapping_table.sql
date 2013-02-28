@@ -1,6 +1,6 @@
 -- This is a new table that would be used to store the host name that was used to create the white list for the MLE.
 
-CREATE  TABLE `mw_as`.`mw_mle_source` (
+CREATE  TABLE `mw_mle_source` (
   `ID` INT NOT NULL AUTO_INCREMENT ,
   `MLE_ID` INT NOT NULL ,
   `Host_Name` VARCHAR(100) NULL ,
