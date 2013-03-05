@@ -3,15 +3,12 @@
  */
 package com.intel.mountwilson.util;
 
-import java.io.IOException;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-
 import com.intel.mountwilson.common.DemoPortalException;
 import com.intel.mtwilson.ApiException;
 import com.sun.jersey.api.client.ClientHandlerException;
-
+import java.io.IOException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +37,8 @@ public class ConnectionUtil {
 		}
 		if (exceptionObject.getClass().equals(ApiException.class)) {
 			
-			/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */
 			ApiException ae=(ApiException) exceptionObject;
-                        return new DemoPortalException(ae.getMessage() + "[" + ae.getErrorCode() + "]");
-                        /* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
-                        //return new DemoPortalException("ApiException."+exceptionObject.getMessage(),exceptionObject);
+                                                                        return new DemoPortalException(ae.getMessage() + "[" + ae.getErrorCode() + "]");
 		}
 		if (exceptionObject.getClass().equals(IllegalArgumentException.class)) {
 			return new DemoPortalException("IllegalArgumentException: "+exceptionObject.getMessage(),exceptionObject);

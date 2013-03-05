@@ -3,31 +3,14 @@
  */
 package com.intel.mountwilson.Service;
 
-import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mountwilson.common.DemoPortalException;
 import com.intel.mountwilson.constant.HelperConstant;
-import com.intel.mountwilson.datamodel.HostDetailsEntityVO;
-import com.intel.mountwilson.datamodel.HostReportTypeVO;
-import com.intel.mountwilson.datamodel.HostVmMappingVO;
-import com.intel.mountwilson.datamodel.MleDetailsEntityVO;
-import com.intel.mountwilson.datamodel.TrustedHostVO;
+import com.intel.mountwilson.datamodel.*;
 import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mountwilson.util.ConverterUtil;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.AttestationService;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.WhitelistService;
@@ -35,7 +18,11 @@ import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.datatypes.PcrLogReport;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
-
+import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Map.Entry;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -100,19 +87,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	                } catch (Exception e) {
 	                	hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,e.getMessage()));
 	                	log.error("Exception while getting trust status "+hostTrustXmlResponse.getName()+". "+ e.getMessage());
-	                	e.printStackTrace();
-	                	/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message-- added below line   */
 	                	throw ConnectionUtil.handleException(e);
-	                	/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
 	                }
                  }
                 
             } catch (Exception e) {
                     log.error("Exception while getting trust status All Host."+ e.getMessage());
-                	/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message*/
                     throw ConnectionUtil.handleException(e);
-                    /* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-                    //throw new DemoPortalException("Exception : "+e.getMessage());
             }
 		}else {
 			throw new DemoPortalException("Currently there are no hosts configured in the system.");
@@ -137,10 +118,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			hostList = ConverterUtil.getHostVOListFromTxtHostRecord(service.queryForHosts("")); 
 		} catch (Exception e) {
 			log.error("Error While getting data from DataBase."+e.getMessage());	
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			 /* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
 		
 		//Check if Return list is empty or Not, if empty throw Exception to controller with Specific message. 
@@ -202,30 +180,15 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			xmloutput = apiClientServices.getSamlForHost(new Hostname(hostName));
 			TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, xmloutput);
 			if( trustAssertion.isValid() ) {
-	             hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, trustAssertion,null);
-	         }
-	         else {
-	            log.error("Trust Assertion is NOT valid "+hostName+". "+ trustAssertion.error());
-	            throw new DemoPortalException("Trust Assertion is NOT valid "+hostName+". "+ trustAssertion.error());
-	         }
-		}/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
-		catch (Exception e) {
-                    // Bug: 445 - We should not be throwing the exception. Instead return the object with data filled in.                    
-                    hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, null,e.getMessage());
-                    //e.printStackTrace();
-                    //throw ConnectionUtil.handleException(e);
-		}
-		/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-		
-		/*catch (ApiException e) {
-			hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, null,e.getMessage());
-			log.error("Error While Getting Trust Status. "+e.getMessage()+"-----"+e.getErrorCode());
+                                                	             hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, trustAssertion,null);
+                                                                        }  else {
+                                                                                        log.error("Trust Assertion is NOT valid "+hostName+". "+ trustAssertion.error());
+                                                                                        throw new DemoPortalException("Trust Assertion is NOT valid "+hostName+". "+ trustAssertion.error());
+                                                                        }
 		} catch (Exception e) {
-			hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, null,e.getMessage());
-			e.printStackTrace();
-		}*/
-		
-		// hostVO.setUpdatedOn(formatter.format(new Date()));
+                                                                        // Bug: 445 - We should not be throwing the exception. Instead return the object with data filled in.                    
+                                                                        hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, null,e.getMessage());
+		}
 		return hostVO;
 	}
 	
@@ -264,14 +227,11 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 				}
 			}else {
 				// throw new DemoPortalException("No OEM & OS Information is present in Database. Please check Database Configuration.");
-                                // Bug:575. Providing a better error message for the user.
+                                                                                                // Bug:575. Providing a better error message for the user.
 				throw new DemoPortalException("Currently no MLEs are configured in the system.");                                
 			}
 		}catch (Exception e) {
-			/* Soni_Begin_17/09/2012_issue_for_consistent_Error_Message  */
 			throw ConnectionUtil.handleException(e);
-			/* Soni_End_17/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
 		return map;
 	}
@@ -295,14 +255,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	        for (MleDetailsEntityVO mleDetailsEntityVO : mleList) {
 	        	maps.put(ConverterUtil.getOSAndVMMInfoString(mleDetailsEntityVO), mleDetailsEntityVO.getOsName().toLowerCase().contains(HelperConstant.OS_IMAGE_VMWARE.toLowerCase()) ? true : false);
 			}
-		}/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
-		catch (Exception e) {
+		}catch (Exception e) {
 			 throw ConnectionUtil.handleException(e);
 		}
-		/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-		/*catch (Exception e) {
-			throw new DemoPortalException(e.getMessage(),e);
-		}*/
 		return maps;
 	}
 
@@ -379,10 +334,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			result = true;
 		} catch (Exception e) {
 			log.error("Errror While Deleting Host.");
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			 /* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e); 
 		}
 		return result;
 	}
@@ -409,10 +361,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			vCenterString = service.queryForHosts(hostName).get(0).AddOn_Connection_String;
 		} catch (Exception e) {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-		 /* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException("Error while getting vCenterString for host ID, cause is "+e.getMessage(),e);
 		}
 		log.info("Connecting to VM Client.");
 		try {
@@ -448,10 +397,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			
 		} catch (Exception e) {
 			log.error("Error while getting data from VMCLient, cause is "+e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
 		//Get the list of All VM with all predefine policy information.
 		return getVMFromHostVmMapping(hostID,vms,vmMappingData);
@@ -477,10 +423,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			vCenterString = service.queryForHosts(hostName).get(0).AddOn_Connection_String;
 		} catch (Exception e) {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException("Error while getting vCenterString for host ID, cause is "+e.getMessage(),e);
 		}
 		
 		try {
@@ -488,10 +431,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			VMwareClient.powerOnOffVM(vmName, hostName, isPowerOnCommand, vCenterString);
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
 		return true;
 	}
@@ -516,10 +456,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			vCenterString = service.queryForHosts(sourceHost).get(0).AddOn_Connection_String;
 		} catch (Exception e) {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException("Error while getting vCenterString for host ID, cause is "+e.getMessage(),e);
 		}
 		
 		try {
@@ -527,10 +464,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			VMwareClient.migrateVM(vmName,hostToTransfer,vCenterString);
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
 		return true;
 	}
@@ -569,10 +503,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			e.printStackTrace();
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		} 
 		//format a SAML String into a XML type using helper Function.
 		return ConverterUtil.formateXMLString(xmloutput);
@@ -589,10 +520,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 				
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
 		return true;
 	}
@@ -708,10 +636,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			hostDetailsEntityVO = ConverterUtil.getHostVOObjectFromTxtHostRecord(service.queryForHosts(hostName).get(0));
 		} catch (Exception e) {
 			log.error("Error While getting data from DataBase."+e.getMessage());
-			/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 			 throw ConnectionUtil.handleException(e);
-			/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-			//throw new DemoPortalException(e.getMessage(),e);
 		}
     	
 		
@@ -753,10 +678,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 				
 			} catch (Exception e) {
 				log.error(e.getMessage());
-				/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 				 throw ConnectionUtil.handleException(e);
-				/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
-				//throw new DemoPortalException(e.getMessage(),e);
 			}
 		
 		return report.getPcrLogs();

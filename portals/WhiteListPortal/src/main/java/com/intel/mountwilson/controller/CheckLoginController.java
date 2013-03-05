@@ -3,30 +3,24 @@
  */
 package com.intel.mountwilson.controller;
 
-import java.io.File;
+import com.intel.mountwilson.common.WLMPConfig;
+import com.intel.mountwilson.common.WLMPPersistenceManager;
+import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.crypto.RsaCredential;
+import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.net.URL;
 import java.util.Properties;
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.apache.commons.configuration.MapConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
-
-import com.intel.mountwilson.common.WLMPConfig;
-import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.io.Filename;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mountwilson.common.WLMPPersistenceManager;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.data.MwKeystore;
-import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
-import com.intel.mtwilson.ms.data.MwPortalUser;
 
 /**
  * @author yuvrajsx
@@ -36,7 +30,7 @@ public class CheckLoginController extends AbstractController {
 
 	
 	// variable declaration used for logging. 
-	private static final Logger logger = Logger.getLogger(CheckLoginController.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(CheckLoginController.class.getName());
 	private WLMPPersistenceManager wlmManager = new WLMPPersistenceManager();
 	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(wlmManager.getEntityManagerFactory("MSDataPU"));
         

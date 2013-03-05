@@ -3,11 +3,10 @@
  */
 package com.intel.mountwilson.Service;
 
-import java.util.List;
-
 import com.intel.mountwilson.common.WLMPortalException;
 import com.intel.mountwilson.datamodel.OEMDataVO;
 import com.intel.mtwilson.WhitelistService;
+import java.util.List;
 
 /**
  * @author yuvrajsx

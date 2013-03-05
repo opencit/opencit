@@ -4,27 +4,6 @@
 package com.intel.mountwilson.controller;
 
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.intel.mountwilson.Service.IManagementConsoleServices;
@@ -36,12 +15,31 @@ import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.datatypes.*;
-import java.math.BigInteger;
+import com.intel.mtwilson.datatypes.HostConfigData;
+import com.intel.mtwilson.datatypes.HostVMMType;
+import com.intel.mtwilson.datatypes.HostWhiteListTarget;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.lang.reflect.Type;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import org.apache.commons.codec.binary.Base64;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 /**
  * @author yuvrajsx
  *
