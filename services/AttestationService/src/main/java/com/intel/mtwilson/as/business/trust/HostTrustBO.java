@@ -375,13 +375,14 @@ public class HostTrustBO extends BaseBO {
                 trustLevel = "unknown";
             }
             HostTrustLevel1String trust = new HostTrustLevel1String();
+            trust.hostname = hostName.toString();
             trust.trustLevel = trustLevel;
             trust.timestamp = Util.getDateString(today);
-            hostTrusts.pollHosts.put(hostName, trust);
+            hostTrusts.pollHosts.add(trust);
 
         }
 
-        hostTrusts.count = hostTrusts.pollHosts.size();
+        
 
         return hostTrusts;
     }
