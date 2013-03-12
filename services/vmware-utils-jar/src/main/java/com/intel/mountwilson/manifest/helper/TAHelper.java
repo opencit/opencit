@@ -13,12 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.persistence.EntityManagerFactory;
 import javax.xml.bind.JAXBException;
-import com.intel.mtwilson.agent.intel.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.tls.*;
-import com.intel.mtwilson.datatypes.InternetAddress;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
@@ -33,7 +30,6 @@ import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.io.ByteArrayResource;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import javax.xml.stream.XMLOutputFactory;
@@ -61,6 +57,8 @@ public class TAHelper {
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
 //	private EntityManagerFactory entityManagerFactory;
+    
+    private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
     
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
         Configuration config = ASConfig.getConfiguration();
@@ -90,6 +88,10 @@ public class TAHelper {
         }
         
 //        this.setEntityManagerFactory(entityManagerFactory);
+    }
+    
+    public void setTrustedAik(String pem) {
+        trustedAik = pem;
     }
 
     // DAA challenge
@@ -213,20 +215,25 @@ public class TAHelper {
 
             ClientRequestType clientRequestType = client.getQuote(nonce, pcrList);
             log.info( "got response from server ["+hostname+"] "+clientRequestType);
-            String aikCertificate = clientRequestType.getAikcert();
-            
-            log.info( "extracted aik cert from response: "+aikCertificate);
-            
+
             String quote = clientRequestType.getQuote();
-
             log.info( "extracted quote from response: "+quote);
-            saveCertificate(aikCertificate, sessionId);
-            
-            log.info( "saved certificate with session id: "+sessionId);
-            
-            saveQuote(quote, sessionId);
 
+            saveQuote(quote, sessionId);
             log.info( "saved quote with session id: "+sessionId);
+
+            // we only need to save the certificate when registring the host ... when we are just getting a quote we need to verify it using the previously saved AIK.
+            if( trustedAik == null ) {
+                String aikCertificate = clientRequestType.getAikcert();            
+                log.info( "extracted aik cert from response: "+aikCertificate);
+            
+                saveCertificate(aikCertificate, sessionId); 
+                log.info( "saved host-provided AIK certificate with session id: "+sessionId);
+            }
+            else {
+                saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
+                log.info( "saved database-provided trusted AIK certificate with session id: "+sessionId);                
+            }
             
             saveNonce(nonce,sessionId);
             

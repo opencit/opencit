@@ -40,6 +40,11 @@ public class TrustAgentStrategy extends TAHelper implements IManifestStrategy {
 		
 		String pcrList = getPcrList(tblHosts);
                 
+                // Important:  If this host is already registered then its record will have an AIK certificate... in that case, we need to use the
+                // known AIK certificate of the host to verify its quote.
+                if( tblHosts.getAIKCertificate() != null ) {
+                    setTrustedAik(tblHosts.getAIKCertificate());
+                }
 		
 		return getQuoteInformationForHost(tblHosts, pcrList); // tblHosts.getIPAddress(), pcrList, tblHosts.getName(), tblHosts.getPort());
 		

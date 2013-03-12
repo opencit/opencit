@@ -114,7 +114,7 @@ public class IntelHostAgent implements HostAgent {
     
     @Override
     public TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<PcrIndex> pcr) {
-        throw new UnsupportedOperationException("Vmware does not provide TPM Quotes"); // XXX TODO throw exception or return null?
+        throw new UnsupportedOperationException("Not supported  yet."); // XXX TODO throw exception or return null?
     }
 
     @Override
@@ -163,6 +163,8 @@ public class IntelHostAgent implements HostAgent {
 //        return help.getHostAttestationReport(hostAddress);
         try {
             TAHelper helper = new TAHelper();
+            // XXX the PCR information returned here is NOT verified using the host's trusted AIk certificate from our database... must call helper.setTrustedAik(...) before calling helper.getQuoteInformationForHost(...) in order to verify the quote
+            // currently the getHostAttestationReport function is ONLY called from Management Service HostBO.configureWhiteListFromCustomData(...)  so there wouldn't be any saved trusted AIK in the database anyway
             HashMap<String, PcrManifest> pcrMap = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient, pcrList);
             vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrMap, vmmName);
             log.debug("Host attestation report for {}", hostAddress);

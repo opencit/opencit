@@ -170,6 +170,7 @@ public class HostTrustBO extends BaseBO {
                 tblHosts.getVmmMleId().getVersion(), tblHosts.getVmmMleId().getOsId().getName(), tblHosts.getVmmMleId().getOsId().getVersion(),
                 tblHosts.getId());
 
+        
         /**
          * Verify trust
 		 *
@@ -238,6 +239,18 @@ public class HostTrustBO extends BaseBO {
         return response;
     }
 
+    /**
+     * This method only verifies that the PCR/module values for the given
+     * host match the host's whitelist -  IT DOES NOT VERIFY THAT THE
+     * PCR/MODULE VALUES FOR THE HOST ARE TRUSTED 
+     * For hosts that return a TPM Quote, you need to verify the integrity
+     * of the quote separately using the host's AIK.
+     * @param host
+     * @param pcrManifestMap
+     * @param gkvBiosPcrManifestMap
+     * @param gkvVmmPcrManifestMap
+     * @return 
+     */
     private HostTrustStatus verifyTrust(TblHosts host,
             HashMap<String, ? extends IManifest> pcrManifestMap,
             HashMap<String, ? extends IManifest> gkvBiosPcrManifestMap,

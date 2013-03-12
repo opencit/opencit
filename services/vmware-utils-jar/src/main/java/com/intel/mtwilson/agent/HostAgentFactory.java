@@ -5,27 +5,20 @@
 package com.intel.mtwilson.agent;
 
 import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.manifest.strategy.TrustAgentStrategy;
-import com.intel.mountwilson.manifest.strategy.VMWareManifestStrategy;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.InternetAddress;
-import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.util.EnumMap;
 import java.util.HashMap;
