@@ -4,15 +4,12 @@
  */
 package com.intel.mountwilson.util;
 
+import com.google.gson.Gson;
 import java.util.Iterator;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.web.servlet.View;
-
-import com.google.gson.Gson;
 
 public class JSONView implements View {
 	private boolean isKeyRequired;

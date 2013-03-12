@@ -3,15 +3,13 @@
  */
 package com.intel.mountwilson.controller;
 
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-
 /**
  * @author yuvrajsx
  *
@@ -19,7 +17,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 @Controller
 public class WLMViewController extends MultiActionController{
 	
-	private static final Logger logger = Logger.getLogger(WLMViewController.class.getName()); 
+	private static final Logger logger = LoggerFactory.getLogger(WLMViewController.class.getName()); 
 
 	/**
 	 * Method to for OS Component

@@ -14,13 +14,6 @@ public interface HelperConstant {
 	String IMAGE_TRUSTED_UNKNOWN = "trustUnknow";
 	
 	String OS_IMAGE_VMWARE = "vmware";
-	
-	/*String OS_IMAGE_UBUNTU = "ubuntu";
-	String OS_IMAGE_SUSE = "suse";
-	String OS_IMAGE_RHEL = "rhel";
-	
-	String HYPER_IMAGE_KVM = "kvm";
-	String HYPER_IMAGE_XEN = "xen";*/
 	String SEPARATOR_VMCLIENT = "::";
 	String VM_POWER_STATE_ON = "POWERED_ON";
         

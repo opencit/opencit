@@ -3,8 +3,6 @@
  */
 package com.intel.mountwilson.datamodel;
 
-import com.intel.mtwilson.datatypes.HostWhiteListTarget;
-
 /**
  * @author yuvrajsx
  *

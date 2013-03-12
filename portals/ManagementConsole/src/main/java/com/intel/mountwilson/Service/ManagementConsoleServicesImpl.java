@@ -1,41 +1,31 @@
 package com.intel.mountwilson.Service;
 
-import java.io.IOException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.slf4j.LoggerFactory;
-
 import com.intel.mountwilson.common.MCPConfig;
 import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mountwilson.common.ManagementConsolePortalException;
-import com.intel.mountwilson.constant.HelperConstant;
 import com.intel.mountwilson.datamodel.ApiClientDetails;
 import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.ConnectionUtil;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ManagementService;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ManagementConsoleServicesImpl implements IManagementConsoleServices {
 
-        private static final Logger logger = Logger.getLogger(ManagementConsoleServicesImpl.class.getName());
+        private static final Logger logger = LoggerFactory.getLogger(ManagementConsoleServicesImpl.class.getName());
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
 	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("ASDataPU"));
         private ApiClientX509JpaController apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));

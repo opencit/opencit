@@ -3,25 +3,6 @@
  */
 package com.intel.mountwilson.controller;
 
-import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-
 import com.google.common.collect.Lists;
 import com.intel.mountwilson.Service.IDemoPortalServices;
 import com.intel.mountwilson.common.DemoPortalException;
@@ -32,9 +13,20 @@ import com.intel.mountwilson.datamodel.HostVmMappingVO;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.AttestationService;
-
+import java.io.IOException;
+import java.security.cert.X509Certificate;
+import java.util.*;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 /**
  * @author yuvrajsx
  *

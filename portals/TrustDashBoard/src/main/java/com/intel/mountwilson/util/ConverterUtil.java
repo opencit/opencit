@@ -3,19 +3,6 @@
  */
 package com.intel.mountwilson.util;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
 import com.intel.mountwilson.common.TDPConfig;
 import com.intel.mountwilson.constant.HelperConstant;
 import com.intel.mountwilson.datamodel.HostDetailsEntityVO;
@@ -28,8 +15,19 @@ import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.datatypes.MleData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 
 /**

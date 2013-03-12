@@ -4,8 +4,8 @@
  */
 package com.intel.mountwilson.common;
 
-import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mtwilson.jpa.PersistenceManager;
 /**
  *
  * @author jbuhacoff

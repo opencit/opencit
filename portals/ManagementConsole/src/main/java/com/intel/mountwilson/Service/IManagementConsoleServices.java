@@ -3,17 +3,15 @@
  */
 package com.intel.mountwilson.Service;
 
-import java.util.List;
-
 import com.intel.mountwilson.common.ManagementConsolePortalException;
+import com.intel.mountwilson.datamodel.ApiClientDetails;
 import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
-import com.intel.mountwilson.datamodel.ApiClientDetails;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.datatypes.HostConfigData;
-import com.intel.mtwilson.datatypes.HostConfigDataList;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.Role;
+import java.util.List;
 
 /**
  * @author yuvrajsx

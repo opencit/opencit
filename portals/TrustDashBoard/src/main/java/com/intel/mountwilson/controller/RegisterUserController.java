@@ -3,27 +3,22 @@
  */
 package com.intel.mountwilson.controller;
 
-import java.io.File;
-import java.net.URL;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.AbstractController;
-
-import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mountwilson.common.TDPConfig;
+import com.intel.mountwilson.common.TDPersistenceManager;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
-import com.intel.mountwilson.common.TDPersistenceManager;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
+import java.net.URL;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
 
 /**
  * @author yuvrajsx
@@ -32,7 +27,7 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 public class RegisterUserController extends AbstractController {
 	
 	// variable declaration used for Logging. 
-        private static final Logger logger = Logger.getLogger(RegisterUserController.class.getName());
+        private static final Logger logger = LoggerFactory.getLogger(RegisterUserController.class.getName());
         private TDPersistenceManager tdpManager = new TDPersistenceManager();
 	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(tdpManager.getEntityManagerFactory("MSDataPU"));
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
