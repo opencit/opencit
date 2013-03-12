@@ -36,7 +36,7 @@ public class OpenStackTest {
         ArrayList<Hostname> hosts = new ArrayList<Hostname>();
         hosts.add(new Hostname("127.0.0.1"));
         OpenStackHostTrustLevelReport report = mtwilson.pollHosts(hosts);
-        System.out.println("Got "+report.count+" hosts");
+        System.out.println("Got "+report.pollHosts.size()+" hosts");
     }
 
     @Test

@@ -14,13 +14,13 @@ table so that it's possible to know the "version" of the schema by examining
 that table.
 
 To dump all the tables into one script, you can use this command:
-      mysqldump --no-data --skip-comments -p mw_as > mw.sql
+      mysqldump --no-data --skip-comments -p mw_as &gt; mw.sql
 </description>
 
     <parent>
 	<groupId>com.intel.mtwilson.database</groupId>
 	<artifactId>mtwilson-database</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
     </parent>
   
   
