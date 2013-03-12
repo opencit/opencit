@@ -11,6 +11,7 @@ clean:
 
 install:
 	mkdir -p /var/opt/intel/aikverifyhome/bin
+	mkdir -p /var/opt/intel/aikverifyhome/data
 	chmod 755 aikqverify openssl.sh
 	cp aikqverify /var/opt/intel/aikverifyhome/bin
 	cp openssl.sh /var/opt/intel/aikverifyhome/bin
