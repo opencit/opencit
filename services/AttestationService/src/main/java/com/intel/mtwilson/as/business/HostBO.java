@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.business;
 
+import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.manifest.data.IManifest;
@@ -29,15 +30,23 @@ import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.util.ResourceFinder;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmCommandEventDetails;
 import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.HostTpmEventLogEntry;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -82,6 +91,16 @@ public class HostBO extends BaseBO {
 
 			if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
 				certificate = getAIKCertificateForHost(tblHosts, host);
+                                // we have to check that the aik certificate was signed by a trusted privacy ca
+                                X509Certificate hostAikCert = X509Util.decodePemCertificate(certificate);
+                                hostAikCert.checkValidity();
+                                // read privacy ca certificate
+                                InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // XXX TODO currently we only support one privacy CA cert... in the future we should read a PEM format file with possibly multiple trusted privacy ca certs
+                                X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+                                IOUtils.closeQuietly(privacyCaIn);
+                                privacyCaCert.checkValidity();
+                                // verify the trusted privacy ca signed this aik cert
+                                hostAikCert.verify(privacyCaCert.getPublicKey()); // NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
                         }
 			else { // ESX host so get the location for the host and store in the
 					// table
