@@ -375,6 +375,7 @@ public class TAHelper {
     }
 
     private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
+        // XXX this block of code where we fix the PEM format can be replaced with mtwilson-crypto X509Util.encodePemCertificate(X509Util.decodePemCertificate(...input...))
         // first get a consistent newline character
         aikCertificate = aikCertificate.replace('\r', '\n').replace("\n\n", "\n");
         if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
