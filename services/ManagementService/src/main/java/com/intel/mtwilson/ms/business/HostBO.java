@@ -148,7 +148,7 @@ public class HostBO extends BaseBO {
                 
                 // Set the default parameters
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
-                hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_GLOBAL);
+                hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
             }
             
             registerStatus = registerHostFromCustomData(hostConfigObj);           
@@ -566,7 +566,7 @@ public class HostBO extends BaseBO {
                 hostConfigObj.setBiosWhiteList(true);
                 hostConfigObj.setVmmWhiteList(true);
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
-                hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_GLOBAL);
+                hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
                 hostConfigObj.setRegisterHost(true);
                 hostConfigObj.setBiosPCRs(MSConfig.getConfiguration().getString("mtwilson.ms.biosPCRs").replace(';', ','));
                 hostConfigObj.setVmmPCRs(MSConfig.getConfiguration().getString("mtwilson.ms.vmmPCRs").replace(';', ','));

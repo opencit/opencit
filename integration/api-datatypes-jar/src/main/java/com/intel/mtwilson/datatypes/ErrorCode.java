@@ -87,7 +87,8 @@ public enum ErrorCode {
     WS_MODULE_WHITELIST_DOES_NOT_EXIST(2017, "White list for the module '%s' is not configured in the system"),
     WS_NAME_SPACE_DOES_NOT_EXIST(2018, "Name space table is not configured in the system. Please contact administrator."),
     WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS(2019, "White list host mapping already exists for the MLE '%s'."),
-    WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST(2019, "White list host mapping does not exist for the MLE '%s'."),
+    WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST(2020, "White list host mapping does not exist for the MLE '%s'."),
+    WS_INVALID_WHITE_LIST_VALUE(2021, "White list '%s' specified for '%s' has invalid characters. Only hexadecimal values are allowed."),
     
     
     // Below are error codes for the Management service
