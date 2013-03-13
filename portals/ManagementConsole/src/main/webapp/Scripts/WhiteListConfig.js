@@ -39,6 +39,8 @@ function fnUploadWhiteListConfigurationData() {
 		hostVo.hostType=$('#MainContent_ddlHOSTType').val();
 		hostVo.status = null;
 		if (isVMWare) {
+
+                     if(fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val())) {
 			var valid0 = fnValidateEmptyValue('whiteListVMware_Host');
 			var valid1 = fnValidateEmptyValue('whiteListVMWare_vCenterServer');
 			var valid2 = fnValidateEmptyValue('whiteListVMWare_LoginID');
@@ -51,12 +53,17 @@ function fnUploadWhiteListConfigurationData() {
 				hostVo.hostName=$('#whiteListVMware_Host').val();;
 				hostVo.hostPortNo=null;
 			}
+                     }else{
+                         alert("Please enter a valid ip address and try again.");
+                     }
 			
 		}else {
-			var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
-			var valid2 = fnValidateEmptyValue('whiteListOpenSource_portNO');
+                        if(fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
+                      
+                            var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
+                            var valid2 = fnValidateEmptyValue('whiteListOpenSource_portNO');
 			
-			if (valid1 && valid2) {
+                            if (valid1 && valid2) {
 				validation= true;
 				hostVo.vmWareType = false;
 				hostVo.vCenterString = null;
@@ -67,10 +74,12 @@ function fnUploadWhiteListConfigurationData() {
 				hostVo.biosWLTarget = null;
 				hostVo.vmmWLtarget = null;
 				hostVo.registered = false;
-			}
+                            }
+                        }else{
+                            alert("Please enter a valid ip address and try again.");
+                        }
 		}
 	}
-	
 	if (validation) {
 		var data = "registerHostVo="+$.toJSON(hostVo)+"&biosWLTagrget="+configurationSaved.biosWLTarget+"&vmmWLTarget="+configurationSaved.vmmWLTarget;
 		var config = new fnWhiteListConfig();
