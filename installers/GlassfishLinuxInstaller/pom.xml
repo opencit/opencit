@@ -22,7 +22,7 @@
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>MtWilsonLinuxUtil</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.parent.version}</version>
       <type>sh</type>
     </dependency>	
     <dependency>
