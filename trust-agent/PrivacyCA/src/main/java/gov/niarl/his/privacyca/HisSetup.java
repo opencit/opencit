@@ -234,8 +234,8 @@ public class HisSetup {
 				OutputStream out = null;
 				try {
 					FileLocation = tomcatPath + "/webapps/HisPrivacyCAWebServices2/";
-					clientPath = "ClientFiles";
-					ecCaPath = "CaCerts";
+					clientPath = "ClientFiles".toLowerCase();
+					ecCaPath = "CaCerts".toLowerCase();
 					//copy the TrustStore:  tomcatPath + "/Certificate/TrustStore.jks"
 					in = new FileInputStream(new File(tomcatPath + "/Certificate/TrustStore.jks"));
 					out = new FileOutputStream(new File(FileLocation + clientPath + "/TrustStore.jks"));

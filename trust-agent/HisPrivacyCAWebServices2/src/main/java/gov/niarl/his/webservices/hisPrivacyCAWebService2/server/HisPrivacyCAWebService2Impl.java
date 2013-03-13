@@ -180,10 +180,10 @@ public class HisPrivacyCAWebService2Impl implements IHisPrivacyCAWebService2 {
 	}
 	private boolean prepEndorsementCaHashMap() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, javax.security.cert.CertificateException{
 
-		File endorsementCaDir = new File(homeFolder + "/CaCerts");
+		File endorsementCaDir = new File(homeFolder + "/CaCerts".toLowerCase());
 		String[] certList = endorsementCaDir.list();
 		if(certList == null){
-			System.out.println("Problem reading CaCerts directory!");
+			System.out.println("Problem reading CaCerts directory: "+endorsementCaDir.getAbsolutePath());
 			return false;
 		}
 		endorsementCerts = new Hashtable<Principal, RSAPublicKey>();
