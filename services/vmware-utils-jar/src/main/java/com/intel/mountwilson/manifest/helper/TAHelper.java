@@ -376,7 +376,7 @@ public class TAHelper {
 
     private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
         // first get a consistent newline character
-        aikCertificate = aikCertificate.replace('\r', '\n');
+        aikCertificate = aikCertificate.replace('\r', '\n').replace("\n\n", "\n");
         if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
             log.info( "adding newlines to certificate BEGIN tag");            
             aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
