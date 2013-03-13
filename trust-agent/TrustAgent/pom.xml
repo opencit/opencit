@@ -151,7 +151,7 @@
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
-            <version>1.0</version>
+            <version>1.0.1-SNAPSHOT</version>
 	    <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
     <!--
@@ -203,18 +203,18 @@
         <dependency>
             <groupId>com.intel.mtwilson.trustagent</groupId>
             <artifactId>PrivacyCA</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <!-- classifier>jar-with-dependencies</classifier this causes an error in maven (bug in maven, it should be very straightforward) so instead of this we're going to put the PrivacyCA dependencies here -->
         </dependency>
        		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>ASCommon</artifactId>
-			<version>${project.parent.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
                         <groupId>com.intel.mtwilson.services</groupId>
                         <artifactId>webservice-util</artifactId>
-                        <version>${project.parent.version}</version>
+                        <version>${project.version}</version>
                 </dependency>
                 <!--
            	<dependency>
