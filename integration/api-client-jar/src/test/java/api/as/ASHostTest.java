@@ -6,8 +6,9 @@ package api.as;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.io.ConfigurationUtil;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.mtwilson.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.SignatureException;

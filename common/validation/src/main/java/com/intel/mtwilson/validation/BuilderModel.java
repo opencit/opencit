@@ -19,6 +19,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * are no errors or false if there are errors.  But getFaults() can be checked
  * to see the errors SO FAR at any point even before calling build() and isValid().
  * 
+ * Classes extending BuilderModel are responsible for calling done() from within
+ * their final build() or equivalent method.
+ * 
  * Classes extending BuilderModel call any of the fault() methods "as they go"
  * instead of evaluating everything in a single validation method as in ObjectModel.
  * 

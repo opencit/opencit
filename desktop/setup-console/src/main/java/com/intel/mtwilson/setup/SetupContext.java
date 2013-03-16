@@ -4,16 +4,13 @@
  */
 package com.intel.mtwilson.setup;
 
-import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.datatypes.TLSPolicy;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.*;
 import java.net.URL;
 import java.security.KeyPair;
-import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
 /**

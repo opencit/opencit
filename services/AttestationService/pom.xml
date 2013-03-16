@@ -374,7 +374,7 @@
 		</dependency>
         <dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>vmware-util-jar</artifactId>
+			<artifactId>trust-util-jar</artifactId>
 			<version>${project.version}</version>
         </dependency>
 		<dependency>

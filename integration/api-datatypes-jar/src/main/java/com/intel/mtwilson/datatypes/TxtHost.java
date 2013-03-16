@@ -1,5 +1,6 @@
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.model.Hostname;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonIgnore;

@@ -9,7 +9,7 @@ import com.intel.mtwilson.as.business.trust.Util;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;

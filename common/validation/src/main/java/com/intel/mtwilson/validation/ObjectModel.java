@@ -53,6 +53,9 @@ public abstract class ObjectModel implements Model {
     
     /**
      * If the model has changed since the last call to isValid() then it will be revalidated.
+     * We rely on the model's hashCode to detect changes so classes that extend ObjectModel
+     * are responsible for implmenting a hashCode() function that reflects changes.
+     * 
      * @return true if the model is valid
      */
     @Override

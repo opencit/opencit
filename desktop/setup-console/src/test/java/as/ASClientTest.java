@@ -10,10 +10,9 @@ import com.intel.mountwilson.client.AttestationService;
 */
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.TrustAssertion;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.BeforeClass;

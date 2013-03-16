@@ -5,6 +5,7 @@ import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.codec.binary.Base64;

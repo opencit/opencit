@@ -15,14 +15,14 @@ import com.intel.mtwilson.AttestationService;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.WhitelistService;
 import com.intel.mtwilson.datatypes.AttestationReport;
-import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.datatypes.PcrLogReport;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
+import com.intel.mtwilson.model.*;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**

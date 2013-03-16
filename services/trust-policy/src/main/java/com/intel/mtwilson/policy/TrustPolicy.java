@@ -1,0 +1,24 @@
+/*
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
+ */
+package com.intel.mtwilson.policy;
+
+/**
+ * A TrustPolicy defines which PCRs must have what values. It is different
+ * than simply defining a PcrManifest because, in addition to allowing for
+ * a variety of expected values, it produces a report that details the compliance
+ * or non-compliance of a given PcrManifest with the policy.
+ * 
+ * The contract of any implementation of TrustPolicy is that it be reusable.
+ * That is, it should be possible to call apply() repeatedly on different
+ * HostReport instances and get a correct report for each one. The TrustPolicy
+ * instance itself should NOT maintain any state regarding the last instance 
+ * checked - the entire result set of apply() must be returned via the TrustReport.
+ * 
+ * @since 1.2
+ * @author jbuhacoff
+ */
+public interface TrustPolicy {
+    TrustReport apply(HostReport hostReport); // applies the trust policy to the given host report and returns the resulting trust report
+}

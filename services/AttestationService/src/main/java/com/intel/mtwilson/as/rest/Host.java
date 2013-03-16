@@ -1,6 +1,13 @@
 
 package com.intel.mtwilson.as.rest;
 
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.business.HostBO;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.security.annotations.*;
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -11,17 +18,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.*;
-//import javax.annotation.security.RolesAllowed;
-import com.intel.mtwilson.security.annotations.*;
-import java.util.List;
-import org.codehaus.enunciate.jaxrs.TypeHint;
 
 /**
  * REST Web Service

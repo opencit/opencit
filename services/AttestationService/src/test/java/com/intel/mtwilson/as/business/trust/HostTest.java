@@ -1,28 +1,18 @@
 package com.intel.mtwilson.as.business.trust;
 
 import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mountwilson.as.common.ValidationException;
-import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -9,7 +9,7 @@ import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
-import com.intel.mtwilson.datatypes.InternetAddress;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.RemoteSetup;

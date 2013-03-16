@@ -1,0 +1,114 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>trust-util-jar</artifactId>
+  <packaging>jar</packaging>
+  <name>Trust Utils Library</name>
+    <parent>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-services</artifactId>
+        <version>1.2-SNAPSHOT</version>
+    </parent>
+  <!--
+  <url>http://maven.apache.org</url>
+    <issueManagement>
+        <system>Redmine</system>
+        <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/issues</url>
+    </issueManagement>
+-->
+    <build>
+		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+		<version>2.3.2</version>     
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+
+  <dependencies>
+    <dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<scope>test</scope>
+        <type>jar</type>
+    </dependency>
+    <dependency>
+            <groupId>com.vmware</groupId>
+            <artifactId>VSphere5.1</artifactId>
+            <version>2.5-774886</version>
+    </dependency>
+
+    <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.6.4</version>
+    </dependency>
+    <!-- <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.4</version>
+    </dependency> -->
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.0.9</version>
+        </dependency>
+	
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ASCommon</artifactId>
+            <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.6</version>
+    </dependency>
+    <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>1.6</version>
+    </dependency>
+    <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>api-datatypes</artifactId>
+            <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>ASData</artifactId>
+            <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>api-client</artifactId>
+            <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>http-authorization</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
+  </dependencies>  
+</project>
