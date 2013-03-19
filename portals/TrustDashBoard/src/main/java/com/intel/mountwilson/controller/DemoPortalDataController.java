@@ -550,7 +550,15 @@ public class DemoPortalDataController extends MultiActionController {
 	public ModelAndView getHostsReport(HttpServletRequest req,HttpServletResponse res) {
 		log.info("DemoPortalDataController.getHostsReport >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
-		List<String> hosts = Arrays.asList(req.getParameterValues("selectedHost"));
+               
+                String[] list = req.getParameterValues("selectedHost");
+                if(list == null) {
+                   responseView.addObject("message", "No hosts were selected for reports.");
+                   log.info("DemoPortalDataController.getHostsReport<<<");
+                    return responseView;
+                }
+		List<String> hosts = Arrays.asList(list);
+
 		try {
 			responseView.addObject("reports", demoPortalServices.getHostTrustReport(hosts,getAttestationService(req,ApiClient.class)));
 			responseView.addObject("result", true);
