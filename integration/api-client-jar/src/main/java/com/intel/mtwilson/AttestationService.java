@@ -28,9 +28,13 @@ public interface AttestationService {
     HostTrustResponse getHostTrust(Hostname hostname) throws IOException, ApiException, SignatureException;
 
     HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException;
+    
+    HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
 
     HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException;
 
+    HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
+    
     HostResponse deleteHost(Hostname hostname) throws IOException, ApiException, SignatureException;
 
     List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException;
