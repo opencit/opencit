@@ -228,7 +228,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			}else {
 				// throw new DemoPortalException("No OEM & OS Information is present in Database. Please check Database Configuration.");
                                                                                                 // Bug:575. Providing a better error message for the user.
-				throw new DemoPortalException("Currently no MLEs are configured in the system.");                                
+				throw new DemoPortalException("Currently no MLEs are configured in the system.  Please make sure you have created both a BIOS and VMM mle");                                
 			}
 		}catch (Exception e) {
 			throw ConnectionUtil.handleException(e);
