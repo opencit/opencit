@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 #
 # description: Get the PCA key and generate an SSL certificate for the trust agent (to answer attestation requests)
 #
@@ -58,7 +59,7 @@ echo "Connecting to PCA..."
 zipfile=/tmp/clientfiles.zip
 touch $zipfile
 chmod 600 $zipfile
-wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
+wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
 if [[ -s $zipfile ]]; then
   unzip -o $zipfile -d /etc/intel/cloudsecurity
   rm $zipfile
@@ -89,7 +90,7 @@ generate_ta_ssl() {
 }
 
 get_privacyca_ssl() {
-  openssl s_client -tls1 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+  openssl s_client -ssl3 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
   openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
   if [ -f "${package_dir}/cert/privacyca.ssl.crt" ]; then rm ${package_dir}/cert/privacyca.ssl.txt; fi
   echo "Importing Privacy CA SSL Certificate into Trust Agent's Keystore..."
