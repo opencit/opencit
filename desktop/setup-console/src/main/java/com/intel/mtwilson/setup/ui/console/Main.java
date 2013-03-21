@@ -92,10 +92,7 @@ public class Main {
      * @param args 
      */
     public static void main(String[] args) {
-        if (console == null) {
-            System.err.println("No console.");
-            System.exit(1);
-        }
+
         if( args.length == 0 ) {
             System.err.println("Usage: <command> [args]");
             System.exit(1);
@@ -124,6 +121,10 @@ public class Main {
         }
         catch(SetupException e) {
             e.printStackTrace(System.err);
+        }
+        catch(IOException e){
+            System.err.println("No console.");
+            e.printStackTrace();   
         }
         catch(Exception e) {
             e.printStackTrace(System.err);
