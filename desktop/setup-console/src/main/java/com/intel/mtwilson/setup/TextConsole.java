@@ -5,6 +5,7 @@
 package com.intel.mtwilson.setup;
 
 import java.io.Console;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.LogManager;
 import org.apache.commons.configuration.Configuration;
@@ -17,10 +18,7 @@ public class TextConsole {
     public static final Console console = System.console();
     public static final SetupContext ctx = new SetupContext();
     public static void main(String[] args) {
-        if (console == null) {
-            System.err.println("No console.");
-            System.exit(1);
-        }
+        
         if( args.length == 0 ) {
             System.err.println("Usage: <command> [args]");
             System.exit(1);
@@ -50,6 +48,10 @@ public class TextConsole {
         }
         catch(SetupException e) {
             e.printStackTrace(System.err);
+        }
+        catch(IOException e){
+            System.err.println("No console.");
+            e.printStackTrace();   
         }
         catch(Exception e) {
             e.printStackTrace(System.err);

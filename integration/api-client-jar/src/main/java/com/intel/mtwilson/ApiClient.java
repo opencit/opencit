@@ -595,9 +595,21 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }
 
     @Override
+    public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPost(asurl("/hosts/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;
+    }
+
+    @Override
     public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException {
         HostResponse added = fromJSON(httpPut(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;        
+    }
+
+    @Override
+    public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPut(asurl("/hosts/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;
     }
 
     @Override

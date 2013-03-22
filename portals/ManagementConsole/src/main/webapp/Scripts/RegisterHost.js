@@ -168,19 +168,23 @@ function showDialogUpFlatFileHelp() {
 function fnRetriveHostFromCluster() {
 	cleanUpAllDivs();
 	var valid = true;
-	$('#vmwareHostType').find('input:text').each(function() {
+        if(fnValidateIpAddress($('#mainRegisterHost_vCenterServer').val())) {
+            $('#vmwareHostType').find('input:text').each(function() {
 		if (!fnValidateEmptyValue($(this).attr('id'))) {
 			valid = false;
 		}
-	});
-	if (!fnValidateEmptyValue('mainRegisterHost_password')) {
+            });
+            if (!fnValidateEmptyValue('mainRegisterHost_password')) {
 		valid = false;
-	}
-	if (valid) {
+            }
+            if (valid) {
 		var data = "clusterName="+$('#mainRegisterHost_ClusterName').val()+"&vCentertConnection="+getVCenterServerAddress('mainRegisterHost_vCenterServer')+";"+$('#mainRegisterHost_loginID').val()+";"+$('#mainRegisterHost_password').val();
 		$('#mainLoadingDiv').prepend(disabledDiv);
 		sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
-	}
+            }
+        }else{
+             alert("Please enter a valid ip address and try again.");
+        }
 }
 
 function fnRetriveHostSuccess(responsJSON) {

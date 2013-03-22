@@ -182,14 +182,16 @@ function chechAddHostValidation() {
 		valid2 = fnTestValidation('MainContent_tbHostPort',normalReg);
 		valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
 		/* Soni_Begin_27/09/2012_for_validating IP address */
-		valid4 = isValidIPAddress('MainContent_tbHostIP');
-		if (!valid4){$('#MainContent_tbHostIP').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Enter valid IP address.</span>');
-		valid =false;
-		return false;}
+		//valid4 = isValidIPAddress('MainContent_tbHostIP');
+		//if (!valid4){
+                //    $('#MainContent_tbHostIP').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Enter valid IP address.</span>'); 
+                //     valid =false;
+                //     return false;
+                //}
 		/* Soni_End_27/09/2012_for_validating IP address */		
 		
 	}else {
-		valid3 =  fnTestValidation('MainContent_tbVCenterAddress',new RegExp());
+		//valid3 =  fnTestValidation('MainContent_tbVCenterAddress',new RegExp());
 		valid3 =  fnTestValidation('MainContent_tbVCenterLoginId',new RegExp());
 		valid3 =  fnTestValidation('MainContent_tbVCenterPass',new RegExp());
 	}
@@ -271,7 +273,19 @@ function fnGetNewHostData() {
 }
 
 function addNewHost() {
-	if (chechAddHostValidation()) {
+        var ipValid = true;
+        if (isVmware == 'false') {
+         if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
+             ipValid=false;
+         }   
+        }else{
+          if(!fnValidateIpAddress($('#MainContent_tbVCenterAddress').val())) {
+             ipValid=false;
+         }    
+        }
+
+        if(ipValid == true) {
+            if (chechAddHostValidation()) {
 		if (confirm("Are you Sure you want to Add this Host ?")) {
 			var dataToSend = fnGetNewHostData();
 			dataToSend.hostId = null;
@@ -280,7 +294,10 @@ function addNewHost() {
 			$('#mleMessage').html('');
 			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+(dataToSend)+"&newhost=true", fnSaveNewHostInfoSuccess, null,"New Host has been successfully Added.");
 		}
-	}
+            }
+        }else{
+            alert("Please enter a valid IP address and try again.")
+        }
 }
 
 function fnSaveNewHostInfoSuccess(response,messageToDisplay) {

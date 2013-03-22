@@ -332,3 +332,14 @@ function getVCeterHostIpAddress(address){
 	string = string.substring(8);
 	return string.split("/")[0];
 }
+
+// stdalex_ validate ip address function
+function fnValidateIpAddress(ipAddress) {
+    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+    if(checkIp.test(ipAddress)) {
+        return true;
+    }else{
+        return false;
+    }
+    
+}

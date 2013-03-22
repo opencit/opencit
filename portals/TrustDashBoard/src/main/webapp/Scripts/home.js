@@ -108,7 +108,19 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
 }
  
 function updateHostInfo() {
-	if (chechAddHostValidation()) {
+    var ipValid = true;
+        if (isVmware == 'false') {
+         if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
+             ipValid=false;
+         }   
+        }else{
+          if(!fnValidateIpAddress($('#MainContent_tbVCenterAddress').val())) {
+             ipValid=false;
+         }    
+        }
+
+        if(ipValid == true) {
+            if (chechAddHostValidation()) {
 		if (confirm("Are you sure you want to update this Host ?")) {
 			var dataToSend = fnGetNewHostData();
 			dataToSend.hostId = selectedHostID;
@@ -117,7 +129,10 @@ function updateHostInfo() {
 			$('#mleMessage').html('');
 			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+dataToSend+"&newhost=false", fnSaveNewHostInfoSuccess, null,"Host has been successfully updated.");
 		}
-	}
+            }
+        }else{
+            alert("Please enter a valid IP address and try again.")
+        }
 }
 
 
