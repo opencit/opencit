@@ -28,6 +28,7 @@ public class ASAuthenticationFilter extends AuthenticationJerseyFilter implement
         // application-specific configuration
         setRequestValidator(new HmacRequestVerifier(new ApiClientBO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
         setRequestValidator(new X509RequestVerifier(new ApiClientX509BO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
+        // SUDHIR TODO: setRequestValidator(new HttpBasicRequestVerifier(..maybe ApiClientBasicBO..ASDataPU)); 
         setTrustedRemoteAddress(MSConfig.getConfiguration().getStringArray("mtwilson.api.trust"));        
         setSslRequired(MSConfig.getConfiguration().getBoolean("mtwilson.ssl.required", true));
     }
