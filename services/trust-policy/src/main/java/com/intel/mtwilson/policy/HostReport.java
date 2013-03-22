@@ -8,12 +8,18 @@ import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.PcrModuleManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * Note:  The trust-policy module and this HostReport object can only be used
+ * AFTER a host is already registered in Mt Wilson and associated with a whitelist.
+ * It should not be used during the registration process.
+ * 
+ * The AIK must be loaded by attestation service from the database and placed
+ * into this instance.
+ * 
  * The HostReport is the "actual value" used when determining a host's compliance
  * with a given TrustPolicy. 
  * The HostReport represents the response we get when we request a TPM quote and

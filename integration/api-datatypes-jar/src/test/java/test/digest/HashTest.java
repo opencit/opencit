@@ -8,7 +8,7 @@ import com.intel.mtwilson.model.Sha1Digest;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.junit.Test;
-
+import static org.junit.Assert.*;
 /**
  *
  * @author jbuhacoff
@@ -31,5 +31,14 @@ public class HashTest {
         hash.update(cat);
         Sha1Digest r2 = new Sha1Digest(hash.digest());        
         System.out.println("a||b = "+r2.toString());
+    }
+    
+    @Test
+    public void testExtendZeros() {
+        Sha1Digest a = new Sha1Digest("0000000000000000000000000000000000000000");
+        Sha1Digest b = new Sha1Digest("0de3710ee2f658a382f2531213233024175a63dd");
+        Sha1Digest r = a.extend(b.toByteArray());
+        System.out.println(r.toString()); // b should be: 8990812e31357a6266a86c079ff49d61b442335b
+        assertEquals("8990812e31357a6266a86c079ff49d61b442335b", r.toString());
     }
 }

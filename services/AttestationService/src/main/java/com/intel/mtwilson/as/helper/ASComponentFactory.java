@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * @deprecated we have decided to use a plugin model based on OSGi in a future release instead of this draft factory
  * @author jbuhacoff
  */
 public class ASComponentFactory {

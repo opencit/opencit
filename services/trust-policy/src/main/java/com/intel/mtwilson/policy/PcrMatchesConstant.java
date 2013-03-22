@@ -17,7 +17,7 @@ import com.intel.mtwilson.policy.fault.PcrValueMissing;
  * @author jbuhacoff
  */
 public class PcrMatchesConstant implements TrustPolicy {
-    private Pcr expected;
+    private final Pcr expected;
     public PcrMatchesConstant(Pcr expected) {
         this.expected = expected;
     }

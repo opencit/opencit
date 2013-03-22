@@ -21,9 +21,9 @@ import java.util.Set;
  * 
  * @author jbuhacoff
  */
-public class PcrModuleManifestEqualsPolicy implements TrustPolicy {
+public class PcrModuleManifestEqualsModuleSet implements TrustPolicy {
     private PcrModuleManifest expected;
-    public PcrModuleManifestEqualsPolicy(PcrModuleManifest expected) {
+    public PcrModuleManifestEqualsModuleSet(PcrModuleManifest expected) {
         this.expected = expected;
     }
     
