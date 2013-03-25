@@ -33,6 +33,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
     private HmacRequestVerifier hmacAuthorization; // currently this is set via Spring Framework; example is new VerifyAuthorization(new LoginBO()); and new VerifyAuthorization(new HashMapSecretKeyFinder());
     private PublicKeyRequestVerifier publickeyAuthorization; // currently this is set via Spring Framework; example is new VerifyAuthorization(new LoginBO()); and new VerifyAuthorization(new HashMapSecretKeyFinder());
     private X509RequestVerifier x509Authorization;
+    // SUDHIR TODO:  ...
     private static Logger log = LoggerFactory.getLogger(AuthenticationJerseyFilter.class);
     private String[] trustWhitelist = null;
     private boolean sslRequired = true;
@@ -43,6 +44,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
     public void setRequestValidator(HmacRequestVerifier validator) { this.hmacAuthorization = validator; }
     public void setRequestValidator(PublicKeyRequestVerifier validator) { this.publickeyAuthorization = validator; }
     public void setRequestValidator(X509RequestVerifier validator) { this.x509Authorization = validator; }
+    // SUDHIR TODO:   setRequestValidator( httpbasicrequestverifier ) { ... }
     public void setTrustedRemoteAddress(String[] ipAddressOrSubnet) { trustWhitelist = ipAddressOrSubnet; } // should be set by mtwilson.api.trust=ipaddresslist
     public void setSslRequired(boolean required) { sslRequired = required; } // should be set by mtwilson.ssl.required=true/false
     
@@ -109,6 +111,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
                 else if( hmacAuthorization != null && scheme.equals(AuthorizationScheme.MtWilson) ) {
                     user = hmacAuthorization.getUserForRequest(request.getMethod(), request.getRequestUri().toString(), request.getRequestHeaders(), requestBody);                
                 }
+                // SUDHIR TODO: else if( basicAuthorization != null && scheme equals AuthorizationScheme.Basic ) { ... }
                 if( user != null ) {
                     log.info("User {} with roles {} is authenticated. Security context is being set.", user.getLoginName(), user.getRoles());
                     log.debug("AuthenticationJerseyFilter: Got user, setting security context");

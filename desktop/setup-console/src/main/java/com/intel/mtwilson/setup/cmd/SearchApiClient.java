@@ -13,6 +13,7 @@ import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.io.Filename;
 import com.intel.mtwilson.setup.SetupContext;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,7 +32,7 @@ import org.apache.commons.configuration.Configuration;
  */
 public class SearchApiClient implements Command {
     private SetupContext ctx = null;
-
+    public static final Console console = System.console();
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
@@ -113,17 +114,22 @@ public class SearchApiClient implements Command {
     //}
     
     private String readInputStringWithPrompt(String prompt) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         System.out.print(String.format("%s: ", prompt));
-        String input = in.readLine();
+        String input = console.readLine();
 //        in.close(); // don't close System.in !!
         return input;
     }
 
     private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        if (console == null) {
+            throw new IOException("no console.");
+        }
+        
         System.out.print(String.format("%s [%s]: ", prompt, defaultValue));
-        String input = in.readLine();
+        String input = console.readLine();
 //        in.close(); // don't close System.in !!
         if( input == null || input.isEmpty() ) {
             input = defaultValue;
