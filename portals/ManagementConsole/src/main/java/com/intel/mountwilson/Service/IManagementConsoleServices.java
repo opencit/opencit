@@ -11,6 +11,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.Role;
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
  */
 public interface IManagementConsoleServices {
 	
-        public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj,HostConfigData hostConfig, ApiClient apiObj) throws ManagementConsolePortalException;
+        public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj,HostConfigData hostConfig, ApiClient apiObj) throws ManagementConsolePortalException, MalformedURLException;
 
         public List<HostDetails> getHostEntryFromVMWareCluster(String clusterName,String vCenterConnection)throws ManagementConsolePortalException;
 
@@ -37,6 +38,6 @@ public interface IManagementConsoleServices {
     
         public boolean updateRequest(ApiClientDetails apiClientDetailsObj, ApiClient apiObj, boolean approve) throws ManagementConsolePortalException;
         
-        public HostConfigResponseList registerHosts(ApiClient apiObj, List<HostDetails> hostRecords) throws ManagementConsolePortalException;
+        public HostConfigResponseList registerHosts(ApiClient apiObj, List<HostDetails> hostRecords) throws ManagementConsolePortalException, MalformedURLException;
 
 }

@@ -20,6 +20,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.crypto.CryptographyException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -53,7 +54,7 @@ public class HostTest {
 
     
     @Test
-    public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException {
+    public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException, MalformedURLException {
         TblHosts tblHosts = new ASComponentFactory().getHostBO().getHostByName(new Hostname("10.1.71.149"));
         log.debug("tblhosts addon connection string length: {}", tblHosts.getAddOnConnectionInfo() == null ? "NULL" : tblHosts.getAddOnConnectionInfo().length());
         TxtHostRecord txtHostRecord = hostTrustBO.createTxtHostRecord(tblHosts);

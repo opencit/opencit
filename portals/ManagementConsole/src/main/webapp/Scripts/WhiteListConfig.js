@@ -36,7 +36,16 @@ function fnUploadWhiteListConfigurationData() {
 	
 	if(checkForPCRConstrain('Oem_Bios_Checkbox','biosPCRsValues','OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox','vmmPCRsValues','VMM')){
 		fnGetWhiteListConfigData();
-		hostVo.hostType=$('#MainContent_ddlHOSTType').val();
+                        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0 ) {
+                            hostVo.hostType = 'vmware'
+                        } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('kvm') >= 0) || 
+                            ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('xen') >= 0)) {
+                            hostVo.hostType = 'intel'
+                        } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('citrix')) >= 0) {
+                            hostVo.hostType = 'citrix'
+                        }
+                        // alert(hostVo.hostType);
+		//hostVo.hostType=$('#MainContent_ddlHOSTType').val();
 		hostVo.status = null;
 		if (isVMWare) {
 

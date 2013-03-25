@@ -8,8 +8,11 @@ import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.helper.MSComponentFactory;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.HostConfigData;
+import com.intel.mtwilson.datatypes.HostConfigResponse;
+import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.HostVMMType;
+import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -41,7 +44,7 @@ public class HostBOTest {
     /**
      * Test of registerHost method, of class HostBO.
      */
-    //@Test
+   //@Test
     public void testRegisterHost() throws Exception {
         System.out.println("registerHost");
         TxtHostRecord hostObj = new TxtHostRecord();
@@ -85,7 +88,7 @@ public class HostBOTest {
         fail("The test case is a prototype.");
     }
     
-    @Test
+   // @Test
     public void testConfigureWhiteListUsingCustomData() {
         HostConfigData wlObj = new HostConfigData();
         TxtHostRecord gkvHost = new TxtHostRecord();
@@ -106,4 +109,19 @@ public class HostBOTest {
         System.out.println(result);
     }
 
+        @Test
+        public void testBulkHostRegistration() throws Exception {
+                System.out.println("Bulk host registrations");
+                TxtHostRecordList hostList = new TxtHostRecordList();
+                TxtHostRecord hostObj = new TxtHostRecord();
+                hostObj.HostName = "10.1.71.154";
+                hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+                hostList.getHostRecords().add(hostObj);
+
+                HostConfigResponseList result = new MSComponentFactory().getHostBO().registerHosts(hostList);
+                for (HostConfigResponse hostRes : result.getHostRecords()) {
+                        System.out.println(hostRes.getHostName() + ":" + hostRes.getStatus() + ":" + hostRes.getErrorMessage());
+                }
+        }
+    
 }

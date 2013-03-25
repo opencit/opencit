@@ -589,7 +589,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }
 
     @Override
-    public HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException {
+    public HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException {
         HostResponse added = fromJSON(httpPost(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;
     }
@@ -601,7 +601,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }
 
     @Override
-    public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException {
+    public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException {
         HostResponse added = fromJSON(httpPut(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;        
     }

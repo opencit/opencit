@@ -9,6 +9,7 @@ import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -27,11 +28,11 @@ public interface AttestationService {
 
     HostTrustResponse getHostTrust(Hostname hostname) throws IOException, ApiException, SignatureException;
 
-    HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException;
+    HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
     
     HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
 
-    HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException;
+    HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
 
     HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
     

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent;
 
+import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VCenterHost;

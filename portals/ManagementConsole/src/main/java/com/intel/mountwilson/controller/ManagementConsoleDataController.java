@@ -51,85 +51,86 @@ public class ManagementConsoleDataController extends MultiActionController{
         Logger log = LoggerFactory.getLogger(getClass().getName());
 	private IManagementConsoleServices services;
 	
-	/**
-	 * @param HttpServletRequest
-	 * @param HttpServletResponse
-	 * @return
-	 */
-	public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
-		req.getSession().removeAttribute("hostVO");
-		ModelAndView responseView = new ModelAndView(new JSONView());
-		List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
-		
-		// Check that we have a file upload request
-		boolean isRequestMultiType = ServletFileUpload.isMultipartContent(req);
-		System.out.println(isRequestMultiType);
-		if (!isRequestMultiType) {
-			responseView.addObject("result",false);
-			log.error("File Upload is not MultiPart. Please check you File Uploaded Plugin.");
-			return responseView;
-		}
-		
-		// Create a factory for disk-based file items
-		FileItemFactory factory = new DiskFileItemFactory();
+        /**
+         * @param HttpServletRequest
+         * @param HttpServletResponse
+         * @return
+         */
+        public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req, HttpServletResponse res) {
+                log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
+                req.getSession().removeAttribute("hostVO");
+                ModelAndView responseView = new ModelAndView(new JSONView());
+                List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
 
-		// Create a new file upload handler
-		ServletFileUpload upload = new ServletFileUpload(factory);
+                // Check that we have a file upload request
+                boolean isRequestMultiType = ServletFileUpload.isMultipartContent(req);
+                System.out.println(isRequestMultiType);
+                if (!isRequestMultiType) {
+                        responseView.addObject("result", false);
+                        log.error("File Upload is not MultiPart. Please check you File Uploaded Plugin.");
+                        return responseView;
+                }
 
-		// Parse the request
-		try {
-			@SuppressWarnings("unchecked")
-			List<FileItem>  items = upload.parseRequest(req);
-			
-			// Process the uploaded items
-			Iterator<FileItem> iter = items.iterator();
-			while (iter.hasNext()) {
-			    FileItem item = (FileItem) iter.next();
+                // Create a factory for disk-based file items
+                FileItemFactory factory = new DiskFileItemFactory();
 
-			    if (!item.isFormField()) {
-			    	String lines[] = item.getString().split("\\r?\\n");
-			    	for (String values : lines) {
-			    		//Split host name and host value with Separator e.g. |
-			    		if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) > 0) {
-			    			String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
-				    		if (val.length > 1) {
-				    			HostDetails host = new HostDetails();
-				    			host.setHostName(val[0]);
-				    			String portOrVCenter = val[1];
-	                                                
-				    			if (portOrVCenter.toLowerCase().contains(HelperConstant.HINT_FOR_VCENTERSTRING.toLowerCase())) {
-                                        host.setvCenterString(portOrVCenter);
-                                        host.setVmWareType(true);
-							}else {
-                                    host.setHostPortNo(portOrVCenter);
-                                    host.setVmWareType(false);
-							}
-				    			listOfRegisterHost.add(host);
-						}
-					}else {
-						responseView.addObject("result",false);
-						log.info("Please Provide Host name and port/vCenterString seperated by | symbol.");
-						return responseView;
-					}
-				}
-			    }
-			}
-		log.info("Uploaded Content :: "+listOfRegisterHost.toString());
-		req.getSession().setAttribute("hostVO",listOfRegisterHost);
-		responseView.addObject("result",listOfRegisterHost.size() > 0 ? true : false);
-			
-		} catch (FileUploadException e) {
-			e.printStackTrace();
-			responseView.addObject("result",false);
-		}catch (Exception e) {
-			e.printStackTrace();
-			responseView.addObject("result",false);
-		}
-                
-		log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
-		return responseView;		
-	}
+                // Create a new file upload handler
+                ServletFileUpload upload = new ServletFileUpload(factory);
+
+                // Parse the request
+                try {
+                        @SuppressWarnings("unchecked")
+                        List<FileItem> items = upload.parseRequest(req);
+
+                        // Process the uploaded items
+                        Iterator<FileItem> iter = items.iterator();
+                        while (iter.hasNext()) {
+                                FileItem item = (FileItem) iter.next();
+
+                                if (!item.isFormField()) {
+                                        String lines[] = item.getString().split("\\r?\\n");
+                                        for (String values : lines) {
+                                                //Split host name and host value with Separator e.g. |
+                                                if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) > 0) {
+                                                        String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
+                                                        if (val.length == 3) {
+                                                                HostDetails host = new HostDetails();
+                                                                host.setHostType(val[0]);
+                                                                host.setHostName(val[1]);
+                                                                String portOrVCenter = val[2];
+
+                                                                if (portOrVCenter.toLowerCase().contains(HelperConstant.HINT_FOR_VCENTERSTRING.toLowerCase())) {
+                                                                        host.setvCenterString(portOrVCenter);
+                                                                        host.setVmWareType(true);
+                                                                } else {
+                                                                        host.setHostPortNo(portOrVCenter);
+                                                                        host.setVmWareType(false);
+                                                                }
+                                                                listOfRegisterHost.add(host);
+                                                        }
+                                                } else {
+                                                        responseView.addObject("result", false);
+                                                        log.info("Please provide the host details in the format specified.");
+                                                        return responseView;
+                                                }
+                                        }
+                                }
+                        }
+                        log.info("Uploaded Content :: " + listOfRegisterHost.toString());
+                        req.getSession().setAttribute("hostVO", listOfRegisterHost);
+                        responseView.addObject("result", listOfRegisterHost.size() > 0 ? true : false);
+
+                } catch (FileUploadException e) {
+                        e.printStackTrace();
+                        responseView.addObject("result", false);
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        responseView.addObject("result", false);
+                }
+
+                log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
+                return responseView;
+        }
 	
 	/**
 	 * This Method will use to Retrieve the pre-fetched Host to be Register, uploaded with flat file.
@@ -327,46 +328,52 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	}
 	
-	/**
-	 * This Method is use to get Retrive Host data from VMWare Cluster. using Cluster name and vCenterConnection String.
-	 * 
-	 * @param req
-	 * @param res
-	 * @return
-	 */
-	public ModelAndView retriveHostFromCluster(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.retriveHostFromCluster >>");
-		ModelAndView responseView = new ModelAndView(new JSONView());
-		String clusterName;
-		String vCenterConnection ;
-                
-		try {
-			clusterName = req.getParameter("clusterName");
-			vCenterConnection = req.getParameter("vCentertConnection");
-		} catch (Exception e) {
-			log.error("Error while getting Input parameter from request."+e.getMessage());
-			responseView.addObject("message","Input Parameters are NUll.");
-			responseView.addObject("result",false);
-			return responseView;
-		}
-		
-		try {
-			List<HostDetails> listOfRegisterHost = services.getHostEntryFromVMWareCluster(clusterName,vCenterConnection);
-			if (listOfRegisterHost != null) {
-				responseView = getListofRegisteredHost(listOfRegisterHost,responseView,getApiClientService(req, ApiClient.class));
-			}
-		} catch (Exception e) {
-            log.error("Error while getting data from VMware vCeneter. " + e.getMessage());
-            responseView.addObject("message",e.getMessage());
-            responseView.addObject("result",false);
-            return responseView;
-		}
+        /**
+         * This Method is use to get Retrive Host data from VMWare Cluster.
+         * using Cluster name and vCenterConnection String.
+         *
+         * @param req
+         * @param res
+         * @return
+         */
+        public ModelAndView retriveHostFromCluster(HttpServletRequest req, HttpServletResponse res) {
+                log.info("ManagementConsoleDataController.retriveHostFromCluster >>");
+                ModelAndView responseView = new ModelAndView(new JSONView());
+                String clusterName;
+                String vCenterConnection;
 
-                responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.retriveHostFromCluster <<<");
-		return responseView;
-		
-	}
+                try {
+                        clusterName = req.getParameter("clusterName");
+                        vCenterConnection = req.getParameter("vCentertConnection");
+                } catch (Exception e) {
+                        log.error("Error while getting Input parameter from request." + e.getMessage());
+                        responseView.addObject("message", "Input Parameters are NUll.");
+                        responseView.addObject("result", false);
+                        return responseView;
+                }
+
+                try {
+                        List<HostDetails> listOfRegisterHost = services.getHostEntryFromVMWareCluster(clusterName, vCenterConnection);
+                        for(HostDetails hostDetail : listOfRegisterHost) {
+                                // Since we have retrieved the hosts from the VMware cluster, we just mark all the hosts as of VMware type
+                                hostDetail.setHostType("vmware");
+                        }
+                        
+                        if (listOfRegisterHost != null) {
+                                responseView = getListofRegisteredHost(listOfRegisterHost, responseView, getApiClientService(req, ApiClient.class));
+                        }
+                } catch (Exception e) {
+                        log.error("Error while getting data from VMware vCeneter. " + e.getMessage());
+                        responseView.addObject("message", e.getMessage());
+                        responseView.addObject("result", false);
+                        return responseView;
+                }
+
+                responseView.addObject("result", true);
+                log.info("ManagementConsoleDataController.retriveHostFromCluster <<<");
+                return responseView;
+
+        }
 	
 	/**
 	 * This Method is use to register multiple host on server..
