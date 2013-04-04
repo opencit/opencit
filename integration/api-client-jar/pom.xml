@@ -129,10 +129,12 @@
 			<pattern>javax.xml</pattern>
 			<shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
 		    </relocation>
+            <!--
 		    <relocation>
 			<pattern>com.sun</pattern>
 			<shadedPattern>com.intel.shaded.com.sun</shadedPattern>
 		    </relocation>
+            -->
 		</relocations>
             </configuration>
          </execution>

@@ -56,11 +56,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * 
- * Original author Will Provost
+ * @author Will Provost (original author)
+ * @author Jonathan Buhacoff
+ *
  * Copyright 2009 Will Provost. All rights reserved by Capstone Courseware, LLC.
+ * Used with permission.
  * 
- * http://code.google.com/p/opensaml/source/browse/
+ * http://capcourse.com/Library/OpenSAML
  */
 public class SAMLSignature
 {
