@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import java.net.MalformedURLException;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -50,7 +51,7 @@ public class TxtHostRecord {
         
     }
     
-    public TxtHostRecord(TxtHost input) {
+    public TxtHostRecord(TxtHost input) throws MalformedURLException {
         HostName = input.getHostName().toString();
         if (input.getIPAddress() != null)
             IPAddress = input.getIPAddress().toString();

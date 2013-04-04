@@ -1,5 +1,6 @@
 package com.intel.mtwilson.datatypes;
 
+import java.net.MalformedURLException;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonIgnore;
@@ -100,12 +101,35 @@ public class TxtHost {
         return port;
     }
 
-    public String getAddOn_Connection_String() {
-        if( connectionString == null && ipAddress != null && port != null ) {
-            // for backwards compatibility with cilents that don't submit a connection string for intel hosts
-            return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
+    public String getAddOn_Connection_String() throws MalformedURLException {
+        ConnectionString connStr = null;
+        if( connectionString == null) {
+            if (ipAddress != null && port != null) {
+                // for backwards compatibility with cilents that don't submit a connection string for intel hosts
+                connStr = new ConnectionString(Vendor.INTEL, ipAddress.toString(), port);
+                // return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
+            }            
+        } else {
+            // Let us first check if the user already has specified the connection string in the correct format. If yes, then return back the connection
+            // string since we do not need to do any formatting.
+            if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
+                return connectionString;
+            } else if (connectionString.startsWith("http")) {
+                // the connection string can be for any of the 3 types of hosts. Check if we have the userName and password fields. If they are
+                // present, then the connection string is for either VMware or Citrix. If not, it is Intel
+                if (connectionString.contains(";") && (connectionString.substring(connectionString.indexOf(";")).length()>0)) {
+                    if (connectionString.contains("/sdk")) {
+                        connStr = new ConnectionString(Vendor.VMWARE, connectionString);
+                    } else {
+                        connStr = new ConnectionString(Vendor.CITRIX, connectionString);
+                    }
+                } else {
+                    connStr = new ConnectionString(Vendor.INTEL, connectionString);
+                }           
+            }
         }
-        return connectionString;
+        // Now return back the properly formatted connection string.
+        return connStr.getConnectionStringWithPrefix();
     }
 
     public String getDescription() {

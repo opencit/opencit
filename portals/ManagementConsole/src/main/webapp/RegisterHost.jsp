@@ -72,7 +72,7 @@
 					<tr>
 						<td class="registerHostRow1">Host Name</td>
 						<td class="registerHostRow2">Port #</td>
-						<td class="registerHostRow3">vCenter Info</td>
+						<td class="registerHostRow3">Add On Connection String</td>
                         <td class="registerHostRow4"><input type="checkbox" checked="checked" onclick="fnSelectAllCheckBox(checked)"><span>&nbsp;Register</span></td>
                         <td class="registerHostRow5" colspan="2"><span>Configuration</span></td>
 						<td class="registerHostRow6Header">Status</td>

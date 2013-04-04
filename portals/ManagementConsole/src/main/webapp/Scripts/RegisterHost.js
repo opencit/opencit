@@ -24,7 +24,7 @@ function fnUploadFlatFile() {
 				fnuploadSuccess(data);
 			},
 			error: function (data, status, e){
-				$('#successMessage').html('<div class="errorMessage">* File is not processed properly. Please check file format. Use help Button to know More.</div>');
+				$('#successMessage').html('<div class="errorMessage">* File is not processed properly. Please check file format. Use help button to know more.</div>');
 			}
 		});
 }
@@ -69,9 +69,8 @@ function updateListHostToBeRegister(responsJson) {
 			var hostNameReplaced = values[val].hostName.replace(/\./g, "_");
 			if(val % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
 			if(values[val].vmWareType){portNo = "";vCenter = values[val].vCenterString;}else{vCenter = "";portNo=values[val].hostPortNo;}
-			/* Soni_Begin_25/09/2012_issue_for_IE_border_line is not visible when port is null  */
 
-			str+='<tr class="'+classValue+'" registered="'+values[val].registered+'" isVMMType="'+values[val].vmWareType+'">'+
+			str+='<tr class="'+classValue+'" registered="'+values[val].registered+'" isVMMType="'+values[val].vmWareType+'" hostType="'+ values[val].hostType +'">'+
 						'<td class="registerHostRow1">'+values[val].hostName+'</td>'+
 						'<td class="registerHostRow2">&nbsp;'+portNo+'</td>'+
 						'<td class="registerHostRow3" vCenterString="'+vCenter+'">'+vCenter.split(';')[0]+'&nbsp;</td>'+
@@ -80,7 +79,6 @@ function updateListHostToBeRegister(responsJson) {
 							for ( var iteam in wlBiosList) {
 								str+='<option>'+wlBiosList[iteam]+'</option>';
 							}
-							/* Soni_Begin_25/09/2012_issue_for_IE_border_line is not visible when port is null  */
 						str+='</select>&nbsp;';
 						if (values[val].registered) {
 							str+='<a id="editConfig_'+hostNameReplaced+'" class="editConfig_'+hostNameReplaced+'" onclick="fnUpdateregisteredHostConfig(this,\'vmmConfigValue_'+hostNameReplaced+'\')" href="javascript:;">Edit</a>';
@@ -207,7 +205,7 @@ function fnRegisterMultipleHost() {
 		if(checkBoxValue == "checked") {
 			checked = true;
 			var host = new RegisterHostVo();
-			host.hostType = null;
+			host.hostType = $(row).attr('hostType');
 			host.status = null;
 			host.hostName = $.trim($(row).find('td:eq(0)').text());
 			if ($(row).attr('isvmmtype') == 'false') {

@@ -37,6 +37,7 @@ import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -542,7 +543,7 @@ public class HostBO extends BaseBO {
         }
 
         private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, String certificate,
-                String location, HashMap<String, ? extends IManifest> pcrMap) throws CryptographyException {
+                String location, HashMap<String, ? extends IManifest> pcrMap) throws CryptographyException, MalformedURLException {
 
 
                 //Building objects and validating that manifests are created ahead of create of host
