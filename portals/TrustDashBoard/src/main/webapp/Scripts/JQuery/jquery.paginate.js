@@ -31,6 +31,8 @@
 		onChange				: function(){return false;}
 	};
 	$.fn.draw = function(o,obj,selectedpage){
+        if(o.count == 0)
+            return;
 		if(o.display > o.count)
 			o.display = o.count;
 		$this.empty();
@@ -49,8 +51,10 @@
 		var _first		= $(document.createElement('a')).addClass('jPag-first').html('First');
 		
 		if(o.rotate){
-			if(o.images) var _rotleft	= $(document.createElement('span')).addClass(spreviousclass);
-			else var _rotleft	= $(document.createElement('span')).addClass(spreviousclass).html('&laquo;');		
+            
+			if(o.images)var _rotleft	= $(document.createElement('span')).addClass(spreviousclass);
+            else var _rotleft	= $(document.createElement('span')).addClass(spreviousclass).html('&laquo;');	
+            
 		}
 		
 		var _divwrapleft	= $(document.createElement('div')).addClass('jPag-control-back');
@@ -205,6 +209,7 @@
 			$(this).html('<span class="jPag-current">'+currval+'</span>');
 			selobj = $(this);
 			$.fn.applystyle(o,$(this).parent().parent().parent(),a_css,hover_css,_first,_ul,_ulwrapdiv,_divwrapright);	
+            
 			var left = (this.offsetLeft) / 2;
 			var left2 = _ulwrapdiv.scrollLeft() + left;
 			var tmp = left - (outsidewidth / 2);
@@ -217,6 +222,7 @@
 		
 		var last = _ulwrapdiv.find('li').eq(o.start-1);
 		last.attr('id','tmp');
+        
 		var left = document.getElementById('tmp').offsetLeft / 2;
 		last.removeAttr('id');
 		var tmp = left - (outsidewidth / 2);
@@ -240,7 +246,8 @@
 					
 					obj.find('li').each(function(i,n){
 						if(i == (o.display-1)){
-							outsidewidth_tmp = this.offsetLeft + this.offsetWidth ;
+                            
+							//outsidewidth_tmp = this.offsetLeft + this.offsetWidth ;
 						}
 						insidewidth += this.offsetWidth;
 					})
