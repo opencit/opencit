@@ -6,4 +6,4 @@
 ALTER TABLE `mw_hosts` ADD COLUMN `TlsPolicy` varchar(255) NOT NULL DEFAULT 'TRUST_FIRST_CERTIFICATE';
 ALTER TABLE `mw_hosts` ADD COLUMN `TlsKeystore` blob NULL;
 
-INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20130106235900,NOW(),'patch for 1.1 adding tls policy enforcement');
+INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20130106235900,NOW(),'core - patch for 1.1 adding tls policy enforcement');

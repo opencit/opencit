@@ -9,12 +9,16 @@ CREATE TABLE `tbl_api_client` (
   PRIMARY KEY (`Client_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172741,NOW(),'premium - create 0.5.1 schema api client and portal user');
+
 CREATE TABLE `tbl_event_type` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `Name` varchar(75) NOT NULL,
   `FieldName` varchar(45) NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172742,NOW(),'premium - create 0.5.1 schema module event');
 
 CREATE TABLE `tbl_host_specific_manifest` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -42,6 +46,8 @@ CREATE TABLE `tbl_package_namespace` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172745,NOW(),'premium - create 0.5.1 schema module package namespace');
+
 ALTER TABLE `tbl_module_manifest` MODIFY COLUMN `Event_ID` int(11) NOT NULL;
 ALTER TABLE `tbl_module_manifest` MODIFY COLUMN `NameSpace_ID` int(11) NOT NULL;
 ALTER TABLE `tbl_module_manifest` ADD COLUMN `Event_ID` int(11) NOT NULL;
@@ -65,3 +71,4 @@ ALTER TABLE `tbl_module_manifest` ADD KEY `Module_Event_ID` (`Event_ID`);
 ALTER TABLE `tbl_module_manifest` ADD CONSTRAINT `Module_NameSpace_ID` FOREIGN KEY (`NameSpace_ID`) REFERENCES `tbl_package_namespace` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 ALTER TABLE `tbl_module_manifest` ADD CONSTRAINT `Module_Event_ID` FOREIGN KEY (`Event_ID`) REFERENCES `tbl_event_type` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172748,NOW(),'premium - create 0.5.1 schema module manifest 2');

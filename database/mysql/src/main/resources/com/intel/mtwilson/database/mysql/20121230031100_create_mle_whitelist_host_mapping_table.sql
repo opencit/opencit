@@ -13,4 +13,4 @@ CREATE  TABLE `mw_mle_source` (
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
-INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20121230031100,NOW(),'Patch to create mw_mle_source table');
+INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20121230031100,NOW(),'premium - Patch to create mw_mle_source table');
