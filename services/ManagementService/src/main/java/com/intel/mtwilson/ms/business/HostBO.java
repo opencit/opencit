@@ -37,6 +37,9 @@ import com.intel.mtwilson.util.MWException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
@@ -77,8 +80,42 @@ public class HostBO extends BaseBO {
         private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mspm.getEntityManagerFactory("MSDataPU"));
         private byte[] dataEncryptionKey;
 
+        private static class Aes128DataCipher implements DataCipher {
+            private Logger log = LoggerFactory.getLogger(getClass());
+            private Aes128 cipher;
+            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
+            
+            @Override
+            public String encryptString(String plaintext) {
+                try {
+                    return cipher.encryptString(plaintext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to encrypt data", e);
+                    return null;
+                }
+            }
+
+            @Override
+            public String decryptString(String ciphertext) {
+                try {
+                    return cipher.decryptString(ciphertext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to decrypt data", e);
+                    return null;
+                }
+            }
+            
+        }
+        
         public void setDataEncryptionKey(byte[] key) {
-                dataEncryptionKey = key;
+                    try {
+                        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
+                    }
+                    catch(CryptographyException e) {
+                        log.error("Cannot initialize data encryption cipher", e);
+                    }      
         }
 
         public HostBO() {
@@ -143,7 +180,7 @@ public class HostBO extends BaseBO {
 
                 try {
 
-                        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+                        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
 
                         // Retrieve the host object.
                         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
@@ -264,7 +301,7 @@ public class HostBO extends BaseBO {
                         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
                         log.debug("Starting to process the registration for host: " + hostObj.HostName);
 
-                        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+                        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
 
                         // First let us check if the host is already configured. If yes, we will return back success
                         TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
@@ -428,7 +465,7 @@ public class HostBO extends BaseBO {
                 try {
                         
                          ApiClient apiClient = createAPIObject();
-                        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+                        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
 
                         log.info("About to start processing {0} the hosts", hostRecords.getHostRecords().size());
 
@@ -926,7 +963,7 @@ public class HostBO extends BaseBO {
 
                                 String reqdManifestList = "";
 
-                                TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+                                TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
                                 ApiClient apiClient = createAPIObject();
 
                                 // For OpenSource hosts, the host has to be registered first before we can extract the

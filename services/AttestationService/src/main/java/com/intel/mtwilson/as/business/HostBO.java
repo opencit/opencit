@@ -402,7 +402,7 @@ public class HostBO extends BaseBO {
                         tblHosts.setVmmMleId(vmmMleId);
 
                         log.info("Updating Host in database");
-                        new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).edit(tblHosts);
+                        new TblHostsJpaController(getEntityManagerFactory()).edit(tblHosts);
 
                         if (tblHostSpecificManifests != null) {
                                 log.info("Updating Host Specific Manifest in database");
@@ -436,8 +436,7 @@ public class HostBO extends BaseBO {
 
                         deleteSAMLAssertions(tblHosts);
 
-                        new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey)
-                                .destroy(tblHosts.getId());
+                        new TblHostsJpaController(getEntityManagerFactory()).destroy(tblHosts.getId());
                 } catch (ASException ase) {
                         throw ase;
                 } catch (CryptographyException e) {
@@ -591,8 +590,7 @@ public class HostBO extends BaseBO {
                 log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
                 log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
-                TblHostsJpaController hostController = new TblHostsJpaController(
-                        getEntityManagerFactory(), dataEncryptionKey);
+                TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
                 tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                 tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
@@ -665,8 +663,7 @@ public class HostBO extends BaseBO {
 
         public HostResponse isHostRegistered(String hostnameOrAddress) {
                 try {
-                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(
-                                getEntityManagerFactory(), dataEncryptionKey);
+                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory());
                         TblHosts tblHosts = tblHostsJpaController.findByName(hostnameOrAddress);
                         if (tblHosts != null) {
                                 return new HostResponse(ErrorCode.OK); // host name exists in
@@ -689,7 +686,7 @@ public class HostBO extends BaseBO {
 
         private void checkForDuplicate(TxtHost host) throws CryptographyException {
                 TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(
-                        getEntityManagerFactory(), dataEncryptionKey);
+                        getEntityManagerFactory());
                 TblHosts tblHosts = tblHostsJpaController.findByName(host.getHostName()
                         .toString()); // datatype.Hostname
                 if (tblHosts != null) {
@@ -722,7 +719,7 @@ public class HostBO extends BaseBO {
          * @throws CryptographyException
          */
         public TblHosts getHostByName(Hostname hostName) throws CryptographyException { // datatype.Hostname
-                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey)
+                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory())
                         .findByName(hostName.toString());
                 return tblHosts;
         }
@@ -739,7 +736,7 @@ public class HostBO extends BaseBO {
          */
         public List<TxtHostRecord> queryForHosts(String searchCriteria) {
                 try {
-                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey);
+                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory());
                         List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
                         List<TblHosts> tblHostList;
 
