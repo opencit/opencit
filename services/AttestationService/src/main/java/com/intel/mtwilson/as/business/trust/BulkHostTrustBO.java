@@ -118,7 +118,12 @@ public class BulkHostTrustBO {
             }
             
             for(Future<?> status : taskStatus) {
-                status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
+                try {
+                    status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
+                }
+                catch(Exception e) {
+                    log.error("Error while waiting for task to complete: {}", e);
+                }
             }
             
 //            scheduler.shutdown();
