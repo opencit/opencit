@@ -26,7 +26,9 @@ import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
+import com.intel.mtwilson.as.data.helper.DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
@@ -66,9 +68,44 @@ public class HostBO extends BaseBO {
         private TblMle vmmMleId = null;
         private byte[] dataEncryptionKey = null;
 
-        public void setDataEncryptionKey(byte[] key) {
-                dataEncryptionKey = key;
+        private static class Aes128DataCipher implements DataCipher {
+            private Logger log = LoggerFactory.getLogger(getClass());
+            private Aes128 cipher;
+            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
+            
+            @Override
+            public String encryptString(String plaintext) {
+                try {
+                    return cipher.encryptString(plaintext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to encrypt data", e);
+                    return null;
+                }
+            }
+
+            @Override
+            public String decryptString(String ciphertext) {
+                try {
+                    return cipher.decryptString(ciphertext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to decrypt data", e);
+                    return null;
+                }
+            }
+            
         }
+        
+        public void setDataEncryptionKey(byte[] key) {
+                    try {
+                        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
+                    }
+                    catch(CryptographyException e) {
+                        log.error("Cannot initialize data encryption cipher", e);
+                    }      
+        }
+        
 
         public HostResponse addHost(TxtHost host) {
                 String certificate = null;

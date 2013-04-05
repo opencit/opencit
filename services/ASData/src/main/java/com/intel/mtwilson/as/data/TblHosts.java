@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.data;
 
+import com.intel.mtwilson.as.data.helper.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
@@ -43,6 +44,10 @@ import org.slf4j.LoggerFactory;
 public class TblHosts implements Serializable {
     @Transient
     private transient Logger log = LoggerFactory.getLogger(getClass());
+    
+    @Transient
+    public static transient DataCipher dataCipher = null;
+    
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
     @Basic(optional =     false)
@@ -76,8 +81,16 @@ public class TblHosts implements Serializable {
     private int port;
     @Column(name = "Description")
     private String description;
+    
+    
+    
     @Column(name = "AddOn_Connection_Info")
-    private String addOnConnectionInfo;
+    private String addOnConnectionInfo_cipherText;   // must be encrypted 
+    
+    @Transient
+    private transient String addOnConnectionInfo_plainText; // the decrypted version
+    
+    
     @Lob
     @Column(name = "AIK_Certificate")
     private String aIKCertificate;
@@ -176,11 +189,19 @@ public class TblHosts implements Serializable {
     }
 
     public String getAddOnConnectionInfo() {
-        return addOnConnectionInfo;
+        if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
+            addOnConnectionInfo_plainText = dataCipher.decryptString(addOnConnectionInfo_cipherText);
+        }
+        return addOnConnectionInfo_plainText;
     }
 
     public void setAddOnConnectionInfo(String addOnConnectionInfo) {
-        this.addOnConnectionInfo = addOnConnectionInfo;
+        this.addOnConnectionInfo_plainText = addOnConnectionInfo;
+        // TODO  encrypt it and set addOnConnectionInfo_cipherText
+        if( addOnConnectionInfo == null ) { addOnConnectionInfo_cipherText = null; }
+        else {
+             addOnConnectionInfo_cipherText = dataCipher.encryptString(addOnConnectionInfo_plainText);
+        }
     }
 
     public String getAIKCertificate() {
