@@ -15,7 +15,7 @@
     <parent>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-integration</artifactId>
-		<version>1.1-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -129,10 +129,12 @@
 			<pattern>javax.xml</pattern>
 			<shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
 		    </relocation>
+            <!--
 		    <relocation>
 			<pattern>com.sun</pattern>
 			<shadedPattern>com.intel.shaded.com.sun</shadedPattern>
 		    </relocation>
+            -->
 		</relocations>
             </configuration>
          </execution>

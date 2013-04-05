@@ -13,7 +13,7 @@ Java code might be a Repository implementation backed by JPA/Hibernate/etc.
     <parent>
 	<groupId>com.intel.mtwilson.database</groupId>
 	<artifactId>mtwilson-database</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.1.1-SNAPSHOT</version>
     </parent>
   
   
