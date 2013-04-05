@@ -32,6 +32,7 @@ function populateViewHostDataIntoTable(hostDetails) {
 			'<td class="viewRow10">'+hostDetails[item].hostDescription+'&nbsp;</td>'+
 		'</tr>';
 	}
+    
 	$('#mainHostDetailsContent table').html(str);
 }
 

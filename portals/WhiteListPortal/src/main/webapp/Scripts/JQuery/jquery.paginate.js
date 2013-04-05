@@ -31,6 +31,8 @@
 		onChange				: function(){return false;}
 	};
 	$.fn.draw = function(o,obj,selectedpage){
+        if(o.count == 0)
+            return;
 		if(o.display > o.count)
 			o.display = o.count;
 		$this.empty();
