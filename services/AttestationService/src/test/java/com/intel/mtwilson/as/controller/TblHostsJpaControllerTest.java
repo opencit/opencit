@@ -43,7 +43,7 @@ public class TblHostsJpaControllerTest {
 
     @Test
     public void testSomeMethod() throws CryptographyException {
-        TblHostsJpaController jpactl = new TblHostsJpaController(ASPersistenceManager.createEntityManagerFactory("ASDataPU", ASConfig.getJpaProperties()), Aes128.generateKey().getEncoded());
+        TblHostsJpaController jpactl = new TblHostsJpaController(ASPersistenceManager.createEntityManagerFactory("ASDataPU", ASConfig.getJpaProperties()));
         TblHosts host = jpactl.findByName("127.0.0.1");
         if( host == null ) {
             System.out.println("got null result");

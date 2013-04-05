@@ -21,6 +21,8 @@ import com.intel.mountwilson.manifest.IManifestStrategyFactory;
 import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mountwilson.manifest.factory.DefaultManifestStrategyFactory;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import java.io.StringWriter;
@@ -41,9 +43,42 @@ public class ReportsBO extends BaseBO {
     
     private byte[] dataEncryptionKey = null;
 
+    private static class Aes128DataCipher implements DataCipher {
+            private Logger log = LoggerFactory.getLogger(getClass());
+            private Aes128 cipher;
+            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
+            
+            @Override
+            public String encryptString(String plaintext) {
+                try {
+                    return cipher.encryptString(plaintext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to encrypt data", e);
+                    return null;
+                }
+            }
 
+            @Override
+            public String decryptString(String ciphertext) {
+                try {
+                    return cipher.decryptString(ciphertext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to decrypt data", e);
+                    return null;
+                }
+            }
+            
+    }
+        
     public void setDataEncryptionKey(byte[] key) {
-        dataEncryptionKey = key;
+                    try {
+                        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
+                    }
+                    catch(CryptographyException e) {
+                        logger.error("Cannot initialize data encryption cipher", e);
+                    }      
     }
 
     public HostsTrustReportType getTrustReport(Collection<Hostname> hostNames) { // datatype.Hostname
@@ -55,7 +90,7 @@ public class ReportsBO extends BaseBO {
         try {
             HostsTrustReportType hostsTrustReportType = new HostsTrustReportType();
             for (Hostname host : hostNames) {
-                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).findByName(host.toString()); // datatype.Hostname
+                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(host.toString()); // datatype.Hostname
 
 
                 if (tblHosts == null) {
@@ -100,7 +135,7 @@ public class ReportsBO extends BaseBO {
          */
         TblHosts tblHosts = null;
         try {
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).findByName(hostName.toString()); // datatype.Hostname
+            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
         } catch (CryptographyException e) {
             throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         }
@@ -177,7 +212,7 @@ public class ReportsBO extends BaseBO {
 
         try {
 
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).findByName(hostName.toString());
+            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString());
 
             if (tblHosts == null) {
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
@@ -274,7 +309,7 @@ public class ReportsBO extends BaseBO {
 
         TblHosts tblHosts = null;
         try {
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).findByName(hostName.toString()); // datatype.Hostname
+            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
         } catch (CryptographyException e) {
             throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         }
