@@ -6,6 +6,8 @@ package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.validation.ObjectModel;
 import java.math.BigInteger;
+import org.apache.commons.codec.binary.Hex;
+import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * XXX TODO this class is just a draft. It needs to be finished.
@@ -35,4 +37,16 @@ public class Nonce extends ObjectModel {
     protected void validate() {
 //        throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    /**
+     * Returns a string representing the Digest in hexadecimal form.
+     *
+     * @see java.lang.Object#toString()
+     */
+    @JsonValue
+    @Override
+    public String toString() {
+        return Hex.encodeHexString(data);
+    }
+    
 }

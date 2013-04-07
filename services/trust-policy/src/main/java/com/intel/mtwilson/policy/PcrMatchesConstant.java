@@ -14,6 +14,8 @@ import com.intel.mtwilson.policy.fault.PcrValueMissing;
  * pre-determined constant value. This is typical for values that are known in 
  * advance such as BIOS or trusted module measurements.
  * 
+ * For example, "PCR {index} must equal {hex-value}"
+ * 
  * @author jbuhacoff
  */
 public class PcrMatchesConstant implements TrustPolicy {
@@ -22,9 +24,13 @@ public class PcrMatchesConstant implements TrustPolicy {
         this.expected = expected;
     }
     
+    public Pcr getExpectedPcr() { return expected; }
+    
     @Override
     public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport();
+        TrustReport report = new TrustReport(this);
+//        report.check(this);
+//        report.check("%s: PCR %s is constant %s", getClass().getSimpleName(),expected.getIndex().toString(), expected.getValue().toString() );
         if( hostReport.pcrManifest == null ) {
             report.fault(new PcrManifestMissing());            
         }
@@ -42,4 +48,8 @@ public class PcrMatchesConstant implements TrustPolicy {
         return report;
     }
     
+    @Override
+    public String toString() {
+        return String.format("PCR %s, %s", expected.getIndex().toString(), expected.getValue().toString());
+    }
 }

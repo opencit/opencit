@@ -563,7 +563,12 @@
             <version>1.16</version>
         </dependency>
 -->
-                        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>trust-policy</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties />
 </project>

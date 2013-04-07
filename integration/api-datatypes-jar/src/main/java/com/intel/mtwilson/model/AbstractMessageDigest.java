@@ -30,11 +30,16 @@ public abstract class AbstractMessageDigest extends ObjectModel {
     }
     
     public String algorithm() { return algorithm; }
-    
+
+    /**
+     * Makes a copy of the byte array.
+     * @param value 
+     */
     protected void setBytes(byte[] value) {
         if( value == null ) { throw new IllegalArgumentException(algorithm+": Null digest"); }
         if( value.length != digestLength ) { throw new IllegalArgumentException(algorithm+": Digest must be "+digestLength+" bytes long"); }
-        this.value = value;
+        this.value = new byte[value.length];
+        System.arraycopy(value, 0, this.value, 0, value.length);
         this.hex = Hex.encodeHexString(value);
     }
     protected void setHex(String hex) {

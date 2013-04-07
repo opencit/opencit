@@ -5,24 +5,21 @@
 package com.intel.mtwilson.agent.intel;
 
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
-import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.manifest.data.PcrManifest;
-import com.intel.mountwilson.manifest.helper.TAHelper;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.model.Nonce;
-import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +36,7 @@ public class IntelHostAgent implements HostAgent {
     private Boolean isTpmAvailable = null;
     private String vendorHostReport = null;
     private String vmmName = null;
-    private HashMap<String, ? extends IManifest> manifestMap = null; // XXX TODO needs to change, it's not a clear programming interface
+    private PcrManifest pcrManifest = null;
     
     public IntelHostAgent(TrustAgentSecureClient client, InternetAddress hostAddress) throws Exception {
         trustAgentClient = client;
@@ -50,7 +47,7 @@ public class IntelHostAgent implements HostAgent {
     
     
     @Override
-    public boolean isTpmAvailable() {
+    public boolean isTpmPresent() {
 //        throw new UnsupportedOperationException("Not supported yet.");
         // bug #538  for now assuming all trust-agent hosts have tpm since we don't have a separate capabilities call
         return true; //  XXX TODO need to have a separate call to trust agent to get host capabilities  ... see bug #540
@@ -117,25 +114,11 @@ public class IntelHostAgent implements HostAgent {
         throw new UnsupportedOperationException("Not supported  yet."); // XXX TODO throw exception or return null?
     }
 
-    @Override
-    public List<Pcr> getPcrValues() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     @Override
-    public List<String> getModuleManifest() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public List<Pcr> getPcrHistory(PcrIndex number) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public HashMap<String, ? extends IManifest> getManifest(VCenterHost postProcessing) { // XXX TODO VCenterHost must not be part of the api;  this was a kludge specific to the VmwareHostAgent
+    public PcrManifest getPcrManifest() {
         // XXX TODO  obtain the manifest map  using existing code in one of the trust agent helper classes
-        return manifestMap;
+        return pcrManifest;
     }
 
     @Override
@@ -165,8 +148,8 @@ public class IntelHostAgent implements HostAgent {
             TAHelper helper = new TAHelper();
             // XXX the PCR information returned here is NOT verified using the host's trusted AIk certificate from our database... must call helper.setTrustedAik(...) before calling helper.getQuoteInformationForHost(...) in order to verify the quote
             // currently the getHostAttestationReport function is ONLY called from Management Service HostBO.configureWhiteListFromCustomData(...)  so there wouldn't be any saved trusted AIK in the database anyway
-            HashMap<String, PcrManifest> pcrMap = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient, pcrList);
-            vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrMap, vmmName);
+            pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient);
+            vendorHostReport = helper.getHostAttestationReport(hostAddress.toString(), pcrManifest, vmmName);
             log.debug("Host attestation report for {}", hostAddress);
             log.debug(vendorHostReport);
             return vendorHostReport;
@@ -174,6 +157,32 @@ public class IntelHostAgent implements HostAgent {
         catch(Exception e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public boolean isIntelTxtSupported() {
+        return true; // XXX TODO need to implement detection
+    }
+
+    @Override
+    public boolean isIntelTxtEnabled() {
+        return true; // XXX TODO need to implement detection
+    }
+
+    @Override
+    public PublicKey getAik() {
+        X509Certificate aikcert = getAikCertificate();
+        return aikcert.getPublicKey();
+    }
+
+    @Override
+    public X509Certificate getEkCertificate() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Map<String, String> getHostAttributes() throws IOException {
+        return new HashMap<String,String>();
     }
     
 }

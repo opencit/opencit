@@ -30,7 +30,7 @@ public class SoftwareMeasurement extends Measurement {
     public String getName() { return name; }
     public String getVersion() { return version; }
     
-    @JsonValue
+//    @JsonValue
     @Override
     public String toString() {
         return String.format("%s %s %s", vendor, name, version);

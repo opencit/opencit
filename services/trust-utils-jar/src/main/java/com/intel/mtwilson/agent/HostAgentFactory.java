@@ -4,14 +4,13 @@
  */
 package com.intel.mtwilson.agent;
 
-import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
-import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.model.InternetAddress;
+import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.TlsPolicy;
@@ -21,7 +20,6 @@ import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +59,7 @@ public class HostAgentFactory {
      * @param host
      * @return 
      */
-    public HashMap<String, ? extends IManifest> getManifest(TblHosts host, VCenterHost postProcessing) {
+    public PcrManifest getManifest(TblHosts host) {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName());
             String connectionString = getConnectionString(host);
@@ -71,9 +69,9 @@ public class HostAgentFactory {
             SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); // XXX TODO see above commment about password;  the per-host trusted certificates keystore has to either be protected by a password known to all mt wilson instances (stored in database or sync'd across each server's configuration files) or it has to be protected by a group secret known to all authorized clients (and then we need a mechanism for the api client to send us the secret in the request, and a way get secrets in and out of api client's keystore so it can be sync'd across the authorized group of clients) or we can just not store it encrypted and use a pem-format keystore instead of a java KeyStore 
             TlsPolicy tlsPolicy = getTlsPolicy(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
             HostAgent hostAgent = getHostAgent(hostAddress, connectionString, tlsPolicy);
-            HashMap<String, ? extends IManifest> manifest = hostAgent.getManifest(postProcessing);
+            PcrManifest pcrManifest = hostAgent.getPcrManifest();
 //            host.setTlsKeystore(resource.toByteArray()); // if the tls policy is TRUST_FIRST_CERTIFICATE then it's possible a new cert has been saved in it and we have to make sure it gets saved to the host record;  for all other tls policies there would be no change so this is a no-op -  the byte array will be the same as the one we started with
-            return manifest;
+            return pcrManifest;
         }
         catch(Exception e) {
             throw new IllegalArgumentException("Cannot get manifest for "+host.getName()+": "+e.toString(), e);

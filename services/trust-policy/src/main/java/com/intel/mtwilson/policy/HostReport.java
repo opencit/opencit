@@ -9,8 +9,8 @@ import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Note:  The trust-policy module and this HostReport object can only be used
@@ -31,7 +31,7 @@ import java.util.Set;
 public class HostReport {
     public Map<String,String> variables; // such as host uuid, which may be referenced in calculated (dynamic) policy
     public PcrManifest pcrManifest; // list of all pcr's and their values... should be a complete list, with 0's for unused pcr's
-    public Map<PcrIndex,Set<Measurement>> pcrModuleManifest; // list of all modules for one pcr ... XXX TODO so actually need a by-pcr map of this...
+//    public Map<PcrIndex,List<Measurement>> pcrModuleManifest; // list of all modules for one pcr ... XXX TODO maybe should be an  LIST (ordered) instead of a SET
     public TpmQuote tpmQuote; // the original quote from the tpm which should cover the pcr manifest (except for vmware for which we don't get a real quote)
     public Aik aik; // the host's aik certificate that signed the quote (except for vmware for which we don't get an aik)
 //    public Nonce nonce; // the nonce that was used to guarantee freshness (is this the challenge nonce or response nonce ??? hmm maybe not needed because it maybe part of TpmQuote)

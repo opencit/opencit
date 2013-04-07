@@ -5,6 +5,8 @@
 package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.validation.ObjectModel;
+import java.util.HashMap;
+import java.util.Map;
 import org.codehaus.jackson.annotate.JsonValue;
 
 /**
@@ -16,16 +18,24 @@ public class Measurement extends ObjectModel {
 
     private final Sha1Digest digest;
     private final String label;
+    private final HashMap<String,String> info = new HashMap<String,String>();
     
     public Measurement(Sha1Digest digest, String label) {
         this.digest = digest;
         this.label = label;
     }
+
+    public Measurement(Sha1Digest digest, String label, Map<String,String> info) {
+        this.digest = digest;
+        this.label = label;
+        this.info.putAll(info);
+    }
     
     public Sha1Digest getValue() { return digest; }
-    public String getLabel() { return label; }
+    public String getLabel() { return label; } // intended to summarize the measurement's origin or purpose in one line... you can put additional information in "info"
+    public Map<String,String> getInfo() { return info; } // other information, such as what vmware provides with each measurement
     
-    @JsonValue
+//    @JsonValue
     @Override
     public String toString() {
         return String.format("%s %s", digest.toString(), label);

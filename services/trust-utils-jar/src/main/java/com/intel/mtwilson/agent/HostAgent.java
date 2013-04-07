@@ -4,18 +4,16 @@
  */
 package com.intel.mtwilson.agent;
 
-import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.Nonce;
-import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -35,19 +33,60 @@ import java.util.Set;
  * It is only responsible for obtaining the host information, AIK, TPM Quote,
  * and Module Manifest. The Attestation Service will interpret these.
  * 
+ * The methods isTpmPresent(), isTpmEnabled(), isIntelTxtSupported(), and
+ *  isIntelTxtEnabled() help the
+ * attestation service provide detailed trust status to clients:
+ * 
+ * 1. Trusted  (host complies with assigned policies in whitelist)
+ * 2. Untrusted (host does not comply with assigned policies in whitelist)
+ * 3. Intel TXT Not Enabled (when isIntelTxtEnabled()==false)
+ * 4. TPM Not Enabled (when isTpmEnabled()==false)
+ * 5. TXT and TPM Not Enabled (when both isTpmEnabled()==false and isIntelTxtEnabled()==false)
+ * 6. TXT Not Supported (when isIntelTxtSupported()==false)
+ * 
+ * if isIntelTxtSupported() and isIntelTxtEnabled() and isTpmPresent() and isTpmEnabled() then
+ *      ... evaluate policies to determine trusted or untrusted ...
+ *      ... actually isIntelTxtSupported() is implied by isIntelTxtEnabled() ...
+ *      ... and isTpmPresent() is implied by isTpmEnabled() ...
+ * else
+ *      ... host trust status is unknown ...
+ *      if isIntelTxtSupported() == false then display #6
+ *      else if isIntelTxtEnabled() == false && isTpmEnabled() == false then display #5
+ *      else if isIntelTxtEnabled() == false then display #3
+ *      else if isTpmEnabled() == false then display #4
+ *      
+ * 
+ * 
  * @author jbuhacoff
  */
 public interface HostAgent {
+
+    /**
+     * Whether the platform supports Intel TXT - is the right hardware present (not including the TPM)
+     * XXX for now all hosts return true until we implement all the detection mechanism
+     * @return 
+     */
+    boolean isIntelTxtSupported();
     
     /**
+     * Whether Intel TXT  has been enabled on the platform (usually through the BIOS)
+     * XXX for now all hosts return true until we implement all the detection mechanism
+     * @return 
+     */
+    boolean isIntelTxtEnabled();
+    
+    
+    /**
+     * XXX for now probably all hosts will return true, until we implement all the detection mechanisms
      * Available means the TPM hardware is present.
      * Linux, Citrix, and Vmware agents should contact the host and find out
      * if it has a TPM before determining the return value.
      * @return true if the host has a TPM
      */
-    boolean isTpmAvailable();
+    boolean isTpmPresent();
     
     /**
+     * XXX for now probably all hosts will return true, until we implement all the detection mechanisms
      * Linux, Citrix agents should contact the host and find out
      * if its TPM is enabled (BIOS enabled and also if the agents have ownership).
      * In this case, "enabled" means it has an owner set AND that owner is
@@ -56,12 +95,16 @@ public interface HostAgent {
      * @return 
      */
     boolean isTpmEnabled();
+
     
     /**
      * Linux and Citrix agents should return true, Vmware should return false.
      * @return true if we can obtain the EK for the host
      */
     boolean isEkAvailable();
+    
+    X509Certificate getEkCertificate();
+    
     
     /**
      * Linux and Citrix agents should return true, Vmware should return false.
@@ -70,19 +113,19 @@ public interface HostAgent {
     boolean isAikAvailable();
     
     /**
+     * AIK's are RSA public keys.  The certificates only exist when a Privacy CA or
+     * a Mt Wilson CA signs the public key to create a certificate.
+     * @return 
+     */
+    PublicKey getAik();
+    
+    /**
      * Linux agent should return true because we use the Privacy CA.
      * Citrix agent uses DAA so it should return false.
      * Vmware agent should return false.
      * @return 
      */
     boolean isAikCaAvailable();
-    
-    /**
-     * Linux and Vmware agent should return false.
-     * Citrix agent should return true.
-     * @return true if the host supports Direct Anonymous Attestation
-     */
-    boolean isDaaAvailable();
     
     /**
      * XXX draft - maybe it should return an X509Certificate object
@@ -95,6 +138,16 @@ public interface HostAgent {
      * @return the Privacy CA certificate that is mentioned in the AIK Certificate
      */
     X509Certificate getAikCaCertificate(); 
+
+    
+    /**
+     * Linux and Vmware agent should return false.
+     * Citrix agent should return true.
+     * @return true if the host supports Direct Anonymous Attestation
+     */
+    boolean isDaaAvailable();
+    
+    
     
     /**
      * XXX draft to approximate getting the bios/os/vmm details from the host...
@@ -130,39 +183,17 @@ public interface HostAgent {
      */
     TpmQuote getTpmQuote(Aik aik, Nonce nonce, Set<PcrIndex> pcr);
     
+    
+    
     /**
+     * 
      * Agents should return the entire set of PCRs from the host. The attestation
      * service will then choose the ones it wants to verify against the whitelist.
      * Returning all PCR's is cheap (there are only 24) and makes the API simple.
-     * @return 
-     */
-    List<Pcr> getPcrValues();
-    
-    /**
+     * 
      * Agents should return the entire set of module measurements from the host.
      * The attestation service will then choose what to verify and how. 
-     * XXX currently written to return the mmodule manifest as a set<string> which
-     * is just a draft. Need to figure out what is a convenient format and what
-     * is the information we really need (just module name&value or do we also
-     * need the ORDER - to verify the pcr calculation for some platforms? and
-     * what about "events" and "packages" and "vendors" that are provided by
-     * some platforms? needed or not?)
-     * @return 
-     */
-    List<String> getModuleManifest();
-    
-    /**
-     * XXX draft,  return a list of pcr values (after an assumed initial zero) that
-     * when extended will yield the current pcr value. This will help us to verify
-     * the pcr value for module attestation... each agent will need to figure out
-     * how to obtain this information from its platform.
-     * @param number
-     * @return 
-     */
-    List<Pcr> getPcrHistory(PcrIndex number);
-    
-    
-    /**
+     * 
      * XXX TODO this method is moved here from the previous interface ManifestStrategy.
      * It's currently here to minimize code changes for the current release
      * but its functionality needs to be moved to the other HostAgent methods.
@@ -172,10 +203,13 @@ public interface HostAgent {
      * they are essentially post-processing the results we obtain from vcenter.
      * So in this adapted getManifest() method, we just provide the subclass
      * instance so it can be called for the post-processing.
+     * 
+     * Bug #607 changed return type to PcrManifest and removed post-processing argument - 
+     * each host agent implementation is reponsible for completing all its processing.
      * @param host
      * @return 
      */
-    HashMap<String, ? extends IManifest> getManifest(VCenterHost postProcessing);
+    PcrManifest getPcrManifest();
     
     /**
      * XXX TODO adapter for existing interface
@@ -194,9 +228,19 @@ public interface HostAgent {
 
     /**
      * Another adapter for existing code.  Each vendor returns a string in their own format.
-     * @param pcrList
+     * @param pcrList  may be ignored, and the full list returned
      * @return
      * @throws IOException 
      */
     String getHostAttestationReport(String pcrList) throws IOException;
+    
+    
+    /**
+     * Use this to obtain host-specific information such as UUID, which may be 
+     * needed for dynamic whitelist rules.  Attributes returned with this method
+     * may be referenced by name from dynamic whitelist rules.
+     * @return
+     * @throws IOException 
+     */
+    Map<String,String> getHostAttributes() throws IOException;
 }

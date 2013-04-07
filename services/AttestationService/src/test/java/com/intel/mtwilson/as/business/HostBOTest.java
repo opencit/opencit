@@ -4,6 +4,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class HostBOTest {
     private static HostBO hostBO;
     
     @BeforeClass
-    public static void createBusinessObject()  {
+    public static void createBusinessObject() throws CryptographyException  {
         hostBO = new HostBO();
         hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
     }

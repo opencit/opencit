@@ -4,13 +4,12 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
-import com.intel.mountwilson.manifest.data.IManifest;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.Nonce;
-import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostTpmAttestationReport;
@@ -20,9 +19,11 @@ import com.vmware.vim25.ManagedObjectReference;
 import com.vmware.vim25.RuntimeFaultFaultMsg;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -45,7 +46,7 @@ public class VmwareHostAgent implements HostAgent {
     private String esxVersion = null;
     private Boolean isTpmAvailable = null;
     private String vendorHostReport = null;
-    private HashMap<String, ? extends IManifest> manifestMap = null; // XXX TODO needs to change, it's not a clear programming interface
+    private PcrManifest pcrManifest = null; 
     
     public VmwareHostAgent(VMwareClient vmwareClient, String hostname) throws Exception {
         vmware = vmwareClient;
@@ -59,7 +60,7 @@ public class VmwareHostAgent implements HostAgent {
     
     
     @Override
-    public boolean isTpmAvailable() {
+    public boolean isTpmPresent() {
             try {
                 if( isTpmAvailable == null ) {
                     isTpmAvailable = (Boolean)vmware.getMORProperty(hostMOR,
@@ -147,21 +148,6 @@ public class VmwareHostAgent implements HostAgent {
         throw new UnsupportedOperationException("Vmware does not provide TPM Quotes"); // XXX TODO throw exception or return null?
     }
 
-    @Override
-    public List<Pcr> getPcrValues() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public List<String> getModuleManifest() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public List<Pcr> getPcrHistory(PcrIndex number) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     /**
      * XXX TODO  auditing of the host report should happen in attestation service.
      * you can obtain the original "raw" report by calling getVendorHostReport()
@@ -228,32 +214,40 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     }
 
     @Override
-    public HashMap<String, ? extends IManifest> getManifest(VCenterHost postProcessing) {
+    public PcrManifest getPcrManifest() {
         try {
-            if( isTpmAvailable() ) {
+            if( isTpmPresent() ) {
 				if (vCenterVersion.contains("5.1")) {
 					HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
                                         vendorHostReport = toXml(HostTpmAttestationReport.class, report);
 					log.info("Retreived HostTpmAttestationReport.");
-					manifestMap = postProcessing.processReport(esxVersion,report);
-				}else{
+//					manifestMap = postProcessing.processReport(esxVersion,report);
+                    if(esxVersion.contains("5.1")) {
+                        pcrManifest = VMWare51Esxi51.createPcrManifest(report);
+                    }
+                    else {
+    //                    return new VMWare50Esxi50().getPcrManiFest(report, 
+                        //        getRequestedPcrs(host));
+                    }
+				}else{ // XXX TODO should check if it's 5.0 ... because what if it's 5.2 ??? then we need to run code ABOVE
 					
 					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMORProperty(hostMOR, "runtime");
                                         vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
 					// Now process the digest information
-					List<HostTpmDigestInfo> htdis = runtimeInfo
-							.getTpmPcrValues();
+					List<HostTpmDigestInfo> htdis = runtimeInfo.getTpmPcrValues();
 					log.info("Retreived HostTpmDigestInfo.");
-					manifestMap =  postProcessing.processDigest(esxVersion,htdis);
+                    // ESX 5.0 did not support module measurement so we return only the PCR's
+                    pcrManifest = VMWare50Esxi50.createPcrManifest(htdis); // bug #607 new
+//					pcrManifest =  postProcessing.processDigest(esxVersion,htdis);
 				}
             }        
         }
         catch(Exception e) {
             log.error("error during getManifest: "+e.toString(), e);
         }
-        return manifestMap;
+        return pcrManifest;
     }
 
     /**
@@ -284,6 +278,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     }
     
 
+    @Override
     public String getHostAttestationReport(String pcrList) throws IOException {
         try {
             return vmware.getHostAttestationReport(hostMOR, hostname, pcrList);        
@@ -292,4 +287,29 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             throw new IOException(String.format("Cannot get attestation report from host '%s': %s", hostname, e.toString()), e);
         }
     }
+
+    @Override
+    public boolean isIntelTxtSupported() {
+        return true; // XXX TODO need to implement detection
+    }
+
+    @Override
+    public boolean isIntelTxtEnabled() {
+        return true; // XXX TODO need to implement detection
+    }
+
+    @Override
+    public PublicKey getAik() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public X509Certificate getEkCertificate() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Map<String, String> getHostAttributes() throws IOException {
+         return new HashMap<String,String>();
+   }
 }

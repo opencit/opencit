@@ -41,12 +41,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.6.4</version>
     </dependency>
-    <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.6.4</version>
-			<scope>test</scope>
-    </dependency>
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+                <scope>test</scope>
+        </dependency>
     
     <!-- javascript interpreter for dynamically computed expected pcr values -->
 <dependency>

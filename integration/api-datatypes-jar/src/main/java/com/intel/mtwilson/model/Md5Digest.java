@@ -15,6 +15,9 @@ import org.codehaus.jackson.annotate.JsonValue;
  * @author jbuhacoff
  */
 public class Md5Digest extends AbstractMessageDigest {
+    public final static Md5Digest ZERO = new Md5Digest(new byte[] {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0});
+    
+    
     public Md5Digest() {
         super("MD5", 16);
     }

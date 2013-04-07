@@ -1,5 +1,7 @@
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.model.Vmm;
+import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Hostname;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;

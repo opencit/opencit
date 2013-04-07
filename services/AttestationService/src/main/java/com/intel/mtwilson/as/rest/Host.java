@@ -3,10 +3,14 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.HostBO;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import java.security.cert.X509Certificate;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
@@ -15,6 +19,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -93,6 +98,66 @@ public class Host {
         }
     }
 
+    @RolesAllowed({"Attestation","Report"})
+    @GET
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/aik-{aik}/trust.json")
+    public HostTrustResponse getTrustByAik(@PathParam("aik")String aikFingerprint) {
+        try {
+            // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
+            Sha1Digest aikId = new Sha1Digest(aikFingerprint);
+            if( aikId.isValid() ) {
+                HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatusByAik(aikId);
+                return new HostTrustResponse(new Hostname(aikId.toString()), trust);                
+            }
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+        }
+        catch(ASException e) {
+            throw e;
+        }catch(Exception e) {
+            throw new ASException(e);
+        }
+    }
+    
+    /**
+     * Implements SAFE AR "closing the loop" aka "tls-enforced attestation" and "host bind-data public key".
+     * Given SHA1(AIK), returns DER-ENCODED X509 CERTIFICATE corresponding to the host in its current trust
+     * policy -- even if the host is not currently trusted, the returned certificate corresponds to the current
+     * trust policy for the host so that when the host becomes trusted the certificate will be valid.
+     * If the whitelist for the host changes you will have to obtain a new certificate.
+     * @author jbuhacoff
+     * @since 1.2
+     * @param aikFingerprint
+     * @return 
+     */
+    @RolesAllowed({"Attestation","Report"})
+    @GET
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @Path("/aik-{aik}/trustcert.x509")
+    public byte[] getCurrentTrustCertificateByAik(@PathParam("aik")String aikFingerprint) {
+        try {
+            // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
+            Sha1Digest aikId = new Sha1Digest(aikFingerprint);
+            if( aikId.isValid() ) {
+                TblHosts host = new ASComponentFactory().getHostBO().getHostByAik(aikId);
+                KeystoreCertificateRepository repository = new KeystoreCertificateRepository(new SimpleKeystore(host.getTlsKeystoreResource(),"password")); // XXX the hard-coded "password" is same as in HostAgentFactory... need to make it configurable!!  (or switch to a keystore format w/o a password, like a list of PEM-encoded certificates,  since the attestation service database is trusted and this doesn't need additional protection... and if it did it would have to be either similar to our AES-encryption of the connection string, or something a lot more complicated that involves the api client to control the unlocking)
+                List<X509Certificate> certificates = repository.getCertificates();
+                for(X509Certificate certificate : certificates) {
+                    // we are looking for a certificate that is marked with the AIK;   the other one is the trust agent's or vcenter's ssl;    for now we are putting the AIK fingerprint in the subject CN
+                    if( certificate.getSubjectX500Principal().getName().contains("CN="+aikId.toString()) ) {
+                        return certificate.getEncoded();
+                    }
+                }
+                throw new ASException(ErrorCode.HTTP_NOT_FOUND, "Host does not have a certificate under that AIK");
+            }
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+        }
+        catch(ASException e) {
+            throw e;
+        }catch(Exception e) {
+            throw new ASException(e);
+        }
+    }
     
     /**
      * Adds a new host to the database. This action involves contacting the host

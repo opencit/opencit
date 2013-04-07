@@ -4,17 +4,19 @@
  */
 package com.intel.mtwilson.model;
 
+import java.security.PublicKey;
+
 /**
- * XXX TODO currently this class is a draft, it needs to be finished. It should
- * extend an RsaPublicKey class if one is available.
+ * XXX draft
  * @author jbuhacoff
  */
 public class Aik {
+    private PublicKey publicKey;
 
-    public Aik(String aikPublicKeyPem) {
-        
+    public Aik(PublicKey aikPublicKey) {
+        this.publicKey = aikPublicKey;
     }
-    public Aik(byte[] aikPublicKeyDer) {
-        
-    }
+    
+    public PublicKey getPublicKey() { return publicKey; }
+    
 }

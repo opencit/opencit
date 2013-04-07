@@ -23,21 +23,11 @@ import javax.ws.rs.core.Response.Status;
 
 import org.opensaml.xml.ConfigurationException;
 
-import com.intel.mtwilson.as.business.trust.gkv.IGKVStrategy;
-import com.intel.mtwilson.as.business.trust.gkv.factory.DefaultGKVStrategyFactory;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.as.helper.saml.SamlAssertion;
 import com.intel.mtwilson.as.helper.saml.SamlGenerator;
-import com.intel.mountwilson.manifest.IManifestStrategy;
-import com.intel.mountwilson.manifest.IManifestStrategyFactory;
-import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.manifest.data.ModuleManifest;
-import com.intel.mountwilson.manifest.data.PcrManifest;
-import com.intel.mountwilson.manifest.data.PcrModuleManifest;
-import com.intel.mountwilson.manifest.factory.DefaultManifestStrategyFactory;
-import com.intel.mountwilson.manifest.factory.VMWareManifestStategyFactory;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.mtwilson.model.*;
@@ -52,6 +42,14 @@ import org.joda.time.DateTime;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.PolicyEngine;
+import com.intel.mtwilson.policy.TrustPolicy;
+import com.intel.mtwilson.policy.TrustReport;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.TrustedBios;
+import com.intel.mtwilson.policy.impl.TrustedLocation;
+import com.intel.mtwilson.policy.impl.TrustedVmm;
 
 /**
  *
@@ -97,83 +95,89 @@ public class HostTrustBO extends BaseBO {
     }
         
     /**
+     * BUG #607 complete rewrite of this to use the "TrustPolicy" framework in the trust-policy module 
+     * instead of the "Strategy" and "IManifest" framework in what was in vmware-trust-utils module.
      * 
      * @param hostName must not be null
      * @return 
      */
     public HostTrustStatus getTrustStatus(Hostname hostName) {
-        HashMap<String, ? extends IManifest> pcrManifestMap;
-        HashMap<String, ? extends IManifest> gkvBiosPcrManifestMap, gkvVmmPcrManifestMap;
         if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
+        long start = System.currentTimeMillis();
         
         TblHosts tblHosts = getHostByName(hostName);
-
+        return getTrustStatus(tblHosts, hostName.toString());
+    }
+    
+    public HostTrustStatus getTrustStatusByAik(Sha1Digest aik) {
+        if( aik == null ) { throw new IllegalArgumentException("missing AIK fingerprint"); }
+        
+        TblHosts tblHosts = getHostByAik(aik);
+        return getTrustStatus(tblHosts, aik.toString());
+    }
+    
+    /**
+     * 
+     * @param tblHosts
+     * @param hostId can be Hostname or AIK (SHA1 hex) ; it's used in any exceptions to refer to the host.  this allows us to use the same code for a trust report lookup by hostname and by aik
+     * @return 
+     */
+    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) {
         if (tblHosts == null) {
             throw new ASException(
                     ErrorCode.AS_HOST_NOT_FOUND,
-                    hostName.toString());
+                    hostId);
         }
+        long start = System.currentTimeMillis();
         log.info( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
         log.info( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
-        if( !agent.isTpmAvailable() ) {
-            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostName.toString());
+        if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
+            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, tblHosts.toString());
         }
         
-        IManifestStrategy manifestStrategy;
-        IManifestStrategyFactory strategyFactory;
-
-        // XXX TODO BUG #497   the factory is what is supposed to decide on which implementation to create... but here we are selecting a factory with the logic that should be in the factory, and the factories themselves end up being nothing more than a verbose constructor for the end-implementation.
-        if (tblHosts.getVmmMleId().getName().contains("ESX")) {
-            strategyFactory = new VMWareManifestStategyFactory();
-        } else {
-            strategyFactory = new DefaultManifestStrategyFactory();
-
-        }
-
-        manifestStrategy = strategyFactory.getManifestStategy(tblHosts, getEntityManagerFactory());
-
-        try {
-            long start = System.currentTimeMillis();
-            
-            pcrManifestMap = manifestStrategy.getManifest(tblHosts);
-            
-            log.info("Manifest Time {}", (System.currentTimeMillis() - start));
-            
-        } catch (ASException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ASException(e);
-        }
-        long start = System.currentTimeMillis();
-        log.info("PCRS from the VMM host {}", pcrManifestMap);
-
-        /**
-         * Get GKV for the given host
-		 *
-         */
-        IGKVStrategy gkvStrategy = new DefaultGKVStrategyFactory().getGkStrategy(tblHosts);
-
-        gkvBiosPcrManifestMap = gkvStrategy.getBiosGoodKnownManifest(tblHosts.getBiosMleId().getName(),
-                tblHosts.getBiosMleId().getVersion(), tblHosts.getBiosMleId().getOemId().getName());
-
-        gkvVmmPcrManifestMap = gkvStrategy.getVmmGoodKnownManifest(tblHosts.getVmmMleId().getName(),
-                tblHosts.getVmmMleId().getVersion(), tblHosts.getVmmMleId().getOsId().getName(), tblHosts.getVmmMleId().getOsId().getVersion(),
-                tblHosts.getId());
+        PcrManifest pcrManifest = agent.getPcrManifest();
+        
+        HostReport hostReport = new HostReport();
+        hostReport.aik = null; // TODO
+        hostReport.pcrManifest = pcrManifest;
+        hostReport.tpmQuote = null; // TODO
+        hostReport.variables = new HashMap<String,String>(); // TODO
+        
+        HostTrustPolicyFactory hostTrustPolicyFactory = new HostTrustPolicyFactory(getEntityManagerFactory());
 
         
-        /**
-         * Verify trust
-		 *
-         */
-        HostTrustStatus trust = verifyTrust(tblHosts, pcrManifestMap,
-                gkvBiosPcrManifestMap, gkvVmmPcrManifestMap);
+        TrustPolicy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts); // must include both bios and vmm policies
+
+        PolicyEngine policyEngine = new PolicyEngine();
+        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+        
+        HostTrustStatus trust = new HostTrustStatus();
+        TrustReport biosReport = trustReport.findMark(TrustedBios.class.getName());
+        if( biosReport != null && biosReport.isTrusted() ) {
+            trust.bios = true;
+        }
+        TrustReport vmmReport = trustReport.findMark(TrustedVmm.class.getName());
+        if( vmmReport != null && vmmReport.isTrusted() ) {
+            trust.vmm = true;
+        }
+        // previous check for trusted location was if the host's location field is not null, then it's trusted... but i think this is better as it checks the pcr.  
+        // XXX TODO need a better feedback mechanism from trust policies... when they succeed, they should be able to set attributes.
+        // or else,  just go with the "marks" thing but then we have to post process and look for certain marks and then  set other fields elsewhere based on them ... or maybe that's not necessary??)
+//        trust.location = tblHosts.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
+        TrustReport locationReport = trustReport.findMark(TrustedLocation.class.getName());
+        if( locationReport != null && locationReport.isTrusted() ) {
+            trust.location = true;
+        }
+        
+        logOverallTrustStatus(tblHosts, toString(trust));
+        
 
         String userName = new AuditLogger().getAuditUserName();
-        Object[] paramArray = {userName, hostName, trust.bios, trust.vmm};
+        Object[] paramArray = {userName, hostId, trust.bios, trust.vmm};
         log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
         
         log.info( "Verfication Time {}", (System.currentTimeMillis() - start));
@@ -233,51 +237,12 @@ public class HostTrustBO extends BaseBO {
         return response;
     }
 
-    /**
-     * This method only verifies that the PCR/module values for the given
-     * host match the host's whitelist -  IT DOES NOT VERIFY THAT THE
-     * PCR/MODULE VALUES FOR THE HOST ARE TRUSTED 
-     * For hosts that return a TPM Quote, you need to verify the integrity
-     * of the quote separately using the host's AIK.
-     * @param host
-     * @param pcrManifestMap
-     * @param gkvBiosPcrManifestMap
-     * @param gkvVmmPcrManifestMap
-     * @return 
-     */
-    private HostTrustStatus verifyTrust(TblHosts host,
-            HashMap<String, ? extends IManifest> pcrManifestMap,
-            HashMap<String, ? extends IManifest> gkvBiosPcrManifestMap,
-            HashMap<String, ? extends IManifest> gkvVmmPcrManifestMap) {
-
-        HostTrustStatus trust = new HostTrustStatus();
-
-        /*
-         * Verify Bios trust
-         */
-        trust.bios = verifyTrust(host, host.getBiosMleId(), pcrManifestMap,
-                gkvBiosPcrManifestMap);
-        /*
-         * Verify Vmm trust
-         */
-        trust.vmm = verifyTrust(host, host.getVmmMleId(), pcrManifestMap,
-                gkvVmmPcrManifestMap);
-        
-        /*
-         * Verify Location trust 
-         */
-        trust.location = host.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
-
-        logOverallTrustStatus(host, toString(trust));
-
-        return trust;
-    }
-
+    
     private String toString(HostTrustStatus trust) {
         return String.format("BIOS:%d,VMM:%d", (trust.bios) ? 1 : 0,
                 (trust.vmm) ? 1 : 0);
     }
-
+/*
     private boolean verifyTrust(TblHosts host, TblMle mle,
             HashMap<String, ? extends IManifest> pcrManifestMap,
             HashMap<String, ? extends IManifest> gkvPcrManifestMap) {
@@ -294,10 +259,8 @@ public class HostTrustBO extends BaseBO {
                 boolean trustStatus = pcrMf.verify(gkvPcrManifestMap.get(pcr));
                 log.info(String.format("PCR %s Host Trust status %s", pcr,
                         String.valueOf(trustStatus)));
-                /*
-                 * Log to database
-                 */
-                logTrustStatus(host, mle,  pcrMf);
+
+*               logTrustStatus(host, mle,  pcrMf);
 
                 if (!trustStatus) {
                     response = false;
@@ -311,7 +274,8 @@ public class HostTrustBO extends BaseBO {
 
         return response;
     }
-
+*/
+    /*
     private void logTrustStatus(TblHosts host, TblMle mle, IManifest manifest) {
         Date today = new Date(System.currentTimeMillis());
         PcrManifest pcrManifest = (PcrManifest)manifest;
@@ -331,7 +295,7 @@ public class HostTrustBO extends BaseBO {
         }
 
     }
-
+    * */
     private void logOverallTrustStatus(TblHosts host, String response) {
         Date today = new Date(System.currentTimeMillis());
         TblTaLog taLog = new TblTaLog();
@@ -350,6 +314,14 @@ public class HostTrustBO extends BaseBO {
     private TblHosts getHostByName(Hostname hostName) { // datatype.Hostname
         try {
             return hostBO.getHostByName(hostName);
+        }
+        catch(CryptographyException e) {
+            throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+        }
+    }
+    private TblHosts getHostByAik(Sha1Digest fingerprint) { // datatype.Hostname
+        try {
+            return hostBO.getHostByAik(fingerprint);
         }
         catch(CryptographyException e) {
             throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
@@ -624,6 +596,7 @@ public class HostTrustBO extends BaseBO {
         return hostTrust;
     }
 
+    /*
     private void saveModuleManifestLog(PcrModuleManifest pcrModuleManifest, TblTaLog taLog) {
         TblModuleManifestLogJpaController controller = new TblModuleManifestLogJpaController(getEntityManagerFactory());
         for(ModuleManifest moduleManifest : pcrModuleManifest.getUntrustedModules()){
@@ -636,5 +609,5 @@ public class HostTrustBO extends BaseBO {
             controller.create(moduleManifestLog);
         }
     }
-
+    */
 }

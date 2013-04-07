@@ -806,7 +806,7 @@ public class HostBO extends BaseBO {
                 // Handle the VMware host
                 
                 // check if it has a TPM first  (should be at the beginning of this method but currently trust agent doesn't support a real is-tpm-available capability)   bug #540
-                if( !agent.isTpmAvailable()  ) {
+                if( !agent.isTpmEnabled()  ) {
                     throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                 }
 

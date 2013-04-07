@@ -16,11 +16,8 @@ import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
-import com.intel.mountwilson.manifest.IManifestStrategy;
-import com.intel.mountwilson.manifest.IManifestStrategyFactory;
-import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.manifest.data.PcrManifest;
-import com.intel.mountwilson.manifest.factory.DefaultManifestStrategyFactory;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import java.io.StringWriter;
@@ -166,18 +163,12 @@ public class ReportsBO extends BaseBO {
 
     // BUG #497 XXX TODO needs rewrite to use HostAgentFactory and HostAgent interfaces
     public String getHostAttestationReport(Hostname hostName) {
-        XMLOutputFactory xof = XMLOutputFactory.newInstance();
-        XMLStreamWriter xtw;
-        StringWriter sw = new StringWriter();
-        IManifestStrategy manifestStrategy;
-        IManifestStrategyFactory strategyFactory;
-        HashMap<String, ? extends IManifest> pcrManifestMap = null;
-        TblHosts tblHosts = null;
-        String attestationReport = "";
+//        TblHosts tblHosts = null;
+//        String attestationReport = "";
 
         try {
 
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).findByName(hostName.toString());
+            TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey).findByName(hostName.toString());
 
             if (tblHosts == null) {
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
@@ -188,12 +179,11 @@ public class ReportsBO extends BaseBO {
 
                 throw new ASException(ErrorCode.AS_OPERATION_NOT_SUPPORTED, "getHostAttestationReport does not support VMWare hosts.");
             }
-
-            // BUG #497 needs to use HostAgentFactory and HostAgent
-            strategyFactory = new DefaultManifestStrategyFactory();
-
-            manifestStrategy = strategyFactory.getManifestStategy(tblHosts, getEntityManagerFactory());
-            pcrManifestMap = manifestStrategy.getManifest(tblHosts); // BUG #497  this is now obtained by IntelHostAgent using TAHelper's getQuoteInformationForHost which is what was called by TrustAgentManifestStrategy.getManifest()
+            
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+//            PcrManifest pcrManifest = agent.getPcrManifest();
+            return agent.getHostAttestationReport("0,17,18,19,20"); // maybe  just 17,18,19,20  // "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"
 
         } catch (ASException aex) {
 
@@ -206,59 +196,6 @@ public class ReportsBO extends BaseBO {
 
             throw new ASException(ex);
         }
-
-        try {
-            // XXX BUG #497 this entire section in try{}catch{} has  moved to TAHelper and used by IntelHostAgent
-            
-            // We need to check if the host supports TPM or not. Only way we can do it
-            // using the host table contents is by looking at the AIK Certificate. Based
-            // on this flag we generate the attestation report.
-            boolean tpmSupport = true;
-            String hostType = "";
-
-            if (tblHosts.getAIKCertificate() == null || tblHosts.getAIKCertificate().isEmpty()) {
-                tpmSupport = false;
-            }
-
-            hostType = tblHosts.getVmmMleId().getName();
-
-            // xtw = xof.createXMLStreamWriter(new FileWriter("c:\\temp\\nb_xml.xml"));
-            xtw = xof.createXMLStreamWriter(sw);
-            xtw.writeStartDocument();
-            xtw.writeStartElement("Host_Attestation_Report");
-            xtw.writeAttribute("Host_Name", hostName.toString());
-            xtw.writeAttribute("Host_VMM", hostType);
-            xtw.writeAttribute("TXT_Support", String.valueOf(tpmSupport));
-
-            if (tpmSupport == true) {
-                ArrayList<IManifest> pcrMFList = new ArrayList<IManifest>();
-                pcrMFList.addAll(pcrManifestMap.values());
-
-                for (IManifest pcrInfo : pcrMFList) {
-                    PcrManifest pInfo = (PcrManifest) pcrInfo;
-                    xtw.writeStartElement("PCRInfo");
-                    xtw.writeAttribute("ComponentName", String.valueOf(pInfo.getPcrNumber()));
-                    xtw.writeAttribute("DigestValue", pInfo.getPcrValue().toUpperCase());
-                    xtw.writeEndElement();
-                }
-            } else {
-                xtw.writeStartElement("PCRInfo");
-                xtw.writeAttribute("Error", "Host does not support TPM.");
-                xtw.writeEndElement();
-            }
-
-            xtw.writeEndElement();
-            xtw.writeEndDocument();
-            xtw.flush();
-            xtw.close();
-            attestationReport = sw.toString();
-
-        } catch (Exception ex) {
-
-            throw new ASException(ex);
-        }
-
-        return attestationReport;
     }
 
     public AttestationReport getAttestationReport(Hostname hostName, Boolean failureOnly) {

@@ -1,34 +1,24 @@
 package com.intel.mtwilson.agent.vmware;
 
 
-import java.math.BigInteger;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.xml.ws.BindingProvider;
-
-import org.apache.commons.codec.binary.Base64;
-
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.crypto.NopX509HostnameVerifier;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.TlsClient;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.vmware.vim25.*;
 import java.io.StringWriter;
+import java.math.BigInteger;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.X509TrustManager;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
-
+import javax.xml.ws.BindingProvider;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

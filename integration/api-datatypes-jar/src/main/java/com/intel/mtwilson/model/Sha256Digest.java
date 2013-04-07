@@ -7,6 +7,9 @@ package com.intel.mtwilson.model;
  * @author jbuhacoff
  */
 public class Sha256Digest extends AbstractMessageDigest {
+    public final static Sha256Digest ZERO = new Sha256Digest(new byte[] {0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0});
+
+    
     public Sha256Digest() {
         super("SHA-256", 32);
     }

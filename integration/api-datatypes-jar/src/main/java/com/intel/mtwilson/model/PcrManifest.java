@@ -1,28 +1,31 @@
 package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.validation.ObjectModel;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.codehaus.jackson.annotate.JsonValue;
 
 /**
- * The PcrManifest class represents a list of PCR (index,value) pairs that
- * form a subset of what may be in the TPM.  For example, a PcrManifest may
- * specify values only for PCR's 17, 18, and 19. 
+ * The PcrManifest class represents a list of PCR numbers, their values,
+ * and any event information that is available about each PCR that is
+ * reported from a specific host.  
  * 
- * One PcrManifest is equal to another PcrManifest if they specify exactly
- * the same set of PCR indices and corresponding values. Subsets and supersets
- * are not considered equal.
+ * DO NOT USE THIS CLASS AS A "WHITELIST", IT IS ONLY FOR "ACTUAL" VALUES.
  * 
- * For the purpose of determining if a given host complies with a policy 
- * (matches the whitelist), you need to have an expected (whitelisted) 
- * PcrManifest and an actual (from the host's TPM Quote)  PcrManifest, and
- * compare the expected to the actual - however, you do not want to do this
- * using equals() because the whitelist only specifies PCRs that it is 
- * interested in and all others can have any value. 
+ * Bug #607 the whitelist is now represented as a collection of TrustPolicy 
+ * instances, which is much more powerful than a list of PCR's and their 
+ * values because those policy instances can also encapsulate formulas with
+ * variables that allow us to verify things such as a host's UUID being extended 
+ * into its PCR 0.
  * 
+ * For example, a PcrManifest instance may include values for a
+ * list of 3 PCRs only, such as 17, 18, and 19.
  * 
- * BUG #497   this class should replace the IManifest interface in places
+ * In order to store event information, there must be a value stored
+ * for the PCR as well.
+ * 
+ * The equals() method has not been defined for this class. Do NOT use equals()
+ * to determine if two PcrManifest instances have the same contents.
+ * 
+ * BUG #497  and BUG #607  this class should replace the IManifest interface in places
  * where it's referring to a PCR manifest.  
  * 
  * @since 0.5.4
@@ -30,6 +33,7 @@ import org.codehaus.jackson.annotate.JsonValue;
  */
 public class PcrManifest extends ObjectModel {
     private final Pcr[] pcrs = new Pcr[24];
+    private final PcrEventLog[] pcrEventLogs = new PcrEventLog[24];
 
     public PcrManifest() {
     }
@@ -41,9 +45,37 @@ public class PcrManifest extends ObjectModel {
     public Pcr getPcr(int index) {
         return pcrs[index];
     }
+
+    public Pcr getPcr(PcrIndex pcrIndex) {
+        return pcrs[pcrIndex.toInteger()];
+    }
     
     public void clearPcr(int index) {
         pcrs[index] = null;
+    }
+    
+    public void clearPcr(PcrIndex pcrIndex) {
+        pcrs[pcrIndex.toInteger()] = null;
+    }
+    
+    public void setPcrEventLog(PcrEventLog pcrEventLog) {
+        pcrEventLogs[pcrEventLog.getPcrIndex().toInteger()] = pcrEventLog;
+    }
+    
+    public PcrEventLog getPcrEventLog(int index) {
+        return pcrEventLogs[index];
+    }
+
+    public PcrEventLog getPcrEventLog(PcrIndex pcrIndex) {
+        return pcrEventLogs[pcrIndex.toInteger()];
+    }
+    
+    public void clearPcrEventLog(int index) {
+        pcrEventLogs[index] = null;
+    }
+    
+    public void clearPcrEventLog(PcrIndex pcrIndex) {
+        pcrEventLogs[pcrIndex.toInteger()] = null;
     }
     
     
@@ -52,24 +84,26 @@ public class PcrManifest extends ObjectModel {
      * @param pcr
      * @return true if the PcrManifest contains the given Pcr at its specified index and value, and false in all other cases
      */
-    public boolean contains(Pcr pcr) {
-        if( pcr == null ) { return false; }
-        if( pcrs[pcr.getIndex().toInteger()] == null ) { return false; }
-        return pcrs[pcr.getIndex().toInteger()].equals(pcr);
+    public boolean containsPcr(PcrIndex index) {
+        if( index == null ) { return false; }
+        if( pcrs[index.toInteger()] == null ) { return false; }
+        return false;
     }
-    
+
     /**
-     * Checks to see if the PcrManifest contains an entry for the given index.
-     * @param index 0-23
-     * @return true if the PcrManifest contains an entry (any non-null value) at the specified index, and false if it does not contain an entry for that index
+     * Checks to see if the PcrManifest contains a PcrEventLog for the same pcr index as the given PcrEventLog (index only, does not check contents) 
+     * @param pcr
+     * @return true if the PcrManifest contains the given Pcr at its specified index and value, and false in all other cases
      */
-    public boolean contains(int index) {
-        return pcrs[index] != null;
+    public boolean containsPcrEventLog(PcrIndex index) {
+        if( index == null ) { return false; }
+        if( pcrEventLogs[index.toInteger()] == null ) { return false; }
+        return true;
     }
     
     /**
      * Returns a string representing the PCR manifest, one PCR index-value pair
-     * per line. Only non-null PCRs are represented in the output. 
+     * per line. Only non-null PCRs are represented in the output. PcrEventLogs are ignored.
      * 
      * @see java.lang.Object#toString()
      */
@@ -82,54 +116,36 @@ public class PcrManifest extends ObjectModel {
         }
         return result;
     }
-    
-    @Override
-    public int hashCode() {
-        HashCodeBuilder builder = new HashCodeBuilder(17,51);
-        for(int i=0; i<pcrs.length; i++) {
-            if( pcrs[i] != null ) {
-                builder.append(i);
-                builder.append(pcrs[i]);
-            }
-        }
-        return builder.toHashCode(); 
-    }
-    
-    /**
-     * A PCR Manifest is equal to another if it contains exactly the same
-     * digest values in the same registers. In addition, because a PCR Manifest
-     * can have ignored (null) digests for some registers, both manifests must
-     * have null digests for the same registers.
-     * @param other
-     * @return 
-     */
-    @Override
-    public boolean equals(Object other) {
-        if( other == null ) { return false; }
-        if( other == this ) { return true; }
-        if( other.getClass() != this.getClass() ) { return false; }
-        PcrManifest rhs = (PcrManifest)other;
-        EqualsBuilder builder = new EqualsBuilder();
-        for(int i=0; i<pcrs.length; i++) {
-            builder.append(pcrs[i], rhs.pcrs[i]);
-        }
-        return builder.isEquals();
-    }
-
+ 
     @Override
     public void validate() {
-        int countEntries = 0;
+        int countPcrEntries = 0;
         for(int i=0; i<pcrs.length; i++) {
             if( pcrs[i] != null ) {
-                countEntries++;
+                countPcrEntries++;
                 if( !pcrs[i].isValid() ) {
                     fault(pcrs[i], String.format("Pcr %d is invalid", i));
                 }
             }
         }
-        if( countEntries == 0 ) {
+        if( countPcrEntries == 0 ) {
             fault("Pcr manifest does not have any entries");
         }
+        // following section commented out because it is not an error to be missing pcr event logs ..... well the policy should decide that ! 
+        /*
+        int countPcrEventLogEntries = 0;
+        for(int i=0; i<pcrEventLogs.length; i++) {
+            if( pcrEventLogs[i] != null ) {
+                countPcrEventLogEntries++;
+                if( !pcrEventLogs[i].isValid() ) {
+                    fault(pcrEventLogs[i], String.format("PcrEventLog %d is invalid", i));
+                }
+            }
+        }
+        if( countPcrEventLogEntries == 0 ) {
+            fault("Pcr manifest does not have any event log entries");
+        }*/
+        
     }
 
 }

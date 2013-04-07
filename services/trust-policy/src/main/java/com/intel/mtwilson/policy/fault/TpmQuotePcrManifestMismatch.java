@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.policy.fault;
 
-import com.intel.mtwilson.validation.Fault;
+import com.intel.mtwilson.policy.Fault;
 
 /**
  * For vmware hosts that do not provide a TPM Quote, so we receive a PCR Manifest

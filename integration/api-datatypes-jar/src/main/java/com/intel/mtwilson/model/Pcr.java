@@ -1,7 +1,7 @@
 package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.validation.ObjectModel;
-import org.codehaus.jackson.annotate.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * BUG #497   renamed to "Pcr" to represent a pair (index,value)
@@ -38,7 +38,7 @@ public class Pcr extends ObjectModel {
      *
      * @see java.lang.Object#toString()
      */
-    @JsonValue
+//    @JsonValue
     @Override
     public String toString() {
         return String.format("%d: %s", pcrIndex.toInteger(), pcrValue.toString());

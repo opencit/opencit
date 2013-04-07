@@ -34,7 +34,9 @@ public class PcrMatchesVariable implements TrustPolicy {
     
     @Override
     public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport();
+        TrustReport report = new TrustReport(this);
+//        report.check(this);
+//        report.check("%s: PCR %s is variable", getClass().getSimpleName(),pcrIndex.toString()); // XXX TODO need to find a way to express what we are checking!
         if( hostReport.pcrManifest == null ) {
             report.fault(new PcrManifestMissing());            
         }

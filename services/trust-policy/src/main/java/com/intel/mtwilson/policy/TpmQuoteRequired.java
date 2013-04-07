@@ -19,7 +19,9 @@ public class TpmQuoteRequired implements TrustPolicy {
 
     @Override
     public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport();
+        TrustReport report = new TrustReport(this);
+//        report.check(this);
+//        report.check(getClass().getSimpleName()); // the minimum... show that the host was evaluated by this policy
         if( hostReport.tpmQuote == null ) {
             report.fault(new TpmQuoteMissing());
         }
