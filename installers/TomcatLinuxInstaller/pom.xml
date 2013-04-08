@@ -25,15 +25,12 @@
       <version>1.1-SNAPSHOT</version>
       <type>sh</type>
     </dependency>	
-	<!-- XXX TODO create a maven package for tomcat and add it here -->
-	<!--
     <dependency>
-      <groupId>org.apache</groupId>
-      <artifactId>apache-tomcat</artifactId>
-      <version>7.x</version>
+	  <groupId>org.apache</groupId>
+	  <artifactId>apache-tomcat</artifactId>
+	  <version>6.0.29</version>
       <type>zip</type>
     </dependency>	
-	-->
 <dependency>
 	<groupId>org.codehaus.jackson</groupId>
 	<artifactId>jackson-core-asl</artifactId>
@@ -94,17 +91,14 @@
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>functions</destFileName>
                 </artifactItem>
-				<!-- XXX TODO  copy the apach tomcat package info to here -->
-				<!--
                 <artifactItem>
 				  <groupId>org.apache</groupId>
 				  <artifactId>apache-tomcat</artifactId>
-				  <version>7.x</version>
+				  <version>6.0.29</version>
                   <type>zip</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>apache-tomcat-7.x.zip</destFileName>
+                  <destFileName>apache-tomcat-6.0.29.zip</destFileName>
                 </artifactItem>
-				-->
                 <artifactItem>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-core-asl</artifactId>
