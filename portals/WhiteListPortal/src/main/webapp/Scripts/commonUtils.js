@@ -4,6 +4,7 @@ var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Specia
 var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
+var moduleAttestationDisplayString = 'PCR + Module';
 
 
 var JSON = JSON || {};
@@ -343,7 +344,13 @@ function fnGetMleData(isNewMle) {
 		}
 		mleObj.mleName = $('#MainContent_ddlMLEName').val();
 		mleObj.mleVersion = $('#MainContent_tbVersion').val();
-		mleObj.attestation_Type = $('#MainContent_ddlAttestationType').val();
+                        // For Module Attestation types, we are displaying PCR + Module string. So, while retrieving the data we need to check if 
+                        // the value of the Attestation Type is PCR + Module and change it accordingly back to Module if needed.
+                        if ($('#MainContent_ddlAttestationType').val() == moduleAttestationDisplayString) {
+                            mleObj.attestation_Type = 'MODULE';
+                        } else {
+                            mleObj.attestation_Type = $('#MainContent_ddlAttestationType').val();
+                        }
 		mleObj.mleDescription = $('#MainContent_tbDesc').val();
 		var mani = [];
 		if ($('#MainContent_ddlAttestationType').val() == "Module" || $('#MainContent_ddlAttestationType').val() == "MODULE") {

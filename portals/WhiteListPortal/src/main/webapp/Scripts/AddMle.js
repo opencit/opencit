@@ -85,7 +85,13 @@ function fnOnChangeVmmName(element) {
 				for ( var vmmNames in hostNameList[name].vmmNames) {
 					str+='<option>'+hostNameList[name].vmmNames[vmmNames]+'</option>';
 				}
-				$('#MainContent_ddlAttestationType').html('<option>'+hostNameList[name].attestationType+'</option>');
+                                                // In the UI for Module attestation type, we want to show the user that Module attestation, both PCR and Modules
+                                                // will be verified. For that we will just update the UI for that
+                                                var displayAttestationTypeValue = hostNameList[name].attestationType;
+                                                if (hostNameList[name].attestationType == "Module" || hostNameList[name].attestationType == "MODULE") {
+                                                    displayAttestationTypeValue = moduleAttestationDisplayString;
+                                                }
+				$('#MainContent_ddlAttestationType').html('<option>'+displayAttestationTypeValue+'</option>');
 				
 				if (hostNameList[name].attestationType == "Module" || hostNameList[name].attestationType == "MODULE") {
 					//$('#mleVmmLableInfo').hide();

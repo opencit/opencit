@@ -37,10 +37,17 @@ function fuCreateViewMleTable(mleData){
 	for ( var items in mleData) {
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
+
+                        // Changing the display value for Module attestation to PCR + Module since we attest both.
+                        var displayAttestationTypeValue = mleData[items].attestation_Type;
+                        if (displayAttestationTypeValue == "Module" || displayAttestationTypeValue == "MODULE") {
+                            displayAttestationTypeValue = moduleAttestationDisplayString;
+                        }
+        
 		str+='<tr class="'+classValue+'">'+
 		'<td class="rowv" style="word-wrap: break-word;max-width:140px;">'+mleData[items].mleName+'</td>'+
 		'<td class="row3">'+mleData[items].mleVersion+'</td>'+
-		'<td class="row1">'+mleData[items].attestation_Type+'</td>'+
+		'<td class="row1">'+displayAttestationTypeValue+'</td>'+
 		'<td class="row4">'+mleData[items].mleType+'</td>';
 		var val1 = mleData[items].osName == undefined ? ' ' : mleData[items].osName;
 		var val2 = mleData[items].osVersion == undefined ? ' ' : mleData[items].osVersion;

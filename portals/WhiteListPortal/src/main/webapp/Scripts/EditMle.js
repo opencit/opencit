@@ -46,11 +46,16 @@ function fuCreateEditMleTable(mleData) {
 	for ( var items in mleData) {
 		var classValue = null; 
 		if(items % 2 === 0){classValue='oddRow';}else{classValue='evenRow';}
+                        // Changing the display value for Module attestation to PCR + Module since we attest both.
+                        var displayAttestationTypeValue = mleData[items].attestation_Type;
+                        if (displayAttestationTypeValue == "Module" || displayAttestationTypeValue == "MODULE") {
+                            displayAttestationTypeValue = moduleAttestationDisplayString;
+                        }
 		str+='<tr class="'+classValue+'">'+
 		'<td class="row1"><a href="javascript:;" onclick="fnEditMleInfo(this)"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteMleInfo(this)"> Delete </a></td>'+
 		'<td class="rowr3" style="word-wrap: break-word;max-width:170px;" name="mleName">'+mleData[items].mleName+'</td>'+
 		'<td class="row2" name="mleVersion">'+mleData[items].mleVersion+'</td>'+
-		'<td class="rowr3" name="attestation_Type">'+mleData[items].attestation_Type+'</td>';
+		'<td class="rowr3" name="attestation_Type">'+displayAttestationTypeValue+'</td>';
 		var val1 = mleData[items].manifestList == undefined ? ' ' : mleData[items].manifestList;
 		
 		 //str+='<td class="rowr7" name="manifestList">'+val1+'&nbsp;</td>'+
@@ -82,6 +87,10 @@ function fnEditMleInfo(element) {
 }
 
 function fnGetMleDataForEdit(data) {
+            // Need to change back the value for the module attestation from PCR + Module to Module during DB access
+            if (data.attestation_Type == moduleAttestationDisplayString) {
+                data.attestation_Type = 'MODULE';
+            }           
 	var dataToSend = "mleName="+data.mleName+"&mleVersion="+data.mleVersion+"&mleType="+data.mleType+"&attestation_Type="+data.attestation_Type;
 	if (data.mleType == "VMM") {
 		isVMM = true;
@@ -123,8 +132,16 @@ function fnEditMleDataSuccess(responseJson,dataToSend) {
 		
 		$('#MainContent_tbVersion').attr('value',response.mleVersion);
 		$('#MainContent_tbVersion').attr('disabled','disabled');
+                        // In the UI for Module attestation type, we want to show the user that Module attestation, both PCR and Modules
+                        // will be verified. For that we will just update the UI for that
+                        var displayAttestationTypeValue = response.attestation_Type;
+                        if (response.attestation_Type == "Module" || response.attestation_Type == "MODULE") {
+                            displayAttestationTypeValue = moduleAttestationDisplayString;
+                        }
+                        
+                        $('#MainContent_ddlAttestationType').html('<option>'+displayAttestationTypeValue+'</option>');
 		
-		$('#MainContent_ddlAttestationType').html('<option selected="selected">'+response.attestation_Type+'</option>');
+		// $('#MainContent_ddlAttestationType').html('<option selected="selected">'+response.attestation_Type+'</option>');
 		$('#MainContent_tbDesc').val(response.mleDescription);
 		$('#MainContent_tbMleSourceHost').val(mleSourceHostName);
 		
