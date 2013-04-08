@@ -21,6 +21,7 @@ DEFAULT_MYSQL_PASSWORD=""
 DEFAULT_MYSQL_DATABASE="mw_as"
 DEFAULT_JAVA_REQUIRED_VERSION="1.6"
 DEFAULT_GLASSFISH_REQUIRED_VERSION="3.0"
+DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
@@ -666,6 +667,8 @@ mysql_write_connection_properties() {
     update_property_in_file ${prefix}.user "${config_file}" "${MYSQL_USERNAME}"
     update_property_in_file ${prefix}.password "${config_file}" "${MYSQL_PASSWORD}"
     update_property_in_file ${prefix}.schema "${config_file}" "${MYSQL_DATABASE}"
+    update_property_in_file ${prefix}.driver "${config_file}" "com.mysql.jdbc.Driver"
+    # if you create a .url property then it takes precedence over the .host, .port, and .schema - so let user do that
 }
 
 # parameters:
@@ -1594,12 +1597,15 @@ tomcat_detect() {
   if [[ -n "$TOMCAT_HOME" && -d "$TOMCAT_HOME" ]]; then
     return
   fi
-  TOMCAT_CANDIDATES=`find ${tomcat_parent_dir} -name tomcat-users.xml`
+
+  TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   TOMCAT_HOME=''
   tomcat_bin=""
   tomcat=""
+  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
   for c in $TOMCAT_CANDIDATES
   do
+    echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
       local bin_dir=`dirname $c`
       local parent=`dirname $bin_dir`
@@ -1621,43 +1627,104 @@ tomcat_detect() {
 
 
 tomcat_install() {
-  #TOMCAT_YUM_PACKAGES="unzip"
-  #TOMCAT_APT_PACKAGES="unzip"
-  #auto_install "Tomcat requirements" "TOMCAT"
+
   tomcat_detect
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
-        echo "Installing $TOMCAT_PACKAGE"
-        if [ -d "${tomcat_parent_dir}/${tomcat_name}" ]; then
-          local datestr=`date +%Y-%m-%d.%H%M`
-          echo "Renaming existing incomplete ${tomcat_parent_dir}/${tomcat_name} to ${tomcat_parent_dir}/${tomcat_name}.${datestr}"
-          mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
-      fi
+      echo "Installing $TOMCAT_PACKAGE"
+      #if [ -d "${tomcat_parent_dir}/${tomcat_name}" ]; then
+      #    local datestr=`date +%Y-%m-%d.%H%M`
+      #    echo "Renaming existing incomplete ${tomcat_parent_dir}/${tomcat_name} to ${tomcat_parent_dir}/${tomcat_name}.${datestr}"
+      #    mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
+      #fi
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
-      #local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tgz '{ print $1 }'`
-      #mv $tomcat_folder $tomcat_parent_dir/$tomcat_name
-      mv $tomcat_name $tomcat_parent_dir/
-      # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts; leaving this in for Tomcat for now until we know that it's not required
-      if [ -f "/etc/hosts" ]; then
-        local hostname=`hostname`
-        local found=`cat "/etc/hosts" | grep "^127.0.0.1" | grep "$hostname"`
-        if [ -z "$found" ]; then
-          local datestr=`date +%Y-%m-%d.%H%M`
-          cp /etc/hosts /etc/hosts.${datestr}
-          local updated=`sed -re "s/^(127.0.0.1\s.*)$/\1 ${hostname}/" /etc/hosts`
-          echo "$updated" > /etc/hosts
-        fi
-      fi
-            
+      local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tgz '{ print $1 }'`
+      mv $tomcat_folder /usr/share
+     tomcat_detect
+    else
+      TOMCAT_YUM_PACKAGES="tomcat6"
+      TOMCAT_APT_PACKAGES="tomcat6"
+      auto_install "Tomcat via package manager" "TOMCAT"
     fi
   fi
-  tomcat_detect
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     echo "Unable to auto-install Tomcat"
     echo "  Tomcat download URL:"
     echo "  http://tomcat.apache.org/"
   fi
 }
+
+# Run this AFTER tomcat_install
+# optional global variables:  
+#   tomcat_username (default value tomcat)
+#   TOMCAT_HOME (default value /usr/share/tomcat)
+# works on Debian, Ubuntu, CentOS, RedHat, SUSE
+# Username should not contain any spaces or punctuation
+# Optional arguments:  one or more directories for tomcat user to own
+tomcat_permissions() {
+  local chown_locations="$@"
+  local username=${TOMCAT_USERNAME:-tomcat}
+  local user_exists=`cat /etc/passwd | grep "^${username}"`
+  if [ -z "$user_exists" ]; then
+    useradd -c "tomcat" -d "${TOMCAT_HOME:-/var}" -r -s /bin/bash "$username"
+  fi
+  local file
+  for file in $chown_locations
+  do
+    if [[ -n "$file" && -e "$file" ]]; then
+      chown -R "${username}:${username}" "$file"
+    fi
+  done
+}
+
+tomcat_running() {  
+  TOMCAT_RUNNING=''
+  if [ -n "$TOMCAT_HOME" ]; then
+    TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
+    if [ -n "$TOMCAT_PID" ]; then
+      TOMCAT_RUNNING=yes
+      return 0
+    fi
+  fi
+  return 1
+}
+
+tomcat_running_report() {
+  echo -n "Checking Tomcat process... "
+  if tomcat_running; then
+    echo "Running (pid $TOMCAT_PID)"
+  else
+    echo "Not running"
+  fi
+}
+tomcat_start() {
+  if [ -n "$tomcat" ]; then
+      $tomcat start
+  fi
+}
+tomcat_stop() {
+  if [ -n "$tomcat" ]; then
+      $tomcat stop
+  fi
+}
+tomcat_restart() {
+  if [ -n "$tomcat" ]; then
+      # XXX does catalina define a 'restart' command?
+      # XXX if not, just call tomcat_stop ; tomcat_start
+      $tomcat restart
+  fi
+}
+tomcat_shutdown() {
+  if tomcat_running; then
+    if [ -n "$TOMCAT_PID" ]; then
+        kill -9 $TOMCAT_PID
+    fi
+  fi
+}
+tomcat_start_report() {
+  action_condition TOMCAT_RUNNING "Starting Tomcat" "tomcat_start > /dev/null; tomcat_running;"
+}
+
 
 ### FUNCTION LIBRARY: java
 
