@@ -36,6 +36,21 @@ if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]
   echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
 fi
 
+# if customer selected mysql but there is no connector present, we abort the install 
+if [ "$DATABASE_VENDOR" == "mysql" ] ; then
+  mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
+  if [ -z "$mysqlconnector_file" ]; then
+    echo_failure "Cannot find MySQL Connector/J under /opt/intel/cloudsecurity/setup-console"
+    mkdir -p /opt/intel/cloudsecurity/setup-console
+    echo "Recommended steps:"
+    echo "1. Download MySQL Connector/J, available free at www.mysql.com"
+    echo "2. Copy the .jar from MySQL Connector/J to /opt/intel/cloudsecurity/setup-console"
+    echo "3. Run this installer again"
+    exit 1
+  fi
+fi
+
+
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
