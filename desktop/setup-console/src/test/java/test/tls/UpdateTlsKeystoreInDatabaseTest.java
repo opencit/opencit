@@ -7,8 +7,12 @@ package test.tls;
 import com.intel.mountwilson.as.common.ASConfig;
 import org.junit.Test;
 import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.as.controller.TblHostsJpaController;
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
+import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.tls.*;
 import com.intel.mtwilson.as.data.*;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
@@ -16,6 +20,7 @@ import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Md5Digest;
+import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
@@ -27,12 +32,14 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringUtils;
 
@@ -109,7 +116,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
      */
     @Test
     public void testAddCurrentTlsCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
-        String username = "ManagementServiceAutomation";
+        String username = "admin2";
         String password = "password";
         String url = "https://10.1.71.88:8181";
         //MSConfig.getJpaProperties(new MSConfig(p).getConfigurationInstance());
@@ -145,4 +152,67 @@ public class UpdateTlsKeystoreInDatabaseTest {
 
     }
     
+    
+    @Test
+    public void testUpdateAikSha1() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {
+        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
+        byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), dek);
+        TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
+        String certificatePem = host.getAIKCertificate();
+        X509Certificate certificate = X509Util.decodePemCertificate(certificatePem);
+        Sha1Digest sha1 = Sha1Digest.valueOf(certificate.getEncoded());
+        host.setAikSha1(sha1.toString());
+        hostsJpa.edit(host);
+    }
+    
+    
+    
+    
+    // for mystery hill
+    @Test
+    public void testAddTrustedCertificateToKeystore() throws CertificateException, CryptographyException, KeyManagementException, KeyStoreException, IOException, IOException, NoSuchAlgorithmException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, ASDataException, ASDataException {
+        String cert = "-----BEGIN CERTIFICATE-----\n"+
+"MIIChzCCAfACAQowDQYJKoZIhvcNAQEFBQAwgYcxCzAJBgNVBAYTAlVTMQswCQYD\n"+
+"VQQIDAJDQTETMBEGA1UEBwwKU2FjcmFtZW50bzEOMAwGA1UECgwFSW50ZWwxDTAL\n"+
+"BgNVBAsMBElBU0kxCzAJBgNVBAMMAkNBMSowKAYJKoZIhvcNAQkBFhtqb25hdGhh\n"+
+"bi5idWhhY29mZkBpbnRlbC5jb20wHhcNMTMwNDA4MDY0MjAwWhcNMTQwNDA4MDY0\n"+
+"MjAwWjCBjzELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExEzARBgNV\n"+
+"BAcTClNhY3JhbWVudG8xDTALBgNVBAoTBENTVVMxFDASBgNVBAMTCzEwLjEuNzEu\n"+
+"MTY5MTEwLwYDVQQDEyg4NzgzNjk1ODIxMDViOGFmOTc4OTlkMWZlNGM4YTcxOWYw\n"+
+"MWU1ZTEwMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDtc9wWbZnBIzGNl+j8\n"+
+"8laPpKqUb3iHaxtjYl9vkXNBdVOGQt90MFGedqVqm1Gip0uGAMzoptYLZ3+cUSmu\n"+
+"BJwWjfkcNQkb2kIjmJrZGeGZpSmfRTubh2DO+j1VTcaYFAMlC5SNOlHwUijMqMNg\n"+
+"pbcTdO6c8FX71mDnHyPrEqaR1QIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAH8e7T8O\n"+
+"feENhru9lniGdlYlZsZSTxWVKGAOxR2FJaoMGO02toyqUhDMZ2BGWy7e9KoVC1Pc\n"+
+"+VTUu95lCYci4JSfQILQLlIDJej35ZmnMW2ITVJKjkFRAFCCLYyu45QujHrg0TaC\n"+
+"JVNhYL6Xz7PDFx0BoV3OQpHPZkcGr/xQ5UzM\n"+
+"-----END CERTIFICATE-----\n";
+        X509Certificate x509 = X509Util.decodePemCertificate(cert);
+        String sha1 = "878369582105b8af97899d1fe4c8a719f01e5e10";
+        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
+        byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), dek);
+        TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
+        SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
+        keystore.addTrustedCertificate(x509, sha1, "dek-recipient");
+        keystore.save();
+        hostsJpa.edit(host);
+    }
+    
+
+    @Test
+    public void testShowCertificatesInExistingHostTlsKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException, UnrecoverableEntryException {
+        byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
+        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), dek);
+        TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
+        SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
+        X509Certificate[] certificates = keystore.getTrustedCertificates("dek-recipient");
+        for(X509Certificate certificate : certificates) {
+            log.info(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+        }
+    }
+    
 }
+
