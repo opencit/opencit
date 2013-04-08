@@ -1568,40 +1568,101 @@ tomcat_clear() {
   tomcat=""
 }
 
-# sets variable TOMCAT_VERSION and TOMCAT_VERSION_OK = yes  or  = no
-tomcat_version() {
-  TOMCAT_VERSION=""
-  TOMCAT_VERSION_OK=""
-  if [ -n "$tomcat" ]; then
-    TOMCAT_VERSION=`$tomcat version 2>&1 | grep -i "Server version:" | awk -F / '{ print $2 }'`
-    if is_version_at_least "$TOMCAT_VERSION" "${tomcat_required_version}"; then
-      TOMCAT_VERSION_OK=yes
-    else
-      TOMCAT_VERSION_OK=no
-    fi
-  fi
+
+
+tomcat_ready_report() {
+  if [[ -z "$TOMCAT_HOME" ]]; then echo_warning "TOMCAT_HOME variable is not set"; return 1; fi
+  if [[ -z "$tomcat_bin" ]]; then echo_warning "Tomcat binary path is not set"; return 1; fi
+  if [[ ! -f "$tomcat_bin" ]]; then echo_warning "Cannot find Tomcat binary at $tomcat_bin"; return 1; fi
+  if [[ -z "$tomcat" ]]; then echo_warning "Tomcat command is not set"; return 1; fi
+  echo_success "Using Tomcat at $TOMCAT_HOME"
+  return 0
 }
 
+
+tomcat_ready() {
+  tomcat_ready_report > /dev/null
+  return $?
+}
+
+# How to use;   GLASSFISH_VERSION=`glassfish_version`
+# If you pass a parameter, it is the path to a glassfish "asadmin" binary 
+# If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
+tomcat_version() {
+  if [[ -n "$tomcat" ]]; then
+    # extract the version number from a string like: glassfish version "3.0"
+    local current_tomcat_version=`$tomcat version 2>&1 | grep -i "^Server version:" | grep -i version | awk -F / '{ print $2 }'`
+    if [ -n "$current_tomcat_version" ]; then
+      echo $current_tomcat_version
+      return 0
+    fi
+    return 2
+  fi
+  return 1
+}
+
+# sample output from "$tomcat version":
+#Using CATALINA_BASE:   /usr/share/apache-tomcat-6.0.29
+#Using CATALINA_HOME:   /usr/share/apache-tomcat-6.0.29
+#Using CATALINA_TMPDIR: /usr/share/apache-tomcat-6.0.29/temp
+#Using JRE_HOME:        /usr/share/jdk1.6.0_29
+#Using CLASSPATH:       /usr/share/apache-tomcat-6.0.29/bin/bootstrap.jar
+#Server version: Apache Tomcat/6.0.29
+#Server built:   July 19 2010 1458
+#Server number:  6.0.0.29
+#OS Name:        Linux
+#OS Version:     3.0.0-12-server
+#Architecture:   amd64
+#JVM Version:    1.6.0_29-b11
+#JVM Vendor:     Sun Microsystems Inc.
+
+
+# Environment:
+# - TOMCAT_REQUIRED_VERSION  (default is 6.0.29)
 tomcat_version_report() {
-  tomcat_version
-  if [ "$TOMCAT_VERSION_OK" == "yes" ]; then
-    echo "Tomcat version $TOMCAT_VERSION is ok"
+  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
+  TOMCAT_VERSION=`tomcat_version`
+  if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+    echo_success "Tomcat version $TOMCAT_VERSION is ok"
+    return 0
   else
-    echo "Tomcat version $TOMCAT_VERSION is not supported, minimum is ${tomcat_required_version}"
+    echo_warning "Tomcat version $TOMCAT_VERSION is not supported, minimum is ${min_version}"
+    return 1
   fi
 }
 
 # detects possible tomcat installations
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
-  if [[ -n "$TOMCAT_HOME" && -d "$TOMCAT_HOME" ]]; then
-    return
+  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
+
+      if [[ -n "$java" ]]; then    
+        local java_bindir=`dirname $java`
+      fi
+
+  # start with TOMCAT_HOME if it is already configured
+  if [[ -n "$TOMCAT_HOME" ]]; then
+    if [[ -z "$tomcat_bin" ]]; then
+      tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
+    fi
+    if [[ -z "$tomcat" ]]; then
+      if [[ -n "$java" ]]; then    
+        # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
+        tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
+      else
+        tomcat="$tomcat_bin"
+      fi
+    fi
+    if [[ -n "$tomcat" ]]; then
+      TOMCAT_VERSION=`tomcat_version`
+      if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+        return 0
+      fi
+    fi
   fi
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
-  TOMCAT_HOME=''
-  tomcat_bin=""
-  tomcat=""
+  tomcat_clear
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
   for c in $TOMCAT_CANDIDATES
   do
@@ -1614,20 +1675,41 @@ tomcat_detect() {
         tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
         tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME $tomcat_bin"
         echo "Found Tomcat: $TOMCAT_HOME"
-        tomcat_version
-        if [ "$TOMCAT_VERSION_OK" != "yes" ]; then
-          TOMCAT_HOME=''
-          tomcat_bin=""
-          tomcat=""
+        TOMCAT_VERSION=`tomcat_version`
+        if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
+          return 0
         fi
+        tomcat_clear
       fi
     fi
   done
 }
 
 
-tomcat_install() {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tomcat_install() {
   tomcat_detect
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
