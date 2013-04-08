@@ -29,7 +29,7 @@
 	  <groupId>org.apache</groupId>
 	  <artifactId>apache-tomcat</artifactId>
 	  <version>6.0.29</version>
-      <type>zip</type>
+      <type>tgz</type>
     </dependency>	
 <dependency>
 	<groupId>org.codehaus.jackson</groupId>
@@ -95,9 +95,9 @@
 				  <groupId>org.apache</groupId>
 				  <artifactId>apache-tomcat</artifactId>
 				  <version>6.0.29</version>
-                  <type>zip</type>
+                  <type>tgz</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>apache-tomcat-6.0.29.zip</destFileName>
+                  <destFileName>apache-tomcat-6.0.29.tgz</destFileName>
                 </artifactItem>
                 <artifactItem>
                     <groupId>org.codehaus.jackson</groupId>
