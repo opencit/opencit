@@ -321,6 +321,7 @@ public class TrustAgentSecureClient {
         HostInfo response;
 		try {
 			byte buf[] = sendRequestWithSSLSocket();
+            log.debug("TrustAgent response: {}", new String(buf));
 			JAXBContext jc = JAXBContext
 					.newInstance("com.intel.mountwilson.ta.data.hostinfo");
 			Unmarshaller u = jc.createUnmarshaller();
