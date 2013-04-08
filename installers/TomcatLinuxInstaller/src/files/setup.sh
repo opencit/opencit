@@ -3,22 +3,19 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-#glassfish_required_version=3.0
-#java_required_version=1.6.0_29
-
 # detect the packages we have to install
-GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
+TOMCAT_PACKAGE=`ls -1 tomcat*.zip 2>/dev/null | tail -n 1`
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
 if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
-glassfish_install $GLASSFISH_PACKAGE
+tomcat_install $TOMCAT_PACKAGE
 
-cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
-cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
-cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
+cp jackson-core-asl.jar ${TOMCAT_HOME}/modules/
+cp jackson-mapper-asl.jar ${TOMCAT_HOME}/modules/
+cp jackson-xc.jar ${TOMCAT_HOME}/modules/
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
@@ -28,14 +25,16 @@ cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
 # here is what the customer is supposed to execute before installing mt wilson:
 # # mkdir -p /opt/intel/cloudsecurity/setup-console
 # # cp mysql-connector-java-5.1.x.jar /opt/intel/cloudsecurity/setup-console
-# so now we check to see if it's there, and copy it to glassfish so the apps
+# so now we check to see if it's there, and copy it to TOMCAT so the apps
 # can use it:
 mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
-  cp $mysqlconnector_files ${GLASSFISH_HOME}/modules/
+  cp $mysqlconnector_files ${TOMCAT_HOME}/modules/
 fi
 
-glassfish_stop
-glassfish_start
+# not sure if this is needed for tomcat... if it's installed before the web apps,
+# maybe the new jars will be picked up for the new web apps that deploy
+#tomcat_stop
+#tomcat_start
 
 echo

@@ -13,7 +13,7 @@ Java code might be a Repository implementation backed by JPA/Hibernate/etc.
     <parent>
 	<groupId>com.intel.mtwilson.database</groupId>
 	<artifactId>mtwilson-database</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.2-SNAPSHOT</version>
     </parent>
   
   
@@ -21,6 +21,7 @@ Java code might be a Repository implementation backed by JPA/Hibernate/etc.
 	<dependency>
 		<groupId>mysql</groupId>
 		<artifactId>mysql-connector-java</artifactId>
+        <scope>provided</scope>
 	</dependency>
   </dependencies>
 

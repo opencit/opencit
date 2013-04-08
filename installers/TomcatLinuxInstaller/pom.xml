@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>glassfish</artifactId>
-  <version>3.1.1</version>
+  <artifactId>mtwilson-tomcat-installer</artifactId>
+  <version>0.1</version>
 
   <packaging>pom</packaging>
-  <name>Glassfish Linux Installer</name>
-  <description>Self-extracting executable that installs Glassfish</description>
+  <name>Mt Wilson Installer for Apache Tomcat</name>
+  <description>Self-extracting executable that installs Apache Tomcat</description>
 
     <parent>
 	<groupId>com.intel.mtwilson.linux</groupId>
@@ -25,12 +25,15 @@
       <version>1.1-SNAPSHOT</version>
       <type>sh</type>
     </dependency>	
+	<!-- XXX TODO create a maven package for tomcat and add it here -->
+	<!--
     <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>glassfish</artifactId>
-      <version>3.1.1</version>
+      <groupId>org.apache</groupId>
+      <artifactId>apache-tomcat</artifactId>
+      <version>7.x</version>
       <type>zip</type>
     </dependency>	
+	-->
 <dependency>
 	<groupId>org.codehaus.jackson</groupId>
 	<artifactId>jackson-core-asl</artifactId>
@@ -91,14 +94,17 @@
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>functions</destFileName>
                 </artifactItem>
+				<!-- XXX TODO  copy the apach tomcat package info to here -->
+				<!--
                 <artifactItem>
-                  <groupId>com.oracle</groupId>
-                  <artifactId>glassfish</artifactId>
-                  <version>3.1.1</version>
+				  <groupId>org.apache</groupId>
+				  <artifactId>apache-tomcat</artifactId>
+				  <version>7.x</version>
                   <type>zip</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>glassfish-3.1.1.zip</destFileName>
+                  <destFileName>apache-tomcat-7.x.zip</destFileName>
                 </artifactItem>
+				-->
                 <artifactItem>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-core-asl</artifactId>

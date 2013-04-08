@@ -8,13 +8,14 @@
     <parent>
         <groupId>com.intel.mtwilson.portals</groupId>
         <artifactId>mtwilson-portals</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.2-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
