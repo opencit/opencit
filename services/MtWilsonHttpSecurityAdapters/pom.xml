@@ -83,7 +83,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
-	<dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ASData</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+        <dependency>
 		<groupId>commons-net</groupId>
 		<artifactId>commons-net</artifactId>
 		<version>3.1</version>

@@ -7,8 +7,10 @@ package com.intel.mtwilson.as.helper;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.security.jersey.AuthenticationJerseyFilter;
 import com.intel.mtwilson.security.jersey.HmacRequestVerifier;
+import com.intel.mtwilson.security.jersey.HttpBasicRequestVerifier;
 import com.intel.mtwilson.security.jersey.X509RequestVerifier;
 import com.intel.mtwilson.security.jpa.ApiClientBO;
+import com.intel.mtwilson.security.jpa.ApiClientHttpBasicBO;
 import com.intel.mtwilson.security.jpa.ApiClientX509BO;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import org.slf4j.Logger;
@@ -28,7 +30,8 @@ public class ASAuthenticationFilter extends AuthenticationJerseyFilter implement
         // application-specific configuration
         setRequestValidator(new HmacRequestVerifier(new ApiClientBO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
         setRequestValidator(new X509RequestVerifier(new ApiClientX509BO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
-        // SUDHIR TODO: setRequestValidator(new HttpBasicRequestVerifier(..maybe ApiClientBasicBO..ASDataPU)); 
+        // Since we might want to support HttpBasic in OpenSource, we have added the corresponding JPA controller in the AttestationService
+        setRequestValidator(new HttpBasicRequestVerifier(new ApiClientHttpBasicBO(persistenceManager.getEntityManagerFactory("ASDataPU"))));
         setTrustedRemoteAddress(MSConfig.getConfiguration().getStringArray("mtwilson.api.trust"));        
         setSslRequired(MSConfig.getConfiguration().getBoolean("mtwilson.ssl.required", true));
     }
