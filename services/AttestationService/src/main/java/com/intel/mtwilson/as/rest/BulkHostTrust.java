@@ -2,6 +2,7 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
@@ -124,23 +125,8 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) {
-                HostConfigResponseList hostResponses = new HostConfigResponseList();
-                if (hostRecords != null && !hostRecords.getHostRecords().isEmpty()) {
-                        for (TxtHostRecord hostRecord : hostRecords.getHostRecords()) {
-                                HostResponse result = new ASComponentFactory().getHostBO().addHost(new TxtHost(hostRecord));
-                                HostConfigResponse hostResponse = new HostConfigResponse();
-                                hostResponse.setHostName(hostRecord.HostName);
-                                if (result.getErrorCodeEnum() == ErrorCode.OK) {
-                                        hostResponse.setStatus(Boolean.toString(true));
-                                        hostResponse.setErrorMessage("");
-                                } else {
-                                        hostResponse.setStatus(Boolean.toString(false));
-                                        hostResponse.setErrorMessage(result.getErrorMessage());
-                                }
-                                hostResponses.getHostRecords().add(hostResponse);
-                        }
-                }
-                return hostResponses;
+            BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
+            return bulkHostMgmtBO.addHosts(hostRecords);
         }
 
         /**
@@ -154,22 +140,7 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) {
-                HostConfigResponseList hostResponses = new HostConfigResponseList();
-                if (hostRecords != null && !hostRecords.getHostRecords().isEmpty()) {
-                        for (TxtHostRecord hostRecord : hostRecords.getHostRecords()) {
-                                HostResponse result = new ASComponentFactory().getHostBO().updateHost(new TxtHost(hostRecord));
-                                HostConfigResponse hostResponse = new HostConfigResponse();
-                                hostResponse.setHostName(hostRecord.HostName);
-                                if (result.getErrorCodeEnum() == ErrorCode.OK) {
-                                        hostResponse.setStatus(Boolean.toString(true));
-                                        hostResponse.setErrorMessage("");
-                                } else {
-                                        hostResponse.setStatus(Boolean.toString(false));
-                                        hostResponse.setErrorMessage(result.getErrorMessage());
-                                }
-                                hostResponses.getHostRecords().add(hostResponse);
-                        }
-                }
-                return hostResponses;
+            BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
+            return bulkHostMgmtBO.updateHosts(hostRecords);
         }
 }
