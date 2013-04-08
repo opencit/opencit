@@ -48,7 +48,7 @@ public class MleBO extends BaseBO {
         TblModuleManifestJpaController moduleManifestJpaController = null;
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
-        private static String hexadecimalRegEx = "[0-9A-Fa-f]+";
+        private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
 
         public MleBO() {
                                 mleJpaController = new TblMleJpaController(getEntityManagerFactory());

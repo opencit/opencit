@@ -73,8 +73,6 @@ public class HostBO extends BaseBO {
         }
         
 	public HostResponse addHost(TxtHost host) {
-            String certificate = null;
-            String location = null;
             
             log.error("HOST BO ADD HOST STARTING");
             
@@ -101,9 +99,9 @@ public class HostBO extends BaseBO {
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                             // BUT... XXX TODO   Intel returns an X509 Certificate containing the AIK Public Key signed by the Privacy CA
                             // ... while Citrix returns just the AIK Public Key (and the EK too) ... 
-                            certificate = getAIKCertificateForHost(tblHosts, host);
+                                setAIKCertificateForHost(tblHosts, host);
                                 // we have to check that the aik certificate was signed by a trusted privacy ca
-                                X509Certificate hostAikCert = X509Util.decodePemCertificate(certificate);
+                                X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                 hostAikCert.checkValidity();
                                 // read privacy ca certificate
                                 InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // XXX TODO currently we only support one privacy CA cert... in the future we should read a PEM format file with possibly multiple trusted privacy ca certs
@@ -134,7 +132,7 @@ public class HostBO extends BaseBO {
 //                            pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
                         
                         // for all hosts (used to be just vmware, but no reason right now to make it vmware-specific...), if pcr 22 happens to match our location database, populate the location field in the host record
-                            location = getLocation(pcrManifest);
+                            tblHosts.setLocation( getLocation(pcrManifest) );
                         
                         
                         //Bug: 597, 594 & 583. Here we were trying to get the length of the TlsKeystore without checking if it is NULL or not. 
@@ -142,7 +140,7 @@ public class HostBO extends BaseBO {
                         log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
                         log.error("HOST BO CALLING SAVEHOSTINDATABASE");
-                        saveHostInDatabase(tblHosts, host, certificate, location, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
+                        saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
 		} catch (ASException ase) {
 			throw ase;
@@ -199,17 +197,8 @@ public class HostBO extends BaseBO {
 
                         HostAgentFactory factory = new HostAgentFactory();
                         HostAgent agent = factory.getHostAgent(tblHosts);
-                        if( agent.isAikAvailable() ) {
                             log.info("Getting identity.");
-                            if( agent.isAikCaAvailable() ) {
-                                String certificate = getAIKCertificateForHost(tblHosts, host);
-                                tblHosts.setAIKCertificate(certificate);
-                            }
-                            else {
-                                String publicKey = null; // XXX TODO stewart citrix  
-                                tblHosts.setAIKCertificate(publicKey);                                
-                            }
-                        }
+                                setAIKCertificateForHost(tblHosts, host);
                         
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
@@ -349,28 +338,30 @@ public class HostBO extends BaseBO {
             }	
 	}
 
-	private String getAIKCertificateForHost(TblHosts tblHosts, TxtHost host) {
+	private void setAIKCertificateForHost(TblHosts tblHosts, TxtHost host) {
             HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
             HostAgent agent = factory.getHostAgent(tblHosts);
             if( agent.isAikAvailable() ) {
                 if( agent.isAikCaAvailable() ) {
                     X509Certificate cert = agent.getAikCertificate();
                     try {
-                        return X509Util.encodePemCertificate(cert);
+                        String pem = X509Util.encodePemCertificate(cert);
+                        tblHosts.setAIKCertificate(pem);
+                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
                     }
                     catch(Exception e) {
                         log.error("Cannot encode AIK certificate: "+e.toString(), e);
-                        return null;
                     }
                 }
                 else {
                     // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
                     PublicKey publicKey = agent.getAik();
-                    return X509Util.encodePemPublicKey(publicKey); 
+                    String pem = X509Util.encodePemPublicKey(publicKey); 
+                    tblHosts.setAIKCertificate(pem);
+                    tblHosts.setAikSha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
                 }
             }
-            return null;
-	}
+ 	}
 
 	/**
 	 * 
@@ -439,8 +430,7 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, String certificate,
-			String location, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException {
 		
 		
 		
@@ -465,13 +455,12 @@ public class HostBO extends BaseBO {
 			tblHosts.setPort(host.getPort());
                 }
 		tblHosts.setVmmMleId(vmmMleId);
-		tblHosts.setAIKCertificate(certificate); // null is ok;  vmware servers do not have aik's.
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
-                if (location != null) {
-                    tblHosts.setLocation(location);
-                }
+//                if (location != null) {
+//                    tblHosts.setLocation(location);
+//                }
                 
 		// create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
