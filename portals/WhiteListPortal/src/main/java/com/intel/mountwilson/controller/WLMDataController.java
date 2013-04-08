@@ -29,6 +29,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
@@ -76,7 +77,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (WLMPortalException e) {
 			log.error("Error Wile Adding OS Data. Root cause "+e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		log.info("WLMDataController.addOSData <<<");
 		return responseView;
@@ -124,7 +125,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (WLMPortalException e) {
 			log.error("Error Wile Editing OS Data. Root cause "+e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		log.info("WLMDataController.updateOSData <<<");
 		return responseView;
@@ -165,7 +166,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (WLMPortalException e) {
 			log.error("Error Wile deleting OS Data. Root cause "+e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		log.info("WLMDataController.deleteOSData <<<");
 		return responseView;
@@ -201,7 +202,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (WLMPortalException e) {
 			log.error("Error While getting Host OS Data for VMM. Root cause "+e.getStackTrace());
 			responseView.addObject("result",false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("HostList",list);
@@ -223,7 +224,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (WLMPortalException e) {
 			log.error("Error While getting Host OS Data for BIOS. Root cause "+e.getStackTrace());
 			responseView.addObject("result",false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		responseView.addObject("HostList",list);
 		responseView.addObject("message","");
@@ -346,7 +347,7 @@ public class WLMDataController extends MultiActionController {
                         responseView.addObject("result",true);
 		} catch (WLMPortalException e) {
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			log.error(e.toString());
 		}
 		
@@ -356,7 +357,7 @@ public class WLMDataController extends MultiActionController {
 			responseView.addObject("mleSource", mleClientService.getMleSourceHost(detailMLEVO,getWhitelistService(req)));
 		} catch (WLMPortalException e) {
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			log.error(e.toString());
 		}
 
@@ -392,7 +393,7 @@ public class WLMDataController extends MultiActionController {
                         responseView.addObject("result",true);
 		} catch (WLMPortalException e) {
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			log.error(e.toString());
 		}
 		
@@ -438,7 +439,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		
@@ -487,7 +488,7 @@ public class WLMDataController extends MultiActionController {
 			}
 		} catch (WLMPortalException e) {
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			log.error(e.toString());
 			return responseView;
 		}
@@ -512,7 +513,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (WLMPortalException e) {
 			log.error("Error Wile Adding OEM Data. Root cause "+e.getStackTrace());
 			responseView.addObject("result",false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		
 		log.info("WLMDataController.addOEMData <<<");
@@ -542,7 +543,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (Exception e) {
 			log.error("Error Wile Editing OEM Data. Root cause "+e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		log.info("WLMDataController.updateOEMData <<<");
 		return responseView;
@@ -573,7 +574,7 @@ public class WLMDataController extends MultiActionController {
 		} catch (Exception e) {
 			log.error("Error Wile Deleting OEM Data. Root cause "+e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		log.info("WLMDataController.deleteOEMData <<<");
 		return responseView;
@@ -597,7 +598,7 @@ public class WLMDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("MLEDataVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -620,7 +621,7 @@ public class WLMDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("MLEDataVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -643,7 +644,7 @@ public class WLMDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("OSDataVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -665,7 +666,7 @@ public class WLMDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("OSDataVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -688,7 +689,7 @@ public class WLMDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("OEMDataVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -710,7 +711,7 @@ public class WLMDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("OEMDataVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -854,7 +855,7 @@ public class WLMDataController extends MultiActionController {
                 service = (WhitelistService)session.getAttribute("apiClientObject");    
             } catch (Exception e) {
 				log.error("Error while creating ApiCliennt Object. "+e.getMessage());
-				throw new WLMPortalException("Error while creating ApiCliennt Object. "+e.getMessage(),e);
+				throw new WLMPortalException("Error while creating ApiCliennt Object. "+StringEscapeUtils.escapeHtml(e.getMessage()),e);
 			}
         }
         return service;

@@ -35,6 +35,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -152,7 +153,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 				result = true;
 			} catch (Exception ex) {
 				log.error("Exception Checking for already register host. " + ex.getMessage());
-				responseView.addObject("message","Exception Checking for already register host. " + ex.getMessage());
+				responseView.addObject("message","Exception Checking for already register host. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
 				responseView.addObject("result",result);
 				return responseView;
 			}
@@ -204,7 +205,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			result = true;            
 		} catch (Exception ex) {
 			log.error("Exception during whitelist configuration. " + ex.getMessage());
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
 			responseView.addObject("result",result);
 			return responseView;
 		}
@@ -318,7 +319,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			
 		} catch (Exception ex) {
 			log.error("Exception during whitelist configuration. " + ex.getMessage());
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(ex.getMessage()));
 			responseView.addObject("result",result);
 			return responseView;
 		}
@@ -346,7 +347,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         clusterName = req.getParameter("clusterName");
                         vCenterConnection = req.getParameter("vCentertConnection");
                 } catch (Exception e) {
-                        log.error("Error while getting Input parameter from request." + e.getMessage());
+                        log.error("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
                         responseView.addObject("message", "Input Parameters are NUll.");
                         responseView.addObject("result", false);
                         return responseView;
@@ -363,7 +364,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                 responseView = getListofRegisteredHost(listOfRegisterHost, responseView, getApiClientService(req, ApiClient.class));
                         }
                 } catch (Exception e) {
-                        log.error("Error while getting data from VMware vCeneter. " + e.getMessage());
+                        log.error("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
                         responseView.addObject("message", e.getMessage());
                         responseView.addObject("result", false);
                         return responseView;
@@ -405,7 +406,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         responseView.addObject("hostVOs", services.registerHosts(apiObj, hostRecords));
                                 } catch (Exception e) {
                                         log.error("Error while registering the hosts. " + e.getMessage());
-                                        responseView.addObject("message",e.getMessage());
+                                        responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
                                         responseView.addObject("result",false);
                                         return responseView;
                                 }
@@ -435,7 +436,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		} catch (Exception e) {
                     
 			log.error("Error While getting pending requests. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -461,7 +462,7 @@ public class ManagementConsoleDataController extends MultiActionController{
             responseView.addObject("approvedRequests", services.getApiClients(apiObj, ApiClientListType.ALL));
 		} catch (Exception e) {
 			log.error("Error While getting all approved requests. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -491,7 +492,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		} catch (Exception e) {
                     
 			log.error("Error While getting all expiring API clients. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -518,7 +519,7 @@ public class ManagementConsoleDataController extends MultiActionController{
             responseView.addObject("apiClientList", services.getApiClients(apiObj, ApiClientListType.DELETE));
 		} catch (Exception e) {
 			log.error("Error while getting Api clients. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 		}
@@ -551,7 +552,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}catch (Exception ex) {
 			log.error(ex.getMessage());
 			responseView.addObject("result", false);
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
 		}
 		
@@ -586,7 +587,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                     
 			log.error(ex.getMessage());
 			responseView.addObject("result", result);
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
                         
 		}
@@ -621,7 +622,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                     
 			log.error(ex.getMessage());
 			responseView.addObject("result", result);
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
                         
 		}
@@ -764,7 +765,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		} catch (Exception e) {
 			log.error("Error While getting ca status. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -816,7 +817,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		} catch (Exception e) {
 			log.error("Error While getting Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 			
@@ -853,7 +854,7 @@ public class ManagementConsoleDataController extends MultiActionController{
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Root CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  
 		}
@@ -884,7 +885,7 @@ public class ManagementConsoleDataController extends MultiActionController{
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  
 		}
@@ -915,7 +916,7 @@ public class ManagementConsoleDataController extends MultiActionController{
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  
 		}
@@ -952,7 +953,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		} catch (Exception e) {
 			log.error("Error While getting Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 			

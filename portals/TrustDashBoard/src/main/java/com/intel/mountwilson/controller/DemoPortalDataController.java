@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -67,7 +68,7 @@ public class DemoPortalDataController extends MultiActionController {
 			log.error(e.toString());
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
                         if(e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
                             responseView.addObject("noHosts",true);
                         }
@@ -106,7 +107,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -131,7 +132,7 @@ public class DemoPortalDataController extends MultiActionController {
 			log.error(e.toString());
 			e.printStackTrace();
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -155,7 +156,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -179,7 +180,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("oemInfo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -203,7 +204,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("osInfo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -222,7 +223,7 @@ public class DemoPortalDataController extends MultiActionController {
 				newhost = Boolean.parseBoolean(req.getParameter("newhost"));
 			} catch (Exception e1) {
 				responseView.addObject("result",false);
-				responseView.addObject("message",e1.getMessage());
+				responseView.addObject("message",StringEscapeUtils.escapeHtml(e1.getMessage()));
 			}
 		System.out.println(hostObject);
 		ObjectMapper mapper = new ObjectMapper();
@@ -236,7 +237,7 @@ public class DemoPortalDataController extends MultiActionController {
 			responseView.addObject("message","Error While Parsing request parameters Data.");
 			return responseView;
 		} catch (JsonMappingException e) {
-			log.error("Error While Mapping request parameters to Mle Data Object. "+e.getMessage());
+			log.error("Error While Mapping request parameters to Mle Data Object. "+StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			responseView.addObject("message","Error While Mapping request parameters to Mle Data Object.");
 			return responseView;
@@ -260,7 +261,7 @@ public class DemoPortalDataController extends MultiActionController {
 		} catch (DemoPortalException e) {
 			log.error(e.getMessage());
 			responseView.addObject("result",false);
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		log.info("WLMDataController.saveNewHostInfo <<<");
@@ -284,7 +285,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("oemInfo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -326,7 +327,7 @@ public class DemoPortalDataController extends MultiActionController {
 			log.error(e.toString());
 			e.printStackTrace();
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("message", "");
@@ -370,7 +371,7 @@ public class DemoPortalDataController extends MultiActionController {
 			log.error(e.toString());
 			e.printStackTrace();
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("message", "");
@@ -412,7 +413,7 @@ public class DemoPortalDataController extends MultiActionController {
 			log.error(e.toString());
 			e.printStackTrace();
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("message", "");
@@ -441,7 +442,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -471,7 +472,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("result", true);
@@ -500,7 +501,7 @@ public class DemoPortalDataController extends MultiActionController {
 			log.error(e.toString());
 			e.printStackTrace();
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			e.printStackTrace();
 			return responseView;
 		}
@@ -532,7 +533,7 @@ public class DemoPortalDataController extends MultiActionController {
 			e.printStackTrace();
 			log.error(e.toString());
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("message", "");
@@ -565,7 +566,7 @@ public class DemoPortalDataController extends MultiActionController {
 		} catch (DemoPortalException e) {
 			log.error(e.getMessage());
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("message", "");
@@ -599,7 +600,7 @@ public class DemoPortalDataController extends MultiActionController {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			responseView.addObject("result", false);
-			responseView.addObject("message", e.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
 		responseView.addObject("message", "");

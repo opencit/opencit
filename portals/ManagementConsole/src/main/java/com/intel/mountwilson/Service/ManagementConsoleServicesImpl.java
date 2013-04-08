@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,7 +157,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 } catch (Exception e) {
                         logger.info(e.getMessage());
                         // Bug: 441 - We should not be throwing exception here. Instead setting the error correctly
-                        hostDetailList.setStatus(e.getMessage());
+                        
+                        hostDetailList.setStatus(StringEscapeUtils.escapeHtml(e.getMessage()));
                 }
                 
             return hostDetailList;
