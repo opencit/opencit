@@ -21,7 +21,7 @@ auto_install "Installer requirements" "APICLIENT"
 echo "Supported database systems are:"
 echo "postgres"
 echo "mysql"
-prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-postgres}
+prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
 if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
   DATABASE_VENDOR=postgres
   echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
@@ -30,7 +30,7 @@ fi
 echo "Supported web servers are:"
 echo "tomcat"
 echo "glassfish"
-prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-tomcat}
+prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
 if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
   WEBSERVER_VENDOR=tomcat
   echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
