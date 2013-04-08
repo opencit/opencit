@@ -38,13 +38,17 @@ fi
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if [ "$DATABASE_VENDOR" == "mysql" ] ; then
-  mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
-  if [ -z "$mysqlconnector_file" ]; then
-    echo_failure "Cannot find MySQL Connector/J under /opt/intel/cloudsecurity/setup-console"
+  mysqlconnector_file=`ls -1 2>/dev/null | grep -i mysql`
+  if [ -n "$mysqlconnector_file" ]; then
     mkdir -p /opt/intel/cloudsecurity/setup-console
+    cp $mysqlconnector_file /opt/intel/cloudsecurity/setup-console
+  fi
+  mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/setup-console/* 2>/dev/null | grep -i mysql`
+  if [ -z "$mysqlconnector_file" ]; then
+    echo_failure "Cannot find MySQL Connector/J"
     echo "Recommended steps:"
     echo "1. Download MySQL Connector/J, available free at www.mysql.com"
-    echo "2. Copy the .jar from MySQL Connector/J to /opt/intel/cloudsecurity/setup-console"
+    echo "2. Copy the .jar from MySQL Connector/J to current directory"
     echo "3. Run this installer again"
     exit 1
   fi
