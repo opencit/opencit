@@ -13,9 +13,11 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
 
-cp jackson-core-asl.jar ${TOMCAT_HOME}/modules/
-cp jackson-mapper-asl.jar ${TOMCAT_HOME}/modules/
-cp jackson-xc.jar ${TOMCAT_HOME}/modules/
+# the Tomcat "endorsed" folder is not present by default, we have to create it.
+mkdir ${TOMCAT_HOME}/endorsed
+cp jackson-core-asl.jar ${TOMCAT_HOME}/endorsed/
+cp jackson-mapper-asl.jar ${TOMCAT_HOME}/endorsed/
+cp jackson-xc.jar ${TOMCAT_HOME}/endorsed/
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
@@ -29,7 +31,7 @@ cp jackson-xc.jar ${TOMCAT_HOME}/modules/
 # can use it:
 mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
-  cp $mysqlconnector_files ${TOMCAT_HOME}/modules/
+  cp $mysqlconnector_files ${TOMCAT_HOME}/endorsed/
 fi
 
 # not sure if this is needed for tomcat... if it's installed before the web apps,
