@@ -18,22 +18,38 @@ APICLIENT_YAST_PACKAGES="unzip"
 APICLIENT_ZYPPER_PACKAGES="unzip"
 auto_install "Installer requirements" "APICLIENT"
 
+echo "Supported database systems are:"
+echo "postgres"
+echo "mysql"
+prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-postgres}
+if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
+  DATABASE_VENDOR=postgres
+  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
+fi
+
+echo "Supported web servers are:"
+echo "tomcat"
+echo "glassfish"
+prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-tomcat}
+if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
+  WEBSERVER_VENDOR=tomcat
+  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
+fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 if using_mysql; then
-    export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
+    export MYSQL_REQUIRED_VERSION=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
-    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
+    export POSTGRES_REQUIRED_VERSION=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
 if using_glassfish; then
-    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
+    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
 elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
+    export TOMCAT_REQUIRED_VERSION=${TOMCAT_REQUIRED_VERSION:-6.0}
 fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
-export java_required_version=${JAVA_REQUIRED_VERSION}
 
 
 find_installer() {

@@ -689,9 +689,9 @@ mysql_clear() {
 }
 
 # Environment:
-# - mysql_required_version (or provide it as a parameter)
+# - MYSQL_REQUIRED_VERSION (or provide it as a parameter)
 mysql_version() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION}}"
   MYSQL_CLIENT_VERSION=""
   MYSQL_CLIENT_VERSION_OK=""
   if [ -n "$mysql" ]; then
@@ -705,20 +705,20 @@ mysql_version() {
 }
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 mysql_version_report() {
   mysql_version
   if [ "$MYSQL_CLIENT_VERSION_OK" == "yes" ]; then
     echo_success "Mysql client version $MYSQL_CLIENT_VERSION is ok"
   else
-    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${mysql_required_version}"
+    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${MYSQL_REQUIRED_VERSION}"
   fi
 }
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 mysql_detect() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION}}"
   if [[ -n "$MYSQL_HOME" && -n "$mysql" && -f "$mysql" ]]; then
     return
   fi
@@ -764,9 +764,9 @@ mysql_env_report() {
 }
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 mysql_require() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION}}"
   if [[ -z "$MYSQL_HOME" || -z "$mysql" || ! -f "$mysql" ]]; then
     mysql_detect ${min_version} > /dev/null
   fi
@@ -779,14 +779,14 @@ mysql_require() {
 
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 mysql_connection() {
   mysql_require
   mysql_connect="$mysql --batch --host=${MYSQL_HOSTNAME:-$DEFAULT_MYSQL_HOSTNAME} --port=${MYSQL_PORTNUM:-$DEFAULT_MYSQL_PORTNUM} --user=${MYSQL_USERNAME:-$DEFAULT_MYSQL_USERNAME} --password=${MYSQL_PASSWORD:-$DEFAULT_MYSQL_PASSWORD}"
 }
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 # sets the is_mysql_available variable to "yes" or ""
 # sets the is_MYSQL_DATABASE_created variable to "yes" or ""
 mysql_test_connection() {
@@ -801,7 +801,7 @@ mysql_test_connection() {
 }
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 mysql_test_connection_report() {
   echo -n "Testing database connection... "
   mysql_test_connection
@@ -815,7 +815,7 @@ mysql_test_connection_report() {
 
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 # installs mysql client programs (not the server)
 # we need the mysql client to create or patch the database, but
 # the server can be installed anywhere
@@ -836,7 +836,7 @@ mysql_install() {
 }
 
 # Environment:
-# - mysql_required_version
+# - MYSQL_REQUIRED_VERSION
 # installs mysql server 
 mysql_server_install() {
   MYSQL_SERVER_YUM_PACKAGES="mysql-server"
@@ -1513,7 +1513,7 @@ glassfish_create_ssl_cert_prompt() {
     prompt_yes_no GLASSFISH_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Glassfish?"
     echo
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
-      if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+      if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; return 1; fi
       glassfish_require
       prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
@@ -1527,7 +1527,7 @@ glassfish_create_ssl_cert_prompt() {
 glassfish_create_ssl_cert() {
 #  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
 #  return
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+  if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"
   local keystorePassword=changeit
@@ -1569,6 +1569,16 @@ tomcat_clear() {
 }
 
 
+tomcat_require() {
+  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
+  if not tomcat_ready; then
+    tomcat_detect ${min_version} > /dev/null
+  fi
+  if not tomcat_ready; then
+    echo_failure "Cannot find Tomcat server version $min_version or later"
+    exit 1
+  fi
+}
 
 tomcat_ready_report() {
   if [[ -z "$TOMCAT_HOME" ]]; then echo_warning "TOMCAT_HOME variable is not set"; return 1; fi
@@ -1663,10 +1673,10 @@ tomcat_detect() {
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
-  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
+  #echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
   for c in $TOMCAT_CANDIDATES
   do
-    echo "debug tomcat candidate: $c"
+    #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
       local bin_dir=`dirname $c`
       local parent=`dirname $bin_dir`
@@ -1791,9 +1801,8 @@ tomcat_stop() {
 }
 tomcat_restart() {
   if [ -n "$tomcat" ]; then
-      # XXX does catalina define a 'restart' command?
-      # XXX if not, just call tomcat_stop ; tomcat_start
-      $tomcat restart
+      $tomcat stop
+      $tomcat start
   fi
 }
 tomcat_shutdown() {
@@ -1862,7 +1871,7 @@ java_version() {
 }
 
 # Environment:
-# - java_required_version
+# - JAVA_REQUIRED_VERSION
 java_version_report() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   local current_version=`java_version`
@@ -1983,7 +1992,7 @@ java_env_report() {
 # if they are not configured it initiates java detect to find them
 # if
 # Environment:
-# - java_required_version in the format "1.6.0_29" (or pass it as a parameter)
+# - JAVA_REQUIRED_VERSION in the format "1.6.0_29" (or pass it as a parameter)
 java_require() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   if [[ -z "$JAVA_HOME" || -z "$java" || ! -f "$java" ]]; then
@@ -2004,7 +2013,7 @@ no_java() {
 }
 
 # Environment:
-# - java_required_version in the format "1.6.0_29"
+# - JAVA_REQUIRED_VERSION in the format "1.6.0_29"
 java_install_openjdk() {
   JAVA_YUM_PACKAGES="java-1.6.0-openjdk java-1.6.0-openjdk-devel"
   JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
@@ -2028,7 +2037,7 @@ java_install() {
 #  JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
 #  auto_install "Java" "JAVA"
   java_clear; java_detect >> $INSTALL_LOG_FILE
-  if no_java ${java_required_version:-1.6} >> $INSTALL_LOG_FILE; then
+  if no_java ${JAVA_REQUIRED_VERSION:-1.6} >> $INSTALL_LOG_FILE; then
     if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
       echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
       return 1
@@ -2122,77 +2131,118 @@ print_env_summary_report() {
 ### FUNCTION LIBRARY: web service on top of glassfish
 
 # parameters: glassfish_application_name such as "AttestationService"
+# output:  returns 0 (success) if running,  1 (error) if not running
+# example:   if webservice_running "myappname"; then echo "ok"; fi
+# also:
+# if web server is glassfish, the variables glassfish_webervice_deployed and 
+#  glassfish_webservice_running are also defined (for use with other glassfish functions)
 webservice_running() {
-  local glassfish_application_name="$1"
-  glassfish_running
-  WEBSERVICE_RUNNING=""
-  if [ -n "$GLASSFISH_RUNNING" ]; then
-    # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
-    WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${glassfish_application_name}" | head -n 1 | awk '{ print $1 }'`
-    if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-      WEBSERVICE_RUNNING=`$glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
+  local webservice_name="$1"
+  if using_glassfish; then
+    if glassfish_running; then
+      glassfish_webservice_deployed=`$glassfish list-applications | grep "${webservice_name}" | head -n 1 | awk '{ print $1 }'`
+      if [ -n "$glassfish_webservice_deployed" ]; then
+        glassfish_webservice_running=`$glassfish show-component-status $glassfish_webservice_deployed | grep enabled`
+        return 0
+      fi
     fi
   fi
+  if using_tomcat; then
+    if tomcat_running; then
+      echo "Not implemented yet: how to check if an app is running in tomcat"
+    fi
+  fi
+  return 1
 }
+
 webservice_running_report() {
-  local glassfish_application_name="$1"
-  echo -n "Checking ${glassfish_application_name}... "
-  webservice_running "${glassfish_application_name}"
-  if [ -n "$WEBSERVICE_RUNNING" ]; then
+  local webservice_name="$1"
+  echo -n "Checking ${webservice_name}... "
+  if webservice_running "${webservice_name}"; then
     echo "Running"
+    return 0
   else
     echo "Not running"
+    return 1
   fi
 }
 
 
 webservice_start() {
-  local glassfish_application_name="$1"
-  webservice_running  "${glassfish_application_name}"
-  if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    $glassfish enable $WEBSERVICE_DEPLOYED
+  local webservice_name="$1"
+  if using_glassfish; then
+    if webservice_running  "${webservice_name}"; then
+      # the glassfish implementation of webservice_running defines the glassfish_webservice_deployed name that we must use here
+      $glassfish enable $glassfish_webservice_deployed
+    fi
+  fi
+  if using_tomcat; then
+      echo "Not implemented yet: how to start an app in tomcat"
   fi
 }
 webservice_stop() {
-  local glassfish_application_name="$1"
-  webservice_running "${glassfish_application_name}"
-  if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    $glassfish disable $WEBSERVICE_DEPLOYED
+  local webservice_name="$1"
+  if using_glassfish; then
+    if webservice_running  "${webservice_name}"; then
+      # the glassfish implementation of webservice_running defines the glassfish_webservice_deployed name that we must use here
+      $glassfish disable $glassfish_webservice_deployed
+    fi
+  fi
+  if using_tomcat; then
+      echo "Not implemented yet: how to stop an app in tomcat"
   fi
 }
 
 webservice_start_report() {
-    local glassfish_application_name="$1"
+  local webservice_name="$1"
     if using_glassfish; then
       glassfish_require
-      glassfish_running
-      if [ -z "$GLASSFISH_RUNNING" ]; then
+      if not glassfish_running; then
           glassfish_start_report
       fi
     fi
-    webservice_running "${glassfish_application_name}"
-    if [ -z "$WEBSERVICE_RUNNING" ]; then
-          action_condition WEBSERVICE_RUNNING "Starting ${glassfish_application_name}" "webservice_start ${glassfish_application_name} > /dev/null; webservice_running ${glassfish_application_name};"
+    if using_tomcat; then
+       tomcat_require
+       if not tomcat_running; then
+           tomcat_start_report
+       fi
     fi
-    if [ -n "$WEBSERVICE_RUNNING" ]; then
-          echo_success "${glassfish_application_name} is running"
+    if not webservice_running "${webservice_name}"; then
+         # action_condition is_webservice_running "Starting ${webservice_name}" "webservice_start ${webservice_name} > /dev/null; webservice_running ${webservice_name};"
+          echo "Starting ${webservice_name}..."
+          webservice_start "${webservice_name}"
+    fi
+    if webservice_running "${webservice_name}"; then
+          echo_success "${webservice_name} is running"
     fi
 }
 webservice_stop_report() {
-    local glassfish_application_name="$1"
+  local webservice_name="$1"
     if using_glassfish; then
       glassfish_require
-      glassfish_running
-    fi
-    webservice_running "${glassfish_application_name}"
-    # XXX TODO need a function like webcontainer_running to handle all supported containers instead of this glassfish-specific check for GLASSFISH_RUNNING
-    if [ -n "$GLASSFISH_RUNNING" ]; then
-      if [ -n "$WEBSERVICE_RUNNING" ]; then
-        inaction_condition WEBSERVICE_RUNNING "Stopping ${glassfish_application_name}" "webservice_stop ${glassfish_application_name} > /dev/null; webservice_running ${glassfish_application_name};"
+      if glassfish_running; then
+         if webservice_running "${webservice_name}"; then
+            webservice_stop "${webservice_name}"
+         fi
       fi
     fi
-    if [ -z "$WEBSERVICE_RUNNING" ]; then
-      echo_success "${glassfish_application_name} is stopped"
+    if using_tomcat; then
+      tomcat_require
+      if tomcat_running; then
+         if webservice_running "${webservice_name}"; then
+            webservice_stop "${webservice_name}"
+         fi
+      fi
+    fi
+       
+    # XXX TODO need a function like webcontainer_running to handle all supported containers instead of this glassfish-specific check for GLASSFISH_RUNNING
+#    if [ -n "$GLASSFISH_RUNNING" ]; then
+ #     if [ -n "$WEBSERVICE_RUNNING" ]; then
+  #      inaction_condition WEBSERVICE_RUNNING "Stopping ${glassfish_application_name}" "webservice_stop ${glassfish_application_name} > /dev/null; webservice_running ${glassfish_application_name};"
+   #   fi
+    #fi
+    if not webservice_running "${webservice_name}"; then
+      echo_success "${webservice_name} is stopped"
     fi
 }
 
