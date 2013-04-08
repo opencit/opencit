@@ -50,10 +50,11 @@ public class ASConfig extends ConfigBase{
         
         super("attestation-service.properties");
     }
+    public ASConfig(Properties custom) {
+        super("attestation-service.properties", custom);
+    }
 
-    
-    public static Properties getJpaProperties() {
-        Configuration config = getConfiguration();
+    public static Properties getJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.as.db.driver", 
@@ -75,6 +76,9 @@ public class ASConfig extends ConfigBase{
                 config.getString("mtwilson.db.password", 
                 "password")));
         return prop;
+    }    
+    public static Properties getJpaProperties() {
+        return getJpaProperties(getConfiguration());
     }
     
     public static int getTrustAgentTimeOutinMilliSecs(){

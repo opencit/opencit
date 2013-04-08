@@ -165,6 +165,7 @@ public class HostBO extends BaseBO {
     }
 
 	private String getLocation(PcrManifest pcrManifest) {
+        if( pcrManifest == null ) { return null; }
         if( pcrManifest.containsPcr(LOCATION_PCR) ) {
             String value = pcrManifest.getPcr(LOCATION_PCR).getValue().toString();
             return locationPcrJpaController.findTblLocationPcrByPcrValue(value);

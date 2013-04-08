@@ -142,7 +142,7 @@ public class TrustAgentSecureClient {
             OutputStream sockOutput = sock.getOutputStream();
 
             log.info("About to start reading/writing to/from socket.");
-
+            log.debug("Writing: {}", new String(data));
             byte[] buf = new byte[5000];
                 sockOutput.write(data, 0, data.length);
             int bytes_read = sockInput.read(buf);

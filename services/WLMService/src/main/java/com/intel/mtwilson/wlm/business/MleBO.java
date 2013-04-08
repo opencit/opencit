@@ -86,7 +86,15 @@ public class MleBO extends BaseBO {
 	 */
 	public String addMLe(MleData mleData) {
                                 try {
-                                        TblMle tblMle = getMleDetails(mleData.getName(),
+                                    log.debug("add mle type: {}", mleData.getMleType());
+                                    log.debug("add mle name: {}", mleData.getName());
+                                    log.debug("add mle version: {}", mleData.getVersion());
+                                    log.debug("add mle os name: {}", mleData.getOsName());
+                                    log.debug("add mle os version: {}", mleData.getOsVersion());
+                                    log.debug("add mle oem: {}", mleData.getOemName());
+                                    log.debug("add mle attestation type: {}", mleData.getAttestationType());
+
+                                    TblMle tblMle = getMleDetails(mleData.getName(),
                                                         mleData.getVersion(), mleData.getOsName(),
                                                         mleData.getOsVersion(), mleData.getOemName());
 
@@ -412,6 +420,9 @@ public class MleBO extends BaseBO {
 		if (mleManifests != null) {
 
 			for (ManifestData manifestData : mleManifests) {
+                log.debug("add pcr manifest name: {}", manifestData.getName());
+                log.debug("add pcr manifest value: '{}'", manifestData.getValue());
+                
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(manifestData.getName());
                                                                                                 // Bug: 375. Need to ensure we are accepting only valid hex strings.
