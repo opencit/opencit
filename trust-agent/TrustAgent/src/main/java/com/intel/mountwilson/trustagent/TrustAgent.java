@@ -71,7 +71,7 @@ public class TrustAgent {
         } else if (xmlInput.contains("host_info")) {
             return hostInfo(xmlInput);
         } else {
-            return generateErrorResponse(ErrorCode.BAD_REQUEST);
+            return generateErrorResponse(ErrorCode.UNSUPPORTED_OPERATION, xmlInput);
         }
     }
 

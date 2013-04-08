@@ -307,6 +307,15 @@ public class TrustAgentSecureClient {
 
     }
 
+    /**
+     * How to test this:  
+     * 
+     * openssl s_client -connect 10.1.71.169:9999
+     * <host_info></host_info>
+     * 
+     * 
+     * @return 
+     */
     public HostInfo getHostInfo()  {
         this.data = "<host_info></host_info>".getBytes();
         HostInfo response;

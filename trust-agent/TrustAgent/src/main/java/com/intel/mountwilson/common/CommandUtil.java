@@ -188,16 +188,22 @@ public class CommandUtil {
     }
 
     public static String generateErrorResponse(ErrorCode errorCode) {
-
+        return generateErrorResponse(errorCode, null);
+    }
+    
+    public static String generateErrorResponse(ErrorCode errorCode, String optionalDescription) {
+        String extra = "";
+        if( optionalDescription != null ) {
+            extra = ": "+optionalDescription;
+        }
         String responseXML =
                 "<client_request> "
                 + "<timestamp>" + new Date(System.currentTimeMillis()).toString() + "</timestamp>"
                 + "<clientIp>" + StringEscapeUtils.escapeXml(CommandUtil.getHostIpAddress()) + "</clientIp>"
                 + "<error_code>" + errorCode.getErrorCode() + "</error_code>"
-                + "<error_message>" + StringEscapeUtils.escapeXml(errorCode.getMessage()) + "</error_message>"
+                + "<error_message>" + StringEscapeUtils.escapeXml(errorCode.getMessage() + extra) + "</error_message>"
                 + "</client_request>";
         return responseXML;
     }
-    
     
 }
