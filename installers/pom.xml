@@ -26,6 +26,7 @@
     <module>WhiteListPortalLinuxInstaller</module>
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-server</module>
+    <module>TomcatLinuxInstaller</module>
   </modules>
 
 <build>
