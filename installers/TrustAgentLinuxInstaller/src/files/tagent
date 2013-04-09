@@ -217,7 +217,6 @@ setup_interactive_install() {
         # This is the place to do any setup while trust agent is not running
         /usr/local/bin/pcakey
 		if [ $? == 1 ]; then
-			echo "Unable to download Privacy CA files: try 'pcakey' again, check server address, username, and password"
 			exit 1
 		fi
         # After setup is done, start the trust agent:
