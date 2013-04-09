@@ -74,6 +74,10 @@ cp functions "${package_dir}"
 cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
 #cp *.sql "${package_dir}"/database/
 
+# copy default logging settings to /etc
+chmod 700 logback.xml
+cp logback.xml "${intel_conf_dir}"
+
 # copy control scripts to /usr/local/bin
 chmod 700 tagent pcakey
 mkdir -p /usr/local/bin

@@ -3,7 +3,7 @@
   <property name="USER_HOME" value="/usr/share/glassfish3/glassfish/domains/domain1/logs" />
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>/tmp/ta.log</file>
+    <file>/var/log/trustAgent.log</file>
     <append>true</append>
     <encoder>
       <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
@@ -11,7 +11,7 @@
   </appender>
 
   <appender name="Logger" class="ch.qos.logback.core.FileAppender">
-    <file>${USER_HOME}/server.log</file>
+    <file>/var/log/trustAgent.log</file>
     <append>true</append>
     <encoder>
       <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
