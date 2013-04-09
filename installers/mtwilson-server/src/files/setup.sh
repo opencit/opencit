@@ -42,10 +42,10 @@ export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if [ "$DATABASE_VENDOR" == "mysql" ] ; then
-  mysqlconnector_file=`ls ~/* -1 2>/dev/null | grep -i mysql`
+  mysqlconnector_file=`ls ~ -1 2>/dev/null | grep -i mysql`
   if [ -n "$mysqlconnector_file" ]; then
     mkdir -p /opt/intel/cloudsecurity/setup-console
-    cp $mysqlconnector_file /opt/intel/cloudsecurity/setup-console
+    cp ~/$mysqlconnector_file /opt/intel/cloudsecurity/setup-console
   fi
   mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/setup-console/* 2>/dev/null | grep -i mysql`
   if [ -z "$mysqlconnector_file" ]; then
