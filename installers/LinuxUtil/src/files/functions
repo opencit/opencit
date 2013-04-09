@@ -19,6 +19,13 @@ DEFAULT_MYSQL_PORTNUM="3306"
 DEFAULT_MYSQL_USERNAME="root"
 DEFAULT_MYSQL_PASSWORD=""
 DEFAULT_MYSQL_DATABASE="mw_as"
+
+DEFAULT_POSTGRES_HOSTNAME="127.0.0.1"
+DEFAULT_POSTGRES_PORTNUM="5432"
+DEFAULT_POSTGRES_USERNAME="root"
+DEFAULT_POSTGRES_PASSWORD=""
+DEFAULT_POSTGRES_DATABASE="mw_as"
+
 DEFAULT_JAVA_REQUIRED_VERSION="1.6"
 DEFAULT_GLASSFISH_REQUIRED_VERSION="3.0"
 DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
@@ -1081,6 +1088,403 @@ mysql_create_ssl() {
   openssl verify -CAfile "${mysql_ssl_ca_cert}" "${ssl_cert}"
 }
 
+### FUNCTION LIBRARY: postgres
+
+postgres_clear() {
+  POSTGRES_HOME=""
+  psql=""
+}
+
+# Environment:
+# - postgres_required_version
+postgres_version_report() {
+  postgres_version
+  if [ "$POSTGRES_CLIENT_VERSION_OK" == "yes" ]; then
+    echo_success "Postgres client version $POSTGRES_CLIENT_VERSION is ok"
+  else
+    echo_warning "Postgres client version $POSTGRES_CLIENT_VERSION is not supported, minimum is ${postgres_required_version}"
+  fi
+}
+
+# Environment:
+# - postgres_required_version
+# installs postgres client programs (not the server)
+# we need the postgres client to create or patch the database, but
+# the server can be installed anywhere
+postgres_install() {
+  POSTGRES_CLIENT_YUM_PACKAGES="postgresql-client-common"
+  POSTGRES_CLIENT_APT_PACKAGES="postgresql-client-common"
+  postgres_detect > /dev/null
+
+  if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
+    auto_install "Postgres client" "POSTGRES_CLIENT" >> $INSTALL_LOG_FILE
+    if [[ -z "$POSTGRES_HOME" || -z "$psql" ]]; then
+      echo_failure "Unable to auto-install Postgres client" | tee -a $INSTALL_LOG_FILE
+      echo "Postgres download URL:" >> $INSTALL_LOG_FILE
+      echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
+    fi
+  else
+    echo "Postgres client is already installed" >> $INSTALL_LOG_FILE
+    echo "Postgres client is already installed skipping..."
+  fi
+}
+
+# Environment:
+# - postgres_required_version
+# installs postgres server 
+postgres_server_install(){
+  POSTGRES_SERVER_YUM_PACKAGES="postgresql"
+  POSTGRES_SERVER_APT_PACKAGES="postgresql"
+
+  postgres_server_detect >> $INSTALL_LOG_FILE
+  if [[ -n "$postgresd" ]]; then
+    echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
+    echo "Postgres server is already installed skipping..."
+    return;
+  fi
+  if [[ -z "$postgresd" ]]; then
+    auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
+    postgres_server_detect
+  fi
+  if [[ -z "$postgresd" ]]; then
+    POSTGRES_SERVER_YUM_PACKAGES="postgresql"
+    POSTGRES_SERVER_APT_PACKAGES="postgresql"
+    auto_install "Postgres server" "POSTGRES_SERVER"  >> $INSTALL_LOG_FILE
+    postgres_server_detect
+  fi
+  if [[ -z "$postgresd" ]]; then
+    echo_failure "Unable to auto-install Postgres server" | tee -a $INSTALL_LOG_FILE
+    echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
+    echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
+  fi
+}
+
+# Environment:
+# - postgres_required_version
+postgres_detect(){
+  local min_version="${1:-${postgres_required_version}}"
+  if [[ -n "$POSTGRES_HOME" && -n "$psql" && -f "$psql" ]]; then
+    return
+  fi
+  psql=`which psql 2>/dev/null`
+  if [ -e "$psql" ]; then
+    POSTGRES_HOME=`dirname $psql`
+    echo "Found postgres client: $psql"
+    postgres_version ${min_version}
+    if [ "$POSTGRES_CLIENT_VERSION_OK" != "yes" ]; then
+      POSTGRES_HOME=''
+      psql=""
+    fi
+  fi
+}
+
+postgres_server_detect() {
+  #find the host file
+  postgresh=`find / -name pg_hba.conf`
+
+  echo "postgresh=$postgresh"
+
+  if [[ -n "$postgresd" && -f "$postgresd" ]]; then
+    echo "Found postgres server: $postgresd"
+    echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+    return 0
+  fi
+  if [[ -n /usr/share/postgresql && -f /etc/init.d/postgresql ]]; then
+    postgresd="/etc/init.d/postgresql"
+    echo "Found postgres server: $postgresd"
+    echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+    return 0
+  fi
+  echo "Postgres server not found"
+  return 1
+}
+postgres_version(){
+  local min_version="${1:-${postgres_required_version}}"
+  POSTGRES_CLIENT_VERSION=""
+  POSTGRES_CLIENT_VERSION_OK=""
+
+  if [ -n "$psql" ]; then
+    POSTGRES_CLIENT_VERSION=`$psql --version |  head -n1 | awk '{print $3}'`
+    echo "POSTGRES_CLIENT_VERSION: $POSTGRES_CLIENT_VERSION"
+    if is_version_at_least "$POSTGRES_CLIENT_VERSION" "${min_version}"; then
+      POSTGRES_CLIENT_VERSION_OK=yes
+    else
+      POSTGRES_CLIENT_VERSION_OK=no
+    fi
+  fi
+  echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK"
+}
+
+# must load from config file or call postgres_detect prior to calling this function
+postgres_env_report() {
+  echo "psql=$psql"
+}
+
+# Environment:
+# - postgres_required_version
+postgres_require() {
+  local min_version="${1:-${postgres_required_version}}"
+  if [[ -z "$POSTGRES_HOME" || -z "$psql" || ! -f "$psql" ]]; then
+    postgres_detect ${min_version} > /dev/null
+  fi
+  if [[ -z "$POSTGRES_HOME" || -z "$psql" || ! -f "$psql" ]]; then
+    echo "Cannot find Postgres client version $min_version or later"
+    exit 1
+  fi
+}
+
+
+# Environment:
+# - postgres_required_version\
+# format like this -> psql -h 127.0.0.1 -p 5432 -d mw_as -U root -c "\l"
+postgres_connection() {
+  postgres_require
+  postgres_connect="psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}"
+}
+
+# Environment:
+# - postgres_required_version
+# sets the is_postgres_available variable to "yes" or ""
+postgres_test_connection() {
+  postgres_connection
+  is_postgres_available=""
+  #check if postgres is installed and we can connect with provided credencials
+  local postgres_test_result=`$postgres_connect -c '\l' 2>/tmp/intel.postgres.err | grep ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} | wc -l`
+  if [ $postgres_test_result -gt 0 ]; then
+    is_postgres_available="yes"
+  fi
+  postgres_connection_error=`cat /tmp/intel.postgres.err`
+  
+  #echo "postgres_connection_error: $postgres_connection_error"
+  rm -f /tmp/intel.postgres.err
+}
+
+# Environment:
+# - postgres_required_version
+postgres_test_connection_report() {
+  echo -n "Testing database connection... "
+  postgres_test_connection
+  if [ -n "$is_postgres_available" ]; then
+    echo "OK"
+  else
+    echo "FAILED"
+    echo_failure "${postgres_connection_error}"
+  fi
+}
+
+# responsible for ensuring that the connection properties in the config file
+# Call this from the control script such as "asctl" before calling the other postgres_* functions
+# Parameters:
+# - absolute path to configuration file
+# - prefix of psql property file names (java style, dot is added automatically)
+# Environment:
+# - script_name such as 'asctl' or 'wlmctl'
+# - intel_conf_dir (deprecated, just use absolute package_config_filename)
+# - package_config_filename  (should be absolute)
+postgres_configure_connection() {
+    local config_file="${1:-/etc/intel/cloudsecurity/postgres.properties}"
+    local prefix="${2:-postgres}"
+    postgres_test_connection
+    if [ -z "$is_postgres_available" ]; then
+      postgres_read_connection_properties "${config_file}" "${prefix}"
+      postgres_test_connection
+    fi
+    while [ -n "$postgres_connection_error" ]
+    do
+      echo_warning "Cannot connect to Postgres: $postgres_connection_error"
+      prompt_yes_no POSTGRES_RETRY_CONFIGURE_AFTER_FAILURE "Do you want to configure it now?"
+      if [[ "no" == "$POSTGRES_RETRY_CONFIGURE_AFTER_FAILURE" ]]; then
+        echo "Postgres settings are in ${package_config_filename}"
+        echo "Run '${script_name} setup' after configuring to continue."
+        return 1
+      fi
+      postgres_userinput_connection_properties
+      postgres_test_connection
+    done
+      echo_success "Connected to database \`${POSTGRES_DATABASE}\` on ${POSTGRES_HOSTNAME}"
+#      local should_save
+#      prompt_yes_no should_save "Save in ${package_config_filename}?"
+#      if [[ "yes" == "${should_save}" ]]; then
+        postgres_write_connection_properties "${config_file}" "${prefix}"
+#      fi
+}
+
+
+# requires a postgres connection that can access the existing database, OR (if it doesn't exist)
+# requires a postgres connection that can create databases and grant privileges
+# call postgres_configure_connection before calling this function
+postgres_create_database() {
+  postgres_test_connection
+  local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
+  local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
+
+  if [ -n "$is_postgres_available" ]; then
+    echo_success "Database \`${POSTGRES_DATABASE}\` already exists"
+    echo_success "Database \`${POSTGRES_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
+    return 0
+  else
+    echo "Creating database..."    >> $INSTALL_LOG_FILE
+    sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+    postgres_connection_error=`cat /tmp/intel.postgres.err`
+    echo "postgres_connection_error: $postgres_connection_error"
+    sudo -u postgres psql postgres -c "${grant_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+    postgres_connection_error=`cat /tmp/intel.postgres.err`
+    echo "postgres_connection_error: $postgres_connection_error"
+
+    postgres_test_connection
+    if [ -z "$is_postgres_available" ]; then
+      echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE
+      echo "Try to execute the following commands on the database:"  >> $INSTALL_LOG_FILE
+      echo "${create_sql}" >> $INSTALL_LOG_FILE
+      echo "${grant_sql}"  >> $INSTALL_LOG_FILE
+      return 1
+    fi
+  fi
+}
+
+# before using this function, you must first set the connection variables postgres_*
+# example:  postgres_run_script /path/to/statements.sql
+postgres_run_script() {
+  local scriptfile="${1}"
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "##### [${datestr}] Script file: ${scriptfile}" >> ${postgres_setup_log}
+  $postgres_connect --force ${POSTGRES_DATABASE} < "${scriptfile}" 2>> ${postgres_setup_log}
+}
+
+# requires a postgres connection that can create tables and procedures inside an existing database.
+# depends on postgres_* variables for the connection information.
+# call postgres_configure_connection before calling this function.
+# Parameters: a list of sql files to execute (absolute paths)
+postgres_install_scripts() {
+  local scriptlist="$@"
+  postgresd_test_connection
+  if [ -n "$is_postgres_available" ]; then
+    echo "Connected to ${POSTGRES_HOSTNAME} as ${POSTGRES_USERNAME}. Executing script..."
+    for scriptname in $scriptlist
+    do
+        postgres_run_script $scriptname
+    done
+    return 0
+  else
+    echo_failure "Cannot connect to database."
+    return 1
+  fi
+}
+
+postgres_running() {  
+  POSTGRES_SERVER_RUNNING=''
+  if [ -n "$postgresd" ]; then
+    local is_running=`$postgresd status | grep running`
+    if [ -n "$is_running" ]; then
+      POSTGRES_SERVER_RUNNING=yes
+    fi
+  fi
+}
+
+postgres_running_report() {
+  echo -n "Checking Postgres process... "
+  postgres_running
+  if [[ "$POSTGRES_SERVER_RUNNING" == "yes" ]]; then
+    echo "Running"
+  else
+    echo "Not running"
+  fi
+}
+postgres_start() {
+  if [ -n "$postgresd" ]; then
+      $postgresd start
+  fi
+}
+postgres_stop() {
+  if [ -n "$postgresd" ]; then
+      $postgresd stop
+  fi
+}
+
+postgres_configure_ca() {
+  export postgres_ssl_ca_dir="${1:-/etc/intel/cloudsecurity/postgres-ca}"
+  # derive CA settings
+  export postgres_ssl_ca_key="${postgres_ssl_ca_dir}/ca.key.pem"
+  export postgres_ssl_ca_cert="${postgres_ssl_ca_dir}/ca.cert.pem"
+  export postgres_ssl_ca_index="${postgres_ssl_ca_dir}/index"  
+}
+
+postgres_configure_ssl() {
+  export postgres_ssl_dir="${1:-/etc/intel/cloudsecurity/postgres-ssl}"
+}
+
+# Parameters:
+# - CA directory where private key, public key, and index is kept
+postgres_create_ca() {
+  postgres_configure_ca "${1:-$postgres_ssl_ca_dir}"
+  # create CA
+  if [ -f "${postgres_ssl_ca_key}" ]; then
+    echo_warning "CA key already exists"
+  else
+    echo "Creating Postgres Certificate Authority..."
+    mkdir -p "${postgres_ssl_ca_dir}"
+    chmod 700 "${postgres_ssl_ca_dir}"
+    touch "${postgres_ssl_ca_key}"
+    chmod 600 "${postgres_ssl_ca_key}"
+    openssl genrsa 2048 > "${postgres_ssl_ca_key}"
+    openssl req -new -x509 -nodes -days 3650 -key "${postgres_ssl_ca_key}" -out "${postgres_ssl_ca_cert}" -subj "/CN=Posgres SSL CA/OU=Mt Wilson/O=Intel/C=US/"
+    echo 0 > "${postgres_ssl_ca_index}"
+  fi
+}
+
+# Parameters:
+# - SSL request file (input)
+# - SSL certificate file (output)
+# - SSL CA dir
+postgres_ca_sign() {
+  local ssl_req="${1}"
+  local ssl_cert="${2}"
+  postgres_configure_ca "${3:-$postgres_ssl_ca_dir}"
+  local prev_index next_index
+  if [ -f "${postgres_ssl_ca_index}" ]; then
+    prev_index=`cat "${postgres_ssl_ca_index}"`
+    ((next_index=prev_index + 1))
+  else
+    echo_failure "Cannot find Postgres CA"
+    return 1
+  fi
+  openssl x509 -req -in "${ssl_req}" -days 3650 -CA "${postgres_ssl_ca_cert}" -CAkey "${postgres_ssl_ca_key}"  -set_serial "${next_index}" -out "${ssl_cert}"
+  echo "${next_index}" > "${postgres_ssl_ca_index}"
+}
+
+# Parameters:
+# - SSL subject name (goes into the common name field in the certificate)
+# - SSL directory where you keep server and client SSL keys and certificates
+# - SSL CA directory
+# Environment:
+# you must have already created the CA key. the CA key information
+# should be in the environment variables:
+# MTWILSON_CA_KEY=/path/to/file
+# MTWILSON_CA_CERT=/path/to/file
+# MTWILSON_CA_PASSWORD=password
+postgres_create_ssl() {
+  local dname="${1}"
+  postgres_configure_ssl "${2:-$postgres_ssl_dir}"
+  postgres_configure_ca "${3:-$postgres_ssl_ca_dir}"
+  echo "Creating Postgres SSL Certificate..."
+  mkdir -p "${postgres_ssl_dir}"
+  if [ -z "$dname" ]; then
+    prompt_with_default POSTGRES_SSL_CERT_CN "Common name (username):"
+    dname=${POSTGRES_SSL_CERT_CN}
+  fi
+  local filename=`echo "${dname}" | sed "s/[^a-zA-Z0-9-]/_/g"`
+  local ssl_key="${postgres_ssl_dir}/${filename}.key.pem"
+  local ssl_cert="${postgres_ssl_dir}/${filename}.cert.pem"
+  openssl req -newkey rsa:1024 -days 3650 -nodes -keyout "${ssl_key}" -out "${ssl_cert}.req" -subj "/CN=${dname}/OU=Mt Wilson/O=Intel/C=US/"
+  openssl rsa -in "${ssl_key}" -out "${ssl_key}"
+  postgres_ca_sign "${ssl_cert}.req" "${ssl_cert}" "${postgres_ssl_ca_dir}"
+  rm -rf "${ssl_cert}.req"
+  # verify the certificate
+  echo "Verifying SSL Certificate..."
+  openssl verify -CAfile "${postgres_ssl_ca_cert}" "${ssl_cert}"
+}
+
+
 ### FUNCTION LIBRARY: glassfish
 
 glassfish_clear() {
@@ -2078,8 +2482,8 @@ print_env_summary_report() {
     error=1
   fi
   if using_mysql; then
-    if [ -n "$MYSQL_HOME" ]; then
-      echo "Mysql: $MYSQL_CLIENT_VERSION"
+    if [ -n "$POSTGRES_HOME" ]; then
+      echo "Mysql: $POSTGRES_CLIENT_VERSION"
     else
       echo_failure "Mysql: not found"
       error=1

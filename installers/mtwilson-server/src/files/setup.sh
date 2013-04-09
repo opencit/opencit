@@ -18,23 +18,23 @@ APICLIENT_YAST_PACKAGES="unzip"
 APICLIENT_ZYPPER_PACKAGES="unzip"
 auto_install "Installer requirements" "APICLIENT"
 
-#echo "Supported database systems are:"
-#echo "postgres"
-#echo "mysql"
-#prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
-#if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
-#  DATABASE_VENDOR=postgres
-#  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
-#fi
+echo "Supported database systems are:"
+echo "postgres"
+echo "mysql"
+prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
+if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
+  DATABASE_VENDOR=postgres
+  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
+fi
 
-#echo "Supported web servers are:"
-#echo "tomcat"
-#echo "glassfish"
-#prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
-#if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
-#  WEBSERVER_VENDOR=tomcat
-#  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
-#fi
+echo "Supported web servers are:"
+echo "tomcat"
+echo "glassfish"
+prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
+if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
+  WEBSERVER_VENDOR=tomcat
+  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
+fi
 
 export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
@@ -138,8 +138,6 @@ echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-# XXX TODO ask about mysql vs postgres
-# XXX TODO ask about glassfish vs tomcat
 
 if using_mysql; then
   mysql_userinput_connection_properties
@@ -168,8 +166,41 @@ if using_mysql; then
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
 elif using_postgres; then
-  echo_warning "Relying on an existing Postgres installation"
+  postgres_userinput_connection_properties
+  
+  export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+  postgres_write_connection_properties "${intel_conf_dir}/attestation-service.properties" "mountwilson.as.db"
+  postgres_write_connection_properties "${intel_conf_dir}/audit-handler.properties" "mountwilson.audit.db"
+  postgres_write_connection_properties "${intel_conf_dir}/management-console.properties" "mountwilson.mc.db"
+
+  # Install Postgres server (if user selected localhost)
+  if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
+    echo "Installing postgres server..."
+    # when we install postgres server on ubuntu it prompts us for root pw
+    # we preset it so we can send all output to the log
+    aptget_detect; dpkg_detect; yum_detect;
+    if [[ -n "$aptget" ]]; then
+     echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
+    fi 
+    postgres_server_install 
+    postgres_start & >> $INSTALL_LOG_FILE
+
+  fi
+  echo "Installing postgres client..."
+  postgres_install
+  postgres_create_database
+
+  export is_postgres_available postgres_connection_error
+  if [ -z "$is_postgres_available" ]; then 
+    echo_warning "Run 'mtwilson setup' after a database is available"; 
+  else
+    mtwilson setup InitDatabase postgres
+  fi
+
+  echo "Installation of postgres client complete..."
 fi
+
 
 
 # Attestation service auto-configuration
