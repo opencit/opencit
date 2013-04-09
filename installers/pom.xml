@@ -27,6 +27,7 @@
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-server</module>
     <module>TomcatLinuxInstaller</module>
+    <module>PostgresLinuxInstaller</module>
   </modules>
 
 <build>

@@ -4,20 +4,15 @@
 # *** TABS will cause errors in some linux distributions
 
 # detect the packages we have to install
-TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tgz 2>/dev/null | tail -n 1`
+POSTGRES_PACKAGE=`ls -1 apache-tomcat*.tgz 2>/dev/null | tail -n 1`
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
 if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
-tomcat_install $TOMCAT_PACKAGE
+tomcat_install $POSTGRES_PACKAGE
 
-# the Tomcat "endorsed" folder is not present by default, we have to create it.
-mkdir ${TOMCAT_HOME}/endorsed
-cp jackson-core-asl.jar ${TOMCAT_HOME}/endorsed/
-cp jackson-mapper-asl.jar ${TOMCAT_HOME}/endorsed/
-cp jackson-xc.jar ${TOMCAT_HOME}/endorsed/
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.

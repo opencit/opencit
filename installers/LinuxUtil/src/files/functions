@@ -1695,30 +1695,6 @@ tomcat_detect() {
   done
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 tomcat_install() {
   tomcat_detect
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
