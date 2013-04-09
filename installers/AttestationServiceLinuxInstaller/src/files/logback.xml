@@ -13,7 +13,10 @@
         <!-- the filter element -->
         <filter class="ch.qos.logback.core.filter.EvaluatorFilter">   
             <evaluator class="ch.qos.logback.classic.boolex.OnMarkerEvaluator">
-                <marker>SYSLOG</marker>
+                <marker>WHITELIST_CONFIGURATION</marker>
+                <marker>HOST_CONFIGURATION</marker>
+                <marker>HOST_ATTESTATION</marker>
+                <marker>USER_CONFIGURATION</marker>                
             </evaluator>
             <onMismatch>DENY</onMismatch>
             <onMatch>ACCEPT</onMatch>
@@ -25,7 +28,7 @@
     </appender>
     
     <root level="INFO">
-        <!-- <appender-ref ref="STDOUT" /> -->
+        <appender-ref ref="STDOUT" />
         <appender-ref ref="AUDIT_FILE" />
     </root>
     

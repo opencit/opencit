@@ -66,7 +66,7 @@ import com.intel.mtwilson.agent.*;
 public class HostTrustBO extends BaseBO {
     public static final String SAML_KEYSTORE_NAME = "SAML";
     private static final Logger log = LoggerFactory.getLogger(HostTrustBO.class);
-    Marker sysLogMarker = MarkerFactory.getMarker("SYSLOG"); // TODO we should create a single class to contain all the markers we want to use throughout the code
+    Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.HOST_ATTESTATION.getValue());
     
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS;
