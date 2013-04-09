@@ -19,6 +19,7 @@ function populateViewHostDataIntoTable(hostDetails) {
 	for ( var item in hostDetails) {
 		var classValue = null;
 		if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
+        if(( hostDetails[item].hostPort == 0) || (hostDetails[item].hostPort == '')){ hostDetails[item].hostPort= '';}
 		str+='<tr class="'+classValue+'">'+
 			'<td class="viewRow1">'+hostDetails[item].hostName+'</td>'+
 			'<td class="viewRow2">'+hostDetails[item].hostIPAddress+'</td>'+

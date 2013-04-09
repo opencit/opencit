@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Map.Entry;
 import java.util.*;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -88,7 +89,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	                		hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage()));
 	                	}
 	                } catch (Exception e) {
-	                	hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,e.getMessage()));
+	                	hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,StringEscapeUtils.escapeHtml(e.getMessage())));
 	                	log.error("Exception while getting trust status "+hostTrustXmlResponse.getName()+". "+ e.getMessage());
 	                	throw ConnectionUtil.handleException(e);
 	                }
@@ -190,7 +191,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                                                                         }
 		} catch (Exception e) {
                                                                         // Bug: 445 - We should not be throwing the exception. Instead return the object with data filled in.                    
-                                                                        hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, null,e.getMessage());
+                                                                        hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, null,StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		return hostVO;
 	}

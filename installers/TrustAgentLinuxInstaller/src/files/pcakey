@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/bin/bash
 #
 # description: Get the PCA key and generate an SSL certificate for the trust agent (to answer attestation requests)
 #

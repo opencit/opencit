@@ -15,6 +15,7 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
@@ -105,7 +106,7 @@ public class RegisterUserController extends AbstractController {
             }
         } catch (Exception e) {
             view.addObject("result",false);   
-            view.addObject("message", "Server Side Error. Could not register the user. " + e.getMessage());
+            view.addObject("message", "Server Side Error. Could not register the user. " +StringEscapeUtils.escapeHtml(e.getMessage()));
                e.printStackTrace();
                return view;
         }

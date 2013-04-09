@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
@@ -113,7 +114,7 @@ public class CheckLoginController extends AbstractController {
                 
             } catch (Exception ex) {
 
-                view.addObject("message", "Error during user authentication. " + ex.getMessage());
+                view.addObject("message", "Error during user authentication. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
                 return view;                    
                 
             } 
