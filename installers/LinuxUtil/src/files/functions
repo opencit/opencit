@@ -2508,138 +2508,104 @@ print_env_summary_report() {
 }
 
 
-### FUNCTION LIBRARY: web service on top of glassfish
+### FUNCTION LIBRARY: web service on top of web server
 
-# parameters: glassfish_application_name such as "AttestationService"
-# output:  returns 0 (success) if running,  1 (error) if not running
-# example:   if webservice_running "myappname"; then echo "ok"; fi
-# also:
-# if web server is glassfish, the variables glassfish_webervice_deployed and 
-#  glassfish_webservice_running are also defined (for use with other glassfish functions)
+# parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
-  local webservice_name="$1"
-  if using_glassfish; then
-    if glassfish_running; then
-      glassfish_webservice_deployed=`$glassfish list-applications | grep "${webservice_name}" | head -n 1 | awk '{ print $1 }'`
-      if [ -n "$glassfish_webservice_deployed" ]; then
-        glassfish_webservice_running=`$glassfish show-component-status $glassfish_webservice_deployed | grep enabled`
-        return 0
+  local webservice_application_name="$1"
+  WEBSERVICE_RUNNING=""
+  if using_glassfish; then 
+    glassfish_running
+    if [ -n "$GLASSFISH_RUNNING" ]; then
+      # TODO ??? check for the specific ATTESTATION_SERVICE_ID name defined in ${intel_conf_dir}/${package_env_filename}
+      WEBSERVICE_DEPLOYED=`$glassfish list-applications | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
+      if [ -n "$WEBSERVICE_DEPLOYED" ]; then
+        WEBSERVICE_RUNNING=`$glassfish show-component-status $WEBSERVICE_DEPLOYED | grep enabled`
       fi
     fi
-  fi
-  if using_tomcat; then
-    if tomcat_running; then
-      echo "Not implemented yet: how to check if an app is running in tomcat"
+  elif using_tomcat; then
+    tomcat_running
+    if [ -n "$TOMCAT_RUNNING" ]; then
+      WEBSERVICE_DEPLOYED=` | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
     fi
   fi
-  return 1
 }
-
 webservice_running_report() {
-  local webservice_name="$1"
-  echo -n "Checking ${webservice_name}... "
-  if webservice_running "${webservice_name}"; then
+  local webservice_application_name="$1"
+  echo -n "Checking ${webservice_application_name}... "
+  webservice_running "${webservice_application_name}"
+  if [ -n "$WEBSERVICE_RUNNING" ]; then
     echo "Running"
-    return 0
   else
     echo "Not running"
-    return 1
   fi
 }
 
 
 webservice_start() {
-  local webservice_name="$1"
-  if using_glassfish; then
-    if webservice_running  "${webservice_name}"; then
-      # the glassfish implementation of webservice_running defines the glassfish_webservice_deployed name that we must use here
-      $glassfish enable $glassfish_webservice_deployed
-    fi
-  fi
-  if using_tomcat; then
-      echo "Not implemented yet: how to start an app in tomcat"
+  local webservice_application_name="$1"
+  webservice_running  "${webservice_application_name}"
+  if [ -n "$WEBSERVICE_DEPLOYED" ]; then
+    $glassfish enable $WEBSERVICE_DEPLOYED
   fi
 }
 webservice_stop() {
-  local webservice_name="$1"
-  if using_glassfish; then
-    if webservice_running  "${webservice_name}"; then
-      # the glassfish implementation of webservice_running defines the glassfish_webservice_deployed name that we must use here
-      $glassfish disable $glassfish_webservice_deployed
-    fi
-  fi
-  if using_tomcat; then
-      echo "Not implemented yet: how to stop an app in tomcat"
+  local webservice_application_name="$1"
+  webservice_running "${webservice_application_name}"
+  if [ -n "$WEBSERVICE_DEPLOYED" ]; then
+    $glassfish disable $WEBSERVICE_DEPLOYED
   fi
 }
 
 webservice_start_report() {
-  local webservice_name="$1"
+    local webservice_application_name="$1"
     if using_glassfish; then
       glassfish_require
-      if not glassfish_running; then
+      glassfish_running
+      if [ -z "$GLASSFISH_RUNNING" ]; then
           glassfish_start_report
       fi
     fi
-    if using_tomcat; then
-       tomcat_require
-       if not tomcat_running; then
-           tomcat_start_report
-       fi
+    webservice_running "${webservice_application_name}"
+    if [ -z "$WEBSERVICE_RUNNING" ]; then
+          action_condition WEBSERVICE_RUNNING "Starting ${webservice_application_name}" "webservice_start ${webservice_application_name} > /dev/null; webservice_running ${webservice_application_name};"
     fi
-    if not webservice_running "${webservice_name}"; then
-         # action_condition is_webservice_running "Starting ${webservice_name}" "webservice_start ${webservice_name} > /dev/null; webservice_running ${webservice_name};"
-          echo "Starting ${webservice_name}..."
-          webservice_start "${webservice_name}"
-    fi
-    if webservice_running "${webservice_name}"; then
-          echo_success "${webservice_name} is running"
+    if [ -n "$WEBSERVICE_RUNNING" ]; then
+          echo_success "${webservice_application_name} is running"
     fi
 }
 webservice_stop_report() {
-  local webservice_name="$1"
+    local webservice_application_name="$1"
     if using_glassfish; then
       glassfish_require
-      if glassfish_running; then
-         if webservice_running "${webservice_name}"; then
-            webservice_stop "${webservice_name}"
-         fi
-      fi
+      glassfish_running
     fi
-    if using_tomcat; then
-      tomcat_require
-      if tomcat_running; then
-         if webservice_running "${webservice_name}"; then
-            webservice_stop "${webservice_name}"
-         fi
-      fi
-    fi
-       
+    webservice_running "${webservice_application_name}"
     # XXX TODO need a function like webcontainer_running to handle all supported containers instead of this glassfish-specific check for GLASSFISH_RUNNING
-#    if [ -n "$GLASSFISH_RUNNING" ]; then
- #     if [ -n "$WEBSERVICE_RUNNING" ]; then
-  #      inaction_condition WEBSERVICE_RUNNING "Stopping ${glassfish_application_name}" "webservice_stop ${glassfish_application_name} > /dev/null; webservice_running ${glassfish_application_name};"
-   #   fi
-    #fi
-    if not webservice_running "${webservice_name}"; then
-      echo_success "${webservice_name} is stopped"
+    if [ -n "$GLASSFISH_RUNNING" ]; then
+      if [ -n "$WEBSERVICE_RUNNING" ]; then
+        inaction_condition WEBSERVICE_RUNNING "Stopping ${webservice_application_name}" "webservice_stop ${webservice_application_name} > /dev/null; webservice_running ${webservice_application_name};"
+      fi
+    fi
+    if [ -z "$WEBSERVICE_RUNNING" ]; then
+      echo_success "${webservice_application_name} is stopped"
     fi
 }
 
 
 # parameters:
-# glassfish_application_name such as "AttestationService"
+# webservice_application_name such as "AttestationService"
 # webservice_war_file such as "/path/to/AttestationService-0.5.1.war"
 # Environment:
 # - glassfish_required_version
 webservice_install() {
-  local glassfish_application_name="$1"
+  local webservice_application_name="$1"
   local webservice_war_file="$2"
   if using_glassfish; then
     glassfish_require
   fi
   #glassfish_create_domain "intel-as" "${ATTESTATION_SERVICE_HOME}/glassfish/domain"
-  webservice_running "${glassfish_application_name}"
+  webservice_running "${webservice_application_name}"
 #  local WAR_NAME=${ATTESTATION_SERVICE_ID}
 #  local WAR_FILE=${ATTESTATION_SERVICE_ID}.war
   local WAR_FILE="${webservice_war_file}"
@@ -2650,17 +2616,17 @@ webservice_install() {
       fi
     else
       if using_glassfish; then
-        echo "Deploying ${glassfish_application_name} to Glassfish..."
-        ${glassfish} deploy --name ${glassfish_application_name} ${WAR_FILE}
+        echo "Deploying ${webservice_application_name} to Glassfish..."
+        ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
       fi
     fi
 }
 
 webservice_uninstall() {
-  local glassfish_application_name="$1"
-  webservice_running "${glassfish_application_name}"
+  local webservice_application_name="$1"
+  webservice_running "${webservice_application_name}"
 #  local WAR_NAME=${ATTESTATION_SERVICE_ID}
-  local WAR_NAME="${glassfish_application_name}"
+  local WAR_NAME="${webservice_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
@@ -2671,5 +2637,103 @@ webservice_uninstall() {
       echo "Application is not deployed on Glassfish; skipping undeploy"
     fi
   fi
+}
+
+### FUNCTION LIBRARY: DATABASE FUNCTIONS
+
+database_restart(){
+  if using_glassfish; then
+    glassfish_restart
+  elif using_tomcat; then
+    tomcat_restart
+  fi
+}
+
+database_shutdown(){
+  if using_glassfish; then
+    glassfish_shutdown
+  elif using_tomcat; then
+    tomcat_shutdown
+  fi
+}
+# determine database
+which_dbms(){
+  echo "Please identify the database which will be used for the Mt Wilson server.
+The supported databases are m=MySQL | p=Postrges"
+  while true; do
+    prompt_with_default DATABASE_CHOICE "Choose Database:" "p";
+
+    if [ "$DATABASE_CHOICE" != 'm' ] && [ "$DATABASE_CHOICE" != 'p' ]; then
+      echo "Be serious.  Common, try again: "
+      DATABASE_CHOICE=
+    else
+      if [ "$DATABASE_CHOICE" = 'm' ]; then 
+        export DATABASE_VENDOR="mysql"
+      else
+        export DATABASE_VENDOR="postgres"
+      fi
+      break
+    fi
+  done
+  echo "Database Choice: $DATABASE_VENDOR"
+}
+
+# determine web server
+which_web_server(){
+echo "Please identify the web server which will be used for the Mt Wilson server.
+The supported servers are g=Glassfish | t=Tomcat"
+  while true; do
+    prompt_with_default WEBSERVER_CHOICE "Choose Web Server:" "t";
+
+    if [ "$WEBSERVER_CHOICE" != 't' ] && [ "$WEBSERVER_CHOICE" != 'g' ]; then
+      echo "Be serious.  Common, try again: "
+      WEBSERVER_CHOICE=
+    else
+      if [ "$WEBSERVER_CHOICE" = 't' ]; then 
+        export WEBSERVER_VENDOR="tomcat"
+      else
+        export WEBSERVER_VENDOR="glassfish"
+      fi
+      break
+    fi
+  done
+  echo "Web Server Choice: $WEBSERVER_VENDOR"
+}
+# parameters:
+# 1. path to properties file
+# 2. properties prefix (for mountwilson.as.db.user etc. the prefix is mountwilson.as.db)
+# the default prefix is "postgres" for properties like "postgres.user", etc. The
+# prefix must not have any spaces or special shell characters
+postgres_read_connection_properties() {
+    local config_file="$1"
+    local prefix="${2:-postgres}"
+    POSTGRES_HOSTNAME=`read_property_from_file ${prefix}.host "${config_file}"`
+    POSTGRES_PORTNUM=`read_property_from_file ${prefix}.port "${config_file}"`
+    POSTGRES_USERNAME=`read_property_from_file ${prefix}.user "${config_file}"`
+    POSTGRES_PASSWORD=`read_property_from_file ${prefix}.password "${config_file}"`
+    POSTGRES_DATABASE=`read_property_from_file ${prefix}.schema "${config_file}"`
+}
+postgres_write_connection_properties() {
+    local config_file="$1"
+    local prefix="${2:-postgres}"
+    update_property_in_file ${prefix}.host "${config_file}" "${POSTGRES_HOSTNAME}"
+    update_property_in_file ${prefix}.port "${config_file}" "${POSTGRES_PORTNUM}"
+    update_property_in_file ${prefix}.user "${config_file}" "${POSTGRES_USERNAME}"
+    update_property_in_file ${prefix}.password "${config_file}" "${POSTGRES_PASSWORD}"
+    update_property_in_file ${prefix}.schema "${config_file}" "${POSTGRES_DATABASE}"
+    update_property_in_file ${prefix}.driver "${config_file}" "org.postgresql.Driver"
+
+}
+
+# parameters:
+# - configuration filename (absolute path)
+# - property prefix for settings in the configuration file (java format is assumed, dot will be automatically appended to prefix)
+postgres_userinput_connection_properties() {
+    echo "Configuring DB Connection..."
+    prompt_with_default POSTGRES_HOSTNAME "Hostname:" ${DEFAULT_POSTGRES_HOSTNAME}
+    prompt_with_default POSTGRES_PORTNUM "Port Num:" ${DEFAULT_POSTGRES_PORTNUM}
+    prompt_with_default POSTGRES_DATABASE "Database:" ${DEFAULT_POSTGRES_DATABASE}
+    prompt_with_default POSTGRES_USERNAME "Username:" ${DEFAULT_POSTGRES_USERNAME}
+    prompt_with_default_password POSTGRES_PASSWORD "Password:" ${DEFAULT_POSTGRES_PASSWORD}
 }
 

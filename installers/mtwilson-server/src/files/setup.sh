@@ -170,9 +170,9 @@ elif using_postgres; then
   
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-  postgres_write_connection_properties "${intel_conf_dir}/attestation-service.properties" "mountwilson.as.db"
-  postgres_write_connection_properties "${intel_conf_dir}/audit-handler.properties" "mountwilson.audit.db"
-  postgres_write_connection_properties "${intel_conf_dir}/management-console.properties" "mountwilson.mc.db"
+  #postgres_write_connection_properties "/etc/intel/cloudsecurity/attestation-service.properties" "mountwilson.as.db"
+  #postgres_write_connection_properties "/etc/intel/cloudsecurity/audit-handler.properties" "mountwilson.audit.db"
+  #postgres_write_connection_properties "/etc/intel/cloudsecurity/management-console.properties" "mountwilson.mc.db"
 
   # Install Postgres server (if user selected localhost)
   if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
