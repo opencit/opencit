@@ -18,23 +18,27 @@ APICLIENT_YAST_PACKAGES="unzip"
 APICLIENT_ZYPPER_PACKAGES="unzip"
 auto_install "Installer requirements" "APICLIENT"
 
-echo "Supported database systems are:"
-echo "postgres"
-echo "mysql"
-prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
-if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
-  DATABASE_VENDOR=postgres
-  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
-fi
+#echo "Supported database systems are:"
+#echo "postgres"
+#echo "mysql"
+#prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
+#if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
+#  DATABASE_VENDOR=postgres
+#  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
+#fi
 
-echo "Supported web servers are:"
-echo "tomcat"
-echo "glassfish"
-prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
-if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
-  WEBSERVER_VENDOR=tomcat
-  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
-fi
+#echo "Supported web servers are:"
+#echo "tomcat"
+#echo "glassfish"
+#prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
+#if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
+#  WEBSERVER_VENDOR=tomcat
+#  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
+#fi
+
+export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if [ "$DATABASE_VENDOR" == "mysql" ] ; then
@@ -56,8 +60,6 @@ fi
 
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 if using_mysql; then
     export MYSQL_REQUIRED_VERSION=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
