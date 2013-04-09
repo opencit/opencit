@@ -9,7 +9,7 @@
          
     <appender name="AUDIT_FILE" class="ch.qos.logback.core.FileAppender">        
     <!-- the filter element -->
-        <file>/var/log/trustAgent.log</file>      
+        <file>/var/log/trustagent.log</file>      
         <encoder>
             <pattern>%date %level [%thread] %logger{10} %msg%n</pattern>
         </encoder>
