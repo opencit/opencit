@@ -105,19 +105,30 @@ public class HostTrustPolicyFactory {
     }
     
     /**
-     * XXX TODO should this go into a jpa controller ? or just USE the jpa controllers ?
      * The purpose of this method is to instantiate a list of policies that have been
      * saved in the database.
      * 
      * This method returns just one policy - so probably it's an instance of RequireAll or RequireAny and
      * it contains other policies within. 
+     * 
+     * NOTE:  the top level policy "RequireAll" does not allow an empty rule set, so if a host exists that
+     * is somehow linked to neither a bios nor vmm mle, and does not have a location defined, it will not
+     * generate any mle-specific or location policies so the overall status will be "not trusted" - by design.
+     *  In English - a host with no trust policy is untrusted
+     * 
      */
     public TrustPolicy loadTrustPolicyForHost(TblHosts host) {
-        Bios bios = new Bios(host.getBiosMleId().getName(), host.getBiosMleId().getVersion(), host.getBiosMleId().getOemId().getName());
-        Vmm vmm = new Vmm(host.getVmmMleId().getName(), host.getVmmMleId().getVersion(), host.getVmmMleId().getOsId().getName(), host.getVmmMleId().getOsId().getVersion());
         ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
-        list.add(new TrustedBios(loadTrustPolicyListForBios(bios,host)));
-        list.add(new TrustedVmm(loadTrustPolicyListForVmm(vmm,host)));
+        // only add bios policy if the host is linked with a bios mle
+        if( host.getBiosMleId() != null ) {
+            Bios bios = new Bios(host.getBiosMleId().getName(), host.getBiosMleId().getVersion(), host.getBiosMleId().getOemId().getName());
+            list.add(new TrustedBios(loadTrustPolicyListForBios(bios,host)));
+        }
+        // only add vmm policy if the host is linked with a vmm mle
+        if( host.getVmmMleId() != null ) {
+            Vmm vmm = new Vmm(host.getVmmMleId().getName(), host.getVmmMleId().getVersion(), host.getVmmMleId().getOsId().getName(), host.getVmmMleId().getOsId().getVersion());
+            list.add(new TrustedVmm(loadTrustPolicyListForVmm(vmm,host)));
+        }
         // only add location policy if the host is expected to be somewhere specific... otherwise, an empty location will result in a policy that can't be met
         if( host.getLocation() != null && !host.getLocation().trim().isEmpty() ) {
             list.add(new TrustedLocation(loadTrustPolicyListForLocation(host)));
