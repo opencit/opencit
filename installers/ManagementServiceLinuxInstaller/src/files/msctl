@@ -12,11 +12,11 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 package_keystore_users_dir=/var/opt/intel/${package_name}/users
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.${package_name}.install.log
-mysql_script_dir=${package_dir}/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=ManagementService
+webservice_application_name=ManagementService
 #java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
@@ -119,13 +119,12 @@ bootstrap_ms_approve_user() {
 }
 
 setup_interactive_install() {
-# - MOVED TO SETUP
-#  if [ -n "$mysql" ]; then
-#    mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
-#    mysql_create_database
-#    #mysql_scripts=`list_mysql_install_scripts`
-#    #mysql_install_scripts ${mysql_scripts}
-#  fi
+  if [ -n "$mysql" ]; then
+    #mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+    #mysql_create_database
+    #mysql_scripts=`list_mysql_install_scripts`
+    #mysql_install_scripts ${mysql_scripts}
+  fi
   # STDALEX_TODO remove this completly
   #depreciated; cloudportal database has been dropped as of 1.0-RC2
   #configure_cloudportal_database
@@ -137,11 +136,11 @@ setup_interactive_install() {
       glassfish_start_report
     fi    
     if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
+      webservice_start_report "${webservice_application_name}"
     else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/ManagementService.war
-      webservice_running_report "${glassfish_application_name}"
+      webservice_uninstall "${webservice_application_name}"
+      webservice_install "${webservice_application_name}" "${package_dir}"/ManagementService.war
+      webservice_running_report "${webservice_application_name}"
     fi
   fi
   bootstrap_ms_internal_user
@@ -171,19 +170,19 @@ case "$1" in
 	echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
         glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -215,7 +214,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         mkdir -p "${intel_conf_dir}"
         cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
         echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"

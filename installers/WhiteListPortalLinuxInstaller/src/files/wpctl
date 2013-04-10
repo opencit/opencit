@@ -17,11 +17,11 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.${package_name}.install.log
-mysql_script_dir=${package_dir}/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=WhiteListPortal
+webservice_application_name=WhiteListPortal
 #java_required_version=1.6.0_29
 
 
@@ -76,11 +76,11 @@ setup_interactive_install() {
       glassfish_start_report
     fi    
     if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
+      webservice_start_report "${webservice_application_name}"
     else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/WhiteListPortal.war
-      webservice_running_report "${glassfish_application_name}"
+      webservice_uninstall "${webservice_application_name}"
+      webservice_install "${webservice_application_name}" "${package_dir}"/WhiteListPortal.war
+      webservice_running_report "${webservice_application_name}"
     fi
   fi
 }
@@ -109,19 +109,19 @@ case "$1" in
 	echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
         glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -149,7 +149,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         if [ -f "${package_config_filename}" ]; then
           mkdir -p "${intel_conf_dir}"
           cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}

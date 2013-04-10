@@ -9,7 +9,6 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-
 # SCRIPT CONFIGURATION:
 script_name=wlmctl
 intel_conf_dir=/etc/intel/cloudsecurity
@@ -18,19 +17,56 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.mw.wlm.install.log
-mysql_script_dir=/opt/intel/cloudsecurity/wlm-service/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=WLMService
+webservice_application_name=WLMService
 #java_required_version=1.6.0_29
+
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
+if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
+configure_api_baseurl() {
+  # setup mtwilson.api.baseurl
+  local input_api_baseurl
+  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+    input_api_baseurl="$MTWILSON_API_BASEURL"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
+    input_api_baseurl="https://${MTWILSON_SERVER}:8181"
+  else
+    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+    prompt_with_default MTWILSON_API_BASEURL "Mt Wilson Server:" "${configured_server_url}"
+    if [[ "$MTWILSON_API_BASEURL" == "http*" ]]; then
+      input_api_baseurl="$MTWILSON_API_BASEURL"
+    else
+      input_api_baseurl="https://${MTWILSON_API_BASEURL}:8181"
+    fi
+  fi
+  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${input_api_baseurl}"
+}
+
+setup_print_summary() {
+  echo "Requirements summary:"
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo "Java: not found"
+  fi
+  if using_glassfish; then
+    if [ -n "$GLASSFISH_HOME" ]; then
+      GLASSFISH_VERSION=`glassfish_version`
+      echo "Glassfish: $GLASSFISH_VERSION"
+    else
+      echo "Glassfish: not found"
+    fi
+  fi
+}
 
 setup_interactive_install() {
   #if using_mysql; then
@@ -50,6 +86,7 @@ setup_interactive_install() {
       webservice_running_report "${glassfish_application_name}"
     fi
   fi
+
 }
 
 
@@ -57,19 +94,9 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" ]]; then
-      echo_failure "Cannot find Java"
-      print_env_summary_report
-      exit 1
-  fi
-  if [[ using_glassfish && -z "$GLASSFISH_HOME" ]]; then
-      echo_failure "Cannot find Glassfish"
-      print_env_summary_report
-      exit 1
-  fi
-  if [[ using_mysql && -z "$mysql" ]]; then
-      echo_failure "Cannot find Mysql"
-      print_env_summary_report
+  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+      echo_warning "Missing one or more required packages"
+      setup_print_summary
       exit 1
   fi
   setup_interactive_install
@@ -86,19 +113,19 @@ case "$1" in
 	echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
         glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -126,7 +153,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         if [ -f "${package_config_filename}" ]; then
           mkdir -p "${intel_conf_dir}"
           cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}

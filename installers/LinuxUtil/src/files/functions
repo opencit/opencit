@@ -1096,18 +1096,18 @@ postgres_clear() {
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 postgres_version_report() {
   postgres_version
   if [ "$POSTGRES_CLIENT_VERSION_OK" == "yes" ]; then
     echo_success "Postgres client version $POSTGRES_CLIENT_VERSION is ok"
   else
-    echo_warning "Postgres client version $POSTGRES_CLIENT_VERSION is not supported, minimum is ${postgres_required_version}"
+    echo_warning "Postgres client version $POSTGRES_CLIENT_VERSION is not supported, minimum is ${POSTGRES_REQUIRED_VERSION}"
   fi
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 # installs postgres client programs (not the server)
 # we need the postgres client to create or patch the database, but
 # the server can be installed anywhere
@@ -1130,7 +1130,7 @@ postgres_install() {
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 # installs postgres server 
 postgres_server_install(){
   POSTGRES_SERVER_YUM_PACKAGES="postgresql"
@@ -1160,9 +1160,9 @@ postgres_server_install(){
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 postgres_detect(){
-  local min_version="${1:-${postgres_required_version}}"
+  local min_version="${1:-${POSTGRES_REQUIRED_VERSION}}"
   if [[ -n "$POSTGRES_HOME" && -n "$psql" && -f "$psql" ]]; then
     return
   fi
@@ -1199,7 +1199,7 @@ postgres_server_detect() {
   return 1
 }
 postgres_version(){
-  local min_version="${1:-${postgres_required_version}}"
+  local min_version="${1:-${POSTGRES_REQUIRED_VERSION}}"
   POSTGRES_CLIENT_VERSION=""
   POSTGRES_CLIENT_VERSION_OK=""
 
@@ -1221,9 +1221,9 @@ postgres_env_report() {
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 postgres_require() {
-  local min_version="${1:-${postgres_required_version}}"
+  local min_version="${1:-${POSTGRES_REQUIRED_VERSION}}"
   if [[ -z "$POSTGRES_HOME" || -z "$psql" || ! -f "$psql" ]]; then
     postgres_detect ${min_version} > /dev/null
   fi
@@ -1235,7 +1235,7 @@ postgres_require() {
 
 
 # Environment:
-# - postgres_required_version\
+# - POSTGRES_REQUIRED_VERSION\
 # format like this -> psql -h 127.0.0.1 -p 5432 -d mw_as -U root -c "\l"
 postgres_connection() {
   postgres_require
@@ -1243,7 +1243,7 @@ postgres_connection() {
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 # sets the is_postgres_available variable to "yes" or ""
 postgres_test_connection() {
   postgres_connection
@@ -1260,7 +1260,7 @@ postgres_test_connection() {
 }
 
 # Environment:
-# - postgres_required_version
+# - POSTGRES_REQUIRED_VERSION
 postgres_test_connection_report() {
   echo -n "Testing database connection... "
   postgres_test_connection
