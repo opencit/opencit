@@ -119,12 +119,13 @@ bootstrap_ms_approve_user() {
 }
 
 setup_interactive_install() {
-  if [ -n "$mysql" ]; then
-    mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
-    mysql_create_database
-    #mysql_scripts=`list_mysql_install_scripts`
-    #mysql_install_scripts ${mysql_scripts}
-  fi
+# - MOVED TO SETUP
+#  if [ -n "$mysql" ]; then
+#    mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+#    mysql_create_database
+#    #mysql_scripts=`list_mysql_install_scripts`
+#    #mysql_install_scripts ${mysql_scripts}
+#  fi
   # STDALEX_TODO remove this completly
   #depreciated; cloudportal database has been dropped as of 1.0-RC2
   #configure_cloudportal_database
