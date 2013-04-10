@@ -178,11 +178,7 @@ monit_required_version=5.5
 # detect the packages we have to install
 MONIT_PACKAGE=`ls -1 monit-*.tar.gz 2>/dev/null | tail -n 1`
 
-# FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-
 # SCRIPT EXECUTION
-
 monit_clear() {
   #MONIT_HOME=""
   monit=""
@@ -275,5 +271,8 @@ check process tagent with pidfile /var/run/tagent.pid
         start program = "/etc/init.d/tagent start" with timeout 30 seconds
         stop program  = "/etc/init.d/tagent stop
 EOF
+
+chmod 700 /etc/monit/monitrc
+service monit restart
 
 echo "monit installed and monitoring tagent"

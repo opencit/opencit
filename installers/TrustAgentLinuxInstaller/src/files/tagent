@@ -299,6 +299,14 @@ function main {
           rm -rf "${package_dir}"
         fi
 	rm /usr/local/bin/${script_name}
+        rm -fr /etc/monit/monitrc
+	echo "Stopping Monit service..."
+	service monit stop &> /dev/null
+	if [ -f /etc/monit/monitrc ]; then
+	 #remove monit config so when it starts back up it has nothing to monitor
+	 # idealy here we should be uninstalling instead
+	 rm -fr /etc/monit/monitrc
+        fi
         ;;
       *)
          echo "Usage: $0 {start|stop|restart|status|setup}"
