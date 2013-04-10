@@ -6,6 +6,7 @@ import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.HostLocation;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.model.*;
+import java.io.IOException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -59,7 +60,7 @@ public class HostTrustBOTest {
      * This is not a good test for AS, should be moved to integration test project
      */
     @Test
-    public void testGetTrustStatusForKnownHost() {
+    public void testGetTrustStatusForKnownHost() throws IOException {
         HostTrustBO htbo = new HostTrustBO();
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response = "+response.vmm);

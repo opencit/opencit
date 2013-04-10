@@ -42,6 +42,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.PolicyEngine;
 import com.intel.mtwilson.policy.TrustPolicy;
@@ -50,6 +51,7 @@ import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
 import com.intel.mtwilson.policy.impl.TrustedBios;
 import com.intel.mtwilson.policy.impl.TrustedLocation;
 import com.intel.mtwilson.policy.impl.TrustedVmm;
+import java.io.IOException;
 
 /**
  *
@@ -73,6 +75,12 @@ public class HostTrustBO extends BaseBO {
     }
     
     public HostTrustBO() {
+        super();
+        loadSamlSigningKey();
+    }
+    
+    public HostTrustBO(PersistenceManager pm) {
+        super(pm);
         loadSamlSigningKey();
     }
     
@@ -101,7 +109,7 @@ public class HostTrustBO extends BaseBO {
      * @param hostName must not be null
      * @return 
      */
-    public HostTrustStatus getTrustStatus(Hostname hostName) {
+    public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
         if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
         long start = System.currentTimeMillis();
         
@@ -109,11 +117,16 @@ public class HostTrustBO extends BaseBO {
         return getTrustStatus(tblHosts, hostName.toString());
     }
     
-    public HostTrustStatus getTrustStatusByAik(Sha1Digest aik) {
+    public HostTrustStatus getTrustStatusByAik(Sha1Digest aik) throws IOException {
         if( aik == null ) { throw new IllegalArgumentException("missing AIK fingerprint"); }
-        
-        TblHosts tblHosts = getHostByAik(aik);
-        return getTrustStatus(tblHosts, aik.toString());
+        try {
+            TblHosts tblHosts = getHostByAik(aik);
+            return getTrustStatus(tblHosts, aik.toString());
+        }
+        catch(IOException e) {
+            log.error("Cannot get trust status for {}", aik.toString(), e); // log the error for sysadmin to troubleshoot, since we are not allowing the original exception to propagate
+            throw new IOException("Cannot get trust status for "+aik.toString()); // rethrowing to make sure that the hostname is not leaked from an exception message; we only provide the AIK in the message
+        }
     }
     
     /**
@@ -122,7 +135,7 @@ public class HostTrustBO extends BaseBO {
      * @param hostId can be Hostname or AIK (SHA1 hex) ; it's used in any exceptions to refer to the host.  this allows us to use the same code for a trust report lookup by hostname and by aik
      * @return 
      */
-    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) {
+    public HostTrustStatus getTrustStatus(TblHosts tblHosts, String hostId) throws IOException {
         if (tblHosts == null) {
             throw new ASException(
                     ErrorCode.AS_HOST_NOT_FOUND,
@@ -132,28 +145,7 @@ public class HostTrustBO extends BaseBO {
         log.info( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
         log.info( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
-        // bug #538 first check if the host supports tpm
-        HostAgentFactory factory = new HostAgentFactory();
-        HostAgent agent = factory.getHostAgent(tblHosts);
-        if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
-            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, tblHosts.toString());
-        }
-        
-        PcrManifest pcrManifest = agent.getPcrManifest();
-        
-        HostReport hostReport = new HostReport();
-        hostReport.aik = null; // TODO
-        hostReport.pcrManifest = pcrManifest;
-        hostReport.tpmQuote = null; // TODO
-        hostReport.variables = new HashMap<String,String>(); // TODO
-        
-        HostTrustPolicyFactory hostTrustPolicyFactory = new HostTrustPolicyFactory(getEntityManagerFactory());
-
-        
-        TrustPolicy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts); // must include both bios and vmm policies
-
-        PolicyEngine policyEngine = new PolicyEngine();
-        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+        TrustReport trustReport = getTrustReportForHost(tblHosts);
         
         HostTrustStatus trust = new HostTrustStatus();
         TrustReport biosReport = trustReport.findMark(TrustedBios.class.getName());
@@ -184,6 +176,42 @@ public class HostTrustBO extends BaseBO {
 
         return trust;
     }
+    
+    /**
+     * NOTE:  the trust report MUST NOT include the host name or ip address;  it's fine to include the AIK.
+     * This property allows the trust report to be used anonymously or to be attached to hostname/ipaddress 
+     * at a higher level if needed for a non-privacy application.
+     * 
+     * @param tblHosts
+     * @return
+     * @throws IOException 
+     */
+    public TrustReport getTrustReportForHost(TblHosts tblHosts) throws IOException {
+        // bug #538 first check if the host supports tpm
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(tblHosts);
+        if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
+            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, tblHosts.toString());
+        }
+        
+        PcrManifest pcrManifest = agent.getPcrManifest();
+        
+        HostReport hostReport = new HostReport();
+        hostReport.aik = null; // TODO
+        hostReport.pcrManifest = pcrManifest;
+        hostReport.tpmQuote = null; // TODO
+        hostReport.variables = new HashMap<String,String>(); // TODO
+        
+        HostTrustPolicyFactory hostTrustPolicyFactory = new HostTrustPolicyFactory(getEntityManagerFactory());
+
+        
+        TrustPolicy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts); // must include both bios and vmm policies
+
+        PolicyEngine policyEngine = new PolicyEngine();
+        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+        
+        return trustReport;
+    }
 
     /**
      * 
@@ -191,7 +219,7 @@ public class HostTrustBO extends BaseBO {
      * @param tblSamlAssertion must not be null
      * @return 
      */
-    public TxtHost getHostWithTrust(Hostname hostName, TblSamlAssertion tblSamlAssertion) {
+    public TxtHost getHostWithTrust(Hostname hostName, TblSamlAssertion tblSamlAssertion) throws IOException {
         TblHosts record = getHostByName(hostName);
         HostTrustStatus trust = getTrustStatus(hostName);
         TxtHostRecord data = createTxtHostRecord(record);
@@ -226,7 +254,7 @@ public class HostTrustBO extends BaseBO {
      * @param hostName must not be null
      * @return {@link String}
      */
-    public String getTrustStatusString(Hostname hostName) { // datatype.Hostname
+    public String getTrustStatusString(Hostname hostName) throws IOException { // datatype.Hostname
 
         HostTrustStatus trust = getTrustStatus(hostName);
 

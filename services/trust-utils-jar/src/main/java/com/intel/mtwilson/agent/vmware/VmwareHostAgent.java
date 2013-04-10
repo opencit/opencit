@@ -78,7 +78,7 @@ public class VmwareHostAgent implements HostAgent {
 
     @Override
     public boolean isTpmEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true; // XXX TODO we need this acpability !!! throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -214,7 +214,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     }
 
     @Override
-    public PcrManifest getPcrManifest() {
+    public PcrManifest getPcrManifest() throws IOException {
         try {
             if( isTpmPresent() ) {
 				if (vCenterVersion.contains("5.1")) {
@@ -246,6 +246,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
         }
         catch(Exception e) {
             log.error("error during getManifest: "+e.toString(), e);
+            throw new IOException("Cannot retrieve PCR Manifest from "+hostname, e);
         }
         return pcrManifest;
     }

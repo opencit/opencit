@@ -55,7 +55,7 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public boolean isTpmEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true; // XXX TODO we need a capability to get this from the host!!  throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -95,7 +95,7 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public X509Certificate getAikCaCertificate() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");  // XXX TODO we need a new API for trust agent to return the privacy ca public key ... corresponding to its aik cert (it should get it from privacy ca when the aik cert is signed ) ... that will allow AS to check that AIK CERT was signed by this AIK CA CERT (PRIVACY CA) and then it can check that the PRIVACY CA cert is in the list of trusted certs. this way if the privacy ca is NOT in the list,  we have some info to display to the administrator.  the other way to do it is to try and look up the privacy ca cert based on the issuer name in the AIK CERT,  but then if it's not in the list the only thing we have to display to the administrator is the AIK CERT info, which only mentinos teh issuer's name.   in the case of a mt wilson privacy ca,  the issuer name is useless because it doesn't say which server its on, etc. 
 //        return null; // XXX TODO throw exception or return null? call should first check isAikCaAvailable  // vmware does not make the Privacy CA Certificate available through its API, if it even uses a Privacy CA
     }
 
@@ -116,8 +116,16 @@ public class IntelHostAgent implements HostAgent {
 
 
     @Override
-    public PcrManifest getPcrManifest() {
-        // XXX TODO  obtain the manifest map  using existing code in one of the trust agent helper classes
+    public PcrManifest getPcrManifest() throws IOException {
+        if( pcrManifest == null ) {
+            try {
+                TAHelper helper = new TAHelper();
+                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient);
+            }
+            catch(Exception e) {
+                throw new IOException("Cannot retrieve PCR Manifest from "+hostAddress.toString(), e);
+            }
+        }
         return pcrManifest;
     }
 
@@ -125,6 +133,7 @@ public class IntelHostAgent implements HostAgent {
     public TxtHostRecord getHostDetails() throws IOException {
         HostInfo hostInfo = trustAgentClient.getHostInfo();
         TxtHostRecord host = new TxtHostRecord();
+        host.BIOS_Name = "Unknown"; // XXX TODO the HostInfo class doesn't have a getBiosName() function!!
         host.BIOS_Oem = hostInfo.getBiosOem().trim();
         host.BIOS_Version = hostInfo.getBiosVersion().trim();
         host.VMM_Name = hostInfo.getVmmName().trim();

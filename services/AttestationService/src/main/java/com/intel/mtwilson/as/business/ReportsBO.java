@@ -20,6 +20,7 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.jpa.PersistenceManager;
 import java.io.StringWriter;
 import java.util.*;
 
@@ -41,6 +42,15 @@ public class ReportsBO extends BaseBO {
 
     public void setDataEncryptionKey(byte[] key) {
         dataEncryptionKey = key;
+    }
+    
+    
+    public ReportsBO() {
+        super();
+    }
+    
+    public ReportsBO(PersistenceManager pm) {
+        super(pm);
     }
 
     public HostsTrustReportType getTrustReport(Collection<Hostname> hostNames) { // datatype.Hostname

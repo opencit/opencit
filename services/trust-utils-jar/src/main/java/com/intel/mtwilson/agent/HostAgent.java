@@ -209,7 +209,7 @@ public interface HostAgent {
      * @param host
      * @return 
      */
-    PcrManifest getPcrManifest();
+    PcrManifest getPcrManifest() throws IOException;
     
     /**
      * XXX TODO adapter for existing interface

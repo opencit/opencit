@@ -59,7 +59,7 @@ public class HostTest {
      * This is not a good unit test for AS, should be moved to integration test project
      */
     @Test
-    public void testGetTrustStatusForKnownHost() {
+    public void testGetTrustStatusForKnownHost() throws IOException {
         HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);

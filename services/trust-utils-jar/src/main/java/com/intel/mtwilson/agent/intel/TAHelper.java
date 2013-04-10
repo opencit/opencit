@@ -27,12 +27,16 @@ import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
 import java.io.StringWriter;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
@@ -40,9 +44,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * XXX this class needs to be moved to a trust-agent-specific package, it's
- * not a reusable "manifest helper" like sha1 hash builder. it's more like
- * the vmware client/helper classes that are in a vmware package.
+ * In order to use the TAHelper, you need to have attestation-service.properties on your machine.
+ * 
+ * Here are example properties that Jonathan has at C:/Intel/CloudSecurity/attestation-service.properties:
+ * 
+com.intel.mountwilson.as.home=C:/Intel/CloudSecurity/AttestationServiceData/aikverifyhome
+com.intel.mountwilson.as.aikqverify.cmd=aikqverify.exe
+com.intel.mountwilson.as.openssl.cmd=openssl.bat
+ * 
+ * The corresponding files must exist. From the above example:
+ * 
+ *    C:/Intel/CloudSecurity/AttestationServiceData/aikverifyhome
+ *    C:/Intel/CloudSecurity/AttestationServiceData/aikverifyhome/data   (can be empty, TAHelper will save files there)
+ *    C:/Intel/CloudSecurity/AttestationServiceData/aikverifyhome/bin
+ *         contains:  aikqverify.exe, cygwin1.dll
+ * 
  * @author dsmagadx
  */
 public class TAHelper {
@@ -51,7 +67,7 @@ public class TAHelper {
     private String aikverifyhome;
     private String aikverifyhomeData;
     private String aikverifyhomeBin;
-    private String opensslCmd;
+//    private String opensslCmd;
     private String aikverifyCmd;
     
     private Pattern pcrNumberPattern = Pattern.compile("[0-9]|[0-1][0-9]|2[0-3]"); // integer 0-23 with optional zero-padding (00, 01, ...)
@@ -67,11 +83,11 @@ public class TAHelper {
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
         aikverifyhomeData = aikverifyhome+File.separator+"data";
         aikverifyhomeBin = aikverifyhome+File.separator+"bin";
-        opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
+//        opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");  // 20130409 removing openssl.bat/openssl.sh requirement because it was used in the mtwilson prototype to extract the RSA Public Key from the X509 Certificate;  we now have convenient facilities to do that from our Java code directly
         aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
         
         boolean foundAllRequiredFiles = true;
-        String required[] = new String[] { aikverifyhome, opensslCmd, aikverifyCmd, aikverifyhomeData };
+        String required[] = new String[] { aikverifyhome, aikverifyCmd, aikverifyhomeData };
         for(String filename : required) {
             File file = new File(filename);
             if( !file.exists() ) {
@@ -377,7 +393,9 @@ public class TAHelper {
         return "quote_" + sessionId +".data";
     }
 
-    private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
+    private void saveCertificate(String aikCertificate, String sessionId) throws IOException, CertificateException  {
+        
+        /*
         // XXX this block of code where we fix the PEM format can be replaced with mtwilson-crypto X509Util.encodePemCertificate(X509Util.decodePemCertificate(...input...))
         // first get a consistent newline character
         aikCertificate = aikCertificate.replace('\r', '\n').replace("\n\n", "\n");
@@ -391,8 +409,13 @@ public class TAHelper {
         }
 
         saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
-
-
+        */
+        
+        X509Certificate aikcert = X509Util.decodePemCertificate(aikCertificate);
+        String pem = X509Util.encodePemCertificate(aikcert);
+        FileOutputStream out = new FileOutputStream(new File(aikverifyhomeData + File.separator + getCertFileName(sessionId)));
+        IOUtils.write(pem, out);
+        IOUtils.closeQuietly(out);
     }
 
     private String getCertFileName(String sessionId) {
@@ -437,12 +460,22 @@ public class TAHelper {
           saveFile(getNonceFileName(sessionId), nonceBytes);
     }
 
-    private void createRSAKeyFile(String sessionId)  {
-        
+    private void createRSAKeyFile(String sessionId) throws IOException, CertificateException  {
+        // 20130409 replacing external openssl command with equivalent java code, see below
+        /*
         String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
         log.info( "RSA Key Command {}", command);
         CommandUtil.runCommand(command, false, "CreateRsaKey" );
         //log.log(Level.INFO, "Result - {0} ", result);
+        */
+        FileInputStream in = new FileInputStream(new File(aikverifyhomeData + File.separator + getCertFileName(sessionId)));
+        String x509cert = IOUtils.toString(in);
+        IOUtils.closeQuietly(in);
+        X509Certificate aikcert = X509Util.decodePemCertificate(x509cert);
+        String aikpubkey = X509Util.encodePemPublicKey(aikcert.getPublicKey());
+        FileOutputStream out = new FileOutputStream(new File(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)));
+        IOUtils.write(aikpubkey, out);
+        IOUtils.closeQuietly(out);
     }
 
     private String getRSAPubkeyFileName(String sessionId) {

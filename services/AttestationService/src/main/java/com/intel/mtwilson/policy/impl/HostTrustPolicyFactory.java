@@ -200,11 +200,13 @@ public class HostTrustPolicyFactory {
      */
     public List<TrustPolicy> loadTrustPolicyListForBios(Bios bios, TblHosts tblHosts) {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
+        log.debug("HostTrustPolicyFactory found BIOS MLE: {}", biosMle.getName());
         Collection<TblPcrManifest> pcrInfoList = biosMle.getTblPcrManifestCollection();
         ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
         for(TblPcrManifest pcrInfo : pcrInfoList) {
             PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
             Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
+            log.debug("... PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
             list.add(new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue)));
         }
         return list;
@@ -212,6 +214,7 @@ public class HostTrustPolicyFactory {
 
     public List<TrustPolicy> loadTrustPolicyListForVmm(Vmm vmm, TblHosts tblHosts) {
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
+        log.debug("HostTrustPolicyFactory found VMM MLE: {}", vmmMle.getName());
         
         ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
 
@@ -220,6 +223,7 @@ public class HostTrustPolicyFactory {
         for(TblPcrManifest pcrInfo : pcrInfoList) {
             PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
             Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
+            log.debug("... PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
             list.add(new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue)));
         }
         
@@ -232,6 +236,7 @@ public class HostTrustPolicyFactory {
         Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();
         for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
             PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
+            log.debug("... MODULE for PCR {}", pcrIndex.toString());
             list.add(new PcrEventLogIntegrity(pcrIndex)); // if we're going to look for things in the host's event log, it needs to have integrity
             HashSet<Measurement> measurements = new HashSet<Measurement>();
             

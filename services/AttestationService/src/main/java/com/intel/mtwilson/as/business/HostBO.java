@@ -25,6 +25,7 @@ import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.TrustPolicy;
@@ -71,6 +72,14 @@ public class HostBO extends BaseBO {
             dataEncryptionKey = key; 
             hostController = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey);
         }
+        
+    public HostBO() {
+        super();
+    }
+    
+    public HostBO(PersistenceManager pm) {
+        super(pm);
+    }
         
 	public HostResponse addHost(TxtHost host) {
             

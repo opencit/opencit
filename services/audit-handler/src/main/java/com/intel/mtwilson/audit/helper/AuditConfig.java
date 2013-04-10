@@ -59,9 +59,11 @@ public class AuditConfig extends ConfigBase {
         return defaults;
     }
 
-
     public static Properties getJpaProperties() {
-        Configuration config = getConfiguration();
+        return getJpaProperties(getConfiguration());
+    }
+
+    public static Properties getJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.audit.db.driver", 
