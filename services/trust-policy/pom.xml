@@ -47,6 +47,49 @@
                 <version>1.0.9</version>
                 <scope>test</scope>
         </dependency>
+
+<!-- testing support for serializing json -->
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-mapper-asl</artifactId>
+	<version>1.9.11</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-core-asl</artifactId>
+	<version>1.9.11</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-xc</artifactId>
+	<version>1.9.11</version>
+  <scope>test</scope>
+</dependency>
+
+<!-- testing support for serializing xml -->
+<dependency>
+  <groupId>com.fasterxml.jackson.dataformat</groupId>
+  <artifactId>jackson-dataformat-xml</artifactId>
+  <version>2.1.4</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.codehaus.woodstox</groupId>
+  <artifactId>woodstox-core-asl</artifactId>
+  <version>4.2.0</version>
+  <scope>test</scope>
+</dependency>
+
+        <!-- testing support for deserializing json/xml, so we can operate on saved reports -->        
+<dependency>
+  <groupId>com.fasterxml.jackson.module</groupId>
+  <artifactId>jackson-module-mrbean</artifactId>
+  <version>2.1.1</version>
+  <scope>test</scope>
+</dependency>        
+<!-- end testing support -->
     
     <!-- javascript interpreter for dynamically computed expected pcr values -->
 <dependency>

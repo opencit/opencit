@@ -165,7 +165,7 @@ public class HostTrustBO extends BaseBO {
             trust.location = true;
         }
         
-        logOverallTrustStatus(tblHosts, toString(trust));
+        logOverallTrustStatus(tblHosts, trust);
         
 
         String userName = new AuditLogger().getAuditUserName();
@@ -324,18 +324,41 @@ public class HostTrustBO extends BaseBO {
 
     }
     * */
-    private void logOverallTrustStatus(TblHosts host, String response) {
+    private void logOverallTrustStatus(TblHosts host, HostTrustStatus status) {
         Date today = new Date(System.currentTimeMillis());
         TblTaLog taLog = new TblTaLog();
         taLog.setHostID(host.getId());
         taLog.setMleId(0);
-        taLog.setTrustStatus(false);
-        taLog.setError(response);
+        taLog.setTrustStatus(status.bios && status.vmm); // XXX TODO should we add && status.location?  this true/false thing doesn't handle a case where location is not expected, so it is neither trusted nor untrusted
+        taLog.setError(toString(status));
         taLog.setManifestName(" ");
         taLog.setManifestValue(" ");
         taLog.setUpdatedOn(today);
 
-        new TblTaLogJpaController(getEntityManagerFactory()).create(taLog);
+        TblTaLogJpaController talog = new TblTaLogJpaController(getEntityManagerFactory());
+        
+        talog.create(taLog); // overall status
+        
+        // bios
+        TblTaLog taLogBios = new TblTaLog();
+        taLogBios.setHostID(host.getId());
+        taLogBios.setMleId(host.getBiosMleId().getId());
+        taLogBios.setTrustStatus(status.bios); // XXX TODO should we add && status.location?  this true/false thing doesn't handle a case where location is not expected, so it is neither trusted nor untrusted
+        taLogBios.setError(toString(status));
+        taLogBios.setManifestName(" "); // XXX TODO there should actually be one record per PCR !!!
+        taLogBios.setManifestValue(" ");// XXX TODO there should actually be one record per PCR !!!
+        taLogBios.setUpdatedOn(today);
+        talog.create(taLogBios);
+        
+        TblTaLog taLogVmm = new TblTaLog();
+        taLogVmm.setHostID(host.getId());
+        taLogVmm.setMleId(host.getVmmMleId().getId());
+        taLogVmm.setTrustStatus(status.vmm); // XXX TODO should we add && status.location?  this true/false thing doesn't handle a case where location is not expected, so it is neither trusted nor untrusted
+        taLogVmm.setError(toString(status));
+        taLogVmm.setManifestName(" ");// XXX TODO there should actually be one record per PCR !!!
+        taLogVmm.setManifestValue(" ");// XXX TODO there should actually be one record per PCR !!!
+        taLogVmm.setUpdatedOn(today);
+        talog.create(taLogVmm);
 
     }
 

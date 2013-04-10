@@ -444,6 +444,21 @@
 	<artifactId>jackson-xc</artifactId>
 	<version>1.9.11</version>
 </dependency>
+
+<!-- for testing policy generation, sometimes xml is easier to read than json -->
+<dependency>
+  <groupId>com.fasterxml.jackson.dataformat</groupId>
+  <artifactId>jackson-dataformat-xml</artifactId>
+  <version>2.1.4</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.codehaus.woodstox</groupId>
+  <artifactId>woodstox-core-asl</artifactId>
+  <version>4.2.0</version>
+  <scope>test</scope>
+</dependency>
+<!-- end for testing -->
                 
         <dependency>
             <groupId>com.sun.jersey</groupId>

@@ -280,7 +280,7 @@ public class HostTrustPolicyFactory {
         return list;
     }
     
-    // XXX FOR SUDHIR  ... IF YOU CONVERT HOST.LOCATION TO ID YOU CAN USE AS-IS... OTHERWISE NEED TO LOOK UP LOCATION BY STRING VALUE ... THAT METHOD ISN'T IN THE CONTROLLER RIGHT NOW
+    // XXX FOR SUDHIR  ... IF YOU CONVERT HOST.LOCATION TO ID YOU CAN USE AS-IS... OTHERWISE NEED TO LOOK UP LOCATION BY STRING VALUE ... THAT METHOD ISN'T IN THE LOCATION CONTROLLER RIGHT NOW
     public List<TrustPolicy> loadTrustPolicyListForLocation(TblHosts tblHosts) {
 //        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcr(tblHosts.getLocationId());
         ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();

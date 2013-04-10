@@ -4,6 +4,8 @@
  */
 package test.policy;
 
+//import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
@@ -13,6 +15,7 @@ import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.audit.helper.AuditConfig;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
@@ -20,13 +23,17 @@ import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.policy.TrustPolicy;
 import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.TrustedBios;
+import com.intel.mtwilson.policy.impl.TrustedLocation;
+import com.intel.mtwilson.policy.impl.TrustedVmm;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.MapConfiguration;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
+//import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -60,7 +67,8 @@ public class TestLinuxXen169 {
     private static CustomPersistenceManager pm;
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    private transient static ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    private transient static com.fasterxml.jackson.databind.ObjectWriter xml = new XmlMapper().writerWithDefaultPrettyPrinter(); 
     private transient String hostname = "10.1.71.169";
     private transient String connection = "intel:https://10.1.71.169:9999";
     
@@ -93,6 +101,7 @@ public class TestLinuxXen169 {
         TblOemJpaController oemJpa = null;
         TblPcrManifestJpaController pcrJpa = null;
         HostTrustPolicyFactory hostTrustFactory = null;
+        MwMleSourceJpaController mleSourceJpa = null;
         public CustomPersistenceManager() {
             
         }
@@ -127,18 +136,26 @@ public class TestLinuxXen169 {
             }
             return pcrJpa;
         }
+        public MwMleSourceJpaController getMleSourceJpa() {
+            if( mleSourceJpa == null ) {
+                mleSourceJpa = new MwMleSourceJpaController(getEntityManagerFactory("ASDataPU"));
+            }
+            return mleSourceJpa;
+        }
         public HostTrustPolicyFactory getHostTrustFactory() {
             if( hostTrustFactory == null ) {
                 hostTrustFactory = new HostTrustPolicyFactory(getEntityManagerFactory("ASDataPU"));
             }
             return hostTrustFactory;
         }
+
     }
     
     @BeforeClass
     public static void createPersistenceManager() {
         pm = new CustomPersistenceManager();
     }
+    
     
     /**
      * 
@@ -301,7 +318,21 @@ Pcr 23 = 0000000000000000000000000000000000000000
             pcrWhitelist.setPCRDescription("Automatic VMM whitelist from "+hostname);
             pm.getPcrJpa().create(pcrWhitelist);
         }
-        
+        // whitelist step 8: document that these mle's came from this host (not necessary for attestation, but to make this example complete)
+        MwMleSource biosMleSource = pm.getMleSourceJpa().findByMleId(bios.getId());
+        if( biosMleSource == null ) {
+            biosMleSource = new MwMleSource();
+            biosMleSource.setMleId(bios);
+            biosMleSource.setHostName(hostname);
+            pm.getMleSourceJpa().create(biosMleSource);
+        }
+        MwMleSource vmmMleSource = pm.getMleSourceJpa().findByMleId(vmm.getId());
+        if( vmmMleSource == null ) {
+            vmmMleSource = new MwMleSource();
+            vmmMleSource.setMleId(vmm);
+            vmmMleSource.setHostName(hostname);
+            pm.getMleSourceJpa().create(vmmMleSource);
+        }
         // aik certificate
         if( agent.isAikAvailable() ) {
             if( agent.isAikCaAvailable() ) {
@@ -318,6 +349,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
         // register host
         host.setBiosMleId(bios);
         host.setVmmMleId(vmm);
+        
         pm.getHostsJpa().create(host);
     }
     
@@ -333,7 +365,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
         HostTrustPolicyFactory hostTrustPolicyFactory = pm.getHostTrustFactory();
         TrustPolicy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(host); // must include both bios and vmm policies
         log.debug(json.writeValueAsString(trustPolicy));
-        
+        log.debug(xml.writeValueAsString(trustPolicy)); // same thing in xml , is it more readable?
     }
     
     /**
@@ -455,5 +487,74 @@ Pcr 23 = 0000000000000000000000000000000000000000
         HostTrustBO hostTrustBO = new HostTrustBO(pm);
         TrustReport trustReport = hostTrustBO.getTrustReportForHost(host);        
         log.debug(json.writeValueAsString(trustReport));
+        log.debug(xml.writeValueAsString(trustReport)); // same thing in xml , is it more readable?
+        
+        
+        HostTrustStatus trust = new HostTrustStatus();
+        TrustReport biosReport = trustReport.findMark(TrustedBios.class.getName());
+        if( biosReport != null && biosReport.isTrusted() ) {
+            log.debug("Found bios policy checkmark");
+            trust.bios = true;
+        }
+
+        TrustReport vmmReport = trustReport.findMark(TrustedVmm.class.getName());
+        if( vmmReport != null && vmmReport.isTrusted() ) {
+            log.debug("Found vmm policy checkmark");
+            trust.vmm = true;
+        }
+        // previous check for trusted location was if the host's location field is not null, then it's trusted... but i think this is better as it checks the pcr.  
+        // XXX TODO need a better feedback mechanism from trust policies... when they succeed, they should be able to set attributes.
+        // or else,  just go with the "marks" thing but then we have to post process and look for certain marks and then  set other fields elsewhere based on them ... or maybe that's not necessary??)
+//        trust.location = tblHosts.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
+        TrustReport locationReport = trustReport.findMark(TrustedLocation.class.getName());
+        if( locationReport != null && locationReport.isTrusted() ) {
+            log.debug("Found location policy checkmark");
+            trust.location = true;
+        }
+        
+        log.debug("Summary of trust status:  bios({}), vmm({}), location({})", new boolean[] { trust.bios, trust.vmm, trust.location });
+        
+        
+        /**
+         * Example output for the next block:
+         * 
+2013-04-09 23:09:19,986 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:520] There are 4 reports with trusted PcrMatchesConstant
+2013-04-09 23:09:19,986 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:522] PCR Report com.intel.mtwilson.policy.PcrMatchesConstant trusted? true
+2013-04-09 23:09:19,987 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:523] ---> {
+  "expectedPcr" : {
+    "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+    "index" : "0"
+  }
+}
+2013-04-09 23:09:19,987 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:522] PCR Report com.intel.mtwilson.policy.PcrMatchesConstant trusted? true
+2013-04-09 23:09:19,987 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:523] ---> {
+  "expectedPcr" : {
+    "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+    "index" : "17"
+  }
+}
+2013-04-09 23:09:19,987 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:522] PCR Report com.intel.mtwilson.policy.PcrMatchesConstant trusted? true
+2013-04-09 23:09:19,988 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:523] ---> {
+  "expectedPcr" : {
+    "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+    "index" : "18"
+  }
+}
+2013-04-09 23:09:19,988 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:522] PCR Report com.intel.mtwilson.policy.PcrMatchesConstant trusted? true
+2013-04-09 23:09:19,988 DEBUG [main] t.p.TestLinuxXen169 [TestLinuxXen169.java:523] ---> {
+  "expectedPcr" : {
+    "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+    "index" : "19"
+  }
+}
+         * 
+         */
+        // now look for all pcr matches:
+        List<TrustReport> pcrReports = trustReport.findAllMarks("com.intel.mtwilson.policy.PcrMatchesConstant");
+        log.debug("There are {} reports with trusted PcrMatchesConstant", pcrReports.size());
+        for(TrustReport pcrReport : pcrReports) {
+            log.debug("PCR Report {} trusted? {}", pcrReport.getPolicyName(), pcrReport.isTrusted());
+            log.debug("---> {}", json.writeValueAsString(pcrReport.getPolicy()));
+        }
     }
 }
