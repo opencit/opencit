@@ -2087,6 +2087,8 @@ tomcat_detect() {
       if [ -f "$parent/bin/catalina.sh" ]; then
         TOMCAT_HOME="$parent"
         TOMCAT_BASE=find / -name "webapps"
+        local conf_dir=find / -name "tomcat-users.xml"
+        TOMCAT_CONF=`dirname $conf_dir`
         tomcat="$TOMCAT_HOME/bin/catalina.sh"
         tomcat_bin=$parent/bin
         tomcat_env="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF"
@@ -2125,7 +2127,14 @@ tomcat_install() {
     echo "Unable to auto-install Tomcat"
     echo "  Tomcat download URL:"
     echo "  http://tomcat.apache.org/"
+  else
+    cd $TOMCAT_CONF
+    mv tomcat-users.xml tomcat-users.xml.old
+    sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomcat" password="tomcat" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+    rm  -f tomcat-users.xml.old
+    #chown -R root:tomcat6 tomcat-users.xml
   fi
+
 }
 
 # Run this AFTER tomcat_install
