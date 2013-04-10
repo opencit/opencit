@@ -259,10 +259,21 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
-chmod 700 monitrc
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
 fi
-cp monitrc /etc/monit/monitrc
+cat >> /etc/monit/monitrc << EOF
+## Monit Process Monitor Config File
+## Configuration options and examples can be found here:
+## http://mmonit.com/monit/documentation/monit.html
+set daemon 60
+# Set path to log file
+set logfile /var/log/monit.log
+# TA monitoring
+check process tagent with pidfile /var/run/tagent.pid
+        start program = "/etc/init.d/tagent start" with timeout 30 seconds
+        stop program  = "/etc/init.d/tagent stop
+EOF
+
 echo "monit installed and monitoring tagent"
