@@ -327,7 +327,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
      * @throws Exception 
      */
     @Test
-    public void verifyCreateTrustPolicyForHost() throws Exception {
+    public void loadTrustPolicyForHost() throws Exception {
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
         HostTrustPolicyFactory hostTrustPolicyFactory = pm.getHostTrustFactory();

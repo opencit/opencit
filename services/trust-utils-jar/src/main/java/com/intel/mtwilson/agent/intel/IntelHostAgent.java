@@ -120,7 +120,7 @@ public class IntelHostAgent implements HostAgent {
         if( pcrManifest == null ) {
             try {
                 TAHelper helper = new TAHelper();
-                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient);
+                pcrManifest = helper.getQuoteInformationForHost(hostAddress.toString(), trustAgentClient); // XXX TODO we should save the entire quote structure so we can return the quote itself with another method to allow the caller to later verify the manifest they just got.
             }
             catch(Exception e) {
                 throw new IOException("Cannot retrieve PCR Manifest from "+hostAddress.toString(), e);

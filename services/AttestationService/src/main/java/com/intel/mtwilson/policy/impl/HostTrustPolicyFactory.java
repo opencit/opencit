@@ -118,7 +118,10 @@ public class HostTrustPolicyFactory {
         ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
         list.add(new TrustedBios(loadTrustPolicyListForBios(bios,host)));
         list.add(new TrustedVmm(loadTrustPolicyListForVmm(vmm,host)));
-        list.add(new TrustedLocation(loadTrustPolicyListForLocation(host)));
+        // only add location policy if the host is expected to be somewhere specific... otherwise, an empty location will result in a policy that can't be met
+        if( host.getLocation() != null && !host.getLocation().trim().isEmpty() ) {
+            list.add(new TrustedLocation(loadTrustPolicyListForLocation(host)));
+        }
         return new RequireAll(list);
     }
     
