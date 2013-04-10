@@ -44,6 +44,7 @@ import org.slf4j.MarkerFactory;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.PcrMatchesConstant;
 import com.intel.mtwilson.policy.PolicyEngine;
 import com.intel.mtwilson.policy.TrustPolicy;
 import com.intel.mtwilson.policy.TrustReport;
@@ -52,6 +53,8 @@ import com.intel.mtwilson.policy.impl.TrustedBios;
 import com.intel.mtwilson.policy.impl.TrustedLocation;
 import com.intel.mtwilson.policy.impl.TrustedVmm;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -165,7 +168,9 @@ public class HostTrustBO extends BaseBO {
             trust.location = true;
         }
         
-        logOverallTrustStatus(tblHosts, trust);
+        Date today = new Date(System.currentTimeMillis()); // create the date here and pass it down, in order to ensure that all created records use the same timestamp
+        logOverallTrustStatus(tblHosts, trust, today);
+        logPcrTrustStatus(tblHosts, trustReport, today);
         
 
         String userName = new AuditLogger().getAuditUserName();
@@ -324,8 +329,7 @@ public class HostTrustBO extends BaseBO {
 
     }
     * */
-    private void logOverallTrustStatus(TblHosts host, HostTrustStatus status) {
-        Date today = new Date(System.currentTimeMillis());
+    private void logOverallTrustStatus(TblHosts host, HostTrustStatus status, Date today) {
         TblTaLog taLog = new TblTaLog();
         taLog.setHostID(host.getId());
         taLog.setMleId(0);
@@ -338,7 +342,7 @@ public class HostTrustBO extends BaseBO {
         TblTaLogJpaController talog = new TblTaLogJpaController(getEntityManagerFactory());
         
         talog.create(taLog); // overall status
-        
+/*        
         // bios
         TblTaLog taLogBios = new TblTaLog();
         taLogBios.setHostID(host.getId());
@@ -359,7 +363,52 @@ public class HostTrustBO extends BaseBO {
         taLogVmm.setManifestValue(" ");// XXX TODO there should actually be one record per PCR !!!
         taLogVmm.setUpdatedOn(today);
         talog.create(taLogVmm);
-
+        */
+    }
+    
+    /**
+     * Searches for all the PcrMatchesConstant policies in the TrustReport and creates 
+     * an entry for each one in the mw_ta_log table... the contents of that table are used
+     * to create the "trust report" in the Trust Dashboard 
+     * 
+     * @param host
+     * @param report 
+     */
+    private void logPcrTrustStatus(TblHosts host, TrustReport report, Date today) {
+        TblTaLogJpaController talogJpa = new TblTaLogJpaController(getEntityManagerFactory());
+        List<String> biosPcrList = Arrays.asList(host.getBiosMleId().getRequiredManifestList().split(","));
+        List<String> vmmPcrList = Arrays.asList(host.getVmmMleId().getRequiredManifestList().split(","));
+        // find all trusted pcr values... XXX right now we are only checking "PcrMatchesConstant"... also need to check "PcrMatchesVariable" and other future policies!!
+        List<TrustReport> pcrReports = report.findAllMarks(PcrMatchesConstant.class.getName());
+        log.debug("Found {} PcrMatchesConstant marks", pcrReports.size());
+        for(TrustReport pcrReport : pcrReports) {
+            log.debug("Looking at policy {}", pcrReport.getPolicyName());
+            TrustPolicy policy = pcrReport.getPolicy();
+            if( policy instanceof PcrMatchesConstant ) {
+                PcrMatchesConstant pcrPolicy = (PcrMatchesConstant)policy;
+                log.debug("Expected PCR {} = {}", pcrPolicy.getExpectedPcr().getIndex().toString(), pcrPolicy.getExpectedPcr().getValue().toString());
+                // XXX we can do this because we know the policy passed and it's a constant pcr value... but ideally we need to be logging the host's actual value from its HostReport!!!
+                // find out which MLE this policy corresponds to and then log it
+                TblTaLog pcr = new TblTaLog();
+                pcr.setHostID(host.getId());
+                pcr.setTrustStatus(false); // start as false, later we'll change to true when we identify each  policy that marked a pcr as trusted
+                pcr.setError(null);
+                pcr.setUpdatedOn(today);
+                pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
+                pcr.setManifestValue(pcrPolicy.getExpectedPcr().getValue().toString()); // we can do this because, since the policy "passed", we know expected=actual
+                if( biosPcrList.contains(pcrPolicy.getExpectedPcr().getIndex().toString()) ) {
+                    pcr.setTrustStatus(true);
+                    pcr.setMleId(host.getBiosMleId().getId());
+                }
+                if( vmmPcrList.contains(pcrPolicy.getExpectedPcr().getIndex().toString()) ) {
+                    pcr.setTrustStatus(true);
+                    pcr.setMleId(host.getVmmMleId().getId());
+                    
+                }
+                talogJpa.create(pcr);
+            }
+        }
+        
     }
 
     private TblHosts getHostByName(Hostname hostName) { // datatype.Hostname

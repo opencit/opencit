@@ -356,6 +356,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     
     /**
      * You need to run testRegisterHostAndWhitelist() first in order to create the host record and the whitelist
+     * 
      * @throws Exception 
      */
     @Test
@@ -370,6 +371,8 @@ Pcr 23 = 0000000000000000000000000000000000000000
     
     /**
      * You need to run testRegisterHostAndWhitelist() first in order to create the host record and the whitelist
+     * 
+     * This test method calls "getTrustReportForHost" which does not do any database logging
      * 
      * The following is an example of the report you get if the host exists & has a bios and mle in the whitelist but
      * those bios and mle do not have any associated mw_pcr_manifest records  - therfore nothing to check against the
@@ -481,7 +484,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
      * @throws Exception 
      */
     @Test
-    public void verifyTrustStatusForXen() throws Exception {
+    public void checkTrustReportForXen() throws Exception {
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
         HostTrustBO hostTrustBO = new HostTrustBO(pm);
@@ -557,4 +560,24 @@ Pcr 23 = 0000000000000000000000000000000000000000
             log.debug("---> {}", json.writeValueAsString(pcrReport.getPolicy()));
         }
     }
+
+    /**
+     * This one calls getTrustStatus(), which logs to the mw_ta_log table
+     * but returns an object with just 3 true/false flags, so we don't have
+     * much to display here -- but check the mw_ta_log table after running
+     * this test to see the real results. should be one record per PCR and
+     * also one "overall trust" record with MleId=0.
+     * @throws Exception 
+     */
+    @Test
+    public void checkHostTrustStatusForXen() throws Exception {
+        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        assertNotNull(host); 
+        HostTrustBO hostTrustBO = new HostTrustBO(pm);
+        HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(host, host.getName());        
+        log.debug("Bios trusted? {}", trustStatus.bios);
+        log.debug("Vmm trusted? {}", trustStatus.vmm);
+        log.debug("Location trusted? {}", trustStatus.location);
+    }
+
 }
