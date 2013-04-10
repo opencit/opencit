@@ -1,0 +1,16 @@
+## Monit Process Monitor Config File
+## Configuration options and examples can be found here:
+## http://mmonit.com/monit/documentation/monit.html
+
+# Start monit in background (run as daemon) and check the services at x-second
+# intervals.  This defines the length of time of a single 'cycle' as used in 
+# the process monitor triggers
+
+set daemon 60
+
+# Set path to log file
+set logfile /var/log/monit.log
+
+check process tagent with pidfile /var/run/tagent.pid
+        start program = "/etc/init.d/tagent start" with timeout 30 seconds
+        stop program  = "/etc/init.d/tagent stop
