@@ -1146,17 +1146,17 @@ postgres_server_install(){
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
-  if [[ -z "$postgresd" ]]; then
-    POSTGRES_SERVER_YUM_PACKAGES="postgresql"
-    POSTGRES_SERVER_APT_PACKAGES="postgresql"
-    auto_install "Postgres server" "POSTGRES_SERVER"  >> $INSTALL_LOG_FILE
-    postgres_server_detect
-  fi
+  
   if [[ -z "$postgresd" ]]; then
     echo_failure "Unable to auto-install Postgres server" | tee -a $INSTALL_LOG_FILE
     echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
+    return 1
   fi
+
+  #if we get here postgres was a fresh install. Need to create the account entered by user
+  local create_user_sql = "CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
+  sudo -u postgres psql postgres -c "${ create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
 }
 
 # Environment:
@@ -1229,7 +1229,7 @@ postgres_require() {
   fi
   if [[ -z "$POSTGRES_HOME" || -z "$psql" || ! -f "$psql" ]]; then
     echo "Cannot find Postgres client version $min_version or later"
-    exit 1
+    #exit 1
   fi
 }
 
@@ -1315,6 +1315,7 @@ postgres_configure_connection() {
 # call postgres_configure_connection before calling this function
 postgres_create_database() {
   postgres_test_connection
+
   local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
   local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
 
