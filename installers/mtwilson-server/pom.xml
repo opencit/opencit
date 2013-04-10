@@ -32,7 +32,12 @@
       <version>3.1.1</version>
       <type>bin</type>
     </dependency>
-    <!-- Monit -->
+    <dependency>
+      <groupId>com.intel.mtwilson.linux</groupId>
+      <artifactId>mtwilson-tomcat-installer</artifactId>
+      <version>0.1</version>
+      <type>bin</type>
+    </dependency>   <!-- Monit -->
     <dependency>
         <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>monit</artifactId>
@@ -166,6 +171,13 @@
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>glassfish</artifactId>
                   <version>3.1.1</version>
+                  <type>bin</type>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>mtwilson-tomcat-installer</artifactId>
+                  <version>0.1</version>
                   <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>

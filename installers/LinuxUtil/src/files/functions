@@ -2086,8 +2086,10 @@ tomcat_detect() {
       local parent=`dirname $bin_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
         TOMCAT_HOME="$parent"
-        tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
-        tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME $tomcat_bin"
+        TOMCAT_BASE=find / -name "webapps"
+        tomcat="$TOMCAT_HOME/bin/catalina.sh"
+        tomcat_bin=$parent/bin
+        tomcat_env="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF"
         echo "Found Tomcat: $TOMCAT_HOME"
         TOMCAT_VERSION=`tomcat_version`
         if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
