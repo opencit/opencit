@@ -4,7 +4,10 @@
  */
 package com.intel.mtwilson.policy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,20 +23,53 @@ import org.slf4j.LoggerFactory;
 public class PolicyEngine {
     private Logger log = LoggerFactory.getLogger(getClass());
     
-    public TrustReport applyAll(HostReport hostReport, TrustPolicy... policies) {
-        RequireAll requireAll = new RequireAll(Arrays.asList(policies));
-        TrustReport report = requireAll.apply(hostReport);
-        return report;
+    // this is the normal case - given a list of policies, apply them all, and combine the results into one report.
+    public List<RuleResult> applyAll(HostReport hostReport, Rule... rules) {
+        ArrayList<RuleResult> list = new ArrayList<RuleResult>();
+        for(Rule rule : rules) {
+            RuleResult result = rule.apply(hostReport);
+            list.add(result);
+        }
+        return list;
     }
     
+    public List<RuleResult> applyAll(HostReport hostReport, List<Rule> rules) {
+        ArrayList<RuleResult> list = new ArrayList<RuleResult>();
+        for(Rule rule : rules) {
+            RuleResult result = rule.apply(hostReport);
+            list.add(result);
+        }
+        return list;
+    }
+    
+    // this was formerly called "applyAny" because if ANY ONE of the policies says isTrusted then it's fine. 
+    // however,  this is not the right spot to check that... so where do we check it ??? in the app?? that
+    // would then be a feature of the app. which is fine.
+    public List<TrustReport> applyAll(HostReport hostReport, Policy... policies) {
+        ArrayList<TrustReport> list = new ArrayList<TrustReport>();
+        for(Policy policy : policies) {
+            TrustReport report = apply(hostReport, policy);
+            list.add(report);
+        }
+        return list;
+    }
+    
+    /*
     public TrustReport applyAny(HostReport hostReport, TrustPolicy... policies) {
         RequireAny requireAny = new RequireAny(Arrays.asList(policies));
         TrustReport report = requireAny.apply(hostReport);
         return report;
-    }
+    }*/
     
-    public TrustReport apply(HostReport hostReport, TrustPolicy policy) {
-        return applyAll(hostReport, policy);
+    public TrustReport apply(HostReport hostReport, Policy policy) {
+        TrustReport policyReport = new TrustReport(policy.getName());
+        List<RuleResult> results = applyAll(hostReport, policy.getRules());
+        Iterator<RuleResult> it = results.iterator();
+        while(it.hasNext()) {
+            RuleResult result = it.next();
+            policyReport.addResult(result);
+        }
+        return policyReport;
     }
     
 }

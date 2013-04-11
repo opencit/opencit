@@ -4,6 +4,9 @@
  */
 package com.intel.mtwilson.policy.impl;
 
+import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
+import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mountwilson.as.common.ASException;
 import java.util.HashSet;
 import com.intel.mtwilson.agent.Vendor;
@@ -97,7 +100,7 @@ public class HostTrustPolicyFactory {
     // see the notepad notes
     // XXX TODO but this method needs to move to another class where we serialize the policies... 
     // in this class it's only deserialize!!
-    public TrustPolicy createHostSpecificTrustPolicy(HostReport hostReport, TblMle biosMleId, TblMle vmmMleId) {
+    public Rule createHostSpecificTrustPolicy(HostReport hostReport, TblMle biosMleId, TblMle vmmMleId) {
         // FOR VMWARE, WE NEED TO GET THE "COMMAND LINE" MODULE,  AND CREATE A HOST-SPECIFIC POLICY FOR IT
         
         // IF THERE IS NOT A HOST -SPECIFIC POLICY THAT IS CREATED, JUST RETURN NULL
@@ -117,23 +120,24 @@ public class HostTrustPolicyFactory {
      *  In English - a host with no trust policy is untrusted
      * 
      */
-    public TrustPolicy loadTrustPolicyForHost(TblHosts host) {
-        ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
+    public Policy loadTrustPolicyForHost(TblHosts host, String hostId) {
+        ArrayList<Rule> list = new ArrayList<Rule>();
         // only add bios policy if the host is linked with a bios mle
         if( host.getBiosMleId() != null ) {
             Bios bios = new Bios(host.getBiosMleId().getName(), host.getBiosMleId().getVersion(), host.getBiosMleId().getOemId().getName());
-            list.add(new TrustedBios(loadTrustPolicyListForBios(bios,host)));
+            list.addAll(loadTrustPolicyListForBios(bios,host));
         }
         // only add vmm policy if the host is linked with a vmm mle
         if( host.getVmmMleId() != null ) {
             Vmm vmm = new Vmm(host.getVmmMleId().getName(), host.getVmmMleId().getVersion(), host.getVmmMleId().getOsId().getName(), host.getVmmMleId().getOsId().getVersion());
-            list.add(new TrustedVmm(loadTrustPolicyListForVmm(vmm,host)));
+            list.addAll(loadTrustPolicyListForVmm(vmm,host));
         }
         // only add location policy if the host is expected to be somewhere specific... otherwise, an empty location will result in a policy that can't be met
         if( host.getLocation() != null && !host.getLocation().trim().isEmpty() ) {
-            list.add(new TrustedLocation(loadTrustPolicyListForLocation(host)));
+            list.addAll(loadTrustPolicyListForLocation(host));
         }
-        return new RequireAll(list);
+        Policy policy = new Policy(String.format("Host trust policy for host with AIK %s", hostId), list);
+        return policy;
     }
     
     /**
@@ -142,7 +146,7 @@ public class HostTrustPolicyFactory {
      * @param host
      * @param trustPolicy 
      */
-    public void saveTrustPolicyForHost(TblHosts host, TrustPolicy trustPolicy) {
+    public void saveTrustPolicyForHost(TblHosts host, Rule trustPolicy) {
         
     }
     
@@ -152,7 +156,7 @@ public class HostTrustPolicyFactory {
      * @param host
      * @param trustPolicy 
      */
-    public void saveTrustPolicyForMle(TblMle host, TrustPolicy trustPolicy) {
+    public void saveTrustPolicyForMle(TblMle host, Rule trustPolicy) {
         
     }
     
@@ -212,25 +216,27 @@ public class HostTrustPolicyFactory {
      * @param bios
      * @return 
      */
-    public List<TrustPolicy> loadTrustPolicyListForBios(Bios bios, TblHosts tblHosts) {
+    public List<Rule> loadTrustPolicyListForBios(Bios bios, TblHosts tblHosts) {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
         log.debug("HostTrustPolicyFactory found BIOS MLE: {}", biosMle.getName());
         Collection<TblPcrManifest> pcrInfoList = biosMle.getTblPcrManifestCollection();
-        ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
+        ArrayList<Rule> list = new ArrayList<Rule>();
         for(TblPcrManifest pcrInfo : pcrInfoList) {
             PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
             Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
             log.debug("... PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-            list.add(new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue)));
+            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
+            rule.setMarkers(TrustMarker.BIOS.name());
+            list.add(rule);
         }
         return list;
     }
 
-    public List<TrustPolicy> loadTrustPolicyListForVmm(Vmm vmm, TblHosts tblHosts) {
+    public List<Rule> loadTrustPolicyListForVmm(Vmm vmm, TblHosts tblHosts) {
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
         log.debug("HostTrustPolicyFactory found VMM MLE: {}", vmmMle.getName());
         
-        ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
+        ArrayList<Rule> list = new ArrayList<Rule>();
 
         // first, get a list of all the pcr's in the whitelist for this vmm
         Collection<TblPcrManifest> pcrInfoList = vmmMle.getTblPcrManifestCollection();
@@ -238,7 +244,9 @@ public class HostTrustPolicyFactory {
             PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
             Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
             log.debug("... PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-            list.add(new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue)));
+            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
+            rule.setMarkers(TrustMarker.VMM.name());
+            list.add(rule);
         }
         
         // second, get a list of any modules in the whitelist for this vmm  (remember if it doesn't apply, then it won't be in the database)
@@ -275,18 +283,22 @@ public class HostTrustPolicyFactory {
                 Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
                 measurements.add(m);
             }
-            list.add(new PcrEventLogIncludes(pcrIndex, measurements));
+            PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, measurements);
+            rule.setMarkers(TrustMarker.VMM.name());
+            list.add(rule);
         }
         return list;
     }
     
     // XXX FOR SUDHIR  ... IF YOU CONVERT HOST.LOCATION TO ID YOU CAN USE AS-IS... OTHERWISE NEED TO LOOK UP LOCATION BY STRING VALUE ... THAT METHOD ISN'T IN THE LOCATION CONTROLLER RIGHT NOW
-    public List<TrustPolicy> loadTrustPolicyListForLocation(TblHosts tblHosts) {
+    public List<Rule> loadTrustPolicyListForLocation(TblHosts tblHosts) {
 //        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcr(tblHosts.getLocationId());
-        ArrayList<TrustPolicy> list = new ArrayList<TrustPolicy>();
+        ArrayList<Rule> list = new ArrayList<Rule>();
 //        PcrIndex pcrIndex = HostBO.LOCATION_PCR;
 //        Sha1Digest pcrValue = new Sha1Digest(locationPcr.getPcrValue());
-//        list.add(new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue)));
+//        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
+//        rule.setMarkers(Marker.LOCATION.name());
+//        list.add(rule);
         return list;
     }
 

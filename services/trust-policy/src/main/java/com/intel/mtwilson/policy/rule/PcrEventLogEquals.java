@@ -2,10 +2,13 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.policy;
+package com.intel.mtwilson.policy.rule;
 
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.PcrEventLog;
+import com.intel.mtwilson.policy.BaseRule;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.fault.PcrEventLogContainsUnexpectedEntries;
 import com.intel.mtwilson.policy.fault.PcrEventLogMissing;
 import com.intel.mtwilson.policy.fault.PcrEventLogMissingExpectedEntries;
@@ -26,7 +29,7 @@ import java.util.Set;
  * 
  * @author jbuhacoff
  */
-public class PcrEventLogEquals implements TrustPolicy {
+public class PcrEventLogEquals extends BaseRule {
     private PcrEventLog expected;
     public PcrEventLogEquals(PcrEventLog expected) {
         this.expected = expected;
@@ -35,8 +38,8 @@ public class PcrEventLogEquals implements TrustPolicy {
     public PcrEventLog getPcrModuleManifest() { return expected; }
     
     @Override
-    public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport(this);
+    public RuleResult apply(HostReport hostReport) {
+        RuleResult report = new RuleResult(this);
 //        report.check(this);        
 //        report.check(getClass().getSimpleName()); // the minimum... show that the host was evaluated by this policy
         if( hostReport.pcrManifest == null ) {

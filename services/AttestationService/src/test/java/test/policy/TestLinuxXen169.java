@@ -6,39 +6,30 @@ package test.policy;
 
 //import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.as.data.*;
-import com.intel.mtwilson.audit.helper.AuditConfig;
-import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.ms.common.MSConfig;
-import com.intel.mtwilson.policy.TrustPolicy;
+import com.intel.mtwilson.policy.Policy;
+import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
-import com.intel.mtwilson.policy.impl.TrustedBios;
-import com.intel.mtwilson.policy.impl.TrustedLocation;
-import com.intel.mtwilson.policy.impl.TrustedVmm;
+import com.intel.mtwilson.policy.impl.TrustMarker;
+import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import java.util.Properties;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.configuration.MapConfiguration;
 import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.ObjectWriter;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import test.util.MyJpaDatastore;
 
 /**
  * The tests in this class check the functions of the business and data layer directly,
@@ -64,98 +55,13 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  * @author jbuhacoff
  */
 public class TestLinuxXen169 {
-    private static CustomPersistenceManager pm;
+    private static MyJpaDatastore pm = new MyJpaDatastore();
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private transient static com.fasterxml.jackson.databind.ObjectWriter xml = new XmlMapper().writerWithDefaultPrettyPrinter(); 
     private transient String hostname = "10.1.71.169";
     private transient String connection = "intel:https://10.1.71.169:9999";
-    
-    /**
-     * The CustomPersistenceManager allows you (developer) to connect
-     * to the database directly for the tests. It also adds some other
-     * convenience functions such as instantiating JPA controllers.
-     */
-    public static class CustomPersistenceManager extends PersistenceManager {
-        @Override
-        public void configure() {
-            Properties p = new Properties();
-            p.setProperty("mtwilson.db.host", "10.1.71.88");
-            p.setProperty("mtwilson.db.schema", "mw_as");
-            p.setProperty("mtwilson.db.user", "root");
-            p.setProperty("mtwilson.db.password", "password");
-            p.setProperty("mtwilson.db.port", "3306");
-            MapConfiguration c = new MapConfiguration(p);
-            addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties(c));
-            addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties(c));
-            addPersistenceUnit("AuditDataPU", AuditConfig.getJpaProperties(c));
-        }
-        public byte[] getDek() {
-            return Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA=="); // arbitrary dek, since it's a development server it's good to use same as what is configured there, but it doesn't matter as it only affects records we are writing, and hopefully after each test is complete there is zero net effect on the database
-        }
-        
-        TblHostsJpaController hostsJpa = null;
-        TblMleJpaController mleJpa = null;
-        TblOsJpaController osJpa = null;
-        TblOemJpaController oemJpa = null;
-        TblPcrManifestJpaController pcrJpa = null;
-        HostTrustPolicyFactory hostTrustFactory = null;
-        MwMleSourceJpaController mleSourceJpa = null;
-        public CustomPersistenceManager() {
-            
-        }
-        
-        public TblHostsJpaController getHostsJpa() throws CryptographyException {
-            if( hostsJpa == null ) {
-                hostsJpa = new TblHostsJpaController(getEntityManagerFactory("ASDataPU"), getDek());
-            }
-            return hostsJpa;
-        }
-        public TblMleJpaController getMleJpa() {
-            if( mleJpa == null ) {
-                mleJpa = new TblMleJpaController(getEntityManagerFactory("ASDataPU"));
-            }
-            return mleJpa;
-        }
-        public TblOsJpaController getOsJpa() {
-            if( osJpa == null ) {
-                osJpa = new TblOsJpaController(getEntityManagerFactory("ASDataPU"));
-            }
-            return osJpa;
-        }
-        public TblOemJpaController getOemJpa() {
-            if( oemJpa == null ) {
-                oemJpa = new TblOemJpaController(getEntityManagerFactory("ASDataPU"));
-            }
-            return oemJpa;
-        }
-        public TblPcrManifestJpaController getPcrJpa() {
-            if( pcrJpa == null ) {
-                pcrJpa = new TblPcrManifestJpaController(getEntityManagerFactory("ASDataPU"));
-            }
-            return pcrJpa;
-        }
-        public MwMleSourceJpaController getMleSourceJpa() {
-            if( mleSourceJpa == null ) {
-                mleSourceJpa = new MwMleSourceJpaController(getEntityManagerFactory("ASDataPU"));
-            }
-            return mleSourceJpa;
-        }
-        public HostTrustPolicyFactory getHostTrustFactory() {
-            if( hostTrustFactory == null ) {
-                hostTrustFactory = new HostTrustPolicyFactory(getEntityManagerFactory("ASDataPU"));
-            }
-            return hostTrustFactory;
-        }
-
-    }
-    
-    @BeforeClass
-    public static void createPersistenceManager() {
-        pm = new CustomPersistenceManager();
-    }
-    
     
     /**
      * 
@@ -356,6 +262,36 @@ Pcr 23 = 0000000000000000000000000000000000000000
     
     /**
      * You need to run testRegisterHostAndWhitelist() first in order to create the host record and the whitelist
+     * Example policy:
+     * 
+{
+  "name" : "Host trust policy for host with AIK 10.1.71.169",
+  "rules" : [ {
+    "markers" : [ "BIOS" ],
+    "expectedPcr" : {
+      "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+      "index" : "0"
+    }
+  }, {
+    "markers" : [ "VMM" ],
+    "expectedPcr" : {
+      "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+      "index" : "17"
+    }
+  }, {
+    "markers" : [ "VMM" ],
+    "expectedPcr" : {
+      "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+      "index" : "18"
+    }
+  }, {
+    "markers" : [ "VMM" ],
+    "expectedPcr" : {
+      "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+      "index" : "19"
+    }
+  } ]
+}     * 
      * 
      * @throws Exception 
      */
@@ -364,9 +300,9 @@ Pcr 23 = 0000000000000000000000000000000000000000
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
         HostTrustPolicyFactory hostTrustPolicyFactory = pm.getHostTrustFactory();
-        TrustPolicy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(host); // must include both bios and vmm policies
+        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(host, hostname); // must include both bios and vmm policies
         log.debug(json.writeValueAsString(trustPolicy));
-        log.debug(xml.writeValueAsString(trustPolicy)); // same thing in xml , is it more readable?
+//        log.debug(xml.writeValueAsString(trustPolicy)); // notice the xml is NOT the same as the json at all... doesn't have all the info, and somehow has mixed "faults" in there somewhere even though the Rule objects do not have a fault method or field...
     }
     
     /**
@@ -379,105 +315,113 @@ Pcr 23 = 0000000000000000000000000000000000000000
      * host:
      * 
 {
-  "policy" : {
-    "checks" : [ {
-      "policy" : {
-        "checks" : [ {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedBios"
-        }, {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedVmm"
-        }, {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedLocation"
-        } ]
-      },
-      "policyName" : "com.intel.mtwilson.policy.RequireAll"
-    } ]
-  },
-  "marks" : [ ],
-  "faults" : [ {
-    "cause" : null,
-    "report" : {
-      "policy" : {
-        "checks" : [ {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedBios"
-        }, {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedVmm"
-        }, {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedLocation"
-        } ]
-      },
-      "marks" : [ ],
-      "faults" : [ {
-        "cause" : null,
-        "report" : {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "marks" : [ ],
-          "faults" : [ {
-            "cause" : null,
-            "faultName" : "com.intel.mtwilson.policy.fault.RequireAllEmptySet"
-          } ],
-          "trusted" : false,
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedBios"
-        },
-        "faultName" : "com.intel.mtwilson.policy.fault.Cite"
-      }, {
-        "cause" : null,
-        "report" : {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "marks" : [ ],
-          "faults" : [ {
-            "cause" : null,
-            "faultName" : "com.intel.mtwilson.policy.fault.RequireAllEmptySet"
-          } ],
-          "trusted" : false,
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedVmm"
-        },
-        "faultName" : "com.intel.mtwilson.policy.fault.Cite"
-      }, {
-        "cause" : null,
-        "report" : {
-          "policy" : {
-            "checks" : [ ]
-          },
-          "marks" : [ ],
-          "faults" : [ {
-            "cause" : null,
-            "faultName" : "com.intel.mtwilson.policy.fault.RequireAllEmptySet"
-          } ],
-          "trusted" : false,
-          "policyName" : "com.intel.mtwilson.policy.impl.TrustedLocation"
-        },
-        "faultName" : "com.intel.mtwilson.policy.fault.Cite"
-      } ],
-      "trusted" : false,
-      "policyName" : "com.intel.mtwilson.policy.RequireAll"
+  "policyName" : "Host trust policy for 10.1.71.169",
+  "results" : [ {
+    "rule" : {
+      "markers" : [ "BIOS" ],
+      "expectedPcr" : {
+        "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+        "index" : "0"
+      }
     },
-    "faultName" : "com.intel.mtwilson.policy.fault.Cite"
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "VMM" ],
+      "expectedPcr" : {
+        "value" : "bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8",
+        "index" : "17"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "VMM" ],
+      "expectedPcr" : {
+        "value" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+        "index" : "18"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "VMM" ],
+      "expectedPcr" : {
+        "value" : "db7f15304b8dd58b69fe3d3dcd6decad24ad5511",
+        "index" : "19"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
   } ],
-  "trusted" : false,
-  "policyName" : "com.intel.mtwilson.policy.RequireAll"
+  "trusted" : true
+}
+     * 
+     * 
+     * Here's an example of the same host, but where the whitelist has changed a little (pcr 18 for vmm now has 00 at the end)
+     * so you can see what it looks like when a rule fails:
+     * 
+{
+  "policyName" : "Host trust policy for 10.1.71.169",
+  "results" : [ {
+    "rule" : {
+      "markers" : [ "BIOS" ],
+      "expectedPcr" : {
+        "value" : "891eb0b556b83fcef1c10f3fa6464345e34f8f91",
+        "index" : "0"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "VMM" ],
+      "expectedPcr" : {
+        "value" : "BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8",
+        "index" : "17"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "VMM" ],
+      "expectedPcr" : {
+        "value" : "A14C6B5735DBDFBBD926925947EA3DA298273900",
+        "index" : "18"
+      }
+    },
+    "faults" : [ {
+      "cause" : null,
+      "pcrIndex" : "18",
+      "expectedValue" : "A14C6B5735DBDFBBD926925947EA3DA298273900",
+      "actualValue" : "a14c6b5735dbdfbbd926925947ea3da2982739fd",
+      "faultName" : "com.intel.mtwilson.policy.fault.PcrValueMismatch"
+    } ],
+    "trusted" : false,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "VMM" ],
+      "expectedPcr" : {
+        "value" : "DB7F15304B8DD58B69FE3D3DCD6DECAD24AD5511",
+        "index" : "19"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  } ],
+  "trusted" : false
 }
      * 
      * 
@@ -488,34 +432,19 @@ Pcr 23 = 0000000000000000000000000000000000000000
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
         HostTrustBO hostTrustBO = new HostTrustBO(pm);
-        TrustReport trustReport = hostTrustBO.getTrustReportForHost(host);        
+        TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname);        
         log.debug(json.writeValueAsString(trustReport));
-        log.debug(xml.writeValueAsString(trustReport)); // same thing in xml , is it more readable?
+//        log.debug(xml.writeValueAsString(trustReport)); // xml doesn't seem to seriailze the same info somehow... 
         
         
         HostTrustStatus trust = new HostTrustStatus();
-        TrustReport biosReport = trustReport.findMark(TrustedBios.class.getName());
-        if( biosReport != null && biosReport.isTrusted() ) {
-            log.debug("Found bios policy checkmark");
-            trust.bios = true;
-        }
+        trust.bios = trustReport.isTrustedForMarker(TrustMarker.BIOS.name());
+        trust.vmm = trustReport.isTrustedForMarker(TrustMarker.VMM.name());
+        trust.location = trustReport.isTrustedForMarker(TrustMarker.LOCATION.name());
 
-        TrustReport vmmReport = trustReport.findMark(TrustedVmm.class.getName());
-        if( vmmReport != null && vmmReport.isTrusted() ) {
-            log.debug("Found vmm policy checkmark");
-            trust.vmm = true;
-        }
-        // previous check for trusted location was if the host's location field is not null, then it's trusted... but i think this is better as it checks the pcr.  
-        // XXX TODO need a better feedback mechanism from trust policies... when they succeed, they should be able to set attributes.
-        // or else,  just go with the "marks" thing but then we have to post process and look for certain marks and then  set other fields elsewhere based on them ... or maybe that's not necessary??)
-//        trust.location = tblHosts.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
-        TrustReport locationReport = trustReport.findMark(TrustedLocation.class.getName());
-        if( locationReport != null && locationReport.isTrusted() ) {
-            log.debug("Found location policy checkmark");
-            trust.location = true;
-        }
+
         
-        log.debug("Summary of trust status:  bios({}), vmm({}), location({})", new boolean[] { trust.bios, trust.vmm, trust.location });
+        log.debug("Summary of trust status:  bios({}), vmm({}), location({})", new Object[] { trust.bios, trust.vmm, trust.location });
         
         
         /**
@@ -553,11 +482,13 @@ Pcr 23 = 0000000000000000000000000000000000000000
          * 
          */
         // now look for all pcr matches:
-        List<TrustReport> pcrReports = trustReport.findAllMarks("com.intel.mtwilson.policy.PcrMatchesConstant");
+        List<RuleResult> pcrReports = trustReport.getResults();
         log.debug("There are {} reports with trusted PcrMatchesConstant", pcrReports.size());
-        for(TrustReport pcrReport : pcrReports) {
-            log.debug("PCR Report {} trusted? {}", pcrReport.getPolicyName(), pcrReport.isTrusted());
-            log.debug("---> {}", json.writeValueAsString(pcrReport.getPolicy()));
+        for(RuleResult pcrReport : pcrReports) {
+            if( pcrReport.getRule() instanceof PcrMatchesConstant ) {
+                log.debug("PCR Report {} trusted? {}", pcrReport.getRuleName(), pcrReport.isTrusted());
+                log.debug("---> {}", json.writeValueAsString(pcrReport.getRule()));
+            }
         }
     }
 

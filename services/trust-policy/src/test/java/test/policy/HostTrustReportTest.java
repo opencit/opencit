@@ -4,16 +4,18 @@
  */
 package test.policy;
 
+import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import com.intel.mtwilson.policy.rule.*;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.*;
-import com.intel.mtwilson.policy.fault.PcrEventLogMissingExpectedEntries;
-import com.intel.mtwilson.policy.Check;
+import com.intel.mtwilson.policy.fault.*;
 import com.intel.mtwilson.policy.Fault;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +57,7 @@ Check: PcrMatchesConstant: PCR 0, aabbccddeeaabbccddeeaabbccddeeaabbccddee
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
         hostReport.pcrManifest.setPcr(expected); // set actual = expected so it should pass
-        TrustReport report = policy.apply(hostReport);
+        RuleResult report = policy.apply(hostReport);
         assertTrue(report.isTrusted());
 //        printFaults(report);
         printReport(report);
@@ -96,7 +98,7 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
         hostReport.pcrManifest.setPcr(actual); // set actual != expected so it should fail
-        TrustReport report = policy.apply(hostReport);
+        RuleResult report = policy.apply(hostReport);
         assertFalse(report.isTrusted());
 //        printFaults(report);
         printReport(report);
@@ -147,12 +149,48 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
 //        policies.add(policy2);
         PolicyEngine engine = new PolicyEngine();
 //        List<TrustReport> report = engine.apply(hostReport, policies);
-        TrustReport report = engine.applyAll(hostReport, policy1, policy2);
-        //        assertTrue(report.isTrusted());
-//        printChecks(report);
-//        printFaults(report);
-        printReport(report);
-        printReportJson(report);
+        List<RuleResult> reports = engine.applyAll(hostReport, policy1, policy2);
+        for(RuleResult report : reports) {
+            printReport(report);
+            printReportJson(report);
+        }
+        
+        
+        /**
+         * Sample output for below:
+{
+  "policyName" : "test pcr matches constant",
+  "reports" : [ {
+    "rule" : {
+      "markers" : [ "bios" ],
+      "expectedPcr" : {
+        "value" : "aabbccddeeaabbccddeeaabbccddeeaabbccddee",
+        "index" : "0"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  }, {
+    "rule" : {
+      "markers" : [ "vmm" ],
+      "expectedPcr" : {
+        "value" : "aabbccddeeaabbccddeeaabbccddeeaabbccddee",
+        "index" : "17"
+      }
+    },
+    "faults" : [ ],
+    "trusted" : true,
+    "ruleName" : "com.intel.mtwilson.policy.rule.PcrMatchesConstant"
+  } ],
+  "trusted" : true
+}
+         * 
+         */
+        // now do the same thing but with a policy
+        Policy policy = new Policy("test pcr matches constant", Arrays.asList(new Rule[] { policy1, policy2 }));
+        TrustReport report = engine.apply(hostReport, policy);
+        printReportJson(report);        
     }
     
     /**
@@ -234,12 +272,11 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
 //        policies.add(policy2);
         PolicyEngine engine = new PolicyEngine();
 //        List<TrustReport> report = engine.apply(hostReport, policies);
-        TrustReport report = engine.applyAll(hostReport, policy1, policy2);
-//        assertFalse(report.isTrusted());
-//        printChecks(report);
-//        printFaults(report)
-        printReport(report);
-        printReportJson(report);
+        List<RuleResult> reports = engine.applyAll(hostReport, policy1, policy2);
+        for(RuleResult report : reports) {
+            printReport(report);
+            printReportJson(report);
+        }
     }
     
     
@@ -331,12 +368,11 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
 //        policies.add(policy2);
         PolicyEngine engine = new PolicyEngine();
 //        List<TrustReport> report = engine.apply(hostReport, policies);
-        TrustReport report = engine.applyAny(hostReport, policy1, policy2);
-//        assertFalse(report.isTrusted());
-//        printChecks(report);
-//        printFaults(report)
-        printReport(report);
-        printReportJson(report);
+        List<RuleResult> reports = engine.applyAll(hostReport, policy1, policy2);
+        for(RuleResult report : reports) {
+            printReport(report);
+            printReportJson(report);
+        }
     }
     
 
@@ -409,12 +445,11 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
 //        policies.add(policy2);
         PolicyEngine engine = new PolicyEngine();
 //        List<TrustReport> report = engine.apply(hostReport, policies);
-        TrustReport report = engine.applyAny(hostReport, policy1, policy2);
-//        assertFalse(report.isTrusted());
-//        printChecks(report);
-//        printFaults(report)
-        printReport(report);
-        printReportJson(report);
+        List<RuleResult> reports = engine.applyAll(hostReport, policy1, policy2);
+        for(RuleResult report : reports) {
+            printReport(report);
+            printReportJson(report);
+        }
     }
 
     
@@ -469,7 +504,7 @@ Modules missing from PCR 8:
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = new PcrManifest();
         hostReport.pcrManifest.setPcrEventLog(new PcrEventLog(new PcrIndex(8),actualModuleSet));
-        TrustReport report = policy.apply(hostReport);
+        RuleResult report = policy.apply(hostReport);
         assertFalse(report.isTrusted());
 //        printFaults(report);
         printReport(report);
@@ -504,17 +539,26 @@ Modules missing from PCR 8:
         }
     }*/
     
-    private void printReport(List<TrustReport> list) {
-        for(TrustReport report : list) {
+    private void printReport(List<RuleResult> list) {
+        for(RuleResult report : list) {
             printReport(report);
         }
     }
-    private void printReport(TrustReport report) {
-        System.out.println("Check: "+report.getPolicy().getClass().getSimpleName()+": "+report.getPolicy().toString());
+    private void printReport(RuleResult report) {
+        System.out.println("Check: "+report.getRule().getClass().getSimpleName()+": "+report.getRule().toString());
         printFaults(report);
     }
     
     private void printReportJson(TrustReport report) {
+        try {
+            System.out.println(json.writeValueAsString(report));
+        }
+        catch(Exception e) {
+            System.out.println("Cannot write report: "+e.toString());
+        }
+    }
+    
+    private void printReportJson(RuleResult report) {
         try {
             System.out.println(json.writeValueAsString(report));
         }
@@ -539,7 +583,7 @@ Modules missing from PCR 8:
         }*/
     }
     
-    private void printFaults(TrustReport m) {
+    private void printFaults(RuleResult m) {
         for(Fault fault : m.getFaults()) {
             System.out.println("Fault: "+fault.toString()+" ["+fault.getClass().getSimpleName()+"]");
             if( fault.getCause() != null ) {
@@ -586,8 +630,9 @@ Modules missing from PCR 8:
         InputStream in = getClass().getResourceAsStream("/trustreport-1.xml");
         com.fasterxml.jackson.databind.ObjectMapper xml = new XmlMapper();
         xml.registerModule(new MrBeanModule());
-        TrustReport report = xml.reader(TrustReport.class).readValue(in);
+        RuleResult report = xml.reader(RuleResult.class).readValue(in);
         IOUtils.closeQuietly(in);
+        /*
         TrustReport biosReport = report.findMark("com.intel.mtwilson.policy.impl.TrustedBios");
         assertNotNull(biosReport);
         assertTrue(biosReport.isTrusted()); 
@@ -596,5 +641,6 @@ Modules missing from PCR 8:
         assertTrue(vmmReport.isTrusted());
         TrustReport locationReport = report.findMark("com.intel.mtwilson.policy.impl.TrustedLocation");
         assertNull(locationReport); // the report did not include a location policy
+        */
     }
 }

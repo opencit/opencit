@@ -5,7 +5,7 @@
 package com.intel.mtwilson.policy.fault;
 
 import com.intel.mtwilson.policy.Fault;
-import com.intel.mtwilson.policy.TrustReport;
+import com.intel.mtwilson.policy.RuleResult;
 
 /**
  * This fault indicates that some other policy was evaluated and the result was not
@@ -20,11 +20,11 @@ import com.intel.mtwilson.policy.TrustReport;
  * @author jbuhacoff
  */
 public class Cite extends Fault {
-    private TrustReport report;
-    public Cite(TrustReport report) {
+    private RuleResult report;
+    public Cite(RuleResult report) {
 //        super(report.getPolicyName()); // XXX TODO maybe use a format like "%s: %s with %d faults", report.getPolicyName(), report.isTrusted() ? "trusted" : "not trusted", report.getFaults().size()
-        super("%s: %s with %d faults", report.getPolicyName(), report.isTrusted() ? "trusted" : "not trusted", report.getFaults().size());
+        super("%s: %s with %d faults", report.getRuleName(), report.isTrusted() ? "trusted" : "not trusted", report.getFaults().size());
         this.report = report;
     }
-    public TrustReport getReport() { return report; }
+    public RuleResult getReport() { return report; }
 }

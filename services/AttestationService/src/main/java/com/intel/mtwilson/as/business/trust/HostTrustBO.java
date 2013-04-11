@@ -1,60 +1,54 @@
 package com.intel.mtwilson.as.business.trust;
 
-import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
-import com.intel.mtwilson.as.controller.TblTaLogJpaController;
-import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
-import com.intel.mtwilson.as.controller.TblModuleManifestLogJpaController;
-import com.intel.mtwilson.as.data.TblMle;
-import com.intel.mtwilson.as.data.TblModuleManifestLog;
-import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblSamlAssertion;
-import com.intel.mtwilson.as.data.TblTaLog;
-import com.intel.mtwilson.as.data.TblLocationPcr;
-import com.intel.mtwilson.as.business.HostBO;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
-import java.util.HashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
-import org.opensaml.xml.ConfigurationException;
-
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.as.business.HostBO;
+import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
+import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
+import com.intel.mtwilson.as.controller.TblTaLogJpaController;
+import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.data.TblLocationPcr;
+import com.intel.mtwilson.as.data.TblSamlAssertion;
+import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.as.helper.saml.SamlAssertion;
 import com.intel.mtwilson.as.helper.saml.SamlGenerator;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.audit.api.AuditLogger;
-import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.io.Resource;
-import com.intel.mtwilson.util.ResourceFinder;
-import java.io.FileNotFoundException;
-import org.apache.commons.configuration.Configuration;
-import org.joda.time.DateTime;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
-import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.HostReport;
-import com.intel.mtwilson.policy.PcrMatchesConstant;
+import com.intel.mtwilson.policy.Policy;
 import com.intel.mtwilson.policy.PolicyEngine;
-import com.intel.mtwilson.policy.TrustPolicy;
+import com.intel.mtwilson.policy.Rule;
+import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
-import com.intel.mtwilson.policy.impl.TrustedBios;
-import com.intel.mtwilson.policy.impl.TrustedLocation;
-import com.intel.mtwilson.policy.impl.TrustedVmm;
+import com.intel.mtwilson.policy.impl.TrustMarker;
+import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import com.intel.mtwilson.util.ResourceFinder;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.configuration.Configuration;
+import org.joda.time.DateTime;
+import org.opensaml.xml.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  *
@@ -148,25 +142,17 @@ public class HostTrustBO extends BaseBO {
         log.info( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
         log.info( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
-        TrustReport trustReport = getTrustReportForHost(tblHosts);
+        TrustReport trustReport = getTrustReportForHost(tblHosts, hostId);
         
         HostTrustStatus trust = new HostTrustStatus();
-        TrustReport biosReport = trustReport.findMark(TrustedBios.class.getName());
-        if( biosReport != null && biosReport.isTrusted() ) {
-            trust.bios = true;
-        }
-        TrustReport vmmReport = trustReport.findMark(TrustedVmm.class.getName());
-        if( vmmReport != null && vmmReport.isTrusted() ) {
-            trust.vmm = true;
-        }
+        trust.bios = trustReport.isTrustedForMarker(TrustMarker.BIOS.name());
+        trust.vmm = trustReport.isTrustedForMarker(TrustMarker.VMM.name());
+
         // previous check for trusted location was if the host's location field is not null, then it's trusted... but i think this is better as it checks the pcr.  
         // XXX TODO need a better feedback mechanism from trust policies... when they succeed, they should be able to set attributes.
         // or else,  just go with the "marks" thing but then we have to post process and look for certain marks and then  set other fields elsewhere based on them ... or maybe that's not necessary??)
 //        trust.location = tblHosts.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
-        TrustReport locationReport = trustReport.findMark(TrustedLocation.class.getName());
-        if( locationReport != null && locationReport.isTrusted() ) {
-            trust.location = true;
-        }
+        trust.location = trustReport.isTrustedForMarker(TrustMarker.LOCATION.name());
         
         Date today = new Date(System.currentTimeMillis()); // create the date here and pass it down, in order to ensure that all created records use the same timestamp
         logOverallTrustStatus(tblHosts, trust, today);
@@ -191,27 +177,29 @@ public class HostTrustBO extends BaseBO {
      * @return
      * @throws IOException 
      */
-    public TrustReport getTrustReportForHost(TblHosts tblHosts) throws IOException {
+    public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId) throws IOException {
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
-            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, tblHosts.toString());
+            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId.toString());
         }
         
         PcrManifest pcrManifest = agent.getPcrManifest();
         
         HostReport hostReport = new HostReport();
-        hostReport.aik = null; // TODO
         hostReport.pcrManifest = pcrManifest;
         hostReport.tpmQuote = null; // TODO
         hostReport.variables = new HashMap<String,String>(); // TODO
+        if( agent.isAikAvailable() ) {
+            hostReport.aik = new Aik(agent.getAik()); 
+        }
         
         HostTrustPolicyFactory hostTrustPolicyFactory = new HostTrustPolicyFactory(getEntityManagerFactory());
 
         
-        TrustPolicy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts); // must include both bios and vmm policies
-
+        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies
+//        trustPolicy.setName(policy for hostId) // do we even need a name? or is that just a managemen thing for the app?
         PolicyEngine policyEngine = new PolicyEngine();
         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
         
@@ -378,12 +366,11 @@ public class HostTrustBO extends BaseBO {
         TblTaLogJpaController talogJpa = new TblTaLogJpaController(getEntityManagerFactory());
         List<String> biosPcrList = Arrays.asList(host.getBiosMleId().getRequiredManifestList().split(","));
         List<String> vmmPcrList = Arrays.asList(host.getVmmMleId().getRequiredManifestList().split(","));
-        // find all trusted pcr values... XXX right now we are only checking "PcrMatchesConstant"... also need to check "PcrMatchesVariable" and other future policies!!
-        List<TrustReport> pcrReports = report.findAllMarks(PcrMatchesConstant.class.getName());
-        log.debug("Found {} PcrMatchesConstant marks", pcrReports.size());
-        for(TrustReport pcrReport : pcrReports) {
-            log.debug("Looking at policy {}", pcrReport.getPolicyName());
-            TrustPolicy policy = pcrReport.getPolicy();
+        List<RuleResult> results = report.getResults();
+        log.debug("Found {} results", results.size());
+        for(RuleResult result : results) {
+            log.debug("Looking at policy {}", result.getRuleName());
+            Rule policy = result.getRule();
             if( policy instanceof PcrMatchesConstant ) {
                 PcrMatchesConstant pcrPolicy = (PcrMatchesConstant)policy;
                 log.debug("Expected PCR {} = {}", pcrPolicy.getExpectedPcr().getIndex().toString(), pcrPolicy.getExpectedPcr().getValue().toString());
@@ -407,6 +394,7 @@ public class HostTrustBO extends BaseBO {
                 }
                 talogJpa.create(pcr);
             }
+            // XXX TODO look for event log rules and log in the module log table
         }
         
     }

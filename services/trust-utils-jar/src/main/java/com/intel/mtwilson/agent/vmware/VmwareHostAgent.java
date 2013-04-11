@@ -35,6 +35,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Instances of VmwareAgent should be created by the VmwareAgentFactory
+ * 
+ * A single instance of VmwareHostAgent is tied to a specific host/connection -- and
+ * it maintains a cache of some information received in order to not send multiple 
+ * redundant requests to the host. For example if it already obtained the OS Name,
+ * that is not going to change between one call and the next so it may be cached. 
+ * TPM Quotes are never cached. If you want to be sure to get fresh data, create
+ * a new instance. 
+ * XXX Or maybe  provide a clear() or reset() method that will clear all
+ * saved data (but it would have to become part of the HostAgent interface to be useful)
+ * 
  * @author jbuhacoff
  */
 public class VmwareHostAgent implements HostAgent {
@@ -101,12 +111,22 @@ public class VmwareHostAgent implements HostAgent {
         return false; // vmware does not support DAA
     }
 
+    /**
+     * Throws an exception because it is a programming error to call getAikCertificate without first checking
+     * the result of isAikCaAvailable()
+     * @return 
+     */
     @Override
     public X509Certificate getAikCertificate() {
         throw new UnsupportedOperationException("Vmware does not provide an AIK Certificate");
 //        return null;  // XXX TODO throw exception or return null? call should first check isAikAvailable // vmware does not make the AIK available through its API
     }
 
+    /**
+     * Throws an exception because it is a programming error to call getAikCaCertificate without first checking
+     * the result of isAikCaAvailable()
+     * @return 
+     */
     @Override
     public X509Certificate getAikCaCertificate() {
         throw new UnsupportedOperationException("Vmware does not provide a Privacy CA Certificate");
@@ -262,10 +282,12 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             TxtHostRecord host = new TxtHostRecord();
             host.HostName = vmware.getMORProperty(hostMOR, "name").toString();
             // hostObj.Description = serviceContent.getAbout().getVersion();
+            host.VMM_Name = vmware.getMORProperty(hostMOR, "config.product.name").toString(); // XXX TODO vmware doesn't return a separate hypervisor name... so for now using same as os name which is "Vmware ESXi"
             host.VMM_OSName = vmware.getMORProperty(hostMOR, "config.product.name").toString();
             host.VMM_OSVersion = vmware.getMORProperty(hostMOR, "config.product.version").toString();
             host.VMM_Version = vmware.getMORProperty(hostMOR, "config.product.build").toString();
             host.BIOS_Oem = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString();
+            host.BIOS_Name = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString(); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
             host.BIOS_Version = vmware.getMORProperty(hostMOR, "hardware.biosInfo.biosVersion").toString();
             return host;
         } catch (InvalidPropertyFaultMsg ex) {

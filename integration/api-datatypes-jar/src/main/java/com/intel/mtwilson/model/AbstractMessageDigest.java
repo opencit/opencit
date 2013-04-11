@@ -37,20 +37,20 @@ public abstract class AbstractMessageDigest extends ObjectModel {
      */
     protected void setBytes(byte[] value) {
         if( value == null ) { throw new IllegalArgumentException(algorithm+": Null digest"); }
-        if( value.length != digestLength ) { throw new IllegalArgumentException(algorithm+": Digest must be "+digestLength+" bytes long"); }
+        if( value.length != digestLength ) {  throw new IllegalArgumentException(algorithm+": Digest must be "+digestLength+" bytes long: "+Hex.encodeHexString(value)); }
         this.value = new byte[value.length];
         System.arraycopy(value, 0, this.value, 0, value.length);
         this.hex = Hex.encodeHexString(value);
     }
     protected void setHex(String hex) {
-        if( hex == null ) { throw new IllegalArgumentException(algorithm+": Null digest"); }
-        if( hex.isEmpty() ) { throw new IllegalArgumentException(algorithm+": Empty digest"); }
-        if( hex.length() != digestLength*2 ) { throw new IllegalArgumentException(algorithm+": Digest must be "+digestLength+" bytes ("+(digestLength*2)+" hex digits) long"); }
+        if( hex == null ) {  throw new IllegalArgumentException(algorithm+": Null digest"); }
+        if( hex.isEmpty() ) {  throw new IllegalArgumentException(algorithm+": Empty digest"); }
+        if( hex.length() != digestLength*2 ) {  throw new IllegalArgumentException(algorithm+": Digest must be "+digestLength+" bytes ("+(digestLength*2)+" hex digits) long: "+hex); }
         try {
             this.value = Hex.decodeHex(hex.toCharArray());
         }
         catch(DecoderException e) {
-            throw new IllegalArgumentException(algorithm+": Invalid digest", e);
+             throw new IllegalArgumentException(algorithm+": Invalid digest: "+value, e);
         }
         this.hex = hex;
     }

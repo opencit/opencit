@@ -2,10 +2,13 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.policy;
+package com.intel.mtwilson.policy.rule;
 
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.policy.BaseRule;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.dynamic.Variable;
 import com.intel.mtwilson.policy.fault.PcrManifestMissing;
 import com.intel.mtwilson.policy.fault.PcrValueMismatch;
@@ -22,7 +25,7 @@ import java.util.Set;
  * 
  * @author jbuhacoff
  */
-public class PcrMatchesVariable implements TrustPolicy {
+public class PcrMatchesVariable extends BaseRule {
     private PcrIndex pcrIndex;
     private Set<Variable> variables;
     private String expression;
@@ -33,8 +36,8 @@ public class PcrMatchesVariable implements TrustPolicy {
     }
     
     @Override
-    public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport(this);
+    public RuleResult apply(HostReport hostReport) {
+        RuleResult report = new RuleResult(this);
 //        report.check(this);
 //        report.check("%s: PCR %s is variable", getClass().getSimpleName(),pcrIndex.toString()); // XXX TODO need to find a way to express what we are checking!
         if( hostReport.pcrManifest == null ) {

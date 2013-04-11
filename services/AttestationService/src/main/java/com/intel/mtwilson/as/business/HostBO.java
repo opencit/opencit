@@ -28,7 +28,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.HostReport;
-import com.intel.mtwilson.policy.TrustPolicy;
+import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
 import com.intel.mtwilson.util.ResourceFinder;
 import com.vmware.vim25.HostTpmAttestationReport;

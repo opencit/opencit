@@ -2,9 +2,15 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.policy;
+package com.intel.mtwilson.policy.rule;
 
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.policy.BaseRule;
+import com.intel.mtwilson.policy.BaseRule;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.RuleResult;
+import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.fault.PcrManifestMissing;
 import com.intel.mtwilson.policy.fault.PcrValueMismatch;
 import com.intel.mtwilson.policy.fault.PcrValueMissing;
@@ -18,7 +24,7 @@ import com.intel.mtwilson.policy.fault.PcrValueMissing;
  * 
  * @author jbuhacoff
  */
-public class PcrMatchesConstant implements TrustPolicy {
+public class PcrMatchesConstant extends BaseRule {
     private final Pcr expected;
     public PcrMatchesConstant(Pcr expected) {
         this.expected = expected;
@@ -27,8 +33,8 @@ public class PcrMatchesConstant implements TrustPolicy {
     public Pcr getExpectedPcr() { return expected; }
     
     @Override
-    public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport(this);
+    public RuleResult apply(HostReport hostReport) {
+        RuleResult report = new RuleResult(this);
 //        report.check(this);
 //        report.check("%s: PCR %s is constant %s", getClass().getSimpleName(),expected.getIndex().toString(), expected.getValue().toString() );
         if( hostReport.pcrManifest == null ) {

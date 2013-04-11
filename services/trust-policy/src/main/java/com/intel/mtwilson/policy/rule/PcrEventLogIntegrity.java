@@ -2,13 +2,19 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.policy;
+package com.intel.mtwilson.policy.rule;
 
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.mtwilson.policy.BaseRule;
+import com.intel.mtwilson.policy.BaseRule;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.RuleResult;
+import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.fault.PcrManifestMissing;
 import com.intel.mtwilson.policy.fault.PcrValueMismatch;
 import com.intel.mtwilson.policy.fault.PcrValueMissing;
@@ -32,7 +38,7 @@ import java.util.List;
  * 
  * @author jbuhacoff
  */
-public class PcrEventLogIntegrity implements TrustPolicy {
+public class PcrEventLogIntegrity extends BaseRule {
     private PcrIndex pcrIndex;
     public PcrEventLogIntegrity(PcrIndex pcrIndex) {
         this.pcrIndex = pcrIndex;
@@ -41,8 +47,8 @@ public class PcrEventLogIntegrity implements TrustPolicy {
     public PcrIndex getPcrIndex() { return pcrIndex; }
     
     @Override
-    public TrustReport apply(HostReport hostReport) {
-        TrustReport report = new TrustReport(this);
+    public RuleResult apply(HostReport hostReport) {
+        RuleResult report = new RuleResult(this);
         if( hostReport.pcrManifest == null ) {
             report.fault(new PcrManifestMissing());            
         }

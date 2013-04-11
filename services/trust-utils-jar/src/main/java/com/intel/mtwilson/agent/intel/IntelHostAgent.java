@@ -133,7 +133,7 @@ public class IntelHostAgent implements HostAgent {
     public TxtHostRecord getHostDetails() throws IOException {
         HostInfo hostInfo = trustAgentClient.getHostInfo();
         TxtHostRecord host = new TxtHostRecord();
-        host.BIOS_Name = "Unknown"; // XXX TODO the HostInfo class doesn't have a getBiosName() function!!
+        host.BIOS_Name = hostInfo.getBiosOem().trim(); // XXX TODO the HostInfo class doesn't have a getBiosName() function!!
         host.BIOS_Oem = hostInfo.getBiosOem().trim();
         host.BIOS_Version = hostInfo.getBiosVersion().trim();
         host.VMM_Name = hostInfo.getVmmName().trim();

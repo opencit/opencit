@@ -19,6 +19,7 @@ package com.intel.mtwilson.policy;
  * @since 1.2
  * @author jbuhacoff
  */
-public interface TrustPolicy {
-    TrustReport apply(HostReport hostReport); // applies the trust policy to the given host report and returns the resulting trust report
+public interface Rule {
+    RuleResult apply(HostReport hostReport); // applies the trust policy to the given host report and returns the resulting trust report
+    String[] getMarkers(); // indicate the purpose of this policy; read like this "policy indicates that [markers] are trusted" where markers can be "bios", "vmm", "location", or user-defined;  BUT the trust is actually defined by "AND" of all policies that declare a marker... so "vmm" only trusted if all policies that include "vmm" in their markers list reported "trusted"
 }

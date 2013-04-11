@@ -6,7 +6,7 @@ package com.intel.mtwilson.policy.impl;
 
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.policy.HostReport;
-import com.intel.mtwilson.policy.TrustPolicy;
+import com.intel.mtwilson.policy.Rule;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public interface VendorHostTrustPolicyFactory {
      * 
      * @return 
      */
-    List<TrustPolicy> createTrustPolicyWhitelistFromHost(TblHosts host, HostReport hostReport); // XXX TODO need a way to accep tthe pcr list from the UI , right? 17,18,19,20,  or 0, or 22, or whatever. ??? for CUSTOMIZATIONS,  because defaults would be encoded by the vendors.
+    List<Rule> createTrustPolicyWhitelistFromHost(TblHosts host, HostReport hostReport); // XXX TODO need a way to accep tthe pcr list from the UI , right? 17,18,19,20,  or 0, or 22, or whatever. ??? for CUSTOMIZATIONS,  because defaults would be encoded by the vendors.
     
     
 }
