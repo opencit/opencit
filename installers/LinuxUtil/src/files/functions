@@ -1190,14 +1190,14 @@ postgres_server_detect() {
   if [[ -n "$postgresd" && -f "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
     echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-    echo listen_addresses='*' >> $postgresc
+    echo listen_addresses = \'*\' >> $postgresc
     return 0
   fi
   if [[ -n /usr/share/postgresql && -f /etc/init.d/postgresql ]]; then
     postgresd="/etc/init.d/postgresql"
     echo "Found postgres server: $postgresd"
     echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-    echo listen_addresses='*' >> $postgresc
+    echo listen_addresses = \'*\' >> $postgresc
     return 0
   fi
   echo "Postgres server not found"
