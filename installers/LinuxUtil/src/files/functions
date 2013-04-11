@@ -1183,7 +1183,7 @@ postgres_server_detect() {
   #find the host file
   postgresh=`find / -name pg_hba.conf`
   #find the configuration file
-  postgresc=`find / -name postgresql.conf'
+  postgresc=`find / -name postgresql.conf`
 
   echo "postgresh=$postgresh"
 
