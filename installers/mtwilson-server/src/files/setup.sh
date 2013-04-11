@@ -21,7 +21,7 @@ auto_install "Installer requirements" "APICLIENT"
 echo "Supported database systems are:"
 echo "postgres"
 echo "mysql"
-prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
+prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-postgres}
 if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
   DATABASE_VENDOR=postgres
   echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"

@@ -138,10 +138,10 @@ is_version_at_least() {
        -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
        && -n "${reqminor}" && "${hasminor}" -ge "${reqminor}" \
      ]]; then
-#    echo "yes"
+    echo "yes"
     return 0
   else
-#    echo "no"
+    echo "no"
     return 1
   fi  
 }
@@ -1176,23 +1176,28 @@ postgres_detect(){
       psql=""
     fi
   fi
+echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK"
 }
 
 postgres_server_detect() {
   #find the host file
   postgresh=`find / -name pg_hba.conf`
+  #find the configuration file
+  postgresc=`find / -name postgresql.conf'
 
   echo "postgresh=$postgresh"
 
   if [[ -n "$postgresd" && -f "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
     echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+    echo listen_addresses = '*' >> $postgresc
     return 0
   fi
   if [[ -n /usr/share/postgresql && -f /etc/init.d/postgresql ]]; then
     postgresd="/etc/init.d/postgresql"
     echo "Found postgres server: $postgresd"
     echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+    echo listen_addresses = '*' >> $postgresc
     return 0
   fi
   echo "Postgres server not found"
@@ -1240,6 +1245,7 @@ postgres_require() {
 postgres_connection() {
   postgres_require
   postgres_connect="psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}"
+  echo $postgres_connect
 }
 
 # Environment:
