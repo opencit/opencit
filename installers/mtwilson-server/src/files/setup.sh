@@ -191,6 +191,7 @@ elif using_postgres; then
   fi
   echo "Installing postgres client..."
   postgres_install
+  postgres_start & >> $INSTALL_LOG_FILE
   postgres_create_database
 
   export is_postgres_available postgres_connection_error
