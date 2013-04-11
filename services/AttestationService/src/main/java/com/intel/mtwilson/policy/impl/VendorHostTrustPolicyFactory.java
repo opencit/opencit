@@ -5,9 +5,13 @@
 package com.intel.mtwilson.policy.impl;
 
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.model.Bios;
+import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.Policy;
 import com.intel.mtwilson.policy.Rule;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The job of a VendorHostTrustPolicyFactory is, given a complete host report from that
@@ -23,7 +27,7 @@ import java.util.List;
 public interface VendorHostTrustPolicyFactory {
     
     /**
-     * The purpose of this method is to create a list of policies specific to the host report.
+     * The purpose of this method is to create a policy (list of rules) specific to the host report.
      * This is used to create a "whitelist" policy out of a "golden master host", and
      * also to create a "host-specific policy" out of any host  (which is the same as making
      * a "whitelist" that applies just to that host). 
@@ -44,7 +48,12 @@ public interface VendorHostTrustPolicyFactory {
      * 
      * @return 
      */
-    List<Rule> createTrustPolicyWhitelistFromHost(TblHosts host, HostReport hostReport); // XXX TODO need a way to accep tthe pcr list from the UI , right? 17,18,19,20,  or 0, or 22, or whatever. ??? for CUSTOMIZATIONS,  because defaults would be encoded by the vendors.
+    Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport); // XXX TODO need a way to accep tthe pcr list from the UI , right? 17,18,19,20,  or 0, or 22, or whatever. ??? for CUSTOMIZATIONS,  because defaults would be encoded by the vendors.
     
-    
+    Set<Rule> loadTrustRulesForBios(Bios bios, TblHosts host);
+
+    Set<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts host);
+
+    Set<Rule> loadTrustRulesForLocation(String location, TblHosts host);
+
 }

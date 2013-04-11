@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.policy;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A policy is a collection of rules; all must be met in order to comply with the policy.
@@ -30,13 +32,18 @@ import java.util.List;
  */
 public class Policy {
     private String name;
-    private List<Rule> rules;
+    private Set<Rule> rules;
     
-    public Policy(String name, List<Rule> rules) {
+    public Policy(String name, Rule... ruleArray) {
         this.name = name;
-        this.rules = rules;
+        this.rules = new HashSet<Rule>(Arrays.asList(ruleArray));
+    }
+    
+    public Policy(String name, Set<Rule> ruleset) {
+        this.name = name;
+        this.rules = new HashSet<Rule>(ruleset);
     }
     
     public String getName() { return name; }
-    public List<Rule> getRules() { return rules; }
+    public Set<Rule> getRules() { return rules; }
 }

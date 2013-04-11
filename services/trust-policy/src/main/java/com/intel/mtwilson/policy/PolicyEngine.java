@@ -5,9 +5,9 @@
 package com.intel.mtwilson.policy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class PolicyEngine {
         return list;
     }
     
-    public List<RuleResult> applyAll(HostReport hostReport, List<Rule> rules) {
+    public List<RuleResult> applyAll(HostReport hostReport, Set<Rule> rules) {
         ArrayList<RuleResult> list = new ArrayList<RuleResult>();
         for(Rule rule : rules) {
             RuleResult result = rule.apply(hostReport);

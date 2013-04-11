@@ -4,7 +4,6 @@
  */
 package test.policy;
 
-import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.policy.rule.*;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
@@ -16,17 +15,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.io.IOUtils;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.map.ObjectReader;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 
 /**
  *
@@ -188,7 +183,7 @@ Fault: Host PCR 0 with value aabbccddeeaabbccddeeaabbccddeeaabbccdd00 does not m
          * 
          */
         // now do the same thing but with a policy
-        Policy policy = new Policy("test pcr matches constant", Arrays.asList(new Rule[] { policy1, policy2 }));
+        Policy policy = new Policy("test pcr matches constant", policy1, policy2);
         TrustReport report = engine.apply(hostReport, policy);
         printReportJson(report);        
     }

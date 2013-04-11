@@ -10,6 +10,7 @@ import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mountwilson.as.common.ASException;
 import java.util.HashSet;
 import com.intel.mtwilson.agent.Vendor;
+import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
@@ -38,6 +39,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,22 +65,18 @@ public class HostTrustPolicyFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
     
     private EntityManagerFactory entityManagerFactory;
-    private TblMleJpaController mleJpaController;
-    private TblPcrManifestJpaController pcrManifestJpaController;
-    private TblLocationPcrJpaController locationPcrJpaController;
+    private JpaPolicyReader util;
 
     private Map<Vendor,VendorHostTrustPolicyFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostTrustPolicyFactory>(Vendor.class);
     //private Logger log = LoggerFactory.getLogger(getClass());
     public HostTrustPolicyFactory(EntityManagerFactory entityManagerFactory) {
+        util = new JpaPolicyReader(entityManagerFactory);
         // we initialize the map with the known vendors; but this could also be done through IoC
-        vendorFactoryMap.put(Vendor.INTEL, new IntelHostTrustPolicyFactory());
-        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostTrustPolicyFactory());
-        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostTrustPolicyFactory());
+        vendorFactoryMap.put(Vendor.INTEL, new IntelHostTrustPolicyFactory(util));
+        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostTrustPolicyFactory(util));
+        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostTrustPolicyFactory(util));
         
         this.entityManagerFactory = entityManagerFactory;
-        mleJpaController = new TblMleJpaController(entityManagerFactory);
-        pcrManifestJpaController = new TblPcrManifestJpaController(entityManagerFactory);
-        locationPcrJpaController = new TblLocationPcrJpaController(entityManagerFactory);
     }
     
     /**
@@ -108,99 +106,87 @@ public class HostTrustPolicyFactory {
     }
     
     /**
+     * CALL THIS FROM ATTESTATION SERVICE HOSTTRUSTBO TO GET THE TRUST POLICY FOR VERIFY HOST TRUST
+     * 
      * The purpose of this method is to instantiate a list of policies that have been
      * saved in the database.
      * 
-     * This method returns just one policy - so probably it's an instance of RequireAll or RequireAny and
-     * it contains other policies within. 
+     * This method is used if the host's whitelist is already saved in our database.
+     * If you are registering a new host, use generateTrustRulesForHost() instead.
      * 
-     * NOTE:  the top level policy "RequireAll" does not allow an empty rule set, so if a host exists that
-     * is somehow linked to neither a bios nor vmm mle, and does not have a location defined, it will not
-     * generate any mle-specific or location policies so the overall status will be "not trusted" - by design.
-     *  In English - a host with no trust policy is untrusted
+     * NOTE:  if there are no whitelist data available for a host, so that no rules are generated,
+     * the empty policy will always evaluate to "untrusted" 
      * 
      */
     public Policy loadTrustPolicyForHost(TblHosts host, String hostId) {
-        ArrayList<Rule> list = new ArrayList<Rule>();
+        VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);        
+        HashSet<Rule> rules = new HashSet<Rule>();
         // only add bios policy if the host is linked with a bios mle
         if( host.getBiosMleId() != null ) {
             Bios bios = new Bios(host.getBiosMleId().getName(), host.getBiosMleId().getVersion(), host.getBiosMleId().getOemId().getName());
-            list.addAll(loadTrustPolicyListForBios(bios,host));
+            rules.addAll(factory.loadTrustRulesForBios(bios, host));
         }
         // only add vmm policy if the host is linked with a vmm mle
         if( host.getVmmMleId() != null ) {
             Vmm vmm = new Vmm(host.getVmmMleId().getName(), host.getVmmMleId().getVersion(), host.getVmmMleId().getOsId().getName(), host.getVmmMleId().getOsId().getVersion());
-            list.addAll(loadTrustPolicyListForVmm(vmm,host));
+            rules.addAll(factory.loadTrustRulesForVmm(vmm,host));
         }
         // only add location policy if the host is expected to be somewhere specific... otherwise, an empty location will result in a policy that can't be met
         if( host.getLocation() != null && !host.getLocation().trim().isEmpty() ) {
-            list.addAll(loadTrustPolicyListForLocation(host));
+            rules.addAll(factory.loadTrustRulesForLocation(host.getLocation(), host));
         }
-        Policy policy = new Policy(String.format("Host trust policy for host with AIK %s", hostId), list);
+        Policy policy = new Policy(String.format("Host trust policy for host with AIK %s", hostId), rules);
         return policy;
     }
     
-    /**
-     * XXX TODO should this go into a jpa controller ? or just USE the jap controllers 
-     * to serialize the policy ?   also this is for a SPECIFIC HOST , NOT for a whitelist.
-     * @param host
-     * @param trustPolicy 
-     */
-    public void saveTrustPolicyForHost(TblHosts host, Rule trustPolicy) {
-        
+    protected VendorHostTrustPolicyFactory getVendorHostTrustPolicyFactoryForHost(TblHosts host) {
+        Vendor[] vendors = Vendor.values();
+        if( host.getAddOnConnectionInfo() == null ) {
+            throw new IllegalArgumentException("Connection info missing");
+        }
+        for(Vendor vendor : vendors) {
+            String prefix = vendor.name().toLowerCase()+":"; // "INTEL" becomes "intel:"
+            if( host.getAddOnConnectionInfo().startsWith(prefix) ) {
+                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendor);
+                if( factory != null ) {
+                    return factory;
+                }
+            }
+        }
+        throw new UnsupportedOperationException("No policy factory registered for this host");        
     }
     
     /**
-     * XXX TODO should this go into a jpa controller ? or just USE the jap controllers 
-     * to serialize the policy ?   also this is for an MLE (whitelist) , NOT for a specific host
+     * CALL THIS METHOD FROM MANAGEMENT SERVICE AUTOMATING SETUP OF A NEW HOST'S WHITELIST FROM HOST INFO
+     * 
+     * Call this method when you are registering a new host and want to GENERATE a trust
+     * policy for that host.  The vendor-specific factory will be called to do it so you
+     * get the best available set of rules.
+     * 
+     * This method is used to generate a set of rules from a host given its vendor and
+     * built-in knowledge about how that vendor's PCRs are extended. 
+     * If you need to load an existing trust policy for a host, use loadTrustPolicyForHost() instead.
+     * 
      * @param host
-     * @param trustPolicy 
+     * @param hostReport
+     * @return 
      */
-    public void saveTrustPolicyForMle(TblMle host, Rule trustPolicy) {
+    public Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport) {
+        VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);
+        return factory.generateTrustRulesForHost(host, hostReport);
+    }
+    
+    public void saveTrustPolicyForHost(TblHosts host, Policy trustPolicy) {
+        throw new UnsupportedOperationException("Cannot save:: not implemented yet");
         
     }
     
-    // moved here from both VMWareManifestStrategy (returned List<String>) and TrustAgentManifestStrategy  (returned String with comma-separated list)
-    // but ... XXX do we even need this?  is the list of indices useless?  because if we're going to query the whitelist, we may as well get ALL the
-    // information and just ninstantiate policies out of it !!!
-    private List<PcrIndex> getPcrIndexList(TblHosts tblHosts) {
-        ArrayList<PcrIndex> pcrs = new ArrayList<PcrIndex>();
-
-        TblMle biosMle = mleJpaController.findMleById(tblHosts.getBiosMleId().getId()); // XXX don't know why we are doing another database lookup, the tblHosts.getBiosMleId() is not an Id it's the full record and it has the same information we are looking up here
-
-        String biosPcrList = biosMle.getRequiredManifestList();
-
-        if (biosPcrList.isEmpty()) {
-            throw new ASException(
-                    ErrorCode.AS_MISSING_MLE_REQD_MANIFEST_LIST,
-                    tblHosts.getBiosMleId().getName(), tblHosts.getBiosMleId().getVersion());
-        }
-
-        String[] biosPcrs = biosPcrList.split(",");
-        for(String str : biosPcrs) {
-            pcrs.add(new PcrIndex(Integer.valueOf(str)));
-        }
-
-        // Get the Vmm MLE without accessing cache
-        TblMle vmmMle = mleJpaController.findMleById(tblHosts.getVmmMleId().getId()); // XXX don't know why we are doing another database lookup, the tblHosts.getVmmMleId() is not an Id it's the full record and it has the same information we are looking up here
-
-
-        String vmmPcrList = vmmMle.getRequiredManifestList();
-
-        if (vmmPcrList == null || vmmPcrList.isEmpty()) {
-            throw new ASException(
-                    ErrorCode.AS_MISSING_MLE_REQD_MANIFEST_LIST,
-                    tblHosts.getVmmMleId().getName(), tblHosts.getVmmMleId().getVersion());
-        }
-
-        String[] vmmPcrs = vmmPcrList.split(",");
+    public void saveTrustPolicyForMle(TblMle host, Policy trustPolicy) {
+        throw new UnsupportedOperationException("Cannot save: not implemented yet");
         
-        for(String str : vmmPcrs) {
-            pcrs.add(new PcrIndex(Integer.valueOf(str)));
-        }
-
-        return pcrs;
     }
+    
+
     
     
     ///////////////////////////////////// BEYOND THIS POINT,  CODE TAKEN FROM THE OLD  "GKV FACTORY"  ///// NEED TO LOAD FROM DB, THEN TURN INTO POLICIES !!!
@@ -216,90 +202,28 @@ public class HostTrustPolicyFactory {
      * @param bios
      * @return 
      */
-    public List<Rule> loadTrustPolicyListForBios(Bios bios, TblHosts tblHosts) {
-        TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
-        log.debug("HostTrustPolicyFactory found BIOS MLE: {}", biosMle.getName());
-        Collection<TblPcrManifest> pcrInfoList = biosMle.getTblPcrManifestCollection();
-        ArrayList<Rule> list = new ArrayList<Rule>();
-        for(TblPcrManifest pcrInfo : pcrInfoList) {
-            PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
-            Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
-            log.debug("... PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
-            rule.setMarkers(TrustMarker.BIOS.name());
-            list.add(rule);
-        }
-        return list;
+    public List<Rule> loadTrustRulesForBios(Bios bios, TblHosts tblHosts) {
+        throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
     }
 
-    public List<Rule> loadTrustPolicyListForVmm(Vmm vmm, TblHosts tblHosts) {
-        TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
-        log.debug("HostTrustPolicyFactory found VMM MLE: {}", vmmMle.getName());
+    public List<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts tblHosts) {
+        throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
         
-        ArrayList<Rule> list = new ArrayList<Rule>();
-
-        // first, get a list of all the pcr's in the whitelist for this vmm
-        Collection<TblPcrManifest> pcrInfoList = vmmMle.getTblPcrManifestCollection();
-        for(TblPcrManifest pcrInfo : pcrInfoList) {
-            PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
-            Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
-            log.debug("... PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
-            rule.setMarkers(TrustMarker.VMM.name());
-            list.add(rule);
-        }
-        
-        // second, get a list of any modules in the whitelist for this vmm  (remember if it doesn't apply, then it won't be in the database)
-        // XXX we use the PcrEventLogIncludes policy so that if the host as any extra modules it's not an error ...   but it's a security risk because could be a new module that is malware!
-        // XXX right now this mechanism is very rigid... straightforward adaptation of our existing database schema to policies.  but the policy mechanism
-        // is a lot more flexible and probably needs changes to the schema to enable its full power. for example we could make a list of mandatory modules,
-        // and a list of optional known-safe modules, and then combine them here,   and that would solve he use case of authorized optional modules while
-        // still being secure against any new unknown modules.
-        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();
-        for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
-            PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
-            log.debug("... MODULE for PCR {}", pcrIndex.toString());
-            list.add(new PcrEventLogIntegrity(pcrIndex)); // if we're going to look for things in the host's event log, it needs to have integrity
-            HashSet<Measurement> measurements = new HashSet<Measurement>();
-            
-            HashMap<String,String> info = new HashMap<String,String>();
-            // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
-            info.put("EventName", moduleInfo.getEventID().getName());
-            info.put("ComponentName", moduleInfo.getComponentName());
-
-            if( moduleInfo.getUseHostSpecificDigestValue() ) {
-                Collection<TblHostSpecificManifest> hostSpecificManifest = moduleInfo.getTblHostSpecificManifestCollection();
-                for(TblHostSpecificManifest hostSpecificModule : hostSpecificManifest) {
-                    Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
-                    measurements.add(m);
-                }
-            }
-            else {
-                // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
-                // XXX the only way to fix this is to change the schema so it can accomodate all the custom info we need w/o needing to know WHAT it is from here.
-                info.put("PackageName", moduleInfo.getPackageName());
-                info.put("PackageVersion", moduleInfo.getPackageVersion());
-                info.put("PackageVendor", moduleInfo.getPackageVendor());
-                Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
-                measurements.add(m);
-            }
-            PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, measurements);
-            rule.setMarkers(TrustMarker.VMM.name());
-            list.add(rule);
-        }
-        return list;
+//        ArrayList<Rule> list = new ArrayList<Rule>();
+//        list.add(loadPcrMatchesConstantRulesForVmm(vmmMle, tblHosts)); // in whitelistutil
     }
     
     // XXX FOR SUDHIR  ... IF YOU CONVERT HOST.LOCATION TO ID YOU CAN USE AS-IS... OTHERWISE NEED TO LOOK UP LOCATION BY STRING VALUE ... THAT METHOD ISN'T IN THE LOCATION CONTROLLER RIGHT NOW
-    public List<Rule> loadTrustPolicyListForLocation(TblHosts tblHosts) {
+    public List<Rule> loadTrustRulesForLocation(TblHosts tblHosts) {
+        throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
 //        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcr(tblHosts.getLocationId());
-        ArrayList<Rule> list = new ArrayList<Rule>();
+//        ArrayList<Rule> list = new ArrayList<Rule>();
 //        PcrIndex pcrIndex = HostBO.LOCATION_PCR;
 //        Sha1Digest pcrValue = new Sha1Digest(locationPcr.getPcrValue());
 //        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
 //        rule.setMarkers(Marker.LOCATION.name());
 //        list.add(rule);
-        return list;
+//        return list;
     }
 
 }
