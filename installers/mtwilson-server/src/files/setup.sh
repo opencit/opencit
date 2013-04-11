@@ -170,6 +170,8 @@ elif using_postgres; then
   
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+  chmod 0600 $HOME/.pgpass
+
   #postgres_write_connection_properties "/etc/intel/cloudsecurity/attestation-service.properties" "mountwilson.as.db"
   #postgres_write_connection_properties "/etc/intel/cloudsecurity/audit-handler.properties" "mountwilson.audit.db"
   #postgres_write_connection_properties "/etc/intel/cloudsecurity/management-console.properties" "mountwilson.mc.db"
