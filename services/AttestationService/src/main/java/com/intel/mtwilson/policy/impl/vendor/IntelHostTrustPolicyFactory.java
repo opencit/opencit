@@ -19,19 +19,19 @@ import java.util.Set;
  * @author jbuhacoff
  */
 public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory {
-    private JpaPolicyReader util;
+    private JpaPolicyReader reader;
     public IntelHostTrustPolicyFactory(JpaPolicyReader util) {
-        this.util = util;
+        this.reader = util;
     }
 
     @Override
-    public Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport) {
+    public Set<Rule> generateTrustRulesForHost(HostReport hostReport) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Set<Rule> loadTrustRulesForBios(Bios bios, TblHosts host) {
-        return util.loadPcrMatchesConstantRulesForBios(bios, host);
+        return reader.loadPcrMatchesConstantRulesForBios(bios, host);
     }
 
     /**
@@ -42,12 +42,12 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
      */
     @Override
     public Set<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts host) {
-        return util.loadPcrMatchesConstantRulesForVmm(vmm, host);
+        return reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
     }
 
     @Override
     public Set<Rule> loadTrustRulesForLocation(String location, TblHosts host) {
-        return util.loadPcrMatchesConstantRulesForLocation(location, host);
+        return reader.loadPcrMatchesConstantRulesForLocation(location, host);
     }
 
 }

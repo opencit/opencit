@@ -510,7 +510,7 @@ public class TAHelper {
                 if( validPcrNumber && validPcrValue ) {
                 	log.info("Result PCR "+pcrNumber+": "+pcrValue);
 //                	pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
-                    pcrManifest.setPcr(new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
+                    pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
                 }            	
             }
             else {

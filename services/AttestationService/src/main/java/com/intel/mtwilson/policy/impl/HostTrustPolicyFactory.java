@@ -65,16 +65,16 @@ public class HostTrustPolicyFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
     
     private EntityManagerFactory entityManagerFactory;
-    private JpaPolicyReader util;
+    private JpaPolicyReader reader;
 
     private Map<Vendor,VendorHostTrustPolicyFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostTrustPolicyFactory>(Vendor.class);
     //private Logger log = LoggerFactory.getLogger(getClass());
     public HostTrustPolicyFactory(EntityManagerFactory entityManagerFactory) {
-        util = new JpaPolicyReader(entityManagerFactory);
+        reader = new JpaPolicyReader(entityManagerFactory);
         // we initialize the map with the known vendors; but this could also be done through IoC
-        vendorFactoryMap.put(Vendor.INTEL, new IntelHostTrustPolicyFactory(util));
-        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostTrustPolicyFactory(util));
-        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostTrustPolicyFactory(util));
+        vendorFactoryMap.put(Vendor.INTEL, new IntelHostTrustPolicyFactory(reader));
+        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostTrustPolicyFactory(reader));
+        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostTrustPolicyFactory(reader));
         
         this.entityManagerFactory = entityManagerFactory;
     }
@@ -95,16 +95,6 @@ public class HostTrustPolicyFactory {
     }
     
     
-    // see the notepad notes
-    // XXX TODO but this method needs to move to another class where we serialize the policies... 
-    // in this class it's only deserialize!!
-    public Rule createHostSpecificTrustPolicy(HostReport hostReport, TblMle biosMleId, TblMle vmmMleId) {
-        // FOR VMWARE, WE NEED TO GET THE "COMMAND LINE" MODULE,  AND CREATE A HOST-SPECIFIC POLICY FOR IT
-        
-        // IF THERE IS NOT A HOST -SPECIFIC POLICY THAT IS CREATED, JUST RETURN NULL
-        return null;
-    }
-    
     /**
      * CALL THIS FROM ATTESTATION SERVICE HOSTTRUSTBO TO GET THE TRUST POLICY FOR VERIFY HOST TRUST
      * 
@@ -116,6 +106,9 @@ public class HostTrustPolicyFactory {
      * 
      * NOTE:  if there are no whitelist data available for a host, so that no rules are generated,
      * the empty policy will always evaluate to "untrusted" 
+     * 
+     * This method delegates to vendor-specific factories for the work of instantiating the Rules, but
+     * it does organize the work into bios, vmm, and location and adds the 
      * 
      */
     public Policy loadTrustPolicyForHost(TblHosts host, String hostId) {
@@ -167,25 +160,32 @@ public class HostTrustPolicyFactory {
      * built-in knowledge about how that vendor's PCRs are extended. 
      * If you need to load an existing trust policy for a host, use loadTrustPolicyForHost() instead.
      * 
-     * @param host
-     * @param hostReport
+     * @param host only required in order to detect the vendor (using connection string) and delegate to the appropriate factory
+     * @param hostReport the information to be used for generating the rules
      * @return 
      */
     public Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport) {
         VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);
-        return factory.generateTrustRulesForHost(host, hostReport);
+        return factory.generateTrustRulesForHost(hostReport);
     }
     
-    public void saveTrustPolicyForHost(TblHosts host, Policy trustPolicy) {
+    // implies that only the host-specific parts will be stored ????   it's not clear from this that someone should call storetrustPolicyforHost AND forBios AND forVmm...  should have just one call for "store trust policy for host" that does all three, and a separate "store trust policy" that only does the mle's (with variables for host-specific things) and doesn't write anything host-specific
+    public void storeTrustPolicyForHost(TblHosts host, Policy trustPolicy) {
         throw new UnsupportedOperationException("Cannot save:: not implemented yet");
         
     }
     
-    public void saveTrustPolicyForMle(TblMle host, Policy trustPolicy) {
+    // implies that anything host-specific will be identified and written out with variables / placeholders
+    public void storeTrustPolicyForBios(TblMle host, Policy trustPolicy) {
         throw new UnsupportedOperationException("Cannot save: not implemented yet");
         
     }
     
+    // implies that anything host-specific will be identified and written out with variables / placeholders
+    public void storeTrustPolicyForVmm(TblMle host, Policy trustPolicy) {
+        throw new UnsupportedOperationException("Cannot save: not implemented yet");
+        
+    }
 
     
     

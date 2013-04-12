@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 public class HostBO extends BaseBO {
 
 	private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
-	public static final PcrIndex LOCATION_PCR = new PcrIndex(22);
+	public static final PcrIndex LOCATION_PCR = PcrIndex.PCR22;
         private Logger log = LoggerFactory.getLogger(getClass());
         private byte[] dataEncryptionKey = null;
         private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
@@ -493,7 +493,7 @@ public class HostBO extends BaseBO {
 	private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest) {
 		List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
-		if (pcrManifest != null && pcrManifest.containsPcrEventLog(new PcrIndex(19)) ) {
+		if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19) ) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
 			
 				for (Measurement m : pcrEventLog.getEventLog()) {

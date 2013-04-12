@@ -44,7 +44,7 @@ public class Measurement extends ObjectModel {
 
     @Override
     public int hashCode() {
-        return digest.hashCode() + label.hashCode();
+        return digest.hashCode() + label.hashCode(); // two measurements are equal if their digests and labels are equal...  this property facilitates very convenient management of measurement using java's collections, such as contains(measurement) and removeAll(list of measurements) where one side comes from the host and may have a different label than what got saved in the database 
     }
 
     /**

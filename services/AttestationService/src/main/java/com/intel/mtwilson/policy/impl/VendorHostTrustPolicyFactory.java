@@ -34,9 +34,10 @@ public interface VendorHostTrustPolicyFactory {
      * 
      * Two important notes:
      * 
-     * First, the list returned from this method need not be complete -- it is only necessary
-     * to return policies that are specific to this vendor's hosts and would not necessarily
-     * apply to another vendor's hosts.
+     * First, the list returned from this method is not necessarily exactly what will be
+     * saved into the database -- in future versions of Mt Wilson a customer could add more
+     * rules or even edit or remove rules returned from this method when they define their 
+     * whitelist.
      * 
      * Second, the result will be used as a whitelist so it may contain some constant values
      * (all hosts assigned to this whitelist need to have the SAME value for some attribute)
@@ -46,14 +47,34 @@ public interface VendorHostTrustPolicyFactory {
      * and it will get filled in when each host's trust status is evaluated by the trust policy
      * engine)
      * 
+     * @param hostReport must contain all relevant information about the host, including pcr manifest, bios/vmm information, and other host attributes
      * @return 
      */
-    Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport); // XXX TODO need a way to accep tthe pcr list from the UI , right? 17,18,19,20,  or 0, or 22, or whatever. ??? for CUSTOMIZATIONS,  because defaults would be encoded by the vendors.
+    Set<Rule> generateTrustRulesForHost(HostReport hostReport); // XXX TODO need a way to accep tthe pcr list from the UI , right? 17,18,19,20,  or 0, or 22, or whatever. ??? for CUSTOMIZATIONS,  because defaults would be encoded by the vendors.
     
+    /**
+     * Uses JpaPolicyReader to load bios whitelist data from database, and instantiates it into Rules.
+     * @param bios
+     * @param host
+     * @return 
+     */
     Set<Rule> loadTrustRulesForBios(Bios bios, TblHosts host);
 
+    /**
+     * Uses JpaPolicyReader to load vmm whitelist data from database, and instantiates it into Rules.
+     * @param bios
+     * @param host
+     * @return 
+     */
     Set<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts host);
 
+    /**
+     * Uses JpaPolicyReader to load location whitelist data from database, and instantiates it into Rules.
+     * Vendor implementations of this in mtwilson-1.2 rely completely on the helper methods.
+     * @param bios
+     * @param host
+     * @return 
+     */
     Set<Rule> loadTrustRulesForLocation(String location, TblHosts host);
 
 }

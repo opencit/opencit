@@ -44,14 +44,15 @@ public class VMWare51Esxi51   {
         // for each event assign it to a PCR event log
         for(HostTpmEventLogEntry logEntry : report.getTpmEvents()) {
             int pcrIndex = logEntry.getPcrIndex();
+            log.debug("PCR {}", pcrIndex);
             Measurement m = convertHostTpmEventLogEntryToMeasurement(logEntry);
-            if( pcrManifest.containsPcrEventLog(new PcrIndex(pcrIndex)) ) {
+            if( pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex)) ) {
                 pcrManifest.getPcrEventLog(pcrIndex).getEventLog().add(m);
             }
             else {
                 ArrayList<Measurement> list = new ArrayList<Measurement>();
                 list.add(m);
-                pcrManifest.setPcrEventLog(new PcrEventLog(new PcrIndex(pcrIndex),list));
+                pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(pcrIndex),list));
             }
         }
         

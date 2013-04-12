@@ -26,7 +26,7 @@ public class CitrixHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
     }
     
     @Override
-    public Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport) {
+    public Set<Rule> generateTrustRulesForHost(HostReport hostReport) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     

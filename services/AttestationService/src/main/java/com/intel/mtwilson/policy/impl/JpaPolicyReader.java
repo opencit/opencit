@@ -108,6 +108,12 @@ public class JpaPolicyReader {
         }
         return list;
     }
+
+    /*
+    public Set<Rule> loadPcrMatchesConstantRules(TblHosts tblHosts, TblMle mle) {
+        Collection<TblPcrManifest> pcrInfoList = mle.getTblPcrManifestCollection();
+        return createPcrMatchesConstantRulesFromTblPcrManifest(pcrInfoList, TrustMarker.BIOS.name());
+    }*/
     
     public Set<Rule> loadPcrMatchesConstantRulesForBios(Bios bios, TblHosts tblHosts) {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());

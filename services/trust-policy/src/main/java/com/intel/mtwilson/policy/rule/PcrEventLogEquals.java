@@ -53,7 +53,7 @@ public class PcrEventLogEquals extends BaseRule {
             else {
                 // we check that for the PCR defined in the policy, the HostReport's PcrModuleManifest contains the exact set of expected modules
                 ArrayList<Measurement> hostActualUnexpected = new ArrayList<Measurement>(moduleManifest);
-                hostActualUnexpected.removeAll(expected.getEventLog()); //  hostActualUnexpected = actual modules - expected modules = only extra modules that shouldn't be there
+                hostActualUnexpected.removeAll(expected.getEventLog()); //  hostActualUnexpected = actual modules - expected modules = only extra modules that shouldn't be there;  comparison is done BY HASH VALUE,  not by name or any "other info"
                 if( !hostActualUnexpected.isEmpty() ) {
                     report.fault(new PcrEventLogContainsUnexpectedEntries(expected.getPcrIndex(), hostActualUnexpected));
                 }
