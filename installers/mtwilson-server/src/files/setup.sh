@@ -43,7 +43,7 @@ if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]
   echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
 fi
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
 
@@ -179,14 +179,7 @@ elif using_postgres; then
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
   chmod 0600 $HOME/.pgpass
 
-  set_config_db_properties "asctl" "attestation-service"
-  postgres_configure_connection "${package_config_filename}" mountwilson.as.db
-  set_config_db_properties "ahctl" "audit-handler"
-  postgres_configure_connection "${package_config_filename}" mountwilson.audit.db
-  set_config_db_properties "msctl" "management-service"
-  postgres_configure_connection "${package_config_filename}" mountwilson.ms.db
-
-
+  
   # Install Postgres server (if user selected localhost)
   if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
     echo "Installing postgres server..."
@@ -199,14 +192,17 @@ elif using_postgres; then
     postgres_server_install 
     postgres_restart & >> $INSTALL_LOG_FILE
     # Delay
-    sleep 20
+    sleep 10
   fi
   echo "Installing postgres client..."
   postgres_install
   postgres_restart & >> $INSTALL_LOG_FILE
   # Delay
-  sleep 20
+  sleep 10
+
   postgres_create_database
+  set_config_db_properties "asctl" "attestation-service"
+  postgres_write_connection_properties "${package_config_filename}" "mountwilson.as.db"
 
   export is_postgres_available postgres_connection_error
   if [ -z "$is_postgres_available" ]; then 

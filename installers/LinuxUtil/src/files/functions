@@ -2761,11 +2761,12 @@ postgres_userinput_connection_properties() {
 }
 
 # Set config file db properties
-set_config_db_properties()
-  script_name="$1"
-  package_name="$2"
+set_config_db_properties() {
+  local scriptname="$1"
+  local packagename="$2"
   intel_conf_dir=/etc/intel/cloudsecurity
-  package_dir=/opt/intel/cloudsecurity/${package_name}
-  package_config_filename=${intel_conf_dir}/${package_name}.properties
-  package_env_filename=${package_dir}/${package_name}.env
-  package_install_filename=${package_dir}/${package_name}.install
+  package_dir=/opt/intel/cloudsecurity/${packagename}
+  package_config_filename=${intel_conf_dir}/${packagename}.properties
+  package_env_filename=${package_dir}/${packagename}.env
+  package_install_filename=${package_dir}/${packagename}.install
+}
