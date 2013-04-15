@@ -171,7 +171,7 @@ echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
-if [ -z "$glassfish" && -z "$tomcat" ]; then
+if [[ -z "$glassfish" && -z "$tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
 
