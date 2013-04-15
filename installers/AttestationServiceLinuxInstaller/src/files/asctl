@@ -209,11 +209,11 @@ setup() {
 #  mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
-      echo_warning "Missing one or more required packages"
-      print_env_summary_report
-      exit 1
-  fi
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
+#      echo_warning "Missing one or more required packages"
+#      print_env_summary_report
+#      exit 1
+#  fi
   setup_interactive_install
 }
 

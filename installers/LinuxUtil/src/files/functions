@@ -1090,6 +1090,7 @@ mysql_create_ssl() {
 
 ### FUNCTION LIBRARY: postgres
 
+
 postgres_clear() {
   POSTGRES_HOME=""
   psql=""
@@ -2759,3 +2760,12 @@ postgres_userinput_connection_properties() {
     prompt_with_default_password POSTGRES_PASSWORD "Password:" ${DEFAULT_POSTGRES_PASSWORD}
 }
 
+# Set config file db properties
+set_config_db_properties()
+  script_name="$1"
+  package_name="$2"
+  intel_conf_dir=/etc/intel/cloudsecurity
+  package_dir=/opt/intel/cloudsecurity/${package_name}
+  package_config_filename=${intel_conf_dir}/${package_name}.properties
+  package_env_filename=${package_dir}/${package_name}.env
+  package_install_filename=${package_dir}/${package_name}.install

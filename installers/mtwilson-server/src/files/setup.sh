@@ -11,6 +11,13 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
+script_name=''
+package_name=''
+intel_conf_dir=/etc/intel/cloudsecurity
+package_dir=/opt/intel/cloudsecurity/${package_name}
+package_config_filename=${intel_conf_dir}/${package_name}.properties
+package_env_filename=${package_dir}/${package_name}.env
+package_install_filename=${package_dir}/${package_name}.install
 
 APICLIENT_YUM_PACKAGES="unzip"
 APICLIENT_APT_PACKAGES="unzip"
@@ -167,14 +174,18 @@ if using_mysql; then
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
 elif using_postgres; then
   postgres_userinput_connection_properties
-  
+
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
   chmod 0600 $HOME/.pgpass
 
-  #postgres_write_connection_properties "/etc/intel/cloudsecurity/attestation-service.properties" "mountwilson.as.db"
-  #postgres_write_connection_properties "/etc/intel/cloudsecurity/audit-handler.properties" "mountwilson.audit.db"
-  #postgres_write_connection_properties "/etc/intel/cloudsecurity/management-console.properties" "mountwilson.mc.db"
+  set_config_db_properties "asctl" "attestation-service"
+  postgres_configure_connection "${package_config_filename}" mountwilson.as.db
+  set_config_db_properties "ahctl" "audit-handler"
+  postgres_configure_connection "${package_config_filename}" mountwilson.audit.db
+  set_config_db_properties "msctl" "management-service"
+  postgres_configure_connection "${package_config_filename}" mountwilson.ms.db
+
 
   # Install Postgres server (if user selected localhost)
   if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then

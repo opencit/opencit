@@ -77,7 +77,8 @@ cp tdctl /usr/local/bin
 /usr/local/bin/tdctl setup
 register_startup_script /usr/local/bin/tdctl tdctl
 
-
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
-glassfish_permissions "${package_var_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+  glassfish_permissions "${package_var_dir}"
+fi

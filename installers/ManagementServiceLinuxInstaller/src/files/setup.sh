@@ -72,5 +72,7 @@ cp msctl /usr/local/bin
 /usr/local/bin/msctl setup
 register_startup_script /usr/local/bin/msctl msctl >> $INSTALL_LOG_FILE
 
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+fi
