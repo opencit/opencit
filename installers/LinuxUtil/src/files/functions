@@ -1157,6 +1157,9 @@ postgres_server_install(){
   #if we get here postgres was a fresh install. Need to create the account entered by user
   local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
   sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+  echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+  echo listen_addresses = \'*\' >> $postgresc
+
 }
 
 # Environment:
@@ -1189,15 +1192,11 @@ postgres_server_detect() {
 
   if [[ -n "$postgresd" && -f "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
-    echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-    echo listen_addresses = \'*\' >> $postgresc
     return 0
   fi
   if [[ -n /usr/share/postgresql && -f /etc/init.d/postgresql ]]; then
     postgresd="/etc/init.d/postgresql"
     echo "Found postgres server: $postgresd"
-    echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-    echo listen_addresses = \'*\' >> $postgresc
     return 0
   fi
   echo "Postgres server not found"
