@@ -1396,6 +1396,11 @@ postgres_running_report() {
     echo "Not running"
   fi
 }
+postgres_restart() {
+  if [ -n "$postgresd" ]; then
+      $postgresd restart
+  fi
+}
 postgres_start() {
   if [ -n "$postgresd" ]; then
       $postgresd start

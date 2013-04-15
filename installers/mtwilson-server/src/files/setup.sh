@@ -186,12 +186,15 @@ elif using_postgres; then
      echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
     fi 
     postgres_server_install 
-    postgres_start & >> $INSTALL_LOG_FILE
-
+    postgres_restart & >> $INSTALL_LOG_FILE
+    # Delay
+    sleep 20
   fi
   echo "Installing postgres client..."
   postgres_install
-  postgres_start & >> $INSTALL_LOG_FILE
+  postgres_restart & >> $INSTALL_LOG_FILE
+  # Delay
+  sleep 20
   postgres_create_database
 
   export is_postgres_available postgres_connection_error
