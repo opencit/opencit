@@ -12,8 +12,8 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
-              #postgres|mysql java tomcat|glassfish privacyca attservice mangservice wlmservice mangportal trustportal wlmportal
- INSTALL_PKGS="mysql java glassfish privacyca attservice mangservice wlmservice mangportal trustportal wlmportal"
+              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal]
+ INSTALL_PKGS="mysql java glassfish privacyca SERVICES PORTALS"
 fi
 
 FIRST=0
@@ -27,7 +27,22 @@ for i in $INSTALL_PKGS; do
   LIST=$LIST", "$pkg
  fi
 done
-echo "installing packages: $LIST"
+
+# if a group is defined, then make all sub parts == true
+if [ ! -z "$portals" ]; then
+  eval mangportal="true"
+  eval trustportal="true"
+  eval wlmportal="true"
+fi
+# if a group is defined, then make all sub parts == true
+if [ ! -z "$services" ]; then
+  eval attservice="true"
+  eval mangservice="true"
+  eval wlmservice="true"
+fi
+
+
+echo "Installing packages: $LIST"
 
 APICLIENT_YUM_PACKAGES="unzip"
 APICLIENT_APT_PACKAGES="unzip"
