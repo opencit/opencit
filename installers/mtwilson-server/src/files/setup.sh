@@ -22,13 +22,12 @@ for i in $INSTALL_PKGS; do
  eval $pkg="true"
  if [ $FIRST == 0 ]; then
   FIRST=1;
-  LIST=$val
+  LIST=$pkg
  else
-  LIST=$LIST", "$val
+  LIST=$LIST", "$pkg
  fi
 done
 echo "installing packages: $LIST"
-
 
 APICLIENT_YUM_PACKAGES="unzip"
 APICLIENT_APT_PACKAGES="unzip"
@@ -241,7 +240,7 @@ if [ ! -z "$trustportal" ]; then
 	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-#TODO-stdalex see if we need to always install monit
+#TODO-stdale monitrc needs to be customized depending on what is installed
 echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
 ./$monit_installer  >> $INSTALL_LOG_FILE
 echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
