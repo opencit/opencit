@@ -112,7 +112,7 @@ echo
 # XXX TODO ask about mysql vs postgres
 # XXX TODO ask about glassfish vs tomcat
 
-if [ -z "$postgres" && -z "$mysql" ]; then
+if [[ -z "$postgres" && -z "$mysql" ]]; then
  echo_warning "Relying on an existing database installation"
 fi
 
