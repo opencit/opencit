@@ -175,18 +175,24 @@ create_data_encryption_key() {
 
 
 setup_interactive_install() {
-# - MOVED TO SETUP
-#  if [ -n "$mysql" ]; then
-#    mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-#    mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
-#    #mysql_configure_connection "${intel_conf_dir}/management-console.properties" mountwilson.mc.db
-#    mysql_create_database
-#    # bug #509 use java program to set up the database
-#    #mysql_scripts=`list_mysql_install_scripts`
-#    #mysql_install_scripts ${mysql_scripts}
-#
-#    mtwilson setup InitDatabase mysql
-#  fi
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+      mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
+      #mysql_configure_connection "${intel_conf_dir}/management-console.properties" mountwilson.mc.db
+      mysql_create_database
+      # bug #509 use java program to set up the database
+      #mysql_scripts=`list_mysql_install_scripts`
+      #mysql_install_scripts ${mysql_scripts}
+
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    postgres_configure_connection "${package_config_filename}" mountwilson.as.db
+    postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
+    postgres_create_database
+    mtwilson setup InitDatabase postgres
+  fi
   create_saml_key 
   download_privacyca_certs
   create_data_encryption_key

@@ -178,7 +178,6 @@ elif using_postgres; then
   export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
   echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
   chmod 0600 $HOME/.pgpass
-
   
   # Install Postgres server (if user selected localhost)
   if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
@@ -199,19 +198,16 @@ elif using_postgres; then
   postgres_restart & >> $INSTALL_LOG_FILE
   # Delay
   sleep 10
+  echo "Installation of postgres client complete..."
 
   postgres_create_database
-  set_config_db_properties "asctl" "attestation-service"
-  postgres_write_connection_properties "${package_config_filename}" "mountwilson.as.db"
 
   export is_postgres_available postgres_connection_error
   if [ -z "$is_postgres_available" ]; then 
     echo_warning "Run 'mtwilson setup' after a database is available"; 
-  else
-    mtwilson setup InitDatabase postgres
   fi
 
-  echo "Installation of postgres client complete..."
+ 
 fi
 
 
