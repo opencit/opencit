@@ -94,9 +94,9 @@ public class InitDatabase implements Command {
             this.description = description;
         }
     }
-    
+    private String vendor = null;
     private void initDatabase(String databaseVendor) throws SetupException, IOException, SQLException {
-        
+        vendor = databaseVendor;
         Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
@@ -260,13 +260,22 @@ public class InitDatabase implements Command {
     }
     
     private List<String> getTableNames(Connection c) throws SQLException {
-        ArrayList<String> list = new ArrayList<String>();
+       ArrayList<String> list = new ArrayList<String>();
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery("SHOW TABLES");
+        String sql = "";
+        if (vendor.equals("mysql")){
+            sql = "SHOW TABLES";
+        }
+        else if (vendor.equals("postgres")){
+            sql = "SELECT table_name FROM information_schema.tables;";          
+        }
+       
+        ResultSet rs = s.executeQuery(sql);
         while(rs.next()) {
             list.add(rs.getString(1));
         }
         return list;
+
     }
     
     private List<ChangelogEntry> getChangelog(Connection c) throws SQLException {
