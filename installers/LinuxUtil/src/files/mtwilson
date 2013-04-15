@@ -11,7 +11,7 @@ apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
 #apiclient_shell=${apiclient_dir}/shell
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 
@@ -24,7 +24,7 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 #if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
@@ -124,9 +124,15 @@ Detected the following options on this server:"
   prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
   export MTWILSON_SERVER
   echo
-
-  mysql_userinput_connection_properties
-  export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
+  if using_mysql; then
+    mysql_userinput_connection_properties
+    export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
+  elif using_postgres; then
+    postgres_userinput_connection_properties
+    export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+    chmod 0600 $HOME/.pgpass
+  if
 
   # Attestation service auto-configuration
   export PRIVACYCA_SERVER=${MTWILSON_SERVER}
@@ -179,6 +185,9 @@ setup_env() {
     mysql_detect > /dev/null
     echo "mysql=$mysql"
     #export mysql
+  elif using_postgres; then
+    postgres_detect > /dev/null
+    echo "postgres=$psql"
   fi
   echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
   if using_glassfish; then
@@ -187,6 +196,11 @@ setup_env() {
     echo "glassfish_bin=$glassfish_bin"
     echo "glassfish=\"$glassfish\""
     #export GLASSFISH_HOME glassfish_bin glassfish
+  elif using_tomcat; then
+    tomcat_detect > /dev/null
+    echo "TOMCAT_HOME=$TOMCAT_HOME"
+    echo "tomcat_bin=$tomcat_bin"
+    echo "tomcat=\"$tomcat\""
   fi
 }
 

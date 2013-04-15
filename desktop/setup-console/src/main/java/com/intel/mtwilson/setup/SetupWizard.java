@@ -40,14 +40,17 @@ public class SetupWizard {
     public Connection getDatabaseConnection() throws SetupException {
         try {
             // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection conn = DriverManager.getConnection(
-                    String.format("jdbc:mysql://%s:%d/%s",
-                        conf.getString("mountwilson.as.db.host", conf.getString("mtwilson.db.host", "127.0.0.1")),
-                        conf.getInteger("mountwilson.as.db.port", conf.getInteger("mtwilson.db.port", 3306)),
-                        conf.getString("mountwilson.as.db.schema", conf.getString("mtwilson.db.schema"))),
-                    conf.getString("mountwilson.as.db.user", conf.getString("mtwilson.db.user")),
-                    conf.getString("mountwilson.as.db.password", conf.getString("mtwilson.db.password")));
+            Class.forName(conf.getString("mountwilson.as.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+            String url =conf.getString("mountwilson.as.db.url",
+                    conf.getString("mtwilson.db.url",
+                    String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                    conf.getString("mountwilson.as.db.host", conf.getString("mtwilson.db.host","127.0.0.1")),
+                    conf.getString("mountwilson.as.db.port", conf.getString("mtwilson.db.port","3306")),
+                    conf.getString("mountwilson.as.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
+            String user = conf.getString("mountwilson.as.db.user", conf.getString("mtwilson.db.user"));
+            String pass = conf.getString("mountwilson.as.db.password", conf.getString("mtwilson.db.password"));
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            
             return conn;
         }
         catch (ClassNotFoundException e) {
