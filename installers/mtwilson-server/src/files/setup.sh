@@ -13,7 +13,7 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
               #postgres|mysql java tomcat|glassfish privacyca attservice mangservice wlmservice mangportal trustportal wlmportal
- INSTALL_PKGS="postgres java glassfish privacyca attservice mangservice wlmservice mangportal trustportal wlmportal"
+ INSTALL_PKGS="mysql java glassfish privacyca attservice mangservice wlmservice mangportal trustportal wlmportal"
 fi
 
 FIRST=0
