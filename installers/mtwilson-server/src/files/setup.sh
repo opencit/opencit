@@ -230,6 +230,7 @@ elif using_tomcat; then
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
     #mtwilson tomcat-sslcert
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
+  fi
 fi
 
 
