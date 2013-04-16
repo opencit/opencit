@@ -79,8 +79,7 @@ public class ASConfig extends ConfigBase{
                 config.getString("mountwilson.as.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
-        return prop;
-    }
+        return prop;    }
     
     public static int getTrustAgentTimeOutinMilliSecs(){
         // Return timeout in milliseconds

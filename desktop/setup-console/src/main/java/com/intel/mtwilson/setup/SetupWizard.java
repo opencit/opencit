@@ -84,9 +84,8 @@ public class SetupWizard {
                     conf.getString("mountwilson.ms.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
             String user = conf.getString("mountwilson.ms.db.user", conf.getString("mtwilson.db.user"));
             String pass = conf.getString("mountwilson.ms.db.password", conf.getString("mtwilson.db.password"));
-        Connection conn = DriverManager.getConnection(url, user, pass);
-            return conn;
-        }
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            return conn;        }
         catch (ClassNotFoundException e) {
             throw new SetupException("Cannot connect to database", e);
         }

@@ -1168,14 +1168,19 @@ postgres_server_install(){
 postgres_detect(){
   local min_version="${1:-${POSTGRES_REQUIRED_VERSION}}"
   if [[ -n "$POSTGRES_HOME" && -n "$psql" && -f "$psql" ]]; then
+    echo "postgres detected. returning..."
     return
   fi
   psql=`which psql 2>/dev/null`
+  export psql
+  echo "psql=$psql"
+  
   if [ -e "$psql" ]; then
     POSTGRES_HOME=`dirname $psql`
     echo "Found postgres client: $psql"
     postgres_version ${min_version}
     if [ "$POSTGRES_CLIENT_VERSION_OK" != "yes" ]; then
+      echo "postgres client version not ok. resetting psql=''"
       POSTGRES_HOME=''
       psql=""
     fi
