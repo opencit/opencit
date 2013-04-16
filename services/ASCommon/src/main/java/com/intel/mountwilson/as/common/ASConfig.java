@@ -63,10 +63,11 @@ public class ASConfig extends ConfigBase{
                 config.getString("mountwilson.as.db.driver", 
                 config.getString("mtwilson.db.driver",
                 "com.mysql.jdbc.Driver")));
+        String dbms = (config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.as.db.url",
                 config.getString("mtwilson.db.url",
-                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
                     config.getString("mountwilson.as.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.as.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.as.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));

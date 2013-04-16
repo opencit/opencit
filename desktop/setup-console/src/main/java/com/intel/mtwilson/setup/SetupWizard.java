@@ -41,9 +41,10 @@ public class SetupWizard {
         try {
             // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
             Class.forName(conf.getString("mountwilson.as.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+            String dbms = (conf.getString("mountwilson.as.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
             String url =conf.getString("mountwilson.as.db.url",
                     conf.getString("mtwilson.db.url",
-                    String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                    String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
                     conf.getString("mountwilson.as.db.host", conf.getString("mtwilson.db.host","127.0.0.1")),
                     conf.getString("mountwilson.as.db.port", conf.getString("mtwilson.db.port","3306")),
                     conf.getString("mountwilson.as.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
@@ -74,9 +75,10 @@ public class SetupWizard {
                     conf.getString("mountwilson.ms.db.user", conf.getString("mtwilson.db.user")),
                     conf.getString("mountwilson.ms.db.password", conf.getString("mtwilson.db.password")));
                     */
+            String dbms = (conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
             String url =conf.getString("mountwilson.ms.db.url",
                     conf.getString("mtwilson.db.url",
-                    String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                    String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
                     conf.getString("mountwilson.ms.db.host", conf.getString("mtwilson.db.host","127.0.0.1")),
                     conf.getString("mountwilson.ms.db.port", conf.getString("mtwilson.db.port","3306")),
                     conf.getString("mountwilson.ms.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
