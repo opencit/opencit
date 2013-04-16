@@ -13,7 +13,7 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 #package_install_filename=${package_dir}/${package_name}.install
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
@@ -66,8 +66,10 @@ chmod 700 "${package_var_dir}"
 #chmod +x $APICLIENT_PACKAGE
 #./$APICLIENT_PACKAGE
 
-#mysql_server_install
-#mysql_install
+if using_mysql; then
+  mysql_server_install
+  mysql_install
+fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 
