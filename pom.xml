@@ -89,7 +89,12 @@
                   <enabled>true</enabled>
                 </snapshots>
         </repository>
-
+        <repository>
+            <id>intel-maven-artifacts</id>
+            <name>Maven Artifacts</name>
+            <url>http://cloudsecurityportal.intel.com</url>
+            <layout>default</layout>
+        </repository>
 	<repository>
 		<id>glassfish.java.net</id>
 		<name>GlassFish Maven Repository</name>
