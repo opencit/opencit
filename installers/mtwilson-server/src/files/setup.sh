@@ -190,10 +190,12 @@ elif using_postgres; then
     fi 
     postgres_server_install 
     postgres_restart & >> $INSTALL_LOG_FILE
+    sleep 10
   fi
   echo "Installing postgres client..."
   postgres_install
   postgres_restart & >> $INSTALL_LOG_FILE
+  sleep 10
   echo "Installation of postgres client complete..."
 
   postgres_create_database
