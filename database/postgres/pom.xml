@@ -12,6 +12,7 @@
 	<artifactId>mtwilson-database</artifactId>
 	<version>1.1.2-SNAPSHOT</version>
     </parent>
+<<<<<<< HEAD
     <dependencies>
         <dependency>
             <groupId>com.postgres</groupId>
@@ -19,4 +20,7 @@
             <version>9.2-1002.jdbc4</version>
         </dependency>
     </dependencies>
+=======
+    
+>>>>>>> e8e2a52aa2a61c7ff66c6d77283d4fa39e89fa12
 </project>
