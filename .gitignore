@@ -4,3 +4,4 @@ target
 .settings
 .project
 .classpath
+/trust-agent/HisPrivacyCAWebServices2/WEB-INF/classes/com/intel/mountwilson/files/ClientFilesServlet.class
