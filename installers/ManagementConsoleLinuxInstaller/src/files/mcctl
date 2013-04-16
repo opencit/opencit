@@ -166,7 +166,22 @@ setup_print_summary() {
 }
 
 setup_interactive_install() {
-  mysql_configure_connection "${intel_conf_dir}/management-console.properties" mountwilson.mc.db
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.mc.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.mc.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
+  fi
   configure_keystore_dir
   configure_api_baseurl
   if [ -n "$GLASSFISH_HOME" ]; then

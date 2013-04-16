@@ -54,10 +54,22 @@ fi
 
 
 # SCRIPT EXECUTION
-if using_mysql; then
-  mysql_server_install
-  mysql_install
-fi
+if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.as.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
+  fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 

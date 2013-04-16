@@ -14,7 +14,7 @@ keystore_dir=/
 #package_install_filename=${package_name}.install
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
@@ -64,8 +64,22 @@ chmod 700 "${package_var_dir}"
 
 
 # SCRIPT EXECUTION
-mysql_server_install
-mysql_install
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.tdbp.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.tdbp.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
+  fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 

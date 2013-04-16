@@ -185,6 +185,7 @@ public class InitDatabase implements Command {
         catch(IOException e) {
             throw new SetupException("Error while scanning for SQL files: "+e.getLocalizedMessage(), e);
         }
+        System.err.println("Number of SQL files: "+sqlmap.size());
         return sqlmap;        
     }
     
