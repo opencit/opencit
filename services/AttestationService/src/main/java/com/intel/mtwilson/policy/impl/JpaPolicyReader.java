@@ -97,19 +97,27 @@ public class JpaPolicyReader {
     }        
 
     public Rule createPcrMatchesConstantRuleFromTblPcrManifest(TblPcrManifest pcrInfo, String... markers) {
-        PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
-        Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
-        log.debug("Creating PcrMatchesConstantRule from PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
-        rule.setMarkers(markers);
-        return rule;
+        try {
+            PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
+            Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
+            log.debug("Creating PcrMatchesConstantRule from PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
+            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
+            rule.setMarkers(markers);
+            return rule;
+        }
+        catch(IllegalArgumentException e) {
+            log.warn("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
+            return null;
+        }
     }
     
     public Set<Rule> createPcrMatchesConstantRulesFromTblPcrManifest(Collection<TblPcrManifest> pcrInfoList, String... markers) {
         HashSet<Rule> list = new HashSet<Rule>();
         for(TblPcrManifest pcrInfo : pcrInfoList) {
-            Rule rule = createPcrMatchesConstantRuleFromTblPcrManifest(pcrInfo, markers);
-            list.add(rule);
+            Rule rule = createPcrMatchesConstantRuleFromTblPcrManifest(pcrInfo, markers); // returns null if the rule cannot be created, such as the digest value is blank
+            if( rule != null ) {
+                list.add(rule);
+            }
         }
         return list;
     }
@@ -153,7 +161,7 @@ public class JpaPolicyReader {
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
 
-        if( moduleInfo.getUseHostSpecificDigestValue() ) {
+        if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue() ) {
             Collection<TblHostSpecificManifest> hostSpecificManifest = moduleInfo.getTblHostSpecificManifestCollection(); // XXX it was created as a collection but there should really only be ONE host-specific module value to replace ONE module value for the rule
             if( hostSpecificManifest.size() > 1 ) {
                 log.error("MULTIPLE HOST-SPECIFIC MODULE VALUES DEFINED FOR SAME MODULE:");
@@ -203,13 +211,21 @@ public class JpaPolicyReader {
             Measurement m = createMeasurementFromTblModuleManifest(moduleInfo);
             measurements.get(pcrIndex).add(m);
         }
+        // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
-            log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
-            list.add(new PcrEventLogIntegrity(pcrIndex)); // if we're going to look for things in the host's event log, it needs to have integrity            
-            log.debug("Adding PcrEventLogIncludes rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
-            PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, measurements.get(pcrIndex));
-            rule.setMarkers(markers);
-            list.add(rule);
+            // XXX TODO for first phase of this implementation in mt wilson 1.2,  we only support pcr 19 ...  in next phase, need to rewrite the way data is stored and also the UI so we can remove this "pcr 19" check and just do it generally for any pcr with modules
+            if( pcrIndex.toInteger() == 19 ) {
+                // event log rule
+                log.debug("Adding PcrEventLogIncludes rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
+                PcrEventLogIncludes eventLogIncludesRule = new PcrEventLogIncludes(pcrIndex, measurements.get(pcrIndex));
+                eventLogIncludesRule.setMarkers(markers);
+                list.add(eventLogIncludesRule);
+                // integrity rule
+                log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
+                PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(pcrIndex);
+                integrityRule.setMarkers(markers);
+                list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity            
+            }
         }
         
         return list;

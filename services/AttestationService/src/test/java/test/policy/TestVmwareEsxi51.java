@@ -4,6 +4,7 @@
  */
 package test.policy;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwMleSource;
@@ -14,6 +15,7 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
+import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Measurement;
@@ -24,6 +26,7 @@ import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.*;
+import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -36,18 +39,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.util.MyJpaDatastore;
 import java.util.Set;
+import org.junit.BeforeClass;
 
 /**
  *
  * @author jbuhacoff
  */
 public class TestVmwareEsxi51 {
-    private static MyJpaDatastore pm = new MyJpaDatastore();
+    private static MyJpaDatastore pm;
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient static ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
 
     private transient String hostname = "10.1.71.155";
     private transient String connection = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+    
+    @BeforeClass
+    public static void initMyJpaDatastore() throws IOException {
+        pm = new MyJpaDatastore(My.persistenceManager());
+    }
     
     private TblHosts initNewHost() {
         TblHosts host = new TblHosts();
@@ -125,6 +134,11 @@ public class TestVmwareEsxi51 {
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         if( host != null ) {
             log.debug("Host {} is already in database, deleting", host.getName());
+            // before we delete a host we first need to delete all its saml assertions, otherwise the database throws a constraint violation...
+            List<TblSamlAssertion> samlRecordList = pm.getSamlJpa().findByHostID(host);
+            for(TblSamlAssertion samlRecord : samlRecordList) {
+                pm.getSamlJpa().destroy(samlRecord.getId());
+            }
             pm.getHostsJpa().destroy(host.getId());
         }
         host = initNewHost();
@@ -173,7 +187,7 @@ public class TestVmwareEsxi51 {
             vmm.setName(hostInfo.VMM_Name);
             vmm.setVersion(hostInfo.VMM_Version);
             vmm.setOsId(os);
-            vmm.setRequiredManifestList("17,18,20"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
+            vmm.setRequiredManifestList("17,18,19,20"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
             pm.getMleJpa().create(vmm);
         }
         // whitelist step 5: get PCRs
@@ -181,9 +195,15 @@ public class TestVmwareEsxi51 {
         // whitelist step 6: create whitelist entries for BIOS PCRs
         String[] biosPcrList = bios.getRequiredManifestList().split(",");
         for(String biosPcrIndex : biosPcrList) {
+            // first delete any pcr's already defined for this vmm, since we will redefine them now
+            TblPcrManifest pcrWhitelist = pm.getPcrJpa().findByMleIdName(bios.getId(), biosPcrIndex);
+            if( pcrWhitelist != null ) {
+                pm.getPcrJpa().destroy(pcrWhitelist.getId());
+            }
+            // now define the pcr
+            pcrWhitelist = new TblPcrManifest();
             Pcr pcr = pcrManifest.getPcr(Integer.valueOf(biosPcrIndex));
             log.debug("Adding BIOS PCR {} = {}", pcr.getIndex().toString(), pcr.getValue().toString());
-            TblPcrManifest pcrWhitelist = new TblPcrManifest();
             pcrWhitelist.setMleId(bios);
             pcrWhitelist.setName(pcr.getIndex().toString());
             pcrWhitelist.setValue(pcr.getValue().toString());
@@ -193,12 +213,23 @@ public class TestVmwareEsxi51 {
         // whitelist step 7: create whitelist entries for VMM PCRs
         String[] vmmPcrList = vmm.getRequiredManifestList().split(","); // only 17, 18, 20  ... 19 is treated separately below for vmware
         for(String vmmPcrIndex : vmmPcrList) {
+            // first delete any pcr's already defined for this vmm, since we will redefine them now
+            TblPcrManifest pcrWhitelist = pm.getPcrJpa().findByMleIdName(vmm.getId(), vmmPcrIndex);
+            if( pcrWhitelist != null ) {
+                pm.getPcrJpa().destroy(pcrWhitelist.getId());
+            }
+            // now define the pcr
+            pcrWhitelist = new TblPcrManifest();
             Pcr pcr = pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex));
             log.debug("Adding VMM PCR {} = {}", pcr.getIndex().toString(), pcr.getValue().toString());
-            TblPcrManifest pcrWhitelist = new TblPcrManifest();
             pcrWhitelist.setMleId(vmm);
             pcrWhitelist.setName(pcr.getIndex().toString());
-            pcrWhitelist.setValue(pcr.getValue().toString());
+            if( pcr.getIndex().equals(PcrIndex.PCR19) ) {// for pcr 19 we skip setting the value, since the value is calculated dynamically based on the events - some of which are host specific which is why we can't record a value here to apply to all hosts
+                pcrWhitelist.setValue("");  // XXX not allows to set it to null due to database schema constraint...     i think mt wilson 1.1 just sets this to a single blank space. TODO either remove the constraint, recognizing that for pcrs that include host-specific events we cannot have a meaningful static whitelist value, or completely change the database schema to model teh policy/rule objects 
+            }
+            else {
+                pcrWhitelist.setValue(pcr.getValue().toString()); 
+            }
             pcrWhitelist.setPCRDescription("Automatic VMM whitelist from "+hostname);
             pm.getPcrJpa().create(pcrWhitelist);
         }
@@ -206,14 +237,26 @@ public class TestVmwareEsxi51 {
         ArrayList<TblHostSpecificManifest> hostSpecificEventLogEntries = new ArrayList<TblHostSpecificManifest>();
         List<Measurement> vmwareEvents = pcr19.getEventLog();
         for(Measurement m : vmwareEvents) {
+            // first delete any measurement that already exists, becuse we are going to redefine it here
+            TblModuleManifest eventLogEntry = pm.getModuleJpa().findByMleNameEventName(vmm.getId(), m.getInfo().get("ComponentName"), m.getInfo().get("EventName"));
+            if( eventLogEntry != null ) {
+                if( eventLogEntry.getUseHostSpecificDigestValue() ) {
+                    TblHostSpecificManifest hostSpecificToDelete = pm.getHostSpecificModuleJpa().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
+                    if( hostSpecificToDelete != null ) {
+                        pm.getHostSpecificModuleJpa().destroy(hostSpecificToDelete.getId());
+                    }
+                }
+                pm.getModuleJpa().destroy(eventLogEntry.getId());
+            }
+            eventLogEntry = new TblModuleManifest();
             log.debug("Adding VMM module/event {} = {}", m.getLabel(), m.getValue().toString());
-            TblModuleManifest eventLogEntry = new TblModuleManifest();
             eventLogEntry.setComponentName(m.getInfo().get("ComponentName"));
             eventLogEntry.setDescription(m.getLabel());
-            eventLogEntry.setEventID(null); // XXX TODO what is this ???
+            log.debug("Looking up event type {}", m.getInfo().get("EventName"));
+            eventLogEntry.setEventID(pm.getEventTypeJpa().findEventTypeByName(m.getInfo().get("EventName"))); // XXX we really don't need these event types, they are too specific to vmware and not configurable anyway... what's the point of looking it up? ... and what we did with prefixing "Vim25Api." just makes it more confusing, because now OUR "Event Type" isn't the same text as VMWARE's "Event Type"
             eventLogEntry.setExtendedToPCR(PcrIndex.PCR19.toString());
             eventLogEntry.setMleId(vmm);
-            eventLogEntry.setNameSpaceID(null); // XXX TODO why do we care ???
+            eventLogEntry.setNameSpaceID(pm.getPackageNamespaceJpa().findTblPackageNamespace(1)); // XXX why do we have this package namespace?   it's too specific to vmware, not configurable, and we always use the same record. 
             eventLogEntry.setPackageName(m.getInfo().get("PackageName"));
             eventLogEntry.setPackageVendor(m.getInfo().get("PackageVendor"));
             eventLogEntry.setPackageVersion(m.getInfo().get("PackageVersion"));
@@ -272,7 +315,17 @@ public class TestVmwareEsxi51 {
         }
         
     }
-        
+
+    @Test
+    public void loadTrustPolicyForHost() throws Exception {
+        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        assertNotNull(host); 
+        HostTrustPolicyManager hostTrustPolicyFactory = pm.getHostTrustFactory();
+        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(host, hostname); // must include both bios and vmm policies
+        log.debug(json.writeValueAsString(trustPolicy));
+//        log.debug(xml.writeValueAsString(trustPolicy)); // notice the xml is NOT the same as the json at all... doesn't have all the info, and somehow has mixed "faults" in there somewhere even though the Rule objects do not have a fault method or field...
+    }
+    
     /*
     @Test
     public void testGeneratePolicyForHost() throws Exception {

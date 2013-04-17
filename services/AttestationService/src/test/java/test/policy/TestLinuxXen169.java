@@ -6,6 +6,7 @@ package test.policy;
 
 //import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
@@ -20,6 +21,7 @@ import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -27,6 +29,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.util.MyJpaDatastore;
@@ -55,7 +58,7 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  * @author jbuhacoff
  */
 public class TestLinuxXen169 {
-    private static MyJpaDatastore pm = new MyJpaDatastore();
+    private static MyJpaDatastore pm;
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -63,6 +66,10 @@ public class TestLinuxXen169 {
     private transient String hostname = "10.1.71.169";
     private transient String connection = "intel:https://10.1.71.169:9999";
     
+    @BeforeClass
+    public static void initMyJpaDatastore() throws IOException {
+        pm = new MyJpaDatastore(My.persistenceManager());
+    }
     /**
      * 
      * Example quote request sent to trust agent:
@@ -435,7 +442,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void checkTrustReportForXen() throws Exception {
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
-        HostTrustBO hostTrustBO = new HostTrustBO(pm);
+        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
         TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname);        
         log.debug(json.writeValueAsString(trustReport));
 //        log.debug(xml.writeValueAsString(trustReport)); // xml doesn't seem to seriailze the same info somehow... 
@@ -508,7 +515,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void checkHostTrustStatusForXen() throws Exception {
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
-        HostTrustBO hostTrustBO = new HostTrustBO(pm);
+        HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
         HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(host, host.getName());        
         log.debug("Bios trusted? {}", trustStatus.bios);
         log.debug("Vmm trusted? {}", trustStatus.vmm);

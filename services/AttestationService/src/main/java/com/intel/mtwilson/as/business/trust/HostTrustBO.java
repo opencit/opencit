@@ -30,6 +30,7 @@ import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
+import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileNotFoundException;
@@ -40,6 +41,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.configuration.Configuration;
@@ -370,9 +372,9 @@ public class HostTrustBO extends BaseBO {
         log.debug("Found {} results", results.size());
         for(RuleResult result : results) {
             log.debug("Looking at policy {}", result.getRuleName());
-            Rule policy = result.getRule();
-            if( policy instanceof PcrMatchesConstant ) {
-                PcrMatchesConstant pcrPolicy = (PcrMatchesConstant)policy;
+            Rule rule = result.getRule();
+            if( rule instanceof PcrMatchesConstant ) {
+                PcrMatchesConstant pcrPolicy = (PcrMatchesConstant)rule;
                 log.debug("Expected PCR {} = {}", pcrPolicy.getExpectedPcr().getIndex().toString(), pcrPolicy.getExpectedPcr().getValue().toString());
                 // XXX we can do this because we know the policy passed and it's a constant pcr value... but ideally we need to be logging the host's actual value from its HostReport!!!
                 // find out which MLE this policy corresponds to and then log it
@@ -394,7 +396,15 @@ public class HostTrustBO extends BaseBO {
                 }
                 talogJpa.create(pcr);
             }
-            // XXX TODO look for event log rules and log in the module log table
+            // XXX TODO look for event log rules and log in the module log table....  but mt wilson 1.1. isn't putting any data in there... and trust dashboard seems to be pulling out module values from soemwhere else for its trust report!
+            /*
+            if( rule instanceof PcrEventLogIncludes ) {
+                PcrEventLogIncludes eventLogRule = (PcrEventLogIncludes)rule;
+                Set<Measurement> measurements = eventLogRule.getMeasurements();
+                for(Measurement m : measurements) {
+                    TblModuleManifestLog event = new TblModuleManifestLog();
+                }
+            }*/
         }
         
     }

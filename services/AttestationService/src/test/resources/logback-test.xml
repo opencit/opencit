@@ -9,4 +9,6 @@
         <appender-ref ref="STDOUT" />
     </root>
     
+    <logger name="com.intel.mtwilson.audit" level="INFO"/>
+    
 </configuration>
