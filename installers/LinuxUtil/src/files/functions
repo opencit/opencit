@@ -2020,11 +2020,16 @@ tomcat_ready() {
 # If you pass a parameter, it is the path to a glassfish "asadmin" binary 
 # If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
 tomcat_version() {
+  # Either the JAVA_HOME or the JRE_HOME environment variable must be defined
+  # At least one of these environment variable is needed to run this program
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+
   if [[ -n "$tomcat" ]]; then
     # extract the version number from a string like: glassfish version "3.0"
     local current_tomcat_version=`$tomcat version 2>&1 | grep -i "^Server version:" | grep -i version | awk -F / '{ print $2 }'`
     if [ -n "$current_tomcat_version" ]; then
       echo $current_tomcat_version
+      export TOMCAT_VERSION=$current_tomcat_version
       return 0
     fi
     return 2
@@ -2052,7 +2057,8 @@ tomcat_version() {
 # - TOMCAT_REQUIRED_VERSION  (default is 6.0.29)
 tomcat_version_report() {
   local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
-  TOMCAT_VERSION=`tomcat_version`
+  #TOMCAT_VERSION=`tomcat_version`
+  tomcat_version
   if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
     echo_success "Tomcat version $TOMCAT_VERSION is ok"
     return 0
@@ -2085,7 +2091,8 @@ tomcat_detect() {
       fi
     fi
     if [[ -n "$tomcat" ]]; then
-      TOMCAT_VERSION=`tomcat_version`
+      #TOMCAT_VERSION=`tomcat_version`
+      tomcat_version
       if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
         return 0
       fi
@@ -2104,7 +2111,7 @@ tomcat_detect() {
       if [ -f "$parent/bin/catalina.sh" ]; then
         export TOMCAT_HOME="$parent"
         export TOMCAT_BASE=`find / -name webapps 2>/dev/null`
-        local conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
+        conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
         export TOMCAT_CONF=`dirname $conf_dir`
         tomcat="$TOMCAT_HOME/bin/catalina.sh"
         tomcat_bin=$parent/bin
