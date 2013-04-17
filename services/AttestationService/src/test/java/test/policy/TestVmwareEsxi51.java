@@ -139,6 +139,11 @@ public class TestVmwareEsxi51 {
             for(TblSamlAssertion samlRecord : samlRecordList) {
                 pm.getSamlJpa().destroy(samlRecord.getId());
             }
+            // also delete the ONE host-specific module, if it was defined for this host.  done here and not below with other modules because 1) there can only be one host-specific module per host in mtwilson-1.1 -- which is weird, and 2) it is looked up by host id and after we delete the host we won't hav an id anymore...
+            TblHostSpecificManifest hostSpecificToDelete = pm.getHostSpecificModuleJpa().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
+            if( hostSpecificToDelete != null ) {
+                pm.getHostSpecificModuleJpa().destroy(hostSpecificToDelete.getId());
+            }
             pm.getHostsJpa().destroy(host.getId());
         }
         host = initNewHost();
@@ -240,18 +245,16 @@ public class TestVmwareEsxi51 {
             // first delete any measurement that already exists, becuse we are going to redefine it here
             TblModuleManifest eventLogEntry = pm.getModuleJpa().findByMleNameEventName(vmm.getId(), m.getInfo().get("ComponentName"), m.getInfo().get("EventName"));
             if( eventLogEntry != null ) {
-                if( eventLogEntry.getUseHostSpecificDigestValue() ) {
-                    TblHostSpecificManifest hostSpecificToDelete = pm.getHostSpecificModuleJpa().findByHostID(host.getId()); // XXX note how there can be only ONE host specific module per host, according to the Jpa Controller's method... not good!!
-                    if( hostSpecificToDelete != null ) {
-                        pm.getHostSpecificModuleJpa().destroy(hostSpecificToDelete.getId());
-                    }
-                }
-                pm.getModuleJpa().destroy(eventLogEntry.getId());
+                pm.getModuleJpa().destroy(eventLogEntry.getId()); // don't need to be concerned with the host-specific version because if it existed,  (and there can be only ONE host-specific module in mtwilson-1.1)  then it was already deleted above when we deleted the host
             }
             eventLogEntry = new TblModuleManifest();
             log.debug("Adding VMM module/event {} = {}", m.getLabel(), m.getValue().toString());
-            eventLogEntry.setComponentName(m.getInfo().get("ComponentName"));
-            eventLogEntry.setDescription(m.getLabel());
+            
+            // NOTE : here we are switching component name and description because the trust dashboard UI shows component name... even though it's EVENTS that are actually of different types and not all of them have a meaningful "component name" ... so... we put the description, which is relevant to every event,  as the component name,  and log the compnet name in the description. when the trust dashboard is fixed this can be reverted to look more natural.
+             eventLogEntry.setComponentName(m.getLabel());
+//            eventLogEntry.setComponentName(String.format("%s-%s", m.getInfo().get("PackageName"), m.getInfo().get("PackageVersion")));  // omitting PackageVendor because it's always VMware for vmware modules... and anyway this record is linked to an MLE which is a vmware MLE, so same name across different MLE's will not be a problem... and it's unlikely that the same mle will have two or more drivers by different vendors with the same name and version! but if it happens it won't be a problem, as long as the hashes are still different. 
+            //m.getInfo().get("ComponentName") // in mtwilson 1.0 component name was something like "componentName.ata_pata.v02" even if the module name was really ata_pata_cmd64x and had a vesrion number like 0.2.5-3vmw10.0.0.799733 which was more than sufficient to distinguish it from other modules.
+            eventLogEntry.setDescription(m.getInfo().get("ComponentName"));
             log.debug("Looking up event type {}", m.getInfo().get("EventName"));
             eventLogEntry.setEventID(pm.getEventTypeJpa().findEventTypeByName(m.getInfo().get("EventName"))); // XXX we really don't need these event types, they are too specific to vmware and not configurable anyway... what's the point of looking it up? ... and what we did with prefixing "Vim25Api." just makes it more confusing, because now OUR "Event Type" isn't the same text as VMWARE's "Event Type"
             eventLogEntry.setExtendedToPCR(PcrIndex.PCR19.toString());
@@ -260,6 +263,7 @@ public class TestVmwareEsxi51 {
             eventLogEntry.setPackageName(m.getInfo().get("PackageName"));
             eventLogEntry.setPackageVendor(m.getInfo().get("PackageVendor"));
             eventLogEntry.setPackageVersion(m.getInfo().get("PackageVersion"));
+            // XXX TODO this magic belongs in the vmware-specific rule factory. only a vmware factory would know that the "HostTpmCommandEvent" value is different for every host because it contains the host's UUID.
             if( m.getInfo().get("EventType").equals("HostTpmCommandEvent") ) {
                 eventLogEntry.setUseHostSpecificDigestValue(true);
                 // now create a host-specific value...

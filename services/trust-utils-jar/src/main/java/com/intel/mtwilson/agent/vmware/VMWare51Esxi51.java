@@ -18,6 +18,8 @@ import com.vmware.vim25.HostTpmSoftwareComponentEventDetails;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.owasp.esapi.codecs.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +78,8 @@ public class VMWare51Esxi51   {
 					info.put("PackageName", componentEventDetails.getVibName());
 					info.put("PackageVendor", componentEventDetails.getVibVendor());
 					info.put("PackageVersion", componentEventDetails.getVibVersion());
-                    label = String.format("%s: %s-%s-%s", info.get("EventType"), componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() );
+//                    label = String.format("%s: %s-%s-%s", info.get("EventType"), componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() );
+                    label = String.format("%s-%s-%s", componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() );
 				} else if (logEventDetails instanceof HostTpmCommandEventDetails) { // CommandLine and DataHash
 					HostTpmCommandEventDetails commandEventDetails = (HostTpmCommandEventDetails) logEventDetails;
                     log.debug("Event name {}", commandEventDetails.getCommandLine());
@@ -84,7 +87,10 @@ public class VMWare51Esxi51   {
 					info.put("EventType", "HostTpmCommandEvent"); // new, properly capture the type of event in a separate field
 					info.put("EventName", "Vim25Api.HostTpmCommandEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
 					info.put("ComponentName", "commandLine."+ getCommandLine(commandEventDetails)); // XXX TODO remove the "commandLine." prefix because we are capturing this now in EventType
-                    label = String.format("%s: %s", info.get("EventType"), getCommandLine(commandEventDetails) );
+                    info.put("UUID", getUuidFromCommandLine(commandEventDetails.getCommandLine()));
+                    log.debug("UUID is {}", info.get("UUID"));
+//                    label = String.format("%s: %s", info.get("EventType"), getCommandLine(commandEventDetails) );
+                    label = String.format("%s", commandEventDetails.getCommandLine()); // UI should abbreviate it with "..." if desired...
 
 				} else if (logEventDetails instanceof HostTpmOptionEventDetails) { // OptionsFilename, BootOptions, and DataHash
 					HostTpmOptionEventDetails optionEventDetails = (HostTpmOptionEventDetails)logEventDetails;
@@ -94,15 +100,16 @@ public class VMWare51Esxi51   {
 					info.put("EventName", "Vim25Api.HostTpmOptionEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
 					info.put("ComponentName", "bootOptions."+ optionEventDetails.getOptionsFileName()); // XXX TODO remove the "bootOptions." prefix because we are capturing this now in EventType
                     // XXX TODO we can get the actual options with   info.put("BootOptions", VMwareClient.byteArrayToHexString(optionEventDetails.getBootOptions()); ... right now we are only capture the file name and not its contents;  probably ok since what the policy checks is the DIGEST anyway
-                    label = String.format("%s: %s", info.get("EventType"), optionEventDetails.getOptionsFileName() );
+//                    label = String.format("%s: %s", info.get("EventType"), optionEventDetails.getOptionsFileName() );
+                    label = optionEventDetails.getOptionsFileName(); // String.format("%s", optionEventDetails.getOptionsFileName())
 				} else if (logEventDetails instanceof HostTpmBootSecurityOptionEventDetails) { // BootSecurityOption and DataHash
 					HostTpmBootSecurityOptionEventDetails optionEventDetails = (HostTpmBootSecurityOptionEventDetails)logEventDetails;
                     log.debug("Event name {}", optionEventDetails.getBootSecurityOption());
 					info.put("EventType", "HostTpmBootSecurityOptionEvent"); // new, properly capture the type of event in a separate field
 					info.put("EventName", "Vim25Api.HostTpmBootSecurityOptionEventDetails"); // XXX TODO the name should be the component name with package name and vendor-version... not the vmware event type, it's not unique
 					info.put("ComponentName", "bootSecurityOption."+ optionEventDetails.getBootSecurityOption()); // XXX TODO remove the "bootSecurityOption." prefix because we are capturing this now in EventType
-                    label = String.format("%s: %s", info.get("EventType"), optionEventDetails.getBootSecurityOption() );
-
+//                    label = String.format("%s: %s", info.get("EventType"), optionEventDetails.getBootSecurityOption() );
+                    label = optionEventDetails.getBootSecurityOption();
 				} else {
 					log.warn("Unrecognized event in module event log "
 							+ logEventDetails.getClass().getName());
@@ -139,12 +146,19 @@ public class VMWare51Esxi51   {
 
 	private static String getCommandLine(HostTpmCommandEventDetails commandEventDetails) {
 		String commandLine = commandEventDetails.getCommandLine();
-		if (commandLine != null && commandLine.contains("no-auto-partition")){
+        if (commandLine != null && commandLine.contains("no-auto-partition")){ // XXX this is the original logic... dont' know what value there is in deleting the information... a UI could always show it abbreviated with "..."
 			commandLine = "";
 		}
 		return commandLine;
 	}    
     
-    
-
+    // example input:    /b.b00 vmbTrustedBoot=true tboot=0x0x101a000 no-auto-partition bootUUID=772753050c0a140bdfbf92e306b9793d
+    private static Pattern uuidPattern = Pattern.compile("bootUUID=([a-fA-F0-9]+)");
+    private static String getUuidFromCommandLine(String commandLine) {
+        Matcher uuidMatcher = uuidPattern.matcher(commandLine);
+        if( uuidMatcher.matches() ) {
+            return uuidMatcher.group(1); 
+        }
+        return null;
+    }
 }
