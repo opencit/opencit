@@ -2102,10 +2102,10 @@ tomcat_detect() {
       local bin_dir=`dirname $c`
       local parent=`dirname $bin_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
-        TOMCAT_HOME="$parent"
-        TOMCAT_BASE=find / -name "webapps"
-        local conf_dir=find / -name "tomcat-users.xml"
-        TOMCAT_CONF=`dirname $conf_dir`
+        export TOMCAT_HOME="$parent"
+        export TOMCAT_BASE=`find / -name "webapps"`
+        local conf_dir=`find / -name "tomcat-users.xml"`
+        export TOMCAT_CONF=`dirname $conf_dir`
         tomcat="$TOMCAT_HOME/bin/catalina.sh"
         tomcat_bin=$parent/bin
         tomcat_env="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF"
