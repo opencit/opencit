@@ -10,7 +10,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
-import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
@@ -99,6 +99,7 @@ public class TestVmwareEsxi51 {
     }
     
     
+    /*
     @Test
     public void testGeneratePolicyForHost() throws Exception {
         TblHosts host = initNewHost();
@@ -107,9 +108,11 @@ public class TestVmwareEsxi51 {
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = agent.getPcrManifest();
         hostReport.variables = agent.getHostAttributes();
-        HostTrustPolicyFactory policyFactory = new HostTrustPolicyFactory(pm.getEntityManagerFactory("ASDataPU"));
-        Set<Rule> rules = policyFactory.generateTrustRulesForHost(host, hostReport);
-        Policy policy = new Policy("Automatically generated policy for "+host.getName(), rules);
+        HostTrustPolicyManager policyFactory = new HostTrustPolicyManager(pm.getEntityManagerFactory("ASDataPU"));
+//        Set<Rule> rules = policyFactory.generateTrustRulesForHost(host, hostReport);
+//        Policy policy = new Policy("Automatically generated policy for "+host.getName(), rules);
+        Policy policy = policyFactory.createWhitelistFromHost(host);
         System.out.println(json.writeValueAsString(policy));
     }
+    */
 }

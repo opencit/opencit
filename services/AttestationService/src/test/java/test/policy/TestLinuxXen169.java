@@ -17,7 +17,7 @@ import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.Policy;
 import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
-import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import java.security.PublicKey;
@@ -299,7 +299,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
     public void loadTrustPolicyForHost() throws Exception {
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         assertNotNull(host); 
-        HostTrustPolicyFactory hostTrustPolicyFactory = pm.getHostTrustFactory();
+        HostTrustPolicyManager hostTrustPolicyFactory = pm.getHostTrustFactory();
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(host, hostname); // must include both bios and vmm policies
         log.debug(json.writeValueAsString(trustPolicy));
 //        log.debug(xml.writeValueAsString(trustPolicy)); // notice the xml is NOT the same as the json at all... doesn't have all the info, and somehow has mixed "faults" in there somewhere even though the Rule objects do not have a fault method or field...

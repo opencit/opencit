@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 
 /**
  * Convenience class to use in JUnit tests... one stop shop to get an instance of any JPA Controller that you need.
@@ -32,7 +32,7 @@ public class MyJpaDatastore extends MyPersistenceManager {
         TblOsJpaController osJpa = null;
         TblOemJpaController oemJpa = null;
         TblPcrManifestJpaController pcrJpa = null;
-        HostTrustPolicyFactory hostTrustFactory = null;
+        HostTrustPolicyManager hostTrustFactory = null;
         MwMleSourceJpaController mleSourceJpa = null;
         
         public TblHostsJpaController getHostsJpa() throws CryptographyException {
@@ -71,9 +71,9 @@ public class MyJpaDatastore extends MyPersistenceManager {
             }
             return mleSourceJpa;
         }
-        public HostTrustPolicyFactory getHostTrustFactory() {
+        public HostTrustPolicyManager getHostTrustFactory() {
             if( hostTrustFactory == null ) {
-                hostTrustFactory = new HostTrustPolicyFactory(getEntityManagerFactory("ASDataPU"));
+                hostTrustFactory = new HostTrustPolicyManager(getEntityManagerFactory("ASDataPU"));
             }
             return hostTrustFactory;
         }

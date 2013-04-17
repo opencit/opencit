@@ -8,6 +8,8 @@ import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import java.util.HashSet;
 import com.intel.mtwilson.agent.Vendor;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
@@ -33,6 +35,7 @@ import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.*;
 import com.intel.mtwilson.policy.impl.vendor.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -60,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jbuhacoff
  */
-public class HostTrustPolicyFactory {
+public class HostTrustPolicyManager {
  
     private Logger log = LoggerFactory.getLogger(getClass());
     
@@ -69,7 +72,7 @@ public class HostTrustPolicyFactory {
 
     private Map<Vendor,VendorHostTrustPolicyFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostTrustPolicyFactory>(Vendor.class);
     //private Logger log = LoggerFactory.getLogger(getClass());
-    public HostTrustPolicyFactory(EntityManagerFactory entityManagerFactory) {
+    public HostTrustPolicyManager(EntityManagerFactory entityManagerFactory) {
         reader = new JpaPolicyReader(entityManagerFactory);
         // we initialize the map with the known vendors; but this could also be done through IoC
         vendorFactoryMap.put(Vendor.INTEL, new IntelHostTrustPolicyFactory(reader));
@@ -96,19 +99,36 @@ public class HostTrustPolicyFactory {
     
     
     /**
-     * CALL THIS FROM ATTESTATION SERVICE HOSTTRUSTBO TO GET THE TRUST POLICY FOR VERIFY HOST TRUST
+     * CALL THIS FROM ATTESTATION SERVICE HostTrustBO TO GET THE TRUST POLICY FOR VERIFY HOST TRUST
      * 
-     * The purpose of this method is to instantiate a list of policies that have been
-     * saved in the database.
+     * In Mt Wilson 1.1 and 1.2, each host has exactly one policy assigned and it is stored in the database
+     * tables this way:
+     * mw_hosts (link to bios and vmm records in mw_mle table)
+     * mw_mle (contains name and version of mle)
+     * mw_pcr_manifest (link to either bios or vmm record in mw_mle table)
+     * mw_module_manifest (link to either bios or vmm record in mw_mle table)
+     * mw_host_specific_manifest (link to a module record in mw_module_manifest table)
      * 
-     * This method is used if the host's whitelist is already saved in our database.
-     * If you are registering a new host, use generateTrustRulesForHost() instead.
+     * Each record in mw_hosts stores a single host.
+     * Each record in mw_pcr_manifest stores a single PCR index and value.
+     * Each record in mw_module_manifest stores a single module value along with vmware-specific attributes
+     * Each record in mw_host_specific_manifest stores a single module value
+     * 
+     * This method reads data from the schema above and instantiates a Policy object containing
+     * a set of rules that reflects that data for a single host - that is, data from mw_host_specific_manifest
+     * is automatically merged with the corresponding data from mw_module_manifest.
+     * 
+     * Precondition is that MLEs, PCR Manifests, Module Manifests, and Host Specific (Module) Manifests are
+     * already defined in the database.
+     * 
+     * The whitelist service and automation functions in management service store that data directly into
+     * the database and are not aware of this class or the Policy class.
      * 
      * NOTE:  if there are no whitelist data available for a host, so that no rules are generated,
      * the empty policy will always evaluate to "untrusted" 
      * 
      * This method delegates to vendor-specific factories for the work of instantiating the Rules, but
-     * it does organize the work into bios, vmm, and location and adds the 
+     * it does organize the work into bios, vmm, and location and adds the host-specific module values.
      * 
      */
     public Policy loadTrustPolicyForHost(TblHosts host, String hostId) {
@@ -132,6 +152,39 @@ public class HostTrustPolicyFactory {
         return policy;
     }
     
+    /*
+    public Policy createWhitelistFromHost(TblHosts host) throws IOException {
+        HostAgentFactory agentFactory = new HostAgentFactory();
+        HostAgent agent = agentFactory.getHostAgent(host);
+        HostReport hostReport = new HostReport();
+        hostReport.pcrManifest = agent.getPcrManifest();
+        hostReport.variables = agent.getHostAttributes();
+        VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);
+//        Set<Rule> rules = factory.createWhitelistRules(host);
+//        Set<Rule> rules = factory.createHostSpecificRules(host);
+        // XXX TODO do we need to replace anything that is host-specific?  or remove anything that is host-specific ? from these rules?
+        Policy policy = new Policy("Automatically generated policy from "+host.getName(), rules);
+        return policy;
+    }
+    */
+    
+    /**
+     * GIVEN A POLICY, CREATES HOST-SPECIFIC RECORDS IN THE DATABASE CORRESPONDING TO THE POLICY SO THAT
+     * WHEN YOU CALL loadTrustPolicyForHost(host,hostId) THOSE HOST-SPECIFIC RECORDS WILL BE INCLUDED AUTOMATICALLY.
+     * CALL THIS WHEN REGISTERING A NEW HOST.
+     * @param host
+     * @param policy 
+     */
+    /*
+    public void storeHostRulesForPolicy(TblHosts host, Policy policy) {
+        
+    }
+    */
+    /*
+    public Set<Rule> loadTrustPolicy(TblMle bios, TblMle vmm) {
+        throw new UnsupportedOperationException("todo");
+    }
+    */
     protected VendorHostTrustPolicyFactory getVendorHostTrustPolicyFactoryForHost(TblHosts host) {
         Vendor[] vendors = Vendor.values();
         if( host.getAddOnConnectionInfo() == null ) {
@@ -164,11 +217,12 @@ public class HostTrustPolicyFactory {
      * @param hostReport the information to be used for generating the rules
      * @return 
      */
-    public Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport) {
-        VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);
-        return factory.generateTrustRulesForHost(hostReport);
-    }
+//    protected Set<Rule> generateTrustRulesForHost(TblHosts host, HostReport hostReport) {
+//        VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);
+//        return factory.generateTrustRulesForHost(hostReport);
+//    }
     
+    /*
     // implies that only the host-specific parts will be stored ????   it's not clear from this that someone should call storetrustPolicyforHost AND forBios AND forVmm...  should have just one call for "store trust policy for host" that does all three, and a separate "store trust policy" that only does the mle's (with variables for host-specific things) and doesn't write anything host-specific
     public void storeTrustPolicyForHost(TblHosts host, Policy trustPolicy) {
         throw new UnsupportedOperationException("Cannot save:: not implemented yet");
@@ -186,7 +240,7 @@ public class HostTrustPolicyFactory {
         throw new UnsupportedOperationException("Cannot save: not implemented yet");
         
     }
-
+*/
     
     
     ///////////////////////////////////// BEYOND THIS POINT,  CODE TAKEN FROM THE OLD  "GKV FACTORY"  ///// NEED TO LOAD FROM DB, THEN TURN INTO POLICIES !!!
@@ -202,6 +256,7 @@ public class HostTrustPolicyFactory {
      * @param bios
      * @return 
      */
+    /*
     public List<Rule> loadTrustRulesForBios(Bios bios, TblHosts tblHosts) {
         throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
     }
@@ -212,7 +267,8 @@ public class HostTrustPolicyFactory {
 //        ArrayList<Rule> list = new ArrayList<Rule>();
 //        list.add(loadPcrMatchesConstantRulesForVmm(vmmMle, tblHosts)); // in whitelistutil
     }
-    
+    */
+    /*
     // XXX FOR SUDHIR  ... IF YOU CONVERT HOST.LOCATION TO ID YOU CAN USE AS-IS... OTHERWISE NEED TO LOOK UP LOCATION BY STRING VALUE ... THAT METHOD ISN'T IN THE LOCATION CONTROLLER RIGHT NOW
     public List<Rule> loadTrustRulesForLocation(TblHosts tblHosts) {
         throw new UnsupportedOperationException("TODO: need to call vendor-specific code....");
@@ -225,5 +281,5 @@ public class HostTrustPolicyFactory {
 //        list.add(rule);
 //        return list;
     }
-
+    */
 }

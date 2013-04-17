@@ -29,7 +29,7 @@ import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.Rule;
-import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.util.ResourceFinder;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmCommandEventDetails;
@@ -64,7 +64,7 @@ public class HostBO extends BaseBO {
         private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
         private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
         private TblHostsJpaController hostController;
-        private HostTrustPolicyFactory hostTrustPolicyFactory = new HostTrustPolicyFactory(getEntityManagerFactory());
+        private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
         private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
         private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
         

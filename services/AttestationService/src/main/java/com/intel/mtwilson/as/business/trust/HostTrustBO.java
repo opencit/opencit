@@ -28,7 +28,7 @@ import com.intel.mtwilson.policy.PolicyEngine;
 import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
-import com.intel.mtwilson.policy.impl.HostTrustPolicyFactory;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -195,7 +195,7 @@ public class HostTrustBO extends BaseBO {
             hostReport.aik = new Aik(agent.getAik()); 
         }
         
-        HostTrustPolicyFactory hostTrustPolicyFactory = new HostTrustPolicyFactory(getEntityManagerFactory());
+        HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
 
         
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies

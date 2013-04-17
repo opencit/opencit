@@ -50,8 +50,8 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
      * @param hostReport
      * @return 
      */
-    @Override
-    public Set<Rule> generateTrustRulesForHost(HostReport hostReport) {
+//    @Override
+    public Set<Rule> createHostSpecificRules(HostReport hostReport) {
         // constant pcrs, modules that are consistent across reboots, and 
         // even modules that change across reboots *IF* there is a way to calculate
         // expected value, like if there are variables that go into it that we can

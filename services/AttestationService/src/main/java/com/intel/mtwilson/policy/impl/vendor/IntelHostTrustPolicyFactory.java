@@ -23,12 +23,12 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
     public IntelHostTrustPolicyFactory(JpaPolicyReader util) {
         this.reader = util;
     }
-
+/*
     @Override
-    public Set<Rule> generateTrustRulesForHost(HostReport hostReport) {
+    public Set<Rule> createHostSpecificRules(HostReport hostReport) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+*/
     @Override
     public Set<Rule> loadTrustRulesForBios(Bios bios, TblHosts host) {
         return reader.loadPcrMatchesConstantRulesForBios(bios, host);

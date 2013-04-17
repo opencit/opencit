@@ -7,7 +7,6 @@ package com.intel.mtwilson.model;
 import com.intel.mtwilson.validation.ObjectModel;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  *
@@ -44,12 +43,11 @@ public class Measurement extends ObjectModel {
 
     @Override
     public int hashCode() {
-        return digest.hashCode() + label.hashCode(); // two measurements are equal if their digests and labels are equal...  this property facilitates very convenient management of measurement using java's collections, such as contains(measurement) and removeAll(list of measurements) where one side comes from the host and may have a different label than what got saved in the database 
+        return digest.hashCode(); // two measurements are equal if their digests are equal...  the labels are arbitrary; this property facilitates very convenient management of measurement using java's collections, such as contains(measurement) and removeAll(list of measurements) where one side comes from the host and may have a different label than what got saved in the database 
     }
 
     /**
-     * Returns true only if the PcrIndex and PcrValue of this object and the other
-     * object are identical.
+     * Returns true only if the digest of this object and the other object are equal
      * @param obj
      * @return 
      */
@@ -63,9 +61,6 @@ public class Measurement extends ObjectModel {
         }
         final Measurement other = (Measurement) obj;
         if ((this.digest == null) ? (other.digest != null) : !this.digest.equals(other.digest)) {
-            return false;
-        }
-        if ((this.label == null) ? (other.label != null) : !this.label.equals(other.label)) {
             return false;
         }
         return true;

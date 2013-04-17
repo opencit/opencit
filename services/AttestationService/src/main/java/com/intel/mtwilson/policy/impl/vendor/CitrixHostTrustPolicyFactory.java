@@ -24,11 +24,11 @@ public class CitrixHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
     public CitrixHostTrustPolicyFactory(JpaPolicyReader util) {
         this.util = util;
     }
-    
+    /*
     @Override
-    public Set<Rule> generateTrustRulesForHost(HostReport hostReport) {
+    public Set<Rule> createHostSpecificRules(HostReport hostReport) {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }*/
     
     
     @Override

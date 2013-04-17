@@ -95,15 +95,20 @@ public class JpaPolicyReader {
         }
         return pcrs;
     }        
+
+    public Rule createPcrMatchesConstantRuleFromTblPcrManifest(TblPcrManifest pcrInfo, String... markers) {
+        PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
+        Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
+        log.debug("Creating PcrMatchesConstantRule from PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
+        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
+        rule.setMarkers(markers);
+        return rule;
+    }
     
     public Set<Rule> createPcrMatchesConstantRulesFromTblPcrManifest(Collection<TblPcrManifest> pcrInfoList, String... markers) {
         HashSet<Rule> list = new HashSet<Rule>();
         for(TblPcrManifest pcrInfo : pcrInfoList) {
-            PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(pcrInfo.getName()));
-            Sha1Digest pcrValue = new Sha1Digest(pcrInfo.getValue());
-            log.debug("Creating PcrMatchesConstantRule from PCR {} value {}", pcrIndex.toString(), pcrValue.toString());
-            PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(pcrIndex, pcrValue));
-            rule.setMarkers(markers);
+            Rule rule = createPcrMatchesConstantRuleFromTblPcrManifest(pcrInfo, markers);
             list.add(rule);
         }
         return list;
@@ -130,58 +135,95 @@ public class JpaPolicyReader {
     }
     
     public Set<Rule> loadPcrMatchesConstantRulesForLocation(String location, TblHosts tblHosts) {
-//        TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
-//        log.debug("WhitelistUtil found VMM MLE: {}", vmmMle.getName());
-//        Collection<TblPcrManifest> pcrInfoList = vmmMle.getTblPcrManifestCollection();
-//        return createPcrMatchesConstantRulesFromTblPcrManifest(pcrInfoList, TrustMarker.VMM.name());
+//        HashSet<Rule> rules = new HashSet<Rule>();
+//        TblLocationPcr locationPcr = locationPcrJpaController.findTblLocationPcrByLocationName(location) // XXX need to create this method
+//        log.debug("WhitelistUtil found Location PCR: {}", locationPcr.getName());
+//        Sha1Digest pcrValue = new Sha1Digest(locationPcr.getValue());
+//        log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", pcrValue.toString());
+//        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, pcrValue));
+//        rule.setMarkers(markers);
+//        rules.add(rule);
+//        return rules;
         throw new UnsupportedOperationException("TODO: add support for checking pcr 22");
     }
-    
-    public Set<Rule> createPcrEventLogIncludesRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, String... markers) {
-        HashSet<Rule> list = new HashSet<Rule>();
-        for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
-            PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
-            log.debug("... MODULE for PCR {}", pcrIndex.toString());
-            list.add(new PcrEventLogIntegrity(pcrIndex)); // if we're going to look for things in the host's event log, it needs to have integrity
-            HashSet<Measurement> measurements = new HashSet<Measurement>();
-            
-            HashMap<String,String> info = new HashMap<String,String>();
-            // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
-            info.put("EventName", moduleInfo.getEventID().getName());
-            info.put("ComponentName", moduleInfo.getComponentName());
 
-            if( moduleInfo.getUseHostSpecificDigestValue() ) {
-                Collection<TblHostSpecificManifest> hostSpecificManifest = moduleInfo.getTblHostSpecificManifestCollection();
+    public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo) {
+        HashMap<String,String> info = new HashMap<String,String>();
+        // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
+        info.put("EventName", moduleInfo.getEventID().getName());
+        info.put("ComponentName", moduleInfo.getComponentName());
+
+        if( moduleInfo.getUseHostSpecificDigestValue() ) {
+            Collection<TblHostSpecificManifest> hostSpecificManifest = moduleInfo.getTblHostSpecificManifestCollection(); // XXX it was created as a collection but there should really only be ONE host-specific module value to replace ONE module value for the rule
+            if( hostSpecificManifest.size() > 1 ) {
+                log.error("MULTIPLE HOST-SPECIFIC MODULE VALUES DEFINED FOR SAME MODULE:");
                 for(TblHostSpecificManifest hostSpecificModule : hostSpecificManifest) {
-                    Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
-                    measurements.add(m);
+                    log.error("ID #{}   DIGEST: {}", hostSpecificModule.getId(), hostSpecificModule.getDigestValue());
                 }
             }
-            else {
-                // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
-                // XXX the only way to fix this is to change the schema so it can accomodate all the custom info we need w/o needing to know WHAT it is from here.
-                info.put("PackageName", moduleInfo.getPackageName());
-                info.put("PackageVersion", moduleInfo.getPackageVersion());
-                info.put("PackageVendor", moduleInfo.getPackageVendor());
-                Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
-                measurements.add(m);
+            TblHostSpecificManifest hostSpecificModule = hostSpecificManifest.iterator().next(); // just grab the first module in case there are multiple (which would be an error, see above log message)
+            Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
+            return m;
+        }
+        else {
+            // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
+            // XXX the only way to fix this is to change the schema so it can accomodate all the custom info we need w/o needing to know WHAT it is from here.
+            info.put("PackageName", moduleInfo.getPackageName());
+            info.put("PackageVersion", moduleInfo.getPackageVersion());
+            info.put("PackageVendor", moduleInfo.getPackageVendor());
+            Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
+            return m;
+        }
+    }
+    
+    // creates a rule for checking that ONE module is included in a pcr event log
+    public Rule createPcrEventLogIncludesRuleFromTblModuleManifest(TblModuleManifest moduleInfo, String... markers) {
+        PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
+        log.debug("... MODULE for PCR {}", pcrIndex.toString());
+        Measurement m = createMeasurementFromTblModuleManifest(moduleInfo);
+        PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, m);
+        rule.setMarkers(markers);
+        return rule;
+    }
+    
+    
+    // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
+    public Set<Rule> createPcrEventLogIncludesRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, String... markers) {
+        HashSet<Rule> list = new HashSet<Rule>();
+    // XXX unfortunately because of our database design, we don't know in advance which  pcr's these modules belong to.
+        // so we need to collect the set of measurements for each pcr, and then for every pcr that has modules/events, we need to add the rules (second section below)
+        HashMap<PcrIndex,Set<Measurement>> measurements = new HashMap<PcrIndex,Set<Measurement>>();
+        for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
+            PcrIndex pcrIndex = PcrIndex.valueOf(Integer.valueOf(moduleInfo.getExtendedToPCR()));
+            
+            if( !measurements.containsKey(pcrIndex) ) {
+                measurements.put(pcrIndex, new HashSet<Measurement>());
             }
-            PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, measurements);
+            
+            Measurement m = createMeasurementFromTblModuleManifest(moduleInfo);
+            measurements.get(pcrIndex).add(m);
+        }
+        for(PcrIndex pcrIndex : measurements.keySet()) {
+            log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
+            list.add(new PcrEventLogIntegrity(pcrIndex)); // if we're going to look for things in the host's event log, it needs to have integrity            
+            log.debug("Adding PcrEventLogIncludes rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
+            PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, measurements.get(pcrIndex));
             rule.setMarkers(markers);
             list.add(rule);
         }
+        
         return list;
     }
     
     public Set<Rule> loadPcrEventLogIncludesRuleForBios(Bios bios, TblHosts tblHosts) {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
-        Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection(); 
+        Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection();  // XXX event logs shouldn't be associated directly to a bios, they should be associated to a specific pcr digest ...
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, TrustMarker.BIOS.name());
     }
     
     public Set<Rule> loadPcrEventLogIncludesRuleForVmm(Vmm vmm, TblHosts tblHosts) {
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
-        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();        
+        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();       // XXX event logs shouldn't be associated directly to a vmm, they should be associated to a specific pcr digest ...  
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, TrustMarker.VMM.name());
     }
     
