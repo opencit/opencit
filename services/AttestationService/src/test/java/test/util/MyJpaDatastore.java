@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
+import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 
@@ -34,6 +35,7 @@ public class MyJpaDatastore extends MyPersistenceManager {
         TblOemJpaController oemJpa = null;
         TblPcrManifestJpaController pcrJpa = null;
         TblModuleManifestJpaController moduleJpa = null;
+        TblHostSpecificManifestJpaController hostSpecificModuleJpa = null;
         HostTrustPolicyManager hostTrustFactory = null;
         MwMleSourceJpaController mleSourceJpa = null;
         
@@ -72,6 +74,12 @@ public class MyJpaDatastore extends MyPersistenceManager {
                 moduleJpa = new TblModuleManifestJpaController(getEntityManagerFactory("ASDataPU"));
             }
             return moduleJpa;
+        }
+        public TblHostSpecificManifestJpaController getHostSpecificModuleJpa() {
+            if( hostSpecificModuleJpa == null ) {
+                hostSpecificModuleJpa = new TblHostSpecificManifestJpaController(getEntityManagerFactory("ASDataPU"));
+            }
+            return hostSpecificModuleJpa;
         }
         public MwMleSourceJpaController getMleSourceJpa() {
             if( mleSourceJpa == null ) {

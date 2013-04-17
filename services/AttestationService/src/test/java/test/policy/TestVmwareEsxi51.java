@@ -7,6 +7,7 @@ package test.policy;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwMleSource;
+import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -25,6 +26,7 @@ import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.*;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.List;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
@@ -126,6 +128,7 @@ public class TestVmwareEsxi51 {
             pm.getHostsJpa().destroy(host.getId());
         }
         host = initNewHost();
+
         // now go to the host and fetch the PCR values -- this is similar to what management service does 
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(host);
@@ -200,6 +203,7 @@ public class TestVmwareEsxi51 {
             pm.getPcrJpa().create(pcrWhitelist);
         }
         PcrEventLog pcr19 = pcrManifest.getPcrEventLog(PcrIndex.PCR19);
+        ArrayList<TblHostSpecificManifest> hostSpecificEventLogEntries = new ArrayList<TblHostSpecificManifest>();
         List<Measurement> vmwareEvents = pcr19.getEventLog();
         for(Measurement m : vmwareEvents) {
             log.debug("Adding VMM module/event {} = {}", m.getLabel(), m.getValue().toString());
@@ -213,10 +217,13 @@ public class TestVmwareEsxi51 {
             eventLogEntry.setPackageName(m.getInfo().get("PackageName"));
             eventLogEntry.setPackageVendor(m.getInfo().get("PackageVendor"));
             eventLogEntry.setPackageVersion(m.getInfo().get("PackageVersion"));
-            if( m.getInfo().get("ComponentName").equals("xxxxx command line x.x.x.x. ???") ) {
+            if( m.getInfo().get("EventType").equals("HostTpmCommandEvent") ) {
                 eventLogEntry.setUseHostSpecificDigestValue(true);
                 // now create a host-specific value...
-                
+                TblHostSpecificManifest hostSpecificEventLogEntry = new TblHostSpecificManifest();
+                hostSpecificEventLogEntry.setDigestValue(m.getValue().toString());
+                hostSpecificEventLogEntry.setModuleManifestID(eventLogEntry); // when it is saved it will get an id, and later when this record is saved it will all work out...
+                hostSpecificEventLogEntries.add(hostSpecificEventLogEntry); // will be saved to database later 
             }
             else {
                 eventLogEntry.setDigestValue(m.getValue().toString());
@@ -251,11 +258,19 @@ public class TestVmwareEsxi51 {
                 host.setAikSha1(Sha1Digest.valueOf(aikpubkey.getEncoded()).toString());
             }
         }
-        // register host
+        // create host with the mle id's
         host.setBiosMleId(bios);
         host.setVmmMleId(vmm);
         
         pm.getHostsJpa().create(host);
+        
+        // now add host-specific information to the database
+        for(TblHostSpecificManifest hostSpecificEventLogEntry : hostSpecificEventLogEntries) {
+            // now that the host is created and has an id, we can do this:
+            hostSpecificEventLogEntry.setHostID(host.getId()); 
+            pm.getHostSpecificModuleJpa().create(hostSpecificEventLogEntry);            
+        }
+        
     }
         
     /*

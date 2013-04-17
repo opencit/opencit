@@ -58,6 +58,7 @@ public class MyPersistenceManager extends PersistenceManager {
     }
     @Override
     public void configure() {
+        testCheckMyPreferences();// show the database connection settings in the console in case there are any connection issues
         MapConfiguration c = new MapConfiguration(jdbcProperties);
         addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties(c));
         addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties(c));
