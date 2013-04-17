@@ -300,10 +300,10 @@ public class InitDatabase implements Command {
         String changelogTableName = null;
         // if we have both changelog tables, copy all records from old changelog to new changelog and then use that
         if( hasChangelog && hasMwChangelog ) {
-            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM `mw_changelog` WHERE ID=?");
-            PreparedStatement insert = c.prepareStatement("INSERT INTO `mw_changelog` SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
+            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?");
+            PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
             Statement select = c.createStatement();
-            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM `changelog`");
+            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog");
             while(rs.next()) {
                 check.setLong(1, rs.getLong("ID"));
                 ResultSet rsCheck = check.executeQuery();
@@ -332,7 +332,7 @@ public class InitDatabase implements Command {
         }
         
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM `%s`", changelogTableName));
+        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName));
         while(rs.next()) {
             ChangelogEntry entry = new ChangelogEntry();
             entry.id = rs.getString("ID");

@@ -224,7 +224,7 @@ if using_glassfish; then
     echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
   fi
 elif using_tomcat; then
-  tomcat_installer=`find_installer tomcat`
+  tomcat_installer=`find_installer mtwilson-tomcat`
   if [[ -n "$tomcat_installer" ]]; then
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
