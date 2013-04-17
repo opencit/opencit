@@ -176,8 +176,8 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-tomcat-installer</artifactId>
-                  <version>0.1</version>
+                  <artifactId>tomcat-installer</artifactId>
+                  <version>6.0.29</version>
                   <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
