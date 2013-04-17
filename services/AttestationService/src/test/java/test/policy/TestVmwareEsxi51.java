@@ -6,12 +6,26 @@ package test.policy;
 
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.as.data.MwMleSource;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.data.TblMle;
+import com.intel.mtwilson.as.data.TblModuleManifest;
+import com.intel.mtwilson.as.data.TblOem;
+import com.intel.mtwilson.as.data.TblOs;
+import com.intel.mtwilson.as.data.TblPcrManifest;
+import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.*;
+import java.security.PublicKey;
+import java.security.cert.X509Certificate;
+import java.util.List;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
@@ -99,6 +113,151 @@ public class TestVmwareEsxi51 {
     }
     
     
+    /**
+     * A lot of the code in this method is similar to what you find in TestLinuxXen169
+     * @throws Exception 
+     */
+    @Test
+    public void testRegisterVmwareHostAndWhitelist() throws Exception {
+        // first, if it's already registered we need to delete it
+        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        if( host != null ) {
+            log.debug("Host {} is already in database, deleting", host.getName());
+            pm.getHostsJpa().destroy(host.getId());
+        }
+        host = initNewHost();
+        // now go to the host and fetch the PCR values -- this is similar to what management service does 
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(host);
+        TxtHostRecord hostInfo = agent.getHostDetails();
+        // whitelist step 1:  create OEM
+        TblOem oem = pm.getOemJpa().findTblOemByName(hostInfo.BIOS_Oem);
+        if( oem == null ) {
+            oem = new TblOem();
+            oem.setName(hostInfo.BIOS_Oem);
+            oem.setDescription("Automatic whitelist from "+hostname);
+            pm.getOemJpa().create(oem);
+        }
+        // whitelist step 2:  create BIOS MLE
+        TblMle bios = pm.getMleJpa().findBiosMle(hostInfo.BIOS_Name, hostInfo.BIOS_Version, hostInfo.BIOS_Oem);
+        if( bios == null ) {
+            bios = new TblMle();
+            bios.setAttestationType("PCR");
+            bios.setDescription("Automatic whitelist from "+hostname);
+            bios.setMLEType("BIOS");
+            bios.setName(hostInfo.BIOS_Name);
+            bios.setVersion(hostInfo.BIOS_Version);
+            bios.setOemId(oem);
+            bios.setRequiredManifestList("0"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
+            pm.getMleJpa().create(bios);
+        }
+        // whitelist step 3:  create OS
+        TblOs os = pm.getOsJpa().findTblOsByNameVersion(hostInfo.VMM_OSName, hostInfo.VMM_OSVersion);
+        if( os == null ) {
+            os = new TblOs();
+            os.setName(hostInfo.VMM_OSName);
+            os.setVersion(hostInfo.VMM_OSVersion);
+            os.setDescription("Automatic whitelist from "+hostname);
+            pm.getOsJpa().create(os);
+        }
+        // whitelist step 4:  create VMM MLE
+        TblMle vmm = pm.getMleJpa().findVmmMle(hostInfo.VMM_Name, hostInfo.VMM_Version, hostInfo.VMM_OSName, hostInfo.VMM_OSVersion);
+        if( vmm == null ) {
+            vmm = new TblMle();
+            vmm.setAttestationType("PCR");
+            vmm.setDescription("Automatic whitelist from "+hostname);
+            vmm.setMLEType("VMM");
+            vmm.setName(hostInfo.VMM_Name);
+            vmm.setVersion(hostInfo.VMM_Version);
+            vmm.setOsId(os);
+            vmm.setRequiredManifestList("17,18,20"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
+            pm.getMleJpa().create(vmm);
+        }
+        // whitelist step 5: get PCRs
+        PcrManifest pcrManifest = agent.getPcrManifest();        
+        // whitelist step 6: create whitelist entries for BIOS PCRs
+        String[] biosPcrList = bios.getRequiredManifestList().split(",");
+        for(String biosPcrIndex : biosPcrList) {
+            Pcr pcr = pcrManifest.getPcr(Integer.valueOf(biosPcrIndex));
+            log.debug("Adding BIOS PCR {} = {}", pcr.getIndex().toString(), pcr.getValue().toString());
+            TblPcrManifest pcrWhitelist = new TblPcrManifest();
+            pcrWhitelist.setMleId(bios);
+            pcrWhitelist.setName(pcr.getIndex().toString());
+            pcrWhitelist.setValue(pcr.getValue().toString());
+            pcrWhitelist.setPCRDescription("Automatic BIOS whitelist from "+hostname);
+            pm.getPcrJpa().create(pcrWhitelist);
+        }
+        // whitelist step 7: create whitelist entries for VMM PCRs
+        String[] vmmPcrList = vmm.getRequiredManifestList().split(","); // only 17, 18, 20  ... 19 is treated separately below for vmware
+        for(String vmmPcrIndex : vmmPcrList) {
+            Pcr pcr = pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex));
+            log.debug("Adding VMM PCR {} = {}", pcr.getIndex().toString(), pcr.getValue().toString());
+            TblPcrManifest pcrWhitelist = new TblPcrManifest();
+            pcrWhitelist.setMleId(vmm);
+            pcrWhitelist.setName(pcr.getIndex().toString());
+            pcrWhitelist.setValue(pcr.getValue().toString());
+            pcrWhitelist.setPCRDescription("Automatic VMM whitelist from "+hostname);
+            pm.getPcrJpa().create(pcrWhitelist);
+        }
+        PcrEventLog pcr19 = pcrManifest.getPcrEventLog(PcrIndex.PCR19);
+        List<Measurement> vmwareEvents = pcr19.getEventLog();
+        for(Measurement m : vmwareEvents) {
+            log.debug("Adding VMM module/event {} = {}", m.getLabel(), m.getValue().toString());
+            TblModuleManifest eventLogEntry = new TblModuleManifest();
+            eventLogEntry.setComponentName(m.getInfo().get("ComponentName"));
+            eventLogEntry.setDescription(m.getLabel());
+            eventLogEntry.setEventID(null); // XXX TODO what is this ???
+            eventLogEntry.setExtendedToPCR(PcrIndex.PCR19.toString());
+            eventLogEntry.setMleId(vmm);
+            eventLogEntry.setNameSpaceID(null); // XXX TODO why do we care ???
+            eventLogEntry.setPackageName(m.getInfo().get("PackageName"));
+            eventLogEntry.setPackageVendor(m.getInfo().get("PackageVendor"));
+            eventLogEntry.setPackageVersion(m.getInfo().get("PackageVersion"));
+            if( m.getInfo().get("ComponentName").equals("xxxxx command line x.x.x.x. ???") ) {
+                eventLogEntry.setUseHostSpecificDigestValue(true);
+                // now create a host-specific value...
+                
+            }
+            else {
+                eventLogEntry.setDigestValue(m.getValue().toString());
+            }
+            pm.getModuleJpa().create(eventLogEntry);
+        }
+        // whitelist step 8: document that these mle's came from this host (not necessary for attestation, but to make this example complete)
+        MwMleSource biosMleSource = pm.getMleSourceJpa().findByMleId(bios.getId());
+        if( biosMleSource == null ) {
+            biosMleSource = new MwMleSource();
+            biosMleSource.setMleId(bios);
+            biosMleSource.setHostName(hostname);
+            pm.getMleSourceJpa().create(biosMleSource);
+        }
+        MwMleSource vmmMleSource = pm.getMleSourceJpa().findByMleId(vmm.getId());
+        if( vmmMleSource == null ) {
+            vmmMleSource = new MwMleSource();
+            vmmMleSource.setMleId(vmm);
+            vmmMleSource.setHostName(hostname);
+            pm.getMleSourceJpa().create(vmmMleSource);
+        }
+        // aik certificate is skipped since vmware doesn't have aik;  but leaving this code here since it's already guarded by isAikAvailable() 
+        if( agent.isAikAvailable() ) {
+            if( agent.isAikCaAvailable() ) {
+                X509Certificate aikcert = agent.getAikCertificate();
+                host.setAIKCertificate(X509Util.encodePemCertificate(aikcert));
+                host.setAikSha1(Sha1Digest.valueOf(aikcert.getPublicKey().getEncoded()).toString());
+            }
+            else {
+                PublicKey aikpubkey = agent.getAik();
+                host.setAIKCertificate(X509Util.encodePemPublicKey(aikpubkey));
+                host.setAikSha1(Sha1Digest.valueOf(aikpubkey.getEncoded()).toString());
+            }
+        }
+        // register host
+        host.setBiosMleId(bios);
+        host.setVmmMleId(vmm);
+        
+        pm.getHostsJpa().create(host);
+    }
+        
     /*
     @Test
     public void testGeneratePolicyForHost() throws Exception {

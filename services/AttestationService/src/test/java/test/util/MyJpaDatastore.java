@@ -7,6 +7,7 @@ package test.util;
 import com.intel.mtwilson.as.controller.MwMleSourceJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
+import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
@@ -32,6 +33,7 @@ public class MyJpaDatastore extends MyPersistenceManager {
         TblOsJpaController osJpa = null;
         TblOemJpaController oemJpa = null;
         TblPcrManifestJpaController pcrJpa = null;
+        TblModuleManifestJpaController moduleJpa = null;
         HostTrustPolicyManager hostTrustFactory = null;
         MwMleSourceJpaController mleSourceJpa = null;
         
@@ -64,6 +66,12 @@ public class MyJpaDatastore extends MyPersistenceManager {
                 pcrJpa = new TblPcrManifestJpaController(getEntityManagerFactory("ASDataPU"));
             }
             return pcrJpa;
+        }
+        public TblModuleManifestJpaController getModuleJpa() {
+            if( moduleJpa == null ) {
+                moduleJpa = new TblModuleManifestJpaController(getEntityManagerFactory("ASDataPU"));
+            }
+            return moduleJpa;
         }
         public MwMleSourceJpaController getMleSourceJpa() {
             if( mleSourceJpa == null ) {

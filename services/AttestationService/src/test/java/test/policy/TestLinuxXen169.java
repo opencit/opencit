@@ -142,8 +142,12 @@ Pcr 23 = 0000000000000000000000000000000000000000
         return host;
     }
     
+    /**
+     * A lot of the code in this method is similar to what you find in TestVmwareEsxi51
+     * @throws Exception 
+     */
     @Test
-    public void testRegisterHostAndWhitelist() throws Exception {
+    public void testRegisterXenHostAndWhitelist() throws Exception {
         // first, if it's already registered we need to delete it
         TblHosts host = pm.getHostsJpa().findByName(hostname);
         if( host != null ) {
