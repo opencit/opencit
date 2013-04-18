@@ -18,6 +18,7 @@ import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
@@ -259,7 +260,7 @@ public class ReportsBO extends BaseBO {
         manifest.setTrustStatus(getTrustStatus(log.getTrustStatus()));
         manifest.setWhiteListValue(tblPcrManifest.getValue());
 //        if (log.getTblModuleManifestLogCollection() != null && log.getTblModuleManifestLogCollection().size() > 0) {
-            addManifestLogs(manifest, log, failureOnly,tblPcrManifest);
+            addManifestLogs(tblHosts.getId(), manifest, log, failureOnly,tblPcrManifest);// 20130417 added host id to parameter list so addManifestLogs can find host-specific module values
 //        }
         return manifest;
     }
@@ -283,7 +284,10 @@ public class ReportsBO extends BaseBO {
 //        return null;
 //
 //    }
-    private void addManifestLogs(PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) {
+    
+    
+    // XXX the mw_ta_log and  mw_module_manifest_log tables are not adequate to express the results of policy evaluation... better to just store a serialized copy of the trust report and then read it in once using json mapper, or maybe yaml,  and then have all the info. 
+    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) {
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<String, ModuleLogReport>();
         
         if(log.getTblModuleManifestLogCollection() != null){
@@ -299,9 +303,15 @@ public class ReportsBO extends BaseBO {
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
                         !moduleReports.containsKey(moduleManifest.getComponentName())){
                     
-                    moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
-                                moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1));
-                    
+                    if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
+                        String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
+                                hostSpecificDigestValue, hostSpecificDigestValue, 1));
+                    }
+                    else {
+                        moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
+                                moduleManifest.getDigestValue(), moduleManifest.getDigestValue(),1)); // XXX what? using the same value for both actual && whitelist?
+                    }
                 }
             }
         }

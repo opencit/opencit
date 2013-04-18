@@ -25,8 +25,10 @@ public class PolicyEngine {
     
     // this is the normal case - given a list of policies, apply them all, and combine the results into one report.
     public List<RuleResult> applyAll(HostReport hostReport, Rule... rules) {
+        log.debug("PolicyEngine.applyAll(... {} rules)", rules.length);
         ArrayList<RuleResult> list = new ArrayList<RuleResult>();
         for(Rule rule : rules) {
+            log.debug("Applying rule {}", rule.getClass().getName());
             RuleResult result = rule.apply(hostReport);
             list.add(result);
         }
@@ -34,8 +36,10 @@ public class PolicyEngine {
     }
     
     public List<RuleResult> applyAll(HostReport hostReport, Set<Rule> rules) {
+        log.debug("PolicyEngine.applyAll(set of {} rules)", rules.size());
         ArrayList<RuleResult> list = new ArrayList<RuleResult>();
         for(Rule rule : rules) {
+            log.debug("Applying rule {}", rule.getClass().getName());
             RuleResult result = rule.apply(hostReport);
             list.add(result);
         }
@@ -46,8 +50,10 @@ public class PolicyEngine {
     // however,  this is not the right spot to check that... so where do we check it ??? in the app?? that
     // would then be a feature of the app. which is fine.
     public List<TrustReport> applyAll(HostReport hostReport, Policy... policies) {
+        log.debug("PolicyEngine.applyAll(... {} policies)", policies.length);
         ArrayList<TrustReport> list = new ArrayList<TrustReport>();
         for(Policy policy : policies) {
+            log.debug("Applying policy {}", policy.getName());
             TrustReport report = apply(hostReport, policy);
             list.add(report);
         }
@@ -62,7 +68,8 @@ public class PolicyEngine {
     }*/
     
     public TrustReport apply(HostReport hostReport, Policy policy) {
-        TrustReport policyReport = new TrustReport(policy.getName());
+        log.debug("PolicyEngine.apply policy {}", policy.getName());
+        TrustReport policyReport = new TrustReport(hostReport, policy.getName());
         List<RuleResult> results = applyAll(hostReport, policy.getRules());
         Iterator<RuleResult> it = results.iterator();
         while(it.hasNext()) {

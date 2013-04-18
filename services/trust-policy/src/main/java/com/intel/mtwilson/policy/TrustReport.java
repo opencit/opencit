@@ -12,18 +12,32 @@ import java.util.List;
 /**
  * Note: passing policy name instead of policy itself because do not want to just "return policy", 
  * since that will have all the same information that you already get in the reports, and anything
- * that serializes this class would then show redundant info.
+ * that serializes this class would then show redundant info.  Every rule result already includes
+ * the rule itself, and since there is a result for every rule in the policy,  the entire policy
+ * is represented by the set of rule results.
+ * 
+ * The host report is also included, which is somewhat redundant but not completely, because it
+ * has information that may not be present in the rules, which the UI may want to show. For example,
+ * for vmware PCR 19 which has a different value for every host due to a host-specific UUID
+ * being extended into it,  the UI may want to show the actual value of PCR 19. however, if the
+ * rules only check for PCR integrity and for some modules to be included, then it doesn't really
+ * say what is the PCR value (and if it did, it would show the expected PCR, not the actual PCR).
+ * Also if module names mismatch even though their digests are the same, that wouldn't normally
+ * be reflected in the results.
  * 
  * @author jbuhacoff
  */
 public class TrustReport {
+    private HostReport hostReport;
     private String policyName;
     private ArrayList<RuleResult> results = new ArrayList<RuleResult>();
     
-    public TrustReport(String policyName) {
+    public TrustReport(HostReport hostReport, String policyName) {
+        this.hostReport = hostReport;
         this.policyName = policyName;
     }
     
+    public HostReport getHostReport() { return hostReport; }
     public String getPolicyName() { return policyName; }
     
     public void addResult(RuleResult result) {

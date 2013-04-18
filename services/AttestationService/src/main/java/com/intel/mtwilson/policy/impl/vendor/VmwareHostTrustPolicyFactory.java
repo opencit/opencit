@@ -98,6 +98,8 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
         HashSet<Rule> rules = new HashSet<Rule>();
         // first, load the list of pcr's marked for this host's vmm mle 
         Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+        // next block removed because the vmware pcr 19 in the database has no value, so the PcrMatchesConstant rule cannot even be created for it.... so there's nothing to find and remove, since it won't be in the list
+        /*
         // second, if that list includes pcr 19, then we remove it -- later we will add module rules instead
         boolean checkPcr19 = false;
         for(Rule rule : pcrConstantRules) {
@@ -109,10 +111,11 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
                 }
             }
         }
+        */ 
         rules.addAll(pcrConstantRules);
         // third, if the list included pcr 19, at this point the pcr matches constant was rmoved and
         // we will replace it with module/eventlog checks. 
-        if( checkPcr19 ) {
+        if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
             Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host);
             rules.addAll(pcrEventLogRules);
         }

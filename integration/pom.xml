@@ -20,6 +20,7 @@
     <module>api-datatypes-jar</module>
     <module>api-client-jar</module>
     <module>api-client-jar-jdk15</module>
+    <module>my</module>
   </modules>
 
 

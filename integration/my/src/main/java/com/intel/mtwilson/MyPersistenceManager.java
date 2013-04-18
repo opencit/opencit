@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.util;
+package com.intel.mtwilson;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.audit.helper.AuditConfig;
@@ -11,6 +11,8 @@ import com.intel.mtwilson.ms.common.MSConfig;
 import java.util.Properties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.MapConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Example:
@@ -27,13 +29,15 @@ import org.apache.commons.configuration.MapConfiguration;
  *
  * @author jbuhacoff
  */
-public class CustomPersistenceManager extends PersistenceManager {
+public class MyPersistenceManager extends PersistenceManager {
+    private transient static Logger log = LoggerFactory.getLogger(MyPersistenceManager.class);
     private Properties jdbcProperties;
-    public CustomPersistenceManager(Properties jdbcProperties) {
+    public MyPersistenceManager(Properties jdbcProperties) {
         this.jdbcProperties = jdbcProperties;
     }
     @Override
     public void configure() {
+        log.debug("MyPersistenceManager: Database Host: {}", jdbcProperties.getProperty("mtwilson.db.host"));
         MapConfiguration c = new MapConfiguration(jdbcProperties);
         addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties(c));
         addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties(c));
@@ -42,4 +46,5 @@ public class CustomPersistenceManager extends PersistenceManager {
     public byte[] getDek() {
         return Base64.decodeBase64(jdbcProperties.getProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==")); // arbitrary default dek, since it's a development server it's good to use same as what is configured there, but it doesn't matter as it only affects records we are writing, and hopefully after each test is complete there is zero net effect on the database
     }
+    
 }

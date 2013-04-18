@@ -1074,7 +1074,7 @@ public class HostBO extends BaseBO {
             
             List<ManifestData> biosMFList = new ArrayList<ManifestData>();            
             for (String biosPCR : biosPCRList){
-                biosMFList.add(new ManifestData(biosPCR, " "));
+                biosMFList.add(new ManifestData(biosPCR, "")); 
             }
             
             mleObj.setManifestList(biosMFList);
@@ -1189,7 +1189,7 @@ public class HostBO extends BaseBO {
             
             List<ManifestData> vmmMFList = new ArrayList<ManifestData>();
             for (String vmmPCR : vmmPCRList){
-                vmmMFList.add(new ManifestData(vmmPCR, " "));
+                vmmMFList.add(new ManifestData(vmmPCR, "")); // whitelist service now allows empty pcr's 
             }
 
             mleVMMObj.setManifestList(vmmMFList);
@@ -1396,7 +1396,7 @@ public class HostBO extends BaseBO {
                             log.debug("uploadToDB: component name set to single-space");
                         }
                         else {
-                            moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName"));
+                            moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
                         }
                         moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
                         moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
@@ -1482,7 +1482,7 @@ public class HostBO extends BaseBO {
                             if (vCenterVersion != null && esxHostVersion != null && vCenterVersion.contains("5.1") 
                                             &&  esxHostVersion.contains("5.1") &&  pcrObj.getPcrName() != null &&
                                     pcrObj.getPcrName().equalsIgnoreCase("19"))
-                                pcrObj.setPcrDigest("");
+                                pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
                             // System.out.println(pcrObj.getPcrName() + ":::" + pcrObj.getPcrDigest());
                             
                             tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
