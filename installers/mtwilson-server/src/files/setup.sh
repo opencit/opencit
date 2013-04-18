@@ -127,36 +127,44 @@ if using_mysql; then
   # Install MySQL server (if user selected localhost)
   if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
 	if [ ! -z "$mysql" ]; then
+	    # Place mysql server install code here
 		echo "Installing mysql server..."
-		# when we install mysql server on ubuntu it prompts us for root pw
-		# we preset it so we can send all output to the log
 		aptget_detect; dpkg_detect;
 		if [[ -n "$aptget" ]]; then
 			echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
 			echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
 		fi 
-	
 		mysql_server_install 
 		mysql_start & >> $INSTALL_LOG_FILE
 	    echo "Installation of mysql server complete..."
+		# End mysql server install code here
 	else
 		echo_warning "Using existing mysql install"
 	fi
   fi
+  # mysql client install here
   echo "Installing mysql client..."
   mysql_install  
+  # mysql db init here
   mysql_create_database 
   echo "Installation of mysql client complete..."
+  # mysql db init end
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
 elif using_postgres; then
  if [ ! -z "$postgres" ]; then
-  # call the actual postgres install here
-  # it just outputs this warning because as of now postgres is unsupported in installer
+  # Place postgres server install code here
   echo_warning "Relying on an existing Postgres installation"
  else
   echo_warning "Relying on an existing Postgres installation"
  fi 
+ # postgres client install code here
+ 
+ #end postgres client install code
+ 
+ # postgress db init here
+ 
+ # postgress db init end
 fi
 
 # Attestation service auto-configuration
@@ -180,23 +188,30 @@ if [[ -z "$glassfish" && -z "$tomcat" ]]; then
 fi
 
 if using_glassfish; then
-  if [ ! -z "$java" ]; then
+  if [ ! -z "$glassfish" ]; then
+  # glassfish install here
 	glassfish_installer=`find_installer glassfish`
 	echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
 	./$glassfish_installer  >> $INSTALL_LOG_FILE
+  # end glassfish installer
   else
     echo_warning "Relying on an existing glassfish installation" 
   fi
+  # glassfish setup 
   mtwilson glassfish-sslcert
   echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+  # end glassfish setup
 elif using_tomcat; then
  if [ ! -z "$tomcat" ]; then
-  #here is where we need to call actual tomcat install
-  #we just put out this warning cause as of now tomcat isn't supported
+  # tomcat install here
   echo_warning "Relying on an existing Tomcat installation"
+  # end tomcat install
  else
   echo_warning "Relying on an existing Tomcat installation"
  fi
+ # tomcat init here
+ 
+ # end tomcat init
 fi
 
 if [ ! -z "$privacyca" ]; then
