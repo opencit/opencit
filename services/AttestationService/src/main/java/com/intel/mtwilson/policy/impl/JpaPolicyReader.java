@@ -169,8 +169,13 @@ public class JpaPolicyReader {
                     log.error("ID #{}   DIGEST: {}", hostSpecificModule.getId(), hostSpecificModule.getDigestValue());
                 }
             }
-            TblHostSpecificManifest hostSpecificModule = hostSpecificManifest.iterator().next(); // just grab the first module in case there are multiple (which would be an error, see above log message)
-            Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
+            if( hostSpecificManifest.size() > 0 ) {
+                TblHostSpecificManifest hostSpecificModule = hostSpecificManifest.iterator().next(); // just grab the first module in case there are multiple (which would be an error, see above log message)
+                Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
+                return m;
+            }
+            // if we get here then it's empty... which means the whitelist module defined it as being host specific but no host specific value was recorded...
+            Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
             return m;
         }
         else {
@@ -179,7 +184,7 @@ public class JpaPolicyReader {
             info.put("PackageName", moduleInfo.getPackageName());
             info.put("PackageVersion", moduleInfo.getPackageVersion());
             info.put("PackageVendor", moduleInfo.getPackageVendor());
-            Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getDescription(), info); // XXX using the description, but maybe we need to add a helpr function so we can use something like vendor-modulename-moduleversion   or vendor-eventdesc
+            Measurement m = new Measurement(new Sha1Digest(moduleInfo.getDigestValue()), moduleInfo.getComponentName(), info); 
             return m;
         }
     }

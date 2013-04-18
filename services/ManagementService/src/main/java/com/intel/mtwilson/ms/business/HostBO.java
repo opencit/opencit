@@ -1074,7 +1074,7 @@ public class HostBO extends BaseBO {
             
             List<ManifestData> biosMFList = new ArrayList<ManifestData>();            
             for (String biosPCR : biosPCRList){
-                biosMFList.add(new ManifestData(biosPCR, " "));
+                biosMFList.add(new ManifestData(biosPCR, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")); // XXX hack,   was empty space,  but now because whitelist service is checking for valid hex value, we are using 20 bytes of FF     ... TODO  change database schema & business logic to allow what the real world has ... dynamically calculated PCR values that are not the same across hosts
             }
             
             mleObj.setManifestList(biosMFList);
@@ -1482,7 +1482,7 @@ public class HostBO extends BaseBO {
                             if (vCenterVersion != null && esxHostVersion != null && vCenterVersion.contains("5.1") 
                                             &&  esxHostVersion.contains("5.1") &&  pcrObj.getPcrName() != null &&
                                     pcrObj.getPcrName().equalsIgnoreCase("19"))
-                                pcrObj.setPcrDigest("");
+                                pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
                             // System.out.println(pcrObj.getPcrName() + ":::" + pcrObj.getPcrDigest());
                             
                             tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());

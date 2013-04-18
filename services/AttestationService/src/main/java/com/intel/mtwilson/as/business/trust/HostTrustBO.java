@@ -6,12 +6,14 @@ import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
+import com.intel.mtwilson.as.controller.TblModuleManifestLogJpaController;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblLocationPcr;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
+import com.intel.mtwilson.as.data.TblModuleManifestLog;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.as.helper.saml.SamlAssertion;
 import com.intel.mtwilson.as.helper.saml.SamlGenerator;
@@ -22,12 +24,14 @@ import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.policy.Fault;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.Policy;
 import com.intel.mtwilson.policy.PolicyEngine;
 import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
+import com.intel.mtwilson.policy.fault.PcrEventLogMissingExpectedEntries;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
@@ -201,7 +205,7 @@ public class HostTrustBO extends BaseBO {
 
         
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies
-//        trustPolicy.setName(policy for hostId) // do we even need a name? or is that just a managemen thing for the app?
+//        trustPolicy.setName(policy for hostId) // do we even need a name? or is that just a management thing for the app?
         PolicyEngine policyEngine = new PolicyEngine();
         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
         
@@ -366,6 +370,7 @@ public class HostTrustBO extends BaseBO {
      */
     private void logPcrTrustStatus(TblHosts host, TrustReport report, Date today) {
         TblTaLogJpaController talogJpa = new TblTaLogJpaController(getEntityManagerFactory());
+        TblModuleManifestLogJpaController moduleLogJpa = new TblModuleManifestLogJpaController(getEntityManagerFactory());
         List<String> biosPcrList = Arrays.asList(host.getBiosMleId().getRequiredManifestList().split(","));
         List<String> vmmPcrList = Arrays.asList(host.getVmmMleId().getRequiredManifestList().split(","));
         List<RuleResult> results = report.getResults();
@@ -396,15 +401,48 @@ public class HostTrustBO extends BaseBO {
                 }
                 talogJpa.create(pcr);
             }
-            // XXX TODO look for event log rules and log in the module log table....  but mt wilson 1.1. isn't putting any data in there... and trust dashboard seems to be pulling out module values from soemwhere else for its trust report!
-            /*
+            // in mtwilson-1.1, the mw_module_manifest_log table is used to record only when host module values do not match the whitelist
             if( rule instanceof PcrEventLogIncludes ) {
+                /*
                 PcrEventLogIncludes eventLogRule = (PcrEventLogIncludes)rule;
                 Set<Measurement> measurements = eventLogRule.getMeasurements();
                 for(Measurement m : measurements) {
                     TblModuleManifestLog event = new TblModuleManifestLog();
                 }
-            }*/
+                */
+                List<Fault> faults = result.getFaults();
+                for(Fault fault : faults) {
+                    if( fault instanceof PcrEventLogMissingExpectedEntries ) { // there would only be one of these faults per PcrEventLogIncludes rule. XXX this might change in the future to have a bunch of individual faults, one per missing entry.
+                        PcrEventLogMissingExpectedEntries missingEntriesFault = (PcrEventLogMissingExpectedEntries)fault;
+
+                        TblTaLog pcr = new TblTaLog();
+                        pcr.setHostID(host.getId());
+                        pcr.setTrustStatus(false); // PCR not trusted since one or more required modules are missing, which we will detail below
+                        pcr.setError("Missing modules");
+                        pcr.setUpdatedOn(today);
+                        pcr.setManifestName(missingEntriesFault.getPcrIndex().toString());
+                        pcr.setManifestValue(""); // doesn't match up with how we store data. we would need to look for another related fault about the dynamic value not matching... 
+                        if( biosPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
+                            pcr.setMleId(host.getBiosMleId().getId());
+                        }
+                        if( vmmPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
+                            pcr.setMleId(host.getVmmMleId().getId());
+                        }
+                        talogJpa.create(pcr);
+                        
+                        Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
+                        for(Measurement m : missingEntries) {
+                            // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it. 
+                            TblModuleManifestLog event = new TblModuleManifestLog();
+                            event.setName(m.getLabel());
+                            event.setTaLogId(pcr);
+                            event.setValue(""); // we don't know from our report what the "actual" value is since we only logged that an expected value was missing... so maybe there's a module with the same name and wrong value in the host report, which we don't know here... see comment above,  this probably needs to change.
+                            event.setWhitelistValue(m.getValue().toString());
+                            moduleLogJpa.create(event);
+                        }
+                    }
+                }
+            }
         }
         
     }

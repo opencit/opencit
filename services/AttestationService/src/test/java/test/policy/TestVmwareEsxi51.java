@@ -330,20 +330,20 @@ public class TestVmwareEsxi51 {
 //        log.debug(xml.writeValueAsString(trustPolicy)); // notice the xml is NOT the same as the json at all... doesn't have all the info, and somehow has mixed "faults" in there somewhere even though the Rule objects do not have a fault method or field...
     }
     
-    /*
     @Test
-    public void testGeneratePolicyForHost() throws Exception {
-        TblHosts host = initNewHost();
+    public void testApplyPolicyForHost() throws Exception {
+        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        assertNotNull(host); 
         HostAgentFactory agentFactory = new HostAgentFactory();
         HostAgent agent = agentFactory.getHostAgent(host);
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = agent.getPcrManifest();
         hostReport.variables = agent.getHostAttributes();
-        HostTrustPolicyManager policyFactory = new HostTrustPolicyManager(pm.getEntityManagerFactory("ASDataPU"));
-//        Set<Rule> rules = policyFactory.generateTrustRulesForHost(host, hostReport);
-//        Policy policy = new Policy("Automatically generated policy for "+host.getName(), rules);
-        Policy policy = policyFactory.createWhitelistFromHost(host);
-        System.out.println(json.writeValueAsString(policy));
+        HostTrustPolicyManager hostTrustPolicyFactory = pm.getHostTrustFactory();
+        Policy policy = hostTrustPolicyFactory.loadTrustPolicyForHost(host, hostname);
+        log.debug("TRUST POLICY: {}", json.writeValueAsString(policy));
+        PolicyEngine engine = new PolicyEngine();
+        TrustReport report = engine.apply(hostReport, policy);
+        log.debug("TRUST REPORT: {}", json.writeValueAsString(report));
     }
-    */
 }

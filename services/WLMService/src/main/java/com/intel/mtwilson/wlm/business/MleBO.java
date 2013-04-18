@@ -60,6 +60,7 @@ public class MleBO extends BaseBO {
 
                         // This function will be used to validate the white list values. We have seen in some cases where in we would get -1. 
                         private boolean isWhiteListValid(String componentName, String whiteList) {
+                            if( whiteList == null || whiteList.isEmpty() ) { return true; } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
                                 if (whiteList.matches(hexadecimalRegEx)) {
                                         return true;
                                 } else {

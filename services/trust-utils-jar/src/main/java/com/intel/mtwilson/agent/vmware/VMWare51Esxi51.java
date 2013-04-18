@@ -79,7 +79,17 @@ public class VMWare51Esxi51   {
 					info.put("PackageVendor", componentEventDetails.getVibVendor());
 					info.put("PackageVersion", componentEventDetails.getVibVersion());
 //                    label = String.format("%s: %s-%s-%s", info.get("EventType"), componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() );
-                    label = String.format("%s-%s-%s", componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() );
+                    
+                    // There are usually 3 components that are filenames like imgdb.tgz, state.tgz, and onetime.tgz, where the filename is listed as ComponentName and there is no PackageVendor, PackageName, or PackageVersion defined.
+                    // So we need to label those using the ComponentName, and label the rest of the modules using PackageVendor-PackageName-PackageVersion.
+                    if( (componentEventDetails.getVibVendor() == null || componentEventDetails.getVibVendor().isEmpty()) &&
+                            (componentEventDetails.getVibName() == null || componentEventDetails.getVibName().isEmpty()) &&
+                            (componentEventDetails.getVibVersion() == null || componentEventDetails.getVibVersion().isEmpty())) {
+                        label = componentEventDetails.getComponentName(); // imgdb.tgz, state.tgz, onetime.tgz
+                    }
+                    else {
+                        label = String.format("%s-%s-%s", componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() ); // VMware-esx-xserver-5.1.0-0.0.799733, VMware-net-ixgbe-sriov-3.7.13.2iov-10vmw.510.0.0.613838, etc.
+                    }
 				} else if (logEventDetails instanceof HostTpmCommandEventDetails) { // CommandLine and DataHash
 					HostTpmCommandEventDetails commandEventDetails = (HostTpmCommandEventDetails) logEventDetails;
                     log.debug("Event name {}", commandEventDetails.getCommandLine());
