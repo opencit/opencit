@@ -1189,7 +1189,7 @@ public class HostBO extends BaseBO {
             
             List<ManifestData> vmmMFList = new ArrayList<ManifestData>();
             for (String vmmPCR : vmmPCRList){
-                vmmMFList.add(new ManifestData(vmmPCR, " "));
+                vmmMFList.add(new ManifestData(vmmPCR, "")); // whitelist service now allows empty pcr's 
             }
 
             mleVMMObj.setManifestList(vmmMFList);
@@ -1396,7 +1396,7 @@ public class HostBO extends BaseBO {
                             log.debug("uploadToDB: component name set to single-space");
                         }
                         else {
-                            moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName"));
+                            moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
                         }
                         moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
                         moduleObj.setEventName(reader.getAttributeValue("", "EventName"));

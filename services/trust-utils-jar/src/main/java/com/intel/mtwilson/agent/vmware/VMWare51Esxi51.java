@@ -88,7 +88,8 @@ public class VMWare51Esxi51   {
                         label = componentEventDetails.getComponentName(); // imgdb.tgz, state.tgz, onetime.tgz
                     }
                     else {
-                        label = String.format("%s-%s-%s", componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() ); // VMware-esx-xserver-5.1.0-0.0.799733, VMware-net-ixgbe-sriov-3.7.13.2iov-10vmw.510.0.0.613838, etc.
+                        label = componentEventDetails.getComponentName(); // was doing vendor-package-version but now that attestation logic matches modules by digest instead of by name, the name doesn't matter. so we can use the short component name.
+//                        label = String.format("%s-%s-%s", componentEventDetails.getVibVendor(), componentEventDetails.getVibName(), componentEventDetails.getVibVersion() ); // VMware-esx-xserver-5.1.0-0.0.799733, VMware-net-ixgbe-sriov-3.7.13.2iov-10vmw.510.0.0.613838, etc.
                     }
 				} else if (logEventDetails instanceof HostTpmCommandEventDetails) { // CommandLine and DataHash
 					HostTpmCommandEventDetails commandEventDetails = (HostTpmCommandEventDetails) logEventDetails;
@@ -163,7 +164,7 @@ public class VMWare51Esxi51   {
 	}    
     
     // example input:    /b.b00 vmbTrustedBoot=true tboot=0x0x101a000 no-auto-partition bootUUID=772753050c0a140bdfbf92e306b9793d
-    private static Pattern uuidPattern = Pattern.compile("bootUUID=([a-fA-F0-9]+)");
+    private static Pattern uuidPattern = Pattern.compile(".*bootUUID=([a-fA-F0-9]+).*");   // don't need [^a-fA-F0-9]?  before the last .* because the (a-fA-F0-9]+) match is greedy
     private static String getUuidFromCommandLine(String commandLine) {
         Matcher uuidMatcher = uuidPattern.matcher(commandLine);
         if( uuidMatcher.matches() ) {

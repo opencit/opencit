@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test.util.MyJpaDatastore;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.BeforeClass;
 
 /**
@@ -352,6 +354,12 @@ public class TestVmwareEsxi51 {
     @Test
     public void testExtractUUID() {
         String input = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000 no-auto-partition bootUUID=772753050c0a140bdfbf92e306b9793d"; // a command line event from a vmware esxi server event log for pcr 19
-        
+        Pattern uuidPattern = Pattern.compile(".*bootUUID=([a-fA-F0-9]+)[^a-fA-F0-9]?.*");
+        Matcher uuidMatcher = uuidPattern.matcher(input);
+        if( uuidMatcher.matches() ) {
+            log.debug("Found UUID: {}", uuidMatcher.group(1)); 
+        }
     }
+    
+
 }
