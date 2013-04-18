@@ -472,7 +472,7 @@ update_property_in_file() {
 
 configure_api_baseurl() {
   # setup mtwilson.api.baseurl
-  local config_filename ="${1}" 
+  local config_file="${1:-/etc/intel/cloudsecurity/my.properties}" 
   local port='8080'
   if using_tomcat; then
     port=$DEFAULT_TOMCAT_API_PORT
@@ -483,18 +483,19 @@ configure_api_baseurl() {
   local input_api_baseurl
   if [ -n "${MTWILSON_API_BASEURL}" ]; then
     mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$port"
+  elif [ -n "${MTWILSON_SERVER_IP_ADDRESS}" ]; then
+    mtwilson_api_baseurl="https://${MTWILSON_SERVER_IP_ADDRESS}:$port"
   else
-    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${config_filename}`
+    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl "${config_file}"`
     prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
+    # TODO ???? FIX THIS CONDITION
     if [[ "$input_api_baseurl" == "http*" ]]; then
       mtwilson_api_baseurl="$input_api_baseurl"
     else
       mtwilson_api_baseurl="https://${input_api_baseurl}:$port"
     fi
   fi
-  update_property_in_file mtwilson.api.baseurl "${config_filename}" "${mtwilson_api_baseurl}"
+  update_property_in_file mtwilson.api.baseurl "${config_file}" "${mtwilson_api_baseurl}"
 }
 
 ### FUNCTION LIBRARY: package management
@@ -2544,15 +2545,20 @@ print_env_summary_report() {
     error=1
   fi
   if using_mysql; then
-    if [ -n "$POSTGRES_HOME" ]; then
-      echo "Mysql: $POSTGRES_CLIENT_VERSION"
+    if [ -n "$MYSQL_HOME" ]; then
+      echo "Mysql: $MYSQL_CLIENT_VERSION"
     else
       echo_failure "Mysql: not found"
       error=1
     fi
   fi
   if using_postgres; then
-    echo_warning "Postgres: relying on existing install"
+    if [ -n "$POSTGRES_HOME" ]; then
+      echo "Postgres: $POSTGRES_CLIENT_VERSION"
+    else
+      echo_failure "Postgres: not found"
+      error=1
+    fi
   fi
   if using_glassfish; then
     if [ -n "$GLASSFISH_HOME" ]; then
@@ -2564,7 +2570,12 @@ print_env_summary_report() {
     fi
   fi
   if using_tomcat; then
-    echo_warning "Tomcat: relying on existing install"
+    if [ -n "$TOMCAT_HOME" ]; then
+      echo "Tomcat: $TOMCAT_CLIENT_VERSION"
+    else
+      echo_failure "Tomcat: not found"
+      error=1
+    fi
   fi
   return $error
 }
@@ -2588,7 +2599,8 @@ webservice_running() {
   elif using_tomcat; then
     tomcat_running
     if [ -n "$TOMCAT_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=` | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }'`
+      # TODO ??? determine how to know if this app is running
+      WEBSERVICE_DEPLOYED=`"${webservice_application_name}"`
     fi
   fi
 }
