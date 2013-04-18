@@ -145,6 +145,8 @@ if using_mysql; then
   # mysql client install here
   echo "Installing mysql client..."
   mysql_install  
+  # mysql client end 
+  
   # mysql db init here
   mysql_create_database 
   echo "Installation of mysql client complete..."
