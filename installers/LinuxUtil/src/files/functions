@@ -30,6 +30,10 @@ DEFAULT_JAVA_REQUIRED_VERSION="1.6"
 DEFAULT_GLASSFISH_REQUIRED_VERSION="3.0"
 DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
 
+DEFAULT_MTWILSON_API_BASEURL="http://127.0.0.1:"
+DEFAULT_TOMCAT_API_PORT="8443"
+DEFAULT_GLASSFISH_API_PORT="8181"
+
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
 ### FUNCTION LIBRARY: terminal display functions
@@ -466,6 +470,32 @@ update_property_in_file() {
   fi
 }
 
+configure_api_baseurl() {
+  # setup mtwilson.api.baseurl
+  local config_filename ="${1}" 
+  local port='8080'
+  if using_tomcat; then
+    port=$DEFAULT_TOMCAT_API_PORT
+  elif using_glassfish; then
+    port=$DEFAULT_GLASSFISH_API_PORT
+  fi
+
+  local input_api_baseurl
+  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
+    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$port"
+  else
+    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${config_filename}`
+    prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
+    if [[ "$input_api_baseurl" == "http*" ]]; then
+      mtwilson_api_baseurl="$input_api_baseurl"
+    else
+      mtwilson_api_baseurl="https://${input_api_baseurl}:$port"
+    fi
+  fi
+  update_property_in_file mtwilson.api.baseurl "${config_filename}" "${mtwilson_api_baseurl}"
+}
 
 ### FUNCTION LIBRARY: package management
 
@@ -2326,7 +2356,7 @@ java_detect() {
     do
         local java_bindir=`dirname $c`
         if [ -f "$java_bindir/java" ]; then
-          JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
           echo "Found Java: $JAVA_HOME"
@@ -2343,7 +2373,7 @@ java_detect() {
     do
         java_bindir=`dirname $c`
         if [ -f "$java_bindir/java" ]; then
-          JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
           echo "Found Java: $JAVA_HOME"
@@ -2361,7 +2391,7 @@ java_detect() {
         java_bindir=`dirname $c`
         # in non-JDK and non-JRE folders the "java" command may be a symlink:
         if [ -f "$java_bindir/java" ]; then
-          JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
           echo "Found Java: $c"
@@ -2372,7 +2402,7 @@ java_detect() {
           local javatarget=`readlink $c`
           if [ -f "$javatarget" ]; then
             java_bindir=`dirname $javatarget`
-            JAVA_HOME=`dirname $java_bindir`
+            export JAVA_HOME=`dirname $java_bindir`
             java=$javatarget
             JAVA_VERSION=`java_version`
             echo "Found Java: $java"

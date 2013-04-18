@@ -31,21 +31,21 @@ list_mysql_install_scripts() {
 #    echo ${mysql_script_dir}/20120718221000_create_0_5_2_schema.sql
 }
 
-configure_api_baseurl() {
-  # setup mtwilson.api.baseurl
-  local default_server_url=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-  local server_url_in
-  if [ -n "${MTWILSON_API_BASEURL}" ]; then
-    server_url_in="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
-    server_url_in="https://${MTWILSON_SERVER}:8181"
-  else
-    prompt_with_default server_url_in "Mt Wilson Server URL:" "${default_server_url}"
-    #server_url_in="https://${server_url_in}:8181"
-  fi
-  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${server_url_in}"
-  mtwilson_api_baseurl=${server_url_in}
-}
+#configure_api_baseurl() {
+#  # setup mtwilson.api.baseurl
+#  local default_server_url=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+#  local server_url_in
+#  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+#    server_url_in="${MTWILSON_API_BASEURL}"
+#  elif [ -n "${MTWILSON_SERVER}" ]; then
+#    server_url_in="https://${MTWILSON_SERVER}:8181"
+#  else
+#    prompt_with_default server_url_in "Mt Wilson Server URL:" "${default_server_url}"
+#    #server_url_in="https://${server_url_in}:8181"
+#  fi
+#  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${server_url_in}"
+#  mtwilson_api_baseurl=${server_url_in}
+#}
 
 configure_keystore_dir() {
   # setup mtwilson.mc.keystore.dir
@@ -67,7 +67,7 @@ setup_interactive_install() {
 #    mysql_scripts=`list_mysql_install_scripts`
 #    mysql_install_scripts ${mysql_scripts}
 #  fi
-  configure_api_baseurl
+  configure_api_baseurl "${package_config_filename}"
   configure_keystore_dir
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
@@ -89,11 +89,11 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
-      echo_warning "Missing one or more required packages"
-      print_env_summary_report
-      exit 1
-  fi
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+#      echo_warning "Missing one or more required packages"
+#      setup_print_summary
+#      exit 1
+#  fi
   setup_interactive_install
 }
 

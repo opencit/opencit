@@ -35,24 +35,24 @@ configure_keystore_dir() {
   mkdir -p ${package_keystore_users_dir}
 }
 
-configure_api_baseurl() {
-  # setup mtwilson.api.baseurl
-  local input_api_baseurl
-  if [ -n "${MTWILSON_API_BASEURL}" ]; then
-    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
-  else
-    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-    prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
-    if [[ "$input_api_baseurl" == "http*" ]]; then
-      mtwilson_api_baseurl="$input_api_baseurl"
-    else
-      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
-    fi
-  fi
-  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
-}
+#configure_api_baseurl() {
+#  # setup mtwilson.api.baseurl
+#  local input_api_baseurl
+#  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+#    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
+#  elif [ -n "${MTWILSON_SERVER}" ]; then
+#    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
+#  else
+#    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+#    prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
+#    if [[ "$input_api_baseurl" == "http*" ]]; then
+#      mtwilson_api_baseurl="$input_api_baseurl"
+#    else
+#      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
+#    fi
+#  fi
+#  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
+#}
 
 bootstrap_first_user() {
   echo "Configuring Management Console administrator username and password..."
@@ -183,7 +183,7 @@ setup_interactive_install() {
     fi
   fi
   configure_keystore_dir
-  configure_api_baseurl
+  configure_api_baseurl "${package_config_filename}"
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
@@ -205,11 +205,13 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" ]]; then
-      echo_warning "Missing one or more required packages"
-      setup_print_summary
-      exit 1
-  fi
+  java_detect
+  echo "JAVA_HOME=$JAVA_HOME"
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" ]]; then
+#      echo_warning "Missing one or more required packages"
+#      setup_print_summary
+#      exit 1
+#  fi
   setup_interactive_install
 }
 
