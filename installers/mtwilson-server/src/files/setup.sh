@@ -62,17 +62,6 @@ cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-if [ ! -z "$mysql" ]; then
- DATABASE_VENDOR="mysql"
-else 
- DATABASE_VENDOR="postgres"
-fi
-
-if [ ! -z "$glassfish" ]; then
- WEBSERVER_VENDOR="glassfish"
-else 
- WEBSERVER_VENDOR="tomcat"
-fi
 
 export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
