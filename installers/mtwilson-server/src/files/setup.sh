@@ -145,28 +145,40 @@ if using_mysql; then
   # mysql client install here
   echo "Installing mysql client..."
   mysql_install  
+  echo "Installation of mysql client complete..."
   # mysql client end 
   
-  # mysql db init here
-  mysql_create_database 
-  echo "Installation of mysql client complete..."
-  # mysql db init end
+  if [ ! -z "$SKIP_DATABASE_INIT" ]; then
+    # mysql db init here
+	mysql_create_database 
+	# mysql db init end
+  else
+    echo_warning "Skipping init of database"
+  fi 
+  
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
+  
 elif using_postgres; then
  if [ ! -z "$postgres" ]; then
-  # Place postgres server install code here
+  # postgres server install 
   echo_warning "Relying on an existing Postgres installation"
+  # postgres server end
  else
   echo_warning "Relying on an existing Postgres installation"
  fi 
- # postgres client install code here
+ # postgres client install here
  
- #end postgres client install code
+ # postgres clinet install end
  
- # postgress db init here
+ if [ ! -z "$SKIP_DATABASE_INIT" ]; then
+    # postgres db init here
+	echo_warning "Init of postgres db currently not supported"
+	# postgress db init end
+  else
+    echo_warning "Skipping init of database"
+  fi 
  
- # postgress db init end
 fi
 
 # Attestation service auto-configuration
@@ -195,13 +207,19 @@ if using_glassfish; then
 	glassfish_installer=`find_installer glassfish`
 	echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
 	./$glassfish_installer  >> $INSTALL_LOG_FILE
+	echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end glassfish installer
   else
     echo_warning "Relying on an existing glassfish installation" 
   fi
-  # glassfish setup 
-  mtwilson glassfish-sslcert
-  echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+  
+  if [ ! -z "$SKIP_WEBSERVICE_INIT" ]; then 
+    # glassfish init code here
+    mtwilson glassfish-sslcert
+	# glassfish init end
+  else
+    echo_warning "Skipping webservice init"
+  fi
   # end glassfish setup
 elif using_tomcat; then
  if [ ! -z "$tomcat" ]; then
@@ -211,9 +229,15 @@ elif using_tomcat; then
  else
   echo_warning "Relying on an existing Tomcat installation"
  fi
- # tomcat init here
  
- # end tomcat init
+ if [ ! -z "$SKIP_WEBSERVICE_INIT" ]; then 
+    # tomcat init code here
+    echo_warning "Init of tomcat currently not supported"
+	# tomcat init end
+  else
+    echo_warning "Skipping webservice init"
+  fi
+ 
 fi
 
 if [ ! -z "$privacyca" ]; then
