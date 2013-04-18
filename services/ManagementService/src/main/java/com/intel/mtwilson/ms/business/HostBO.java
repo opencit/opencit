@@ -1074,7 +1074,7 @@ public class HostBO extends BaseBO {
             
             List<ManifestData> biosMFList = new ArrayList<ManifestData>();            
             for (String biosPCR : biosPCRList){
-                biosMFList.add(new ManifestData(biosPCR, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")); // XXX hack,   was empty space,  but now because whitelist service is checking for valid hex value, we are using 20 bytes of FF     ... TODO  change database schema & business logic to allow what the real world has ... dynamically calculated PCR values that are not the same across hosts
+                biosMFList.add(new ManifestData(biosPCR, "")); 
             }
             
             mleObj.setManifestList(biosMFList);

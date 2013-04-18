@@ -376,8 +376,29 @@ public class HostTrustBO extends BaseBO {
         List<String> vmmPcrList = Arrays.asList(host.getVmmMleId().getRequiredManifestList().split(","));
         List<RuleResult> results = report.getResults();
         log.debug("Found {} results", results.size());
-        // we log at most ONE record per PCR ... so keep track here in case multiple rules refer to the same PCR... so we only record it once.
-//        HashMap<PcrIndex,TblTaLog> taLogMap = new HashMap<PcrIndex,TblTaLog>();
+        // we log at most ONE record per PCR ... so keep track here in case multiple rules refer to the same PCR... so we only record it once... hopefully there is no overlap between bios and vmm pcr's!
+        HashMap<PcrIndex,TblTaLog> taLogMap = new HashMap<PcrIndex,TblTaLog>();
+        for(String biosPcrIndex : biosPcrList) {
+            TblTaLog pcr = new TblTaLog();
+            pcr.setHostID(host.getId());
+            pcr.setMleId(host.getBiosMleId().getId());
+            pcr.setUpdatedOn(today);
+            pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults
+            pcr.setManifestName(biosPcrIndex);
+            pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
+            taLogMap.put(PcrIndex.valueOf(Integer.valueOf(biosPcrIndex)), pcr);
+        }
+        for(String vmmPcrIndex : vmmPcrList) {
+            TblTaLog pcr = new TblTaLog();
+            pcr.setHostID(host.getId());
+            pcr.setMleId(host.getVmmMleId().getId());
+            pcr.setUpdatedOn(today);
+            pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults
+            pcr.setManifestName(vmmPcrIndex);
+            pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
+            taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
+        }
+        
         for(RuleResult result : results) {
             log.debug("Looking at policy {}", result.getRuleName());
             Rule rule = result.getRule();
@@ -386,13 +407,14 @@ public class HostTrustBO extends BaseBO {
                 log.debug("Expected PCR {} = {}", pcrPolicy.getExpectedPcr().getIndex().toString(), pcrPolicy.getExpectedPcr().getValue().toString());
                 // XXX we can do this because we know the policy passed and it's a constant pcr value... but ideally we need to be logging the host's actual value from its HostReport!!!
                 // find out which MLE this policy corresponds to and then log it
-                TblTaLog pcr = new TblTaLog();
-                pcr.setHostID(host.getId());
-                pcr.setTrustStatus(false); // start as false, later we'll change to true when we identify each  policy that marked a pcr as trusted
-                pcr.setError(null);
-                pcr.setUpdatedOn(today);
-                pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
-                pcr.setManifestValue(pcrPolicy.getExpectedPcr().getValue().toString()); // we can do this because, since the policy "passed", we know expected=actual
+                TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
+                pcr.setTrustStatus(result.isTrusted());
+                if( !result.isTrusted() ) {
+                    pcr.setError("Incorrect value for PCR "+pcrPolicy.getExpectedPcr().getIndex().toString());
+                }
+//                pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
+//                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString()); 
+                /*
                 if( biosPcrList.contains(pcrPolicy.getExpectedPcr().getIndex().toString()) ) {
                     pcr.setTrustStatus(true);
                     pcr.setMleId(host.getBiosMleId().getId());
@@ -401,19 +423,19 @@ public class HostTrustBO extends BaseBO {
                     pcr.setTrustStatus(true);
                     pcr.setMleId(host.getVmmMleId().getId());
                     
-                }
-//                taLogMap.put(pcrPolicy.getExpectedPcr().getIndex(), pcr);
-                talogJpa.create(pcr);
+                }*/
             }
             if( rule instanceof PcrEventLogIntegrity ) { // for now assuming there is only one, for pcr 19...
                 PcrEventLogIntegrity eventLogIntegrityRule = (PcrEventLogIntegrity)rule;
-                TblTaLog pcr = new TblTaLog();
-                pcr.setHostID(host.getId());
+                TblTaLog pcr = taLogMap.get(eventLogIntegrityRule.getPcrIndex());
                 pcr.setTrustStatus(result.isTrusted()); 
-                pcr.setError(null);
-                pcr.setUpdatedOn(today);
-                pcr.setManifestName(eventLogIntegrityRule.getPcrIndex().toString());
-                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(eventLogIntegrityRule.getPcrIndex()).getValue().toString());
+                if( !result.isTrusted() ) {
+                    pcr.setError("No integrity in PCR "+eventLogIntegrityRule.getPcrIndex().toString());
+                }
+//                pcr.setError(null);
+//                pcr.setManifestName(eventLogIntegrityRule.getPcrIndex().toString());
+//                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(eventLogIntegrityRule.getPcrIndex()).getValue().toString());
+                /*
                 if( biosPcrList.contains(eventLogIntegrityRule.getPcrIndex().toString()) ) {
                     pcr.setMleId(host.getBiosMleId().getId());
                 }
@@ -421,6 +443,7 @@ public class HostTrustBO extends BaseBO {
                     pcr.setMleId(host.getVmmMleId().getId());
                 }
                 talogJpa.create(pcr);
+                */
             }
             // in mtwilson-1.1, the mw_module_manifest_log table is used to record only when host module values do not match the whitelist
             if( rule instanceof PcrEventLogIncludes ) {
@@ -436,28 +459,36 @@ public class HostTrustBO extends BaseBO {
                     if( fault instanceof PcrEventLogMissingExpectedEntries ) { // there would only be one of these faults per PcrEventLogIncludes rule. XXX this might change in the future to have a bunch of individual faults, one per missing entry.
                         PcrEventLogMissingExpectedEntries missingEntriesFault = (PcrEventLogMissingExpectedEntries)fault;
 
-                        TblTaLog pcr = new TblTaLog();
-                        pcr.setHostID(host.getId());
+                        TblTaLog pcr = taLogMap.get(missingEntriesFault.getPcrIndex());
+//                        pcr.setHostID(host.getId());
                         pcr.setTrustStatus(false); // PCR not trusted since one or more required modules are missing, which we will detail below
                         pcr.setError("Missing modules");
-                        pcr.setUpdatedOn(today);
-                        pcr.setManifestName(missingEntriesFault.getPcrIndex().toString());
-                        pcr.setManifestValue(""); // doesn't match up with how we store data. we would need to look for another related fault about the dynamic value not matching... 
-                        if( biosPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
-                            pcr.setMleId(host.getBiosMleId().getId());
-                        }
-                        if( vmmPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
-                            pcr.setMleId(host.getVmmMleId().getId());
-                        }
-                        talogJpa.create(pcr);
+//                        pcr.setUpdatedOn(today);
+//                        pcr.setManifestName(missingEntriesFault.getPcrIndex().toString());
+//                        pcr.setManifestValue(""); // doesn't match up with how we store data. we would need to look for another related fault about the dynamic value not matching... 
+//                        if( biosPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
+//                            pcr.setMleId(host.getBiosMleId().getId());
+//                        }
+//                        if( vmmPcrList.contains(missingEntriesFault.getPcrIndex().toString()) ) {
+//                            pcr.setMleId(host.getVmmMleId().getId());
+//                        }
+                        talogJpa.create(pcr); // exception to creating all at the end... 
                         
                         Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                         for(Measurement m : missingEntries) {
+                            // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                            List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
+                            Measurement found = null;
+                            for(Measurement a : actualEntries) {
+                                if( a.getLabel().equals(m.getLabel()) ) {
+                                    found = a;
+                                }
+                            }
                             // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it. 
                             TblModuleManifestLog event = new TblModuleManifestLog();
                             event.setName(m.getLabel());
                             event.setTaLogId(pcr);
-                            event.setValue(""); // we don't know from our report what the "actual" value is since we only logged that an expected value was missing... so maybe there's a module with the same name and wrong value in the host report, which we don't know here... see comment above,  this probably needs to change.
+                            event.setValue( found == null ? "" : found.getValue().toString() ); // we don't know from our report what the "actual" value is since we only logged that an expected value was missing... so maybe there's a module with the same name and wrong value in the host report, which we don't know here... see comment above,  this probably needs to change.
                             event.setWhitelistValue(m.getValue().toString());
                             moduleLogJpa.create(event);
                         }
@@ -465,12 +496,21 @@ public class HostTrustBO extends BaseBO {
                 }
             }
         }
-        /*
         // now create all those mw_ta_log records (one per pcr)
         for(TblTaLog pcr : taLogMap.values()) {
-            talogJpa.create(pcr);
+            if( pcr.getId() == null ) {
+                talogJpa.create(pcr);
+            }
+            else {
+                try {
+                    talogJpa.edit(pcr); // it it was already created (reasonable instance of PcrEventLogIncludes or not)
+                }
+                catch(Exception e) {
+                    log.error(e.toString());
+                    e.printStackTrace(System.out);
+                }
+            }
         }
-        */
     }
 
     private TblHosts getHostByName(Hostname hostName) { // datatype.Hostname
