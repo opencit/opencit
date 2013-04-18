@@ -35,6 +35,7 @@ import com.intel.mtwilson.policy.fault.PcrEventLogMissingExpectedEntries;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
+import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.FileNotFoundException;
@@ -375,6 +376,8 @@ public class HostTrustBO extends BaseBO {
         List<String> vmmPcrList = Arrays.asList(host.getVmmMleId().getRequiredManifestList().split(","));
         List<RuleResult> results = report.getResults();
         log.debug("Found {} results", results.size());
+        // we log at most ONE record per PCR ... so keep track here in case multiple rules refer to the same PCR... so we only record it once.
+//        HashMap<PcrIndex,TblTaLog> taLogMap = new HashMap<PcrIndex,TblTaLog>();
         for(RuleResult result : results) {
             log.debug("Looking at policy {}", result.getRuleName());
             Rule rule = result.getRule();
@@ -398,6 +401,24 @@ public class HostTrustBO extends BaseBO {
                     pcr.setTrustStatus(true);
                     pcr.setMleId(host.getVmmMleId().getId());
                     
+                }
+//                taLogMap.put(pcrPolicy.getExpectedPcr().getIndex(), pcr);
+                talogJpa.create(pcr);
+            }
+            if( rule instanceof PcrEventLogIntegrity ) { // for now assuming there is only one, for pcr 19...
+                PcrEventLogIntegrity eventLogIntegrityRule = (PcrEventLogIntegrity)rule;
+                TblTaLog pcr = new TblTaLog();
+                pcr.setHostID(host.getId());
+                pcr.setTrustStatus(result.isTrusted()); 
+                pcr.setError(null);
+                pcr.setUpdatedOn(today);
+                pcr.setManifestName(eventLogIntegrityRule.getPcrIndex().toString());
+                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(eventLogIntegrityRule.getPcrIndex()).getValue().toString());
+                if( biosPcrList.contains(eventLogIntegrityRule.getPcrIndex().toString()) ) {
+                    pcr.setMleId(host.getBiosMleId().getId());
+                }
+                if( vmmPcrList.contains(eventLogIntegrityRule.getPcrIndex().toString()) ) {
+                    pcr.setMleId(host.getVmmMleId().getId());
                 }
                 talogJpa.create(pcr);
             }
@@ -444,7 +465,12 @@ public class HostTrustBO extends BaseBO {
                 }
             }
         }
-        
+        /*
+        // now create all those mw_ta_log records (one per pcr)
+        for(TblTaLog pcr : taLogMap.values()) {
+            talogJpa.create(pcr);
+        }
+        */
     }
 
     private TblHosts getHostByName(Hostname hostName) { // datatype.Hostname

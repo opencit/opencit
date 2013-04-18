@@ -238,16 +238,17 @@ public class TestVmwareEsxi51 {
             pcrWhitelist.setPCRDescription("Automatic VMM whitelist from "+hostname);
             pm.getPcrJpa().create(pcrWhitelist);
         }
+        // whitelist step 7.1:  delete existing whitelist entries for modules that correspond to VMM PCR's
+        List<TblModuleManifest> existingEventLogEntries = pm.getModuleJpa().findByMleId(vmm.getId());
+        for(TblModuleManifest eventLogEntry : existingEventLogEntries) {
+            pm.getModuleJpa().destroy(eventLogEntry.getId()); // don't need to be concerned with the host-specific version because if it existed,  (and there can be only ONE host-specific module in mtwilson-1.1)  then it was already deleted above when we deleted the host
+        }
+        // whitelist step 7.5: create whitelist entries for modules that correspond to VMM PCR's
         PcrEventLog pcr19 = pcrManifest.getPcrEventLog(PcrIndex.PCR19);
         ArrayList<TblHostSpecificManifest> hostSpecificEventLogEntries = new ArrayList<TblHostSpecificManifest>();
         List<Measurement> vmwareEvents = pcr19.getEventLog();
         for(Measurement m : vmwareEvents) {
-            // first delete any measurement that already exists, becuse we are going to redefine it here
-            TblModuleManifest eventLogEntry = pm.getModuleJpa().findByMleNameEventName(vmm.getId(), m.getInfo().get("ComponentName"), m.getInfo().get("EventName"));
-            if( eventLogEntry != null ) {
-                pm.getModuleJpa().destroy(eventLogEntry.getId()); // don't need to be concerned with the host-specific version because if it existed,  (and there can be only ONE host-specific module in mtwilson-1.1)  then it was already deleted above when we deleted the host
-            }
-            eventLogEntry = new TblModuleManifest();
+            TblModuleManifest eventLogEntry = new TblModuleManifest();
             log.debug("Adding VMM module/event {} = {}", m.getLabel(), m.getValue().toString());
             
             // NOTE : here we are switching component name and description because the trust dashboard UI shows component name... even though it's EVENTS that are actually of different types and not all of them have a meaningful "component name" ... so... we put the description, which is relevant to every event,  as the component name,  and log the compnet name in the description. when the trust dashboard is fixed this can be reverted to look more natural.
@@ -341,9 +342,16 @@ public class TestVmwareEsxi51 {
         hostReport.variables = agent.getHostAttributes();
         HostTrustPolicyManager hostTrustPolicyFactory = pm.getHostTrustFactory();
         Policy policy = hostTrustPolicyFactory.loadTrustPolicyForHost(host, hostname);
-        log.debug("TRUST POLICY: {}", json.writeValueAsString(policy));
+//        log.debug("TRUST POLICY: {}", json.writeValueAsString(policy));
         PolicyEngine engine = new PolicyEngine();
         TrustReport report = engine.apply(hostReport, policy);
         log.debug("TRUST REPORT: {}", json.writeValueAsString(report));
+    }
+    
+    
+    @Test
+    public void testExtractUUID() {
+        String input = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000 no-auto-partition bootUUID=772753050c0a140bdfbf92e306b9793d"; // a command line event from a vmware esxi server event log for pcr 19
+        
     }
 }

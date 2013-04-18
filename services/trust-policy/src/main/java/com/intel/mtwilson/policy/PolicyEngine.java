@@ -69,7 +69,7 @@ public class PolicyEngine {
     
     public TrustReport apply(HostReport hostReport, Policy policy) {
         log.debug("PolicyEngine.apply policy {}", policy.getName());
-        TrustReport policyReport = new TrustReport(policy.getName());
+        TrustReport policyReport = new TrustReport(hostReport, policy.getName());
         List<RuleResult> results = applyAll(hostReport, policy.getRules());
         Iterator<RuleResult> it = results.iterator();
         while(it.hasNext()) {
