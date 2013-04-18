@@ -34,9 +34,13 @@ if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${TOMCAT_HOME}/endorsed/
 fi
 
-# not sure if this is needed for tomcat... if it's installed before the web apps,
-# maybe the new jars will be picked up for the new web apps that deploy
-#tomcat_stop
-#tomcat_start
+# Add the manager role give access to the tomcat user in the tomcat-users.xml
+cd $TOMCAT_CONF
+mv tomcat-users.xml tomcat-users.xml.old
+sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomcat" password="tomcat" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+rm  -f tomcat-users.xml.old
+#chown -R root:tomcat6 tomcat-users.xml
+
+tomcat_restart
 
 echo

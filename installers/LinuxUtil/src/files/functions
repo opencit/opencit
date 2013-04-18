@@ -2146,18 +2146,14 @@ tomcat_install() {
       TOMCAT_YUM_PACKAGES="tomcat6"
       TOMCAT_APT_PACKAGES="tomcat6"
       auto_install "Tomcat via package manager" "TOMCAT"
+      tomcat_detect
     fi
   fi
+  
   if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     echo "Unable to auto-install Tomcat"
     echo "  Tomcat download URL:"
     echo "  http://tomcat.apache.org/"
-  else
-    cd $TOMCAT_CONF
-    mv tomcat-users.xml tomcat-users.xml.old
-    sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomcat" password="tomcat" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
-    rm  -f tomcat-users.xml.old
-    #chown -R root:tomcat6 tomcat-users.xml
   fi
 
 }
