@@ -5,6 +5,7 @@
 package test.tls;
 
 import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mtwilson.My;
 import org.junit.Test;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -83,8 +84,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
     public void testShowTlsCertificatesInExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException, UnrecoverableEntryException {
         String username = "ManagementServiceAutomation";
         String password = "password";
-        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
-        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(pm.getEntityManagerFactory("MSDataPU"));
+        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
         MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
         byte[] keystorebytes = portalUser.getKeystore();
         log.debug("keystore: {}", Md5Digest.valueOf(keystorebytes));
@@ -118,16 +118,16 @@ public class UpdateTlsKeystoreInDatabaseTest {
     public void testAddCurrentTlsCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
         String username = "admin2";
         String password = "password";
+        
         String url = "https://10.1.71.88:8181";
-        //MSConfig.getJpaProperties(new MSConfig(p).getConfigurationInstance());
-        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
-        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(pm.getEntityManagerFactory("MSDataPU"));
+        
+        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
         MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
         byte[] oldkeystore = portalUser.getKeystore();
         log.debug("old keystore: {}", Md5Digest.valueOf(oldkeystore));
         ByteArrayResource resource = new ByteArrayResource(oldkeystore);
         SimpleKeystore keystore = new SimpleKeystore(resource, password);
-        SslUtil.addSslCertificatesToKeystore(keystore, new URL(url));
+        SslUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
         keystore.save();
         byte[] newkeystore = resource.toByteArray();
         log.debug("new keystore: {}", Md5Digest.valueOf(newkeystore));
@@ -135,29 +135,11 @@ public class UpdateTlsKeystoreInDatabaseTest {
         keystoreJpa.edit(portalUser);
     }
     
-    public static class CustomMSPersistenceManager extends PersistenceManager {
-
-        @Override
-        public void configure() {
-            Properties p = new Properties();
-            p.setProperty("mtwilson.db.host", "10.1.71.88");
-            p.setProperty("mtwilson.db.schema", "mw_as");
-            p.setProperty("mtwilson.db.user", "root");
-            p.setProperty("mtwilson.db.password", "password");
-            p.setProperty("mtwilson.db.port", "3306");
-            MapConfiguration c = new MapConfiguration(p);
-            addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties(c));
-            addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties(c));
-        }
-
-    }
-    
     
     @Test
     public void testUpdateAikSha1() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {
-        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
         byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
-        TblHostsJpaController hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), dek);
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), dek);
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         String certificatePem = host.getAIKCertificate();
         X509Certificate certificate = X509Util.decodePemCertificate(certificatePem);
@@ -190,9 +172,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
 "-----END CERTIFICATE-----\n";
         X509Certificate x509 = X509Util.decodePemCertificate(cert);
         String sha1 = "878369582105b8af97899d1fe4c8a719f01e5e10";
-        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
-        byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
-        TblHostsJpaController hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), dek);
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), My.persistenceManager().getDek());
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
         keystore.addTrustedCertificate(x509, sha1, "dek-recipient");
@@ -203,9 +183,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
 
     @Test
     public void testShowCertificatesInExistingHostTlsKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException, UnrecoverableEntryException {
-        byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
-        CustomMSPersistenceManager pm = new CustomMSPersistenceManager();
-        TblHostsJpaController hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), dek);
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), My.persistenceManager().getDek());
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
         X509Certificate[] certificates = keystore.getTrustedCertificates("dek-recipient");
