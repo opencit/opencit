@@ -30,6 +30,7 @@ public class BuildQuoteXMLCmd implements ICommand {
                 + "<error_message>" + StringEscapeUtils.escapeXml(context.getErrorCode().getMessage()) + "</error_message>"
                 + "<aikcert>" + StringEscapeUtils.escapeXml(context.getAIKCertificate()) + "</aikcert>"
                 + "<quote>" + new String(Base64.encodeBase64(context.getTpmQuote())) + "</quote>"
+                +  context.getModules() //To add the module information into the response.
                 + "</client_request>";
 
         context.setResponseXML(responseXML);
