@@ -31,6 +31,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -39,6 +41,7 @@ import org.apache.commons.configuration.Configuration;
 public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
     private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
+    private static final Logger logger = LoggerFactory.getLogger(BootstrapUser.class.getName());
     private SetupContext ctx = null;
     public static final Console console = System.console();
     
@@ -91,6 +94,13 @@ public class BootstrapUser implements Command {
             System.out.println("Password is required");
             return;
         }
+        
+        MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
+        if(keyTest != null) {
+          logger.info("An user already exists with the specified User Name. Please select different User Name.");
+          throw new SetupException("User account with that name already exists ");
+        }
+        
         // create user
         System.out.println(String.format("Creating keystore for %s in db and registering user with service at %s", username,baseurl));        
         /*
