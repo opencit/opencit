@@ -42,7 +42,8 @@ rm  -f tomcat-users.xml.old
 #chown -R root:tomcat6 tomcat-users.xml
 
 # release the connectors!
-cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {N; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {N; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
+cd $TOMCAT_CONF
+cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
 
 tomcat_start

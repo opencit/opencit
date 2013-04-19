@@ -67,16 +67,16 @@ fi
 
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-if using_mysql; then
+#if using_mysql; then
     export MYSQL_REQUIRED_VERSION=${MYSQL_REQUIRED_VERSION:-5.0}
-elif using_postgres; then
+#elif using_postgres; then
     export POSTGRES_REQUIRED_VERSION=${POSTGRES_REQUIRED_VERSION:-8.4}
-fi
-if using_glassfish; then
+#fi
+#if using_glassfish; then
     export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
-elif using_tomcat; then
+#elif using_tomcat; then
     export TOMCAT_REQUIRED_VERSION=${TOMCAT_REQUIRED_VERSION:-6.0}
-fi
+#fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
 
 
@@ -199,7 +199,6 @@ elif using_postgres; then
   echo "Installation of postgres client complete..."
 
   postgres_create_database
-  mtwilson setup InitDatabase postgres
 
   export is_postgres_available postgres_connection_error
   if [ -z "$is_postgres_available" ]; then 
