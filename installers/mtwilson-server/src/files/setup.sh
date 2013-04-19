@@ -231,7 +231,7 @@ elif using_tomcat; then
     #mtwilson tomcat-sslcert
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   fi
-fi
+fi 
 
 
 if [[ -n "$privacyca_service" ]]; then
