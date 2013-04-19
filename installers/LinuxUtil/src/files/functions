@@ -2629,7 +2629,7 @@ webservice_start() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     $glassfish enable $WEBSERVICE_DEPLOYED
   elif using_tomcat; then
-    #wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/start?path=/${WEBSERVICE_DEPLOYED} -O - -q
+    wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/start?path=/${WEBSERVICE_DEPLOYED} -O - -q
   fi
 }
 webservice_stop() {
