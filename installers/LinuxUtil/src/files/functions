@@ -2588,6 +2588,7 @@ print_env_summary_report() {
 # parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
   local webservice_application_name="$1"
+  echo "webservice_application_name: $webservice_application_name"
   WEBSERVICE_RUNNING=""
   if using_glassfish; then 
     glassfish_running
