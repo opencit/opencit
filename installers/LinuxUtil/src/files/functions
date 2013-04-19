@@ -2136,7 +2136,7 @@ tomcat_detect() {
       local parent=`dirname $bin_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
         export TOMCAT_HOME="$parent"
-        export TOMCAT_BASE=`find / -name webapps 2>/dev/null`
+        export TOMCAT_BASE="$parent"
         conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
         export TOMCAT_CONF=`dirname $conf_dir`
         tomcat_bin=$parent/bin/catalina.sh
