@@ -45,6 +45,6 @@ rm  -f tomcat-users.xml.old
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {N; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {N; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
 
-tomcat_restart
+tomcat_start
 
-echo "Restarting Tomcat..."
+echo "Starting Tomcat..."

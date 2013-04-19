@@ -193,18 +193,18 @@ elif using_postgres; then
     sleep 10
   fi
   echo "Installing postgres client..."
-  postgres_install
-  postgres_restart & >> $INSTALL_LOG_FILE
-  sleep 10
+  #postgres_install
+  #postgres_restart & >> $INSTALL_LOG_FILE
+  #sleep 10
   echo "Installation of postgres client complete..."
 
   postgres_create_database
+  mtwilson setup InitDatabase postgres
 
   export is_postgres_available postgres_connection_error
   if [ -z "$is_postgres_available" ]; then 
     echo_warning "Run 'mtwilson setup' after a database is available"; 
   fi
-
  
 fi
 
