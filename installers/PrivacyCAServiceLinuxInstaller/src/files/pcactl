@@ -34,12 +34,7 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 configure_privacyca_url() {
   # PrivacyCaUrl = https://privacyca.server.com:8181/HisPrivacyCAWebServices2
   local privacyca_server privacyca_url
-  local port=""
-  if using_glassfish; then
-    port=DEFAULT_GLASSFISH_API_PORT
-  elif using_tomcat; then
-    port=DEFAULT_TOMCAT_API_PORT
-  fi
+
   if [ -n "$PRIVACYCA_SERVER" ]; then
     privacyca_server="$PRIVACYCA_SERVER"
   elif [ -n "$MTWILSON_SERVER" ]; then
@@ -47,7 +42,7 @@ configure_privacyca_url() {
   else
     prompt_with_default privacyca_server "Privacy CA Server:" 127.0.0.1
   fi
-  privacyca_url="https://${privacyca_server}:8181/HisPrivacyCAWebServices2"
+  privacyca_url="https://${privacyca_server}:$DEFAULT_API_PORT/HisPrivacyCAWebServices2"
   update_property_in_file PrivacyCaUrl "${intel_conf_dir}/privacyca-client.properties" "${privacyca_url}"
   # Now prompt for the client files download username and password
   #local privacyca_download_username PRIVACYCA_DOWNLOAD_PASSWORD
@@ -127,6 +122,8 @@ protect_privacyca_files() {
   chmod 600 $PRIVACYCA_FILES
   if using_glassfish; then
     glassfish_permissions $PRIVACYCA_FILES
+  elif using_tomcat; then
+    tomcat_permissions $PRIVACYCA_FILES
   fi
 }
 

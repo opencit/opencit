@@ -88,7 +88,7 @@ download_privacyca_certs() {
     touch $zipfile
     chmod 600 $zipfile
     # XXX password in URL is insecure in systems that have user accounts or software which should not know this password
-    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O ${zipfile}
+    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:$DEFAULT_API_PORT/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O ${zipfile}
     if [ -s ${zipfile} ]; then
       mkdir -p /tmp/clientfiles.x
       chmod -R 600 /tmp/clientfiles.x
