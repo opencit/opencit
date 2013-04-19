@@ -33,6 +33,7 @@ DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
 DEFAULT_MTWILSON_API_BASEURL="http://127.0.0.1:"
 DEFAULT_TOMCAT_API_PORT="8443"
 DEFAULT_GLASSFISH_API_PORT="8181"
+DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
@@ -317,7 +318,7 @@ using_glassfish() { if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then return 0
 using_tomcat() { if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then return 0; else return 1; fi }
 using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
 using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
-
+ 
 ### FUNCTION LIBARRY: conditional execution functions
 
 # TODO: rename to positive_condition
@@ -473,26 +474,20 @@ update_property_in_file() {
 configure_api_baseurl() {
   # setup mtwilson.api.baseurl
   local config_file="${1:-/etc/intel/cloudsecurity/my.properties}" 
-  local port='8080'
-  if using_tomcat; then
-    port=$DEFAULT_TOMCAT_API_PORT
-  elif using_glassfish; then
-    port=$DEFAULT_GLASSFISH_API_PORT
-  fi
-
+  
   local input_api_baseurl
   if [ -n "${MTWILSON_API_BASEURL}" ]; then
     mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
   elif [ -n "${MTWILSON_SERVER_IP_ADDRESS}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER_IP_ADDRESS}:$port"
+    mtwilson_api_baseurl="https://${MTWILSON_SERVER_IP_ADDRESS}:$DEFAULT_API_PORT"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl "${config_file}"`
     prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
-    # TODO ???? FIX THIS CONDITION
+    
     if [[ "$input_api_baseurl" == http* ]]; then
       mtwilson_api_baseurl="$input_api_baseurl"
     else
-      mtwilson_api_baseurl="https://${input_api_baseurl}:$port"
+      mtwilson_api_baseurl="https://${input_api_baseurl}:$DEFAULT_API_PORT"
     fi
   fi
   update_property_in_file mtwilson.api.baseurl "${config_file}" "${mtwilson_api_baseurl}"
@@ -2022,7 +2017,7 @@ tomcat_clear() {
 
 
 tomcat_require() {
-  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
+  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
   if not tomcat_ready; then
     tomcat_detect ${min_version} > /dev/null
   fi
@@ -2048,7 +2043,7 @@ tomcat_ready() {
 }
 
 # How to use;   GLASSFISH_VERSION=`glassfish_version`
-# If you pass a parameter, it is the path to a glassfish "asadmin" binary 
+# If you pass a parameter, it is the path to a glassfish "asadmin" binary
 # If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
 tomcat_version() {
   # Either the JAVA_HOME or the JRE_HOME environment variable must be defined
@@ -2144,9 +2139,8 @@ tomcat_detect() {
         export TOMCAT_BASE=`find / -name webapps 2>/dev/null`
         conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
         export TOMCAT_CONF=`dirname $conf_dir`
-        tomcat="$TOMCAT_HOME/bin/catalina.sh"
-        tomcat_bin=$parent/bin
-        tomcat_env="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF"
+        tomcat_bin=$parent/bin/catalina.sh
+        tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
         echo "Found Tomcat: $TOMCAT_HOME"
         #TOMCAT_VERSION=`tomcat_version`
         tomcat_version
@@ -2216,8 +2210,10 @@ tomcat_running() {
   TOMCAT_RUNNING=''
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
+    echo TOMCAT_PID: $TOMCAT_PID
     if [ -n "$TOMCAT_PID" ]; then
       TOMCAT_RUNNING=yes
+      echo TOMCAT_RUNNING: $TOMCAT_RUNNING
       return 0
     fi
   fi
@@ -2633,7 +2629,7 @@ webservice_start() {
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     $glassfish enable $WEBSERVICE_DEPLOYED
   elif using_tomcat; then
-    wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/start?path=/${WEBSERVICE_DEPLOYED} -O - -q
+    #wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/start?path=/${WEBSERVICE_DEPLOYED} -O - -q
   fi
 }
 webservice_stop() {
@@ -2721,7 +2717,8 @@ webservice_install() {
         ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         echo "Deploying ${webservice_application_name} to Tomcat..."
-        wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/deploy?path=/${WEBSERVICE_DEPLOYED}&war=file:${webservice_war_file} -O - -q
+        cp ${webservice_war_file} $TOMCAT_HOME/webapps/
+        #wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/deploy?path=/${webservice_application_name}&war=file:${webservice_war_file} -O - -q
       fi
     fi
 }

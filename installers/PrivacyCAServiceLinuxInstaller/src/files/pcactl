@@ -22,7 +22,7 @@ glassfish_parent_dir=/usr/share
 #java_required_version=1.6.0_29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev"
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
-glassfish_application_name=HisPrivacyCAWebServices2
+webservice_application_name=HisPrivacyCAWebServices2
 
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
@@ -34,6 +34,12 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 configure_privacyca_url() {
   # PrivacyCaUrl = https://privacyca.server.com:8181/HisPrivacyCAWebServices2
   local privacyca_server privacyca_url
+  local port=""
+  if using_glassfish; then
+    port=DEFAULT_GLASSFISH_API_PORT
+  elif using_tomcat; then
+    port=DEFAULT_TOMCAT_API_PORT
+  fi
   if [ -n "$PRIVACYCA_SERVER" ]; then
     privacyca_server="$PRIVACYCA_SERVER"
   elif [ -n "$MTWILSON_SERVER" ]; then
@@ -67,6 +73,14 @@ setup_print_summary() {
       echo "Glassfish: not found"
     fi
   fi
+  if using_tomcat; then
+    if [ -n "$TOMCAT_HOME" ]; then
+      TOMCAT_VERSION=`tomcat_version`
+      echo "Tomcat: $TOMCAT_VERSION"
+    else
+      echo "Tomcat: not found"
+    fi
+  fi
 }
 
 setup_interactive_install() {
@@ -75,16 +89,23 @@ setup_interactive_install() {
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
-    fi    
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
-    else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
-      webservice_running_report "${glassfish_application_name}"
     fi
-    protect_privacyca_files
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
+    fi
+  fi    
+
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
+    webservice_running_report "${webservice_application_name}"
   fi
+  protect_privacyca_files
+
 }
 
 
@@ -92,11 +113,11 @@ setup() {
 #  mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
-      echo_warning "Missing one or more required packages"
-      setup_print_summary
-      exit 1
-  fi
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+#      echo_warning "Missing one or more required packages"
+#      setup_print_summary
+#      exit 1
+#  fi
   setup_interactive_install
 }
 
@@ -104,7 +125,9 @@ setup() {
 protect_privacyca_files() {
   local PRIVACYCA_FILES="${intel_conf_dir}/PrivacyCA.p12 ${intel_conf_dir}/PrivacyCA.properties ${intel_conf_dir}/clientfiles ${intel_conf_dir}/clientfiles.zip ${intel_conf_dir}/cacerts"
   chmod 600 $PRIVACYCA_FILES
-  glassfish_permissions $PRIVACYCA_FILES
+  if using_glassfish; then
+    glassfish_permissions $PRIVACYCA_FILES
+  fi
 }
 
 RETVAL=0
@@ -117,20 +140,20 @@ case "$1" in
 	echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         protect_privacyca_files
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
         glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -158,7 +181,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         if [ -f "${package_config_filename}" ]; then
           mkdir -p "${intel_conf_dir}"
           cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}

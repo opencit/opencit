@@ -46,6 +46,11 @@ fi
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
+if using_glassfish; then
+  export DEFAULT_API_PORT=DEFAULT_GLASSFISH_API_PORT; 
+elif using_tomcat; then
+  export DEFAULT_API_PORT=DEFAULT_TOMCAT_API_PORT;
+
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if [ "$DATABASE_VENDOR" == "mysql" ] ; then

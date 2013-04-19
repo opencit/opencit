@@ -8,7 +8,7 @@ intel_conf_dir=/etc/intel/cloudsecurity
 package_name=privacyca
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #tomcat_required_version=6.0.29
@@ -16,7 +16,7 @@ mysql_required_version=5.0
 #tomcat_name=apache-tomcat-6.0.29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev mysql-client-5.1"
-glassfish_application_name=HisPrivacyCAWebServices2
+webservice_application_name=HisPrivacyCAWebServices2
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
