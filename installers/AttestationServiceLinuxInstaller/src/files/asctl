@@ -187,8 +187,10 @@ setup_interactive_install() {
       echo "inside psql: $psql"
       postgres_configure_connection "${package_config_filename}" mountwilson.as.db
       postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
-      if [ postgres_create_database -ne 0 ]; then
+      local result=`postgres_create_database`
+      if [ result -ne 0 ]; then
         mtwilson setup InitDatabase postgres
+      fi
     else
       echo "psql not defined"
       exit 1
