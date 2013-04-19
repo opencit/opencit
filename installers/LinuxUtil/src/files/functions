@@ -2604,6 +2604,7 @@ webservice_running() {
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING"
     if [ -n "$TOMCAT_RUNNING" ]; then
       # determine if this app is deployed
+      echo "MTWILSON_SERVER: $MTWILSON_SERVER"
       WEBSERVICE_DEPLOYED=`wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/list -O - -q | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "${webservice_application_name}"`
       echo "WEBSERVICE_DEPLOYED=$WEBSERVICE_DEPLOYED"
       #if deployed, make sure it is runnning
