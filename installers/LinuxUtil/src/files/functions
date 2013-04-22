@@ -490,6 +490,7 @@ configure_api_baseurl() {
       mtwilson_api_baseurl="https://${input_api_baseurl}:$DEFAULT_API_PORT"
     fi
   fi
+  export MTWILSON_API_BASEURL=$mtwilson_api_baseurl
   update_property_in_file mtwilson.api.baseurl "${config_file}" "${mtwilson_api_baseurl}"
 }
 

@@ -41,18 +41,7 @@
         </dependency>
 
         <!-- XXX the following dependencies are declared so the java code will compile in the IDE - but they are included separately by the ant build for now; when we fully mavenize, we can use them directly -->
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.servlet</artifactId>
-			<version>3.1.1</version>
-                        <scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.servlet.jsp</artifactId>
-			<version>3.1.1</version>
-                        <scope>provided</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>com.sun.xml.ws</groupId>
 			<artifactId>jaxws-rt</artifactId>

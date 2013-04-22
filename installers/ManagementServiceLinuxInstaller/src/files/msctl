@@ -43,15 +43,15 @@ configure_keystore_dir() {
 #    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
 #  elif [ -n "${MTWILSON_SERVER}" ]; then
 #    if [[
-#    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
+#    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
 #  else
 #    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
 #    local input_api_baseurl
 #    prompt_with_default input_api_baseurl "Mt Wilson Server:" "${configured_server_url}"
-#    if [[ "$input_api_baseurl" == "http*" ]]; then
+#    if [[ "$input_api_baseurl" == http* ]]; then
 #      mtwilson_api_baseurl="$input_api_baseurl"
 #    else
-#      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
+#      mtwilson_api_baseurl="https://${input_api_baseurl}:$DEFAULT_API_PORT"
 #    fi
 #  fi
 #  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
