@@ -70,38 +70,7 @@ mtwilson_saml_cert_report() {
   java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
 }
 
-erase_data_with_user_confirmation() {
-  # WARNING: the following prompt value SHOULD NOT be scripted in an answer file
-  echo_warning "You are about to delete the Mt Wilson database."
-  prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
-  if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
-    mysql_read_connection_properties "${conf_dir}/attestation-service.properties" "mountwilson.as.db"
-    mysql_test_connection
-    if [ -n "$is_mysql_available" ]; then
-      echo "Connected to ${MYSQL_HOSTNAME} as ${MYSQL_USERNAME}. Dropping database..."
-      $mysql_connect --force -e "DROP DATABASE ${MYSQL_DATABASE}"
-    else
-      echo_failure "${mysql_connection_error}"
-    fi
-  fi
-  
-  CONFIRM_ERASE_DATA=
 
-  echo_warning "You are about to delete the Mt Wilson user accounts."
-  prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
-  if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
-   if [ -d /var/opt/intel/management-console/users ]; then
-     for i in `ls -1 /var/opt/intel/management-console/users`; do
-      usr=`echo $i | sed -e s/.jks//g`
-      echo_warning "deleting $usr jks file"
-      rm  /var/opt/intel/management-console/users/$i;
-     done
-     echo_warning "Mt Wilson user accounts deleted."
-   else
-     echo_warning "No Mt Wilson user accounts to delete."
-   fi
-  fi
-}
 
 setup() {
   java_detect; java_env_report > ${env_dir}/java
@@ -281,7 +250,12 @@ case "$1" in
         all_status
         ;;
   erase-data)
-        erase_data_with_user_confirmation
+        call_setupcommand EraseHostRegistrationData
+        call_setupcommand EraseWhitelistData
+        call_setupcommand EraseLogs
+        ;;
+  erase-users)
+        call_setupcommand EraseUserAccounts
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
