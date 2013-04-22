@@ -2142,7 +2142,7 @@ tomcat_detect() {
         tomcat_bin=$parent/bin/catalina.sh
         tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
         echo "Found Tomcat: $TOMCAT_HOME"
-        #TOMCAT_VERSION=`tomcat_version`
+        echo "tomcat=$tomcat"
         tomcat_version
         if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
           return 0
@@ -2694,11 +2694,11 @@ webservice_stop_report() {
 webservice_install() {
   local webservice_application_name="$1"
   local webservice_war_file="$2"
-  if using_glassfish; then
-    glassfish_require
-  elif using_tomcat; then
-      tomcat_require
-  fi
+#  if using_glassfish; then
+#    glassfish_require
+#  elif using_tomcat; then
+#      tomcat_require
+#  fi
 
   webservice_running "${webservice_application_name}"
 
