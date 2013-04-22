@@ -17,6 +17,7 @@
         <module>ManagementConsole</module>
 	<module>WhiteListPortal</module>
 	<module>TrustDashBoard</module>
+	<module>mtwilson-portal</module>
   </modules>
 
 </project>
