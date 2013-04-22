@@ -16,7 +16,12 @@ import com.intel.mtwilson.datatypes.Pcr;
 import com.intel.mtwilson.datatypes.PcrIndex;
 import com.intel.mtwilson.datatypes.TpmQuote;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.Aik;
+import com.intel.mtwilson.model.Nonce;
+import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.model.TpmQuote;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
 import java.io.IOException;
@@ -24,6 +29,7 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,11 +58,7 @@ public class CitrixHostAgent implements HostAgent{
      
     }
     
-    @Override
-    public boolean isTpmAvailable() {
-        return true;
-    }
-
+    
     @Override
     public boolean isTpmEnabled() {
         return true;
@@ -118,26 +120,6 @@ public class CitrixHostAgent implements HostAgent{
     }
 
     @Override
-    public List<Pcr> getPcrValues() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public List<String> getModuleManifest() {
-        throw new UnsupportedOperationException("Not supported");
-    }
-
-    @Override
-    public List<Pcr> getPcrHistory(PcrIndex number) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public HashMap<String, ? extends IManifest> getManifest(VCenterHost postProcessing) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public TxtHostRecord getHostDetails() throws IOException {
         //throw new UnsupportedOperationException("Not supported yet.");
         TxtHostRecord record = new TxtHostRecord();
@@ -194,15 +176,15 @@ public class CitrixHostAgent implements HostAgent{
             xtw.writeAttribute("HostVersion", "5.0");
             //xtw.writeAttribute("TXT_Support", tpmSupport.toString());
         
-            HashMap<String, PcrManifest> pcrMap = client.getQuoteInformationForHost(pcrList);
-        
+            HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
+            
             Iterator it = pcrMap.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
                 xtw.writeStartElement("PCRInfo");
-                PcrManifest pcr = (PcrManifest)pairs.getValue();
-                xtw.writeAttribute("ComponentName",Integer.toString(pcr.getPcrNumber()));
-                xtw.writeAttribute("DigestValue", pcr.getPcrValue());
+                Pcr pcr = (Pcr)pairs.getValue();
+                xtw.writeAttribute("ComponentName",pcr.getIndex().toString());
+                xtw.writeAttribute("DigestValue", pcr.getValue().toString());
                 xtw.writeEndElement();
                
                 it.remove(); // avoids a ConcurrentModificationException
@@ -219,6 +201,41 @@ public class CitrixHostAgent implements HostAgent{
         
         System.err.println("stdalex-error getHostAttestationReport report:" + attestationReport);
         return attestationReport;
+    }
+
+    @Override
+    public boolean isIntelTxtSupported() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isIntelTxtEnabled() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isTpmPresent() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public X509Certificate getEkCertificate() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public PublicKey getAik() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public PcrManifest getPcrManifest() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Map<String, String> getHostAttributes() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

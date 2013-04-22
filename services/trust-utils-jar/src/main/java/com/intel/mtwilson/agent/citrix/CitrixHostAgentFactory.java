@@ -6,8 +6,8 @@ package com.intel.mtwilson.agent.citrix;
 
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
-import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.model.InternetAddress;
+import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-          CitrixClient client = new CitrixClient(vendorConnectionString);
+          CitrixClient client = new CitrixClient(new TlsConnection(vendorConnectionString, tlsPolicy));
           return new CitrixHostAgent(client);
         }
         catch(Exception e) {

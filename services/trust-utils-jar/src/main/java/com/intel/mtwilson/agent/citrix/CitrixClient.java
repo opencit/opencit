@@ -44,14 +44,16 @@ import com.xensource.xenapi.Session;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
 
-import com.intel.mtwilson.datatypes.ConnectionString;
+
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
 import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
+import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.tls.TlsConnection;
 import java.util.Arrays;
 import java.util.logging.Level;
 import org.apache.xmlrpc.XmlRpcException;
@@ -78,7 +80,7 @@ public class CitrixClient {
     private String aikverifyhomeBin;
     private String opensslCmd;
     private String aikverifyCmd;
-    
+    private TlsConnection tlsConnection;
     private Pattern pcrNumberPattern = Pattern.compile("[0-9]|[0-1][0-9]|2[0-3]"); // integer 0-23 with optional zero-padding (00, 01, ...)
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
@@ -87,8 +89,8 @@ public class CitrixClient {
     
     protected static Connection connection;
 	
-    public CitrixClient(String connectionString){
-        this.connectionString = connectionString;
+    public CitrixClient(TlsConnection tlsConnection){
+        this.tlsConnection = tlsConnection;
         log.info("CitrixClient connectionString == " + connectionString);
 
         try {
@@ -167,7 +169,7 @@ public class CitrixClient {
      public keys() {}
     }
 	
-    public HashMap<String, PcrManifest> getQuoteInformationForHost(String pcrList) {
+    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
           System.err.println("stdalex-error getQuoteInformationForHost pcrList == " + pcrList);
           try {
             
@@ -180,29 +182,13 @@ public class CitrixClient {
             }catch (MalformedURLException e) { 
                throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
             } 
-			
-	    // TODO-stdalex:  Do this so we actually check trust here and not just blindly accept	
-            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-              @Override 
-              public X509Certificate[] getAcceptedIssuers() {
-               return null;  
-              }  
-			  // Trust always  
-              @Override 
-              public void checkClientTrusted(X509Certificate[] certs,  String authType) {}
-			  // Trust always  
-              @Override 
-              public void checkServerTrusted(X509Certificate[] certs, String authType) {}  
-             } 
-            };  
+            
+            TrustManager[] trustAllCerts = new TrustManager[] { tlsConnection.getTlsPolicy().getTrustManager() };
+            
             // Install the all-trusting trust manager  
             SSLContext sc = SSLContext.getInstance("SSL");  
             // Create empty HostnameVerifier  
-            HostnameVerifier hv = new HostnameVerifier() {  
-             public boolean verify(String arg0, SSLSession arg1) {  
-              return true;  
-             }  
-            };  
+            HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();  
  
             sc.init(null, trustAllCerts, new java.security.SecureRandom());  
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
@@ -257,7 +243,7 @@ public class CitrixClient {
 
            System.err.println( "created RSA key file for session id: "+sessionId);
             
-            HashMap<String, PcrManifest> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
+            HashMap<String, Pcr> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
             
             System.err.println( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
@@ -394,7 +380,7 @@ public class CitrixClient {
         return "rsapubkey_" + sessionId + ".key";
     }
 
-    private HashMap<String,PcrManifest> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
+    private HashMap<String,Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
         HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         System.err.println( "verifyQuoteAndGetPcr for session " + sessionId);
         String command = String.format("%s -c %s %s %s",aikverifyCmd, aikverifyhomeData + File.separator+getNonceFileName( sessionId),
@@ -425,7 +411,8 @@ public class CitrixClient {
                 if( validPcrNumber && validPcrValue ) {
                 	System.err.println("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
-                            pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
+                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(pcrNumber), new Sha1Digest(pcrValue)));
+                                    //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }
             else {
