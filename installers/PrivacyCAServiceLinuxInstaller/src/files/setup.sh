@@ -44,6 +44,15 @@ cp $WAR_PACKAGE "${package_dir}"
 chmod 600 privacyca-client.properties
 cp privacyca-client.properties "${package_dir}/privacyca-client.properties.example"
 
+#copy jars to endorsed
+echo "TOMCAT_HOME:${TOMCAT_HOME}"
+if [[ -f ! ${TOMCAT_HOME}/endorsed ]]; then
+  mkdir ${TOMCAT_HOME}/endorsed
+fi
+cp jaxws-api.jar ${TOMCAT_HOME}/endorsed/
+cp jaxws-rt.jar ${TOMCAT_HOME}/endorsed/
+cp jaxws-tools.jar ${TOMCAT_HOME}/endorsed/
+
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"

@@ -19,6 +19,9 @@ cp jackson-core-asl.jar ${TOMCAT_HOME}/endorsed/
 cp jackson-mapper-asl.jar ${TOMCAT_HOME}/endorsed/
 cp jackson-xc.jar ${TOMCAT_HOME}/endorsed/
 
+#Create SSL cert
+tomcat_create_ssl_cert $MTWILSON_SERVER
+
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
 # due to its GPLv2 license we cannot integrate it in any way with what we
