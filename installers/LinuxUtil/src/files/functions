@@ -2274,7 +2274,7 @@ tomcat_create_ssl_cert() {
   local mtwilson=`which mtwilson 2>/dev/null`
 
   if [ ! -f $keystore ]; then
-    keytool -genkey -alias s1as -keyalg RSA -keystore $keystore
+    $keytool -genkey -alias s1as -keyalg RSA -keystore $keystore
   fi
 
    # Check if there is already a certificate for this serverName in the Glassfish keystore
