@@ -839,40 +839,6 @@ function fnSelectAllCheckBox(status) {
 	});
 }
 
-/**
- * This Method is used to crate pagination on a JSP page using elementID and noOfPages parameter passed to it.
- * The file used to create pagination is "jquery.paginate.js".
- * For more details about pagination plugin please chack following address
- * http://tympanus.net/codrops/2009/11/17/jpaginate-a-fancy-jquery-pagination-plugin/
- * 
- * @param elementID (Div id on which you want to create pagination)
- * @param noOfPages (no of pages to be created)
- * @param fuToCallOnButtonClick (function to be called when user click on any page no.)
- * @param startPageNo (page no to be selected once pagination is done)
- */
-function applyPagination(elementID,noOfPages,fuToCallOnButtonClick,startPageNo){
-	selectedPageNo = startPageNo;
-	$("#"+elementID).paginate({
-		count : noOfPages,
-		start : startPageNo,
-		display   : 10,
-		border : true,
-		border_color: '#fff',
-		text_color : '#fff',
-		background_color	: 'black',	
-		border_hover_color	: '#ccc',
-		text_hover_color  	: '#000',
-		background_hover_color: '#fff', 
-		images	: false,
-		mouse	: 'press',
-		onChange	: function(page){
-			selectedPageNo = page;
-			var args = []; 
-			args.push(page);
-			fuToCallOnButtonClick.apply(null,args);
-					  }
-	});
-}
 
 /**
  * This method is used to open custom dialog box with specific Title and Content.

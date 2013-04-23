@@ -20,7 +20,8 @@
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
 	<script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
-	
+    <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
+    
     <script type="text/javascript" src="Scripts/commonUtils.js"></script>
 	<script type="text/javascript" src="Scripts/CommonMessage.js"></script>
 	<script type="text/javascript" src="Scripts/home.js"></script>
@@ -42,7 +43,19 @@
                     
                 <!-- TRUST DASHBOARD --> 
                 
-						<li ><a href="javascript:;" onclick="getDashBoardPage()">Trust Dashboard</a><ul></ul></li>
+						<li>
+                            <a>Trust</a>
+							<ul>
+								<li><a href="javascript:;" onclick="getDashBoardPage()">Trust</a></li> <!-- was "Trust Dashboard" -->
+								<li><a href="javascript:;" onclick="bulktrustUpdate()">Bulk Refresh</a></li> <!-- was "Bulk Trust Refresh" -->
+								<li><a href="javascript:;" onclick="getShowReportPage()">Reports</a></li>
+							</ul>
+						</li>
+						<!-- 
+                        <li ><a href="javascript:;" onclick="getDashBoardPage()">Trust Dashboard</a><ul></ul></li> 
+						<li><a href="javascript:;" onclick="bulktrustUpdate()">Bulk Trust Refresh</a><ul></ul></li>
+						<li><a href="javascript:;" onclick="getShowReportPage()">Reports</a><ul></ul></li>
+                        -->
 						<li>
 							<a>Host Management</a>
 							<ul>
@@ -57,12 +70,20 @@
 								<li><a href="javascript:;" onclick="updateDBForMle()">Update DB</a></li>
 							</ul>
 						</li> -->
-						<li><a href="javascript:;" onclick="bulktrustUpdate()">Bulk Trust Refresh</a><ul></ul></li>
-						<li><a href="javascript:;" onclick="getShowReportPage()">Reports</a><ul></ul></li>
                 
                     
                     <!-- WHITELIST PORTAL -->
-                    
+                        <li >
+                            <a>Whitelist</a>
+                            <ul>
+                                <li><a href="javascript:getWhiteListConfigurationPage();">Add White List</a></li>
+                                <li><a href="javascript:getRegisterHostPage();">Register Host</a></li>
+                                <li><a href="javascript:getEditMle();">Edit MLE</a></li>
+                                <li><a href="javascript:fnGetEditOS()">Edit OS</a></li>
+                                <li><a href="javascript:fnEditOEM()">Edit OEM</a></li>
+                            </ul>
+                        </li>
+                    <!--
 				<li >
 					<a>MLE</a>
 					<ul>
@@ -88,9 +109,32 @@
 						<li><a href="javascript:;" onclick="fnViewAllOEM()">View OEM</a></li>
 					</ul>
 				</li>
-                    
+
+                    -->
                     <!--  MANAGEMENT CONSOLE -->
+					<li >
+						<a>Administration</a>
+						<ul>
+							<li><a href="javascript:getApproveRequestPage();">Approve Request</a></li>
+							<li><a href="javascript:getDeletePendingRegistration();">Delete Request</a></li>
+							<li><a href="javascript:getViewExpiringPage();">Extend Request</a></li>
+							<li><a href="javascript:getViewRequest();">View Request</a></li>
+                            <li><a href="javascript:viewCert();">View Certificates</a></li>
+						</ul>
+					</li>
                     
+					<!--Begin Added by stdale on 1/8/13 for New Screen for MC fingerprint -->
+                    <!--
+                    <li >
+						<a>Certificates</a>
+						<ul>
+							<li><a href="javascript:viewCert();">View Certificates</a></li>
+							
+						</ul>
+					</li>
+                    -->
+                    
+                    <!--
 					<li >
 						<a>API Client</a>
 						<ul>
@@ -108,9 +152,10 @@
 							<li><a href="javascript:getRegisterHostPage();">Register Host</a></li>
 						</ul>
 					</li>
-					<li >
+                    -->
 					<!--    We will move this functionality to the MW 1.2 release.
                                                 Begin Added by Soni on 18/10/12 for New Screen for CA 
+                       <li>
 						<a>CA</a>
 						<ul>
 							<li><a href="javascript:getCAStatus();">Enable/Disable</a></li>
@@ -129,14 +174,6 @@
 						</ul>
 					</li>
 					-->
-                                        <li >
-					<!--Begin Added by stdale on 1/8/13 for New Screen for MC fingerprint -->
-						<a>Certificates</a>
-						<ul>
-							<li><a href="javascript:viewCert();">View Certificates</a></li>
-							
-						</ul>
-					</li>
 					<!--End Added by Soni on 18/10/12 for New Screen for SAML-->
                     
 				</ul>
