@@ -80,10 +80,9 @@ mkdir -p /usr/local/bin
 cp tagent pcakey /usr/local/bin
 
 #module attestation script
+chmod 755 module_analysis.sh
 cp module_analysis.sh "${package_dir}"/bin
 echo "module_script=${package_dir}/bin/module_analysis.sh" >> "${intel_conf_dir}/${package_name}.properties"
-chmod 777 module_analysis.sh
-cp module_analysis.sh "${intel_conf_dir}"/module_analysis.sh
 
 java_install $JAVA_PACKAGE
 
