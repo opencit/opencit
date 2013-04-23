@@ -16,7 +16,7 @@
 <body>
 	<div class="page">
 	<div class="header">
-       <div class="title"><h1>Mt. Wilson Management Console</h1></div>
+       <div class="title"><h1>Mt. Wilson</h1></div>
             <div class="clear hideSkiplink">
 				<div style="clear: left;"></div><a id="NavigationMenu_SkipLink"></a>
             </div>

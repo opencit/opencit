@@ -2,6 +2,9 @@ var disabledDiv = '<div id="disabledDiv" class="disabledDiv"><img class="loading
 var validationDiv = '<div class="errorMessage validationErrorDiv"> Value Can\'t be Empty.</div>';
 var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special Characters are not allowed.</div>';
 var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
+var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
+var selectedPageNo = 1;
+var moduleAttestationDisplayString = 'PCR + Module';
 
 var isVMWare = false;
 

@@ -16,7 +16,7 @@
 <body>
 	<div>
 	<div class="header">
-       <div class="title"><h1>Mt. Wilson Management Console</h1></div>
+       <div class="title"><h1>Mt. Wilson</h1></div>
             <div class="clear hideSkiplink">
                 <span style="float: right;padding-right: 50px;font-size: 13px;font-weight: bold;">
                  <a href="login.htm" id="LogInOut">Log-in</a>
