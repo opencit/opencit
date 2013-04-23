@@ -30,7 +30,7 @@
 </head>
 <body>
 	<div class="header">
-      	<div class="title"><h1>Management Console</h1></div>
+      	<div class="title"><h1>Mt Wilson</h1></div>
         <div class="loginDisplay">
             <span id="loginStatusValue">Welcome <%=session.getAttribute("username") %>  </span>
             <a href="javascript:logoutUser();" id="LogInOut">Logout</a>
@@ -39,6 +39,58 @@
           <div class="clear hideSkiplink">
              <div id="NavigationMenu" class="menu" style="float: left;">
 				<ul id="menubarItems">
+                    
+                <!-- TRUST DASHBOARD --> 
+                
+						<li ><a href="javascript:;" onclick="getDashBoardPage()">Trust Dashboard</a><ul></ul></li>
+						<li>
+							<a>Host Management</a>
+							<ul>
+								<li><a href="javascript:;" onclick="getAddHostPage()">Add Host</a></li>
+								<li><a href="javascript:;" onclick="getEditHostPage()">Edit Host</a></li>
+								<li><a href="javascript:;" onclick="getViewHostPage()">View Host</a></li>
+							</ul>
+						</li>
+						<!-- <li>
+							<a>Administration</a>
+							<ul>
+								<li><a href="javascript:;" onclick="updateDBForMle()">Update DB</a></li>
+							</ul>
+						</li> -->
+						<li><a href="javascript:;" onclick="bulktrustUpdate()">Bulk Trust Refresh</a><ul></ul></li>
+						<li><a href="javascript:;" onclick="getShowReportPage()">Reports</a><ul></ul></li>
+                
+                    
+                    <!-- WHITELIST PORTAL -->
+                    
+				<li >
+					<a>MLE</a>
+					<ul>
+						<li><a href="javascript:getAddMLE();">Add</a></li>
+						<li><a href="javascript:getEditMle();">Edit</a></li>
+						<li><a href="javascript:getViewMle();">View</a></li>
+					</ul>
+				</li>
+				
+				<li >
+					<a tabindex="-1" class="dynamic">OS</a>
+					<ul>
+						<li><a href="javascript:;" onclick="fnGetAddOS()">Add OS</a></li>
+						<li><a href="javascript:;" onclick="fnGetEditOS()">Edit OS</a></li>
+						<li><a href="javascript:;" onclick="fnViewAllOS()">View OS</a></li>
+					</ul>
+				</li>
+				<li>
+					<a>OEM</a>
+					<ul>
+						<li><a href="javascript:;" onclick="fnAddOEM()">Add OEM</a></li>
+						<li><a href="javascript:;" onclick="fnEditOEM()">Edit OEM</a></li>
+						<li><a href="javascript:;" onclick="fnViewAllOEM()">View OEM</a></li>
+					</ul>
+				</li>
+                    
+                    <!--  MANAGEMENT CONSOLE -->
+                    
 					<li >
 						<a>API Client</a>
 						<ul>
@@ -86,6 +138,7 @@
 						</ul>
 					</li>
 					<!--End Added by Soni on 18/10/12 for New Screen for SAML-->
+                    
 				</ul>
 
 			</div>

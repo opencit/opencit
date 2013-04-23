@@ -4,8 +4,8 @@
 
 $(function() {
 	createMenubar("menubarItems");
-	getApproveRequestPage();
-//	getDashBoardPage();
+//	getApproveRequestPage();
+	getDashBoardPage();
 //	getViewMle();
 
 });
