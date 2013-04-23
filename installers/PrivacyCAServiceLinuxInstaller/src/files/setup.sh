@@ -45,7 +45,9 @@ chmod 600 privacyca-client.properties
 cp privacyca-client.properties "${package_dir}/privacyca-client.properties.example"
 
 #copy jars to endorsed
+tomcat_detect
 echo "TOMCAT_HOME:${TOMCAT_HOME}"
+
 if [[ ! -d ${TOMCAT_HOME}/endorsed ]]; then
   mkdir ${TOMCAT_HOME}/endorsed
 fi

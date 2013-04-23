@@ -24,4 +24,4 @@ fi
 
 if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
   echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
-FI  
+fi
