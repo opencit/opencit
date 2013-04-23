@@ -38,22 +38,27 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         */
         @Override
         public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj, HostConfigData hostConfig, ApiClient apiObj)throws ManagementConsolePortalException {           
-                logger.info("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
+                System.err.println("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
                 boolean result = false;                            
                 ManagementService msAPIObj = (ManagementService) apiObj;
            
                 // Create the host config object to be sent to the Management API for white list configuration
                 HostConfigData hostConfigObj = hostConfig;
                 TxtHostRecord hostRecord = new TxtHostRecord();
+                System.err.println("stdalex saveWhiteListConf for host[" + hostDetailsObj.getHostType() + "] " + hostDetailsObj.getHostName() + " with cs of " + hostDetailsObj.getvCenterString());
                 if (hostDetailsObj.isVmWareType()) {
                         hostRecord.HostName = hostDetailsObj.getHostName();
-                        hostRecord.AddOn_Connection_String = hostDetailsObj.getvCenterString();
+                       hostRecord.AddOn_Connection_String = hostDetailsObj.getvCenterString();
                 } else {
-                        hostRecord.HostName = hostDetailsObj.getHostName();
-                        hostRecord.IPAddress = hostDetailsObj.getHostName();
-                        hostRecord.Port = Integer.parseInt(hostDetailsObj.getHostPortNo());
+                    if(hostDetailsObj.getHostType().contains("citrix")) {
+                      hostRecord.AddOn_Connection_String = "citrix:" + hostDetailsObj.getvCenterString();  
+                      System.err.println("stdalex saveWhiteListConf type was citrix");
+                    }
+                    hostRecord.HostName = hostDetailsObj.getHostName();
+                    hostRecord.IPAddress = hostDetailsObj.getHostName();
+                    hostRecord.Port = Integer.parseInt(hostDetailsObj.getHostPortNo());
                 }
-            
+                
                 hostConfigObj.setTxtHostRecord(hostRecord);
             
                 try {

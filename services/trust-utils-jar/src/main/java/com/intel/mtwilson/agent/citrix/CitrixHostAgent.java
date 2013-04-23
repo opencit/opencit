@@ -4,17 +4,10 @@
  */
 package com.intel.mtwilson.agent.citrix;
 
-import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.manifest.data.PcrManifest;
+
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.Aik;
-import com.intel.mtwilson.datatypes.Nonce;
-import com.intel.mtwilson.datatypes.Pcr;
-import com.intel.mtwilson.datatypes.PcrIndex;
-import com.intel.mtwilson.datatypes.TpmQuote;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.Nonce;
@@ -27,10 +20,13 @@ import com.xensource.xenapi.Types.XenAPIException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
+import java.security.KeyFactory;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -55,7 +51,6 @@ public class CitrixHostAgent implements HostAgent{
     
     public CitrixHostAgent(CitrixClient client) {
      this.client = client;
-     
     }
     
     
@@ -86,6 +81,8 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public X509Certificate getAikCertificate() {
+        throw new UnsupportedOperationException("Not supported");
+        /*
         X509Certificate cert = null;
         try {
             String crt = client.getAIKCertificate().replaceAll("\n", "").replaceAll("\r","");
@@ -97,6 +94,7 @@ public class CitrixHostAgent implements HostAgent{
             
         }
         return cert;
+        */
     }
 
     @Override
@@ -225,7 +223,16 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public PublicKey getAik() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        PublicKey pk = null;
+        //throw new UnsupportedOperationException("Not supported yet.");
+         try {
+            String crt = client.getAIKCertificate();
+            System.err.print("getAik crt == " + crt); 
+            pk = X509Util.decodePemPublicKey(crt);                                    
+        }  catch(Exception ex){
+            System.out.println("getAik caught: " + ex.getMessage());     
+       }
+        return pk;
     }
 
     @Override

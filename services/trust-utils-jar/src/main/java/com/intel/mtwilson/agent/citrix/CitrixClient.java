@@ -48,11 +48,12 @@ import com.xensource.xenapi.Types.XenAPIException;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
-import com.intel.mountwilson.manifest.data.PcrManifest;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.tls.TlsConnection;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -91,21 +92,23 @@ public class CitrixClient {
 	
     public CitrixClient(TlsConnection tlsConnection){
         this.tlsConnection = tlsConnection;
+        this.connectionString = tlsConnection.getConnectionString();
         log.info("CitrixClient connectionString == " + connectionString);
-
-        try {
-            ConnectionString connection = new ConnectionString(connectionString);
+        // connectionString == citrix:https://xenserver:port;username;password
+        String cs = connectionString.substring(8);
+        log.info("ConnectionString cs == " + cs);
+        String[] parts = cs.split(";");
+        // 10.1.70.126:443;root;P@ssw0rd
+                                   
+        String   ipParts = parts[0];
+        String[] ip = ipParts.split(":");
             
-            this.hostIpAddress = connection.getIpAddress();
-            this.port = connection.getPort();
-            this.userName = connection.getUserName();
-            this.password = connection.getPassword();
-            log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
-        } catch (MalformedURLException ex) {
-            java.util.logging.Logger.getLogger(CitrixClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        
+        this.hostIpAddress = ip[0];
+        this.port = Integer.parseInt(ip[1]);
+        this.userName = parts[1];
+        this.password = parts[2];
+        log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+               
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
         aikverifyhomeData = aikverifyhome+File.separator+"data";
@@ -134,8 +137,8 @@ public class CitrixClient {
         }    
     }
 	
-    public CitrixClient(EntityManagerFactory entityManagerFactory, String connectionString) {
-        this(connectionString);
+    public CitrixClient(EntityManagerFactory entityManagerFactory,TlsConnection tlsConnection) {
+        this(tlsConnection);
         this.setEntityManagerFactory(entityManagerFactory);
     }
     
@@ -381,7 +384,7 @@ public class CitrixClient {
     }
 
     private HashMap<String,Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
-        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
+        HashMap<String,Pcr> pcrMp = new HashMap<String,Pcr>();
         System.err.println( "verifyQuoteAndGetPcr for session " + sessionId);
         String command = String.format("%s -c %s %s %s",aikverifyCmd, aikverifyhomeData + File.separator+getNonceFileName( sessionId),
                 aikverifyhomeData + File.separator+getCertFileName(sessionId),
@@ -411,7 +414,7 @@ public class CitrixClient {
                 if( validPcrNumber && validPcrValue ) {
                 	System.err.println("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
-                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(pcrNumber), new Sha1Digest(pcrValue)));
+                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
                                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }
