@@ -158,6 +158,8 @@ div.hideSkiplink {
 
 .page {
     background-color: #FFFFFF;
+    border: 1px solid #496077;
+    margin: 20px auto 0;
     width: auto;
 }
 
@@ -258,6 +260,10 @@ h5, h6
     color: White;
     font-weight: bold;
 }
+.tableDisplay tr td{
+    border: 1px solid #6E3F4A;
+    empty-cells: show;
+}
 
 .tableBorderClass tr td{
     border: 1px solid #3A4F63;
@@ -269,6 +275,33 @@ h5, h6
     empty-cells: show;
     word-wrap: break-word;
 }
+.tableDivMLE{
+	width: 1000px;
+   max-height: 350px;
+}
+.tableDivMLE table{
+	border: 1px solid #6E3F4A;
+}
+.tableDivMLE table tr{
+	height: 25px;
+}
+.tableDiv{
+   max-height: 330px;
+    width: 650px;
+}
+.tableDivEditMle{
+    max-height: 330px;
+   /*  width: 870px; */
+}
+
+.tableDiv table{
+	border: 1px solid #6E3F4A;
+}
+
+.tableDiv table tr{
+	height: 28px;
+}
+
 .mainTableContant{
 	width: 100%;
 	max-height: 454px;
@@ -296,6 +329,19 @@ h5, h6
 .registerHostRow6Header{width: 240px;}
 .registerHostRow5Sub{width: 140px;}
 
+.tableDivMLE .row1{width: 80px;}
+.tableDivMLE .row2{width: 80px;}
+.tableDivMLE .rowv{width: 140px;}
+.tableDivMLE .row3{width: 80px;}
+.tableDivMLE .row4{width: 80px;}
+.tableDivMLE .rowr1{width: 100px;}
+.tableDivMLE .rowr2{width: 120px;}
+.tableDivMLE .rowr3{width: 170px;}
+.tableDivMLE .rowr4{width: 130px;}
+.tableDivMLE .rowr5{width: 100px;}
+.tableDivMLE .rowr6{width: 65px;}
+.tableDivMLE .rowr7{width: 90px;}
+
 .row1{width: 20px;}
 .row2{width: 80px;}
 .row3{width: 175px;}
@@ -310,6 +356,14 @@ h5, h6
 .row5Sub{width: 150px;}
 
 /*.row12{width: 50px;}*/
+
+.manifestModuleTypeRow1{width: 144px;}
+.manifestModuleTypeRow2{width: 160px;}
+.manifestModuleTypeRow3{width: 115px;}
+.manifestModuleTypeRow4{width: 65px;}
+.manifestModuleTypeRow5{width: 65px;}
+.manifestModuleTypeRow6{width: 75px;}
+
 
 
 /* Class for View Pending Registration page */
@@ -342,6 +396,12 @@ h5, h6
 	width: 67%;
 }
 
+.requiredField{
+	color: red;
+	float: left;
+	font-size: small;
+	margin-left: 4px;
+}
 .errorMessage{
 	color: red;
 	float: left;
@@ -367,6 +427,12 @@ h5, h6
     color: black;
 	
 }
+
+.manifestListClass{
+	max-height: 200px;
+	margin-top: 25px;
+}
+
 .singleDiv{
 	/*height: 28px;*/
 	margin-top: 10px;
@@ -422,6 +488,12 @@ h5, h6
 	width: 90%
 }
 
+.textBox_Border{
+	border: 1px solid #7A5660;
+	width: 300px;
+	height: 20px;
+}
+
 .uploadButton{
 	float: left;
 	margin-right: 5px;
@@ -436,6 +508,11 @@ text-align: center;
 	font-size: small;
     margin-top: 2px;
     height: 25px;
+}
+/*class for help dialog pcr div*/
+
+.pcrDivHelp{
+	margin-top: 10px;
 }
 
 
@@ -517,6 +594,24 @@ text-align: center;
 	margin-left: 4px;
 }
 
+#moduleTypeAttestationMez{
+	font-size: 12px;
+	color: black;
+	margin-left: 40px;
+	font-weight: bold;
+	margin-top: 35px;
+	margin-bottom: 5px;
+}
+
+#mainContainerForWhiteList{
+    overflow: auto;
+}
+
+.whiteListSingleDiv{
+    height: 10px;
+    margin-top: 10px;
+    width: 600px;
+}
 
 /*Class for White List Configuration page*/
 .mainContainer{
