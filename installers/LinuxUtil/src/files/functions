@@ -2128,7 +2128,7 @@ tomcat_detect() {
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
-  #echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
+  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
   for c in $TOMCAT_CANDIDATES
   do
     #echo "debug tomcat candidate: $c"
@@ -2662,18 +2662,22 @@ webservice_start() {
   local webservice_application_name="$1"
   webservice_running  "${webservice_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    $glassfish enable $WEBSERVICE_DEPLOYED
-  elif using_tomcat; then
-    wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/start?path=/${WEBSERVICE_DEPLOYED} -O - -q
+    if using_glassfish; then
+      $glassfish enable $WEBSERVICE_DEPLOYED
+    elif using_tomcat; then
+      wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/start?path=/${WEBSERVICE_DEPLOYED} -O - -q
+    fi
   fi
 }
 webservice_stop() {
   local webservice_application_name="$1"
   webservice_running "${webservice_application_name}"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-    $glassfish disable $WEBSERVICE_DEPLOYED
-  elif using_tomcat; then
-    wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/stop?path=/${WEBSERVICE_DEPLOYED} -O - -q
+    if using_glassfish; then
+      $glassfish disable $WEBSERVICE_DEPLOYED
+    elif using_tomcat; then
+      wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/stop?path=/${WEBSERVICE_DEPLOYED} -O - -q
+    fi
   fi
 }
 
