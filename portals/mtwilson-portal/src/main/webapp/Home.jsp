@@ -59,8 +59,8 @@
 						<li>
 							<a>Host Management</a>
 							<ul>
+                                <li><a href="javascript:getRegisterHostPage();">Import...</a></li> <!-- was "Register Host" under Management Console automation -->
 								<li><a href="javascript:getAddHostPage()">Add Host</a></li>
-                                <li><a href="javascript:getRegisterHostPage();">Add Trusted Host</a></li> <!-- was "Register Host" under Management Console automation -->
 								<li><a href="javascript:getEditHostPage()">Edit Host</a></li>
 								<li><a href="javascript:getViewHostPage()">View Host</a></li>
 							</ul>
