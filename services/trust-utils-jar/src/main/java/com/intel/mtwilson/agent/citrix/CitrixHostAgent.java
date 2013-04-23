@@ -228,7 +228,8 @@ public class CitrixHostAgent implements HostAgent{
          try {
             String crt = client.getAIKCertificate();
             System.err.print("getAik crt == " + crt); 
-            pk = X509Util.decodePemPublicKey(crt);                                    
+            pk = X509Util.decodePemPublicKey(crt);          
+           
         }  catch(Exception ex){
             System.out.println("getAik caught: " + ex.getMessage());     
        }
