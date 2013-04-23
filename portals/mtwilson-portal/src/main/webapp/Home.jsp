@@ -46,7 +46,7 @@
 						<li>
                             <a>Trust</a>
 							<ul>
-								<li><a href="javascript:;" onclick="getDashBoardPage()">Trust</a></li> <!-- was "Trust Dashboard" -->
+								<li><a href="javascript:;" onclick="getDashBoardPage()">Dashboard</a></li> <!-- was "Trust Dashboard" -->
 								<li><a href="javascript:;" onclick="bulktrustUpdate()">Bulk Refresh</a></li> <!-- was "Bulk Trust Refresh" -->
 								<li><a href="javascript:;" onclick="getShowReportPage()">Reports</a></li>
 							</ul>
@@ -59,9 +59,10 @@
 						<li>
 							<a>Host Management</a>
 							<ul>
-								<li><a href="javascript:;" onclick="getAddHostPage()">Add Host</a></li>
-								<li><a href="javascript:;" onclick="getEditHostPage()">Edit Host</a></li>
-								<li><a href="javascript:;" onclick="getViewHostPage()">View Host</a></li>
+								<li><a href="javascript:getAddHostPage()">Add Host</a></li>
+                                <li><a href="javascript:getRegisterHostPage();">Add Trusted Host</a></li> <!-- was "Register Host" under Management Console automation -->
+								<li><a href="javascript:getEditHostPage()">Edit Host</a></li>
+								<li><a href="javascript:getViewHostPage()">View Host</a></li>
 							</ul>
 						</li>
 						<!-- <li>
@@ -76,8 +77,7 @@
                         <li >
                             <a>Whitelist</a>
                             <ul>
-                                <li><a href="javascript:getWhiteListConfigurationPage();">Add White List</a></li>
-                                <li><a href="javascript:getRegisterHostPage();">Register Host</a></li>
+                                <li><a href="javascript:getWhiteListConfigurationPage();">Import from Trusted Host</a></li> <!-- was "Whitelist Configuration" under Management Console automation -->
                                 <li><a href="javascript:getEditMle();">Edit MLE</a></li>
                                 <li><a href="javascript:fnGetEditOS()">Edit OS</a></li>
                                 <li><a href="javascript:fnEditOEM()">Edit OEM</a></li>
@@ -115,10 +115,10 @@
 					<li >
 						<a>Administration</a>
 						<ul>
-							<li><a href="javascript:getApproveRequestPage();">Approve Request</a></li>
-							<li><a href="javascript:getDeletePendingRegistration();">Delete Request</a></li>
-							<li><a href="javascript:getViewExpiringPage();">Extend Request</a></li>
-							<li><a href="javascript:getViewRequest();">View Request</a></li>
+							<li><a href="javascript:getApproveRequestPage();">Pending Requests</a></li> <!-- was "Approve Request" -->
+							<li><a href="javascript:getViewRequest();">List Users</a></li> <!-- was "View Request" -->
+							<li><a href="javascript:getDeletePendingRegistration();">Delete User</a></li> <!-- was "Delete Request" -->
+							<li><a href="javascript:getViewExpiringPage();">Extend User</a></li> <!-- was "Extend Request" -->
                             <li><a href="javascript:viewCert();">View Certificates</a></li>
 						</ul>
 					</li>
