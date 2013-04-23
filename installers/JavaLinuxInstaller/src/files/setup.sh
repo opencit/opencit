@@ -21,3 +21,7 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   backup_file "${JAVA_HOME}/jre/lib/security/java.security"
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
+
+if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
+  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+FI  
