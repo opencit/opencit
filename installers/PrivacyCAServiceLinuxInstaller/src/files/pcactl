@@ -32,7 +32,7 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 configure_privacyca_url() {
-  # PrivacyCaUrl = https://privacyca.server.com:8181/HisPrivacyCAWebServices2
+
   local privacyca_server privacyca_url
 
   if [ -n "$PRIVACYCA_SERVER" ]; then

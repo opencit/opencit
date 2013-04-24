@@ -49,7 +49,11 @@
 	<version>1.9.11</version>
         <type>jar</type>
 </dependency>
-    
+    <dependency>
+      <groupId>com.sun.xml</groupId>
+      <artifactId>jaxws-rt</artifactId>
+      <version>2.2.6</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -122,106 +126,6 @@
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jackson-xc.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.sun.xml.ws</groupId>
-                    <artifactId>jaxws-rt</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>jaxws-rt.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>javax.xml.ws</groupId>
-                    <artifactId>jaxws-api</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>jaxws-api.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>javax.xml.bind</groupId>
-                    <artifactId>jaxb-api</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>jaxb-api.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.sun.xml.bind</groupId>
-                    <artifactId>jaxb-impl</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>jaxb-impl.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>org.jvnet.mimepull</groupId>
-                    <artifactId>mimepull</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>mimepull.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.sun.xml.ws</groupId>
-                    <artifactId>policy</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>policy.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>javax.xml.soap</groupId>
-                    <artifactId>saaj-api</artifactId>
-
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>saaj-api.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.sun.xml.messaging.saaj</groupId>
-                    <artifactId>saaj-impl</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>saaj-impl.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>javax.xml.stream</groupId>
-                    <artifactId>stax-api</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>stax-api.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>org.jvnet.staxex</groupId>
-                    <artifactId>stax-ex</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>stax-ex.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>stax2-api</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>stax2-api.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.sun.xml.stream.buffer</groupId>
-                    <artifactId>streambuffer</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>streambuffer.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>woodstox-core-asl</artifactId>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>woodstox-core-asl.jar</destFileName>
-                </artifactItem>
-                <artifactItem>
-                    <groupId>com.postgres</groupId>
-                    <artifactId>postgres</artifactId>
-                    <version>9.2-1002.jdbc4</version>
-                    <type>jar</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
-                    <destFileName>postgresql-9.2-1002.jdbc4.jar</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>
