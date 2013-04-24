@@ -49,7 +49,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 
 /**
- *
+ * Accepts one option:  --all   indicates that even admin and ManagementServiceAutomation should be removed.
  * @author jbuhacoff
  */
 public class EraseUserAccounts implements Command {
@@ -83,23 +83,29 @@ public class EraseUserAccounts implements Command {
     }
     
     private void deletePortalUsers() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException {
+        boolean deleteAll = options.getBoolean("all", false);
         MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
         List<MwPortalUser> list = jpa.findMwPortalUserEntities();
         for(MwPortalUser record : list) {
-            jpa.destroy(record.getId());
+            if( deleteAll || (!deleteAll && !record.getUsername().equals("ManagementServiceAutomation") && !record.getUsername().equals("admin")) ) {
+                jpa.destroy(record.getId());
+            }
         }
     }
     
     private void deleteApiClients() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
+        boolean deleteAll = options.getBoolean("all", false);
         ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
         ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
         List<ApiClientX509> list = jpa.findApiClientX509Entities();
         for(ApiClientX509 record : list) {
-            Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
-            for(ApiRoleX509 role : roles) {
-                rolejpa.destroy(role.getApiRoleX509PK());
+            if( deleteAll || (!deleteAll && !record.getName().contains("CN=ManagementServiceAutomation") && !record.getName().contains("CN=admin")) ) {
+                Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
+                for(ApiRoleX509 role : roles) {
+                    rolejpa.destroy(role.getApiRoleX509PK());
+                }
+                jpa.destroy(record.getId());
             }
-            jpa.destroy(record.getId());
         }
     }
     
