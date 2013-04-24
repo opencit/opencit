@@ -239,10 +239,13 @@ BwIDAQAB
     public PublicKey getAik() {
         PublicKey pk = null;
          try {
-            //String crt = client.getAIKCertificate();
-            String crt = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwTNGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0YoMMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS85uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6BiBwIDAQAB-----END PUBLIC KEY-----";
-            System.err.print("getAik hardcoded crt == " + crt); 
-            pk = X509Util.decodePemPublicKey(crt);          
+            String crt = client.getAIKCertificate().replace(X509Util.BEGIN_PUBLIC_KEY, "").replace(X509Util.END_PUBLIC_KEY, "").replaceAll("\n","").replaceAll("\r","");
+            byte[] crtB = Base64.decodeBase64(crt);
+            System.err.println("getAik still trying crt w/ BC == " + crt); 
+            X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(crtB);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            System.err.println("using provider " + keyFactory.getProvider().getInfo());
+            pk = keyFactory.generatePublic(pubKeySpec);
            
         }  catch(Exception ex){
             System.out.println("getAik caught: " + ex.getMessage()); 
