@@ -189,7 +189,7 @@
                 <artifactItem>
                     <groupId>org.jvnet.mimepull</groupId>
                     <artifactId>mimepull</artifactId>
-                    <version>1.8></version>
+                    <version>1.8</version>
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>mimepull-1.8.jar</destFileName>
