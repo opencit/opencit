@@ -255,11 +255,13 @@ Pcr 23 = 0000000000000000000000000000000000000000
             if( agent.isAikCaAvailable() ) {
                 X509Certificate aikcert = agent.getAikCertificate();
                 host.setAIKCertificate(X509Util.encodePemCertificate(aikcert));
+                host.setAikPublicKey(X509Util.encodePemPublicKey(aikcert.getPublicKey()));
                 host.setAikSha1(Sha1Digest.valueOf(aikcert.getPublicKey().getEncoded()).toString());
             }
             else {
                 PublicKey aikpubkey = agent.getAik();
-                host.setAIKCertificate(X509Util.encodePemPublicKey(aikpubkey));
+                host.setAIKCertificate(null);
+                host.setAikPublicKey(X509Util.encodePemPublicKey(aikpubkey));
                 host.setAikSha1(Sha1Digest.valueOf(aikpubkey.getEncoded()).toString());
             }
         }

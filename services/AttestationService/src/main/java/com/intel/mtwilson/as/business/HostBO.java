@@ -356,6 +356,7 @@ public class HostBO extends BaseBO {
                     try {
                         String certPem = X509Util.encodePemCertificate(cert);
                         tblHosts.setAIKCertificate(certPem);
+                        tblHosts.setAikPublicKey(X509Util.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
                         tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                     }
                     catch(Exception e) {
@@ -366,7 +367,8 @@ public class HostBO extends BaseBO {
                     // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
                     PublicKey publicKey = agent.getAik();
                     String pem = X509Util.encodePemPublicKey(publicKey); 
-                    tblHosts.setAIKCertificate(pem);
+                    tblHosts.setAIKCertificate(null);
+                    tblHosts.setAikPublicKey(pem);
                     tblHosts.setAikSha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
                 }
             }
