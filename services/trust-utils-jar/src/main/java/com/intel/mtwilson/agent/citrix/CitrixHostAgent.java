@@ -226,7 +226,7 @@ public class CitrixHostAgent implements HostAgent{
         PublicKey pk = null;
         //throw new UnsupportedOperationException("Not supported yet.");
          try {
-            String crt = client.getAIKCertificate();
+            String crt = client.getAIKCertificate().replaceAll("\\r|\\n", "");;
             System.err.print("getAik crt == " + crt); 
             pk = X509Util.decodePemPublicKey(crt);          
            
