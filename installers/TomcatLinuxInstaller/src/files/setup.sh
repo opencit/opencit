@@ -40,7 +40,14 @@ cp txw2-20110809.jar ${TOMCAT_HOME}/endorsed/
 cp woodstox-core-asl-4.1.2.jar ${TOMCAT_HOME}/endorsed/
 
 
+FINISH=0
 
+while [ $FINISH == 0 ]; do
+ if [ -a /etc/intel/cloudsecurity/p12.sdf ]; then
+  $FINISH=1
+ fi
+
+done
 
 #Create SSL cert
 tomcat_create_ssl_cert $MTWILSON_SERVER

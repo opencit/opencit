@@ -2748,7 +2748,7 @@ webservice_install() {
         ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-        wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/reload?path=/${WEBSERVICE_DEPLOYED} -O - -q
+        wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/reload?path=/${WEBSERVICE_DEPLOYED} -O -q
       fi
     else
       if using_glassfish; then
@@ -2756,8 +2756,8 @@ webservice_install() {
         ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         echo "Deploying ${webservice_application_name} to Tomcat..."
-        #cp ${webservice_war_file} $TOMCAT_HOME/webapps/
-        wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/deploy?path=/${webservice_application_name}&war=file:${webservice_war_file} -O - -q
+        cp ${webservice_war_file} $TOMCAT_HOME/webapps/
+        #wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/deploy?path=/${webservice_application_name}&war=file:${webservice_war_file} -O -q
       fi
     fi
 }
@@ -2772,7 +2772,7 @@ webservice_uninstall() {
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/undeploy?path=/${WEBSERVICE_DEPLOYED} -O - -q
+      wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/undeploy?path=/${WEBSERVICE_DEPLOYED} -O -q
     fi
   else
     if using_glassfish; then
