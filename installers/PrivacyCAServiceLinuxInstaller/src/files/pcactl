@@ -99,9 +99,9 @@ setup_interactive_install() {
     webservice_install "${webservice_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
     #stall until deploy is done
     local FINISH=0
-    while [ $FINISH == 0 ]; do
+    while [ $FINISH -le 0 ]; do
       if [ -f /etc/intel/cloudsecurity/PrivacyCA.properties ]; then
-        $FINISH=1
+        FINISH=1
       fi
     done
 
