@@ -18,6 +18,29 @@ mkdir ${TOMCAT_HOME}/endorsed
 cp jackson-core-asl.jar ${TOMCAT_HOME}/endorsed/
 cp jackson-mapper-asl.jar ${TOMCAT_HOME}/endorsed/
 cp jackson-xc.jar ${TOMCAT_HOME}/endorsed/
+#HisPrivacyCa depends on the following to be in the endorsed folder
+cp jaxws-api-2.2.8.jar ${TOMCAT_HOME}/endorsed/
+cp jaxws-rt-2.2.7.jar ${TOMCAT_HOME}/endorsed/
+cp activation-1.1.jar ${TOMCAT_HOME}/endorsed/
+cp gmbal-api-only-3.1.0-b001.jar ${TOMCAT_HOME}/endorsed/
+cp ha-api-33.1.8.jar ${TOMCAT_HOME}/endorsed/
+cp istack-commons-runtime-2.4.jar ${TOMCAT_HOME}/endorsed/
+cp jaxb-api-2.2.4.jar ${TOMCAT_HOME}/endorsed/
+cp jaxb-impl-2.2.6.jar ${TOMCAT_HOME}/endorsed/
+cp management-api-3.0.0-b012.jar ${TOMCAT_HOME}/endorsed/
+cp mimepull-1.8.jar ${TOMCAT_HOME}/endorsed/
+cp policy-2.3.1.jar ${TOMCAT_HOME}/endorsed/
+cp relaxngDatatype-20020414.jar ${TOMCAT_HOME}/endorsed/
+cp saaj-api-1.3.4.jar ${TOMCAT_HOME}/endorsed/
+cp saaj-impl-1.3.19.jar ${TOMCAT_HOME}/endorsed/
+cp stax-ex-1.7.jar ${TOMCAT_HOME}/endorsed/
+cp stax2-api-3.1.1.jar ${TOMCAT_HOME}/endorsed/
+cp streambuffer-1.5.jar ${TOMCAT_HOME}/endorsed/
+cp txw2-20110809.jar ${TOMCAT_HOME}/endorsed/
+cp woodstox-core-asl-4.1.2.jar ${TOMCAT_HOME}/endorsed/
+
+
+
 
 #Create SSL cert
 tomcat_create_ssl_cert $MTWILSON_SERVER

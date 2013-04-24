@@ -23,5 +23,6 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
 fi
 
 if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
-  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  local javaHome=${JAVA_HOME}
+  echo "JAVA_HOME=$javaHome" >> /etc/environment
 fi

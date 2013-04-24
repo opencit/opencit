@@ -2756,8 +2756,8 @@ webservice_install() {
         ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         echo "Deploying ${webservice_application_name} to Tomcat..."
-        cp ${webservice_war_file} $TOMCAT_HOME/webapps/
-        #wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/deploy?path=/${webservice_application_name}&war=file:${webservice_war_file} -O - -q
+        #cp ${webservice_war_file} $TOMCAT_HOME/webapps/
+        wget http://tomcat:tomcat@$MTWILSON_SERVER:8080/manager/deploy?path=/${webservice_application_name}&war=file:${webservice_war_file} -O - -q
       fi
     fi
 }
