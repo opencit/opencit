@@ -101,8 +101,9 @@ public class GenerateModulesCmd implements ICommand {
             }
             
             log.info("Content of the XML file before replace all: " + xmlInput);
-            
-            context.setModules(xmlInput.replaceAll(">\\s*<", "><"));
+            String tempXML = xmlInput.replaceAll(">\\s*<", "><");
+            context.setModules(tempXML);
+            log.info("Contents of the context is : " + context.getModules());
 
         } catch (Exception e) {
             throw new TAException(ErrorCode.BAD_REQUEST, "Cannot find modules in the input xml");
