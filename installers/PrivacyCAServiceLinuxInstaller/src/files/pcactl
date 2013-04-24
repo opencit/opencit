@@ -126,7 +126,7 @@ create_privacyca_keys() {
     # creates PrivacyCA.p12 and endorsement.p12  (also creates the cacerts and clientfiles dirs)
     local oldpwd=`pwd`
     cd "${intel_conf_dir}"
-    java -jar ${package_dir}/HisPrivacyCAWebServices2-setup.jar
+    $java -jar ${package_dir}/HisPrivacyCAWebServices2-setup.jar
     cd "${oldpwd}"  
   fi
 }
