@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.util.encoders.Base64Encoder;
 
 /**
  *
@@ -50,9 +49,8 @@ public class GenerateModulesCmd implements ICommand {
      * @author skaja
      */
     private void getXmlFromMeasureLog() throws TAException, IOException {
-
         
-        log.info(String.format("%s%s", context.getModulesFolder(), context.getMeasureLogLaunchScript()));
+        log.info("About to run the command: " + context.getMeasureLogLaunchScript());
         long startTime = System.currentTimeMillis();
         CommandUtil.runCommand( context.getMeasureLogLaunchScript());
         long endTime = System.currentTimeMillis();
@@ -75,7 +73,7 @@ public class GenerateModulesCmd implements ICommand {
             e.printStackTrace();
         }
 
-        log.info("Content of the XML file before getting modules: " + content);
+        log.debug("Content of the XML file before getting modules: " + content);
         
         getModulesFromMeasureLogXml(content);
 
@@ -91,22 +89,23 @@ public class GenerateModulesCmd implements ICommand {
     private void getModulesFromMeasureLogXml(String xmlInput) throws TAException {
         try {
 
-            /*Pattern PATTERN = Pattern.compile("(<txt>.*</txt>)");
-            Matcher m = PATTERN.matcher(xmlInput);
-            while (m.find()) {
-                xmlInput = m.group(1);
-            }*/
+            // Since the output from the script will have lot of details and we are interested in just the module section, we will
+            // strip out the remaining data,
             Pattern PATTERN = Pattern.compile("(<modules>.*</modules>)");
             Matcher m = PATTERN.matcher(xmlInput);
             while (m.find()) {
                 xmlInput = m.group(1);
             }
+            // removes any white space characters from the xml string
+            String moduleInfo = xmlInput.replaceAll(">\\s*<", "><");
             
-            log.info("Content of the XML file before replace all: " + xmlInput);
-            String tempXML = xmlInput.replaceAll(">\\s*<", "><");
-            tempXML = Base64.encodeBase64String(tempXML.getBytes());
-            context.setModules(tempXML);
-            log.info("Contents of the context is : " + context.getModules());
+            log.debug("Module information : " + moduleInfo);
+            
+            // If we have XML data, we we will have issues mapping the response to the ClientRequestType using JaxB unmarshaller. So,
+            // we will encode the string and send it.
+            moduleInfo = Base64.encodeBase64String(moduleInfo.getBytes());
+            context.setModules(moduleInfo);
+            
 
         } catch (Exception e) {
             throw new TAException(ErrorCode.BAD_REQUEST, "Cannot find modules in the input xml");

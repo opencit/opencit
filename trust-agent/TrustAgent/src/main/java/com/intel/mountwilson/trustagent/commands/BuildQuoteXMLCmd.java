@@ -35,7 +35,7 @@ Logger log = LoggerFactory.getLogger(getClass().getName());
                 +  "<eventLog>" + context.getModules() + "</eventLog>" //To add the module information into the response.
                 + "</client_request>";
 
-        log.info("Final XML that is being sent back to the AS is : " + responseXML);
+        log.debug("Final content that is being sent back to the AS is : " + responseXML);
         context.setResponseXML(responseXML);
     }
 }
