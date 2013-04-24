@@ -62,7 +62,7 @@ public class TAConfig {
         // Additional properties to support module attestation
         defaults.setProperty("modules.folder", "modules"); 
         defaults.setProperty("modulesXml.filename", "measureLog.xml");
-        defaults.setProperty("modulesScript.filename", "measure_analysis.sh");        
+        defaults.setProperty("modulesScript.filename", "module_analysis.sh");        
         config = gatherConfiguration("trustagent.properties", defaults);
     }
     
