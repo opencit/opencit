@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
+import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.util.encoders.Base64Encoder;
 
 /**
  *
@@ -102,6 +104,7 @@ public class GenerateModulesCmd implements ICommand {
             
             log.info("Content of the XML file before replace all: " + xmlInput);
             String tempXML = xmlInput.replaceAll(">\\s*<", "><");
+            tempXML = Base64.encodeBase64String(tempXML.getBytes());
             context.setModules(tempXML);
             log.info("Contents of the context is : " + context.getModules());
 
