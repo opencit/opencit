@@ -73,6 +73,8 @@ public class GenerateModulesCmd implements ICommand {
             e.printStackTrace();
         }
 
+        log.info("Content of the XML file before getting modules: " + content);
+        
         getModulesFromMeasureLogXml(content);
 
         CommandUtil.runCommand(String.format("rm -fr %s", context.getMeasureLogXmlFile()));
@@ -97,7 +99,9 @@ public class GenerateModulesCmd implements ICommand {
             while (m.find()) {
                 xmlInput = m.group(1);
             }
-
+            
+            log.info("Content of the XML file before replace all: " + xmlInput);
+            
             context.setModules(xmlInput.replaceAll(">\\s*<", "><"));
 
         } catch (Exception e) {
