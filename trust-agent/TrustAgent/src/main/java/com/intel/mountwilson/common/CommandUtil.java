@@ -48,6 +48,8 @@ public class CommandUtil {
             log.info( "\"{0}\"", commandLine);
         }
 
+                log.info("Commandline 4 is :" + commandLine);
+
         Process p = Runtime.getRuntime().exec(commandLine);
 
         List<String> result = new ArrayList<String>();
