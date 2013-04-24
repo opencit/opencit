@@ -354,9 +354,9 @@ public class HostBO extends BaseBO {
                 if( agent.isAikCaAvailable() ) {
                     X509Certificate cert = agent.getAikCertificate();
                     try {
-                        String pem = X509Util.encodePemCertificate(cert);
-                        tblHosts.setAIKCertificate(pem);
-                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
+                        String certPem = X509Util.encodePemCertificate(cert);
+                        tblHosts.setAIKCertificate(certPem);
+                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                     }
                     catch(Exception e) {
                         log.error("Cannot encode AIK certificate: "+e.toString(), e);
