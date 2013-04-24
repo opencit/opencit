@@ -7,6 +7,7 @@ package com.intel.mtwilson.agent.citrix;
 
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
@@ -221,18 +222,32 @@ public class CitrixHostAgent implements HostAgent{
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /*  BEFORE
+     * -----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwT
+NGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX
+98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0Yo
+MMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ
+4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS8
+5uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6Bi
+BwIDAQAB
+-----END PUBLIC KEY-----
+*   AFTER
+* -----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwTNGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0YoMMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS85uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6BiBwIDAQAB-----END PUBLIC KEY-----
+     */
     @Override
     public PublicKey getAik() {
         PublicKey pk = null;
-        //throw new UnsupportedOperationException("Not supported yet.");
          try {
-            String crt = client.getAIKCertificate().replaceAll("\\r|\\n", "");;
-            System.err.print("getAik crt == " + crt); 
+            //String crt = client.getAIKCertificate();
+            String crt = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwTNGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0YoMMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS85uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6BiBwIDAQAB-----END PUBLIC KEY-----";
+            System.err.print("getAik hardcoded crt == " + crt); 
             pk = X509Util.decodePemPublicKey(crt);          
            
         }  catch(Exception ex){
-            System.out.println("getAik caught: " + ex.getMessage());     
-       }
+            System.out.println("getAik caught: " + ex.getMessage()); 
+            
+        }  
         return pk;
     }
 
