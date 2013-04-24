@@ -6,13 +6,15 @@ import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dsmagadX
  */
 public class BuildQuoteXMLCmd implements ICommand {
-
+Logger log = LoggerFactory.getLogger(getClass().getName());
     private TADataContext context = null;
 
     public BuildQuoteXMLCmd(TADataContext context) {
@@ -33,6 +35,7 @@ public class BuildQuoteXMLCmd implements ICommand {
                 +  "<eventLog>" + context.getModules() + "</eventLog>" //To add the module information into the response.
                 + "</client_request>";
 
+        log.info("Final XML that is being sent back to the AS is : " + responseXML);
         context.setResponseXML(responseXML);
     }
 }

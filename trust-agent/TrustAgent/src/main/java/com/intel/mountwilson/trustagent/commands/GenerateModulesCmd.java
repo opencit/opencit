@@ -89,13 +89,13 @@ public class GenerateModulesCmd implements ICommand {
     private void getModulesFromMeasureLogXml(String xmlInput) throws TAException {
         try {
 
-            Pattern PATTERN = Pattern.compile("(<txt>.*</txt>)");
+            /*Pattern PATTERN = Pattern.compile("(<txt>.*</txt>)");
             Matcher m = PATTERN.matcher(xmlInput);
             while (m.find()) {
                 xmlInput = m.group(1);
-            }
-            PATTERN = Pattern.compile("(<modules>.*</modules>)");
-            m = PATTERN.matcher(xmlInput);
+            }*/
+            Pattern PATTERN = Pattern.compile("(<modules>.*</modules>)");
+            Matcher m = PATTERN.matcher(xmlInput);
             while (m.find()) {
                 xmlInput = m.group(1);
             }
