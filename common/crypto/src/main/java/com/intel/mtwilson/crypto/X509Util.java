@@ -42,6 +42,8 @@ public class X509Util {
     public static final String END_CERTIFICATE = "-----END CERTIFICATE-----";
     public static final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
     public static final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
+    public static final String BEGIN_RSA_PUBLIC_KEY = "-----BEGIN RSA PUBLIC KEY-----";
+    public static final String END_RSA_PUBLIC_KEY = "-----END RSA PUBLIC KEY-----";
     public static final String PEM_NEWLINE = "\r\n";
 
     /**
@@ -112,7 +114,13 @@ public class X509Util {
     }
 
     public static PublicKey decodePemPublicKey(String text) throws CryptographyException {
-        String content = text.replace(BEGIN_PUBLIC_KEY, "").replace(END_PUBLIC_KEY, "");
+        String content = text;
+        if( text.contains(BEGIN_PUBLIC_KEY) ) {
+            content = text.replace(BEGIN_PUBLIC_KEY, "").replace(END_PUBLIC_KEY, "");
+        }
+        if( text.contains(BEGIN_RSA_PUBLIC_KEY) ) {
+            content = text.replace(BEGIN_RSA_PUBLIC_KEY, "").replace(END_RSA_PUBLIC_KEY, "");
+        }
         byte[] der = Base64.decodeBase64(content);
         return decodeDerPublicKey(der);
     }
