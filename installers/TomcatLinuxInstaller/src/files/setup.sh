@@ -22,12 +22,12 @@ cp jackson-xc.jar ${TOMCAT_HOME}/endorsed/
 cp jaxws-api-2.2.8.jar ${TOMCAT_HOME}/endorsed/
 cp jaxws-rt-2.2.7.jar ${TOMCAT_HOME}/endorsed/
 cp activation-1.1.jar ${TOMCAT_HOME}/endorsed/
-cp gmbal-api-only-3.1.0-b001.jar ${TOMCAT_HOME}/endorsed/
+#cp gmbal-api-only-3.1.0-b001.jar ${TOMCAT_HOME}/endorsed/
 cp ha-api-33.1.8.jar ${TOMCAT_HOME}/endorsed/
 cp istack-commons-runtime-2.4.jar ${TOMCAT_HOME}/endorsed/
 cp jaxb-api-2.2.4.jar ${TOMCAT_HOME}/endorsed/
 cp jaxb-impl-2.2.6.jar ${TOMCAT_HOME}/endorsed/
-cp management-api-3.0.0-b012.jar ${TOMCAT_HOME}/endorsed/
+#cp management-api-3.0.0-b012.jar ${TOMCAT_HOME}/endorsed/
 cp mimepull-1.8.jar ${TOMCAT_HOME}/endorsed/
 cp policy-2.3.1.jar ${TOMCAT_HOME}/endorsed/
 cp relaxngDatatype-20020414.jar ${TOMCAT_HOME}/endorsed/
@@ -40,14 +40,6 @@ cp txw2-20110809.jar ${TOMCAT_HOME}/endorsed/
 cp woodstox-core-asl-4.1.2.jar ${TOMCAT_HOME}/endorsed/
 
 
-FINISH=0
-
-while [ $FINISH == 0 ]; do
- if [ -a /etc/intel/cloudsecurity/p12.sdf ]; then
-  $FINISH=1
- fi
-
-done
 
 #Create SSL cert
 tomcat_create_ssl_cert $MTWILSON_SERVER

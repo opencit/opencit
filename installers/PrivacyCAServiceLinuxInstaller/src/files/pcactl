@@ -97,6 +97,14 @@ setup_interactive_install() {
   else
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
+    #stall until deploy is done
+    locat FINISH=0
+    while [ $FINISH == 0 ]; do
+      if [ -f /etc/intel/cloudsecurity/PrivacyCA.properties ]; then
+        $FINISH=1
+      fi
+    done
+
     webservice_running_report "${webservice_application_name}"
   fi
   protect_privacyca_files
