@@ -27,17 +27,21 @@ public class CommandUtil {
 
     public static List<String> runCommand(String commandLine) throws TAException, IOException {
 
-
+        log.info("Commandline is :" + commandLine);
+        
         if(StringUtils.isBlank(commandLine))
             throw new TAException(ErrorCode.ERROR,"Command cannot be empty.");
         
         String[] command = commandLine.split(" ");
+        log.info("Split command 0 :" + command[0]);
         
         if(new File(Config.getBinPath() + File.separator + command[0]).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
+        log.info("Commandline 2 is :" + commandLine);
 //        commandLine = System.getProperty("app.path", ".") + "/bin/./" + commandLine;
         if(new File(Config.getBinPath() + File.separator + commandLine).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
+        log.info("Commandline 3 is :" + commandLine);
         
 
         if (Config.isDebug()) {
