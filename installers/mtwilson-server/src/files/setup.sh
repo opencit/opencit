@@ -51,6 +51,7 @@ if using_glassfish; then
 elif using_tomcat; then
   export DEFAULT_API_PORT=$DEFAULT_TOMCAT_API_PORT;
 fi
+
 echo "DEFAULT_API_PORT=$DEFAULT_API_PORT"
 
 # if customer selected mysql but there is no connector present, we abort the install 
@@ -196,7 +197,7 @@ elif using_postgres; then
     fi 
     postgres_server_install 
     postgres_restart & >> $INSTALL_LOG_FILE
-    sleep 10
+    sleep 5
   fi
   echo "Installing postgres client..."
   #postgres_install

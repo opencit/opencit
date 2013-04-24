@@ -100,7 +100,7 @@ setup_interactive_install() {
     #stall until deploy is done
     local FINISH=0
     while [ $FINISH -le 0 ]; do
-      if [ -f /etc/intel/cloudsecurity/PrivacyCA.properties ]; then
+      if [ -f /etc/intel/cloudsecurity/PrivacyCA.p12 ]; then
         FINISH=1
       fi
     done

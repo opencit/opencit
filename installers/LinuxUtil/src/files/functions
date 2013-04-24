@@ -33,7 +33,7 @@ DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
 DEFAULT_MTWILSON_API_BASEURL="http://127.0.0.1:"
 DEFAULT_TOMCAT_API_PORT="8443"
 DEFAULT_GLASSFISH_API_PORT="8181"
-DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT
+#DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
@@ -478,8 +478,8 @@ configure_api_baseurl() {
   local input_api_baseurl
   if [ -n "${MTWILSON_API_BASEURL}" ]; then
     mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER_IP_ADDRESS}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER_IP_ADDRESS}:$DEFAULT_API_PORT"
+  elif [ -n "${MTWILSON_SERVER}" ]; then
+    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl "${config_file}"`
     prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
