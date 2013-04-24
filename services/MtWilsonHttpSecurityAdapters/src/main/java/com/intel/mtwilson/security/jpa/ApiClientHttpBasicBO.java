@@ -4,9 +4,9 @@
  */
 package com.intel.mtwilson.security.jpa;
 
-import com.intel.mtwilson.security.core.HttpBasicUserFinder;
 import com.intel.mtwilson.as.controller.MwApiClientHttpBasicJpaController;
 import com.intel.mtwilson.as.data.MwApiClientHttpBasic;
+import com.intel.mtwilson.security.core.HttpBasicUserFinder;
 import javax.persistence.EntityManagerFactory;
 
 

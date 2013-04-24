@@ -7,22 +7,22 @@
 
 Background
 
- The Mt Wilson Java API is compatible with OSGi environments. This document
- contains integration tips for OSGi environments.
+    The Mt Wilson Java API is compatible with OSGi environments. This document
+contains integration tips for OSGi environments.
 
 Packaging
 
- The Java API is available in both jar and jar-with-dependencies formats. 
- For OSGi environments, the jar format is more convenient. See the list
- of {{./dependencies.html}} for details. A zip file is available containing
- all the dependencies for convenience.
+    The Java API is available in both jar and jar-with-dependencies formats. 
+For OSGi environments, the jar format is more convenient. See the list
+of {{./dependencies.html}} for details. A zip file is available containing
+all the dependencies for convenience.
 
 Integration
 
 * JAXB
 
- After you create the api object, call setJaxbClassLoader in order to set the
- OSGi class loader that should be used when deserializing XML with JAXB.
+    After you create the api object, call setJaxbClassLoader in order to set the
+OSGi class loader that should be used when deserializing XML with JAXB.
 
 +---
 File directory = new File(System.getProperty("user.home", "."));
