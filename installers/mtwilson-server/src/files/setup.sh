@@ -292,7 +292,7 @@ echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
 echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
-  mtwilson_localhost_integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
+  mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
 if using_glassfish; then
