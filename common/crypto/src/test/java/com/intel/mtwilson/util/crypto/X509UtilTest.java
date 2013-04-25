@@ -135,6 +135,7 @@ public class X509UtilTest {
 //        PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pemBytes));
         PublicKey willNotWork = X509Util.decodePemPublicKey(pem);  // you would get an exception like DerInputStream.getLength(): lengthTag=127, too big   ... ebcause this isn't an X509 certificate, it's an RSA public key w/o the certificate.
         System.out.println("testSTDkey got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat());
+        System.out.println("got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat() + " extra: " + willNotWork.toString());
     }
     
     @Test(expected=InvalidKeySpecException.class)

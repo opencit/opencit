@@ -152,12 +152,12 @@ public class X509Util {
     public static PublicKey decodeDerPublicKey(byte[] publicKeyBytes) throws CryptographyException {
         try {
             KeyFactory factory = KeyFactory.getInstance("RSA"); // throws NoSuchAlgorithmException
-            System.err.println("stdalex using alg? " + factory.getAlgorithm());
+            
             PublicKey publicKey  = factory.generatePublic(new X509EncodedKeySpec(publicKeyBytes)); // throws InvalidKeySpecException
             return publicKey;
         }
         catch(Exception e) {
-            System.out.println("stdalex decodeDerPublicKey caught: " + e.getMessage()); 
+             
             throw new CryptographyException(e);
         }
     }

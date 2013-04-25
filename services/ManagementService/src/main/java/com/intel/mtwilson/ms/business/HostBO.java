@@ -1084,27 +1084,27 @@ public class HostBO extends BaseBO {
             if (tblMleObj == null ) {
                 
                 wlApiClient.addMLE(mleObj);
-                log.info("Successfully created the BIOS MLE : " + hostObj.BIOS_Name);
+                System.out.println("Successfully created the BIOS MLE : " + hostObj.BIOS_Name);
                 
             } else {
                 biosMLEAlreadyExists = true;
-                log.info("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
+                System.out.println("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
             }
           }
         } catch (MSException me) {
             
-            log.error("Error during OEM - BIOS MLE configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            System.out.println("Error during OEM - BIOS MLE configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
             
         } catch (ApiException ae) {
             
-            log.error("API Client error during OEM - BIOS MLE configuration. " + ae.getErrorCode() + " :" + ae.getMessage());
+            System.out.println("API Client error during OEM - BIOS MLE configuration. " + ae.getErrorCode() + " :" + ae.getMessage());
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() +
                     ": Error during OEM-BIOS MLE Configuration. " + ae.getMessage());
 
         } catch (Exception ex) {
             
-            log.error("Unexpected errror during OEM - BIOS MLE configuration. " + ex.getMessage());
+            System.out.println("Unexpected errror during OEM - BIOS MLE configuration. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OEM - BIOS MLE configuration. " + ex.getMessage());
         }   
 
