@@ -81,8 +81,12 @@ public class TblHosts implements Serializable {
     private String addOnConnectionInfo;
     @Lob
     @Column(name = "AIK_Certificate")
-    private String aIKCertificate;
+    private String aikCertificate;
 
+    @Lob
+    @Column(name = "AIK_PublicKey")
+    private String aikPublicKey;
+    
     @Column(name = "AIK_SHA1")
     private String aikSha1;
     
@@ -187,19 +191,35 @@ public class TblHosts implements Serializable {
     }
 
     public String getAIKCertificate() {
-        return aIKCertificate;
+        return aikCertificate;
     }
 
-    public void setAIKCertificate(String aIKCertificate) {
-        this.aIKCertificate = aIKCertificate;
+    public void setAIKCertificate(String aikCertificate) {
+        this.aikCertificate = aikCertificate;
+    }
+
+    public String getAikPublicKey() {
+        return aikPublicKey;
+    }
+
+    /**
+     * You should set this anytime you set the AIK Certificate
+     * @param aikPublicKey 
+     */
+    public void setAikPublicKey(String aikPublicKey) {
+        this.aikPublicKey = aikPublicKey;
     }
     
+    /**
+     * The AIK SHA1 hash is ALWAYS a hash of the Public Key, NOT the Certificate
+     * @return 
+     */
     public String getAikSha1() {
         return aikSha1;
     }
     
     /**
-     * You should set this anytime you setAIKCertificate.
+     * You should set this anytime you set the AIK Public Key.
      * The value should be hex-encoded sha1 of the DER-ENCODED (binary) AIK Public Key
      * Even if someone has signed the AIK and created an AIK CERTIFICATE, this value
      * should remain as the AIK PUBLIC KEY SHA1 so that it is unambiguous. 

@@ -35,7 +35,9 @@ import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmCommandEventDetails;
 import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.HostTpmEventLogEntry;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -44,8 +46,10 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -107,20 +111,18 @@ public class HostBO extends BaseBO {
                         HostAgent agent = factory.getHostAgent(tblHosts);
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
-                            // BUT... XXX TODO   Intel returns an X509 Certificate containing the AIK Public Key signed by the Privacy CA
-                            // ... while Citrix returns just the AIK Public Key (and the EK too) ... 
-                                setAIKCertificateForHost(tblHosts, host);
-                                // we have to check that the aik certificate was signed by a trusted privacy ca
-                                X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
-                                hostAikCert.checkValidity();
-                                // read privacy ca certificate
-                                InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // XXX TODO currently we only support one privacy CA cert... in the future we should read a PEM format file with possibly multiple trusted privacy ca certs
-                                X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
-                                IOUtils.closeQuietly(privacyCaIn);
-                                privacyCaCert.checkValidity();
-                                // verify the trusted privacy ca signed this aik cert
-                                hostAikCert.verify(privacyCaCert.getPublicKey()); // NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
-                            
+                                // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
+                                setAikForHost(tblHosts, host); 
+                                // Intel hosts return an X509 certificate for the AIK public key, signed by the privacy CA.  so we must verify the certificate is ok.
+                                if( agent.isAikCaAvailable() ) {
+                                    // we have to check that the aik certificate was signed by a trusted privacy ca
+                                    X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
+                                    hostAikCert.checkValidity(); // AIK certificate must be valid today
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
+                                    if( !validCaSignature ) {
+                                        throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
+                                    }
+                                }
                         }
 
                         // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
@@ -164,6 +166,54 @@ public class HostBO extends BaseBO {
 		return new HostResponse(ErrorCode.OK);
 	}
 
+    private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
+        log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
+        // TODO read privacy ca certs from database and see if any one of them signed it. 
+        // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
+        HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
+        try {
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs
+            List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
+            pcaList.addAll(privacyCaCerts);
+            IOUtils.closeQuietly(privacyCaIn);
+            log.debug("Added {} certificates from PrivacyCA.p12.pem", privacyCaCerts.size());
+        }
+        catch(Exception e) {
+            // FileNotFoundException: cannot find PrivacyCA.pem
+            // CertificateException: error while reading certificates from file
+            log.warn("Cannot load PrivacyCA.p12.pem");            
+        }
+        try {
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
+            X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+            pcaList.add(privacyCaCert);
+            IOUtils.closeQuietly(privacyCaIn);
+            log.debug("Added certificate from PrivacyCA.cer");
+        }
+        catch(Exception e) {
+            // FileNotFoundException: cannot find PrivacyCA.cer
+            // CertificateException: error while reading certificate from file
+            log.warn("Cannot load PrivacyCA.cer", e);            
+        }
+        boolean validCaSignature = false;
+        for(X509Certificate pca : pcaList) {
+            try {
+                if( Arrays.equals(pca.getSubjectX500Principal().getEncoded(), hostAikCert.getIssuerX500Principal().getEncoded()) ) {
+                    log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
+                    pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
+                    hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
+                    // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
+                    // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
+                    validCaSignature = true;
+                }
+            }
+            catch(Exception e) {
+                log.warn("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+            }
+        }
+        return validCaSignature;
+    }
+    
     private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
         
         for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
@@ -208,7 +258,7 @@ public class HostBO extends BaseBO {
                         HostAgentFactory factory = new HostAgentFactory();
                         HostAgent agent = factory.getHostAgent(tblHosts);
                             log.info("Getting identity.");
-                                setAIKCertificateForHost(tblHosts, host);
+                                setAikForHost(tblHosts, host);
                         
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
@@ -348,16 +398,17 @@ public class HostBO extends BaseBO {
             }	
 	}
 
-	private void setAIKCertificateForHost(TblHosts tblHosts, TxtHost host) {
+	private void setAikForHost(TblHosts tblHosts, TxtHost host) {
             HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
             HostAgent agent = factory.getHostAgent(tblHosts);
             if( agent.isAikAvailable() ) {
                 if( agent.isAikCaAvailable() ) {
                     X509Certificate cert = agent.getAikCertificate();
                     try {
-                        String pem = X509Util.encodePemCertificate(cert);
-                        tblHosts.setAIKCertificate(pem);
-                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getEncoded()).toString());
+                        String certPem = X509Util.encodePemCertificate(cert);
+                        tblHosts.setAIKCertificate(certPem);
+                        tblHosts.setAikPublicKey(X509Util.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
+                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                     }
                     catch(Exception e) {
                         log.error("Cannot encode AIK certificate: "+e.toString(), e);
@@ -367,7 +418,8 @@ public class HostBO extends BaseBO {
                     // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
                     PublicKey publicKey = agent.getAik();
                     String pem = X509Util.encodePemPublicKey(publicKey); 
-                    tblHosts.setAIKCertificate(pem);
+                    tblHosts.setAIKCertificate(null);
+                    tblHosts.setAikPublicKey(pem);
                     tblHosts.setAikSha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
                 }
             }

@@ -199,7 +199,13 @@ public class HostTrustBO extends BaseBO {
         hostReport.tpmQuote = null; // TODO
         hostReport.variables = new HashMap<String,String>(); // TODO
         if( agent.isAikAvailable() ) {
-            hostReport.aik = new Aik(agent.getAik()); 
+            if( agent.isAikCaAvailable() ) {
+                hostReport.aik = new Aik(agent.getAikCertificate());
+                // TODO: if the host sends an aik cert, tthen it should ALSO send the privacy ca cert that signed it, and then we can add it to the report hre... instaead of having to contact the database, for exapmle, to try and finding a matching ca first and then add it here.
+            }
+            else {
+                hostReport.aik = new Aik(agent.getAik()); 
+            }
         }
         
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
@@ -245,6 +251,8 @@ public class HostTrustBO extends BaseBO {
         to.VMM_OSName = from.getVmmMleId().getOsId().getName();
         to.VMM_OSVersion = from.getVmmMleId().getOsId().getVersion();
         to.AIK_Certificate = from.getAIKCertificate();
+        to.AIK_PublicKey = from.getAikPublicKey();
+        to.AIK_SHA1 = from.getAikSha1();
         return to;
     }
 
