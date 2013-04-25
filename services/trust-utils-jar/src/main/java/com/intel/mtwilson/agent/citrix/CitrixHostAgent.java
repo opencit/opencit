@@ -15,6 +15,7 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
@@ -204,17 +205,17 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public boolean isIntelTxtSupported() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
     public boolean isIntelTxtEnabled() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
     public boolean isTpmPresent() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
     @Override
@@ -262,7 +263,18 @@ BwIDAQAB
 
     @Override
     public PcrManifest getPcrManifest() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        PcrManifest pcrManifest = new PcrManifest();
+        String pcrList = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24";
+         HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
+            
+         Iterator it = pcrMap.entrySet().iterator();
+         while (it.hasNext()) {
+                Map.Entry pairs = (Map.Entry)it.next();
+                Pcr pcr = (Pcr)pairs.getValue();
+                pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcr.getIndex().toString())), new Sha1Digest(pcr.getValue().toString())));
+                it.remove(); // avoids a ConcurrentModificationException
+        }
+       return pcrManifest;
     }
 
     @Override
