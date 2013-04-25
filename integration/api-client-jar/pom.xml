@@ -256,12 +256,6 @@
             <artifactId>mtwilson-crypto</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- stdalex 1/15 jks2db!disk -->
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>ASData</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.common</groupId>
             <artifactId>mtwilson-io</artifactId>

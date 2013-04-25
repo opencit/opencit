@@ -2094,3 +2094,19 @@ webservice_uninstall() {
   fi
 }
 
+
+### MISC
+
+# called by installer to automatically configure the server for localhost integration,
+# if the customer has enabled this option
+# arguments:   currently supports just one optional argument, IP address or hostname, to enable as trusted IN ADDITION TO 127.0.0.1
+mtwilson_localhost_integration() {
+  local iplist;
+  if [ -n "$1" ]; then
+    iplist="127.0.0.1,$1"
+  else
+    iplist="127.0.0.1"
+  fi
+  update_property_in_file mtwilson.api.trust /etc/intel/cloudsecurity/management-service.properties "$iplist"
+  update_property_in_file mtwilson.ssl.required /etc/intel/cloudsecurity/management-service.properties "false"
+}

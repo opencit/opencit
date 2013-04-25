@@ -3,7 +3,7 @@
 -- This file contains the mw_api_client_http_basic table, which will be used to store the user name & password used for supporting
 -- HTTP Basic authentication
 
-CREATE TABLE `mw_as`.`mw_api_client_http_basic` (
+CREATE TABLE `mw_api_client_http_basic` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
   `user_name` varchar(45) NOT NULL,
   `password` varchar(45) NOT NULL,
