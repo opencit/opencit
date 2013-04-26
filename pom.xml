@@ -76,12 +76,12 @@
   <distributionManagement>
       <repository>
 	  <id>cpg-maven-repository</id>
-	  <url>dav:http://10.1.71.63/maven</url>
+	  <url>dav:http://10.1.71.63/maven/repository</url>
           <name>Cloud Platform Group's Maven Repository</name>
       </repository>
       <site>
           <id>cpg-website</id>
-          <url>dav:http://10.1.71.63/site/cpg</url>
+          <url>dav:http://10.1.71.63/maven/site</url>
           <name>Cloud Platform Group Documentation Site</name>
       </site>
   </distributionManagement>
@@ -90,7 +90,7 @@
 	<repository>
 		<id>cpg-x</id>
 		<name>Cloud Platform Group</name>
-		<url>http://10.1.71.63/maven</url>
+		<url>http://10.1.71.63/maven/repository</url>
 		<layout>default</layout>
                 <snapshots>
                   <enabled>true</enabled>
