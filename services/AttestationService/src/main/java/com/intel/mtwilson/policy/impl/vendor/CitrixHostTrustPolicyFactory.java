@@ -20,9 +20,9 @@ import java.util.Set;
  * @author jbuhacoff
  */
 public class CitrixHostTrustPolicyFactory implements VendorHostTrustPolicyFactory {
-    private JpaPolicyReader util;
-    public CitrixHostTrustPolicyFactory(JpaPolicyReader util) {
-        this.util = util;
+    private JpaPolicyReader reader;
+    public CitrixHostTrustPolicyFactory(JpaPolicyReader reader) {
+        this.reader = reader;
     }
     /*
     @Override
@@ -33,17 +33,17 @@ public class CitrixHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
     
     @Override
     public Set<Rule> loadTrustRulesForBios(Bios bios, TblHosts host) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return reader.loadPcrMatchesConstantRulesForBios(bios, host);
     }
 
     @Override
     public Set<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts host) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
     }
 
     @Override
     public Set<Rule> loadTrustRulesForLocation(String location, TblHosts host) {
-        return util.loadPcrMatchesConstantRulesForLocation(location, host);
+        return reader.loadPcrMatchesConstantRulesForLocation(location, host);
     }
     
 }
