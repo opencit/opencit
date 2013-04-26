@@ -37,34 +37,6 @@ public interface WhitelistService {
 
     boolean updateOS(OsData os) throws IOException, ApiException, SignatureException;
 
-    /**
-     * This API creates new OS information in the system. 
-     * 
-     * Method type: POST
-     * 
-     * Sample Call: https://192.168.1.100:8181/WLMService/resources/os
-     * 
-     * Sample Input: {"Name":"OS Name 1","Version":"v1234","Description":"Test OS"}
-     * 
-     * Sample Output: True (HTTP Status code: 200)
-     * 
-     * If the OS Name/Version combination already exists in the database an appropriate error would be returned back.
-     * 
-     * Sample Input: {"Name":"OS Name 1","Version":"v1234","Description":"New description"}
-     * 
-     * Sample Output: (Http Status Code: 400)
-     * 
-     * {
-     * "error_code": 1006,
-     * "error_message": "Data Error - OS OS Name 1 Version v1234 already exists in the database"
-     * }
-     * 
-     * @param os information comprised of name, version, and optional description
-     * @return
-     * @throws IOException
-     * @throws ApiException
-     * @throws SignatureException 
-     */
     boolean addOS(OsData os) throws IOException, ApiException, SignatureException;
 
     boolean deleteOS(OsData os) throws IOException, ApiException, SignatureException;
