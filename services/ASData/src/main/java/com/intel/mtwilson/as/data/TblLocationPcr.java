@@ -23,7 +23,7 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author dsmagadx
  */
 @Entity
-@Customizer(AuditEventHandler.class)
+//@Customizer(AuditEventHandler.class)
 @Table(name = "mw_location_pcr")
 @XmlRootElement
 @NamedQueries({

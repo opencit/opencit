@@ -29,17 +29,26 @@ import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
+import com.vmware.vim25.HostTpmEventLogEntry;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +78,8 @@ public class TAHelper {
     private Pattern pcrNumberPattern = Pattern.compile("[0-9]|[0-1][0-9]|2[0-3]"); // integer 0-23 with optional zero-padding (00, 01, ...)
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
-    private String pcrValueUntaint = "[^0-9a-fA-F]";
+    private String pcrValueUntaint = "[^0-9a-fA-F]";   
+    
 //	private EntityManagerFactory entityManagerFactory;
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
 
@@ -205,7 +215,6 @@ public class TAHelper {
 
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
-
             return getQuoteInformationForHost(tblHosts.getIPAddress(), client);
 
         } catch (ASException e) {
@@ -222,6 +231,10 @@ public class TAHelper {
         String nonce = generateNonce();
 
         String sessionId = generateSessionId();
+
+        // FIrst let us ensure that we have an AIK cert created on the host before trying to retrieve the quote. The trust agent
+        // would verify if a AIK is already present or not. If not it will create a new one.
+        trustedAik = client.getAIKCertificate();
 
         ClientRequestType clientRequestType = client.getQuote(nonce, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
         log.info("got response from server [" + hostname + "] " + clientRequestType);
@@ -252,9 +265,11 @@ public class TAHelper {
 
         log.info("created RSA key file for session id: " + sessionId);
         
-        log.info("Event log retrieved from the host consists of: " + clientRequestType.getEventLog());
-
-        PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId);
+        String decodedEventLog = new String(Base64.decodeBase64(clientRequestType.getEventLog()));
+        log.info("Event log retrieved from the host consists of: " + decodedEventLog);
+        
+        // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
+        PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
 
         log.info("Got PCR map");
         //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
@@ -311,6 +326,25 @@ public class TAHelper {
             xtw.writeEndElement();
         }
 
+        // Now we need to traverse through the PcrEventLogs and write that also into the Attestation Report. 
+        for(int pcrIndex=0; pcrIndex<24; pcrIndex++){
+             if( pcrManifest.containsPcrEventLog(PcrIndex.valueOf(pcrIndex)) ) {
+                 List<Measurement> eventLogs = pcrManifest.getPcrEventLog(pcrIndex).getEventLog();
+                 for(Measurement eventLog : eventLogs) {
+                                    xtw.writeStartElement("EventDetails");
+                                    xtw.writeAttribute("EventName", "OpenSource.EventName");
+                                    xtw.writeAttribute("ComponentName", eventLog.getLabel());
+                                    xtw.writeAttribute("DigestValue", eventLog.getValue().toString().toUpperCase());
+                                    xtw.writeAttribute("ExtendedToPCR", String.valueOf(pcrIndex));
+                                    xtw.writeAttribute("PackageName", "");
+                                    xtw.writeAttribute("PackageVendor", "");
+                                    xtw.writeAttribute("PackageVersion", "");
+                                    // since there will be only 2 modules for PCR 19, which changes across hosts, we will consider them as host specific ones
+                                    xtw.writeAttribute("UseHostSpecificDigest", "true"); 
+                                    xtw.writeEndElement();                 
+                 }
+            }
+        }
         xtw.writeEndElement();
         xtw.writeEndDocument();
         xtw.flush();
@@ -471,7 +505,7 @@ public class TAHelper {
     }
 
     // BUG #497 need to rewrite this to return List<Pcr> ... the Pcr.equals()  does same as (actually more than) IManifest.verify() because Pcr ensures the index is the same and IManifest does not!  and also it is less redundant, because this method returns Map< pcr index as string, manifest object containing pcr index and value >  
-    private PcrManifest verifyQuoteAndGetPcr(String sessionId) {
+    private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
 //        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         PcrManifest pcrManifest = new PcrManifest();
         log.info("verifyQuoteAndGetPcr for session {}", sessionId);
@@ -509,8 +543,85 @@ public class TAHelper {
              */
         }
 
+        // Now that we captured the PCR details, we need to capture the module information also into the PcrManifest object
+        // Sample Format:
+        // <modules>
+        //<module><pcrNumber>17</pcrNumber><name>tb_policy</name><value>9704353630674bfe21b86b64a7b0f99c297cf902</value></module>
+        //<module><pcrNumber>18</pcrNumber><name>xen.gz</name><value>dfdffe5d3bdff697c4d7447115440e34fa27c1a4</value></module>
+        //<module><pcrNumber>19</pcrNumber><name>vmlinuz</name><value>d3f525b0dc6f7d7c9a3af165bcf6c3e3e02b2599</value></module>
+        //<module><pcrNumber>19</pcrNumber><name>initrd</name><value>3dfa5762c78623ccfc778498ab4cb7136bb3f5ab</value></module>
+        //</modules>
+        try {
+            XMLInputFactory xif = XMLInputFactory.newInstance();
+            //FileInputStream fis = new FileInputStream("c:\\temp\\nbtest.txt");
+            StringReader sr = new StringReader(eventLog);
+            XMLStreamReader reader = xif.createXMLStreamReader(sr);
+
+            int extendedToPCR = -1;
+            String digestValue = "";
+            String componentName = "";
+
+            while (reader.hasNext()) {
+                if (reader.getEventType() == XMLStreamConstants.START_ELEMENT
+                        && reader.getLocalName().equalsIgnoreCase("module")) {
+                    reader.next();
+                    // Get the PCR Number to which the module is extended to
+                    if (reader.getLocalName().equalsIgnoreCase("pcrNumber")) {
+                        extendedToPCR = Integer.parseInt(reader.getElementText());
+                    }
+
+                    reader.next();
+                    // Get the Module name 
+                    if (reader.getLocalName().equalsIgnoreCase("name")) {
+                        componentName = reader.getElementText();
+                    }
+
+                    reader.next();
+                    // Get the Module hash value 
+                    if (reader.getLocalName().equalsIgnoreCase("value")) {
+                        digestValue = reader.getElementText();
+                    }
+
+                    log.debug("Process module {0} getting extended to {1}", componentName, extendedToPCR);
+
+                    // Attach the PcrEvent logs to the corresponding pcr indexes.
+                    // Note: Since we will not be processing the even logs for 17 & 18, we will ignore them for now.
+                    Measurement m = convertHostTpmEventLogEntryToMeasurement(extendedToPCR, componentName, digestValue);
+                    if (pcrManifest.containsPcrEventLog(PcrIndex.valueOf(extendedToPCR))) {
+                        pcrManifest.getPcrEventLog(extendedToPCR).getEventLog().add(m);
+                    } else {
+                        ArrayList<Measurement> list = new ArrayList<Measurement>();
+                        list.add(m);
+                        pcrManifest.setPcrEventLog(new PcrEventLog(PcrIndex.valueOf(extendedToPCR), list));
+                    }
+                }
+                reader.next();
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
         return pcrManifest;
 
+    }
+
+    /**
+     * Helper method to create the Measurement Object.
+     *
+     * @param extendedToPcr
+     * @param moduleName
+     * @param moduleHash
+     * @return
+     */
+    private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash) {
+        HashMap<String, String> info = new HashMap<String, String>();
+        info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
+        info.put("ComponentName", "OpenSource." + moduleName); // XXX TODO remove the "componentName." prefix because we are capturing this now in EventType
+        info.put("PackageName", "");
+        info.put("PackageVendor", "");
+        info.put("PackageVersion", "");
+
+        return new Measurement(new Sha1Digest(moduleHash), moduleName, info);
     }
     /*
      public EntityManagerFactory getEntityManagerFactory() {
@@ -532,3 +643,5 @@ public class TAHelper {
      }
      */
 }
+
+
