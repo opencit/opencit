@@ -1,0 +1,36 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
+package com.intel.dcsg.cpg.console;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author jbuhacoff
+ */
+public class PackageCommandFinder implements CommandFinder {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    private String packageName = "com.intel.dcg.console.cmd";
+    public PackageCommandFinder(String packageName) {
+        this.packageName = packageName;
+    }
+    
+    @Override
+    public Command forName(String commandName) {
+        try {
+            log.debug("Command package: {}", packageName);
+            Class commandClass = Class.forName(packageName+"."+commandName); // ClassNotFoundException
+            Object commandObject = commandClass.newInstance(); // InstantiationException, IllegalAccessException
+            Command command = (Command)commandObject;
+            return command;
+        }
+        catch(Exception e) {
+            log.debug("Cannot load command "+commandName+" in package "+packageName+": "+e.toString());
+            return null;
+        }
+    }
+    
+}

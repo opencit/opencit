@@ -1,0 +1,146 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>cpg-tls-policy</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>cpg-tls-policy</name>
+
+    <parent>
+	  <groupId>com.intel.dcsg.cpg</groupId>
+	  <artifactId>cpg</artifactId>
+	  <version>0.1-SNAPSHOT</version>
+    </parent>
+  
+ 
+  <description>A high-level API to help application programmers use the SSL/TLS protocol in a secure way</description>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+      
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-io</artifactId>
+		<version>1.3.2</version>
+	</dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.6</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.1</version>
+      <type>jar</type>
+    </dependency>
+    <!-- begin apache httpclient support  -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.2</version>
+		<scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.2</version>
+		<scope>provided</scope>
+        </dependency>
+    <!-- end apache httpclient support -->
+    
+    <!-- begin logging support -->
+        <dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.6.4</version>
+    </dependency>
+        <!--
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.4</version>
+            <scope>provided</scope>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.10</version>
+            <scope>provided</scope>
+        </dependency>        
+    <!-- end logging support -->
+    
+    <!-- begin jetty embedded web server for use with junit -->
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-embedded</artifactId>
+      <version>6.1.26</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+    <!-- end jetty embedded web server for use with junit -->
+  </dependencies>
+  
+  <build>
+      <plugins>
+          
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <!--
+                        <addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+                        -->
+                        <mainClass>com.intel.dcsg.cpg.tls.policy.Tool</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>regular-jar-with-dependencies</id>
+                <phase>package</phase>
+                <goals><goal>shade</goal></goals>
+                <configuration>
+        		<shadedArtifactAttached>true</shadedArtifactAttached>
+                	<shadedClassifierName>with-dependencies</shadedClassifierName>
+                </configuration>
+            </execution>
+            </executions>
+      </plugin>
+          
+      </plugins>
+  </build>
+</project>
