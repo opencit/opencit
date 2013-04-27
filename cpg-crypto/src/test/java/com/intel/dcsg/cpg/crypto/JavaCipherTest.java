@@ -4,7 +4,6 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
-import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -13,8 +12,6 @@ import java.security.Security;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Set;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -24,7 +21,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 import org.slf4j.Logger;

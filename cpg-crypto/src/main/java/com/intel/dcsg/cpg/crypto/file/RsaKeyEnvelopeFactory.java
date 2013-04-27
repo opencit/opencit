@@ -52,7 +52,7 @@ public class RsaKeyEnvelopeFactory {
         try {
             this.algorithm = DEFAULT_ALGORITHM;
             this.certificate = certificate;
-            this.certificateFingerprint = Md5Digest.valueOf(certificate.getEncoded()).toString();
+            this.certificateFingerprint = Md5Digest.digestOf(certificate.getEncoded()).toString();
         }
         catch(Exception e) {
             throw new CryptographyException(e);

@@ -32,7 +32,7 @@ public class RsaKeyEnvelopeRecipient {
     public RsaKeyEnvelopeRecipient(RsaCredentialX509 recipient) throws CryptographyException {
         try {
             this.recipient = recipient;
-            this.recipientFingerprint = Md5Digest.valueOf(recipient.getCertificate().getEncoded()).toString();
+            this.recipientFingerprint = Md5Digest.digestOf(recipient.getCertificate().getEncoded()).toString();
         }
         catch(Exception e) {
             throw new CryptographyException(e);

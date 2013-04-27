@@ -81,7 +81,7 @@
       </repository>
       <site>
           <id>cpg-website</id>
-          <url>dav://10.1.71.63/maven/site</url>
+          <url>dav://10.1.71.63/maven/site/cpg</url>
           <name>Cloud Platform Group Documentation Site</name>
       </site>
   </distributionManagement>

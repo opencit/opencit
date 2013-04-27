@@ -72,8 +72,8 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
             List<String> aliases = Collections.list(keystore.aliases());
             for(String alias : aliases) {
                 log.debug("Keystore entry alias: {}", alias);
-                Md5Digest fingerprint = new Md5Digest(alias);
-                if( fingerprint.isValid() ) {
+                if( Md5Digest.isValidHex(alias) ) {
+                    Md5Digest fingerprint = new Md5Digest(alias);
                     X509Certificate cert = getCertificate(fingerprint);
                     if( cert != null ) {
                         allCerts.add(cert);
@@ -119,7 +119,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
     @Override
     public void addCertificate(X509Certificate certificate) throws KeyManagementException {
         try {
-            Md5Digest fingerprint = Md5Digest.valueOf(certificate.getEncoded());
+            Md5Digest fingerprint = Md5Digest.digestOf(certificate.getEncoded());
             X509Certificate trustedCert = getCertificate(fingerprint);
             if( trustedCert != null ) {
                 log.debug("Certificate is already in keystore: {}", certificate.getSubjectX500Principal().getName());

@@ -15,7 +15,7 @@ package com.intel.dcsg.cpg.validation;
  * InputModel instances are intended to be re-used to parse additional
  * input and create corresponding Object instances (that do not necessarily
  * implement Model), 
- * whereas ObjectModel instances represent a single input.
+ * whereas ObjectModel instances represent a single input or value.
  * 
  * For example in order to create a re-usable Integer-within-range validator
  * you could create a subclass of InputModel<Integer> and implement the range
