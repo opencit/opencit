@@ -159,6 +159,11 @@ public class Host {
                 return hostBO.deleteHost(new Hostname(hostName));
         }
 
+        /**
+         * 
+         * @param searchCriteria optional, a string that would be contained in the host name;  if not specified you will get a list of all the hosts
+         * @return list of hosts whose hostname contains the value specified by searchCriteria;  in SQL terms, WHERE hostname LIKE '%searchCriteria%'
+         */
         @RolesAllowed({"Attestation", "Report", "Security"})
         @GET
         @Produces({MediaType.APPLICATION_JSON})
