@@ -9,7 +9,7 @@ http://maven.apache.org/plugins/maven-site-plugin/examples/sitedescriptor.html
 <project>
   <bannerLeft>
     <name>DCSG CPG</name>
-    <src>http://10.1.71.63/maven/site/images/logos/intel-logo-transparent-103x74.png</src>
+    <src>http://10.1.71.63/maven/site/cpg/images/logos/intel-logo-blue-transparent-160x121.png</src>
     <href>http://10.1.71.63/drupal</href>  <!-- replace with link to our team site when we it's up -->
   </bannerLeft>
   <!-- for some reason, only SOME of the changes in the skin are being copied... there must be an old version cached by maven somewhere.
