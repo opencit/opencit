@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class PublicKeyRequestVerifier {
     private static Logger log = LoggerFactory.getLogger(PublicKeyRequestVerifier.class);
     private PublicKeyUserFinder finder;
-    private int requestsExpireAfterMs = 5 * 60 * 1000; // 5 minutes
+    private int requestsExpireAfterMs = 60 * 60 * 1000; // 60 minutes
     
     private String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+)=\"([^\"]+)\"";
     private Pattern headerAttributeNameValuePairPattern = Pattern.compile(headerAttributeNameValuePair);
@@ -74,13 +74,10 @@ public class PublicKeyRequestVerifier {
             log.debug("PublicKeyAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
             
-            if( headers.containsKey("X-HTTP-Method-Override") ) {
-                signatureBlock.httpMethod = headers.getFirst("X-HTTP-Method-Override");
-            }
-            else {
-                signatureBlock.httpMethod = a.httpMethod;
-            }
+            signatureBlock.httpMethod = a.httpMethod;
             
+            /*
+             * Bug #383 disabling support for this because it creates a security vulnerability
             if( headers.containsKey("X-Original-URL") ) {
                 signatureBlock.url = headers.getFirst("X-Original-URL");
             }
@@ -90,6 +87,8 @@ public class PublicKeyRequestVerifier {
             else {
                 signatureBlock.url = a.url;
             }
+            */
+            signatureBlock.url = a.url;
             
             signatureBlock.realm = a.realm;
             signatureBlock.fingerprintBase64 = a.fingerprintBase64;

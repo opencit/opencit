@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class HmacRequestVerifier {
     private static Logger log = LoggerFactory.getLogger(HmacRequestVerifier.class);
     private SecretKeyFinder finder;
-    private int requestsExpireAfterMs = 5 * 60 * 1000; // 5 minutes
+    private int requestsExpireAfterMs = 60 * 60 * 1000; // 60 minutes
     
     private String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+)=\"([^\"]+)\"";
     private Pattern headerAttributeNameValuePairPattern = Pattern.compile(headerAttributeNameValuePair);

@@ -70,14 +70,10 @@ public class X509RequestVerifier {
             log.debug("X509CertificateAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
             
-            if( headers.containsKey("X-HTTP-Method-Override") ) {
-                signatureBlock.httpMethod = headers.getFirst("X-HTTP-Method-Override");
-                log.debug("X509CertificateAuthorization: Using X-HTTP-Method-Override");
-            }
-            else {
-                signatureBlock.httpMethod = httpMethod;
-            }
+            signatureBlock.httpMethod = httpMethod;
             
+            /**
+             * Bug #383 disabling support for this because it creates a security vulnerability
             if( headers.containsKey("X-Original-URL") ) {
                 signatureBlock.url = headers.getFirst("X-Original-URL");
                 log.debug("X509CertificateAuthorization: Using X-Original-URL");
@@ -89,6 +85,8 @@ public class X509RequestVerifier {
             else {
                 signatureBlock.url = requestUrl;
             }
+            */
+            signatureBlock.url = requestUrl;
             
             signatureBlock.realm = a.realm;
             signatureBlock.fingerprintBase64 = a.fingerprintBase64;
