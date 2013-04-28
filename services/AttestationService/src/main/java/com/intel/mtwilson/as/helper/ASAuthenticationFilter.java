@@ -12,6 +12,7 @@ import com.intel.mtwilson.security.jersey.X509RequestVerifier;
 import com.intel.mtwilson.security.jpa.ApiClientBO;
 import com.intel.mtwilson.security.jpa.ApiClientHttpBasicBO;
 import com.intel.mtwilson.security.jpa.ApiClientX509BO;
+import com.intel.mtwilson.security.jpa.RequestLogBO;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ public class ASAuthenticationFilter extends AuthenticationJerseyFilter implement
     
     public ASAuthenticationFilter() {
         // application-specific configuration
+        setRequestLog(new RequestLogBO(persistenceManager.getEntityManagerFactory("ASDataPU")));
         setRequestValidator(new HmacRequestVerifier(new ApiClientBO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
         setRequestValidator(new X509RequestVerifier(new ApiClientX509BO(persistenceManager.getEntityManagerFactory("MSDataPU"))));
         // Since we might want to support HttpBasic in OpenSource, we have added the corresponding JPA controller in the AttestationService

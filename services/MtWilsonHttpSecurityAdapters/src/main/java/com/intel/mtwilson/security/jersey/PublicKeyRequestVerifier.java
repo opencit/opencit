@@ -4,6 +4,7 @@ import com.intel.mtwilson.security.core.PublicKeyUserFinder;
 import com.intel.mtwilson.security.core.PublicKeyUserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.Md5Digest;
 import com.sun.jersey.core.header.HttpDateFormat;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
@@ -70,20 +71,6 @@ public class PublicKeyRequestVerifier {
 //        try {
             Authorization a = parseAuthorization(authorizationHeader);
             
-            // check if the request has expired by looking at the HTTP Date header
-            if( headers.containsKey("Date") ) {
-                try {
-                    Date requestDate = HttpDateFormat.readDate(headers.getFirst("Date")); // http date must be in RFC 1123 date format (as specified by email RFC 822 and http RFC 2616)
-                    if( isRequestExpired(requestDate) ) {
-                        log.error("PublicKeyAuthorization: Request expired; date="+requestDate);
-                        return null;
-                    }
-                }
-                catch(ParseException e) {
-                    throw new IllegalArgumentException("Authorization timestamp must conform to ISO 8601 format", e);
-                }
-            }
-
             log.debug("PublicKeyAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
             
@@ -164,7 +151,23 @@ public class PublicKeyRequestVerifier {
 
             if( isValid ) {
                 log.info("Request is authenticated");
-                return new User(a.fingerprintBase64, userInfo.roles);
+                
+                // check if the request has expired by looking at the HTTP Date header, but only if it was signed.
+                if( signatureBlock.headers.containsKey("Date") ) {
+                    try {
+                        Date requestDate = HttpDateFormat.readDate(signatureBlock.headers.get("Date")); // http date must be in RFC 1123 date format (as specified by email RFC 822 and http RFC 2616)
+                        if( isRequestExpired(requestDate) ) {
+                            log.error("PublicKeyAuthorization: Request expired; date="+requestDate);
+                            return null;
+                        }
+                    }
+                    catch(ParseException e) {
+                        throw new IllegalArgumentException("Authorization timestamp must conform to ISO 8601 format", e);
+                    }
+                }
+
+                
+                return new User(a.fingerprintBase64, userInfo.roles, "", Md5Digest.valueOf(signature));
             }
         /*}
         catch (ParseException e) {

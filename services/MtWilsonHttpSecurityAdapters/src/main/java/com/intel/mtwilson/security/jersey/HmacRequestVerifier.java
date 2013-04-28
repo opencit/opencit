@@ -5,6 +5,7 @@ import com.intel.mtwilson.security.core.SecretKeyFinder;
 import com.intel.mtwilson.security.http.HmacSignatureInput;
 import com.intel.mtwilson.iso8601.Iso8601Date;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.Md5Digest;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -79,14 +80,6 @@ public class HmacRequestVerifier {
         String authorizationHeader = headers.getFirst("Authorization");
 //        try {
             Authorization a = parseAuthorization(authorizationHeader);
-            try {
-                if( a.timestamp == null || isRequestExpired(a.timestamp) ) { // may throw ParseException
-                    return null;
-                }
-            }
-            catch(ParseException e) {
-                    throw new IllegalArgumentException("Date is not in ISO8601 format: "+a.timestamp, e);
-            }
             
             log.debug("VerifyAuthorization: Request timestamp ok");
             HmacSignatureInput signatureBlock = new HmacSignatureInput();
@@ -144,7 +137,17 @@ public class HmacRequestVerifier {
             
             if( signature.equals(a.signature) ) {
                 log.info("Request is authenticated");
-                return new User(username, new Role[] { Role.Attestation, Role.Whitelist }, username); // XXX default permissions for secretkey clients... TODO should create a role table for secret key clients and manage that like rsa clients... 
+                
+                try {
+                    if( signatureBlock.timestamp == null || isRequestExpired(signatureBlock.timestamp) ) { // may throw ParseException
+                        return null;
+                    }
+                }
+                catch(ParseException e) {
+                        throw new IllegalArgumentException("Date is not in ISO8601 format: "+signatureBlock.timestamp, e);
+                }
+                
+                return new User(username, new Role[] { Role.Attestation, Role.Whitelist }, username,  Md5Digest.valueOf(Base64.decodeBase64(signature))); // XXX default permissions for secretkey clients... TODO should create a role table for secret key clients and manage that like rsa clients... 
             }
     /*
         }

@@ -5,6 +5,7 @@ import com.intel.mtwilson.security.core.X509UserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import com.intel.mtwilson.rfc822.Rfc822Date;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.Md5Digest;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.cert.Certificate;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class X509RequestVerifier {
     private static Logger log = LoggerFactory.getLogger(X509RequestVerifier.class);
     private X509UserFinder finder;
-    private int requestsExpireAfterMs = 5 * 60 * 1000; // 5 minutes
+    private int requestsExpireAfterMs = 60 * 60 * 1000; // 1 hour, in milliseconds
     
     private String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+)=\"([^\"]+)\"";
     private Pattern headerAttributeNameValuePairPattern = Pattern.compile(headerAttributeNameValuePair);
@@ -65,21 +66,6 @@ public class X509RequestVerifier {
 //        try {
             log.debug("Parsing authorization header: {}", authorizationHeader);
             Authorization a = parseAuthorization(authorizationHeader);
-
-            // check if the request has expired by looking at the HTTP Date header
-            if( headers.containsKey("Date") ) {
-                //Date requestDate = HttpDateFormat.readDate(headers.getFirst("Date")); // http date must be in RFC 1123 date format (as specified by email RFC 822 and http RFC 2616)
-                Date requestDate = Rfc822Date.parse(headers.getFirst("Date"));
-                if( isRequestExpired(requestDate) ) {
-                    log.error("X509CertificateAuthorization: Request expired; date="+requestDate);
-                    throw new IllegalArgumentException("Request expired"); //; current time is "+Iso8601Date.format(new Date()));
-                }
-            }
-            else {
-                throw new IllegalArgumentException("Missing date header in request");                
-            }
-            
-            // TODO: check duplicate request cache to prevent replays within the window
 
             log.debug("X509CertificateAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
@@ -167,7 +153,21 @@ public class X509RequestVerifier {
             if( isValid ) {
                 log.info("Request is authenticated");
                 
-                return new User(a.fingerprintBase64, userInfo.roles, userInfo.loginName);
+                // check if the request has expired by looking at the HTTP Date header... but only if it was signed.
+                if( signatureBlock.headers.containsKey("Date") ) {
+                    Date requestDate = Rfc822Date.parse(signatureBlock.headers.get("Date"));
+                    if( isRequestExpired(requestDate) ) {
+                        log.error("X509CertificateAuthorization: Request expired; date="+requestDate);
+                        throw new IllegalArgumentException("Request expired"); //; current time is "+Iso8601Date.format(new Date()));
+                    }
+                }
+                else {
+                    throw new IllegalArgumentException("Missing date header in request");                
+                }
+
+                
+                
+                return new User(a.fingerprintBase64, userInfo.roles, userInfo.loginName,  Md5Digest.valueOf(signature));
             }
             /*
         }
