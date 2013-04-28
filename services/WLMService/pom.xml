@@ -114,6 +114,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+          <groupId>com.postgres</groupId> 
+          <artifactId>postgres</artifactId> 
+        
+        </dependency>
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>MSData</artifactId>
 			<version>${project.version}</version>

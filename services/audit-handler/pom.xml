@@ -37,6 +37,11 @@
 	<artifactId>jackson-mapper-asl</artifactId>
 	<version>1.9.9</version>
 </dependency>
+<dependency>
+          <groupId>com.postgres</groupId> 
+          <artifactId>postgres</artifactId> 
+        
+        </dependency>
     <dependency>
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>

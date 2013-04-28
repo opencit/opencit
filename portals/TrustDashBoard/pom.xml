@@ -40,6 +40,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+          <groupId>com.postgres</groupId> 
+          <artifactId>postgres</artifactId> 
+        
+        </dependency>
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
             <version>3.1.1</version>
