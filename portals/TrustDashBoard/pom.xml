@@ -39,11 +39,11 @@
             <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-          <groupId>com.postgres</groupId> 
-          <artifactId>postgres</artifactId> 
-        
-        </dependency>
+       <dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency> 
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
