@@ -2280,7 +2280,7 @@ tomcat_create_ssl_cert() {
   
   if [ -f $keystore ]; then
     # Check if there is already a certificate for this serverName in the Glassfish keystore
-    local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "CN=${serverName}"`
+    has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "CN=${serverName}"`
   fi
 
   if [ -n "$has_cert" ]; then
