@@ -142,7 +142,7 @@ public class ConfigureRemote implements Command {
     
     
     
-    private boolean shouldTrustRemoteHost(String server, PublicKey serverPublicKey) {
+    private boolean shouldTrustRemoteHost(String server, PublicKey serverPublicKey) throws IOException {
         Preferences prefs = Preferences.userRoot().node(MTWILSON_SSH_KNOWN_HOSTS_PACKAGE);
         byte[] knownHostKey = prefs.getByteArray(server, null);        
         if( knownHostKey == null ) {
@@ -185,7 +185,7 @@ public class ConfigureRemote implements Command {
         }
     }
     
-    public void collectUserInput() {
+    public void collectUserInput() throws IOException {
         try {
             inputMtWilsonURL();
             inputMtWilsonDatabase();
@@ -227,7 +227,10 @@ public class ConfigureRemote implements Command {
         }
     }
     
-    private String getConfirmedPasswordWithPrompt(String prompt) {
+    private String getConfirmedPasswordWithPrompt(String prompt) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         while(true) {
             System.out.println(prompt);
             char[] password = console.readPassword("Password: ");
@@ -239,7 +242,10 @@ public class ConfigureRemote implements Command {
         }
     }
 
-    private String getRequiredPasswordWithPrompt(String prompt) {
+    private String getRequiredPasswordWithPrompt(String prompt) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         while(true) {
             System.out.println(prompt);
             char[] password = console.readPassword("Password: ");
@@ -249,7 +255,10 @@ public class ConfigureRemote implements Command {
         }
     }
 
-    private int getSelectionFromListWithPrompt(List<String> list, String prompt) {
+    private int getSelectionFromListWithPrompt(List<String> list, String prompt) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         while(true) {
             System.out.println(prompt);
             for(int i=0; i<list.size(); i++) {
@@ -268,7 +277,7 @@ public class ConfigureRemote implements Command {
         }
     }
 
-    private <T> T getRequiredEnumWithPrompt(Class<T> clazz, String prompt) {
+    private <T> T getRequiredEnumWithPrompt(Class<T> clazz, String prompt) throws IOException {
         T[] list = clazz.getEnumConstants();
         if( list == null ) { throw new IllegalArgumentException(clazz.getName()+" is not an enum type"); }
         ArrayList<String> strings = new ArrayList<String>();
@@ -279,17 +288,17 @@ public class ConfigureRemote implements Command {
         return list[selected];
     }
     
-    private String getRequiredStringWithPrompt(String prompt) {
+    private String getRequiredStringWithPrompt(String prompt) throws IOException {
         return getRequiredInputWithPrompt(STRING_INPUT, prompt, "String:");
     }
 
     
-    private Integer getRequiredIntegerWithPrompt(String prompt) {
+    private Integer getRequiredIntegerWithPrompt(String prompt) throws IOException {
         return getRequiredInputWithPrompt(INTEGER_INPUT, prompt, "Integer:");
     }
     
 
-    private Integer getRequiredIntegerInRangeWithPrompt(int min, int max, String prompt) {
+    private Integer getRequiredIntegerInRangeWithPrompt(int min, int max, String prompt) throws IOException {
         return getRequiredInputWithPrompt(new IntegerInput(min,max), prompt, String.format("Integer [%d-%d]:", min, max));
     }
     
@@ -298,22 +307,25 @@ public class ConfigureRemote implements Command {
      * @param prompt
      * @return true for Yes, false for No
      */
-    private boolean getRequiredYesNoWithPrompt(String prompt) {
+    private boolean getRequiredYesNoWithPrompt(String prompt) throws IOException {
         return getRequiredInputWithPrompt(YES_NO_INPUT, prompt, "[Y]es or [N]o:").booleanValue();
     }
 
-    private URL getRequiredURLWithPrompt(String prompt) {
+    private URL getRequiredURLWithPrompt(String prompt) throws IOException {
         return getRequiredInputWithPrompt(URL_INPUT, prompt, "URL:");
     }
 
-    private InternetAddress getRequiredInternetAddressWithPrompt(String prompt) {
+    private InternetAddress getRequiredInternetAddressWithPrompt(String prompt) throws IOException {
         return getRequiredInputWithPrompt(INTERNET_ADDRESS_INPUT, prompt, "Hostname or IP Address:");
     }
-    private InternetAddress getRequiredInternetAddressWithDefaultPrompt(String prompt, String defaultValue) {
+    private InternetAddress getRequiredInternetAddressWithDefaultPrompt(String prompt, String defaultValue) throws IOException {
         return getRequiredInputWithDefaultPrompt(INTERNET_ADDRESS_INPUT, prompt, "Hostname or IP Address:", defaultValue);
     }
     
-    private <T> T getRequiredInputWithPrompt(InputModel<T> model, String caption, String prompt) {
+    private <T> T getRequiredInputWithPrompt(InputModel<T> model, String caption, String prompt) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         while(true) {
             System.out.println(caption);
             String input = console.readLine(prompt+" ");
@@ -356,7 +368,10 @@ public class ConfigureRemote implements Command {
         }
     }
 
-    private <T> T getRequiredInputWithDefaultPrompt(InputModel<T> model, String caption, String prompt, String defaultValue) {
+    private <T> T getRequiredInputWithDefaultPrompt(InputModel<T> model, String caption, String prompt, String defaultValue) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         while(true) {
             System.out.println(caption);
             String input = console.readLine(prompt+" ["+defaultValue+"] ");
@@ -375,7 +390,7 @@ public class ConfigureRemote implements Command {
         }
     }
     
-    private InternetAddress getRequiredInternetAddressWithMenuPrompt(String prompt) throws SocketException {
+    private InternetAddress getRequiredInternetAddressWithMenuPrompt(String prompt) throws SocketException, IOException {
         SetMtWilsonURL cmd = new SetMtWilsonURL();
         List<String> options = cmd.getLocalAddresses();
         if( ctx.serverAddress != null && !options.contains(ctx.serverAddress.toString())) { 
@@ -393,7 +408,7 @@ public class ConfigureRemote implements Command {
         return address;
     }
     
-    public void inputMtWilsonURL() throws SocketException {
+    public void inputMtWilsonURL() throws SocketException, IOException {
         if( ctx.target.equals(SetupTarget.LOCAL) ) {
             InternetAddress address = getRequiredInternetAddressWithMenuPrompt("Local Mt Wilson Hostname or IP Address");
             System.out.println("selected: "+address.toString());
@@ -424,7 +439,7 @@ public class ConfigureRemote implements Command {
         
     }
     
-    public void inputMtWilsonDatabase() throws SocketException {
+    public void inputMtWilsonDatabase() throws SocketException, IOException {
         Database db = new Database();
         db.type = getRequiredEnumWithPrompt(DatabaseType.class, "Database system");
         db.driver = db.type.defaultJdbcDriver();
@@ -448,7 +463,7 @@ public class ConfigureRemote implements Command {
         // TODO: verify the connection & login;  maybe do it outside this function so the entire thing can be repeated as necessary.
     }
     
-    public void inputEkSigningKeyCredentials() {
+    public void inputEkSigningKeyCredentials() throws IOException {
         System.out.println("In order to authorize Linux hosts using Trust Agent, an EK Signing Key is downloaded from Mt Wilson.");
         System.out.println("You must set a username and password to authenticate administrators who are downloading the key during a Trust Agent install.");
         PrivacyCA pca = new PrivacyCA();
@@ -459,7 +474,7 @@ public class ConfigureRemote implements Command {
     }
 
 
-    public void inputManagementServiceAdminCredentials() {
+    public void inputManagementServiceAdminCredentials() throws IOException {
         System.out.println("You must set a username and password for the first Mt Wilson administrator account.");
         AdminUser admin = new AdminUser();
         admin.username = getRequiredStringWithPrompt("Administrator Username");
