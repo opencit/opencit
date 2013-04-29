@@ -39,7 +39,9 @@ CREATE TABLE mw_certificate_x509 (
   name varchar(255) NOT NULL,
   issuer varchar(255) DEFAULT NULL,
   expires timestamp DEFAULT NULL,
-  enabled bit(1) NOT NULL DEFAULT b'0',
+-- stdalex
+-- enabled bit(1) NOT NULL DEFAULT b'0',
+  enabled boolean NOT NULL DEFAULT '0',
   status varchar(128) NOT NULL DEFAULT 'Pending',
   comment text,
   PRIMARY KEY (ID),
@@ -72,7 +74,9 @@ CREATE TABLE mw_portal_user (
   ID integer NOT NULL DEFAULT nextval('mw_portal_user_serial'),
   username varchar(255) NOT NULL,
   keystore bytea NOT NULL,
-  enabled bit(1) NOT NULL DEFAULT b'0',
+-- stdalex
+-- enabled bit(1) NOT NULL DEFAULT b'0',
+  enabled boolean NOT NULL DEFAULT '0',
   status varchar(128) NOT NULL DEFAULT 'Pending',
   comment text NULL,
   PRIMARY KEY (ID),
