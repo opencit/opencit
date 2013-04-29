@@ -2272,19 +2272,22 @@ tomcat_create_ssl_cert() {
   local keystore=${TOMCAT_HOME}/ssl/keystore.jks
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
-
+  local has_cert
 #  if [ ! -f $keystore ]; then
 #    mkdir -p ${TOMCAT_HOME}/ssl
 #      $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -dname "CN=$MTWILSON_SERVER, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}
 #  fi
+  
+  if [ -f $keystore ]; then
+    # Check if there is already a certificate for this serverName in the Glassfish keystore
+    local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "CN=${serverName}"`
+  fi
 
-   # Check if there is already a certificate for this serverName in the Glassfish keystore
-  local has_cert=`$keytool -list -v -alias s1as -keystore $keystore -storepass $keystorePassword | grep "^Owner:" | grep "CN=${serverName}"`
   if [ -n "$has_cert" ]; then
     echo "SSL Certificate for ${serverName} already exists"
   else
     echo "Creating SSL Certificate for ${serverName}..."
-    $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
+    #$keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
     $mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     echo "Restarting Tomcat domain..."
