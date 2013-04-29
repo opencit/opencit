@@ -2269,7 +2269,7 @@ tomcat_create_ssl_cert() {
 
   local serverName="${1}"
   local keystorePassword=changeit
-  local keystore=${TOMCAT_HOME}/ssl/keystore.jks
+  local keystore=${TOMCAT_HOME}/ssl/.keystore
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   local has_cert
@@ -2290,8 +2290,14 @@ tomcat_create_ssl_cert() {
     #$keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
     $mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
+    $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
     echo "Restarting Tomcat domain..."
-    tomcat_restart
+
+    if tomcat_running; then 
+      tomcat_restart
+    else
+      tomcat_start
+    fi
   fi
 }
 

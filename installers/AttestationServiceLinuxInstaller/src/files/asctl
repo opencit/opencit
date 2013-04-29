@@ -94,7 +94,13 @@ download_privacyca_certs() {
       chmod -R 600 /tmp/clientfiles.x
       unzip -o ${zipfile} -d /tmp/clientfiles.x
       rm -f ${zipfile}
-      glassfish_permissions /tmp/clientfiles.x
+
+      if using_glassfish; then
+        glassfish_permissions /tmp/clientfiles.x
+      else
+        tomcat__permissions /tmp/clientfiles.x
+      fi
+
       mv /tmp/clientfiles.x/hisprovisioner.properties ${intel_conf_dir}/hisprovisioner.properties
       mv /tmp/clientfiles.x/PrivacyCA.cer ${intel_conf_dir}/PrivacyCA.cer
       mv /tmp/clientfiles.x/endorsement.p12 ${intel_conf_dir}/endorsement.p12
