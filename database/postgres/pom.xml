@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.postgres</groupId>
             <artifactId>postgres</artifactId>
-            <version>9.2-1002.jdbc4</version>
+            
         </dependency>
     </dependencies>
 

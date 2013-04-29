@@ -68,6 +68,7 @@ public class MSConfig extends ConfigBase {
          * note that there are two levels of defaults:   if we dont' find a property mountwilson.ms.db.X, we look for mtwilson.db.X and THEN to our default
          */
     public static Properties getJpaProperties() {
+        /*
         Configuration config = getConfiguration();
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
@@ -81,6 +82,33 @@ public class MSConfig extends ConfigBase {
                     config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        prop.put("javax.persistence.jdbc.user",
+                config.getString("mountwilson.ms.db.user",
+                config.getString("mtwilson.db.user",
+                "root")));
+        prop.put("javax.persistence.jdbc.password", 
+                config.getString("mountwilson.ms.db.password", 
+                config.getString("mtwilson.db.password", 
+                "password")));
+        return prop;
+        */
+           Configuration config = getConfiguration();
+        Properties prop = new Properties();
+        prop.put("javax.persistence.jdbc.driver", 
+                config.getString("mountwilson.ms.db.driver", 
+                config.getString("mtwilson.db.driver",
+                "com.mysql.jdbc.Driver")));
+        System.err.println("stdalex msConfig getJpaConfig driver == " + config.getString("mountwilson.ms.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+        String dbms = (config.getString("mountwilson.ms.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        System.err.println("stdalex msConfig getJpaConfig dbms == " + dbms);
+        prop.put("javax.persistence.jdbc.url" , 
+                config.getString("mountwilson.ms.db.url",
+                config.getString("mtwilson.db.url",
+                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
+                    config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        System.err.println("stdalex msConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
         prop.put("javax.persistence.jdbc.user",
                 config.getString("mountwilson.ms.db.user",
                 config.getString("mtwilson.db.user",

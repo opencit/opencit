@@ -23,6 +23,7 @@ import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.setup.helper.SCPersistenceManager;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -39,7 +40,8 @@ public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
     private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
     private SetupContext ctx = null;
-
+    public static final Console console = System.console();
+    
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
@@ -160,6 +162,9 @@ public class BootstrapUser implements Command {
     }
     
     private String readInputStringWithPrompt(String prompt) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s: ", prompt));
         String input = in.readLine();
@@ -168,6 +173,9 @@ public class BootstrapUser implements Command {
     }
 
     private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s [%s]: ", prompt, defaultValue));
         String input = in.readLine();

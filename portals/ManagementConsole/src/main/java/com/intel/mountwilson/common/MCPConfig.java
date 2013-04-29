@@ -47,6 +47,7 @@ public class MCPConfig extends ConfigBase {
 
     
     public static Properties getJpaProperties() {
+        /*
         Configuration config = getConfiguration();
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
@@ -57,6 +58,30 @@ public class MCPConfig extends ConfigBase {
                 config.getString("mountwilson.mc.db.url",
                 config.getString("mtwilson.db.url",
                 String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                    config.getString("mountwilson.mc.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.mc.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.mc.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        prop.put("javax.persistence.jdbc.user",
+                config.getString("mountwilson.mc.db.user",
+                config.getString("mtwilson.db.user",
+                "root")));
+        prop.put("javax.persistence.jdbc.password", 
+                config.getString("mountwilson.mc.db.password", 
+                config.getString("mtwilson.db.password", 
+                "password")));
+        return prop;
+        */
+        Configuration config = getConfiguration();
+        Properties prop = new Properties();
+        prop.put("javax.persistence.jdbc.driver", 
+                config.getString("mountwilson.mc.db.driver", 
+                config.getString("mtwilson.db.driver",
+                "com.mysql.jdbc.Driver")));
+        String dbms = (config.getString("mountwilson.mc.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        prop.put("javax.persistence.jdbc.url" , 
+                config.getString("mountwilson.mc.db.url",
+                config.getString("mtwilson.db.url",
+                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
                     config.getString("mountwilson.mc.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.mc.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.mc.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));

@@ -83,6 +83,11 @@
             <artifactId>gson</artifactId>
             <version>2.1</version>
         </dependency>
+		<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency> 
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-bundle</artifactId>
