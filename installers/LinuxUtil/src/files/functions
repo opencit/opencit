@@ -2294,7 +2294,7 @@ tomcat_create_ssl_cert() {
     $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem" -outform pem
     
-    sed -i.bak 's/sslProtocol="TLS"/sslProtocol="TLS" SSLCertificateFile="${catalina.base}/ssl/ssl.${serverName}.crt" SSLCertificateKeyFile="${catalina.base}/ssl/ssl.${serverName}.crt.pem"/g' ${TOMCAT_HOME}/conf/server.xml
+    sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     
     echo "Restarting Tomcat domain..."
 
