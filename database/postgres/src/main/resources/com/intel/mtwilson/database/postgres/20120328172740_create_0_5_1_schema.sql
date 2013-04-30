@@ -134,15 +134,10 @@ CREATE TABLE tbl_pcr_manifest (
   MLE_ID integer NOT NULL,
   Name varchar(20) NOT NULL,
   Value varchar(100) NOT NULL,
-  
-  Created_By integer ,
-  Created_On timestamp ,
-  Updated_By integer ,
-  Updated_On timestamp ,
+
   PCR_Description varchar(100) DEFAULT NULL,
   PRIMARY KEY (ID),
-  CONSTRAINT PCR_Created_By FOREIGN KEY (Created_By) REFERENCES tbl_db_portal_user (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT PCR_Last_Updated_By FOREIGN KEY (Updated_By) REFERENCES tbl_db_portal_user (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  
   CONSTRAINT PCR_MLE_ID FOREIGN KEY (MLE_ID) REFERENCES tbl_mle (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
@@ -194,14 +189,9 @@ CREATE TABLE tbl_module_manifest (
   PackageVersion varchar(45) DEFAULT NULL,
   UseHostSpecificDigestValue boolean DEFAULT NULL,
   Description varchar(100) DEFAULT NULL,
-  Created_By integer ,
-  Created_On timestamp ,
-  Updated_By integer DEFAULT NULL,
-  Updated_On timestamp DEFAULT NULL,
+ 
   PRIMARY KEY (ID),
   CONSTRAINT Module_MLE_ID FOREIGN KEY (MLE_ID) REFERENCES tbl_mle (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT Module_Created_By FOREIGN KEY (Created_By) REFERENCES tbl_db_portal_user (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT Module_Last_Updated_By FOREIGN KEY (Updated_By) REFERENCES tbl_db_portal_user (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT Module_NameSpace_ID FOREIGN KEY (NameSpace_ID) REFERENCES tbl_package_namespace (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT Module_Event_ID FOREIGN KEY (Event_ID) REFERENCES tbl_event_type (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
