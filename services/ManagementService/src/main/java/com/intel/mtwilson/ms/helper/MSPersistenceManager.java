@@ -8,6 +8,7 @@ package com.intel.mtwilson.ms.helper;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.ms.common.MSConfig;
+import java.util.Properties;
 
 /**
  *

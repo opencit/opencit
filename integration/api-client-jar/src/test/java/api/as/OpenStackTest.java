@@ -10,19 +10,19 @@ import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ApiRequest;
 import com.intel.mtwilson.ApiResponse;
 import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
+import com.intel.mtwilson.model.*;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.junit.Test;
-import java.util.Properties;
-import org.apache.commons.configuration.MapConfiguration;
-import java.util.ArrayList;
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Properties;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.configuration.MapConfiguration;
+import org.junit.Test;
 /**
  *
  * @author jbuhacoff

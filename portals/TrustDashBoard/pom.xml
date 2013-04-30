@@ -14,7 +14,7 @@
     <dependencies>
       <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>vmware-util-jar</artifactId>
+            <artifactId>trust-util-jar</artifactId>
             <version>${project.version}</version>         
       </dependency>        
                 <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->

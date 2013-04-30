@@ -48,7 +48,7 @@ public class MleBO extends BaseBO {
         TblModuleManifestJpaController moduleManifestJpaController = null;
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
-        private static String hexadecimalRegEx = "[0-9A-Fa-f]+";
+        private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
 
         public MleBO() {
                                 mleJpaController = new TblMleJpaController(getEntityManagerFactory());
@@ -60,6 +60,7 @@ public class MleBO extends BaseBO {
 
                         // This function will be used to validate the white list values. We have seen in some cases where in we would get -1. 
                         private boolean isWhiteListValid(String componentName, String whiteList) {
+                            if( whiteList == null || whiteList.trim().isEmpty() ) { return true; } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
                                 if (whiteList.matches(hexadecimalRegEx)) {
                                         return true;
                                 } else {
@@ -86,7 +87,15 @@ public class MleBO extends BaseBO {
 	 */
 	public String addMLe(MleData mleData) {
                                 try {
-                                        TblMle tblMle = getMleDetails(mleData.getName(),
+                                    log.debug("add mle type: {}", mleData.getMleType());
+                                    log.debug("add mle name: {}", mleData.getName());
+                                    log.debug("add mle version: {}", mleData.getVersion());
+                                    log.debug("add mle os name: {}", mleData.getOsName());
+                                    log.debug("add mle os version: {}", mleData.getOsVersion());
+                                    log.debug("add mle oem: {}", mleData.getOemName());
+                                    log.debug("add mle attestation type: {}", mleData.getAttestationType());
+
+                                    TblMle tblMle = getMleDetails(mleData.getName(),
                                                         mleData.getVersion(), mleData.getOsName(),
                                                         mleData.getOsVersion(), mleData.getOemName());
 
@@ -412,6 +421,9 @@ public class MleBO extends BaseBO {
 		if (mleManifests != null) {
 
 			for (ManifestData manifestData : mleManifests) {
+                log.debug("add pcr manifest name: {}", manifestData.getName());
+                log.debug("add pcr manifest value: '{}'", manifestData.getValue());
+                
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(manifestData.getName());
                                                                                                 // Bug: 375. Need to ensure we are accepting only valid hex strings.

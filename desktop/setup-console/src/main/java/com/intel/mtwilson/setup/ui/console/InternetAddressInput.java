@@ -4,8 +4,7 @@
  */
 package com.intel.mtwilson.setup.ui.console;
 
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mtwilson.datatypes.InternetAddress;
+import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.validation.InputModel;
 import java.io.IOException;
 import java.net.InetAddress;

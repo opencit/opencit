@@ -46,6 +46,10 @@ public class TxtHostRecord {
     public String Location;
     @JsonProperty
     public String AIK_Certificate;
+    @JsonProperty
+    public String AIK_PublicKey;
+    @JsonProperty
+    public String AIK_SHA1;
     
     public TxtHostRecord() {
         
@@ -70,5 +74,7 @@ public class TxtHostRecord {
         Email = input.getEmail();
         Location = input.getLocation();
         AIK_Certificate = input.getAikCertificate();
+        AIK_PublicKey = input.getAikPublicKey();
+        AIK_SHA1 = input.getAikSha1();
     }
 }

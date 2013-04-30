@@ -374,7 +374,7 @@
 		</dependency>
         <dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>vmware-util-jar</artifactId>
+			<artifactId>trust-util-jar</artifactId>
 			<version>${project.version}</version>
         </dependency>
 		<dependency>
@@ -444,6 +444,21 @@
 	<artifactId>jackson-xc</artifactId>
 	<version>1.9.11</version>
 </dependency>
+
+<!-- for testing policy generation, sometimes xml is easier to read than json -->
+<dependency>
+  <groupId>com.fasterxml.jackson.dataformat</groupId>
+  <artifactId>jackson-dataformat-xml</artifactId>
+  <version>2.1.4</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.codehaus.woodstox</groupId>
+  <artifactId>woodstox-core-asl</artifactId>
+  <version>4.2.0</version>
+  <scope>test</scope>
+</dependency>
+<!-- end for testing -->
                 
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -554,7 +569,13 @@
             <artifactId>mtwilson-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
-                        
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.2</version>
+        </dependency>                        
+		
 <!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
 <!--
         <dependency>
@@ -563,7 +584,19 @@
             <version>1.16</version>
         </dependency>
 -->
-                        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>trust-policy</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>my</artifactId>
+            <version>1.2-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties />
 </project>

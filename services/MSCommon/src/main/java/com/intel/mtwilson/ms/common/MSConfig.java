@@ -22,8 +22,11 @@ public class MSConfig extends ConfigBase {
     private static Logger log = LoggerFactory.getLogger(MSConfig.class);
     private static final MSConfig global = new MSConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-    private MSConfig() {
+    public MSConfig() {
         super("management-service.properties");
+    }
+    public MSConfig(Properties custom) {
+        super("management-service.properties", custom);
     }
 
     @Override
@@ -62,8 +65,7 @@ public class MSConfig extends ConfigBase {
         /** 
          * note that there are two levels of defaults:   if we dont' find a property mountwilson.ms.db.X, we look for mtwilson.db.X and THEN to our default
          */
-    public static Properties getJpaProperties() {
-        Configuration config = getConfiguration();
+    public static Properties getJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.ms.db.driver", 
@@ -85,6 +87,10 @@ public class MSConfig extends ConfigBase {
                 config.getString("mtwilson.db.password", 
                 "password")));
         return prop;
+        
+    }
+    public static Properties getJpaProperties() {
+        return getJpaProperties(getConfiguration());
     }
     
 }

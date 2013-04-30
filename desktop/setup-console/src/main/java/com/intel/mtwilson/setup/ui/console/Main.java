@@ -4,49 +4,11 @@
  */
 package com.intel.mtwilson.setup.ui.console;
 
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.X509Builder;
-import com.intel.mtwilson.validation.InputModel;
-import com.intel.mtwilson.datatypes.InternetAddress;
-import com.intel.mtwilson.datatypes.Md5Digest;
-import com.intel.mtwilson.datatypes.Sha1Digest;
-import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.setup.*;
-import com.intel.mtwilson.setup.cmd.*;
-import com.intel.mtwilson.setup.model.*;
-import com.intel.mtwilson.validation.Fault;
-import com.intel.mtwilson.validation.Model;
 import java.io.Console;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyPair;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.common.SecurityUtils;
-import net.schmizz.sshj.transport.verification.HostKeyVerifier;
-import net.schmizz.sshj.userauth.UserAuthException;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A simple console program to obtain user preferences for either a local or

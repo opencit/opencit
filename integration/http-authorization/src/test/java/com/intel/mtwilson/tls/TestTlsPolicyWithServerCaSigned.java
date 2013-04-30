@@ -4,22 +4,12 @@
  */
 package com.intel.mtwilson.tls;
 
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
-import com.intel.mtwilson.tls.ArrayCertificateRepository;
-import com.intel.mtwilson.tls.ApacheTlsPolicy;
-import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
-import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.crypto.NopX509TrustManager;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.crypto.X509Builder;
-import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.model.InternetAddress;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -30,15 +20,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.configuration.SystemConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -48,21 +33,16 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.security.SslSocketConnector;
-import sun.security.x509.BasicConstraintsExtension;
-import sun.security.x509.OIDMap;
-import sun.security.x509.PKIXExtensions;
 
 /**
  * Sample http output from Jetty configured with no content handlers:

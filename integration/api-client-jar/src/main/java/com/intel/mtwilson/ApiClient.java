@@ -10,9 +10,9 @@ import com.intel.mtwilson.crypto.HmacCredential;
 import com.intel.mtwilson.crypto.Password;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
@@ -805,6 +805,23 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
+        HostTrustResponse trust = fromJSON(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.json")), HostTrustResponse.class);
+        return trust;
+    }
+
+    @Override
+    public X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
+        byte[] trust = binary(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trustcert.x509")));
+        try {
+            X509Certificate cert = X509Util.decodeDerCertificate(trust);
+            return cert;
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot decode X509 certificate ("+trust.length+" bytes)");
+        }
+    }
     
     // this is required so that the jackson mapper will create an instance of ListMleData (List<MleData>) instead of creating an instance of List<LinkedHashMap>
     public static class ListHostData extends ArrayList<TxtHostRecord> { };

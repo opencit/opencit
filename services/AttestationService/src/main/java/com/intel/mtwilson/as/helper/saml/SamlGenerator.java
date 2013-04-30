@@ -355,8 +355,15 @@ public class SamlGenerator {
             if( host.isLocationTrusted() ) {
                 attrStatement.getAttributes().add(createStringAttribute("Location", host.getLocation()));            
             }
-            attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
-
+            if( host.getAikCertificate() != null ) {
+                attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
+                attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+            }
+            else if( host.getAikPublicKey() != null ) {
+                attrStatement.getAttributes().add(createStringAttribute("AIK_PublicKey", host.getAikPublicKey()));                
+                attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
+            }
+            
             return attrStatement;
             
         }

@@ -17,7 +17,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.security.http.HttpRequestURL;
 import com.intel.mtwilson.crypto.RsaCredential;

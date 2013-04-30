@@ -1,17 +1,16 @@
 package com.intel.mtwilson.as.business;
 
-import com.intel.mtwilson.as.business.ReportsBO;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.AttestationReport;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
+import java.util.*;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import java.util.*;
 
 /**
  *

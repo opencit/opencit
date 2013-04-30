@@ -4,65 +4,47 @@
  */
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.as.controller.TblMleJpaController;
-import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
-import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
-import com.intel.mtwilson.as.controller.TblOsJpaController;
-import com.intel.mtwilson.as.controller.TblOemJpaController;
+import com.intel.mtwilson.*;
+import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
-import com.intel.mtwilson.as.data.TblPcrManifest;
+import com.intel.mtwilson.as.controller.TblMleJpaController;
+import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
+import com.intel.mtwilson.as.controller.TblOemJpaController;
+import com.intel.mtwilson.as.controller.TblOsJpaController;
+import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
+import com.intel.mtwilson.as.data.TblEventType;
+import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.data.TblMle;
+import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
-import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblModuleManifest;
-import com.intel.mtwilson.as.data.TblEventType;
-import com.intel.mtwilson.as.data.TblMle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.intel.mtwilson.agent.*;
-import com.intel.mtwilson.ms.helper.BaseBO;
-import com.intel.mtwilson.ms.helper.HostInfoInterface;
-import com.intel.mtwilson.ms.helper.OpenSourceVMMHelper;
-import com.intel.mtwilson.ms.helper.VMWareHelper;
-import com.intel.mtwilson.*;
-import com.intel.mtwilson.datatypes.*;
-import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.as.data.TblPcrManifest;
+import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.io.Filename;
-import com.intel.mtwilson.util.MWException;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.mtwilson.as.data.helper.DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
+import com.intel.mtwilson.ms.helper.BaseBO;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.ResourceBundle;
-import javax.servlet.http.HttpSession;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
-import org.codehaus.plexus.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -432,6 +414,59 @@ public class HostBO extends BaseBO {
                                         hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
                                         hostList.getHostRecords().add(hostConfigObj);
                                 }
+
+                if (attestationReport != null && !attestationReport.isEmpty()) {
+                    // Bug# 467: We do not want to delete the MLEs here since we were able to successfully make a call to 
+                    // get the attestation report but it is not having the data. So, we are ok to leave the MLEs
+                    // with empty white lists.
+                    if (!attestationReport.contains("ComponentName"))
+                        throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
+                }
+                
+                log.info("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
+                                   
+                // Finally store the attestation report by calling into the WhiteList REST APIs
+                uploadToDB(hostConfigObj, attestationReport, apiClient);
+                log.info("Successfully updated the white list database with the good known white list from host: " + gkvHost.HostName);
+                
+                // Now that we have configured the white list, if the user did not want the host to be registered, delete it
+                if (hostConfigObj.isRegisterHost() == false && hostAlreadyConfigured == false) {
+                    apiClient.deleteHost(new Hostname((gkvHost.HostName)));
+                    log.info(String.format("Successfully deleted the host '%s' as the user did not want the host to be registered.", gkvHost.HostName));
+                    
+                    // Also delete the MLEs that the user didn't intend to add. This is the fix for Bug# 478.
+                    if ((hostConfigObj.addBiosWhiteList()== false) && (biosMLEAlreadyExists == false)) {
+                        deleteMLE(apiClient, gkvHost, true);
+                    } else {
+                        // Since either a new BIOS MLE was created or an existing one was updated, we need to store the 
+                        // mapping of the white list host that was used to configure the MLE in the DB.
+                        configureMleSource(apiClient, gkvHost, true);
+                        log.info("Successfully configured the details of the host that was used to white list the BIOS MLE - " + gkvHost.BIOS_Name);
+                    }
+                    
+                    if ((hostConfigObj.addVmmWhiteList() == false) && (vmmMLEAlreadyExists == false)){
+                        deleteMLE(apiClient, gkvHost, false);
+                    } else {
+                        // Since either a new VMM MLE was created or an existing one was updated, we need to store the 
+                        // mapping of the white list host that was used to configure the MLE in the DB.
+                        configureMleSource(apiClient, gkvHost, false);
+                        log.info("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
+                    }                   
+                }
+                
+                // If in case the host is already configured, let us update it with the latest MLE configuration
+                if (hostAlreadyConfigured == true) {
+                    apiClient.updateHost(new TxtHost(gkvHost));
+                    log.info(String.format("Successfully updated the host '%s' with the new MLE information.", gkvHost.HostName));                    
+                }
+                                    
+            } else {
+                // Handle the VMware host
+                
+                // check if it has a TPM first  (should be at the beginning of this method but currently trust agent doesn't support a real is-tpm-available capability)   bug #540
+                if( !agent.isTpmEnabled()  ) {
+                    throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
+                }
 
                         }
 
@@ -893,12 +928,134 @@ public class HostBO extends BaseBO {
                                 if ((hostConfigObj.addVmmWhiteList() == true) && (hostConfigObj.getVmmWLTarget() == null
                                         || hostConfigObj.getVmmWLTarget().getValue().isEmpty())) {
 
+            // If we are setting host specific MLE, then we need to append the host name to the BIOS Name as well
+            boolean value = (hostConfigObj.getBiosWLTarget() == HostWhiteListTarget.BIOS_HOST);
+            if (hostConfigObj != null && value)
+                hostObj.BIOS_Name = hostObj.HostName + "_" + hostObj.BIOS_Name;
+            
+            TblOem oemTblObj = oemJpa.findTblOemByName(hostObj.BIOS_Oem);
+            
+            // Create the OEM if it does not exist
+            if (oemTblObj == null) {
+                
+                OemData oemObj = new OemData(hostObj.BIOS_Oem, hostObj.BIOS_Oem);
+                wlApiClient.addOEM(oemObj);                
+                log.info("Successfully created the OEM : " + hostObj.BIOS_Oem);
+                
+            } else
+                log.info("Database already has the configuration details for OEM : " + hostObj.BIOS_Oem);
+                      
+            // Create the BIOS MLE for the host. 
+            MleData mleObj = new MleData();
+            mleObj.setName(hostObj.BIOS_Name);
+            mleObj.setVersion(hostObj.BIOS_Version);
+            mleObj.setAttestationType("PCR");
+            mleObj.setMleType("BIOS");
+            mleObj.setDescription("");
+            mleObj.setOsName("");
+            mleObj.setOsVersion("");
+            mleObj.setOemName(hostObj.BIOS_Oem);
+            
+            // Now we need to create empty manifests for all the BIOS PCRs that need to
+            // be verified. 
+            String biosPCRs = hostConfigObj.getBiosPCRs();
+            if (biosPCRs.isEmpty())
+                biosPCRs = "0";            
+            String[] biosPCRList = biosPCRs.split(",");
+            
+            List<ManifestData> biosMFList = new ArrayList<ManifestData>();            
+            for (String biosPCR : biosPCRList){
+                biosMFList.add(new ManifestData(biosPCR, "")); 
+            }
+            
+            mleObj.setManifestList(biosMFList);
+            
+            // If the MLE does not exist, then let us create it.
+            TblMle tblMleObj = mleJpa.findBiosMle(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
+            if (tblMleObj == null ) {
+                
+                wlApiClient.addMLE(mleObj);
+                log.info("Successfully created the BIOS MLE : " + hostObj.BIOS_Name);
+                
+            } else {
+                biosMLEAlreadyExists = true;
+                log.info("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
+            }
+          }
+        } catch (MSException me) {
+            
+            log.error("Error during OEM - BIOS MLE configuration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+            
+        } catch (ApiException ae) {
+            
+            log.error("API Client error during OEM - BIOS MLE configuration. " + ae.getErrorCode() + " :" + ae.getMessage());
+            throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() +
+                    ": Error during OEM-BIOS MLE Configuration. " + ae.getMessage());
+
                                         throw new MSException(ErrorCode.MS_INVALID_WHITELIST_TARGET, hostConfigObj.getBiosWLTarget().toString());
                                 }
 
 
 
                                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
+            // Need to do some data massaging. Firstly we need to change the White Spaces
+            // in the OS name to underscores. This is to ensure that it works correctly with
+            // the WLM portal. In case of Intel's BIOS, need to trim it since it will be very long.
+            hostObj.VMM_OSName = hostObj.VMM_OSName.replace(' ', '_');
+            if ((hostObj.VMM_OSName.contains("ESX")) && hostObj.VMM_OSVersion.contains("5.1"))
+                attestationType = "MODULE";
+            else
+                attestationType = "PCR";
+            
+            // Update the host object with the names of BIOS and VMM, which is needed during
+            // host registration.
+            hostObj.VMM_Version = hostObj.VMM_OSVersion + "-" + hostObj.VMM_Version;
+            
+            // For VMware since there is no separate OS and VMM, we use the same name
+            if (hostObj.VMM_OSName.contains("ESX"))
+                hostObj.VMM_Name = hostObj.VMM_OSName;
+                        
+            TblOs tblOsObj = osJpa.findTblOsByNameVersion(hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+            if (tblOsObj == null) {
+            
+                // Now let us create the OS information corresponding to the host
+                OsData osObj = new OsData(hostObj.VMM_OSName, hostObj.VMM_OSVersion, "");
+                wlApiClient.addOS(osObj);
+                log.info("Successfully created the OS : " + hostObj.VMM_OSName);
+                
+            } else
+                log.info("Database already has the configuration details for the OS : " + hostObj.VMM_OSName);
+            
+            // If we are setting host specific MLE, then we need to append the host name to the VMM Name as well
+            boolean value = (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_HOST);
+            boolean value2 = (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM);
+            if (hostConfigObj != null && value) {
+                hostObj.VMM_Name = hostObj.HostName + "_" + hostObj.VMM_Name;
+            }else if (hostConfigObj != null && value2){
+                hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + hostObj.VMM_Name;
+            }
+            // Create the VMM MLE
+            MleData mleVMMObj = new MleData();
+            mleVMMObj.setName(hostObj.VMM_Name);
+            mleVMMObj.setVersion(hostObj.VMM_Version);
+            mleVMMObj.setAttestationType(attestationType);
+            mleVMMObj.setMleType("VMM");
+            mleVMMObj.setDescription("");
+            mleVMMObj.setOsName(hostObj.VMM_OSName);
+            mleVMMObj.setOsVersion(hostObj.VMM_OSVersion);
+            mleVMMObj.setOemName("");
+            
+            // Let us create the dummy manifests now. We will update it later after
+            // host registration. NOTE: We should not add PCR19 into the required manifest
+            // list if the host is ESXi 5.0 as it will change. 
+            String vmmPCRs = hostConfigObj.getVmmPCRs();
+            String[] vmmPCRList = vmmPCRs.split(",");
+            
+            List<ManifestData> vmmMFList = new ArrayList<ManifestData>();
+            for (String vmmPCR : vmmPCRList){
+                vmmMFList.add(new ManifestData(vmmPCR, "")); // whitelist service now allows empty pcr's 
+            }
 
 
                                 // bug #497   this should be a different object than TblHosts  
@@ -1242,6 +1399,8 @@ public class HostBO extends BaseBO {
                         if (hostObj.VMM_OSName.contains("ESX")) {
                                 hostObj.VMM_Name = hostObj.VMM_OSName;
                         }
+                        else {
+                            moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
 
                         // We need to handle the case where the user might want to use the OEM specific White List. By default it is
                         // the global value.
@@ -1367,6 +1526,16 @@ public class HostBO extends BaseBO {
                                 }
                                 String[] biosPCRList = biosPCRs.split(",");
 
+                            // If in case the vCenter is 5.1 and host is 5.1, then we should not be
+                            // storing anything for the PCR 19 digest value. So, we need to null it out.
+                            if (vCenterVersion != null && esxHostVersion != null && vCenterVersion.contains("5.1") 
+                                            &&  esxHostVersion.contains("5.1") &&  pcrObj.getPcrName() != null &&
+                                    pcrObj.getPcrName().equalsIgnoreCase("19"))
+                                pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
+                            // System.out.println(pcrObj.getPcrName() + ":::" + pcrObj.getPcrDigest());
+                            
+                            tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
+                            if (tblPCR == null) {
                                 List<ManifestData> biosMFList = new ArrayList<ManifestData>();
                                 for (String biosPCR : biosPCRList) {
                                         biosMFList.add(new ManifestData(biosPCR, " "));

@@ -6,10 +6,11 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
@@ -17,13 +18,12 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import org.junit.AfterClass;
-import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *

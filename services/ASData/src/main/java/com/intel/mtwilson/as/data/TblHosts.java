@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblHosts.findAll", query = "SELECT t FROM TblHosts t"),
     @NamedQuery(name = "TblHosts.findById", query = "SELECT t FROM TblHosts t WHERE t.id = :id"),
     @NamedQuery(name = "TblHosts.findByName", query = "SELECT t FROM TblHosts t WHERE t.name = :name"),
+    @NamedQuery(name = "TblHosts.findByAikSha1", query = "SELECT t FROM TblHosts t WHERE t.aikSha1 = :aikSha1"), // XXX TODO NEED TO ADD A COLUMN TO DATABASE, AND POPULATE IT WITH SHA1(AIK) WHENEVER WE UPDATE THE AIK ITSELF
     @NamedQuery(name = "TblHosts.findByIPAddress", query = "SELECT t FROM TblHosts t WHERE t.iPAddress = :iPAddress"),
     @NamedQuery(name = "TblHosts.findByPort", query = "SELECT t FROM TblHosts t WHERE t.port = :port"),
     @NamedQuery(name = "TblHosts.findByDescription", query = "SELECT t FROM TblHosts t WHERE t.description = :description"),
@@ -93,8 +94,14 @@ public class TblHosts implements Serializable {
     
     @Lob
     @Column(name = "AIK_Certificate")
-    private String aIKCertificate;
+    private String aikCertificate;
 
+    @Lob
+    @Column(name = "AIK_PublicKey")
+    private String aikPublicKey;
+    
+    @Column(name = "AIK_SHA1")
+    private String aikSha1;
     
     @Column(name = "TlsPolicy")
     private String tlsPolicyName;
@@ -205,11 +212,44 @@ public class TblHosts implements Serializable {
     }
 
     public String getAIKCertificate() {
-        return aIKCertificate;
+        return aikCertificate;
     }
 
-    public void setAIKCertificate(String aIKCertificate) {
-        this.aIKCertificate = aIKCertificate;
+    public void setAIKCertificate(String aikCertificate) {
+        this.aikCertificate = aikCertificate;
+    }
+
+    public String getAikPublicKey() {
+        return aikPublicKey;
+    }
+
+    /**
+     * You should set this anytime you set the AIK Certificate
+     * @param aikPublicKey 
+     */
+    public void setAikPublicKey(String aikPublicKey) {
+        this.aikPublicKey = aikPublicKey;
+    }
+    
+    /**
+     * The AIK SHA1 hash is ALWAYS a hash of the Public Key, NOT the Certificate
+     * @return 
+     */
+    public String getAikSha1() {
+        return aikSha1;
+    }
+    
+    /**
+     * You should set this anytime you set the AIK Public Key.
+     * The value should be hex-encoded sha1 of the DER-ENCODED (binary) AIK Public Key
+     * Even if someone has signed the AIK and created an AIK CERTIFICATE, this value
+     * should remain as the AIK PUBLIC KEY SHA1 so that it is unambiguous. 
+     * It is trivial to extract the AIK PUBLIC KEY from the AIK CERTIFICATE in order
+     * to compute the SHA1.
+     * @param aikSha1 
+     */
+    public void setAikSha1(String aikSha1) {
+        this.aikSha1 = aikSha1;
     }
     
     public String getTlsPolicyName() { return tlsPolicyName; }

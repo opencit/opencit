@@ -21,11 +21,12 @@ import com.intel.mtwilson.datatypes.PcrLogReport;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
+import com.intel.mtwilson.model.*;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -388,7 +389,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		String vCenterString;
 		try {
 			//get vCenterString of Host.
-			vCenterString = service.queryForHosts(hostName).get(0).AddOn_Connection_String;
+            // we now have to strip the Identifer off the begining of the connection string
+			vCenterString = service.queryForHosts(hostName).get(0).AddOn_Connection_String.replaceAll("vmware:","");
+            
 		} catch (Exception e) {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
 			 throw ConnectionUtil.handleException(e);

@@ -3,12 +3,7 @@ package com.intel.mtwilson.as.business;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
-import com.intel.mountwilson.manifest.data.IManifest;
-import com.intel.mountwilson.manifest.data.ModuleManifest;
-import com.intel.mountwilson.manifest.data.PcrManifest;
-import com.intel.mountwilson.manifest.data.PcrModuleManifest;
 import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.agent.vmware.VCenterHost;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
@@ -32,22 +27,32 @@ import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.policy.HostReport;
+import com.intel.mtwilson.policy.Rule;
+import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.util.ResourceFinder;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmCommandEventDetails;
 import com.vmware.vim25.HostTpmDigestInfo;
 import com.vmware.vim25.HostTpmEventLogEntry;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -61,12 +66,18 @@ import org.slf4j.LoggerFactory;
  */
 public class HostBO extends BaseBO {
 
-        private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
-        private static final String LOCATION_PCR = "22";
+	private static final String COMMAND_LINE_MANIFEST = "/b.b00 vmbTrustedBoot=true tboot=0x0x101a000";
+	public static final PcrIndex LOCATION_PCR = PcrIndex.PCR22;
         private Logger log = LoggerFactory.getLogger(getClass());
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
         private byte[] dataEncryptionKey = null;
+        private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
+        private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
+        private TblHostsJpaController hostController;
+        private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+        private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
+        private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
 
         private static class Aes128DataCipher implements DataCipher {
             private Logger log = LoggerFactory.getLogger(getClass());
@@ -106,11 +117,23 @@ public class HostBO extends BaseBO {
                     }      
         }
         
+    public HostBO() {
+        super();
+    }
+    
+    public HostBO(PersistenceManager pm) {
+        super(pm);
+    }
+        
+	public HostResponse addHost(TxtHost host) {
+            
+            log.error("HOST BO ADD HOST STARTING");
+            
+		try {
+            checkForDuplicate(host);
 
-        public HostResponse addHost(TxtHost host) {
-                String certificate = null;
-                String location = null;
-                HashMap<String, ? extends IManifest> pcrMap = null;
+          TblMle  biosMleId = findBiosMleForHost(host); 
+          TblMle  vmmMleId = findVmmMleForHost(host); 
 
                 log.error("HOST BO ADD HOST STARTING");
 
@@ -136,58 +159,128 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
+                        HostAgentFactory factory = new HostAgentFactory();
+                        HostAgent agent = factory.getHostAgent(tblHosts);
 
-                        if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
-                                certificate = getAIKCertificateForHost(tblHosts, host);
-                                // we have to check that the aik certificate was signed by a trusted privacy ca
-                                X509Certificate hostAikCert = X509Util.decodePemCertificate(certificate);
-                                hostAikCert.checkValidity();
-                                // read privacy ca certificate
-                                InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // XXX TODO currently we only support one privacy CA cert... in the future we should read a PEM format file with possibly multiple trusted privacy ca certs
-                                X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
-                                IOUtils.closeQuietly(privacyCaIn);
-                                privacyCaCert.checkValidity();
-                                // verify the trusted privacy ca signed this aik cert
-                                hostAikCert.verify(privacyCaCert.getPublicKey()); // NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
-                        } else { // ESX host so get the location for the host and store in the
-                                // table
-
-                                pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
-
-                                log.info("Getting location for host from VCenter");
-                                location = getLocation(pcrMap);
+                        if( agent.isAikAvailable() ) { // INTEL and CITRIX
+                                // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
+                                setAikForHost(tblHosts, host); 
+                                // Intel hosts return an X509 certificate for the AIK public key, signed by the privacy CA.  so we must verify the certificate is ok.
+                                if( agent.isAikCaAvailable() ) {
+                                    // we have to check that the aik certificate was signed by a trusted privacy ca
+                                    X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
+                                    hostAikCert.checkValidity(); // AIK certificate must be valid today
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
+                                    if( !validCaSignature ) {
+                                        throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
+                                    }
+                                }
                         }
 
+                        // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
+                        PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
+                        
+
+                        // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
+                        // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
+                        // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
+//                        HostReport hostReport = new HostReport();
+//                        hostReport.aik = null; // TODO should be what we get above if it's available
+//                        hostReport.pcrManifest = pcrManifest;
+//                        hostReport.tpmQuote = null;
+//                        hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
+
+//                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
+                        List<TblHostSpecificManifest>   tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest);
+                        // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
+//                            pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
+                        
+
+                        // for all hosts (used to be just vmware, but no reason right now to make it vmware-specific...), if pcr 22 happens to match our location database, populate the location field in the host record
+                            tblHosts.setLocation( getLocation(pcrManifest) );
+                        
+                        
                         //Bug: 597, 594 & 583. Here we were trying to get the length of the TlsKeystore without checking if it is NULL or not. 
                         // If in case it is NULL, it would throw NullPointerException                        
                         log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
                         log.error("HOST BO CALLING SAVEHOSTINDATABASE");
-                        saveHostInDatabase(tblHosts, host, certificate, location, pcrMap);
+                        saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
-                } catch (ASException ase) {
-                        throw ase;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-                } catch (Exception e) {
-                        throw new ASException(e);
+		} catch (ASException ase) {
+			throw ase;
+		} 
+//                catch(CryptographyException e) {
+//                    throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+//                } 
+        catch (Exception e) {
+			throw new ASException(e);
+		}
+		return new HostResponse(ErrorCode.OK);
+	}
+
+    private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
+        log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
+        // TODO read privacy ca certs from database and see if any one of them signed it. 
+        // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
+        HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
+        try {
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs
+            List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
+            pcaList.addAll(privacyCaCerts);
+            IOUtils.closeQuietly(privacyCaIn);
+            log.debug("Added {} certificates from PrivacyCA.p12.pem", privacyCaCerts.size());
+        }
+        catch(Exception e) {
+            // FileNotFoundException: cannot find PrivacyCA.pem
+            // CertificateException: error while reading certificates from file
+            log.warn("Cannot load PrivacyCA.p12.pem");            
+        }
+        try {
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
+            X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+            pcaList.add(privacyCaCert);
+            IOUtils.closeQuietly(privacyCaIn);
+            log.debug("Added certificate from PrivacyCA.cer");
+        }
+        catch(Exception e) {
+            // FileNotFoundException: cannot find PrivacyCA.cer
+            // CertificateException: error while reading certificate from file
+            log.warn("Cannot load PrivacyCA.cer", e);            
+        }
+        boolean validCaSignature = false;
+        for(X509Certificate pca : pcaList) {
+            try {
+                if( Arrays.equals(pca.getSubjectX500Principal().getEncoded(), hostAikCert.getIssuerX500Principal().getEncoded()) ) {
+                    log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
+                    pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
+                    hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
+                    // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
+                    // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
+                    validCaSignature = true;
                 }
-                return new HostResponse(ErrorCode.OK);
+            }
+            catch(Exception e) {
+                log.warn("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+            }
+        }
+        return validCaSignature;
+    }
+    
+    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
+        
+        for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
+                tblHostSpecificManifest.setHostID(tblHosts.getId());
+                hostSpecificManifestJpaController.create(tblHostSpecificManifest);
         }
 
-        private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
-                TblHostSpecificManifestJpaController thsmController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
-
-                for (TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests) {
-                        tblHostSpecificManifest.setHostID(tblHosts.getId());
-                        thsmController.create(tblHostSpecificManifest);
-                }
+	private String getLocation(PcrManifest pcrManifest) {
+        if( pcrManifest == null ) { return null; }
+        if( pcrManifest.containsPcr(LOCATION_PCR) ) {
+            String value = pcrManifest.getPcr(LOCATION_PCR).getValue().toString();
+            return locationPcrJpaController.findTblLocationPcrByPcrValue(value);
         }
-
-        private String getLocation(HashMap<String, ? extends IManifest> pcrMap) {
-
-                if (pcrMap != null) {// Pcr map will be null for host which dont support TPM
-
+		return null;
                         if (pcrMap.containsKey(LOCATION_PCR)) {
                                 return new TblLocationPcrJpaController(getEntityManagerFactory())
                                         .findTblLocationPcrByPcrValue(((PcrManifest) pcrMap
@@ -195,159 +288,8 @@ public class HostBO extends BaseBO {
                         }
                 }
 
-                return null;
-        }
 
-        // BUG #497 adding TblHosts parameter to this call so we can send the TlsPolicy to the HostAgentFactory for making the connection
-        private HashMap<String, ? extends IManifest> getHostPcrManifest(TblHosts tblHosts, TxtHost host) {
-                try {
-
-                        // bug #538 check the host capability before we try to get a manifest
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
-                        if (agent.isTpmAvailable()) {
-
-                                HashMap<String, ? extends IManifest> pcrMap = getPcrModuleManifestMap(tblHosts, host);
-                                return pcrMap;
-                        } else {
-                                throw new ASException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
-                        }
-
-                } catch (ASException e) {
-                        if (!e.getErrorCode().equals(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED)) {
-                                throw e;
-                        } else {
-                                log.info("VMWare host does not support TPM. Ignoring the error for now");
-                        }
-                        return null;
-                }
-        }
-
-        // BUG #497 XXX TODO need to rewrite to get this from the HostAgentFactory and HostAgent interfaces
-        private HashMap<String, ? extends IManifest> getPcrModuleManifestMap(
-                TblHosts tblHosts, // BUG #497 adding TblHosts parameter to this call so we can send the TlsPolicy to the HostAgentFactory for making the connection
-                TxtHost host) {
-
-                VCenterHost postProcessing = new VCenterHost() { // BUG #497 the VCenterHost class is now completely abstract and here we are providing the desired post-processing for the information obtained from vcenter
-                        @Override
-                        public HashMap<String, ? extends IManifest> processReport(String esxiVersion,
-                                HostTpmAttestationReport report) {
-                                log.info("ESX version :{}", esxiVersion);
-                                HashMap<String, PcrModuleManifest> pcrManifestMap = new HashMap<String, PcrModuleManifest>();
-
-                                for (HostTpmDigestInfo hostTpmDigestInfo : report
-                                        .getTpmPcrValues()) {
-                                        if (LOCATION_PCR.equals(String.valueOf(hostTpmDigestInfo
-                                                .getPcrNumber()))) {
-                                                String digestValue = VMwareClient.byteArrayToHexString(hostTpmDigestInfo
-                                                        .getDigestValue());
-
-                                                pcrManifestMap.put(String.valueOf(hostTpmDigestInfo
-                                                        .getPcrNumber()), new PcrModuleManifest(
-                                                        hostTpmDigestInfo.getPcrNumber(), digestValue));
-
-                                        } else if ("19".equals(String.valueOf(hostTpmDigestInfo
-                                                .getPcrNumber()))) {
-
-                                                PcrModuleManifest manifest = new PcrModuleManifest(
-                                                        hostTpmDigestInfo.getPcrNumber(),
-                                                        VMwareClient.byteArrayToHexString(hostTpmDigestInfo
-                                                        .getDigestValue()));
-
-                                                pcrManifestMap.put(String.valueOf(hostTpmDigestInfo
-                                                        .getPcrNumber()), manifest);
-                                                // get the command line manifest
-                                                getModuleManifest(report, pcrManifestMap);
-                                        }
-                                }
-
-                                return pcrManifestMap;
-                        }
-
-                        @Override
-                        public HashMap<String, ? extends IManifest> processDigest(String esxiVersion,
-                                List<HostTpmDigestInfo> htdis) {
-                                HashMap<String, PcrManifest> pcrMap = new HashMap<String, PcrManifest>();
-
-                                for (HostTpmDigestInfo htdi : htdis) {
-
-                                        if (LOCATION_PCR
-                                                .equals(String.valueOf(htdi.getPcrNumber()))) {
-                                                String digest = VMwareClient.byteArrayToHexString(htdi
-                                                        .getDigestValue());
-                                                pcrMap.put(String.valueOf(htdi.getPcrNumber()),
-                                                        new PcrManifest(htdi.getPcrNumber(), digest));
-
-                                        }
-                                }
-
-                                return pcrMap;
-                        }
-
-                        // PREMIUM FEATURE, should be moved to PremiumHostBO, but this is actually inside a VCenterHost object so ... need to discuss this one.
-                        private void getModuleManifest(HostTpmAttestationReport report,
-                                HashMap<String, PcrModuleManifest> pcrMap) {
-
-                                for (HostTpmEventLogEntry logEntry : report.getTpmEvents()) {
-
-                                        if (pcrMap.containsKey(String.valueOf(logEntry
-                                                .getPcrIndex()))) {
-
-                                                PcrModuleManifest pcrModuleManifest = pcrMap.get(String
-                                                        .valueOf(logEntry.getPcrIndex()));
-
-                                                if (logEntry.getEventDetails() instanceof HostTpmCommandEventDetails) {
-                                                        HostTpmCommandEventDetails commandEventDetails = (HostTpmCommandEventDetails) logEntry
-                                                                .getEventDetails();
-                                                        ModuleManifest moduleManifest = new ModuleManifest();
-
-                                                        if (commandEventDetails.getCommandLine() != null && commandEventDetails.getCommandLine().contains(
-                                                                "no-auto-partition")) {
-
-                                                                moduleManifest
-                                                                        .setEventName("Vim25Api.HostTpmCommandEventDetails");
-                                                                moduleManifest.setComponentName("commandLine."
-                                                                        + getCommandLine(commandEventDetails));
-                                                                moduleManifest
-                                                                        .setDigestValue(VMwareClient.byteArrayToHexString(commandEventDetails
-                                                                        .getDataHash()));
-
-                                                                log.debug("getModuleManifest HostTpmCommandEventDetails componentName is '" + moduleManifest.getComponentName() + "'");
-                                                                // Add to the module manifest map of the pcr
-                                                                pcrModuleManifest.getModuleManifests().put(
-                                                                        moduleManifest.getMFKey(),
-                                                                        moduleManifest);
-                                                        }
-                                                }
-
-                                        }
-
-                                }
-                        }
-
-                        private String getCommandLine(
-                                HostTpmCommandEventDetails commandEventDetails) {
-                                String commandLine = commandEventDetails.getCommandLine();
-                                if (commandLine != null
-                                        && commandLine.contains("no-auto-partition")) {
-                                        commandLine = "";
-                                        log.debug("commandLine contains no-auto-partition so setting to empty value");
-                                }
-                                log.debug("getCommandLine returns '" + commandLine + "'");
-                                return commandLine;
-                        }
-                };
-
-                HostAgentFactory hostAgentFactory = new HostAgentFactory();
-                HashMap<String, ? extends IManifest> pcrMap = hostAgentFactory.getManifest(tblHosts, postProcessing);
-                return pcrMap;
-        }
-
-        // XXX TODO need to replace with a call to HostAgent.isAikSupported() or HostAgent.isAikAvailable() and rely on the HostAgent implementations
-        private boolean canFetchAIKCertificateForHost(String vmmName) {
-                return (!vmmName.contains("ESX"));
-        }
-
+	public HostResponse updateHost(TxtHost host) {
         public HostResponse updateHost(TxtHost host) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 try {
@@ -357,7 +299,9 @@ public class HostBO extends BaseBO {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, host.getHostName().toString());
                         }
 
-                        getBiosAndVMM(host);
+          TblMle  biosMleId = findBiosMleForHost(host); 
+          TblMle  vmmMleId = findVmmMleForHost(host); 
+            
 
                         // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
                         if (tblHosts.getTlsPolicyName() == null && tblHosts.getTlsPolicyName().isEmpty()) { // XXX new code to test
@@ -375,19 +319,30 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        log.info("Getting identity.");
-                        if (canFetchAIKCertificateForHost(host.getVmm().getName())) { // datatype.Vmm
-                                String certificate = getAIKCertificateForHost(tblHosts, host);
-                                tblHosts.setAIKCertificate(certificate);
-                        } else { // ESX host so get the location for the host and store in the
-                                if (vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue()) {
-                                        log.info("VMM is updated. Update the host specific manifest");
+                        HostAgentFactory factory = new HostAgentFactory();
+                        HostAgent agent = factory.getHostAgent(tblHosts);
+                            log.info("Getting identity.");
+                                setAikForHost(tblHosts, host);
+                        
+                        
+                            if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
+                                log.info("VMM is updated. Update the host specific manifest");
+                                // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
+                                PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
-                                        HashMap<String, ? extends IManifest> pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 added tblHosts parameter
-                                        //Building objects and validating that manifests are created ahead of create of host
-                                        tblHostSpecificManifests = getHostSpecificManifest(pcrMap);
-                                }
-                        }
+
+                                // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
+                                // for vmware this is the "HostTpmCommandLineEventDetails" which is a host-specific value and must be
+                                // saved into mw_host_specific _manifest  (using the MLE information obtained with getBiosAndVmm(host) above...)
+//                                HostReport hostReport = new HostReport();
+//                                hostReport.aik = null; // TODO should be what we get above if it's available
+//                                hostReport.pcrManifest = pcrManifest;
+//                                hostReport.tpmQuote = null;
+//                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
+//                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
+
+                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest);
+                            }
 
                         log.info("Saving Host in database");
                         tblHosts.setBiosMleId(biosMleId);
@@ -401,13 +356,13 @@ public class HostBO extends BaseBO {
                         if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }                        
                         tblHosts.setVmmMleId(vmmMleId);
 
-                        log.info("Updating Host in database");
-                        new TblHostsJpaController(getEntityManagerFactory()).edit(tblHosts);
-
-                        if (tblHostSpecificManifests != null) {
-                                log.info("Updating Host Specific Manifest in database");
-                                deleteHostSpecificManifest(tblHosts.getId());
-                                createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
+			log.info("Updating Host in database");
+			hostController.edit(tblHosts);
+                        
+                        if(tblHostSpecificManifests != null){
+                            log.info("Updating Host Specific Manifest in database");
+                            deleteHostSpecificManifest(tblHosts.getId());
+                            createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
                         }
 
                 } catch (ASException ase) {
@@ -505,20 +460,32 @@ public class HostBO extends BaseBO {
                 }
         }
 
-        private String getAIKCertificateForHost(TblHosts tblHosts, TxtHost host) {
-                HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
-                HostAgent agent = factory.getHostAgent(tblHosts);
-                if (agent.isAikAvailable()) {
-                        X509Certificate cert = agent.getAikCertificate();
-                        try {
-                                return X509Util.encodePemCertificate(cert);
-                        } catch (Exception e) {
-                                log.error("Cannot encode AIK certificate: " + e.toString(), e);
-                                return null;
-                        }
+	private void setAikForHost(TblHosts tblHosts, TxtHost host) {
+            HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            if( agent.isAikAvailable() ) {
+                if( agent.isAikCaAvailable() ) {
+                    X509Certificate cert = agent.getAikCertificate();
+                    try {
+                        String certPem = X509Util.encodePemCertificate(cert);
+                        tblHosts.setAIKCertificate(certPem);
+                        tblHosts.setAikPublicKey(X509Util.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
+                        tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
+                    }
+                    catch(Exception e) {
+                        log.error("Cannot encode AIK certificate: "+e.toString(), e);
+                    }
                 }
-                return null;
-        }
+                else {
+                    // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
+                    PublicKey publicKey = agent.getAik();
+                    String pem = X509Util.encodePemPublicKey(publicKey); 
+                    tblHosts.setAIKCertificate(null);
+                    tblHosts.setAikPublicKey(pem);
+                    tblHosts.setAikSha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
+                }
+            }
+ 	}
 
         /**
          *
@@ -578,21 +545,37 @@ public class HostBO extends BaseBO {
                 }
         }
 
-        private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, String certificate,
-                String location, HashMap<String, ? extends IManifest> pcrMap) throws CryptographyException, MalformedURLException {
+	private TblMle findBiosMleForHost(TxtHost host) {
+		
+		TblMle biosMleId = mleController.findBiosMle(host.getBios().getName(),
+				host.getBios().getVersion(), host.getBios().getOem());
+		if (biosMleId == null) {
+			throw new ASException(ErrorCode.AS_BIOS_INCORRECT, host.getBios().getName(),host.getBios().getVersion());
+		}
+        return biosMleId;
+	}
+	private TblMle findVmmMleForHost(TxtHost host) {
+		TblMle vmmMleId = mleController.findVmmMle(host.getVmm().getName(), host
+				.getVmm().getVersion(), host.getVmm().getOsName(), host
+				.getVmm().getOsVersion());
+		if (vmmMleId == null) {
+			throw new ASException(ErrorCode.AS_VMM_INCORRECT, host.getVmm().getName(),host.getVmm().getVersion());
+		}
+        return vmmMleId;
+	}
 
+    // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException {
+		
+		
+		
+		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
+		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+		log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
-                //Building objects and validating that manifests are created ahead of create of host
-                List<TblHostSpecificManifest> tblHostSpecificManifests = getHostSpecificManifest(pcrMap);
-
-
-                TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-                log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-                log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-
-                TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
-                tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
-                tblHosts.setBiosMleId(biosMleId);
+		
+		tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                 // tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
                 // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
@@ -606,14 +589,13 @@ public class HostBO extends BaseBO {
                 if (host.getPort() != null) {
                         tblHosts.setPort(host.getPort());
                 }
-                tblHosts.setVmmMleId(vmmMleId);
-                tblHosts.setAIKCertificate(certificate); // null is ok;  vmware servers do not have aik's.
-
+		tblHosts.setVmmMleId(vmmMleId);
+                
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
-                if (location != null) {
-                        tblHosts.setLocation(location);
-                }
+//                if (location != null) {
+//                    tblHosts.setLocation(location);
+//                }
 
                 // create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
@@ -624,31 +606,50 @@ public class HostBO extends BaseBO {
 
         }
 
-        // PREMIUM FEATURE ?
-        private List<TblHostSpecificManifest> getHostSpecificManifest(HashMap<String, ? extends IManifest> pcrMap) {
-                List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
+    /*
+     * It looks for a very specific event that
+     * is extended into pcr 19 in vmware hosts.  So the vmware host-specific policy factory creates a TrustPolicy
+     * that has that event,  and here we just convert it to a TblHostSpecificManifest record.
+     * BUG #607 ... given a complete list of pcrs and module values from the host, and list of pcr's that should be used ... figures out 
+     * what host-specific module values should be recorded in the database... apparently hard-coded to pcr 19
+     * and vmware information... so this is a candidate for moving into VmwareHostTrustPolicyFactory,
+     * and instaed of returning a "host-specific manifest" it should return a list of policies with module-included
+     * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
+    */
+	private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest) {
+		List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
-                if (pcrMap != null && pcrMap.containsKey("19")) {
+		if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19) ) {
+            PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
+			
+				for (Measurement m : pcrEventLog.getEventLog()) {
+				
+					log.info("getHostSpecificManifest creating host specific manifest for event '"
+							+ m.getInfo().get("EventName") +"' field '"+m.getLabel()+"' component '"+m.getInfo().get("ComponentName") +"'");
 
-                        PcrModuleManifest pcrModuleManifest = (PcrModuleManifest) pcrMap
-                                .get("19");
+					
+                    // we are looking for the "commandline" event specifically  (vmware)
+                    if(  m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails") ) { 
+                    
+                        TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
+                                m.getInfo().get("ComponentName"),
+                                m.getInfo().get("EventName"));
 
-                        for (ModuleManifest moduleManifest : pcrModuleManifest.getModuleManifests().values()) {
-
-                                log.info("getHostSpecificManifest creating host specific manifest for event '"
-                                        + moduleManifest.getEventName() + "' field '" + moduleManifest.getFieldName() + "' component '" + moduleManifest.getComponentName() + "'");
-
-
-                                TblModuleManifest tblModuleManifest = new TblModuleManifestJpaController(
-                                        getEntityManagerFactory()).findByMleNameEventName(this.vmmMleId.getId(),
-                                        moduleManifest.getComponentName(),
-                                        moduleManifest.getEventName());
-
-                                TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                                tblHostSpecificManifest.setDigestValue(moduleManifest.getDigestValue());
-//					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                                tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                                tblHostSpecificManifests.add(tblHostSpecificManifest);
+                        TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                        tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                        tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                        tblHostSpecificManifests.add(tblHostSpecificManifest);
+                    }
+					
+				}				
+				
+				return tblHostSpecificManifests;
+			
+		} else {
+			log.warn("No PCR 19 found.SO not saving host specific manifest.");
+			return tblHostSpecificManifests;
+		}
 
                         }
 
@@ -723,6 +724,11 @@ public class HostBO extends BaseBO {
                         .findByName(hostName.toString());
                 return tblHosts;
         }
+	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException { // datatype.Hostname
+		TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey)
+				.findByAikSha1(aik.toString());
+		return tblHosts;
+	}
 
         /**
          * Author: Sudhir

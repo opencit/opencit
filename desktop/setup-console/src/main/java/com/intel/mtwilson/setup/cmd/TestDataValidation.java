@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.datatypes.PcrIndex;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.validation.Fault;

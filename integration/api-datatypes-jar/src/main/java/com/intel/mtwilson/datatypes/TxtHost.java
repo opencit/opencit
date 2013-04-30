@@ -2,6 +2,10 @@ package com.intel.mtwilson.datatypes;
 
 import java.net.MalformedURLException;
 import org.codehaus.jackson.annotate.JsonCreator;
+import com.intel.mtwilson.model.Vmm;
+import com.intel.mtwilson.model.Bios;
+import com.intel.mtwilson.model.Hostname;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -22,6 +26,8 @@ public class TxtHost {
     private String location;
     private HostTrustStatus trustStatus;
     private String aikCertificate;  // may be null
+    private String aikPublicKey;  // may be null
+    private String aikSha1;  // may be null
 
     public TxtHost(TxtHostRecord host, HostTrustStatus trustStatus) {
         this(host);
@@ -56,6 +62,8 @@ public class TxtHost {
         location = host.Location;
         trustStatus = new HostTrustStatus(); //defaults to all false
         aikCertificate = host.AIK_Certificate; // may be null
+        aikPublicKey = host.AIK_PublicKey; // may be null
+        aikSha1 = host.AIK_SHA1; // may be null
 
         // BUG #497  now all hosts require a connection string,  but the UI's are not updated yet so we allow not having one here and detect it in  HostAgentFactory
 //        if (connectionString == null || connectionString.isEmpty()) {
@@ -146,6 +154,14 @@ public class TxtHost {
     
     public String getAikCertificate() {
         return aikCertificate;
+    }
+
+    public String getAikPublicKey() {
+        return aikPublicKey;
+    }
+
+    public String getAikSha1() {
+        return aikSha1;
     }
 
     final public boolean requiresConnectionString() {

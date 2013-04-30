@@ -4,7 +4,7 @@
  */
 package validation;
 
-import com.intel.mtwilson.datatypes.PcrIndex;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.validation.*;
 import org.junit.Test;
 

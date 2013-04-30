@@ -7,21 +7,25 @@ package com.intel.mtwilson.datatypes;
 import org.codehaus.jackson.annotate.JsonGetter;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
+import com.intel.mtwilson.validation.ObjectModel;
 
 /**
  *
  * @author dsmagadx
  */
-public final class OemData {
+public final class OemData extends ObjectModel {
 
 
-    private String name;
-    private String description;
+    private String name = null;
+    private String description  = null;
 
     public OemData(){
         
     }
     
+    public OemData(String name) {
+        setName(name); 
+    }
     public OemData(String name, String description) {
         setName(name); 
         setDescription(description);
@@ -45,9 +49,6 @@ public final class OemData {
 
     @JsonGetter("Name")
     public String getName() {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("OEM Name is missing");
-        }
 
         return this.name;
     }
@@ -58,4 +59,11 @@ public final class OemData {
 
     }
 
+    @Override
+    protected void validate() {
+        if (name == null || name.isEmpty()) {
+            fault("OEM Name is missing");
+        }
+        
+    }
 }

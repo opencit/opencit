@@ -4,7 +4,9 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -28,7 +30,7 @@ public class HostBOTest {
     private static HostBO hostBO;
     
     @BeforeClass
-    public static void createBusinessObject()  {
+    public static void createBusinessObject() throws CryptographyException  {
         hostBO = new HostBO();
         hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
     }
@@ -201,7 +203,7 @@ public class HostBOTest {
      * This is not a good unit test for AS, should be moved to integration test project
      */
     @Test
-    public void testGetTrustStatusForKnownHost() {
+    public void testGetTrustStatusForKnownHost() throws IOException {
         HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);

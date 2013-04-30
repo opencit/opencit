@@ -4,18 +4,14 @@
  */
 package com.intel.mtwilson.tls;
 
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.model.InternetAddress;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
 /**
  *
  * @author jbuhacoff

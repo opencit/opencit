@@ -7,20 +7,26 @@ package com.intel.mtwilson.datatypes;
 import org.codehaus.jackson.annotate.JsonGetter;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonSetter;
+import com.intel.mtwilson.validation.ObjectModel;
 
 /**
  *
  * @author dsmagadx
  */
-public final class OsData {
+public final class OsData extends ObjectModel {
 
 
-    private String name;
-    private String version;
-    private String description;
+    private String name = null;
+    private String version = null;
+    private String description = null;
 
     public OsData(){
         
+    }
+ 
+    public OsData(String name, String version) {
+        setName(name); 
+        setVersion(version);
     }
     
     public OsData(String name, String version, String description) {
@@ -47,9 +53,6 @@ public final class OsData {
 
     @JsonGetter("Name")
     public String getName() {
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("OS Name is missing");
-        }
 
         return this.name;
     }
@@ -62,14 +65,22 @@ public final class OsData {
 
     @JsonGetter("Version")
     public String getVersion() {
-        if (version == null || version.isEmpty()) {
-            throw new IllegalArgumentException("OS Version is missing");
-        }
         return version;
     }
 
     @JsonSetter("Version")
     public void setVersion(String value) {
         this.version = value;
+    }
+    
+    @Override
+    protected void validate() {
+        if (version == null || version.isEmpty()) {
+            fault("OS Version is missing");
+        }
+        if (name == null || name.isEmpty()) {
+            fault("OS Name is missing");
+        }
+        
     }
 }

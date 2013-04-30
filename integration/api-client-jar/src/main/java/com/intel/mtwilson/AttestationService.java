@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -31,6 +32,11 @@ public interface AttestationService {
     HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
     
     HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
+
+    HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+    
+    X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+
 
     HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
 

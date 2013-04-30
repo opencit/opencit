@@ -4,15 +4,11 @@
  */
 package com.intel.mtwilson.ms.helper;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
-import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.AttestationService;
-import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSConfig;
-import com.intel.mtwilson.util.ResourceFinder;
-import java.io.File;
 
 /**
  * Bug #497  this class needs to be merged into the IntelHostAgent class.
