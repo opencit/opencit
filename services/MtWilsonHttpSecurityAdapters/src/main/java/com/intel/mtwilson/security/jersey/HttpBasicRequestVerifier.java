@@ -5,7 +5,7 @@
 package com.intel.mtwilson.security.jersey;
 
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.datatypes.Md5Digest;
+import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.mtwilson.security.core.HttpBasicUserFinder;
 import java.io.UnsupportedEncodingException;

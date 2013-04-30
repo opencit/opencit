@@ -129,9 +129,6 @@ public class HostBO extends BaseBO {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
-		try {
-            checkForDuplicate(host);
-
           TblMle  biosMleId = findBiosMleForHost(host); 
           TblMle  vmmMleId = findVmmMleForHost(host); 
 
@@ -267,13 +264,6 @@ public class HostBO extends BaseBO {
         }
         return validCaSignature;
     }
-    
-    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
-        
-        for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
-                tblHostSpecificManifest.setHostID(tblHosts.getId());
-                hostSpecificManifestJpaController.create(tblHostSpecificManifest);
-        }
 
 	private String getLocation(PcrManifest pcrManifest) {
         if( pcrManifest == null ) { return null; }
@@ -282,15 +272,17 @@ public class HostBO extends BaseBO {
             return locationPcrJpaController.findTblLocationPcrByPcrValue(value);
         }
 		return null;
-                        if (pcrMap.containsKey(LOCATION_PCR)) {
-                                return new TblLocationPcrJpaController(getEntityManagerFactory())
-                                        .findTblLocationPcrByPcrValue(((PcrManifest) pcrMap
-                                        .get(LOCATION_PCR)).getPcrValue());
-                        }
-                }
+    }
+    
+    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
+        
+        for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
+                tblHostSpecificManifest.setHostID(tblHosts.getId());
+                hostSpecificManifestJpaController.create(tblHostSpecificManifest);
+        }
+    }
 
 
-	public HostResponse updateHost(TxtHost host) {
         public HostResponse updateHost(TxtHost host) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 try {
@@ -566,7 +558,7 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException {
 		
 		
 		
@@ -652,14 +644,6 @@ public class HostBO extends BaseBO {
 			return tblHostSpecificManifests;
 		}
 
-                        }
-
-                        return tblHostSpecificManifests;
-
-                } else {
-                        log.warn("No PCR 19 found.SO not saving host specific manifest.");
-                        return tblHostSpecificManifests;
-                }
 
         }
 
@@ -726,7 +710,7 @@ public class HostBO extends BaseBO {
                 return tblHosts;
         }
 	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException { // datatype.Hostname
-		TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory(), dataEncryptionKey)
+		TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory())
 				.findByAikSha1(aik.toString());
 		return tblHosts;
 	}

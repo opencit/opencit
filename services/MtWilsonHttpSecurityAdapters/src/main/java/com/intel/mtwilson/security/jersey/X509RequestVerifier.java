@@ -5,7 +5,7 @@ import com.intel.mtwilson.security.core.X509UserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import com.intel.mtwilson.rfc822.Rfc822Date;
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.datatypes.Md5Digest;
+import com.intel.mtwilson.model.Md5Digest;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.cert.Certificate;

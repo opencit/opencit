@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.security.jersey;
 
-import com.intel.mtwilson.datatypes.Md5Digest;
+import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.datatypes.Role;
 import java.security.Principal;
         

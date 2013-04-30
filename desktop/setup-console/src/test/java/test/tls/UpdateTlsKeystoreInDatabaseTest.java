@@ -136,7 +136,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
     @Test
     public void testUpdateAikSha1() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {
         byte[] dek = Base64.decodeBase64("hPKk/2uvMFRAkpJNJgoBwA==");
-        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), dek);
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"));
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         String certificatePem = host.getAIKCertificate();
         X509Certificate certificate = X509Util.decodePemCertificate(certificatePem);
@@ -169,7 +169,10 @@ public class UpdateTlsKeystoreInDatabaseTest {
 "-----END CERTIFICATE-----\n";
         X509Certificate x509 = X509Util.decodePemCertificate(cert);
         String sha1 = "878369582105b8af97899d1fe4c8a719f01e5e10";
+        /*
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), My.persistenceManager().getDek());
+        */
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"));
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
         keystore.addTrustedCertificate(x509, sha1, "dek-recipient");
@@ -180,7 +183,10 @@ public class UpdateTlsKeystoreInDatabaseTest {
 
     @Test
     public void testShowCertificatesInExistingHostTlsKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException, UnrecoverableEntryException {
+        /*
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), My.persistenceManager().getDek());
+        */
+        TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"));
         TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
         SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
         X509Certificate[] certificates = keystore.getTrustedCertificates("dek-recipient");

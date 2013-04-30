@@ -53,7 +53,10 @@ public class MyJpaDatastore  {
         
         public TblHostsJpaController getHostsJpa() throws CryptographyException {
             if( hostsJpa == null ) {
+                /*
                 hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), pm.getDek());
+                */
+                hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"));
             }
             return hostsJpa;
         }

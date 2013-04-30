@@ -4,7 +4,7 @@ import com.intel.mtwilson.security.core.PublicKeyUserFinder;
 import com.intel.mtwilson.security.core.PublicKeyUserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.datatypes.Md5Digest;
+import com.intel.mtwilson.model.Md5Digest;
 import com.sun.jersey.core.header.HttpDateFormat;
 import java.io.UnsupportedEncodingException;
 import java.security.*;

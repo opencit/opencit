@@ -81,13 +81,6 @@ public class Main {
         catch(ClassNotFoundException e) {
             System.err.println("Unrecognized command: "+commandName);
         }
-        catch(SetupException e) {
-            e.printStackTrace(System.err);
-        }
-        catch(IOException e){
-            System.err.println("No console.");
-            e.printStackTrace();   
-        }
         catch(Exception e) {
             e.printStackTrace(System.err);
         }

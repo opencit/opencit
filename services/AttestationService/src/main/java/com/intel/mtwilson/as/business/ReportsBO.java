@@ -209,7 +209,7 @@ public class ReportsBO extends BaseBO {
 
     // BUG #497 XXX TODO needs rewrite to use HostAgentFactory and HostAgent interfaces
     public String getHostAttestationReport(Hostname hostName) {
-//        TblHosts tblHosts = null;
+        TblHosts tblHosts = null;
 //        String attestationReport = "";
 
         try {

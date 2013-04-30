@@ -164,6 +164,158 @@ public class HostBO extends BaseBO {
         return registerStatus;
     }
 
+ 
+/**
+* This is a helper function which if provided the host name and
+* connection string, would retrieve the BIOS & VMM configuration from
+* the host, verifies if those corresponding MLEs are already configured
+* in the Mt.Wilson system. If not, it would throw appropriate exception
+* back. The object returned back from his helper function could be used
+* to directly register the host.
+*
+* @param hostConfigObj
+* @return
+*/
+private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj) {
+try {
+TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
+// Retrieve the host object.
+TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+TblHosts tblHosts = new TblHosts();
+tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+// TODO: Check with jonathan on the policy used.
+// XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
+tblHosts.setTlsKeystore(null);
+tblHosts.setName(hostObj.HostName);
+tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+tblHosts.setIPAddress(hostObj.IPAddress);
+if (hostObj.Port != null) {
+tblHosts.setPort(hostObj.Port);
+}
+HostAgentFactory factory = new HostAgentFactory();
+HostAgent agent = factory.getHostAgent(tblHosts);
+try {
+TxtHostRecord hostDetails = agent.getHostDetails();
+hostObj.BIOS_Oem = hostDetails.BIOS_Oem;
+hostObj.BIOS_Version = hostDetails.BIOS_Version;
+hostObj.VMM_Name = hostDetails.VMM_Name;
+hostObj.VMM_Version = hostDetails.VMM_Version;
+hostObj.VMM_OSName = hostDetails.VMM_OSName;
+hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
+} catch (Throwable te) {
+log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
+throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+}
+// Let us verify if we got all the data back correctly or not 
+if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
+throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
+}
+hostConfigObj.setTxtHostRecord(hostObj);
+log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
++ hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version);
+// Let us first verify if all the configuration details required for host registration already exists. If not, it will throw
+// corresponding exception.
+verifyMLEForHost(hostConfigObj);
+return hostConfigObj;
+} catch (MSException me) {
+log.error("Error during retrieval of host MLE information. " + me.getErrorCode() + " :" + me.getErrorMessage());
+throw me;
+} catch (Exception ex) {
+log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
+throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
+}
+}
+
+/**
+* Bulk host registration/update function.
+*
+* @param hostRecords : List of hosts to be updated or newly registered.
+* @return
+*/
+public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
+TxtHostRecordList hostsToBeAddedList = new TxtHostRecordList();
+TxtHostRecordList hostsToBeUpdatedList = new TxtHostRecordList();
+HostConfigResponseList results = new HostConfigResponseList();
+try {
+ApiClient apiClient = createAPIObject();
+TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
+log.info("About to start processing {0} the hosts", hostRecords.getHostRecords().size());
+// We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
+// One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
+// need to be updated.
+for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {
+TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+log.info("Processing host {0}.", hostObj.HostName);
+TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
+if (hostSearchObj == null) {
+hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
+}
+if (hostSearchObj != null) {
+log.info(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
+// Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
+// return back the same error to the user
+try {
+hostConfigObj = getHostMLEDetails(hostConfigObj);
+hostsToBeUpdatedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
+} catch (MSException mse) {
+HostConfigResponse error = new HostConfigResponse();
+error.setHostName(hostObj.HostName);
+error.setStatus("false");
+error.setErrorMessage(mse.getErrorMessage() + "[" + mse.getErrorCode().toString() + "]");
+// add this to the final result list
+results.getHostRecords().add(error);
+}
+} else {
+log.info(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
+try {
+hostConfigObj = getHostMLEDetails(hostConfigObj);
+hostsToBeAddedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
+} catch (MSException mse) {
+HostConfigResponse error = new HostConfigResponse();
+error.setHostName(hostObj.HostName);
+error.setStatus("false");
+error.setErrorMessage(mse.getErrorMessage() + "[" + mse.getErrorCode().toString() + "]");
+// add this to the final result list
+results.getHostRecords().add(error);
+}
+}
+}
+ 
+// We will call into the addHosts API first for all the new hosts that need to be registered and then updateHosts API for the
+// hosts to be updated. We will combine the resuls of both and return back to the caller.
+if (!hostsToBeAddedList.getHostRecords().isEmpty()) {
+HostConfigResponseList addHostResults = apiClient.addHosts(hostsToBeAddedList);
+for (HostConfigResponse hcr : addHostResults.getHostRecords()) {
+results.getHostRecords().add(hcr);
+}
+}
+if (!hostsToBeUpdatedList.getHostRecords().isEmpty()) {
+HostConfigResponseList updateHostResults = apiClient.updateHosts(hostsToBeUpdatedList);
+for (HostConfigResponse hcr : updateHostResults.getHostRecords()) {
+results.getHostRecords().add(hcr);
+}
+}
+ 
+// Return back the results
+return results;                     
+ 
+} catch (MSException me) {
+log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+throw me;
+ 
+} catch (ApiException ae) {
+ 
+log.error("API Client error during bulk host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
+throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
+ 
+} catch (Exception ex) {
+ 
+log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+                 }
+}
+
+    
     /**
      * Author: Sudhir
      *
@@ -188,7 +340,7 @@ public class HostBO extends BaseBO {
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             log.debug("Starting to process the registration for host: " + hostObj.HostName);
 
-            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
 
             // First let us check if the host is already configured.
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
@@ -656,7 +808,7 @@ public class HostBO extends BaseBO {
 
                 String reqdManifestList = "";
 
-                TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+                TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
                 ApiClient apiClient = createAPIObject();
 
                 // Similar to VMware even TA supports retrieval of Host information and attestation report without needing the host to be registered. So,

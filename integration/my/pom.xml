@@ -84,6 +84,26 @@
 		<artifactId>api-client</artifactId>
 		<version>${project.version}</version>        
     </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.common</groupId>
+		<artifactId>mtwilson-jpa</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>ASCommon</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>MSCommon</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>audit-handler</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
         
   </dependencies>  
 </project>

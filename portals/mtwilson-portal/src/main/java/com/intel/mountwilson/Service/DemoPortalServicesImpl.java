@@ -17,7 +17,7 @@ import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.WhitelistService;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.datatypes.PcrLogReport;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;

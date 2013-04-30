@@ -311,7 +311,6 @@ public class TblHostsJpaController implements Serializable {
 
             if (list != null && list.size() > 0) {
                 host = list.get(0);
-                decryptStrings(host);
             }
         } finally {
                 em.close();
