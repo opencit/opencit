@@ -42,6 +42,11 @@
         <type>jar</type>
     </dependency>
     <dependency>
+    <groupId>com.xensource</groupId>
+			<artifactId>citrix-sdk</artifactId>
+			<version>6.1</version>
+    </dependency>
+    <dependency>
             <groupId>com.vmware</groupId>
             <artifactId>VSphere5.1</artifactId>
             <version>2.5-774886</version>

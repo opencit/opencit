@@ -103,8 +103,9 @@ public class X509UtilTest {
 //        String pem = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwTNGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0YoMMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS85uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6BiBwIDAQAB";
 //        byte[] pemBytes = Base64.decodeBase64(pem);
 //        PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pemBytes));
+        
         PublicKey willNotWork = X509Util.decodePemPublicKey(pem);  // you would get an exception like DerInputStream.getLength(): lengthTag=127, too big   ... ebcause this isn't an X509 certificate, it's an RSA public key w/o the certificate.
-        System.out.println("got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat());
+        System.out.println("got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat() + " extra: " + willNotWork.toString());
     }
 
     @Test
@@ -127,21 +128,14 @@ public class X509UtilTest {
     
     @Test
     public void testReadAikKeyWithStewartsKey() throws Exception {
-        String pem = "-----BEGIN PUBLIC KEY----- \n"+
-"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwT \n"+
-"NGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX \n"+
-"98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0Yo \n"+
-"MMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ \n"+
-"4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS8 \n"+
-"5uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6Bi \n"+
-"BwIDAQAB \n"+
-"-----END PUBLIC KEY-----\n";
+        String pem = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwTNGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0YoMMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS85uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6BiBwIDAQAB-----END PUBLIC KEY-----";
 
 //        String pem = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvNEz3+TStAAndHTc1qwTNGvZYyB7DD1FshQf+mbQUGJ9HccOXNn5oHB7fWQjODjlDrYyCs7FclSMTLxA3lHX98QWeWHL2O8t8qrJQQEUWZITmr/ddiNJOOvMeYF0K5if4m84vjgx/pTwwAVyU0YoMMXPnRozO8o7zSyRsH4jixALDugrsveEjLQI/cIEFvNjqlhyfumHyJKywNkMH1oJ4e/f89FkpeDV694lsLs1jguuLLnvroXYJ5Uzeos+F0Pj1zFDUvhWrjVwxsUfAxS85uFGTUm6EEl9XiKwi+mgg8ODrY5dh3uE2yKB2T1Qj8BfK55zB8cYbORSsm6/f6BiBwIDAQAB";
 //        byte[] pemBytes = Base64.decodeBase64(pem);
 //        PublicKey publicKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(pemBytes));
         PublicKey willNotWork = X509Util.decodePemPublicKey(pem);  // you would get an exception like DerInputStream.getLength(): lengthTag=127, too big   ... ebcause this isn't an X509 certificate, it's an RSA public key w/o the certificate.
-        System.out.println("got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat());
+        System.out.println("testSTDkey got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat());
+        System.out.println("got public key? alg :"+willNotWork.getAlgorithm()+" format: "+willNotWork.getFormat() + " extra: " + willNotWork.toString());
     }
     
     @Test(expected=InvalidKeySpecException.class)

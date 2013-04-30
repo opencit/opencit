@@ -87,7 +87,7 @@ public class HostBO extends BaseBO {
         
 	public HostResponse addHost(TxtHost host) {
             
-            log.error("HOST BO ADD HOST STARTING");
+           System.err.println("HOST BO ADD HOST STARTING");
             
 		try {
             checkForDuplicate(host);
@@ -95,12 +95,13 @@ public class HostBO extends BaseBO {
           TblMle  biosMleId = findBiosMleForHost(host); 
           TblMle  vmmMleId = findVmmMleForHost(host); 
 
-            log.info("Getting Server Identity.");
+            System.err.println("Getting Server Identity.");
             
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
                         tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
                         tblHosts.setTlsKeystore(null);
+                        System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         if( host.getHostName() != null ) { tblHosts.setName(host.getHostName().toString()); }
                         if( host.getIPAddress() != null ) { tblHosts.setIPAddress(host.getIPAddress().toString()); }
