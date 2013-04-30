@@ -98,7 +98,7 @@ download_privacyca_certs() {
       if using_glassfish; then
         glassfish_permissions /tmp/clientfiles.x
       else
-        tomcat__permissions /tmp/clientfiles.x
+        tomcat_permissions /tmp/clientfiles.x
       fi
 
       mv /tmp/clientfiles.x/hisprovisioner.properties ${intel_conf_dir}/hisprovisioner.properties
