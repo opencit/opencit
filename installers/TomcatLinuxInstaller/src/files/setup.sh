@@ -15,14 +15,11 @@ tomcat_install $TOMCAT_PACKAGE
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
 mkdir ${TOMCAT_HOME}/endorsed
-cp jackson-core-asl.jar ${TOMCAT_HOME}/endorsed/
-cp jackson-mapper-asl.jar ${TOMCAT_HOME}/endorsed/
-cp jackson-xc.jar ${TOMCAT_HOME}/endorsed/
-#HisPrivacyCa depends on the following to be in the endorsed folder
 cp *.jar ${TOMCAT_HOME}/endorsed/
 
 #Create SSL cert
 tomcat_create_ssl_cert $MTWILSON_SERVER
+
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
@@ -51,6 +48,5 @@ cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
 
-tomcat_start
 
 echo "Starting Tomcat..."

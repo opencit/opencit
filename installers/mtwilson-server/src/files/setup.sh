@@ -235,6 +235,13 @@ elif using_tomcat; then
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
     #mtwilson tomcat-sslcert
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   fi
 fi 

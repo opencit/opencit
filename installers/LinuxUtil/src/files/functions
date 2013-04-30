@@ -2296,13 +2296,6 @@ tomcat_create_ssl_cert() {
     sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     cp ${keystore} /root/
 
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
   fi
 }
 
