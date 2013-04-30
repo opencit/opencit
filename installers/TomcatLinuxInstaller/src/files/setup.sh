@@ -43,10 +43,15 @@ sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomca
 rm  -f tomcat-users.xml.old
 #chown -R root:tomcat6 tomcat-users.xml
 
+# Here is what the connector string should look like
+#<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+#               maxThreads="150" scheme="https" secure="true"
+#               clientAuth="false" sslProtocol="TLS"
+#               keystoreFile="/usr/share/apache-tomcat-6.0.29/ssl/keystore.jks" keystorePass="changeit" />
 # release the connectors!
 cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
-
+sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-6.0.29\/ssl\/keystore.jks\" keystorePass=\"changeit\" \/>/g' test.xml
 
 echo "Starting Tomcat..."
