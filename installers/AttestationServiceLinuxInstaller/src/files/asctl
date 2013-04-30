@@ -164,8 +164,13 @@ create_saml_key() {
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
 
   #saml.issuer=https://localhost:8181
-  local saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
-   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
+  local saml_issuer=""
+  if using_glassfish; then
+    saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
+  else
+    saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8443"
+  fi
+  update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
 }
 
 create_data_encryption_key() {
