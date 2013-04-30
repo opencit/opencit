@@ -2275,8 +2275,7 @@ tomcat_create_ssl_cert() {
   local has_cert
   if [ ! -f $keystore ]; then
     mkdir -p ${TOMCAT_HOME}/ssl
-    $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}
-    cp ${keystore} /root/  
+    $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}  
   fi
   
   if [ -f $keystore ]; then
@@ -2295,12 +2294,13 @@ tomcat_create_ssl_cert() {
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem" -outform pem
     
     sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
-    
-    echo "Restarting Tomcat domain..."
+    cp ${keystore} /root/
 
     if tomcat_running; then 
+      echo "Restarting Tomcat ..."
       tomcat_restart
     else
+      echo "Starting Tomcat ..."
       tomcat_start
     fi
   fi
