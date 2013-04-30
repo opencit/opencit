@@ -45,7 +45,8 @@ import javax.xml.bind.annotation.XmlType;
     "errorCode",
     "errorMessage",
     "aikcert",
-    "quote"
+    "quote",
+    "eventLog"
 })
 public class ClientRequestType {
 
@@ -61,7 +62,8 @@ public class ClientRequestType {
     protected String aikcert;
     @XmlElement(required = true)
     protected String quote;
-
+    @XmlElement(required = true)
+    protected String eventLog; // This will have the list of modules from the event log, which we will parse later.
     /**
      * Gets the value of the timestamp property.
      * 
@@ -196,6 +198,15 @@ public class ClientRequestType {
      */
     public void setQuote(String value) {
         this.quote = value;
+    }
+
+    
+    public String getEventLog() {
+        return eventLog;
+    }
+
+    public void setEventLog(String eventLog) {
+        this.eventLog = eventLog;
     }
 
 }

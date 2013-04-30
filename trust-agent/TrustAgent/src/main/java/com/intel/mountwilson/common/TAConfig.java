@@ -59,6 +59,10 @@ public class TAConfig {
         defaults.setProperty("secure.port", "9999");
         defaults.setProperty("nonsecure.port", "9998");
         defaults.setProperty("daa.enabled", "false");
+        // Additional properties to support module attestation
+        defaults.setProperty("modules.folder", "modules"); 
+        defaults.setProperty("modulesXml.filename", "measureLog.xml");
+        defaults.setProperty("modulesScript.filename", "measure_analysis.sh");        
         config = gatherConfiguration("trustagent.properties", defaults);
     }
     

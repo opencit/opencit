@@ -241,6 +241,14 @@ public interface HostAgent {
      * may be referenced by name from dynamic whitelist rules.
      * @return
      * @throws IOException 
+     * 
+     *  * Format should look something like this
+     * <?xml version='1.0' encoding='UTF-8'?>
+     * <Host_Attestation_Report Host_Name="10.1.70.126" vCenterVersion="5.0" HostVersion="5.0">
+     *      <PCRInfo ComponentName="0" DigestValue="1d670f2ae1dde52109b33a1f14c03e079ade7fea"/>
+     *      <PCRInfo ComponentName="17" DigestValue="ca21b877fa54dff86ed5170bf4dd6536cfe47e4d"/>
+     *      <PCRInfo ComponentName="18" DigestValue="8cbd66606433c8b860de392efb30d76990a3b1ed"/>
+     * </Host_Attestation_Report>
      */
     Map<String,String> getHostAttributes() throws IOException;
 }

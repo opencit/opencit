@@ -101,10 +101,40 @@
 							</div>
 						</div>
 					</div>
+                    <div id="citrixHostType" style="display: none;">
+						<div class="singleDiv">
+							<div class="labelDiv">WhiteList Host : </div>
+							<div class="valueDiv">
+								<input type="text" class="textBox_Border" id="whiteListCitrix_Host">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+						<div class="singleDiv">
+							<div class="labelDiv">Port #: </div>
+							<div class="valueDiv">
+								<input type="text" class="textBox_Border" id="whiteListCitrix_portNO">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+                        <div class="singleDiv">
+							<div class="labelDiv">UserName: </div>
+							<div class="valueDiv">
+								<input type="text" class="textBox_Border" id="whiteListCitrix_userName">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+                        <div class="singleDiv">
+							<div class="labelDiv">Password: </div>
+							<div class="valueDiv">
+								<input type="password" class="textBox_Border" id="whiteListCitrix_password">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+					</div>
 					<div id="vmwareHostType" style="display: none;" >
 						<div id="defineVMWareHostType">
 							<div class="singleDiv">
-								<div class="labelDiv">Good Known Host : </div>
+								<div class="labelDiv">WhiteList Host : </div>
 								<div class="valueDiv">
 									<input type="text" class="textBox_Border" id="whiteListVMware_Host">
 									<span class="requiredField">*</span>
