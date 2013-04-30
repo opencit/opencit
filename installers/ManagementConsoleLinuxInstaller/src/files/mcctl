@@ -184,19 +184,27 @@ setup_interactive_install() {
   fi
   configure_keystore_dir
   configure_api_baseurl "${package_config_filename}"
+
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
-    fi    
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${webservice_application_name}"
-    else
-      webservice_uninstall "${webservice_application_name}"
-      webservice_install "${webservice_application_name}" "${package_dir}"/ManagementConsole.war
-      webservice_running_report "${webservice_application_name}"
     fi
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
+    fi
+  fi  
+ 
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/ManagementConsole.war
+    webservice_running_report "${webservice_application_name}"
   fi
+
   bootstrap_first_user
 }
 

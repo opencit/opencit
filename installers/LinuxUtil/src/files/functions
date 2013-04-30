@@ -2275,7 +2275,7 @@ tomcat_create_ssl_cert() {
   local has_cert
   if [ ! -f $keystore ]; then
     mkdir -p ${TOMCAT_HOME}/ssl
-    $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} -validity 3650  -keypass ${keystorePassword}
+    $keytool -genkey -alias s1as -keyalg RSA  -keysize 2048 -keystore ${keystore} -storepass ${keystorePassword} "CN=tomcat, OU=Mt Wilson, O=Intel, L=Folsom, ST=CA, C=US" -validity 3650  -keypass ${keystorePassword}
     cp ${keystore} /root/  
   fi
   

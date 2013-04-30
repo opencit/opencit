@@ -69,22 +69,41 @@ setup_print_summary() {
 }
 
 setup_interactive_install() {
-  #if using_mysql; then
-    #mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-    #mysql_create_database
-  #fi
-  if using_glassfish; then
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.as.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
+  fi
+  
+  if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
-    fi    
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
-    else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/WLMService.war
-      webservice_running_report "${glassfish_application_name}"
     fi
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
+    fi
+  fi  
+ 
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/WLMService.war
+    webservice_running_report "${webservice_application_name}"
   fi
 
 }
