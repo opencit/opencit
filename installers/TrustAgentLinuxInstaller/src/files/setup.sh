@@ -79,11 +79,10 @@ chmod 700 tagent pcakey
 mkdir -p /usr/local/bin
 cp tagent pcakey /usr/local/bin
 
-#rc3Begin skaja
-#chmod 700 module_analysis.sh
-#cp module_analysis.sh "${package_dir}"/bin
-#echo "module_script=${package_dir}/bin/module_analysis.sh" >> "${intel_conf_dir}/${package_name}.properties"
-#rc3End
+#module attestation script
+chmod 755 module_analysis.sh
+cp module_analysis.sh "${package_dir}"/bin
+echo "module_script=${package_dir}/bin/module_analysis.sh" >> "${intel_conf_dir}/${package_name}.properties"
 
 java_install $JAVA_PACKAGE
 

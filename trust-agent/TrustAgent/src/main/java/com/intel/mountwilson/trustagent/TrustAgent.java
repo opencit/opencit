@@ -86,6 +86,8 @@ public class TrustAgent {
 
             new CreateNonceFileCmd(context).execute();
             new ReadIdentityCmd(context).execute();
+            // Get the module information
+            new GenerateModulesCmd(context).execute();
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
 
