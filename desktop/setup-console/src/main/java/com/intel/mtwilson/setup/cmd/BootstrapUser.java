@@ -121,11 +121,11 @@ public class BootstrapUser implements Command {
 //        ApiClientInfo apiClientRecord = findApiClientRecord(serviceConf, rsaCredentialX509.identity());
 //        if( apiClientRecord == null ) {
         // approve user
-        approveApiClientRecord(serviceConf, rsaCredentialX509.identity());
+        approveApiClientRecord(serviceConf,  username);
         System.out.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
     }
     
-    private void approveApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException {
+    private void approveApiClientRecord(Configuration conf, String username) throws SetupException {
         SetupWizard wizard = new SetupWizard(conf);
         try {
             // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
@@ -139,8 +139,10 @@ public class BootstrapUser implements Command {
             c.close();
             */
             MSPersistenceManager persistenceManager = new MSPersistenceManager();
-            ApiClientX509JpaController jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
-            ApiClientX509 apiClient = jpaController.findApiClientX509ByFingerprint(fingerprint);
+            MwPortalUserJpaController jpaController = new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            //ApiClientX509JpaController jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);
+                    //.findApiClientX509ByFingerprint(fingerprint);
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
             jpaController.edit(apiClient);
