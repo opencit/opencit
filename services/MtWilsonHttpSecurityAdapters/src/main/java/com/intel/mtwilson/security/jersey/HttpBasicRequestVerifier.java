@@ -5,8 +5,11 @@
 package com.intel.mtwilson.security.jersey;
 
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.Md5Digest;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.mtwilson.security.core.HttpBasicUserFinder;
+import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -65,11 +68,21 @@ public class HttpBasicRequestVerifier {
             throw new CryptographyException("Either the user name or password specified is not correct.");
         }
 
+        // XXX since HTTP BASIC requests don't have a cryptographic signature and are inherently vulnerable to replay, we cannot really do anything to prevent it within the standard;  so we just hash something that will change on every request... if we used something like md5(authorization) then it would be the same on every request and all the user's requests will be rejected after the first one within the recent window, and that would be bad.        
+        String insecureRequestSummary = httpMethod+ " "+requestUrl + " "+String.valueOf(headers.getFirst("Date")); // the hash of this complete value will not be used in anti-replay protection, but it will be logged in the database with the request.
+        
         // Because of security reasons, the users using HttpBasic would be able to just retrieve the attestation status and will 
         // not have previleges for any any other operations.
-        log.info("Request is authenticated");
-        User userInfo = new User(userName, new Role[]{Role.Report}, userName);
-        return userInfo;
+        try {
+            log.info("Request is authenticated");
+            User userInfo = new User(userName, new Role[]{Role.Report}, userName, Md5Digest.valueOf(insecureRequestSummary.getBytes("UTF-8"))); 
+            return userInfo;
+        }
+        catch(UnsupportedEncodingException e) {
+            // unlikely to happen because we are using UTF-8 ...
+            User userInfo = new User(userName, new Role[]{Role.Report}, userName, Md5Digest.valueOf(insecureRequestSummary.getBytes()));
+            return userInfo;            
+        }
     }
 
     /**
