@@ -26,8 +26,7 @@ public class CommandUtil {
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
 
     public static List<String> runCommand(String commandLine) throws TAException, IOException {
-
-
+        
         if(StringUtils.isBlank(commandLine))
             throw new TAException(ErrorCode.ERROR,"Command cannot be empty.");
         
@@ -35,14 +34,11 @@ public class CommandUtil {
         
         if(new File(Config.getBinPath() + File.separator + command[0]).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
-//        commandLine = System.getProperty("app.path", ".") + "/bin/./" + commandLine;
+
         if(new File(Config.getBinPath() + File.separator + commandLine).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
         
-
-        if (Config.isDebug()) {
-            log.info( "\"{0}\"", commandLine);
-        }
+        log.info("Command to be executed is :" + commandLine);
 
         Process p = Runtime.getRuntime().exec(commandLine);
 
