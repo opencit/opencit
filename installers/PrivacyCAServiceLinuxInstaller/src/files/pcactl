@@ -112,10 +112,11 @@ setup_interactive_install() {
        # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
        echo -n "Waiting for PrivacyCA to finish deploying"
        while [ ! -f $TOMCAT_HOME/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
+     while [ ! -f /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
        echo -n "."
        sleep 10
        done
-       sed -i.bak 's/com.sun.xml.ws.transport.http.servlet.WSServletContextListener/ /g' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
+     sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
     fi
   fi
    protect_privacyca_files
