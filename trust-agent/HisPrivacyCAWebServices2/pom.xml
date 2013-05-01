@@ -3,14 +3,14 @@
 
   <artifactId>HisPrivacyCAWebServices2</artifactId>
 
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <name>Privacy CA Web Service - HisPrivacyCAWebServices2</name>
   <description>Installs MySQL, Java, Glassfish, Web Services, and UI Portals</description>
 
     <parent>
 	<groupId>com.intel.mtwilson.trustagent</groupId>
 	<artifactId>trust-agent-parent</artifactId>
-	<version>1.1.2-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
     </parent>
    
  <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
@@ -41,7 +41,6 @@
         </dependency>
 
         <!-- XXX the following dependencies are declared so the java code will compile in the IDE - but they are included separately by the ant build for now; when we fully mavenize, we can use them directly -->
-		
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.servlet</artifactId>
@@ -64,7 +63,7 @@
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15</artifactId>
                     <version>1.46</version>                     <!-- was 1.41 -->
-                    <scope>provided</scope>
+                  <!--  <scope>provided</scope>--> <!-- need to include it for the -setup.jar  -->
                 </dependency>
                 <!--
                 <dependency>
@@ -77,7 +76,7 @@
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
-            <version>1.0</version>
+            <version>1.0.1-SNAPSHOT</version>
 	    <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
 
@@ -168,6 +167,41 @@
 
       <!-- end build .war file -->
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+            <execution>
+                <id>regular-jar-with-dependencies</id>
+                <phase>package</phase>
+                <goals><goal>shade</goal></goals>
+                <configuration>
+        		<shadedArtifactAttached>true</shadedArtifactAttached>
+                	<shadedClassifierName>setup</shadedClassifierName>
+                        <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                          <manifestEntries>
+                            <Main-Class>gov.niarl.his.privacyca.HisSetup</Main-Class>
+                          </manifestEntries>
+                        </transformer>
+                        </transformers>                        
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <includes>
+                                    <include>gov/niarl/his/privacyca/**</include>
+                                    <include>com/intel/mtwilson/util/**</include>
+                                    <include>org/slf4j/**</include>
+                                    <include>ch/qos/logback/**</include>
+                                    <include>org/bouncycastle/**</include>
+                                </includes>
+                            </filter>
+                        </filters>
+                </configuration>
+            </execution>
+        </executions>
+      </plugin>
+
 
       <!-- begin deploy artifact to repository -->
         <plugin>
@@ -197,11 +231,13 @@
                                 <type>war</type>
                             </artifact>
                             <!--  this artifact created by the ant script build.xml ; should be same code as the specially-created artifact gov.niarl.his.webservices:his-clients:1.0:HisPrivacyCAWebServices2-client .. actually that one was made from this same artifact;   one day we may replace all usages of that one with this file so the build will be more easily repeatable -->
+                            <!--
 			      <artifact>
 				  <file>${project.build.directory}/HisPrivacyCAWebServices2-client.jar</file>
 				  <type>jar</type>
 				  <classifier>client</classifier>
 			      </artifact>
+                              -->
                               <!--
 			      <artifact>
 				  <file>HisWebServices-client.jar</file>
@@ -209,6 +245,11 @@
 				  <classifier>HisWebServices-client</classifier>
 			      </artifact>
                               -->
+			      <artifact>
+				  <file>${project.build.directory}/${project.artifactId}-setup.jar</file>
+				  <type>jar</type>
+				  <classifier>setup</classifier>
+			      </artifact>
                         </artifacts>
                     </configuration>
                 </execution>
