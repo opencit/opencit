@@ -233,9 +233,14 @@ elif using_tomcat; then
   tomcat_installer=`find_installer tomcat`
   if [[ -n "$tomcat_installer" ]]; then
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    ./$tomcat_installer  >> $INSTALL_LOG_FILE
-	echo "export JAVA_OPTS=\"$JAVA_OPTS -Xmx512m -XX:MaxPermSize=128m\"" >> /etc/profile
+    if grep -q MaxPermSize /etc/profile; then
+     someRand=""
+    else
+	 echo "export JAVA_OPTS=\"$JAVA_OPTS -Xmx512m -XX:MaxPermSize=128m\"" >> /etc/profile
+    fi
     . /etc/profile
+    ./$tomcat_installer  >> $INSTALL_LOG_FILE
+    
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
