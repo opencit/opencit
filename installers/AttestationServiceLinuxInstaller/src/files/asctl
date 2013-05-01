@@ -169,7 +169,7 @@ create_saml_key() {
     saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
   else
     saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8443"
-    saml_issuer=`echo $saml_issuer |  sed -e 's/\\//g'`
+    #saml_issuer=`echo $saml_issuer |  sed -e 's/\\//g'`
   fi
   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
 }
