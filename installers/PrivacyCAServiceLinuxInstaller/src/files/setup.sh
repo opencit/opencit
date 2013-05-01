@@ -124,8 +124,4 @@ register_startup_script /usr/local/bin/pcactl pcactl >> $INSTALL_LOG_FILE
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
-else
- # TODO-stdalex start here tomorrow
- 
-
 fi
