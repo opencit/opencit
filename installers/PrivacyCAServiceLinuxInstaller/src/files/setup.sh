@@ -25,7 +25,7 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
 pcactl=`which pcactl 2>/dev/null`
-if [ -f "$asctl" ]; then
+if [ -f "$pcactl" ]; then
   echo "Uninstalling previous version..."
   $pcactl uninstall
 fi
@@ -124,4 +124,7 @@ register_startup_script /usr/local/bin/pcactl pcactl >> $INSTALL_LOG_FILE
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
 fi

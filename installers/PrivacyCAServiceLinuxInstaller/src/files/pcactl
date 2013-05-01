@@ -97,16 +97,18 @@ setup_interactive_install() {
   else
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
-    #stall until deploy is done
-    #local FINISH=0
-    #while [ $FINISH -le 0 ]; do
-    #  if [ -f /etc/intel/cloudsecurity/PrivacyCA.p12 ]; then
-    #    FINISH=1
-    #  fi
-    #done
-    sleep 30
+    sleep 15
     webservice_running_report "${webservice_application_name}"
+
+    #stall until deploy is done
+    local FINISH=0
+    while [ $FINISH -le 0 ]; do
+      if [ -f /etc/intel/cloudsecurity/clientfiles.zip ]; then
+        FINISH=1
+      fi
+    done
   fi
+
   protect_privacyca_files
 
 }
