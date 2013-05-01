@@ -126,12 +126,6 @@ if using_glassfish; then
   glassfish_permissions "${package_dir}"
 else
  # TODO-stdalex start here tomorrow
- # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
- echo -n "Waiting for PrivacyCA to finish deploying"
- while [ ! -f /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
-  echo -n "."
-  sleep 10
- done
- sed -i.bak 's/com.sun.xml.ws.transport.http.servlet.WSServletContextListener/ /g' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
+ 
 
 fi
