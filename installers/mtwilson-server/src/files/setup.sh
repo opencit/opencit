@@ -307,8 +307,9 @@ if using_glassfish; then
   mtwilson glassfish-restart >> $INSTALL_LOG_FILE
   echo "Glassfish restarted..." | tee -a  $INSTALL_LOG_FILE
 else
-  echo "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-  /usr/local/bin/asctl restart >> $INSTALL_LOG_FILE
+  echo "Restarting Tomcat" | tee -a  $INSTALL_LOG_FILE
+  /usr/share/apache-tomcat-6.0.29/bin/catalina.sh stop >> $INSTALL_LOG_FILE
+  /usr/share/apache-tomcat-6.0.29/bin/catalina.sh start >> $INSTALL_LOG_FILE
   echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
 fi
 
