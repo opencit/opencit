@@ -103,12 +103,22 @@ setup_interactive_install() {
     #stall until deploy is done
     local FINISH=0
     while [ $FINISH -le 0 ]; do
+
       if [ -f /etc/intel/cloudsecurity/clientfiles.zip ]; then
         FINISH=1
       fi
     done
-  fi
-
+	
+	if using_tomcat; then
+	 # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
+     echo -n "Waiting for PrivacyCA to finish deploying"
+     while [ ! -f /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
+      echo -n "."
+      sleep 10
+     done
+     sed -i.bak 's/com.sun.xml.ws.transport.http.servlet.WSServletContextListener/ /g' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
+    fi
+	
   protect_privacyca_files
 
 }

@@ -234,6 +234,8 @@ elif using_tomcat; then
   if [[ -n "$tomcat_installer" ]]; then
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
+	echo "export JAVA_OPTS=\"$JAVA_OPTS -Xmx512m -XX:MaxPermSize=128m\"" >> /etc/profile
+    . /etc/profile
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
