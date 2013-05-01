@@ -127,6 +127,6 @@ if using_glassfish; then
 else
  # TODO-stdalex start here tomorrow
  # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
- sed -i.bak 's/com.sun.xml.ws.transport.http.servlet.WSServletContextListener/ /g' /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
+ sed -i.bak 's/com.sun.xml.ws.transport.http.servlet.WSServletContextListener/ /g' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
 
 fi
