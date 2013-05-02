@@ -41,7 +41,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         @Override
         public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj, HostConfigData hostConfig, ApiClient apiObj)
                 throws ManagementConsolePortalException, MalformedURLException {           
-                System.err.println("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
+                logger.info("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
                 boolean result = false;                            
                 ManagementService msAPIObj = (ManagementService) apiObj;
            

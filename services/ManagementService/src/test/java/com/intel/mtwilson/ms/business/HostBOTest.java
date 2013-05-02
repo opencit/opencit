@@ -108,7 +108,7 @@ public class HostBOTest {
         boolean result = instance.configureWhiteListFromCustomData(wlObj);
         System.out.println(result);
     }
-/*
+
         @Test
         public void testBulkHostRegistration() throws Exception {
                 System.out.println("Bulk host registrations");
@@ -123,5 +123,5 @@ public class HostBOTest {
                         System.out.println(hostRes.getHostName() + ":" + hostRes.getStatus() + ":" + hostRes.getErrorMessage());
                 }
         }
-*/    
+    
 }
