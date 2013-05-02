@@ -106,16 +106,12 @@ setup_interactive_install() {
        sleep 10
        done
       sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
-      echo "Restarting Tomcat..."
-      tomcat_restart
+      
     fi
+      
     
-    
-
-    webservice_running_report "${webservice_application_name}"
-
     #stall until deploy is done
-    echo "waiting for PrivacyCA install to complete"
+    echo "Waiting for PrivacyCA install to complete"
     local FINISH=0
     while [ $FINISH -le 0 ]; do
       echo -n "."
@@ -124,8 +120,10 @@ setup_interactive_install() {
         FINISH=1
       fi
     done
-	
-    
+
+	echo "Restarting Tomcat..."
+    tomcat_restart
+    webservice_running_report "${webservice_application_name}"
   fi
    protect_privacyca_files
 
