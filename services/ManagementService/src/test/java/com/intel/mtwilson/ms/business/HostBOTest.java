@@ -109,19 +109,19 @@ public class HostBOTest {
         System.out.println(result);
     }
 
-        @Test
-        public void testBulkHostRegistration() throws Exception {
-                System.out.println("Bulk host registrations");
-                TxtHostRecordList hostList = new TxtHostRecordList();
-                TxtHostRecord hostObj = new TxtHostRecord();
-                hostObj.HostName = "10.1.71.154";
-                hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
-                hostList.getHostRecords().add(hostObj);
-
-                HostConfigResponseList result = new MSComponentFactory().getHostBO().registerHosts(hostList);
-                for (HostConfigResponse hostRes : result.getHostRecords()) {
-                        System.out.println(hostRes.getHostName() + ":" + hostRes.getStatus() + ":" + hostRes.getErrorMessage());
-                }
-        }
+       // @Test
+       //public void testBulkHostRegistration() throws Exception {
+       //         System.out.println("Bulk host registrations");
+       //         TxtHostRecordList hostList = new TxtHostRecordList();
+       //         TxtHostRecord hostObj = new TxtHostRecord();
+       //         hostObj.HostName = "10.1.71.154";
+       //         hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+       //         hostList.getHostRecords().add(hostObj);
+       //
+       //         HostConfigResponseList result = new MSComponentFactory().getHostBO().registerHosts(hostList);
+       //         for (HostConfigResponse hostRes : result.getHostRecords()) {
+       //                 System.out.println(hostRes.getHostName() + ":" + hostRes.getStatus() + ":" + hostRes.getErrorMessage());
+       //         }
+       //}
     
 }
