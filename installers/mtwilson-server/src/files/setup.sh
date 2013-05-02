@@ -12,7 +12,7 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
-              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal]
+              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ]
  INSTALL_PKGS="mysql java glassfish privacyca SERVICES PORTALS"
 fi
 
@@ -34,6 +34,7 @@ if [ ! -z "$portals" ]; then
   eval mangportal="true"
   eval trustportal="true"
   eval wlmportal="true"
+  eval mtwportal="true"
 fi
 # if a group is defined, then make all sub parts == true
 if [ ! -z "$services" ]; then
@@ -96,7 +97,7 @@ attestation_service=`find_installer AttestationService`
 whitelist_portal=`find_installer WhiteListPortal`
 management_console=`find_installer ManagementConsole`
 trust_dashboard=`find_installer TrustDashBoard`
-
+mtw_portal=`find_installer mtwilson-portal-installer`
 # Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
 export MTWILSON_SETUP_NODEPLOY=
 
@@ -281,6 +282,12 @@ if [ ! -z "$wlmportal" ]; then
 fi
 
 if [ ! -z "$trustportal" ]; then
+	echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
+	./$trust_dashboard >> $INSTALL_LOG_FILE
+	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
+fi
+
+if [ ! -z "$mtwportal" ]; then
 	echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
 	./$trust_dashboard >> $INSTALL_LOG_FILE
 	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
