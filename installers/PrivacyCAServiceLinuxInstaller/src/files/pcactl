@@ -101,8 +101,11 @@ setup_interactive_install() {
     webservice_running_report "${webservice_application_name}"
     sleep 10
     #stall until deploy is done
+    echo "waiting for PrivacyCA install to complete"
     local FINISH=0
     while [ $FINISH -le 0 ]; do
+      echo -n "."
+      sleep 10
       if [ -f /etc/intel/cloudsecurity/clientfiles.zip ]; then
         FINISH=1
       fi
@@ -110,7 +113,7 @@ setup_interactive_install() {
 	
     if using_tomcat; then
        # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
-       echo -n "Waiting for PrivacyCA to finish deploying"
+       echo -n "Waiting for PrivacyCA web.xml to finish deploying"
        while [ ! -f $TOMCAT_HOME/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
        echo -n "."
        sleep 10
