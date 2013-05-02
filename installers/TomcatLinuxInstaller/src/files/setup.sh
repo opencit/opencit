@@ -12,7 +12,9 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # SCRIPT EXECUTION
 if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
-chown -R tomcat:tomcat /usr/share/apache-tomcat-6.0.29
+
+#chown -R tomcat:tomcat /usr/share/apache-tomcat-6.0.29
+tomcat_permissions ${TOMCAT_HOME}
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
 if [ ! -d ${TOMCAT_HOME}/endorsed ]; then

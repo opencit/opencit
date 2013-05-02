@@ -2241,10 +2241,13 @@ tomcat_stop() {
 }
 tomcat_restart() {
   if [ -n "$tomcat" ]; then
+    if tomcat_running; then
       $tomcat stop
       sleep 5
-      $tomcat start
-      sleep 5
+    fi  
+  
+    $tomcat start
+    sleep 5
   fi
 }
 tomcat_shutdown() {

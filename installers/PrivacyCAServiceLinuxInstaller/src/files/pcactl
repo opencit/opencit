@@ -97,9 +97,23 @@ setup_interactive_install() {
   else
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/HisPrivacyCAWebServices2.war
-    sleep 10
+    
+    if using_tomcat; then
+       # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
+       echo -n "Waiting for PrivacyCA web.xml to finish deploying"
+       while [ ! -f $TOMCAT_HOME/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
+       echo -n "."
+       sleep 10
+       done
+      sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
+      echo "Restarting Tomcat
+      tomcat_restart
+    fi
+    
+    
+
     webservice_running_report "${webservice_application_name}"
-    sleep 10
+
     #stall until deploy is done
     echo "waiting for PrivacyCA install to complete"
     local FINISH=0
@@ -111,15 +125,7 @@ setup_interactive_install() {
       fi
     done
 	
-    if using_tomcat; then
-       # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
-       echo -n "Waiting for PrivacyCA web.xml to finish deploying"
-       while [ ! -f $TOMCAT_HOME/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
-       echo -n "."
-       sleep 10
-       done
-     sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
-    fi
+    
   fi
    protect_privacyca_files
 
