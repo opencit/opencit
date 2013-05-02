@@ -121,11 +121,11 @@ public class BootstrapUser implements Command {
 //        ApiClientInfo apiClientRecord = findApiClientRecord(serviceConf, rsaCredentialX509.identity());
 //        if( apiClientRecord == null ) {
         // approve user
-        approveApiClientRecord(serviceConf,  username);
+        approveApiClientRecord(serviceConf,  username, rsaCredentialX509.identity());
         System.out.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
     }
     
-    private void approveApiClientRecord(Configuration conf, String username) throws SetupException {
+    private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
         SetupWizard wizard = new SetupWizard(conf);
         try {
             // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
@@ -139,13 +139,17 @@ public class BootstrapUser implements Command {
             c.close();
             */
             MSPersistenceManager persistenceManager = new MSPersistenceManager();
-            MwPortalUserJpaController jpaController = new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
-            //ApiClientX509JpaController jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
-            MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);
-                    //.findApiClientX509ByFingerprint(fingerprint);
+            MwPortalUserJpaController jpaController = new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
+            MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);   
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
             jpaController.edit(apiClient);
+            
+            ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
+            client.setStatus("Approved");
+            client.setEnabled(true);
+            x509jpaController.edit(client);
         }
         catch(Exception e) {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
