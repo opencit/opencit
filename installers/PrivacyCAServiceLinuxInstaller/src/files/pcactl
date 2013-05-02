@@ -111,7 +111,9 @@ setup_interactive_install() {
     webservice_running $webservice_application_name
 
     while [ -z "$WEBSERVICE_RUNNING" ]; do
-        webservice_running $webservice_application_name
+      webservice_running $webservice_application_name
+      echo -n "."
+      sleep 10
     done      
     #webservice_running_report "${webservice_application_name}"
   fi
