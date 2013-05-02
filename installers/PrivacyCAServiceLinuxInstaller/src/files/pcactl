@@ -106,7 +106,7 @@ setup_interactive_install() {
        sleep 10
        done
       sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
-      echo "Restarting Tomcat
+      echo "Restarting Tomcat..."
       tomcat_restart
     fi
     
