@@ -41,6 +41,8 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
      * HOW TO USE THIS METHOD:  You call generateTrustRulesForHost(HostReport) and get a set of Rules back.
      * Then, based on what checkboxes the customer selected in the UI, you use only the applicable rules.
      * 
+     * This function is not being used in MW 1.2 Release. Currently the JPAPolicyReader already includes all the modules ( PCR, Module Manifest and Host Specific ones).
+     * 
      * VMWARE RULES:
      * BIOS:  PCR 0
      * VMM: PCR 17, 18, 19, 20
