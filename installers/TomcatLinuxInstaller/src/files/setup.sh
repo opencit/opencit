@@ -15,7 +15,7 @@ tomcat_install $TOMCAT_PACKAGE
 chown -R tomcat:tomcat /usr/share/apache-tomcat-6.0.29
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
-if [ ! -d ${TOMCAT_HOME/endorsed} ]; then
+if [ ! -d ${TOMCAT_HOME}/endorsed ]; then
  mkdir -p ${TOMCAT_HOME}/endorsed
 fi
 cp *.jar ${TOMCAT_HOME}/endorsed/
