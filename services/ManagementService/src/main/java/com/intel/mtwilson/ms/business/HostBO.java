@@ -65,6 +65,7 @@ import org.apache.commons.configuration.MapConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.StringUtils;
+import com.intel.mtwilson.datatypes.Vendor;
 
 /**
  *
@@ -127,6 +128,115 @@ public class HostBO extends BaseBO {
     }
 
     /**
+     * This is a helper function which if provided the host name and connection
+     * string, would retrieve the BIOS & VMM configuration from the host,
+     * verifies if those corresponding MLEs are already configured in the
+     * Mt.Wilson system. If not, it would throw appropriate exception back. The
+     * object returned back from his helper function could be used to directly
+     * register the host.
+     *     
+* @param hostConfigObj
+     * @return
+     */
+    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj) {
+        
+        try {
+            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
+        
+            // Retrieve the host object.
+            TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+            TblHosts tblHosts = new TblHosts();
+            tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+            
+            // TODO: Check with jonathan on the policy used.
+            // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a 
+            //man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default 
+            //policy (including global default trusted certs or ca's) to choose here and that way instead of us making this 
+            //assumption, it's the operator who knows the environment.
+            tblHosts.setTlsKeystore(null);
+            tblHosts.setName(hostObj.HostName);
+            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setIPAddress(hostObj.IPAddress);
+            if (hostObj.Port != null) {
+                tblHosts.setPort(hostObj.Port);
+            }
+            
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            try {
+                TxtHostRecord hostDetails = agent.getHostDetails();
+                hostObj.BIOS_Oem = hostDetails.BIOS_Oem;
+                hostObj.BIOS_Version = hostDetails.BIOS_Version;
+                hostObj.VMM_Name = hostDetails.VMM_Name;
+                hostObj.VMM_Version = hostDetails.VMM_Version;
+                hostObj.VMM_OSName = hostDetails.VMM_OSName;
+                hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
+            } catch (Throwable te) {
+                log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
+                throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+            }
+            
+            // Let us verify if we got all the data back correctly or not 
+            if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
+                throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
+            }
+            
+            hostConfigObj.setTxtHostRecord(hostObj);
+            log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
+                    + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version);
+
+            // Let us first verify if all the configuration details required for host registration already exists. If not, it will throw
+            // corresponding exception.
+            verifyMLEForHost(hostConfigObj);
+            return hostConfigObj;
+            
+        } catch (MSException me) {
+            log.error("Error during retrieval of host MLE information. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+        } catch (Exception ex) {
+            log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
+        }
+    }
+
+    /**
+     * Helper function that checks if the host specified is already configured
+     * in the system or not.
+     *
+     * @param hostObj
+     * @return
+     */
+    private boolean IsHostConfigured(TxtHostRecord hostObj) {
+        boolean isHostConfigured = false;
+        try {
+            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
+
+            log.info("Processing host {0}.", hostObj.HostName);
+            TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
+            if (hostSearchObj == null) {
+                hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
+            }
+            if (hostSearchObj != null) {
+                log.info(String.format("Host '%s' is already configured in the system.", hostObj.HostName));
+                isHostConfigured = true;
+            } else {
+                log.info(String.format("Host '%s' is currently not configured. ", hostObj.HostName));
+                isHostConfigured = false;
+            }
+
+            // Return back the results
+            return isHostConfigured;
+
+        } catch (MSException me) {
+            log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+        } catch (Exception ex) {
+            log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+        }
+    }
+
+    /**
      * Author: Sudhir
      *
      * Registers the host with Mount Wilson.
@@ -137,14 +247,39 @@ public class HostBO extends BaseBO {
     public boolean registerHost(TxtHostRecord hostObj) {
         HostConfigData hostConfigObj = null;
         boolean registerStatus = false;
-
+        String biosPCRs = "";
+        String vmmPCRs = "";
+        
         try {
 
             if (hostObj != null) {
 
                 hostConfigObj = new HostConfigData();
-                hostConfigObj.setTxtHostRecord(hostObj);
+                TxtHost tempHostObj = new TxtHost(hostObj);
+                ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
+                
+                //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
+                // option to separately configure BIOS and VMM PCRs
+                
+                // The below changes are to address the bug in which if the REST API is directly called the default
+                // PCRs were being read from the property file which does not match the UI defaults.
+                if (connString.getVendor().equals(Vendor.VMWARE)) {
+                    biosPCRs = "0";
+                    vmmPCRs = "17,18,19,20";
+                } else if (connString.getVendor().equals(Vendor.CITRIX)) {
+                    biosPCRs = "0";
+                    vmmPCRs = "17,18";                    
+                } else {
+                    // Assuming INTEL
+                    biosPCRs = "0";
+                    vmmPCRs = "17,18,19";                    
+                }
+                
+                hostConfigObj.setBiosPCRs(biosPCRs);
+                hostConfigObj.setVmmPCRs(vmmPCRs);
 
+                hostConfigObj.setTxtHostRecord(hostObj);
+                                
                 // Set the default parameters
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
@@ -165,151 +300,162 @@ public class HostBO extends BaseBO {
     }
 
  
-/**
-* This is a helper function which if provided the host name and
-* connection string, would retrieve the BIOS & VMM configuration from
-* the host, verifies if those corresponding MLEs are already configured
-* in the Mt.Wilson system. If not, it would throw appropriate exception
-* back. The object returned back from his helper function could be used
-* to directly register the host.
-*
-* @param hostConfigObj
-* @return
-*/
-private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj) {
-    try {
-        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
-        // Retrieve the host object.
-        TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
-        TblHosts tblHosts = new TblHosts();
-        tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
-        // TODO: Check with jonathan on the policy used.
-        // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
-        tblHosts.setTlsKeystore(null);
-        tblHosts.setName(hostObj.HostName);
-        tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
-        tblHosts.setIPAddress(hostObj.IPAddress);
-        if (hostObj.Port != null) {
-            tblHosts.setPort(hostObj.Port);
-        }
-        HostAgentFactory factory = new HostAgentFactory();
-        HostAgent agent = factory.getHostAgent(tblHosts);
-        try {
-            TxtHostRecord hostDetails = agent.getHostDetails();
-            hostObj.BIOS_Oem = hostDetails.BIOS_Oem;
-            hostObj.BIOS_Version = hostDetails.BIOS_Version;
-            hostObj.VMM_Name = hostDetails.VMM_Name;
-            hostObj.VMM_Version = hostDetails.VMM_Version;
-            hostObj.VMM_OSName = hostDetails.VMM_OSName;
-            hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
-        } catch (Throwable te) {
-            log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
-            throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
-        }
-        // Let us verify if we got all the data back correctly or not 
-        if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
-            throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
-        }
-        hostConfigObj.setTxtHostRecord(hostObj);
-        log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
-                    + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version);
-        // Let us first verify if all the configuration details required for host registration already exists. If not, it will throw
-        // corresponding exception.
-        verifyMLEForHost(hostConfigObj);
-        return hostConfigObj;
-    } catch (MSException me) {
-        log.error("Error during retrieval of host MLE information. " + me.getErrorCode() + " :" + me.getErrorMessage());
-        throw me;
-    } catch (Exception ex) {
-        log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
-        throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
-    }
-}
 
-/**
-* Bulk host registration/update function.
-*
-* @param hostRecords : List of hosts to be updated or newly registered.
-* @return
-*/
-public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
-    TxtHostRecordList hostsToBeAddedList = new TxtHostRecordList();
-    TxtHostRecordList hostsToBeUpdatedList = new TxtHostRecordList();
-    HostConfigResponseList results = new HostConfigResponseList();
-    try {
-        ApiClient apiClient = createAPIObject();
-        TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
-        log.info("About to start processing {0} the hosts", hostRecords.getHostRecords().size());
-        // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
-        // One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
-        // need to be updated.
-        for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {
-            TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
-            log.info("Processing host {0}.", hostObj.HostName);
-            TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
-            if (hostSearchObj == null) {
-                hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
-            }
-            if (hostSearchObj != null) {
-                log.info(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
-                // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
-                // return back the same error to the user
+        /**
+         * Function that supports bulk host registration. If the user has just specified the host details to be registered, then
+         * we would use the default white list target of OEM for both BIOS and VMM.
+         * 
+         * @param hostRecords
+         * @return 
+         */
+        public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) {
+                HostConfigDataList hostList = new HostConfigDataList();
+                HostConfigResponseList hostResponseList = null;
+                String biosPCRs = "";
+                String vmmPCRs = "";
+
                 try {
-                    hostConfigObj = getHostMLEDetails(hostConfigObj);
-                    hostsToBeUpdatedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
-                } catch (MSException mse) {
-                    HostConfigResponse error = new HostConfigResponse();
-                    error.setHostName(hostObj.HostName);
-                    error.setStatus("false");
-                    error.setErrorMessage(mse.getErrorMessage() + "[" + mse.getErrorCode().toString() + "]");
-                    // add this to the final result list
-                    results.getHostRecords().add(error);
+                        
+                        log.error("About to process {0} servers", hostRecords.getHostRecords().size());
+
+                      if (hostRecords != null) {
+
+                                // For all the hosts specified, setup the default parameters and add it to the list
+                                for (TxtHostRecord hostObj : hostRecords.getHostRecords()) {
+                                        HostConfigData hostConfigObj = new HostConfigData();
+                                        TxtHost tempHostObj = new TxtHost(hostObj);
+                                        ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
+
+                                        //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
+                                        // option to separately configure BIOS and VMM PCRs
+
+                                        // The below changes are to address the bug in which if the REST API is directly called the default
+                                        // PCRs were being read from the property file which does not match the UI defaults.
+                                        if (connString.getVendor().equals(Vendor.VMWARE)) {
+                                            biosPCRs = "0";
+                                            vmmPCRs = "17,18,19,20";
+                                        } else if (connString.getVendor().equals(Vendor.CITRIX)) {
+                                            biosPCRs = "0";
+                                            vmmPCRs = "17,18";                    
+                                        } else {
+                                            // Assuming INTEL
+                                            biosPCRs = "0";
+                                            vmmPCRs = "17,18,19";                    
+                                        }
+
+                                        hostConfigObj.setBiosPCRs(biosPCRs);
+                                        hostConfigObj.setVmmPCRs(vmmPCRs);
+                                        
+                                        hostConfigObj.setTxtHostRecord(hostObj);
+
+                                        hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
+                                        hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
+                                        hostList.getHostRecords().add(hostConfigObj);
+                                }
+
+                        }
+
+                        // Call into the overloaded method for actually calling into the ApiClient library and getting the results.
+                       hostResponseList = registerHosts(hostList);
+
+                        return hostResponseList;
+
+                } catch (MSException me) {
+                        log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+                        throw me;
+
+                } catch (Exception ex) {
+
+                        log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+                        throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
                 }
-            } else {
-                log.info(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
-                try {
-                    hostConfigObj = getHostMLEDetails(hostConfigObj);
-                    hostsToBeAddedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
-                } catch (MSException mse) {
-                    HostConfigResponse error = new HostConfigResponse();
-                    error.setHostName(hostObj.HostName);
-                    error.setStatus("false");
-                    error.setErrorMessage(mse.getErrorMessage() + "[" + mse.getErrorCode().toString() + "]");
-                    // add this to the final result list
-                    results.getHostRecords().add(error);
-                }
-            }
         }
- 
-        // We will call into the addHosts API first for all the new hosts that need to be registered and then updateHosts API for the
-        // hosts to be updated. We will combine the resuls of both and return back to the caller.
-        if (!hostsToBeAddedList.getHostRecords().isEmpty()) {
-            HostConfigResponseList addHostResults = apiClient.addHosts(hostsToBeAddedList);
+
+    /**
+     * Bulk host registration/update function.
+     *     
+* @param hostRecords : List of hosts to be updated or newly registered.
+     * @return
+     */
+    public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
+        TxtHostRecordList hostsToBeAddedList = new TxtHostRecordList();
+        TxtHostRecordList hostsToBeUpdatedList = new TxtHostRecordList();
+        HostConfigResponseList results = new HostConfigResponseList();
+        
+        try {
+            ApiClient apiClient = createAPIObject();
+            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory());
+            log.info("About to start processing {0} the hosts", hostRecords.getHostRecords().size());
+        
+            // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
+            // One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
+            // need to be updated.
+            for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {
+                TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+                if (IsHostConfigured(hostObj)) {
+                    log.info(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
+                    // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
+                    // return back the same error to the user
+                    try {
+                        hostConfigObj = getHostMLEDetails(hostConfigObj);
+                        hostsToBeUpdatedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
+                    } catch (MSException mse) {
+                        HostConfigResponse error = new HostConfigResponse();
+                        error.setHostName(hostObj.HostName);
+                        error.setStatus("false");
+                        error.setErrorMessage(mse.getErrorMessage() + "[" + mse.getErrorCode().toString() + "]");
+                        // add this to the final result list
+                        results.getHostRecords().add(error);
+                    }
+                } else {
+                    log.info(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
+                    try {
+                        hostConfigObj = getHostMLEDetails(hostConfigObj);
+                        hostsToBeAddedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
+                    } catch (MSException mse) {
+                        HostConfigResponse error = new HostConfigResponse();
+                        error.setHostName(hostObj.HostName);
+                        error.setStatus("false");
+                        error.setErrorMessage(mse.getErrorMessage() + "[" + mse.getErrorCode().toString() + "]");
+                        // add this to the final result list
+                        results.getHostRecords().add(error);
+                    }
+                }
+            }
+
+            // We will call into the addHosts API first for all the new hosts that need to be registered and then updateHosts API for the
+            // hosts to be updated. We will combine the resuls of both and return back to the caller.
+            if (!hostsToBeAddedList.getHostRecords().isEmpty()) {
+                HostConfigResponseList addHostResults = apiClient.addHosts(hostsToBeAddedList);
                 for (HostConfigResponse hcr : addHostResults.getHostRecords()) {
                     results.getHostRecords().add(hcr);
                 }
-        }
-        if (!hostsToBeUpdatedList.getHostRecords().isEmpty()) {
-            HostConfigResponseList updateHostResults = apiClient.updateHosts(hostsToBeUpdatedList);
-            for (HostConfigResponse hcr : updateHostResults.getHostRecords()) {
-                results.getHostRecords().add(hcr);
             }
-        }   
- 
-        // Return back the results
-        return results;                     
-    
-    } catch (MSException me) {
-        log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
-        throw me;
-     } catch (ApiException ae) {
-         log.error("API Client error during bulk host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
-        throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
-     } catch (Exception ex) {
-        log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
-        throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
-     }
-}
+            if (!hostsToBeUpdatedList.getHostRecords().isEmpty()) {
+                HostConfigResponseList updateHostResults = apiClient.updateHosts(hostsToBeUpdatedList);
+                for (HostConfigResponse hcr : updateHostResults.getHostRecords()) {
+                    results.getHostRecords().add(hcr);
+                }
+            }
+
+            // Return back the results
+            return results;
+
+        } catch (MSException me) {
+            log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+
+        } catch (ApiException ae) {
+
+            log.error("API Client error during bulk host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
+            throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
+
+        } catch (Exception ex) {
+
+            log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+        }
+    }
 
     
     /**
@@ -354,6 +500,11 @@ public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
                 return updateHostStatus;
             }
 
+            // This helper function verifies if all the required MLEs are present for the host registration. If no exception is 
+            // thrown, we can go ahead with the host registration.
+            hostConfigObj = getHostMLEDetails(hostConfigObj);
+            
+            /*
             // bug #497   this should be a different object than TblHosts  
             TblHosts tblHosts = new TblHosts();
             tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
@@ -396,10 +547,10 @@ public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
 
             if (verifyStatus == true) {
 
-                // Finally register the host.
-                txtHost = new TxtHost(hostConfigObj.getTxtHostRecord());
-                apiClient.addHost(txtHost);
-            }
+                // Finally register the host. */
+            txtHost = new TxtHost(hostConfigObj.getTxtHostRecord());
+            apiClient.addHost(txtHost);
+           // }
 
             // If everything is successful, set the status flag to true
             registerStatus = true;
@@ -688,6 +839,25 @@ public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
             if (gkvHost != null) {
 
                 hostConfigObj = new HostConfigData();
+                
+                String biosPCRs = "";
+                String vmmPCRs = "";                
+                TxtHost tempHostObj = new TxtHost(gkvHost);
+                ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());                
+                // The below changes are to address the bug in which if the REST API is directly called the default
+                // PCRs were being read from the property file which does not match the UI defaults.
+                if (connString.getVendor().equals(Vendor.VMWARE)) {
+                    biosPCRs = "0";
+                    vmmPCRs = "17,18,19,20";
+                } else if (connString.getVendor().equals(Vendor.CITRIX)) {
+                    biosPCRs = "0";
+                    vmmPCRs = "17,18";                    
+                } else {
+                    // Assuming INTEL
+                    biosPCRs = "0";
+                    vmmPCRs = "17,18,19";                    
+                }
+                
                 hostConfigObj.setTxtHostRecord(gkvHost);
 
                 // Set the default parameters
@@ -695,11 +865,12 @@ public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) {
                 hostConfigObj.setVmmWhiteList(true);
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
-                hostConfigObj.setRegisterHost(true);
+                
+                // By default we should not be registering the host since the user wants to just configure the white list.
+                hostConfigObj.setRegisterHost(false);
 
-                //TODO: Replace the below PCRs with the Vendor specific pcrs once the connectionstring class is integrated
-                hostConfigObj.setBiosPCRs(MSConfig.getConfiguration().getString("mtwilson.ms.biosPCRs").replace(';', ','));
-                hostConfigObj.setVmmPCRs(MSConfig.getConfiguration().getString("mtwilson.ms.vmmPCRs").replace(';', ','));
+                hostConfigObj.setBiosPCRs(biosPCRs);
+                hostConfigObj.setVmmPCRs(vmmPCRs);
             }
 
             configStatus = configureWhiteListFromCustomData(hostConfigObj);
