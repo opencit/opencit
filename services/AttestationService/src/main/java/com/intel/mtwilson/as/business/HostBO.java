@@ -564,7 +564,7 @@ public class HostBO extends BaseBO {
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
 		System.err.println("saveHostInDatabase with tls policy "+ tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-		System.err.println("saveHostInDatabase with tls policy " + tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+		
 
 		String cs = host.getAddOn_Connection_String();
         System.err.println("saveHostInDatabase cs = " + cs);
@@ -577,6 +577,8 @@ public class HostBO extends BaseBO {
                 tblHosts.setEmail(host.getEmail());
                 if (host.getIPAddress() != null) {
                         tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                }else{
+                        tblHosts.setIPAddress(host.getHostName().toString());
                 }
                 tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
 
@@ -593,9 +595,9 @@ public class HostBO extends BaseBO {
 
                 // create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
-                log.error("saveHostInDatabase tblHost = " + tblHosts.getAIKCertificate() + ", " + tblHosts.getAddOnConnectionInfo() + ", " + tblHosts.getAikPublicKey() + 
-                          ", " + tblHosts.getAikSha1() + ", " + tblHosts.getDescription() + ", " + tblHosts.getEmail() + ", " + tblHosts.getErrorDescription() + "," +
-                          tblHosts.getIPAddress() + ", " + tblHosts.getLocation() + ", " + tblHosts.getName() + ", " + tblHosts.getTlsPolicyName());
+                log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
+                          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
+                          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName());
                 hostController.create(tblHosts);
 
                 log.info("Save host specific manifest if any.");
