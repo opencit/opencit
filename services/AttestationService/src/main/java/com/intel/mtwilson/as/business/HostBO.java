@@ -563,11 +563,12 @@ public class HostBO extends BaseBO {
 		
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-		log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+		System.err.println("saveHostInDatabase with tls policy "+ tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+		System.err.println("saveHostInDatabase with tls policy " + tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
-		
-		tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+		String cs = host.getAddOn_Connection_String();
+        System.err.println("saveHostInDatabase cs = " + cs);
+		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                 // tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
@@ -592,6 +593,9 @@ public class HostBO extends BaseBO {
 
                 // create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
+                log.error("saveHostInDatabase tblHost = " + tblHosts.getAIKCertificate() + ", " + tblHosts.getAddOnConnectionInfo() + ", " + tblHosts.getAikPublicKey() + 
+                          ", " + tblHosts.getAikSha1() + ", " + tblHosts.getDescription() + ", " + tblHosts.getEmail() + ", " + tblHosts.getErrorDescription() + "," +
+                          tblHosts.getIPAddress() + ", " + tblHosts.getLocation() + ", " + tblHosts.getName() + ", " + tblHosts.getTlsPolicyName());
                 hostController.create(tblHosts);
 
                 log.info("Save host specific manifest if any.");

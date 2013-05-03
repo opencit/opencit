@@ -37,6 +37,9 @@ import com.intel.mtwilson.util.MWException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
@@ -83,10 +86,44 @@ public class HostBO extends BaseBO {
     private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mspm.getEntityManagerFactory("MSDataPU"));
     private byte[] dataEncryptionKey;
 
-    public void setDataEncryptionKey(byte[] key) {
-        dataEncryptionKey = key;
-    }
+     private static class Aes128DataCipher implements DataCipher {
+            private Logger log = LoggerFactory.getLogger(getClass());
+            private Aes128 cipher;
+            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
+            
+            @Override
+            public String encryptString(String plaintext) {
+                try {
+                    return cipher.encryptString(plaintext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to encrypt data", e);
+                    return null;
+                }
+            }
 
+            @Override
+            public String decryptString(String ciphertext) {
+                try {
+                    return cipher.decryptString(ciphertext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to decrypt data", e);
+                    return null;
+                }
+            }
+            
+        }
+    
+    public void setDataEncryptionKey(byte[] key) {
+                    try {
+                        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
+                    }
+                    catch(CryptographyException e) {
+                        log.error("Cannot initialize data encryption cipher", e);
+                    }      
+    }
+    
     public HostBO() {
     }
 
