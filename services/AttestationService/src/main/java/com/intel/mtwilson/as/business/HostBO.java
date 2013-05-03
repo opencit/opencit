@@ -687,8 +687,6 @@ public class HostBO extends BaseBO {
                         return new HostResponse(ErrorCode.AS_HOST_NOT_FOUND);
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }
@@ -777,8 +775,6 @@ public class HostBO extends BaseBO {
                         return txtHostList;
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }
