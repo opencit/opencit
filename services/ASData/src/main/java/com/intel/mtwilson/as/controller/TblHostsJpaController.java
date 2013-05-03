@@ -72,9 +72,9 @@ public class TblHostsJpaController implements Serializable {
             }
             tblHosts.setTblSamlAssertionCollection(attachedTblSamlAssertionCollection);
             
-           System.err.println("tblHosts create before persist");
+            System.err.println("tblHosts create before persist");
             em.persist(tblHosts);
-          System.err.println("tblHosts create after persist");
+            System.err.println("tblHosts create after persist");
             
             if (vmmMleId != null) {
                 vmmMleId.getTblHostsCollection().add(tblHosts);

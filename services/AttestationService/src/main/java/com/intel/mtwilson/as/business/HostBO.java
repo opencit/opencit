@@ -117,12 +117,15 @@ public class HostBO extends BaseBO {
                     }      
         }
         
-    public HostBO() {
+    public HostBO() throws CryptographyException {
+        
         super();
+        this.hostController = new TblHostsJpaController(getEntityManagerFactory());
     }
     
-    public HostBO(PersistenceManager pm) {
+    public HostBO(PersistenceManager pm) throws CryptographyException {
         super(pm);
+        this.hostController = new TblHostsJpaController(getEntityManagerFactory());
     }
         
 	public HostResponse addHost(TxtHost host) {
@@ -558,7 +561,7 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, Exception {
 		
 		
 		
@@ -585,7 +588,7 @@ public class HostBO extends BaseBO {
                 if (host.getPort() != null) {
                         tblHosts.setPort(host.getPort());
                 }
-		tblHosts.setVmmMleId(vmmMleId);
+                tblHosts.setVmmMleId(vmmMleId);
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
@@ -598,8 +601,14 @@ public class HostBO extends BaseBO {
                 log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
                           ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
                           tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName());
-                hostController.create(tblHosts);
-
+                try {
+                    hostController.create(tblHosts);
+                }catch (Exception e){
+                    log.error("SaveHostInDatabase caught ex!");
+                    e.printStackTrace();
+                    log.error("end print stack trace");
+                    throw e;
+                }
                 log.info("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
 
