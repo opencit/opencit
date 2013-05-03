@@ -74,7 +74,7 @@ public class HostBO extends BaseBO {
         private byte[] dataEncryptionKey = null;
         private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
         private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
-        private TblHostsJpaController hostController;
+        private TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
         private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
         private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
         private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
@@ -120,21 +120,13 @@ public class HostBO extends BaseBO {
     public HostBO()  {
         
         super();
-        try {
-          this.hostController = new TblHostsJpaController(getEntityManagerFactory());
-        }catch(Exception e){
-            log.debug("exception creating tblHostsJpaController: " + e.getMessage());
-        }
+       
    
     }
     
     public HostBO(PersistenceManager pm) {
         super(pm);
-         try {
-          this.hostController = new TblHostsJpaController(getEntityManagerFactory());
-        }catch(Exception e){
-            log.debug("exception creating tblHostsJpaController: " + e.getMessage());
-        }
+       
     }
         
 	public HostResponse addHost(TxtHost host) {
