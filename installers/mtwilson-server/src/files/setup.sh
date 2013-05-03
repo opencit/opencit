@@ -149,7 +149,7 @@ if using_mysql; then
   echo "Installation of mysql client complete..."
   # mysql client end 
   
-  if [ ! -z "$SKIP_DATABASE_INIT" ]; then
+  if [ -z "$SKIP_DATABASE_INIT" ]; then
     # mysql db init here
 	mysql_create_database 
 	# mysql db init end
@@ -172,7 +172,7 @@ elif using_postgres; then
  
  # postgres clinet install end
  
- if [ ! -z "$SKIP_DATABASE_INIT" ]; then
+ if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
 	echo_warning "Init of postgres db currently not supported"
 	# postgress db init end
@@ -214,7 +214,7 @@ if using_glassfish; then
     echo_warning "Relying on an existing glassfish installation" 
   fi
   
-  if [ ! -z "$SKIP_WEBSERVICE_INIT" ]; then 
+  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
     mtwilson glassfish-sslcert
 	# glassfish init end
@@ -231,7 +231,7 @@ elif using_tomcat; then
   echo_warning "Relying on an existing Tomcat installation"
  fi
  
- if [ ! -z "$SKIP_WEBSERVICE_INIT" ]; then 
+ if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here
     echo_warning "Init of tomcat currently not supported"
 	# tomcat init end
