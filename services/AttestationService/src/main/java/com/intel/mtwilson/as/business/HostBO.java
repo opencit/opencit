@@ -117,15 +117,24 @@ public class HostBO extends BaseBO {
                     }      
         }
         
-    public HostBO() throws CryptographyException {
+    public HostBO()  {
         
         super();
-        this.hostController = new TblHostsJpaController(getEntityManagerFactory());
+        try {
+          this.hostController = new TblHostsJpaController(getEntityManagerFactory());
+        }catch(Exception e){
+            log.debug("exception creating tblHostsJpaController: " + e.getMessage());
+        }
+   
     }
     
-    public HostBO(PersistenceManager pm) throws CryptographyException {
+    public HostBO(PersistenceManager pm) {
         super(pm);
-        this.hostController = new TblHostsJpaController(getEntityManagerFactory());
+         try {
+          this.hostController = new TblHostsJpaController(getEntityManagerFactory());
+        }catch(Exception e){
+            log.debug("exception creating tblHostsJpaController: " + e.getMessage());
+        }
     }
         
 	public HostResponse addHost(TxtHost host) {
