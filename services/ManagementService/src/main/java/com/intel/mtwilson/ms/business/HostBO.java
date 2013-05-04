@@ -37,6 +37,9 @@ import com.intel.mtwilson.util.MWException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
@@ -83,10 +86,44 @@ public class HostBO extends BaseBO {
     private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mspm.getEntityManagerFactory("MSDataPU"));
     private byte[] dataEncryptionKey;
 
-    public void setDataEncryptionKey(byte[] key) {
-        dataEncryptionKey = key;
-    }
+     private static class Aes128DataCipher implements DataCipher {
+            private Logger log = LoggerFactory.getLogger(getClass());
+            private Aes128 cipher;
+            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
+            
+            @Override
+            public String encryptString(String plaintext) {
+                try {
+                    return cipher.encryptString(plaintext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to encrypt data", e);
+                    return null;
+                }
+            }
 
+            @Override
+            public String decryptString(String ciphertext) {
+                try {
+                    return cipher.decryptString(ciphertext);
+                }
+                catch(CryptographyException e) {
+                    log.error("Failed to decrypt data", e);
+                    return null;
+                }
+            }
+            
+        }
+    
+    public void setDataEncryptionKey(byte[] key) {
+                    try {
+                        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
+                    }
+                    catch(CryptographyException e) {
+                        log.error("Cannot initialize data encryption cipher", e);
+                    }      
+    }
+    
     public HostBO() {
     }
 
@@ -961,7 +998,7 @@ public class HostBO extends BaseBO {
                     throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
 
-                log.info("Starting to process the white list configuration from host: " + gkvHost.HostName);
+                System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
 
                 // Let us verify if we got all the data back correctly or not (Bug: 442)
                 if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null) {
@@ -969,7 +1006,7 @@ public class HostBO extends BaseBO {
                 }
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
-                log.info("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":"
+                System.err.println("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":"
                         + gkvHost.BIOS_Version + ":" + gkvHost.VMM_OSName + ":" + gkvHost.VMM_OSVersion
                         + ":" + gkvHost.VMM_Version);
 
@@ -1007,7 +1044,7 @@ public class HostBO extends BaseBO {
                     // Retrieve the attestation report from the host
                     attestationReport = agent.getHostAttestationReport(reqdManifestList);   // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
                 } catch (Throwable te) {
-                    log.error("Unexpected error from getHostAttestationReport in registerHostFromCustomData: {}", te.toString());
+                    System.err.println("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
                     te.printStackTrace();
                     throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
@@ -1015,56 +1052,56 @@ public class HostBO extends BaseBO {
                 // We are checking for component name since in the attestation report all the pcr and the event logs would use componentname as the label 
                 if (attestationReport != null && !attestationReport.isEmpty()) {
                     if (!attestationReport.contains("ComponentName")) {
-                        log.info("Attestation report content: " + attestationReport);
+                       System.err.println("Attestation report content: " + attestationReport);
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                     }
                 }
 
-                log.info("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
-                log.debug("Attestation report is : " + attestationReport);
+                System.err.println("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
+                System.err.println("Attestation report is : " + attestationReport);
 
                 // Finally store the attestation report by calling into the WhiteList REST APIs
                 uploadToDB(hostConfigObj, attestationReport, apiClient);
-                log.info("Successfully updated the white list database with the good known white list from host: " + gkvHost.HostName);
+                System.err.println("Successfully updated the white list database with the good known white list from host: " + gkvHost.HostName);
 
                 // Register host only if required.
                 if (hostConfigObj.isRegisterHost() == true) {
                     // First let us check if the host is already configured. If yes, we will return back success
                     TblHosts hostSearchObj = hostsJpaController.findByName(gkvHost.HostName);
                     if (hostSearchObj == null) {
-                        log.info("Could not find the host using host name: " + gkvHost.HostName);
+                        System.err.println("Could not find the host using host name: " + gkvHost.HostName);
                         hostSearchObj = hostsJpaController.findByIPAddress(gkvHost.IPAddress);
                     }
 
                     if (hostSearchObj == null) {
-                        log.info("Could not find the host using host IP address: " + gkvHost.IPAddress);
-                        log.info("Creating a new host.");
+                        System.err.println("Could not find the host using host IP address: " + gkvHost.IPAddress);
+                        System.err.println("Creating a new host.");
 
                         TxtHost hostObj = new TxtHost(gkvHost);
                         apiClient.addHost(hostObj);
-                        log.info("Successfully registered the host : " + hostObj.getHostName());
+                        System.err.println("Successfully registered the host : " + hostObj.getHostName());
 
                     } else {
-                        log.info("Database already has the configuration details for host : " + hostSearchObj.getName());
+                        System.err.println("Database already has the configuration details for host : " + hostSearchObj.getName());
                         // Since we might have changed the MLE configuration on the host, let us update the host
                         if (gkvHost.Port == null) {
                             gkvHost.Port = 0;
                         }
                         TxtHost newHostObj = new TxtHost(gkvHost);
                         apiClient.updateHost(newHostObj);
-                        log.info(String.format("Successfully updated the host %s with the new MLE information.", gkvHost.HostName));
+                        System.err.println(String.format("Successfully updated the host %s with the new MLE information.", gkvHost.HostName));
                     }
                 }
 
                 // Now we need to configure the MleSource table with the details of the host that was used for white listing the MLE.
                 if (hostConfigObj.addBiosWhiteList()) {
                     configureMleSource(apiClient, gkvHost, true);
-                    log.info("Successfully configured the details of the host that was used to white list the BIOS MLE - " + gkvHost.BIOS_Name);
+                    System.err.println("Successfully configured the details of the host that was used to white list the BIOS MLE - " + gkvHost.BIOS_Name);
                 }
 
                 if (hostConfigObj.addVmmWhiteList()) {
                     configureMleSource(apiClient, gkvHost, false);
-                    log.info("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
+                    System.err.println("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
                 }
                 configStatus = true;
             }

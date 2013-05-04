@@ -74,7 +74,7 @@ public class HostBO extends BaseBO {
         private byte[] dataEncryptionKey = null;
         private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
         private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
-        private TblHostsJpaController hostController;
+        private TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
         private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
         private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
         private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
@@ -117,12 +117,16 @@ public class HostBO extends BaseBO {
                     }      
         }
         
-    public HostBO() {
+    public HostBO()  {
+        
         super();
+       
+   
     }
     
     public HostBO(PersistenceManager pm) {
         super(pm);
+       
     }
         
 	public HostResponse addHost(TxtHost host) {
@@ -574,16 +578,17 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, Exception {
 		
 		
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-		log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-
+		System.err.println("saveHostInDatabase with tls policy "+ tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 		
-		tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+
+		String cs = host.getAddOn_Connection_String();
+        System.err.println("saveHostInDatabase cs = " + cs);
+		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                 // tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
@@ -592,13 +597,15 @@ public class HostBO extends BaseBO {
                 tblHosts.setEmail(host.getEmail());
                 if (host.getIPAddress() != null) {
                         tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                }else{
+                        tblHosts.setIPAddress(host.getHostName().toString());
                 }
                 tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
 
                 if (host.getPort() != null) {
                         tblHosts.setPort(host.getPort());
                 }
-		tblHosts.setVmmMleId(vmmMleId);
+                tblHosts.setVmmMleId(vmmMleId);
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
@@ -608,8 +615,17 @@ public class HostBO extends BaseBO {
 
                 // create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
-                hostController.create(tblHosts);
-
+                log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
+                          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
+                          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName());
+                try {
+                    hostController.create(tblHosts);
+                }catch (Exception e){
+                    log.error("SaveHostInDatabase caught ex!");
+                    e.printStackTrace();
+                    log.error("end print stack trace");
+                    throw e;
+                }
                 log.info("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
 
@@ -692,8 +708,6 @@ public class HostBO extends BaseBO {
                         return new HostResponse(ErrorCode.AS_HOST_NOT_FOUND);
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }
@@ -782,8 +796,6 @@ public class HostBO extends BaseBO {
                         return txtHostList;
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }

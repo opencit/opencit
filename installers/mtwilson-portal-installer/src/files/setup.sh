@@ -24,10 +24,10 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
-mcctl=`which mcctl 2>/dev/null`
-if [ -f "$mcctl" ]; then
+mtwilson-portal=`which mtwilson-portal 2>/dev/null`
+if [ -f "$mtwilson-portal" ]; then
   echo "Uninstalling previous version..."
-  $mcctl uninstall
+  $mtwilson-portal uninstall
 fi
 
 # detect the packages we have to install
@@ -72,11 +72,11 @@ chmod 700 "${package_var_dir}"
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x mcctl
+chmod +x mtwilson-portal
 mkdir -p /usr/local/bin
-cp mcctl /usr/local/bin
-/usr/local/bin/mcctl setup
-register_startup_script /usr/local/bin/mcctl mcctl >> $INSTALL_LOG_FILE
+cp mtwilson-portal /usr/local/bin
+/usr/local/bin/mtwilson-portal setup
+register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 
 glassfish_permissions "${intel_conf_dir}"
 glassfish_permissions "${package_dir}"

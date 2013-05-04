@@ -124,8 +124,6 @@ public class ReportsBO extends BaseBO {
 
             }
             return hostsTrustReportType;
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         } catch (Exception e) {
             throw new ASException(e);
         }
@@ -142,11 +140,8 @@ public class ReportsBO extends BaseBO {
          *
          */
         TblHosts tblHosts = null;
-        try {
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-        }
+        
+        tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
 
         if (tblHosts == null) {
             throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
@@ -236,9 +231,7 @@ public class ReportsBO extends BaseBO {
             throw aex;
 
 
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-        } catch (Exception ex) {
+        }  catch (Exception ex) {
 
             throw new ASException(ex);
         }
@@ -256,12 +249,8 @@ public class ReportsBO extends BaseBO {
          */
 
         TblHosts tblHosts = null;
-        try {
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-        }
-
+                    tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
+        
         if (tblHosts == null) {
             throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
         }
