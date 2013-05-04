@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# This file defines some functions that can be considered
+# extension points, or abstract, or basic implementations
+# of common features.
+# The filename starts with an underscore so that it will
+# be loaded before other plugins and give other plugins
+# a chance to override these methods.
+
+# Functions in optional modules may override these with
+# improved or customized implementations.
+# For example, the echo_warning and echo_failure functions
+# defined here simply do a regular echo, but there is a
+# colorful version defined by the color plugin.
+
+TERM_DISPLAY_MODE=plain
+
+echo_success() {
+  echo "$@"
+  return 0
+}
+
+echo_warning() {
+  echo "$@"
+  return 1
+}
+
+echo_failure() {
+  echo "$@"
+  return 1
+}
+
+
+# Parameters:
+# - character like 'a' for which to echo the character code
+# echos the character code of the specified character
+# For example:   ord a     will echo 97
+ord() { printf '%d' "'$1"; }

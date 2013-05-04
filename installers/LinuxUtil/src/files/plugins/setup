@@ -1,0 +1,150 @@
+#!/bin/sh
+
+setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+
+# REQUIRES: java
+
+# Usage 1: mtwilson setup
+# Usage 2: mtwilson setup <command> [args]
+mw_setup() {
+        if [ $# -gt 0 ]; then
+          call_setupcommand $@
+        else
+          setup
+        fi
+}
+
+# Usage: mtwilson setup-env
+mw_setup_env() {
+        setup_env
+}
+
+
+### FUNCTION LIBRARY: setup
+
+
+# Helper function for script commands that need to invoke a Java command in the setup tool
+# Usage: call_setupcommand <command name> [args]
+call_setupcommand() {
+  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+  SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.setup.TextConsole
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
+}
+
+setup_env() {
+  local datestr=`date +%Y-%m-%d.%H%M`
+  echo "# environment on ${datestr}"
+  java_detect > /dev/null
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+  #export JAVA_HOME java_bindir java
+  if using_mysql; then
+    mysql_detect > /dev/null
+    echo "mysql=$mysql"
+    #export mysql
+  fi
+  echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
+  echo "DATABASE_VENDOR=$DATABASE_VENDOR"
+  if using_glassfish; then
+    glassfish_detect > /dev/null
+    echo "GLASSFISH_HOME=$GLASSFISH_HOME"
+    echo "glassfish_bin=$glassfish_bin"
+    echo "glassfish=\"$glassfish\""
+    #export GLASSFISH_HOME glassfish_bin glassfish
+  fi
+}
+
+
+
+setup() {
+  java_detect; java_env_report > ${env_dir}/java
+  glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
+  find_ctl_commands
+
+  # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to glassfish directly)
+  export MTWILSON_SETUP_NODEPLOY=1
+
+  # Gather default configuration
+  MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
+  MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
+
+  # Prompt for installation settings
+  echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
+This address will be used in the server SSL certificate and in all Mt Wilson URLs,
+such as https://${MTWILSON_SERVER:-127.0.0.1}.
+Detected the following options on this server:"
+  IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
+  prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
+  export MTWILSON_SERVER
+  echo
+
+  mysql_userinput_connection_properties
+  export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
+
+  # Attestation service auto-configuration
+  export PRIVACYCA_SERVER=${MTWILSON_SERVER}
+
+  # TODO should be completely removed because functions to create certificates are moving to the java tool
+  # ## TODO: prompt for server settings (move from mtwilson-server installer setup.sh to here)
+  # create glassfish ssl cert (TODO: move to a "glassfish" control script that should be created to make glassfish management easier... so instead of "mtwilson glassfish-stop" it would be just "glassfish stop"  etc)
+  if using_glassfish; then
+    if [ -n "${MTWILSON_SERVER}" ]; then
+      glassfish_create_ssl_cert "${MTWILSON_SERVER}"
+    else
+      glassfish_create_ssl_cert_prompt
+    fi
+  fi
+  # setup web services:
+  if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
+  if [ -n "$asctl" ]; then $asctl setup; fi
+  if [ -n "$msctl" ]; then $msctl setup; fi
+  if [ -n "$wlmctl" ]; then $wlmctl setup; fi
+  if [ -n "$mcctl" ]; then $mcctl setup; fi
+  if [ -n "$wpctl" ]; then $wpctl setup; fi
+  if [ -n "$tdctl" ]; then $tdctl setup; fi
+
+  # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
+  shift
+  call_setupcommand EncryptDatabase
+}
+
+
+
+# environment dependencies report
+print_env_summary_report() {
+  echo "Requirements summary:"
+  local error=0
+  if [ -n "$JAVA_HOME" ]; then
+    echo "Java: $JAVA_VERSION"
+  else
+    echo_failure "Java: not found"
+    error=1
+  fi
+  if using_mysql; then
+    if [ -n "$MYSQL_HOME" ]; then
+      echo "Mysql: $MYSQL_CLIENT_VERSION"
+    else
+      echo_failure "Mysql: not found"
+      error=1
+    fi
+  fi
+  if using_postgres; then
+    echo_warning "Postgres: relying on existing install"
+  fi
+  if using_glassfish; then
+    if [ -n "$GLASSFISH_HOME" ]; then
+      GLASSFISH_VERSION=`glassfish_version`
+      echo "Glassfish: $GLASSFISH_VERSION"
+    else
+      echo_failure "Glassfish: not found"
+      error=1
+    fi
+  fi
+  if using_tomcat; then
+    echo_warning "Tomcat: relying on existing install"
+  fi
+  return $error
+}
+

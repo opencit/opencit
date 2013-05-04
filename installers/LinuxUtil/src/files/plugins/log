@@ -1,0 +1,11 @@
+#!/bin/sh
+
+
+export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
+export logfile=/var/log/mtwilson.log
+
+mw_log() {
+  local datestr=`date "+%Y-%m-%d.%H:%M:%S"`
+  echo "[$datestr] $@" >> $logfile
+}
+

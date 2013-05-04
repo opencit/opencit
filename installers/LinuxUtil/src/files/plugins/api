@@ -1,0 +1,21 @@
+#!/bin/sh
+
+apiclient_dir=/usr/local/share/mtwilson/apiclient
+apiclient_java=${apiclient_dir}/java
+
+
+# Usage: mtwilson api <command> [args]
+mw_api() {
+        call_apiclient $@
+}
+
+
+### FUNCTION LIBRARY: api
+
+call_apiclient() {
+  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.client.TextConsole
+  $java -cp "$APICLIENT_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
+}
+

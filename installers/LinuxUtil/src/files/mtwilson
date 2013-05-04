@@ -3,318 +3,158 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-# SCRIPT CONFIGURATION:
-share_dir=/usr/local/share/mtwilson/util
-apiclient_dir=/usr/local/share/mtwilson/apiclient
-setupconsole_dir=/opt/intel/cloudsecurity/setup-console
-apiclient_java=${apiclient_dir}/java
-env_dir=/usr/local/share/mtwilson/env
-conf_dir=/etc/intel/cloudsecurity
-#apiclient_shell=${apiclient_dir}/shell
-mysql_required_version=5.0
-#glassfish_required_version=3.0
-#java_required_version=1.6.0_29
+logfile=/var/log/mtwilson.log
+plugindir=/usr/share/mtwilson/script/plugins
+cmdprefix=mw
 
-# FUNCTION LIBRARY and VERSION INFORMATION
-if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
-if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
-if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
-shell_include_files ${env_dir}/*
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-#if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
+# Set to "true" to show "Loading <plugin>..." lines
+# Set to "false" to hide them
+debug_plugin=false
 
-# ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
-if using_mysql; then
-    export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
-elif using_postgres; then
-    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
-fi
-if using_glassfish; then
-    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
-elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
-fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
-export java_required_version=${JAVA_REQUIRED_VERSION}
-
-call_apiclient() {
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
-  APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.mtwilson.client.TextConsole
-  $java -cp "$APICLIENT_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
-}
-
-call_setupcommand() {
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
-  SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
-}
-
-find_ctl_commands() {
-  pcactl=`which pcactl 2>/dev/null`
-  msctl=`which msctl 2>/dev/null`
-  wlmctl=`which wlmctl 2>/dev/null`
-  asctl=`which asctl 2>/dev/null`
-  mcctl=`which mcctl 2>/dev/null`
-  wpctl=`which wpctl 2>/dev/null`
-  tdctl=`which tdctl 2>/dev/null`
-}
-
-mtwilson_saml_cert_report() {
-  local keystore=`read_property_from_file saml.keystore.file ${conf_dir}/attestation-service.properties`
-  local keystorePassword=`read_property_from_file saml.keystore.password ${conf_dir}/attestation-service.properties`
-  local keyalias=`read_property_from_file saml.key.alias ${conf_dir}/attestation-service.properties`
-  java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
-}
-
-
-# called by installer to automatically configure the server for localhost integration,
-# if the customer has enabled this option
-# arguments:   currently supports just one optional argument, IP address or hostname, to enable as trusted IN ADDITION TO 127.0.0.1
-mtwilson_localhost_integration() {
-  local iplist;
-  if [ -n "$1" ]; then
-    iplist="127.0.0.1,$1"
-  else
-    iplist="127.0.0.1"
-  fi
-  update_property_in_file mtwilson.api.trust /etc/intel/cloudsecurity/management-service.properties "$iplist"
-  update_property_in_file mtwilson.ssl.required /etc/intel/cloudsecurity/management-service.properties "false"
-}
-
-
-setup() {
-  java_detect; java_env_report > ${env_dir}/java
-  glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
-  find_ctl_commands
-
-  # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to glassfish directly)
-  export MTWILSON_SETUP_NODEPLOY=1
-
-  # Gather default configuration
-  MTWILSON_SERVER_IP_ADDRESS=${MTWILSON_SERVER_IP_ADDRESS:-$(hostaddress)}
-  MTWILSON_SERVER=${MTWILSON_SERVER:-$MTWILSON_SERVER_IP_ADDRESS}
-
-  # Prompt for installation settings
-  echo "Please enter the IP Address or Hostname that will identify the Mt Wilson server.
-This address will be used in the server SSL certificate and in all Mt Wilson URLs,
-such as https://${MTWILSON_SERVER:-127.0.0.1}.
-Detected the following options on this server:"
-  IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
-  prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
-  export MTWILSON_SERVER
-  echo
-
-  mysql_userinput_connection_properties
-  export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
-
-  # Attestation service auto-configuration
-  export PRIVACYCA_SERVER=${MTWILSON_SERVER}
-
-  # TODO should be completely removed because functions to create certificates are moving to the java tool
-  # ## TODO: prompt for server settings (move from mtwilson-server installer setup.sh to here)
-  # create glassfish ssl cert (TODO: move to a "glassfish" control script that should be created to make glassfish management easier... so instead of "mtwilson glassfish-stop" it would be just "glassfish stop"  etc)
-  if using_glassfish; then
-    if [ -n "${MTWILSON_SERVER}" ]; then
-      glassfish_create_ssl_cert "${MTWILSON_SERVER}"
-    else
-      glassfish_create_ssl_cert_prompt
+# input:  filename (relative or absolute)
+# output: success (0) if file begins with #!/bin/sh
+#         error (1) if file is not found
+#         error (2) if file does not begin with #!/bin/sh
+is_shell_script() {
+  local file="$1"
+  if [ -f "$file" ]; then
+    local firstline=`head -n 1 $file`
+    if [ "#!/bin/sh" = "$firstline" ] || [ "#!/bin/bash" == "$firstline" ]; then
+      return 0
     fi
+    return 2
   fi
-  # setup web services:
-  if [ -n "$pcactl" ]; then $pcactl setup; $pcactl restart; fi
-  if [ -n "$asctl" ]; then $asctl setup; fi
-  if [ -n "$msctl" ]; then $msctl setup; fi
-  if [ -n "$wlmctl" ]; then $wlmctl setup; fi
-  if [ -n "$mcctl" ]; then $mcctl setup; fi
-  if [ -n "$wpctl" ]; then $wpctl setup; fi
-  if [ -n "$tdctl" ]; then $tdctl setup; fi
-
-  # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
-  shift
-  call_setupcommand EncryptDatabase
+  return 1
 }
 
-all_status() {
-  find_ctl_commands
-  if [ -n "$pcactl" ]; then $pcactl status; fi
-  if [ -n "$asctl" ]; then $asctl status; fi
-  if [ -n "$msctl" ]; then $msctl status; fi
-  if [ -n "$wlmctl" ]; then $wlmctl status; fi
-  if [ -n "$mcctl" ]; then $mcctl status; fi
-  if [ -n "$wpctl" ]; then $wpctl status; fi
-  if [ -n "$tdctl" ]; then $tdctl status; fi
+# populates a variable AVAILABLE_PLUGINS with the list
+# of plugin names (no paths, they are assumed to be in plugin dir)
+set_available_plugins() {
+  AVAILABLE_PLUGINS=`ls -1 $plugindir`
+}
+
+# Checks if the given plugin name is installed in the plugins
+# directory.
+# Input:  plugin name, for example "tomcat"
+# Output: returns success(0) if it's there and is a valid script, error (1) otherwise
+isplugin() {
+  local pluginfile="$1"
+  local pluginfilepath="$plugindir/$pluginfile"
+  if is_shell_script "$pluginfilepath"; then
+    return 0
+  fi
+  return 1
 }
 
 
-setup_env() {
-  local datestr=`date +%Y-%m-%d.%H%M`
-  echo "# environment on ${datestr}"
-  java_detect > /dev/null
-  echo "JAVA_HOME=$JAVA_HOME"
-  echo "java_bindir=$java_bindir"
-  echo "java=$java"
-  #export JAVA_HOME java_bindir java
-  if using_mysql; then
-    mysql_detect > /dev/null
-    echo "mysql=$mysql"
-    #export mysql
-  fi
-  echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
-  echo "DATABASE_VENDOR=$DATABASE_VENDOR"
-  if using_glassfish; then
-    glassfish_detect > /dev/null
-    echo "GLASSFISH_HOME=$GLASSFISH_HOME"
-    echo "glassfish_bin=$glassfish_bin"
-    echo "glassfish=\"$glassfish\""
-    #export GLASSFISH_HOME glassfish_bin glassfish
+# Given a plugin name (not full path) attempts to load it
+# from the plugin dir and returns 0 on success, 1 on error
+# Plugin file requirements:
+# - First line is #!/bin/sh
+# - In general plugins should only define functions, and not
+#   run anything outside of functions
+# - Any code outside of functions will be executed immediately
+#   when the plugin is loaded, so it must be crafted carefully
+#   so it does not interefere with the main program or other
+#   plugins
+# - All functions defined in a plugin will be available to all
+#   other plugins (including plugins loaded after this one)
+#   and that works because any function calls within functions
+#   are not checked by the shell until they are actually invoked
+# - Functions that correspond to commands have a naming convention:
+#   for example in "mtwilson tomcat start" the word "tomcat" is a
+#   command, and the corresponding function must be named
+#   "tomcat".  Hyphens in command names are allowed and are
+#   automatically converted to underscores. For example the command
+#   "tomcat-restart" is converted to "tomcat_restart"
+loadplugin() {
+  local pluginfile="$1"
+  local pluginfilepath="$plugindir/$pluginfile"
+  if is_shell_script "$pluginfilepath"; then
+    $debug_plugin && echo "Loading $pluginfile..."
+    . $pluginfilepath
+    return 0
+  else
+    echo "Cannot load $pluginfilepath"
+    return 1
   fi
 }
 
-RETVAL=0
 
-# See how we were called.
-case "$1" in
-  version)
-        echo "MtWilson Linux Utility"
-	echo "Version ${VERSION}"
-	echo "Build ${BUILD}"
-        ;;
-  setup-env)
-        setup_env
-        ;;
-  glassfish-detect)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_detect ${2:-$GLASSFISH_REQUIRED_VERSION}
-        glassfish_env_report
-        ;;
-  glassfish-start)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        glassfish_start_report
-        ;;
-  glassfish-stop)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        glassfish_shutdown
-        ;;
-  glassfish-restart)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        glassfish_restart
-        ;;
-  glassfish-status)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        glassfish_running_report
-        glassfish_sslcert_report
-        ;;
-  glassfish-sslcert)
-        #echo_warning "This feature has been disabled: mtwilson glassfish-sslcert"
-        glassfish_create_ssl_cert_prompt
-        ;;
-  glassfish-enable-logging)
-        glassfish_enable_logging
-        ;;
-  mysql-detect)
-        mysql_detect ${2:-$mysql_required_version}
-        mysql_env_report
-        ;;
-  mysql-sslcert)
-        mysql_create_ca
-        mysql_create_ssl "MySQL Server"
-        mysql_create_ssl "Attestation Service"
-        mysql_create_ssl "Management Service"
-        mysql_create_ssl "Whitelist Service"
-        mysql_create_ssl "Trust Dashboard"
-        ;;
-  java-detect)
-        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
-        java_env_report
-        ;;
-  localhost-integration)
-        mtwilson_localhost_integration $@
-        ;;
-  api)
-        shift
-        call_apiclient $@
-        ;;
-  setup)
-        if [ $# -gt 1 ]; then
-          shift
-          call_setupcommand $@
-        else
-          setup
-        fi
-        ;;
-  fingerprint)
-        # show server ssh fingerprint, glassfish ssl fingerprint, and saml cert fingerprint
-        echo "== SSH HOST KEYS =="
-        ssh_fingerprints
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        if using_glassfish; then
-          glassfish_require
-          echo "== GLASSFISH SSL CERTIFICATE =="
-          glassfish_sslcert_report
-        fi
-        echo "== MT WILSON SAML CERTIFICATE =="
-        mtwilson_saml_cert_report
-        ;;
-  status)
-        all_status
-        ;;
-  erase-data)
-        call_setupcommand EraseHostRegistrationData
-        call_setupcommand EraseWhitelistData
-        call_setupcommand EraseLogs
-        ;;
-  erase-users)
-        call_setupcommand EraseUserAccounts
-        ;;
-  uninstall)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        if using_glassfish; then
-          glassfish_require
-          echo "Stopping Glassfish..."
-          glassfish_shutdown
-          # application files
-          echo "Removing Glassfish in /usr/share/glassfish3..."
-          rm -rf /usr/share/glassfish3
-        fi
-        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
-        rm -rf /opt/intel/cloudsecurity
-        echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
-        rm -rf /usr/local/share/mtwilson
-        # configuration files
-        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
-        rm -rf /etc/intel/cloudsecurity
-        # data files
-        echo "Removing Mt Wilson data in /var/opt/intel..."
-        rm -rf /var/opt/intel
-        # control scripts
-        echo "Removing Mt Wilson control scripts..."
-        echo asctl wlmctl msctl pcactl mcctl wpctl tdctl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
-		echo "Stopping Monit service..."
-		service monit stop &> /dev/null
-		if [ -f /etc/monit/monitrc ]; then
-		 #remove monit config so when it starts back up it has nothing to monitor
-		 # idealy here we should be uninstalling instead
-		 rm -fr /etc/monit/monitrc
-		fi
-        # java:  rm -rf /usr/share/jdk1.6.0_29
-        echo_success "Done"
-        ;;
-  help)
-        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-decect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
-        ;;
-  *)
-        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-decect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
-        exit 1
-esac
+# Input: command name (from command line)
+# Output: corresponding function name (in plugin)
+# Given a command name like "tomcat-restart" converts it
+# to a function name like "tomcat_restart"
+# The rule is that all hyphens are converted to underscores,
+# and then anything that isn't a letter digit or underscore is
+# deleted.
+command_function_name() {
+  local name="$1"
+  #local converted=`echo "$name" | tr '-' '_'`
+  #echo $converted
+  echo "$name" | tr '-' '_' | tr -dc 'a-zA-Z0-9_'
+}
 
-exit $RETVAL
+# Input: function name
+# Output:  success (0) if the function exists, error (1) if it doesn't
+# Example: is_function do_something && do_something
+is_function() {
+  local result=`type $1 2>/dev/null | head -n 1`
+  #if [ -n "$result" ]; then
+  if [ "$result" == "$1 is a function" ]; then
+    return 0
+  fi
+  return 1
+}
+
+# Looks for a function that is named like prefix_name
+# where prefix is the value of cmdprefix variable declared
+# at the top of this script, and name is the command
+# name (probably typed in by the user like "mtwilson <command-name> args..."
+find_command() {
+  local inputname="$1"
+  local underscored="${inputname//-/_}"
+  local sanitized="${inputname//[^a-z0-9_]/}"
+  local fn="${cmdprefix}_${sanitized}"
+  if is_function $fn; then
+    echo $fn
+    return 0
+  else
+    return 1
+  fi
+}
+
+# init
+if [ ! -f $logfile ]; then touch $logfile; fi
+if [ ! -d $plugindir ]; then mkdir -p $plugindir; fi
+set_available_plugins
+for pluginfile in $AVAILABLE_PLUGINS
+do
+  loadplugin $pluginfile
+done
+
+# from env plugin:
+if isplugin env; then loadenv; fi
+
+if isplugin log; then mw_log "$@"; fi
+
+#parse_args $@
+
+# Look for a command with this name defined by one of the
+# plugins. If more than one plugin defines the samea command,
+# the plugin with the "greater" (alphabetically) name will
+# be loaded last and override any earlier definitions.
+# Example input:  "version"
+# Example output:  "mw_version"
+cmd=`find_command $1`
+
+# Shift once to remove the command's name from the list of
+# arguments. So we only pass to the command arguments that
+# were after its name.
+shift
+
+# Invoke the command with its arguments, and exit using whatever
+# error code was returned from the command.
+$cmd $@
+exit $?
+

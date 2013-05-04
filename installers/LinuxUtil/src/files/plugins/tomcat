@@ -1,0 +1,112 @@
+#!/bin/sh
+
+#mw_tomcat() {
+#addopt "s" "start"
+#addopt "t" "stop"
+#  echo "tomcat: hello world: $@"
+#}
+
+
+### FUNCTION LIBRARY: tomcat
+
+# tomcat 
+
+tomcat_clear() {
+  TOMCAT_HOME=""
+  tomcat_bin=""
+  tomcat=""
+}
+
+# sets variable TOMCAT_VERSION and TOMCAT_VERSION_OK = yes  or  = no
+tomcat_version() {
+  TOMCAT_VERSION=""
+  TOMCAT_VERSION_OK=""
+  if [ -n "$tomcat" ]; then
+    TOMCAT_VERSION=`$tomcat version 2>&1 | grep -i "Server version:" | awk -F / '{ print $2 }'`
+    if is_version_at_least "$TOMCAT_VERSION" "${tomcat_required_version}"; then
+      TOMCAT_VERSION_OK=yes
+    else
+      TOMCAT_VERSION_OK=no
+    fi
+  fi
+}
+
+tomcat_version_report() {
+  tomcat_version
+  if [ "$TOMCAT_VERSION_OK" == "yes" ]; then
+    echo "Tomcat version $TOMCAT_VERSION is ok"
+  else
+    echo "Tomcat version $TOMCAT_VERSION is not supported, minimum is ${tomcat_required_version}"
+  fi
+}
+
+# detects possible tomcat installations
+# does nothing if TOMCAT_HOME is already set; unset before calling to force detection
+tomcat_detect() {
+  if [[ -n "$TOMCAT_HOME" && -d "$TOMCAT_HOME" ]]; then
+    return
+  fi
+  TOMCAT_CANDIDATES=`find ${tomcat_parent_dir} -name tomcat-users.xml`
+  TOMCAT_HOME=''
+  tomcat_bin=""
+  tomcat=""
+  for c in $TOMCAT_CANDIDATES
+  do
+    if [ -z "$TOMCAT_HOME" ]; then
+      local bin_dir=`dirname $c`
+      local parent=`dirname $bin_dir`
+      if [ -f "$parent/bin/catalina.sh" ]; then
+        TOMCAT_HOME="$parent"
+        tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
+        tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME $tomcat_bin"
+        echo "Found Tomcat: $TOMCAT_HOME"
+        tomcat_version
+        if [ "$TOMCAT_VERSION_OK" != "yes" ]; then
+          TOMCAT_HOME=''
+          tomcat_bin=""
+          tomcat=""
+        fi
+      fi
+    fi
+  done
+}
+
+
+tomcat_install() {
+  #TOMCAT_YUM_PACKAGES="unzip"
+  #TOMCAT_APT_PACKAGES="unzip"
+  #auto_install "Tomcat requirements" "TOMCAT"
+  tomcat_detect
+  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
+    if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
+        echo "Installing $TOMCAT_PACKAGE"
+        if [ -d "${tomcat_parent_dir}/${tomcat_name}" ]; then
+          local datestr=`date +%Y-%m-%d.%H%M`
+          echo "Renaming existing incomplete ${tomcat_parent_dir}/${tomcat_name} to ${tomcat_parent_dir}/${tomcat_name}.${datestr}"
+          mv $tomcat_parent_dir/$tomcat_name $tomcat_parent_dir/${tomcat_name}.${datestr}
+      fi
+      gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
+      #local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tgz '{ print $1 }'`
+      #mv $tomcat_folder $tomcat_parent_dir/$tomcat_name
+      mv $tomcat_name $tomcat_parent_dir/
+      # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts; leaving this in for Tomcat for now until we know that it's not required
+      if [ -f "/etc/hosts" ]; then
+        local hostname=`hostname`
+        local found=`cat "/etc/hosts" | grep "^127.0.0.1" | grep "$hostname"`
+        if [ -z "$found" ]; then
+          local datestr=`date +%Y-%m-%d.%H%M`
+          cp /etc/hosts /etc/hosts.${datestr}
+          local updated=`sed -re "s/^(127.0.0.1\s.*)$/\1 ${hostname}/" /etc/hosts`
+          echo "$updated" > /etc/hosts
+        fi
+      fi
+            
+    fi
+  fi
+  tomcat_detect
+  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
+    echo "Unable to auto-install Tomcat"
+    echo "  Tomcat download URL:"
+    echo "  http://tomcat.apache.org/"
+  fi
+}
