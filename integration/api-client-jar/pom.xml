@@ -407,7 +407,15 @@
             <version>1.6</version>
         </dependency>
         <!-- end httpclient -->
-    
+        
+        
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+        
         <!-- begin jersey  -->
     
         <!-- jersey-core provides MultivaluedMap and MediaType -->

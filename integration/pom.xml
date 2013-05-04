@@ -21,6 +21,7 @@
     <module>api-client-jar</module>
     <module>api-client-jar-jdk15</module>
     <module>my</module>
+    <module>mtwilson-autotest</module>
   </modules>
 
 
