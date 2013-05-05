@@ -79,7 +79,7 @@ public class HostBO extends BaseBO {
         private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
         private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
 
-        private static class Aes128DataCipher implements DataCipher {
+        public static class Aes128DataCipher implements DataCipher {
             private Logger log = LoggerFactory.getLogger(getClass());
             private Aes128 cipher;
             public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
