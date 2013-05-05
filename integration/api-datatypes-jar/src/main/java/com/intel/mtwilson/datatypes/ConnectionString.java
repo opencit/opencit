@@ -4,17 +4,19 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.model.Hostname;
 import java.net.MalformedURLException;
 import org.apache.commons.lang3.StringUtils;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
 public class ConnectionString {
+    private static Logger log = LoggerFactory.getLogger(ConnectionString.class);
 
     private static final String httpDelimiter = "//";
     private static final String parameterDelimiter = ":";
@@ -22,6 +24,7 @@ public class ConnectionString {
     private static final String intelVendorRegEx = "^(https?://)?([a-zA-Z0-9\\._-])+(:)*([0-9])*$";
     private String addOnConnectionString;
     private Vendor vendor;
+    private Hostname hostname;
     private String managementServerName;
     private Integer port;
     private String userName;
@@ -29,8 +32,9 @@ public class ConnectionString {
 
     public ConnectionString() {
         this.addOnConnectionString = "";
-        this.managementServerName = "";
+        this.hostname = null;
         this.port = 0;
+        this.managementServerName = "";
         this.userName = "";
         this.password = "";
     }
@@ -67,7 +71,7 @@ public class ConnectionString {
             this.addOnConnectionString = addOnConnectionString;
             
         } catch (MalformedURLException ex) {
-            Logger.getLogger(ConnectionString.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(ex.toString());
             throw ex;
         }
     }
@@ -161,7 +165,7 @@ public class ConnectionString {
                 }
             }
         } catch (MalformedURLException ex) {
-            Logger.getLogger(ConnectionString.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(ex.toString());
             throw ex;
         }
     }
@@ -175,22 +179,8 @@ public class ConnectionString {
      * @return
      */
     public String getConnectionStringWithPrefix() {
-        String connectionString = "";
-
-        if (this.vendor == Vendor.INTEL) {
-            connectionString = String.format("intel:https://%s:%d", this.managementServerName, this.port);
-        } else if (this.vendor == Vendor.VMWARE) {
-            connectionString = (this.addOnConnectionString.isEmpty()) ? 
-                    String.format("vmware:https://%s:%d/sdk;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
-                    String.format("vmware:%s", this.addOnConnectionString);
-        } else if (this.vendor == Vendor.CITRIX) {
-            connectionString = (this.addOnConnectionString.isEmpty()) ? 
-                    String.format("citrix:https://%s:%d;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
-                    String.format("citrix:%s", this.addOnConnectionString);
-        } else {
-            connectionString = "";
-        }
-        return connectionString;
+        if( this.vendor == null ) { return ""; } // XXX should we return null to indicate an error? or maybe this shouldn't even be possible to have a ConnectionString object without a vendor?
+        return String.format("%s:%s", this.vendor.name().toLowerCase(), getConnectionString());
     }
 
     /**
@@ -230,6 +220,15 @@ public class ConnectionString {
         return addOnConnectionString;
     }
 
+    
+    /**
+     * Returns the hostname of the host represented by this connection string.
+     * @return 
+     */
+    public Hostname getHostname() {
+        return hostname;
+    }
+    
     /**
      * This retrieves the hostName component of the connection string. Before calling this method
      * ConnectionString(String connectionString) constructor has to be called by passing in the completed connection
@@ -260,4 +259,363 @@ public class ConnectionString {
         return vendor;
     }
   
+    /**
+     * Creates a connection string for an Intel host with default port 9999
+     * @param hostname DNS name or IP address
+     * @return 
+     */
+    public static ConnectionString forIntel(String hostname) {
+        return forIntel(new Hostname(hostname));
+    }
+    
+    /**
+     * Creates a connection string for an Intel host with default port 9999
+     * @param hostname DNS name or IP address
+     * @return 
+     */
+    public static ConnectionString forIntel(Hostname hostname) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.INTEL;
+        conn.managementServerName = hostname.toString();
+        conn.port = 9999; // default Intel Trust Agent port
+        return conn;
+    }
+    
+    /**
+     * Creates a connection string for an Intel host with specified port
+     * @param hostname DNS name or IP address
+     * @param port to connect to Trust Agent
+     * @return 
+     */
+    public static ConnectionString forIntel(Hostname hostname, Integer port) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.INTEL;
+        conn.managementServerName = hostname.toString();
+        conn.port = port;
+        return conn;
+    }
+
+    /**
+     * Creates a connection string for an Intel host with specified port
+     * @param hostname DNS name or IP address
+     * @param port to connect to Trust Agent
+     * @return 
+     */
+    public static ConnectionString forIntel(String hostname, Integer port) {
+        return forIntel(new Hostname(hostname), port);
+    }
+
+    
+    /**
+     * Creates a connection string for an Intel host with specified port
+     * @param url like https://hostname:9999
+     * @return 
+     */
+    public static ConnectionString forIntel(URL url) {
+        return forIntel(new Hostname(url.getHost()), portFromURL(url));
+    }
+    
+    /**
+     * Creates a connection string for a Citrix host with default port 443
+     * @param hostname DNS name or IP address
+     * @param username for Citrix host management
+     * @param password for Citrix host management
+     * @return 
+     */
+    public static ConnectionString forCitrix(Hostname hostname, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.CITRIX;
+        conn.hostname = hostname;
+        conn.managementServerName = hostname.toString();
+        conn.port = 443;
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
+    
+    /**
+     * Creates a connection string for a Citrix host with specified default port
+     * @param hostname DNS name or IP address
+     * @param port to connect to Citrix host management API
+     * @param username for Citrix host management
+     * @param password for Citrix host management
+     * @return 
+     */
+    public static ConnectionString forCitrix(Hostname hostname, Integer port, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.CITRIX;
+        conn.hostname = hostname;
+        conn.managementServerName = hostname.toString();
+        conn.port = port;
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
+    
+    /**
+     * Creates a connection string for a Citrix host with specified port
+     * @param url like https://hostname:443;username;password or https://hostname:443;u=username;p=password
+     * @return 
+     */
+    public static ConnectionString forCitrix(URL url) {
+        return forCitrix(new Hostname(url.getHost()), portFromURL(url), usernameFromURL(url), passwordFromURL(url));
+    }
+    
+    
+    
+    /**
+     * Creates a connection string for a VMware host with default port 443
+     * @param hostname DNS name or IP address of the host
+     * @param vcenter DNS name or IP address of the vcenter appliance
+     * @param username for Vcenter host management
+     * @param password for Vcenter host management
+     * @return 
+     */
+    public static ConnectionString forVmware(Hostname hostname, Hostname vcenter, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.VMWARE;
+        conn.hostname = hostname;
+        conn.managementServerName = vcenter.toString();
+        conn.port = 443;
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
+
+    /**
+     * Creates a connection string for a VMware host with specified port
+     * @param hostname DNS name or IP address of the host
+     * @param vcenter DNS name or IP address of the vcenter appliance
+     * @param port to connect to the vcenter API
+     * @param username for Vcenter host management
+     * @param password for Vcenter host management
+     * @return 
+     */
+    public static ConnectionString forVmware(Hostname hostname, Hostname vcenter, Integer port, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.VMWARE;
+        conn.hostname = hostname;
+        conn.managementServerName = vcenter.toString();
+        conn.port = port;
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
+    
+    /**
+     * Creates a connection string for a VMware host with specified Vcenter URL
+     * @param hostname DNS name or IP address of the host
+     * @param vcenter URL for the Vcenter API
+     * @param username for Vcenter host management
+     * @param password for Vcenter host management
+     * @return 
+     */
+    public static ConnectionString forVmware(Hostname hostname, URL vcenter, String username, String password) {
+        ConnectionString conn = new ConnectionString();
+        conn.vendor = Vendor.VMWARE;
+        conn.hostname = hostname;
+        conn.managementServerName = vcenter.toString();
+        conn.port = portFromURL(vcenter);
+        conn.userName = username;
+        conn.password = password;
+        return conn;
+    }
+
+    /**
+     * Creates a connection string for a VMware host with specified port
+     * @param url like https://vcenter:443/sdk;username;password;hostname or https://hostname:443;u=username;p=password;h=hostname
+     * @return 
+     */
+    public static ConnectionString forVmware(URL url) {
+        return forVmware(new Hostname(url.getHost()), new Hostname(hostnameFromURL(url)), portFromURL(url), usernameFromURL(url), passwordFromURL(url));
+    }
+    
+    /**
+     * Creates a connection string with the given vendor and vendor-specific URL
+     * @param vendor like INTEL, CITRIX, VMWARE
+     * @param url vendor-specific URL like https://citrix:443;username;password or https://vcenter:443/sdk;u=username;p=password;h=hostname or https://hostname:9999
+     * @return 
+     */
+    public static ConnectionString forVendor(Vendor vendor, URL url) {
+        if( vendor == null ) { return null; }
+        switch(vendor) {
+            case INTEL:
+                return forIntel(url);
+            case CITRIX:
+                return forCitrix(url);
+            case VMWARE:
+                return forVmware(url);
+            default:
+                log.error("Unknown vendor: "+vendor.name());
+                return null;
+        }
+    }
+    
+    /**
+     * The URL object returns -1 for the port number if it was not explicitly defined in the URL.
+     * So this method checks for -1 and returns default https or default http port depending on 
+     * the protocol of the URL. If the port is not defined in the URL and the scheme is neither
+     * https nor http then the -1 is returned.
+     * @param url
+     * @return 
+     */
+    private static int portFromURL(URL url) {
+        if( url.getPort() == -1  && url.getProtocol().equals("https") ) {
+            return 443;
+        }
+        else if( url.getPort() == -1  && url.getProtocol().equals("http") ) {
+            return 80;
+        }
+        else {
+            return url.getPort();
+        }        
+    }
+    
+    /**
+     * For supported URLs that include a username and password, the username is either
+     * the first parameter after the first semicolon, or a parameter that starts with u=
+     * 
+     * For example:
+     * https://citrix:443;username;password
+     * https://citrix:443;u=username;p=password
+     * https://citrix:443;p=password;u=username
+     * https://vcenter:443/sdk;username;password;hostname
+     * https://vcenter:443/sdk;u=username;p=password;u=hostname
+     * https://vcenter:443/sdk;u=hostname;u=username;p=password
+     * 
+     * @param url
+     * @return 
+     */
+    private static String usernameFromURL(URL url) {
+        String str = url.toExternalForm();
+        if( str.indexOf(';') == -1 ) {
+            return null;
+        }
+        String params = str.substring(str.indexOf(';')+1); // get everything after the first semicolon 
+        String[] parts = params.split(";");
+        if( parts.length == 1 ) {
+            if( parts[0].startsWith("u=") ) {
+                return parts[0].substring(2); // value after the "u="  for URL like https://citrix:443;u=username
+            }
+            return parts[0]; // the only value after semicolon for URL like https://citrix:443;username
+        }
+        if( parts.length == 2 ) {
+            if( parts[0].startsWith("u=") ) {
+                return parts[0].substring(2); // value after the "u="  for URL like https://citrix:443;u=username;p=password
+            }
+            if( parts[1].startsWith("u=") ) {
+                return parts[1].substring(2); // value after the "u="  for URL like https://citrix:443;p=password;u=username
+            }
+            return parts[0]; // the first value after semicolon for URL like https://citrix:443;username;password
+        }
+        if( parts.length == 3 ) {
+            if( parts[0].startsWith("u=") ) {
+                return parts[0].substring(2); // value after the "u="  for URL like https://vcenter:443/sdk;u=username;p=password;h=hostname
+            }
+            if( parts[1].startsWith("u=") ) {
+                return parts[1].substring(2); // value after the "u="  for URL like https://vcenter:443/sdk;h=hostname;u=username;p=password or https://vcenter:443/sdk;p=password;u=username;h=hostname
+            }
+            if( parts[2].startsWith("u=") ) {
+                return parts[1].substring(2); // value after the "u="  for URL like https://vcenter:443/sdk;h=hostname;p=password;u=username
+            }
+            return parts[0]; // the first value after semicolon for URL like https://vcenter:443/sdk;username;password;hostname
+        }
+        return null;
+    }
+    
+    /**
+     * For supported URLs that include a username and password, the password is either
+     * the second parameter after the first semicolon, or a parameter that starts with p=
+     * 
+     * For example:
+     * https://citrix:443;username;password
+     * https://citrix:443;u=username;p=password
+     * https://citrix:443;p=password;u=username
+     * https://vcenter:443/sdk;username;password;hostname
+     * https://vcenter:443/sdk;u=username;p=password;u=hostname
+     * https://vcenter:443/sdk;u=hostname;u=username;p=password
+     * 
+     * @param url
+     * @return 
+     */
+    private static String passwordFromURL(URL url) {
+        String str = url.toExternalForm();
+        if( str.indexOf(';') == -1 ) {
+            return null;
+        }
+        String params = str.substring(str.indexOf(';')+1); // get everything after the first semicolon 
+        String[] parts = params.split(";");
+        if( parts.length == 1 ) {
+            return null; // no password in URL like  https://citrix:443;username or https://vcenter:443/sdk;username
+        }
+        if( parts.length == 2 ) {
+            if( parts[0].startsWith("p=") ) {
+                return parts[0].substring(2); // value after the "p="  for URL like https://citrix:443;u=username;p=password
+            }
+            if( parts[1].startsWith("p=") ) {
+                return parts[1].substring(2); // value after the "p="  for URL like https://citrix:443;p=password;u=username
+            }
+            return parts[1]; // the second value after semicolon for URL like https://citrix:443;username;password
+        }
+        if( parts.length == 3 ) {
+            if( parts[0].startsWith("p=") ) {
+                return parts[0].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;p=password;u=username;h=hostname
+            }
+            if( parts[1].startsWith("p=") ) {
+                return parts[1].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;h=hostname;p=password;u=username or https://vcenter:443/sdk;u=username;p=password;h=hostname
+            }
+            if( parts[2].startsWith("p=") ) {
+                return parts[1].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;h=hostname;u=username;p=password
+            }
+            return parts[1]; // the second value after semicolon for URL like https://vcenter:443/sdk;username;password;hostname
+        }
+        return null;
+    }    
+    
+    /**
+     * For vmware URLs, the hostname in the URL is the vcenter hostname, and the "real" hostname
+     * is passed as a parameter next to username and password. So this function searches for that
+     * parameter and returns it if it was found.
+     * 
+     * For example:
+     * https://vcenter:443/sdk;username;password;hostname
+     * https://vcenter:443/sdk;u=username;p=password;u=hostname
+     * https://vcenter:443/sdk;u=hostname;u=username;p=password
+     * 
+     * @param url
+     * @return 
+     */
+    private static String hostnameFromURL(URL url) {
+        String str = url.toExternalForm();
+        if( str.indexOf(';') == -1 ) {
+            return null;
+        }
+        String params = str.substring(str.indexOf(';')+1); // get everything after the first semicolon 
+        String[] parts = params.split(";");
+        if( parts.length == 1 ) {
+            return null; // no hostname in URL like https://vcenter:443/sdk;username
+        }
+        if( parts.length == 2 ) {
+            if( parts[0].startsWith("h=") ) {
+                return parts[0].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;h=hostname;u=username
+            }
+            if( parts[1].startsWith("h=") ) {
+                return parts[1].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;u=username;h=hostname
+            }
+            return null; // no hostname URL like https://vcenter:443/sdk;username;password
+        }
+        if( parts.length == 3 ) {
+            if( parts[0].startsWith("h=") ) {
+                return parts[0].substring(2); // value after the "h="  for URL like https://vcenter:443/sdk;h=hostname;u=username;p=password
+            }
+            if( parts[1].startsWith("h=") ) {
+                return parts[1].substring(2); // value after the "h="  for URL like https://vcenter:443/sdk;p=password;h=hostname;u=username or https://vcenter:443/sdk;u=username;h=hostname;p=password
+            }
+            if( parts[2].startsWith("h=") ) {
+                return parts[1].substring(2); // value after the "h="  for URL like https://vcenter:443/sdk;p=password;u=username;h=hostname
+            }
+            return parts[2]; // the third value after semicolon for URL like https://vcenter:443/sdk;username;password;hostname
+        }
+        return null;
+    }        
 }
