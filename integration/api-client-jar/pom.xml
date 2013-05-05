@@ -292,6 +292,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>my</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.6.4</version>

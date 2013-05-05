@@ -24,6 +24,8 @@ public class My {
     private static MyConfiguration config = null;
     private static ApiClient client = null;
     private static MyPersistenceManager pm = null;
+    private static MyJpa jpa = null;
+    private static MyEnvironment env = null;
     
     public static MyConfiguration configuration() throws IOException { 
         if( config == null ) {
@@ -51,5 +53,19 @@ public class My {
                     "mtwilson.db.password", "mtwilson.db.schema", "mtwilson.as.dek"));
         }
         return pm;
+    }
+    
+    public static MyJpa jpa() {
+        if( jpa == null ) {
+            jpa = new MyJpa();
+        }
+        return jpa;
+    }
+    
+    public static MyEnvironment env() throws IOException {
+        if( env == null ) {
+            env = new MyEnvironment(configuration().getEnvironmentFile());
+        }
+        return env;
     }
 }
