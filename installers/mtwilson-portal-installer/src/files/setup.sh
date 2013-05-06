@@ -72,9 +72,9 @@ chmod 700 "${package_var_dir}"
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x mtwilson_portal
+chmod +x mtwilson-portal
 mkdir -p /usr/local/bin
-cp mtwilson_portal /usr/local/bin
+cp mtwilson-portal /usr/local/bin
 /usr/local/bin/mtwilson-portal setup
 register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 
