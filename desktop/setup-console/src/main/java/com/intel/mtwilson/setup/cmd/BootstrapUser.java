@@ -127,7 +127,7 @@ public class BootstrapUser implements Command {
 //        if( apiClientRecord == null ) {
         // approve user
         approveApiClientRecord(serviceConf,  username, rsaCredentialX509.identity());
-        System.out.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
+        System.err.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
     }
     
     private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
@@ -148,7 +148,7 @@ public class BootstrapUser implements Command {
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
             jpaController.edit(apiClient);
-            
+            System.err.println(String.format("Attempt to approved %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
             ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
             ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
             client.setStatus("Approved");

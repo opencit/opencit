@@ -233,12 +233,27 @@ elif using_tomcat; then
   tomcat_installer=`find_installer tomcat`
   if [[ -n "$tomcat_installer" ]]; then
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    if grep -q MaxPermSize /etc/profile; then
+    
+    if grep -q MaxPermSize /usr/loca/bin/tomcat_starter.sh; then
      someRand=""
     else
-	 echo "export JAVA_OPTS=\"$JAVA_OPTS -Xmx512m -XX:MaxPermSize=128m\"" >> /etc/profile
+      #setup the java_opts and tomcat start in the starter file
+	  echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
+      echo "export JAVA_OPTS=\"$JAVA_OPTS -Djava.library.path=/usr/lib -Xms512m -Xmx2560m -XX:MaxPermSize=384m\"" >> /usr/local/bin/tomcat_starter.sh
+      echo "/usr/share/apachace/bin/catalinia.sh start"  >> /usr/local/bin/tomcat_starter.sh
+      #make the starter file exec on startup
+      echo "#!/bin/bash" >> /etc/init.d/tomcat.sh
+      echo "case \"$1\" in" >> /etc/init.d/tomcat.sh
+      echo "start)" >> /etc/init.d/tomcat.sh
+      echo "/usr/local/bin/tomcat_starter.sh" >> /etc/init.d/tomcat.sh
+      echo ";;" >> /etc/init.d/tomcat.sh
+      echo "stop)" >> /etc/init.d/tomcat.sh
+      echo "/usr/share/apache-tomcat-6.0.29/bin/catalinia.sh stop" >> /etc/init.d/tomcat.sh
+      echo ";;" >> /etc/init.d/tomcat.sh
+      echo "esac" >> /etc/init.d/tomcat.sh
     fi
-    . /etc/profile
+
+    chmod +x /etc/init.d/tomcat.sh
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
     
     #mtwilson tomcat-sslcert
