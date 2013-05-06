@@ -171,7 +171,7 @@ if [ ! -z "$trustportal" ]; then
 fi
 
 if [ ! -z "$mtwportal" ]; then
-	if [ -e $mtw_portal ]; then
+	if [ ! -e $mtw_portal ]; then
 		echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
