@@ -312,10 +312,13 @@ if using_glassfish; then
   mtwilson glassfish-restart >> $INSTALL_LOG_FILE
   echo "Glassfish restarted..." | tee -a  $INSTALL_LOG_FILE
 else
-  echo "Restarting Tomcat" | tee -a  $INSTALL_LOG_FILE
-  /usr/share/apache-tomcat-6.0.29/bin/catalina.sh stop >> $INSTALL_LOG_FILE
-  /usr/share/apache-tomcat-6.0.29/bin/catalina.sh start >> $INSTALL_LOG_FILE
-  echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
-fi
+  if tomcat_running; then 
+      echo "Restarting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
+      tomcat_start
+    fi
+  fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"

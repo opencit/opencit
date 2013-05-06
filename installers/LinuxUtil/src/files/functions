@@ -2770,9 +2770,9 @@ webservice_install() {
         
         #wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} -O - -q --no-check-certificate
         #wait here until the app finishes deploying
-]       webservice_running $webservice_application_name
+        webservice_running $webservice_application_name
         while [ -z "$WEBSERVICE_RUNNING" ]; do
-          webservice_running $webservice_application_name
+          webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
           echo -n "."
           sleep 10
         done      

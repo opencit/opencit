@@ -112,7 +112,7 @@ public class BootstrapUser implements Command {
          ByteArrayResource certResource = new ByteArrayResource();
          SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
          MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);
-         if(apiClient != null){
+         if(apiClient == null){
             MwPortalUser keyTable = new MwPortalUser();
             keyTable.setUsername(username);
             keyTable.setKeystore(certResource.toByteArray());
