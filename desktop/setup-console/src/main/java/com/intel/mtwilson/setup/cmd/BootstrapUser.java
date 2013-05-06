@@ -41,6 +41,8 @@ public class BootstrapUser implements Command {
     private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
     private SetupContext ctx = null;
     public static final Console console = System.console();
+    MSPersistenceManager persistenceManager = new MSPersistenceManager();
+    MwPortalUserJpaController jpaController = new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
     
     @Override
     public void setContext(SetupContext ctx) {
@@ -109,11 +111,14 @@ public class BootstrapUser implements Command {
         // load the new key
          ByteArrayResource certResource = new ByteArrayResource();
          SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
-         MwPortalUser keyTable = new MwPortalUser();
-         keyTable.setUsername(username);
-         keyTable.setKeystore(certResource.toByteArray());
-         keyTable.setStatus("PENDING");
-         keystoreJpa.create(keyTable);
+         MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);
+         if(apiClient != null){
+            MwPortalUser keyTable = new MwPortalUser();
+            keyTable.setUsername(username);
+            keyTable.setKeystore(certResource.toByteArray());
+            keyTable.setStatus("PENDING");
+            keystoreJpa.create(keyTable);
+         }
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();
@@ -138,8 +143,7 @@ public class BootstrapUser implements Command {
             s.close();
             c.close();
             */
-            MSPersistenceManager persistenceManager = new MSPersistenceManager();
-            MwPortalUserJpaController jpaController = new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
+           
             MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);   
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);

@@ -2758,7 +2758,7 @@ webservice_install() {
         ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-        wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED} -O -q --no-check-certificate
+        wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED} -O - -q --no-check-certificate
       fi
     else
       if using_glassfish; then
@@ -2767,7 +2767,7 @@ webservice_install() {
       elif using_tomcat; then
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp ${webservice_war_file} $TOMCAT_HOME/webapps/
-        #wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} -O -q --no-check-certificate
+        #wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} -O - -q --no-check-certificate
       fi
     fi
 }
@@ -2782,7 +2782,7 @@ webservice_uninstall() {
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED} -O -p --no-check-certificate
+      wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED} -O - -p --no-check-certificate
     fi
   else
     if using_glassfish; then
