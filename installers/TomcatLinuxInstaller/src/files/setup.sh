@@ -13,7 +13,6 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
 
-#chown -R tomcat:tomcat /usr/share/apache-tomcat-6.0.29
 tomcat_permissions ${TOMCAT_HOME}
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
@@ -42,11 +41,12 @@ if [[ -n "$mysqlconnector_files" ]]; then
 fi
 
 # Add the manager role give access to the tomcat user in the tomcat-users.xml
+
 cd $TOMCAT_CONF
 mv tomcat-users.xml tomcat-users.xml.old
 sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomcat" password="tomcat" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
 rm  -f tomcat-users.xml.old
-#chown -R root:tomcat6 tomcat-users.xml
+
 
 # Here is what the connector string should look like
 #<Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"

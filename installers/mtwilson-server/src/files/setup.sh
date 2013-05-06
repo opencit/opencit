@@ -238,19 +238,23 @@ elif using_tomcat; then
      someRand=""
     else
       #setup the java_opts and tomcat start in the starter file
-	  echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
-      echo "export JAVA_OPTS=\"$JAVA_OPTS -Djava.library.path=/usr/lib -Xms512m -Xmx2560m -XX:MaxPermSize=384m\"" >> /usr/local/bin/tomcat_starter.sh
-      echo "/usr/share/apachace/bin/catalinia.sh start"  >> /usr/local/bin/tomcat_starter.sh
+      if [ ! -f /usr/local/bin/tomcat_starter.sh ]; then
+	    echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
+        echo "export JAVA_OPTS=\"\$JAVA_OPTS -Djava.library.path=/usr/lib -Xms512m -Xmx2560m -XX:MaxPermSize=384m\"" >> /usr/local/bin/tomcat_starter.sh
+        echo "/usr/share/apachace/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
+      fi
       #make the starter file exec on startup
-      echo "#!/bin/bash" >> /etc/init.d/tomcat.sh
-      echo "case \"$1\" in" >> /etc/init.d/tomcat.sh
-      echo "start)" >> /etc/init.d/tomcat.sh
-      echo "/usr/local/bin/tomcat_starter.sh" >> /etc/init.d/tomcat.sh
-      echo ";;" >> /etc/init.d/tomcat.sh
-      echo "stop)" >> /etc/init.d/tomcat.sh
-      echo "/usr/share/apache-tomcat-6.0.29/bin/catalinia.sh stop" >> /etc/init.d/tomcat.sh
-      echo ";;" >> /etc/init.d/tomcat.sh
-      echo "esac" >> /etc/init.d/tomcat.sh
+      if [ ! -f /etc/init.d/tomcat.sh ]; then
+        echo "#!/bin/bash" >> /etc/init.d/tomcat.sh
+        echo "case \"\$1\" in" >> /etc/init.d/tomcat.sh
+        echo "start)" >> /etc/init.d/tomcat.sh
+        echo "/usr/local/bin/tomcat_starter.sh" >> /etc/init.d/tomcat.sh
+        echo ";;" >> /etc/init.d/tomcat.sh
+        echo "stop)" >> /etc/init.d/tomcat.sh
+        echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh stop" >> /etc/init.d/tomcat.sh
+        echo ";;" >> /etc/init.d/tomcat.sh
+        echo "esac" >> /etc/init.d/tomcat.sh
+      fi 
     fi
 
     chmod +x /etc/init.d/tomcat.sh
