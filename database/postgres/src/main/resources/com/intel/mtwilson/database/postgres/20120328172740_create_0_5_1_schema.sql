@@ -79,8 +79,6 @@ CREATE TABLE tbl_hosts (
   AddOn_Connection_Info varchar(80) DEFAULT NULL,
   AIK_Certificate text,
   Email varchar(45) DEFAULT NULL,
-  Created_On timestamp NOT NULL,
-  Updated_On timestamp NOT NULL,
   Error_Code integer DEFAULT NULL,
   Error_Description varchar(100) DEFAULT NULL,
   Location varchar(200) DEFAULT NULL,
