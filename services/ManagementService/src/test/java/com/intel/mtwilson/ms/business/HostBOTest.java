@@ -48,8 +48,11 @@ public class HostBOTest {
     public void testRegisterHost() throws Exception {
         System.out.println("registerHost");
         TxtHostRecord hostObj = new TxtHostRecord();
-        hostObj.HostName = "10.1.71.155";
-        hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+        hostObj.HostName = "10.1.71.169";
+        hostObj.IPAddress = "10.1.71.169";
+        hostObj.Port = 9999;        
+//        hostObj.HostName = "10.1.71.155";
+//        hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
         HostBO instance = new MSComponentFactory().getHostBO();
         boolean expResult = true;
         boolean result = instance.registerHost(hostObj);
@@ -92,13 +95,13 @@ public class HostBOTest {
     public void testConfigureWhiteListUsingCustomData() {
         HostConfigData wlObj = new HostConfigData();
         TxtHostRecord gkvHost = new TxtHostRecord();
-        gkvHost.HostName = "10.1.71.155";
-        //gkvHost.IPAddress = "10.1.71.169";
-        //gkvHost.Port = 9999;
-        gkvHost.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd"; //intel123!";
+        gkvHost.HostName = "10.1.71.169";
+        gkvHost.IPAddress = "10.1.71.169";
+        gkvHost.Port = 9999;
+       // gkvHost.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd"; //intel123!";
         wlObj.setTxtHostRecord(gkvHost);
         wlObj.setBiosPCRs("0");
-        wlObj.setVmmPCRs("17,18,19,20");
+        wlObj.setVmmPCRs("17,18,19");
         wlObj.setBiosWhiteList(true);
         wlObj.setVmmWhiteList(true);
         wlObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
