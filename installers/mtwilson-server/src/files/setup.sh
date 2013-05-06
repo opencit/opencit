@@ -102,33 +102,33 @@ glassfish_installer=`find_installer glassfish`
 
 # Verify the installers we need are present before we start installing
 if [ ! -z "$java" ]; then
-	if [ ! -a $java_installer ]; then
+	if [ ! -e $java_installer ]; then
 		echo_warning "Java installer marked for install but missing. Please verify you are using the right installer";
 		exit -1;
 	fi
 fi
 
-if [ ! -a $mtwilson_util ]; then
+if [ ! -e $mtwilson_util ]; then
 	echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
 	exit -1;
 fi
 
 if [ ! -z "$glassfish" ]; then
-	if [ ! -a $glassfish_installer ]; then
+	if [ ! -e $glassfish_installer ]; then
 		echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$privacyca" ]; then
-	if [ ! -a $privacyca_service ]; then
+	if [ ! -e $privacyca_service ]; then
 	echo_warning "Privacy CA installer marked for install but missing. Please verify you are using the right installer"
 	exit -1;
 	fi
 fi
 
 if [ ! -z "$attservice" ]; then
-	if [ ! -a $attestation_service ]; then
+	if [ ! -e $attestation_service ]; then
 		echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
@@ -136,49 +136,49 @@ fi
 
 
 if [ ! -z "$mangservice" ]; then
-	if [ ! -a $management_service ]; then
+	if [ ! -e $management_service ]; then
 		echo_warning "Management Service installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$wlmservice" ]; then
-	if [ ! -a $whitelist_service ]; then
+	if [ ! -e $whitelist_service ]; then
 		echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$mangportal" ]; then
-	if [ ! -a $management_console ]; then
+	if [ ! -e $management_console ]; then
 		echo_warning "Management Console installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$wlmportal" ]; then
-	if [ ! -a $whitelist_portal ]; then
+	if [ ! -e $whitelist_portal ]; then
 		echo_warning "WhiteList Portal installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$trustportal" ]; then
-	if [ ! -a $trust_dashboard ]; then
+	if [ ! -e $trust_dashboard ]; then
 		echo_warning "Trust DashBoard installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$mtwportal" ]; then
-	if [ -a $mtw_portal ]; then
+	if [ -e $mtw_portal ]; then
 		echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
 if [ ! -z "$monit" ]; then
-	if [ ! -a $monit_installer ]; then
+	if [ ! -e $monit_installer ]; then
 		echo_warning "Monit installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
