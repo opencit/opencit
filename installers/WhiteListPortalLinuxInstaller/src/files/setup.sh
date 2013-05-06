@@ -96,4 +96,8 @@ if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
   glassfish_permissions "${package_var_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
+  tomcat_permissions "${package_var_dir}"
 fi

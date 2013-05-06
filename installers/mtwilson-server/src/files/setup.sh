@@ -241,7 +241,7 @@ elif using_tomcat; then
       if [ ! -f /usr/local/bin/tomcat_starter.sh ]; then
 	    echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
         echo "export JAVA_OPTS=\"\$JAVA_OPTS -Djava.library.path=/usr/lib -Xms512m -Xmx2560m -XX:MaxPermSize=384m\"" >> /usr/local/bin/tomcat_starter.sh
-        echo "/usr/share/apachace/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
+        echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
       fi
       #make the starter file exec on startup
       if [ ! -f /etc/init.d/tomcat.sh ]; then
@@ -258,15 +258,18 @@ elif using_tomcat; then
     fi
 
     chmod +x /etc/init.d/tomcat.sh
+    chmod +x /usr/local/bin/tomcat_starter.sh
+
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
     
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      /etc/init.d/tomcat.sh stop
+      /etc/init.d/tomcat.sh start
     else
       echo "Starting Tomcat ..."
-      tomcat_start
+      /etc/init.d/tomcat.sh start
     fi
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   fi

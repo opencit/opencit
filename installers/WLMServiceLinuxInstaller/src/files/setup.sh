@@ -15,9 +15,6 @@ package_env_filename=${package_dir}/${package_name}.env
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
-
 # if there's already a previous version installed, uninstall it
 wlmctl=`which wlmctl 2>/dev/null`
 if [ -f "$wlmctl" ]; then
@@ -84,4 +81,7 @@ register_startup_script /usr/local/bin/wlmctl wlmctl
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
 fi
