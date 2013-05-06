@@ -24,10 +24,10 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
-mtwilson-portal=`which mtwilson-portal 2>/dev/null`
-if [ -f "$mtwilson-portal" ]; then
+mtwilson_portal=`which mtwilson-portal 2>/dev/null`
+if [ -f "$mtwilson_portal" ]; then
   echo "Uninstalling previous version..."
-  $mtwilson-portal uninstall
+  $mtwilson_portal uninstall
 fi
 
 # detect the packages we have to install
@@ -72,9 +72,9 @@ chmod 700 "${package_var_dir}"
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x mtwilson-portal
+chmod +x mtwilson_portal
 mkdir -p /usr/local/bin
-cp mtwilson-portal /usr/local/bin
+cp mtwilson_portal /usr/local/bin
 /usr/local/bin/mtwilson-portal setup
 register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 

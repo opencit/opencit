@@ -31,9 +31,9 @@ done
 
 # if a group is defined, then make all sub parts == true
 if [ ! -z "$portals" ]; then
-  eval mangportal="true"
-  eval trustportal="true"
-  eval wlmportal="true"
+  #eval mangportal="true"
+  #eval trustportal="true"
+  #eval wlmportal="true"
   eval mtwportal="true"
 fi
 # if a group is defined, then make all sub parts == true
