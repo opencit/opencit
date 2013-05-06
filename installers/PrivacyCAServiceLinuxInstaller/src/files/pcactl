@@ -108,13 +108,7 @@ setup_interactive_install() {
       sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
       
     fi
-    webservice_running $webservice_application_name
-
-    while [ -z "$WEBSERVICE_RUNNING" ]; do
-      webservice_running $webservice_application_name
-      echo -n "."
-      sleep 10
-    done      
+    
     #webservice_running_report "${webservice_application_name}"
   fi
    #protect_privacyca_files

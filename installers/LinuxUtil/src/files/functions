@@ -2766,8 +2766,15 @@ webservice_install() {
         ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
         echo "Deploying ${webservice_application_name} to Tomcat..."
-        cp ${webservice_war_file} $TOMCAT_HOME/webapps/
-        #wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} -O - -q --no-check-certificate
+        #cp ${webservice_war_file} $TOMCAT_HOME/webapps/
+        #wait here until the app finishes deploying
+        wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} -O - -q --no-check-certificate
+        webservice_running $webservice_application_name
+        while [ -z "$WEBSERVICE_RUNNING" ]; do
+          webservice_running $webservice_application_name
+          echo -n "."
+          sleep 10
+        done      
       fi
     fi
 }
