@@ -181,5 +181,25 @@ public class TblHostSpecificManifestJpaController implements Serializable {
         }
     	    	
     }
+
+    public TblHostSpecificManifest findByModuleAndHostID(int hostId, int moduleID) {
+    	EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblHostSpecificManifest.findByModuleAndHostID");
+            query.setParameter("hostID", hostId);
+            query.setParameter("Module_Manifest_ID", moduleID);
+            
+            TblHostSpecificManifest tblHostSpecificManifest = (TblHostSpecificManifest) query.getSingleResult();
+            return tblHostSpecificManifest;
+
+        }catch (NoResultException e) {
+            log.info("NoResultException: No Host specific manifest for Host [{}]", 
+                    String.valueOf(hostId));
+            return null;
+        } finally {
+            em.close();
+        }
+    	    	
+    }
     
 }

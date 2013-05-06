@@ -328,7 +328,9 @@ public class ReportsBO extends BaseBO {
                         !moduleReports.containsKey(moduleManifest.getComponentName())){
                     
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
-                        String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
+                        //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByModuleAndHostID(hostId, moduleManifest.getId()).getDigestValue();
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }

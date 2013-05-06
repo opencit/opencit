@@ -5,6 +5,7 @@
 package test.util;
 
 import com.intel.mtwilson.MyPersistenceManager;
+import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.MwMleSourceJpaController;
 import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -16,6 +17,8 @@ import com.intel.mtwilson.as.controller.TblPackageNamespaceJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
+import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 
@@ -29,6 +32,7 @@ import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
  * MyJpaDatastore pm = new MyJpaDatastore();
  * TblHosts host = pm.getHostsJpa().findHostByName(...);
  * 
+ * @deprecated please use My.jpa() instead  (added in feature-autotest branch)
  * @author jbuhacoff
  */
 public class MyJpaDatastore  {
@@ -57,6 +61,7 @@ public class MyJpaDatastore  {
                 hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"), pm.getDek());
                 */
                 hostsJpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"));
+                TblHosts.dataCipher = new HostBO.Aes128DataCipher(new Aes128(pm.getDek()));
             }
             return hostsJpa;
         }

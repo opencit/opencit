@@ -86,7 +86,7 @@ public class HostBO extends BaseBO {
     private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mspm.getEntityManagerFactory("MSDataPU"));
     private byte[] dataEncryptionKey;
 
-     private static class Aes128DataCipher implements DataCipher {
+     public static class Aes128DataCipher implements DataCipher {
             private Logger log = LoggerFactory.getLogger(getClass());
             private Aes128 cipher;
             public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
