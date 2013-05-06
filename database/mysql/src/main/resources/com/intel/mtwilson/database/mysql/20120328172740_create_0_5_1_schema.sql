@@ -83,8 +83,6 @@ CREATE TABLE `tbl_hosts` (
   `AddOn_Connection_Info` varchar(80) DEFAULT NULL,
   `AIK_Certificate` text,
   `Email` varchar(45) DEFAULT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_On` datetime NOT NULL,
   `Error_Code` int(11) DEFAULT NULL,
   `Error_Description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`),
