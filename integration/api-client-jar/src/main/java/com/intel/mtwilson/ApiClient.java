@@ -874,10 +874,21 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     public String getSamlForHost(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("ID", hostname.toString());
+        // By default we will get it from cache.
+        query.add("force_verify", Boolean.toString(false));
         String saml = text(httpGet(asurl("/saml/assertions/host", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
         return saml;
     }
 
+    @Override
+    public String getSamlForHost(Hostname hostname, boolean forceVerify) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("hostName", hostname.toString());
+        query.add("force_verify", Boolean.toString(forceVerify));
+        String saml = text(httpGet(asurl("/saml/assertions/host", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        return saml;
+    }
+    
     public TrustAssertion verifyTrustAssertion(String saml) throws IOException, ApiException, SignatureException {
         X509Certificate[] trustedSamlCertificates;
         try {
