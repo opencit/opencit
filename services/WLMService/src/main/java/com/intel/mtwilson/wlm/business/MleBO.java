@@ -778,6 +778,7 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
+            String fullComponentName = "";
             
             try {
 
@@ -805,9 +806,16 @@ public class MleBO extends BaseBO {
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
                     log.debug("addModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(
-                            tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
-                            moduleData.getEventName());
+
+                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                    if (moduleData.getEventName().contains("Vim25")) {
+                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                    } else {
+                        fullComponentName = moduleData.getComponentName();
+                    }
+                    
+                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                     if (tblModule != null) {
                         throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
@@ -830,8 +838,8 @@ public class MleBO extends BaseBO {
                 newModuleRecord.setMleId(tblMle);
                 newModuleRecord.setEventID(tblEvent);
                 newModuleRecord.setNameSpaceID(nsPackNS);
-                log.debug("MleBO addModuleWhiteList setComponentName {}", tblEvent.getFieldName() + "." + moduleData.getComponentName());
-                newModuleRecord.setComponentName(tblEvent.getFieldName() + "." + moduleData.getComponentName());
+                log.debug("MleBO addModuleWhiteList setComponentName {}", fullComponentName);
+                newModuleRecord.setComponentName(fullComponentName);
                 
                 // Bug 375: If the white list is not valid, then an exception would be thrown.
                 validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
@@ -874,7 +882,8 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
-
+            String fullComponentName = "";
+            
             try {
                 
                 try {
@@ -901,9 +910,16 @@ public class MleBO extends BaseBO {
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
                     log.debug("updateModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(
-                            tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
-                            moduleData.getEventName());
+                   
+                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                    if (moduleData.getEventName().contains("Vim25")) {
+                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                    } else {
+                        fullComponentName = moduleData.getComponentName();
+                    }
+
+                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                 } catch (NoResultException nre){
                     throw new ASException(nre,ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());                    

@@ -1635,10 +1635,16 @@ public class HostBO extends BaseBO {
                             moduleObj.setOsVersion(hostObj.VMM_OSVersion);
                             moduleObj.setOemName("");
 
-                            TblEventType eventSearchObj = eventJpa.findEventTypeByName(moduleObj.getEventName());
-                            String fullComponentName = "";
-                            if (eventSearchObj != null) {
-                                fullComponentName = eventSearchObj.getFieldName() + "." + moduleObj.getComponentName();
+                            // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                            // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                            String fullComponentName = "";                            
+                            if (moduleObj.getEventName().contains("Vim25")) {
+                                TblEventType eventSearchObj = eventJpa.findEventTypeByName(moduleObj.getEventName());
+                                if (eventSearchObj != null) {
+                                    fullComponentName = eventSearchObj.getFieldName() + "." + moduleObj.getComponentName();
+                                }
+                            } else {
+                                fullComponentName = moduleObj.getComponentName();
                             }
 
                             log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
