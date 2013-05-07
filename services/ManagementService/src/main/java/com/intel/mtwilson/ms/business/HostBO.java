@@ -1155,7 +1155,12 @@ public class HostBO extends BaseBO {
             }
 
             // Update the host object with the names of BIOS and VMM, which is needed during host registration.
-            hostObj.BIOS_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + hostObj.VMM_OSName.split("_")[0].toString();
+            //hostObj.BIOS_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + hostObj.VMM_OSName.split("_")[0].toString();
+            
+            // Now that we know that the PCR 0 should be cosistent across the different hypervisors for the same BIOS version, we
+            // need not append the OS name
+            hostObj.BIOS_Name = hostObj.BIOS_Oem.replace(' ', '_');
+            
             hostObj.VMM_Version = hostObj.VMM_OSVersion + "-" + hostObj.VMM_Version;
 
             // For VMware since there is no separate OS and VMM, we use the same name
@@ -1244,8 +1249,12 @@ public class HostBO extends BaseBO {
                 // Update the host object with the names of BIOS. For the name we are using a combination of the OEM
                 // and the hypervisor running on the host since we have seen different PCR 0 for the same
                 // OEM having different hypervisors.
-                hostObj.BIOS_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + tempVMMOSName.split("_")[0].toString();
-
+                //hostObj.BIOS_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + tempVMMOSName.split("_")[0].toString();
+                
+                // Now that we know that the PCR 0 should be cosistent across the different hypervisors for the same BIOS version, we
+                // need not append the OS name
+                hostObj.BIOS_Name = hostObj.BIOS_Oem.replace(' ', '_');
+                
                 // If we are setting host specific MLE, then we need to append the host name to the BIOS Name as well
                 boolean value = (hostConfigObj.getBiosWLTarget() == HostWhiteListTarget.BIOS_HOST);
                 if (hostConfigObj != null && value) {
