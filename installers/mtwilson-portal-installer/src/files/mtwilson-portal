@@ -20,7 +20,7 @@ glassfish_application_name=mtwilson-portal
 #java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f /usr/local/share/mtwilson/util/functions ]; then . /usr/local/share/mtwilson/util/functions; else echo "Missing file: /usr/local/share/mtwilson/util/functions"; exit 1; fi
+if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
@@ -97,8 +97,8 @@ setup_print_summary() {
 
 setup_interactive_install() {
   mysql_configure_connection "${intel_conf_dir}/mtwilson.properties" mtwilson.db
-  configure_api_baseurl
   configure_keystore_dir
+  configure_api_baseurl
   if using_glassfish; then
     if not glassfish_running; then
       glassfish_start_report
