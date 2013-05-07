@@ -116,7 +116,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
      */
     @Test
     public void testAddCurrentTlsCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
-        String username = "admin2";
+        String username = "admin";
         String password = "password";
         MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
         MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
@@ -132,6 +132,20 @@ public class UpdateTlsKeystoreInDatabaseTest {
         keystoreJpa.edit(portalUser);
     }
     
+    @Test
+    public void testPrintCurrenUserKeystoreContents() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException {
+        String username = "admin";
+        String password = "password";
+        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
+        MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
+        byte[] keystorebytes = portalUser.getKeystore();
+        ByteArrayResource resource = new ByteArrayResource(keystorebytes);
+        SimpleKeystore keystore = new SimpleKeystore(resource, password);
+        for(String alias : keystore.aliases()) {
+            X509Certificate cert = keystore.getX509Certificate(alias);
+            System.out.println(alias+": "+cert.getSubjectX500Principal().getName());
+        }
+    }
     
     @Test
     public void testUpdateAikSha1() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {

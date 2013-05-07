@@ -23,7 +23,7 @@ public class WLMPConfig extends ConfigBase {
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private WLMPConfig() {
-        super("whitelist-portal.properties");
+        super("mtwilson-portal.properties");
     }
 
     @Override

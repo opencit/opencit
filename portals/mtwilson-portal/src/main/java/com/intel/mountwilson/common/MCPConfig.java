@@ -23,7 +23,7 @@ public class MCPConfig extends ConfigBase {
         
     private MCPConfig() {
         
-        super("management-console.properties");
+        super("mtwilson-portal.properties");
     }
 
     @Override

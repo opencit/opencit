@@ -22,7 +22,7 @@ public class TDPConfig extends ConfigBase {
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private TDPConfig() {
-        super("trust-dashboard.properties");
+        super("mtwilson-portal.properties");
     }
 
     @Override
