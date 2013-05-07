@@ -118,7 +118,11 @@
 				 <artifactId>audit-data</artifactId>
 				 <version>${project.version}</version>
 		</dependency>
-        
+        <dependency>
+		  <groupId>org.apache.jstl</groupId>
+				 <artifactId>jslt-12</artifactId>
+				 <version>1.2</version>
+		</dependency>
     </dependencies>
 
     <properties>
