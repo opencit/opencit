@@ -189,8 +189,8 @@ public class HostBO extends BaseBO {
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             log.debug("Starting to process the registration for host: " + hostObj.HostName);            
             
-            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
-            
+            //TblHostsJpaController hostsJpaController = new TblHostsJpaController(getASEntityManagerFactory(), dataEncryptionKey);
+            TblHostsJpaController hostsJpaController = new TblHostsJpaController(getMSEntityManagerFactory(), dataEncryptionKey);
             // First let us check if the host is already configured. If yes, we will return back success
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
             if (hostSearchObj == null) {

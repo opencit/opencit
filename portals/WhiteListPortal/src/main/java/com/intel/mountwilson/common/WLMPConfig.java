@@ -76,9 +76,9 @@ public class WLMPConfig extends ConfigBase {
                 config.getString("mountwilson.wlmp.db.driver", 
                 config.getString("mtwilson.db.driver",
                 "com.mysql.jdbc.Driver")));
-        System.err.println("stdalex wlmpconfig getJpaConfig driver == " + config.getString("mountwilson.wlmp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+        //System.err.println("stdalex wlmpconfig getJpaConfig driver == " + config.getString("mountwilson.wlmp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
         String dbms = (config.getString("mountwilson.wlmp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
-        System.err.println("stdalex wlmconfig getJpaConfig dbms == " + dbms);
+        //System.err.println("stdalex wlmconfig getJpaConfig dbms == " + dbms);
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.wlmp.db.url",
                 config.getString("mtwilson.db.url",
@@ -86,7 +86,7 @@ public class WLMPConfig extends ConfigBase {
                     config.getString("mountwilson.wlmp.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.wlmp.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.wlmp.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        System.err.println("stdalex wlmp url == " + prop.getProperty("javax.persistence.jdbc.url")); 
+        //System.err.println("stdalex wlmp url == " + prop.getProperty("javax.persistence.jdbc.url")); 
         prop.put("javax.persistence.jdbc.user",
                 config.getString("mountwilson.wlmp.db.user",
                 config.getString("mtwilson.db.user",

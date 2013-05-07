@@ -91,9 +91,9 @@ public class AuditConfig extends ConfigBase {
                 config.getString("mountwilson.audit.db.driver", 
                 config.getString("mtwilson.db.driver",
                 "com.mysql.jdbc.Driver")));
-        System.err.println("stdalex auditConfig getJpaConfig driver == " + config.getString("mountwilson.audit.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+        //System.err.println("stdalex auditConfig getJpaConfig driver == " + config.getString("mountwilson.audit.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
         String dbms = (config.getString("mountwilson.audit.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
-        System.err.println("stdalex auditConfig getJpaConfig dbms == " + dbms);
+        //System.err.println("stdalex auditConfig getJpaConfig dbms == " + dbms);
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.audit.db.url",
                 config.getString("mtwilson.db.url",
@@ -101,7 +101,7 @@ public class AuditConfig extends ConfigBase {
                     config.getString("mountwilson.audit.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.audit.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.audit.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        System.err.println("stdalex auditConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
+        //System.err.println("stdalex auditConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
         prop.put("javax.persistence.jdbc.user",
                 config.getString("mountwilson.audit.db.user",
                 config.getString("mtwilson.db.user",

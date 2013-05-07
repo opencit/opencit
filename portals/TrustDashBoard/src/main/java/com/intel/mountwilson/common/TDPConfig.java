@@ -75,9 +75,9 @@ public class TDPConfig extends ConfigBase {
                 config.getString("mountwilson.tdbp.db.driver", 
                 config.getString("mtwilson.db.driver",
                 "com.mysql.jdbc.Driver")));
-        System.err.println("stdalex tdpConfig getJpaConfig driver == " + config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+        //System.err.println("stdalex tdpConfig getJpaConfig driver == " + config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
         String dbms = (config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
-        System.err.println("stdalex tdpConfig getJpaConfig dbms == " + dbms);
+        //System.err.println("stdalex tdpConfig getJpaConfig dbms == " + dbms);
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.tdbp.db.url",
                 config.getString("mtwilson.db.url",
@@ -85,7 +85,7 @@ public class TDPConfig extends ConfigBase {
                     config.getString("mountwilson.tdbp.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.tdbp.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.tdbp.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        System.err.println("stdalex tdpConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
+        //System.err.println("stdalex tdpConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
         prop.put("javax.persistence.jdbc.user",
                 config.getString("mountwilson.tdbp.db.user",
                 config.getString("mtwilson.db.user",
