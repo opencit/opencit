@@ -52,7 +52,7 @@ elif using_tomcat; then
   export DEFAULT_API_PORT=$DEFAULT_TOMCAT_API_PORT;
 fi
 
-echo "DEFAULT_API_PORT=$DEFAULT_API_PORT"
+echo "DEFAULT_API_PORT=$DEFAULT_API_PORT" >> $INSTALL_LOG_FILE
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if [ "$DATABASE_VENDOR" == "mysql" ] ; then

@@ -214,7 +214,7 @@ setup() {
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
   java_detect
-  echo "JAVA_HOME=$JAVA_HOME"
+  echo "JAVA_HOME=$JAVA_HOME" >> $INSTALL_LOG_FILE
 #  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" ]]; then
 #      echo_warning "Missing one or more required packages"
 #      setup_print_summary

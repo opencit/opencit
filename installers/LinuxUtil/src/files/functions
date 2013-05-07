@@ -1200,11 +1200,11 @@ postgres_detect(){
   fi
   psql=`which psql 2>/dev/null`
   export psql
-  echo "psql=$psql"
+  echo "psql=$psql" >> $INSTALL_LOG_FILE
   
   if [ -e "$psql" ]; then
     POSTGRES_HOME=`dirname $psql`
-    echo "Found postgres client: $psql"
+    echo "Found postgres client: $psql" >> $INSTALL_LOG_FILE
     postgres_version ${min_version}
     if [ "$POSTGRES_CLIENT_VERSION_OK" != "yes" ]; then
       echo "postgres client version not ok. resetting psql=''"
@@ -1212,7 +1212,7 @@ postgres_detect(){
       psql=""
     fi
   fi
-echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK"
+echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_FILE
 }
 
 postgres_server_detect() {
@@ -1221,7 +1221,7 @@ postgres_server_detect() {
   #find the configuration file
   postgresc=`find / -name postgresql.conf`
 
-  echo "postgresh=$postgresh"
+  echo "postgresh=$postgresh" >> $INSTALL_LOG_FILE
 
   if [[ -n "$postgresd" && -f "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
@@ -1242,19 +1242,19 @@ postgres_version(){
 
   if [ -n "$psql" ]; then
     POSTGRES_CLIENT_VERSION=`$psql --version |  head -n1 | awk '{print $3}'`
-    echo "POSTGRES_CLIENT_VERSION: $POSTGRES_CLIENT_VERSION"
+    echo "POSTGRES_CLIENT_VERSION: $POSTGRES_CLIENT_VERSION" >> $INSTALL_LOG_FILE
     if is_version_at_least "$POSTGRES_CLIENT_VERSION" "${min_version}"; then
       POSTGRES_CLIENT_VERSION_OK=yes
     else
       POSTGRES_CLIENT_VERSION_OK=no
     fi
   fi
-  echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK"
+  echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_FILE
 }
 
 # must load from config file or call postgres_detect prior to calling this function
 postgres_env_report() {
-  echo "psql=$psql"
+  echo "psql=$psql" >> $INSTALL_LOG_FILE
 }
 
 # Environment:
@@ -1277,7 +1277,7 @@ postgres_require() {
 postgres_connection() {
   postgres_require
   postgres_connect="psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}"
-  echo $postgres_connect
+  echo $postgres_connect >> $INSTALL_LOG_FILE
 }
 
 # Environment:
@@ -1365,10 +1365,10 @@ postgres_create_database() {
     echo "Creating database..."    >> $INSTALL_LOG_FILE
     sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     postgres_connection_error=`cat /tmp/intel.postgres.err`
-    echo "postgres_connection_error: $postgres_connection_error"
+    echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
     sudo -u postgres psql postgres -c "${grant_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     postgres_connection_error=`cat /tmp/intel.postgres.err`
-    echo "postgres_connection_error: $postgres_connection_error"
+    echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
 
     postgres_test_connection
     if [ -z "$is_postgres_available" ]; then
@@ -2055,7 +2055,7 @@ tomcat_version() {
     # extract the version number from a string like: glassfish version "3.0"
     local current_tomcat_version=`$tomcat version 2>&1 | grep -i "^Server version:" | grep -i version | awk -F / '{ print $2 }'`
     if [ -n "$current_tomcat_version" ]; then
-      echo $current_tomcat_version
+      echo "current_tomcat_version: $current_tomcat_version" >> $INSTALL_LOG_FILE
       export TOMCAT_VERSION=$current_tomcat_version
       return 0
     fi
@@ -2128,7 +2128,7 @@ tomcat_detect() {
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
-  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}"
+  echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES
   do
     #echo "debug tomcat candidate: $c"
@@ -2142,8 +2142,8 @@ tomcat_detect() {
         export TOMCAT_CONF=`dirname $conf_dir`
         tomcat_bin=$parent/bin/catalina.sh
         tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
-        echo "Found Tomcat: $TOMCAT_HOME"
-        echo "tomcat=$tomcat"
+        echo "Found Tomcat: $TOMCAT_HOME" >> $INSTALL_LOG_FILE
+        echo "tomcat=$tomcat" >> $INSTALL_LOG_FILE
         tomcat_version
         if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
           return 0
@@ -2211,10 +2211,10 @@ tomcat_running() {
   TOMCAT_RUNNING=''
   if [ -n "$TOMCAT_HOME" ]; then
     TOMCAT_PID=`ps gauwxx | grep java | grep -v grep | grep "$TOMCAT_HOME" | awk '{ print $2 }'`
-    echo TOMCAT_PID: $TOMCAT_PID
+    echo TOMCAT_PID: $TOMCAT_PID >> $INSTALL_LOG_FILE
     if [ -n "$TOMCAT_PID" ]; then
       TOMCAT_RUNNING=yes
-      echo TOMCAT_RUNNING: $TOMCAT_RUNNING
+      echo TOMCAT_RUNNING: $TOMCAT_RUNNING >> $INSTALL_LOG_FILE
       return 0
     fi
   fi
@@ -2629,7 +2629,7 @@ print_env_summary_report() {
 # parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
   local webservice_application_name="$1"
-  echo "webservice_application_name: $webservice_application_name"
+  echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
   WEBSERVICE_RUNNING=""
   if using_glassfish; then 
     glassfish_running
@@ -2642,16 +2642,16 @@ webservice_running() {
     fi
   elif using_tomcat; then
     tomcat_running
-    echo "TOMCAT_RUNNING: $TOMCAT_RUNNING"
+    echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
     if [ -n "$TOMCAT_RUNNING" ]; then
       # determine if this app is deployed
-      echo "MTWILSON_SERVER: $MTWILSON_SERVER"
+      echo "MTWILSON_SERVER: $MTWILSON_SERVER" >> $INSTALL_LOG_FILE
       WEBSERVICE_DEPLOYED=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "${webservice_application_name}"`
-      echo "WEBSERVICE_DEPLOYED=$WEBSERVICE_DEPLOYED"
+      echo "WEBSERVICE_DEPLOYED=$WEBSERVICE_DEPLOYED" >> $INSTALL_LOG_FILE
       #if deployed, make sure it is runnning
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
         WEBSERVICE_RUNNING=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
-        echo "WEBSERVICE_RUNNING=$WEBSERVICE_RUNNING"
+        echo "WEBSERVICE_RUNNING=$WEBSERVICE_RUNNING" >> $INSTALL_LOG_FILE
       fi
     fi
   fi
@@ -2675,7 +2675,7 @@ webservice_start() {
     if using_glassfish; then
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED} -O - -q --no-check-certificate
+      wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
     fi
   fi
 }
@@ -2686,7 +2686,7 @@ webservice_stop() {
     if using_glassfish; then
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED} -O - -q --no-check-certificate
+      wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED} 
     fi
   fi
 }
@@ -2757,8 +2757,8 @@ webservice_install() {
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
         ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
-        echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
-        wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED} -O - -q --no-check-certificate
+        echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
+        wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED} 
       fi
     else
       if using_glassfish; then
@@ -2768,13 +2768,13 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp ${webservice_war_file} $TOMCAT_HOME/webapps/
         
-        #wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} -O - -q --no-check-certificate
+        #wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
         webservice_running $webservice_application_name
         while [ -z "$WEBSERVICE_RUNNING" ]; do
           webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
-          echo -n "."
-          sleep 10
+          echo -n "." >> $INSTALL_LOG_FILE
+          sleep 5
         done      
       fi
     fi
@@ -2790,7 +2790,7 @@ webservice_uninstall() {
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED} -O - -p --no-check-certificate
+      wget -O -p --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
     fi
   else
     if using_glassfish; then
@@ -2837,7 +2837,7 @@ The supported databases are m=MySQL | p=Postrges"
       break
     fi
   done
-  echo "Database Choice: $DATABASE_VENDOR"
+  echo "Database Choice: $DATABASE_VENDOR" >> $INSTALL_LOG_FILE
 }
 
 # determine web server
@@ -2859,7 +2859,7 @@ The supported servers are g=Glassfish | t=Tomcat"
       break
     fi
   done
-  echo "Web Server Choice: $WEBSERVER_VENDOR"
+  echo "Web Server Choice: $WEBSERVER_VENDOR" >> $INSTALL_LOG_FILE
 }
 # parameters:
 # 1. path to properties file
