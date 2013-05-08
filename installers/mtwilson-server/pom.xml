@@ -10,11 +10,12 @@
     <parent>
         <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>mtwilson-linux</artifactId>
-        <version>1.2-SNAPSHOOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
   
   <properties>
-    <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
+    <makeself.basic>${project.build.directory}/${project.artifactId}-${project.version}</makeself.basic>
+    <makeself.jdk_glassfish_monit>${project.build.directory}/${project.artifactId}-${project.version}-jdk_glassfish_monit</makeself.jdk_glassfish_monit>
   </properties>
  
  <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
@@ -108,7 +109,12 @@
       <version>${project.version}</version>
       <type>bin</type>
     </dependency>
-
+	<dependency>
+      <groupId>com.intel.mtwilson.linux</groupId>
+      <artifactId>mtwilson-portal-installer</artifactId>
+      <version>${project.version}</version>
+      <type>bin</type>
+    </dependency>
      <!-- API Client and Linux Utils -->
     <dependency>
 	<groupId>com.intel.mtwilson.linux</groupId>
@@ -152,7 +158,101 @@
         <version>2.4</version>
         <executions>
           <execution>
-            <id>copy</id>
+            <id>copy-basic-artifacts</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+		<!-- Web services -->
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>PrivacyCAService</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>ManagementService</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>WLMService</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>AttestationService</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+		<!-- other -->
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <version>${project.version}</version>
+                  <type>sh</type>
+                  <destFileName>functions</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+		<!-- UI portals -->
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>WhiteListPortal</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>ManagementConsole</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>TrustDashBoard</artifactId>
+                  <version>${project.version}</version>
+                  <type>bin</type>
+                </artifactItem>
+				<artifactItem>
+					<groupId>com.intel.mtwilson.linux</groupId>
+					<artifactId>mtwilson-portal-installer</artifactId>
+					<version>${project.version}</version>
+					<type>bin</type>
+				</artifactItem>
+                <!-- setup console --> 
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.desktop</groupId>
+                  <artifactId>setup-console</artifactId>
+                  <classifier>with-dependencies</classifier>
+                  <version>${project.version}</version>
+                  <type>jar</type>
+                </artifactItem>
+		<!-- api client -->
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.integration</groupId>
+                  <artifactId>api-client</artifactId>
+                  <version>${project.version}</version>
+                  <type>zip</type>
+                </artifactItem>
+                
+              </artifactItems>
+              <outputDirectory>${makeself.basic}</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-all-with-jdk-glassfish-monit</id>
             <phase>generate-resources</phase>
             <goals>
               <goal>copy</goal>
@@ -165,14 +265,12 @@
                   <artifactId>java</artifactId>
                   <version>1.6.0_29</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>glassfish</artifactId>
                   <version>3.1.1</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
@@ -187,7 +285,6 @@
                     <artifactId>monit</artifactId>
                     <version>5.5</version>
                     <type>bin</type>
-                    <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
 		<!-- Web services -->
                 <artifactItem>
@@ -195,28 +292,24 @@
                   <artifactId>PrivacyCAService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>ManagementService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>WLMService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>AttestationService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
 		<!-- other -->
                 <artifactItem>
@@ -224,7 +317,6 @@
                   <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
                   <type>sh</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>functions</destFileName>
                 </artifactItem>
                 <artifactItem>
@@ -232,7 +324,6 @@
                   <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
 		<!-- UI portals -->
                 <artifactItem>
@@ -240,22 +331,25 @@
                   <artifactId>WhiteListPortal</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>ManagementConsole</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>TrustDashBoard</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
+				 <artifactItem>
+					<groupId>com.intel.mtwilson.linux</groupId>
+					<artifactId>mtwilson-portal-installer</artifactId>
+					<version>${project.version}</version>
+					<type>bin</type>
+				</artifactItem>
                 <!-- setup console --> 
                 <artifactItem>
                   <groupId>com.intel.mtwilson.desktop</groupId>
@@ -263,7 +357,6 @@
                   <classifier>with-dependencies</classifier>
                   <version>${project.version}</version>
                   <type>jar</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
 		<!-- api client -->
                 <artifactItem>
@@ -271,11 +364,9 @@
                   <artifactId>api-client</artifactId>
                   <version>${project.version}</version>
                   <type>zip</type>
-                  <outputDirectory>${makeself.directory}</outputDirectory>
-                </artifactItem>
-                
+                </artifactItem>                
               </artifactItems>
-              <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->
+              <outputDirectory>${makeself.jdk_glassfish_monit}</outputDirectory>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>true</overWriteSnapshots>
             </configuration>
@@ -290,13 +381,32 @@
         <version>2.5</version>
         <executions>
           <execution>
-            <id>copy-resources</id>
+            <id>copy-resources-basic</id>
             <phase>generate-resources</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${makeself.directory}</outputDirectory>
+              <outputDirectory>${makeself.basic}</outputDirectory>
+		<resources>
+		    <resource>
+			<directory>src/files</directory>
+			<includes>
+			    <include>**/*</include>
+			</includes>
+			<filtering>false</filtering>
+		    </resource>
+		</resources>
+            </configuration>            
+          </execution>
+          <execution>
+            <id>copy-resources-jdk_glassfish_monit</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${makeself.jdk_glassfish_monit}</outputDirectory>
 		<resources>
 		    <resource>
 			<directory>src/files</directory>
@@ -319,7 +429,7 @@
         <version>1.2.1</version>
         <executions>
           <execution>
-            <id>create-single-installer</id>
+            <id>create-single-installer-basic</id>
 	    <phase>compile</phase>
             <goals>
               <goal>exec</goal>
@@ -328,7 +438,21 @@
 	    <executable>bash</executable>
 	    <arguments>
 		<argument>makebin-auto.sh</argument>
-		<argument>${makeself.directory}</argument>
+		<argument>${makeself.basic}</argument>
+	    </arguments>
+	    </configuration>
+          </execution>
+          <execution>
+            <id>create-single-installer-jdk_glassfish_monit</id>
+	    <phase>compile</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+	    <configuration>
+	    <executable>bash</executable>
+	    <arguments>
+		<argument>makebin-auto.sh</argument>
+		<argument>${makeself.jdk_glassfish_monit}</argument>
 	    </arguments>
 	    </configuration>
           </execution>
@@ -359,8 +483,13 @@
                     <configuration>
                         <artifacts>
                             <artifact>
-                                <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
+                                <file>${makeself.basic}.bin</file>
                                 <type>bin</type>
+                            </artifact>
+                            <artifact>
+                                <file>${makeself.jdk_glassfish_monit}.bin</file>
+                                <type>bin</type>
+                                <classifier>jdk_glassfish_monit</classifier>
                             </artifact>
                         </artifacts>
                     </configuration>

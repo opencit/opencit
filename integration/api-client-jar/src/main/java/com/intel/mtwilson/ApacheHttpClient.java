@@ -379,6 +379,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     
     public ApiResponse post(String requestURL, ApiRequest message) throws IOException, SignatureException {
         log.debug("POST url: {}", requestURL);
+        log.debug("POST content-type: {}", message == null ? "(empty)" : message.content.toString());
         log.debug("POST content: {}", message == null ? "(empty)" : message.content);
         HttpPost request = new HttpPost(requestURL);
         if( message != null && message.content != null ) {

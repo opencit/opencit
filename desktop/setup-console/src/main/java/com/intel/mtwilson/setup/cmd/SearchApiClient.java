@@ -32,7 +32,7 @@ import org.apache.commons.configuration.Configuration;
  */
 public class SearchApiClient implements Command {
     private SetupContext ctx = null;
-     public static final Console console = System.console();
+    public static final Console console = System.console();
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
@@ -114,23 +114,25 @@ public class SearchApiClient implements Command {
     //}
     
     private String readInputStringWithPrompt(String prompt) throws IOException {
-         if (console == null) {
+        
+        if (console == null) {
             throw new IOException("no console.");
         }
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s: ", prompt));
-        String input = in.readLine();
+        String input = console.readLine();
 //        in.close(); // don't close System.in !!
         return input;
     }
 
     private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
-         if (console == null) {
+        
+        if (console == null) {
             throw new IOException("no console.");
         }
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s [%s]: ", prompt, defaultValue));
-        String input = in.readLine();
+        String input = console.readLine();
 //        in.close(); // don't close System.in !!
         if( input == null || input.isEmpty() ) {
             input = defaultValue;

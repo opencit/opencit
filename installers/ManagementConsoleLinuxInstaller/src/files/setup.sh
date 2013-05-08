@@ -59,7 +59,6 @@ fi
 # copy default user to /var/opt
 mkdir -p "${package_var_dir}/users"
 chmod 700 "${package_var_dir}"
-#cp Admin.jks "${package_var_dir}/users"
 
 
 # SCRIPT EXECUTION

@@ -5,13 +5,11 @@
 package api.quickstart;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.KeystoreUtil;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.TrustAssertion;
+import com.intel.mtwilson.model.*;
 import java.io.File;
 import java.net.URL;
-import java.security.cert.X509Certificate;
-import java.util.Date;
 import org.junit.Test;
 
 /**

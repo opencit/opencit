@@ -4,9 +4,12 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,7 +30,7 @@ public class HostBOTest {
     private static HostBO hostBO;
     
     @BeforeClass
-    public static void createBusinessObject()  {
+    public static void createBusinessObject() throws CryptographyException  {
         hostBO = new HostBO();
         hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
     }
@@ -200,7 +203,7 @@ public class HostBOTest {
      * This is not a good unit test for AS, should be moved to integration test project
      */
     @Test
-    public void testGetTrustStatusForKnownHost() {
+    public void testGetTrustStatusForKnownHost() throws IOException {
         HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);
@@ -259,5 +262,24 @@ public class HostBOTest {
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
         hostBO.addHost(host2);
+    }
+    
+    @Test
+    public void txtHostMapping() throws MalformedURLException {
+            TxtHostRecord hostInfo = new TxtHostRecord();
+            hostInfo.HostName = "10.1.71.170";
+            hostInfo.IPAddress = "10.1.71.170";
+            hostInfo.Port = 9999;
+            hostInfo.BIOS_Name = "TestBiosMLE";
+            hostInfo.BIOS_Version = "1234";
+            hostInfo.BIOS_Oem = "TestOEM";
+            hostInfo.VMM_Name = "TestVMMMLE";
+            hostInfo.VMM_Version = "1234";
+            hostInfo.VMM_OSName = "TestOS";
+            hostInfo.VMM_OSVersion = "123";
+            hostInfo.AddOn_Connection_String = "https://10.1.71.188:9999";
+        TxtHost hostObj = new TxtHost(hostInfo);
+        String connStr = hostObj.getAddOn_Connection_String();
+        System.out.println(connStr);
     }
 }

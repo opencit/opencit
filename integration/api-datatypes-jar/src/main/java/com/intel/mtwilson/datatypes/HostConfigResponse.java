@@ -16,6 +16,7 @@ public class HostConfigResponse {
     private String hostName;
     private String status;
     private String errorMessage;
+    private ErrorCode errorCode;
 
     @JsonProperty("Error_Message")
     public String getErrorMessage() {
@@ -45,6 +46,16 @@ public class HostConfigResponse {
     @JsonProperty("Status")        
     public void setStatus(String status) {
         this.status = status;
+    }
+
+   @JsonProperty("Error_Code")        
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+   @JsonProperty("Error_Code")        
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
     }
    
 }

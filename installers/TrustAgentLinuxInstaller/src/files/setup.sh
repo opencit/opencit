@@ -74,16 +74,19 @@ cp functions "${package_dir}"
 cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
 #cp *.sql "${package_dir}"/database/
 
+# copy default logging settings to /etc
+chmod 700 logback.xml
+cp logback.xml "${intel_conf_dir}"
+
 # copy control scripts to /usr/local/bin
 chmod 700 tagent pcakey
 mkdir -p /usr/local/bin
 cp tagent pcakey /usr/local/bin
 
-#rc3Begin skaja
-#chmod 700 module_analysis.sh
-#cp module_analysis.sh "${package_dir}"/bin
-#echo "module_script=${package_dir}/bin/module_analysis.sh" >> "${intel_conf_dir}/${package_name}.properties"
-#rc3End
+#module attestation script
+chmod 755 module_analysis.sh
+cp module_analysis.sh "${package_dir}"/bin
+echo "module_script=${package_dir}/bin/module_analysis.sh" >> "${intel_conf_dir}/${package_name}.properties"
 
 java_install $JAVA_PACKAGE
 
@@ -167,3 +170,108 @@ register_startup_script /usr/local/bin/tagent tagent
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
 /usr/local/bin/tagent setup
+
+# now install monit
+monit_required_version=5.5
+
+# detect the packages we have to install
+MONIT_PACKAGE=`ls -1 monit-*.tar.gz 2>/dev/null | tail -n 1`
+
+# SCRIPT EXECUTION
+monit_clear() {
+  #MONIT_HOME=""
+  monit=""
+}
+
+monit_detect() {
+  local monitrc=`ls -1 /etc/monitrc 2>/dev/null | tail -n 1`
+  monit=`which monit 2>/dev/null`
+}
+
+monit_install() {
+  MONIT_YUM_PACKAGES=""
+  MONIT_APT_PACKAGES="monit"
+  MONIT_YAST_PACKAGES=""
+  MONIT_ZYPPER_PACKAGES="monit"
+  auto_install "Monit" "MONIT"
+  monit_clear; monit_detect;
+    if [[ -z "$monit" ]]; then
+      echo_failure "Unable to auto-install Monit"
+      echo "  Monit download URL:"
+      echo "  http://www.mmonit.com"
+    else
+      echo_success "Monit installed in $monit"
+    fi
+}
+
+monit_src_install() {
+  local MONIT_PACKAGE="${1:-monit-5.5-linux-src.tar.gz}"
+#  DEVELOPER_YUM_PACKAGES="make gcc openssl libssl-dev"
+#  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
+  DEVELOPER_YUM_PACKAGES="make gcc"
+  DEVELOPER_APT_PACKAGES="dpkg-dev make gcc"
+  auto_install "Developer tools" "DEVELOPER"
+  monit_clear; monit_detect;
+  if [[ -z "$monit" ]]; then
+    if [[ -z "$MONIT_PACKAGE" || ! -f "$MONIT_PACKAGE" ]]; then
+      echo_failure "Missing Monit installer: $MONIT_PACKAGE"
+      return 1
+    fi
+    local monitfile=$MONIT_PACKAGE
+    echo "Installing $monitfile"
+    is_targz=`echo $monitfile | grep ".tar.gz$"`
+    is_tgz=`echo $monitfile | grep ".tgz$"`
+    if [[ -n "$is_targz" || -n "$is_tgz" ]]; then
+      gunzip -c $monitfile | tar xf -
+    fi
+    local monit_unpacked=`ls -1d monit-* 2>/dev/null`
+    local monit_srcdir
+    for f in $monit_unpacked
+    do
+      if [ -d "$f" ]; then
+        monit_srcdir="$f"
+      fi
+    done
+    if [[ -n "$monit_srcdir" && -d "$monit_srcdir" ]]; then
+      echo "Compiling monit..."
+      cd $monit_srcdir
+      ./configure --without-pam --without-ssl 2>&1 >/dev/null
+      make 2>&1 >/dev/null
+      make install  2>&1 >/dev/null
+    fi
+    monit_clear; monit_detect
+    if [[ -z "$monit" ]]; then
+      echo_failure "Unable to auto-install Monit"
+      echo "  Monit download URL:"
+      echo "  http://www.mmonit.com"
+    else
+      echo_success "Monit installed in $monit"
+    fi
+  else
+    echo "Monit is already installed"
+  fi
+}
+
+monit_install $MONIT_PACKAGE
+
+if [ -f /etc/monit/monitrc ]; then
+    echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
+    backup_file /etc/monit/monitrc
+fi
+cat >> /etc/monit/monitrc << EOF
+## Monit Process Monitor Config File
+## Configuration options and examples can be found here:
+## http://mmonit.com/monit/documentation/monit.html
+set daemon 60
+# Set path to log file
+set logfile /var/log/monit.log
+# TA monitoring
+check process tagent with pidfile /var/run/tagent.pid
+        start program = "/etc/init.d/tagent start" with timeout 30 seconds
+        stop program  = "/etc/init.d/tagent stop
+EOF
+
+chmod 700 /etc/monit/monitrc
+service monit restart
+
+echo "monit installed and monitoring tagent"

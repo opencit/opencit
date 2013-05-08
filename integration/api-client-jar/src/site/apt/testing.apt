@@ -7,22 +7,22 @@
 
 Background
 
- This document contains helpful instructions for testing various aspects of the
- Java API.
+    This document contains helpful instructions for testing various aspects of the
+Java API.
 
 Security
 
 * Expiration
 
- To test an expired API client, use the following procedure:
+    To test an expired API client, use the following procedure:
 
- 1. Set the computer date to one in the past. In this example, December 15th 1996 at noon:
+    1. Set the computer date to one in the past. In this example, December 15th 1996 at noon:
 
 +---
 date 121512001996
 +---
 
- 2. Create a new RSA keypair for your API client using the keytool command. Make sure the validity period
+    2. Create a new RSA keypair for your API client using the keytool command. Make sure the validity period
 is short enough so that it will expire before today's real date. Then register the API client.
 
 +---
@@ -35,9 +35,9 @@ keytool -genkey -alias ${api_username} -keyalg RSA -keysize 2048 -keystore ${key
 mtwilson api RegisterUser ${keystore} "${mtwilson_api_baseurl}" Attestation,Whitelist "${api_password}"
 +---
 
- 3. Approve the registration request in Management Console
+    3. Approve the registration request in Management Console
 
- 4. Copy the .jks file to /var/opt/intel/management-console/users, /var/opt/intel/trust-dashboard/users, and /var/opt/intel/whitelist-portal/users 
+    4. Copy the .jks file to /var/opt/intel/management-console/users, /var/opt/intel/trust-dashboard/users, and /var/opt/intel/whitelist-portal/users 
 
- 5. Try logging in with that user to any one of the portals and do something
+    5. Try logging in with that user to any one of the portals and do something
 

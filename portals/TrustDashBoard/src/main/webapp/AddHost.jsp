@@ -61,6 +61,26 @@
 					</select>
 				</div>
 			</div>
+            <div id="citrixStringElement">
+				<div class="singleDiv">
+					<div class="labelDiv">XenServer Details :</div>
+					<div class="valueDiv">&nbsp;
+						<!-- <textarea class="textAreaBoxClass" id="MainContent_tbVCenterDetails" cols="20" rows="2"></textarea> -->
+					</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv">Login ID :</div>
+						<div class="valueDiv">
+							<input type="text" maxlength="200" id="MainContent_tbVcitrixLoginId" class="textBoxClass">
+						</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv">Password :</div>
+						<div class="valueDiv">
+							<input type="password" maxlength="200" id="MainContent_tbVcitrixPass" class="textBoxClass">
+						</div>
+				</div>
+			</div>
 			<div id="vcenterStringElement">
 				<div class="singleDiv">
 					<div class="labelDiv">vCenter Details :</div>
@@ -101,8 +121,8 @@
 					<table style="padding-top:20px;padding-bottom: 10px;">
 						<tr>
 							<td><input type="button" class="button" value="Add Host" id="addHostButton" onclick="addNewHost()"/></td>
-                                                        <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()"/></td>
-							<td><input type="button" class="button" value="Cancel" onclick="getDashBoardPage()"/></td>
+                                                                                                                                                                         <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()"/></td>
+							<td><input type="button" class="button" value="Cancel" onclick="getEditHostPage()"/></td>
 							<td><input type="button" value="Clear" class="button" onclick="clearAllFiled('mainAddHostContainer')"/></td>
 						</tr>
 					</table>

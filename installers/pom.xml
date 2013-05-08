@@ -9,7 +9,7 @@
     <parent>
 	<groupId>com.intel.mtwilson</groupId>
 	<artifactId>mtwilson</artifactId>
-	<version>1.2-SNAPSHOOT</version>
+	<version>1.2-SNAPSHOT</version>
     </parent>
 
   <modules>
@@ -24,6 +24,7 @@
     <module>TrustAgentLinuxInstaller</module>
     <module>TrustDashBoardLinuxInstaller</module>
     <module>WhiteListPortalLinuxInstaller</module>
+	<module>mtwilson-portal-installer</module>
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-server</module>
     <module>TomcatLinuxInstaller</module>

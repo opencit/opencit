@@ -10,9 +10,9 @@ import com.intel.mtwilson.crypto.HmacCredential;
 import com.intel.mtwilson.crypto.Password;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
@@ -589,15 +589,27 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }
 
     @Override
-    public HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException {
+    public HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException {
         HostResponse added = fromJSON(httpPost(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;
     }
 
     @Override
-    public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException {
+    public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPost(asurl("/hosts/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;
+    }
+
+    @Override
+    public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException {
         HostResponse added = fromJSON(httpPut(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;        
+    }
+
+    @Override
+    public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPut(asurl("/hosts/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;
     }
 
     @Override
@@ -793,6 +805,23 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
+        HostTrustResponse trust = fromJSON(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.json")), HostTrustResponse.class);
+        return trust;
+    }
+
+    @Override
+    public X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
+        byte[] trust = binary(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trustcert.x509")));
+        try {
+            X509Certificate cert = X509Util.decodeDerCertificate(trust);
+            return cert;
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot decode X509 certificate ("+trust.length+" bytes)");
+        }
+    }
     
     // this is required so that the jackson mapper will create an instance of ListMleData (List<MleData>) instead of creating an instance of List<LinkedHashMap>
     public static class ListHostData extends ArrayList<TxtHostRecord> { };
@@ -844,11 +873,22 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     @Override
     public String getSamlForHost(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
-        query.add("ID", hostname.toString());
+        query.add("hostName", hostname.toString());
+        // By default we will get it from cache.
+        query.add("force_verify", Boolean.toString(false));
         String saml = text(httpGet(asurl("/saml/assertions/host", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
         return saml;
     }
 
+    @Override
+    public String getSamlForHost(Hostname hostname, boolean forceVerify) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("hostName", hostname.toString());
+        query.add("force_verify", Boolean.toString(forceVerify));
+        String saml = text(httpGet(asurl("/saml/assertions/host", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        return saml;
+    }
+    
     public TrustAssertion verifyTrustAssertion(String saml) throws IOException, ApiException, SignatureException {
         X509Certificate[] trustedSamlCertificates;
         try {

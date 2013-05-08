@@ -22,18 +22,16 @@ public class MSConfig extends ConfigBase {
     private static Logger log = LoggerFactory.getLogger(MSConfig.class);
     private static final MSConfig global = new MSConfig();
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-    private MSConfig() {
+    public MSConfig() {
         super("management-service.properties");
+    }
+    public MSConfig(Properties custom) {
+        super("management-service.properties", custom);
     }
 
     @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
-
-        defaults.setProperty("mountwilson.ms.db.password", "password");
-        defaults.setProperty("mountwilson.ms.db.user", "root");
-        defaults.setProperty("mountwilson.ms.db.host", "localhost");
-        defaults.setProperty("mountwilson.ms.db.schema", "mw_as");
 
 //        defaults.setProperty("mtwilson.saml.certificate", "saml.cer");// XXX TODO remove this; deprecated in mtwilson-1.1  in favor of mtwilson.saml.certificate.file (PEM format)
         
@@ -67,7 +65,7 @@ public class MSConfig extends ConfigBase {
         /** 
          * note that there are two levels of defaults:   if we dont' find a property mountwilson.ms.db.X, we look for mtwilson.db.X and THEN to our default
          */
-    public static Properties getJpaProperties() {
+     public static Properties getJpaProperties(Configuration config) {
         /*
         Configuration config = getConfiguration();
         Properties prop = new Properties();
@@ -92,7 +90,7 @@ public class MSConfig extends ConfigBase {
                 "password")));
         return prop;
         */
-           Configuration config = getConfiguration();
+        
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.ms.db.driver", 
@@ -118,6 +116,9 @@ public class MSConfig extends ConfigBase {
                 config.getString("mtwilson.db.password", 
                 "password")));
         return prop;
+    }
+    public static Properties getJpaProperties() {
+        return getJpaProperties(getConfiguration());
     }
     
 }

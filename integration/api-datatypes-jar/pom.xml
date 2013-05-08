@@ -5,10 +5,10 @@
   <packaging>jar</packaging>
   <name>API Datatypes</name>
   
-    <parent>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>mtwilson-integration</artifactId>
-		<version>1.2-SNAPSHOOT</version>
+    <parent> 
+        <groupId>com.intel.mtwilson.integration</groupId> 
+        <artifactId>mtwilson-integration</artifactId> 
+        <version>1.2-SNAPSHOT</version> 
     </parent>
 
 
@@ -111,6 +111,7 @@
 		<artifactId>commons-lang3</artifactId>
 		<version>3.1</version>
 	</dependency>
+
 <!--
         <dependency>
                 <groupId>com.jayway.restassured</groupId>

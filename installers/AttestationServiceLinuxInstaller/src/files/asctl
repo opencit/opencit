@@ -105,6 +105,13 @@ download_privacyca_certs() {
       mv /tmp/clientfiles.x/PrivacyCA.cer ${intel_conf_dir}/PrivacyCA.cer
       mv /tmp/clientfiles.x/endorsement.p12 ${intel_conf_dir}/endorsement.p12
       rm -r /tmp/clientfiles.x
+      # create the list of trusted privacy ca's if it doesn't exist.  the list is in PrivacyCA.p12.pem
+      if [ ! -f "${intel_conf_dir}/PrivacyCA.p12.pem" ]; then
+          touch "${intel_conf_dir}/PrivacyCA.p12.pem"
+          chmod 600 "${intel_conf_dir}/PrivacyCA.p12.pem"
+      fi
+      # add the privacy ca certificate to a list of trusted privacy ca's
+      openssl x509 -in "${intel_conf_dir}/PrivacyCA.cer" -inform der -outform pem >> "${intel_conf_dir}/PrivacyCA.p12.pem"
       # if we got here with user input then save the Privacy CA server name in properties file
       if [ -z "${privacyca_server_config}" ]; then
         update_property_in_file privacyca.server "${package_config_filename}" "${PRIVACYCA_SERVER}"

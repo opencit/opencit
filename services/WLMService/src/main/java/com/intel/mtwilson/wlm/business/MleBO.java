@@ -43,31 +43,46 @@ import org.slf4j.LoggerFactory;
 public class MleBO extends BaseBO {
 
         Logger log = LoggerFactory.getLogger(getClass().getName());
-	TblMleJpaController mleJpaController = null;
-	TblPcrManifestJpaController pcrManifestJpaController = null;
-//        TblDbPortalUserJpaController dbPortalUserJpaController = null;
-//	TblDbPortalUser loggedInUser = null;
-	TblModuleManifestJpaController moduleManifestJpaController = null;
+        TblMleJpaController mleJpaController = null;
+        TblPcrManifestJpaController pcrManifestJpaController = null;
+        TblModuleManifestJpaController moduleManifestJpaController = null;
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
+        private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
 
-	public MleBO() {
-            mleJpaController = new TblMleJpaController(getEntityManagerFactory());
-            pcrManifestJpaController = new TblPcrManifestJpaController(getEntityManagerFactory());
-//            dbPortalUserJpaController = new TblDbPortalUserJpaController(getEntityManagerFactory());
-            moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
-            eventTypeJpaController = new TblEventTypeJpaController(getEntityManagerFactory());
-            packageNSJpaController = new TblPackageNamespaceJpaController(getEntityManagerFactory());
-	}
+        public MleBO() {
+                                mleJpaController = new TblMleJpaController(getEntityManagerFactory());
+                                pcrManifestJpaController = new TblPcrManifestJpaController(getEntityManagerFactory());
+                                moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
+                                eventTypeJpaController = new TblEventTypeJpaController(getEntityManagerFactory());
+                                packageNSJpaController = new TblPackageNamespaceJpaController(getEntityManagerFactory());
+        }
 
-        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
-        /*
-        private TblDbPortalUser getLoggedInUser() {
-            if( loggedInUser == null ) {
-                loggedInUser = dbPortalUserJpaController.findTblDbPortalUser(1);
-            }
-            return loggedInUser;
-        }*/
+                        // This function will be used to validate the white list values. We have seen in some cases where in we would get -1. 
+                        private boolean isWhiteListValid(String whiteList) {
+                            if( whiteList == null || whiteList.trim().isEmpty() ) { return true; } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
+                                if (whiteList.matches(hexadecimalRegEx)) {
+                                        return true;
+                                } else {
+                                    return false;
+                                }
+                        }
+                        
+                        private void validateWhitelistValue(String componentName, String whiteList) {
+                            if(!isWhiteListValid(whiteList)) {
+                                log.error("White list '{0}' specified for '{1}' is not valid.", whiteList, componentName);
+                                throw new ASException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
+                            }
+                        }
+        
+                        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                        /*
+                        private TblDbPortalUser getLoggedInUser() {
+                            if( loggedInUser == null ) {
+                                loggedInUser = dbPortalUserJpaController.findTblDbPortalUser(1);
+                            }
+                            return loggedInUser;
+                        }*/
         
 	/**
 	 * For VMM, the OS Name and OS Version in the new MLE must ALREADY be in the
@@ -77,308 +92,280 @@ public class MleBO extends BaseBO {
 	 * @return
 	 */
 	public String addMLe(MleData mleData) {
-            try {
-                    TblMle tblMle = getMleDetails(mleData.getName(),
-                                    mleData.getVersion(), mleData.getOsName(),
-                                    mleData.getOsVersion(), mleData.getOemName());
+                                try {
+                                    log.debug("add mle type: {}", mleData.getMleType());
+                                    log.debug("add mle name: {}", mleData.getName());
+                                    log.debug("add mle version: {}", mleData.getVersion());
+                                    log.debug("add mle os name: {}", mleData.getOsName());
+                                    log.debug("add mle os version: {}", mleData.getOsVersion());
+                                    log.debug("add mle oem: {}", mleData.getOemName());
+                                    log.debug("add mle attestation type: {}", mleData.getAttestationType());
 
-                    if (tblMle != null) {
-                            throw new ASException(ErrorCode.WS_MLE_ALREADY_EXISTS, mleData.getName());
-                    }
+                                    TblMle tblMle = getMleDetails(mleData.getName(),
+                                                        mleData.getVersion(), mleData.getOsName(),
+                                                        mleData.getOsVersion(), mleData.getOemName());
 
-                    if(mleData.getName().toUpperCase().contains("ESX")){
-                            String version = getUpperCase(mleData.getVersion()).substring(0, 2);
-                            if(!version.equals("51") && !version.equals("50")){
-                                    throw new ASException(ErrorCode.WS_ESX_MLE_NOT_SUPPORTED);
-                            }
-                    }
-                    tblMle = getTblMle(mleData);
-                    mleJpaController.create(tblMle);
+                                        if (tblMle != null) {
+                                                throw new ASException(ErrorCode.WS_MLE_ALREADY_EXISTS, mleData.getName());
+                                        }
 
-                    addPcrManifest(tblMle, mleData.getManifestList());
+                                        // XXX TODO this needs to be refactored into vendor-specific checks
+                                        if(mleData.getName().toUpperCase().contains("ESX")){
+                                                String version = getUpperCase(mleData.getVersion()).substring(0, 2);
+                                                if(!version.equals("51") && !version.equals("50")){
+                                                        throw new ASException(ErrorCode.WS_ESX_MLE_NOT_SUPPORTED);
+                                                }
+                                        }
+                                        tblMle = getTblMle(mleData);
+                                        
+                                        // before we create the MLE, check that the provided PCR values are valid -- if they aren't we abort
+                                        if( mleData.getManifestList() != null ) {
+                                            for(ManifestData pcrData : mleData.getManifestList()) {
+                                                validateWhitelistValue(pcrData.getName(), pcrData.getValue());
+                                            }
+                                        }
+                                        mleJpaController.create(tblMle);
+                                        // now add the PCRs that were validated above
+                                        addPcrManifest(tblMle, mleData.getManifestList());
 
-            } catch (ASException ase) {
-                //log.error("Exception while adding MLE data." + ase.getErrorMessage());
-                throw ase;
-            } catch (Exception e) {
-                //log.error("Error while adding MLE data. " + e.getMessage());            
-//                throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while adding MLE '%s'. %s", 
-//                        mleData.getName(), e.getMessage()), e);
-                
-                throw new ASException(e);
-            }
+                                } catch (ASException ase) {
+                                    //log.error("Exception while adding MLE data." + ase.getErrorMessage());
+                                    throw ase;
+                                } catch (Exception e) {
+                                                        //log.error("Error while adding MLE data. " + e.getMessage());            
+                                        //                throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while adding MLE '%s'. %s", 
+                                        //                        mleData.getName(), e.getMessage()), e);
+                                    throw new ASException(e);
+                                }
 
-            return "true";
+                                return "true";
 	}
 	
-        /**
-         * 
-         * @param str
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param str
+                         * @return 
+                         */
 	private String getUpperCase(String str) {
-		if(str != null){
-			return str.toUpperCase().replaceAll("[/.]","");
-		}
-		return "NULL";
+                                if(str != null){
+                                        return str.toUpperCase().replaceAll("[/.]","");
+                                }
+                                return "NULL";
 	}
 
 
-        /**
-         * 
-         * @param mleData
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleData
+                         * @return 
+                         */
 	public String updateMle(MleData mleData) {
-            try {
-                    TblMle tblMle = getMleDetails(mleData.getName(),
-                                    mleData.getVersion(), mleData.getOsName(),
-                                    mleData.getOsVersion(), mleData.getOemName());
+                                try {
+                                        TblMle tblMle = getMleDetails(mleData.getName(),
+                                                        mleData.getVersion(), mleData.getOsName(),
+                                                        mleData.getOsVersion(), mleData.getOemName());
 
-                    if (tblMle == null) {
-                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
-                    }
+                                        if (tblMle == null) {
+                                                throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                                        }
 
-                    setTblMle(tblMle, mleData);
+                                        setTblMle(tblMle, mleData);
 
-                    mleJpaController.edit(tblMle);
-                    updatePcrManifest(tblMle, mleData);
+                                        mleJpaController.edit(tblMle);
+                                        updatePcrManifest(tblMle, mleData);
 
-            } catch (ASException ase) {
-                throw ase;
-            } catch (Exception e) {
-//                throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while updating MLE '%s'. %s", 
-//                        mleData.getName(), e.getMessage()), e);
-                new ASException(e);
-            }
+                                } catch (ASException ase) {
+                                    throw ase;
+                                } catch (Exception e) {
+                    //                throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while updating MLE '%s'. %s", 
+                    //                        mleData.getName(), e.getMessage()), e);
+                                    new ASException(e);
+                                }
 
-            return "true";
+                                return "true";
 	}
 
-        /**
-         * 
-         * @param mleName
-         * @param mleVersion
-         * @param osName
-         * @param osVersion
-         * @param oemName
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleName
+                         * @param mleVersion
+                         * @param osName
+                         * @param osVersion
+                         * @param oemName
+                         * @return 
+                         */
 	public String deleteMle(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
-            try {
-                TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+                                try {
+                                    TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
 
-                if (tblMle == null) {
-                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
-                }
+                                    if (tblMle == null) {
+                                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
+                                    }
 
-                // Bug:438 - Need to check the type of the MLE and accordingly call the function
-                // to get the associated host list.
-                Collection<TblHosts> tblHostsCollection;
-                if (oemName == null || oemName.isEmpty()) {
-                    tblHostsCollection = tblMle.getTblHostsCollection();
-                } else {
-                    tblHostsCollection = tblMle.getTblHostsCollection1();
-                }
-                if( tblHostsCollection != null ) {
-                    log.info(String.format("MLE '%s' is currently associated with '%d' hosts. ", mleName, tblHostsCollection.size()));
+                                    // Bug:438 - Need to check the type of the MLE and accordingly call the function
+                                    // to get the associated host list.
+                                    Collection<TblHosts> tblHostsCollection;
+                                    if (oemName == null || oemName.isEmpty()) {
+                                        tblHostsCollection = tblMle.getTblHostsCollection();
+                                    } else {
+                                        tblHostsCollection = tblMle.getTblHostsCollection1();
+                                    }
+                                    if( tblHostsCollection != null ) {
+                                        log.info(String.format("MLE '%s' is currently associated with '%d' hosts. ", mleName, tblHostsCollection.size()));
 
-                    if (!tblHostsCollection.isEmpty()) {
-                        throw new ASException(ErrorCode.WS_MLE_ASSOCIATION_EXISTS, mleName, mleVersion, tblHostsCollection.size());
-                    }
-                }
-                
-                for(TblModuleManifest moduleManifest : tblMle.getTblModuleManifestCollection()){
-                        moduleManifestJpaController.destroy(moduleManifest.getId());
-                }
+                                        if (!tblHostsCollection.isEmpty()) {
+                                            throw new ASException(ErrorCode.WS_MLE_ASSOCIATION_EXISTS, mleName, mleVersion, tblHostsCollection.size());
+                                        }
+                                    }
+
+                                    for(TblModuleManifest moduleManifest : tblMle.getTblModuleManifestCollection()){
+                                            moduleManifestJpaController.destroy(moduleManifest.getId());
+                                    }
 
 
-                for (TblPcrManifest manifest : tblMle.getTblPcrManifestCollection()) {
-                        pcrManifestJpaController.destroy(manifest.getId());
-                }
+                                    for (TblPcrManifest manifest : tblMle.getTblPcrManifestCollection()) {
+                                            pcrManifestJpaController.destroy(manifest.getId());
+                                    }
 
-                // We also need to delete entries in the MleSource table for the MLE. This table would store the host
-                // name that was used to white list the MLE.
-                deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
-                
-                mleJpaController.destroy(tblMle.getId());
+                                    // We also need to delete entries in the MleSource table for the MLE. This table would store the host
+                                    // name that was used to white list the MLE.
+                                    deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
 
-            } catch (ASException ase) {
-                throw ase;
-            } catch (Exception e) {
-//                throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while deleting MLE '%s'. %s", 
-//                        mleName, e.getMessage()), e);                
-                throw new ASException(e);
-            }
+                                    mleJpaController.destroy(tblMle.getId());
 
-            return "true";
+                                } catch (ASException ase) {
+                                    throw ase;
+                                } catch (Exception e) {
+                    //                throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while deleting MLE '%s'. %s", 
+                    //                        mleName, e.getMessage()), e);                
+                                    throw new ASException(e);
+                                }
+
+                                return "true";
 	}
 
-        /**
-         * 
-         * @param searchCriteria
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param searchCriteria
+                         * @return 
+                         */
 	public List<MleData> listMles(String searchCriteria) {
-            List<MleData> mleDataList = new ArrayList<MleData>();
+                                List<MleData> mleDataList = new ArrayList<MleData>();
 
-            List<TblMle> tblMleList;
+                                List<TblMle> tblMleList;
 
-            try {
-                if (searchCriteria != null && !searchCriteria.isEmpty())
-                        tblMleList = mleJpaController .findMleByNameSearchCriteria(searchCriteria);
-                else
-                        tblMleList = mleJpaController.findTblMleEntities();
+                                try {
+                                    if (searchCriteria != null && !searchCriteria.isEmpty())
+                                            tblMleList = mleJpaController .findMleByNameSearchCriteria(searchCriteria);
+                                    else
+                                            tblMleList = mleJpaController.findTblMleEntities();
 
-                if (tblMleList != null) {
-                        log.info(String.format("Found [%d] mle results for search criteria [%s]", tblMleList.size(), searchCriteria));
+                                    if (tblMleList != null) {
+                                            log.info(String.format("Found [%d] mle results for search criteria [%s]", tblMleList.size(), searchCriteria));
 
-                        for (TblMle tblMle : tblMleList) {
-                                MleData mleData = createMleDataFromDatabaseRecord(tblMle, false);
-                                mleDataList.add(mleData);
-                        }
-                } else {
-                        log.info(String.format("Found [%d] mle results for search criteria [%s]", 0,searchCriteria));
-                }
+                                            for (TblMle tblMle : tblMleList) {
+                                                    MleData mleData = createMleDataFromDatabaseRecord(tblMle, false);
+                                                    mleDataList.add(mleData);
+                                            }
+                                    } else {
+                                            log.info(String.format("Found [%d] mle results for search criteria [%s]", 0,searchCriteria));
+                                    }
 
-            } catch (ASException ase) {
-                    throw ase;
-            } catch (Exception e) {
-//                    throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while searching for MLEs. %s", e.getMessage()), e);                
-                throw new ASException(e);
-            }
-            return mleDataList;
+                                } catch (ASException ase) {
+                                        throw ase;
+                                } catch (Exception e) {
+                    //                    throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while searching for MLEs. %s", e.getMessage()), e);                
+                                    throw new ASException(e);
+                                }
+                                return mleDataList;
 	}
 
-        /**
-         * 
-         * @param mleName
-         * @param mleVersion
-         * @param osName
-         * @param osVersion
-         * @param oemName
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleName
+                         * @param mleVersion
+                         * @param osName
+                         * @param osVersion
+                         * @param oemName
+                         * @return 
+                         */
 	public MleData findMle(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
-            try {
-                    TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+                                try {
+                                        TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
 
-                    if (tblMle == null) {
-                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);                        
-                    }
+                                        if (tblMle == null) {
+                                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);                        
+                                        }
 
-                    MleData mleData = createMleDataFromDatabaseRecord(tblMle, true);
-                    return mleData;
+                                        MleData mleData = createMleDataFromDatabaseRecord(tblMle, true);
+                                        return mleData;
 
-            } catch (ASException ase) {
-                    throw ase;
-            } catch (Exception e) {
-//                    throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Exception while retrieving the MLE details. %s", e.getMessage()), e);                                
-                throw new ASException(e);
-            }	
+                                } catch (ASException ase) {
+                                        throw ase;
+                                } catch (Exception e) {
+                    //                    throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Exception while retrieving the MLE details. %s", e.getMessage()), e);                                
+                                    throw new ASException(e);
+                                }	
 	}
 
-        /**
-         * 
-         * @param mleName
-         * @param mleVersion
-         * @param osName
-         * @param osVersion
-         * @param oemName
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleName
+                         * @param mleVersion
+                         * @param osName
+                         * @param osVersion
+                         * @param oemName
+                         * @return 
+                         */
 	private TblMle getMleDetails(String mleName, String mleVersion,	String osName, String osVersion, String oemName) {
-            TblMle tblMle;
-            log.info(String.format("Mle name '%s' version '%s' os '%s' os version '%s' oem '%s'. ",
-                            mleName, mleVersion, osName, osVersion, oemName));
-            validateNull("mleName", mleName);
-            validateNull("mleVersion", mleVersion);
-            validateMleExtraAttributes(osName, osVersion, oemName);
-            if (StringUtils.isNotBlank(oemName)) {
-                    log.info("Getting BIOS MLE from database");
-                    tblMle = mleJpaController.findBiosMle(mleName, mleVersion, oemName);
-            } else {
-                    log.info("Get VMM MLE from database");
-                    tblMle = mleJpaController.findVmmMle(mleName, mleVersion, osName,osVersion);
-            }
-            return tblMle;
+                                TblMle tblMle;
+                                log.info(String.format("Mle name '%s' version '%s' os '%s' os version '%s' oem '%s'. ",
+                                                mleName, mleVersion, osName, osVersion, oemName));
+                                validateNull("mleName", mleName);
+                                validateNull("mleVersion", mleVersion);
+                                validateMleExtraAttributes(osName, osVersion, oemName);
+                                if (StringUtils.isNotBlank(oemName)) {
+                                        log.info("Getting BIOS MLE from database");
+                                        tblMle = mleJpaController.findBiosMle(mleName, mleVersion, oemName);
+                                } else {
+                                        log.info("Get VMM MLE from database");
+                                        tblMle = mleJpaController.findVmmMle(mleName, mleVersion, osName,osVersion);
+                                }
+                                return tblMle;
 	}
 
-        /**
-         * 
-         * @param tblMle
-         * @param addManifest
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param tblMle
+                         * @param addManifest
+                         * @return 
+                         */
 	public MleData createMleDataFromDatabaseRecord(TblMle tblMle, boolean addManifest) {
-            List<ManifestData> manifestList = null;
+                                List<ManifestData> manifestList = null;
 
-            if (addManifest) {
-                    manifestList = new ArrayList<ManifestData>();
-                    for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
-                            manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue()));
-                    }
-            }
+                                if (addManifest) {
+                                        manifestList = new ArrayList<ManifestData>();
+                                        for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
+                                                manifestList.add(new ManifestData(pcrManifest.getName(), pcrManifest.getValue()));
+                                        }
+                                }
 
-            String osName = (tblMle.getOsId() == null) ? null : tblMle.getOsId().getName();
-            String osVersion = (tblMle.getOsId() == null) ? null : tblMle.getOsId().getVersion();
-            String oemName = (tblMle.getOemId() == null) ? null : tblMle.getOemId().getName();
+                                String osName = (tblMle.getOsId() == null) ? null : tblMle.getOsId().getName();
+                                String osVersion = (tblMle.getOsId() == null) ? null : tblMle.getOsId().getVersion();
+                                String oemName = (tblMle.getOemId() == null) ? null : tblMle.getOemId().getName();
 
-            MleData s = new MleData(tblMle.getName(), tblMle.getVersion(), MleData.MleType.valueOf(tblMle.getMLEType()),
-                            MleData.AttestationType.valueOf(tblMle.getAttestationType()),
-                            manifestList, tblMle.getDescription(), osName, osVersion, oemName);
+                                MleData s = new MleData(tblMle.getName(), tblMle.getVersion(), MleData.MleType.valueOf(tblMle.getMLEType()),
+                                                MleData.AttestationType.valueOf(tblMle.getAttestationType()),
+                                                manifestList, tblMle.getDescription(), osName, osVersion, oemName);
 
-            return s;
+                                return s;
 	}
 
-	/*public String scrambleMLEManifest(String mleName, String mleVersion,
-			String osName, String osVersion, String oemName, String updateFlag) {
-		String scrambleSeed = "*ICB*";
-		try {
-			TblMle tblMle = getMleDetails(mleName, mleVersion, osName,
-					osVersion, oemName);
-			if (tblMle == null) {
-				throw new ASException(ErrorCode.VALIDATION_ERROR,
-						"MLE not found in attestation data");
-			}
-
-			log.info("Update flag received " + updateFlag);
-
-			for (TblPcrManifest pcrManifest : tblMle
-					.getTblPcrManifestCollection()) {
-				if (updateFlag.equalsIgnoreCase("true")) { // scramble if not
-															// already scrambled
-					if (!pcrManifest.getValue().contains(scrambleSeed)) {
-						pcrManifest.setValue(pcrManifest.getValue()
-								+ scrambleSeed);
-					}
-					log.log(Level.INFO, "Scramble added to PCR [{0}]",
-							pcrManifest.getName());
-				} else { // unscramble if not already scrambled
-					if (pcrManifest.getValue().contains(scrambleSeed)) {
-						pcrManifest.setValue(pcrManifest.getValue().replace(
-								scrambleSeed, ""));
-					}
-					log.log(Level.INFO, "Scramble removed from PCR [{0}]",
-							pcrManifest.getName());
-				}
-				pcrManifestJpaController.edit(pcrManifest);
-			}
-
-		} catch (Exception e) {
-			throw new ASException(ErrorCode.UNKNOWN_ERROR,
-					"Error while getting MLE pcrs in WLM Service", e);
-		}
-
-		return "true";
-
-	}*/
-
-        /**
-         * 
-         * @param mleData
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleData
+                         * @return 
+                         */
 	private TblMle getTblMle(MleData mleData) {
 		TblMle tblMle = new TblMle();
 
@@ -400,11 +387,11 @@ public class MleBO extends BaseBO {
 		return tblMle;
 	}
 
-        /**
-         * 
-         * @param mleManifests
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleManifests
+                         * @return 
+                         */
 	private List<String> manifestNames(List<ManifestData> mleManifests) {
 		ArrayList<String> names = new ArrayList<String>();
 		for( ManifestData manifestData : mleManifests ) {
@@ -413,23 +400,23 @@ public class MleBO extends BaseBO {
 		return names;
 	}
         
-        /**
-         * 
-         * @param mleManifests
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleManifests
+                         * @return 
+                         */
 	private String getRequiredManifestList(List<ManifestData> mleManifests) {
 		String manifestList = mleManifests == null ? "" : StringUtils.join(manifestNames(mleManifests), ",");
 		log.info("Required Manifest list: " + manifestList);
 		return manifestList;
 	}
 
-        /**
-         * 
-         * @param label
-         * @param input
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param label
+                         * @param input
+                         * @return 
+                         */
 	private String validateNull(String label, String input) {
 		if (input == null || input.isEmpty()) {
 			log.info(String.format("Required input parameter '%s' is null or missing.", label));
@@ -438,9 +425,9 @@ public class MleBO extends BaseBO {
 		return input;
 	}
 
-        /**
-         * 
-         */
+                        /**
+                         * 
+                         */
 	private void addPcrManifest(TblMle tblMle, List<ManifestData> mleManifests) {
 		
 		tblMle.setTblPcrManifestCollection(new ArrayList<TblPcrManifest>());
@@ -448,18 +435,29 @@ public class MleBO extends BaseBO {
 		if (mleManifests != null) {
 
 			for (ManifestData manifestData : mleManifests) {
+                try {
+                log.debug("add pcr manifest name: {}", manifestData.getName());
+                log.debug("add pcr manifest value: '{}'", manifestData.getValue());
+                
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(manifestData.getName());
-				pcrManifest.setValue(manifestData.getValue());
-                                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
-                                /*
+                                                                                                // Bug: 375. Need to ensure we are accepting only valid hex strings.
+                                                                                                validateWhitelistValue(manifestData.getName(), manifestData.getValue()); // throws exception if invalid
+                                                                                                        pcrManifest.setValue(manifestData.getValue());
+                                                                                                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                                                                                                /*
 				pcrManifest.setCreatedOn(today);
 				pcrManifest.setCreatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedOn(today);
-                                */
+                                                                                                */
 				pcrManifest.setMleId(tblMle);
 				pcrManifestJpaController.create(pcrManifest);
+                }
+                catch(Exception e) {
+                    log.error("Cannot add PCR "+manifestData.getName()+" to MLE: "+e.toString());
+                    // XXX should we continue the loop to the next PCR, trying to add as many as we can?  or should we be checking all the PCR values early, and if any one of them is bad don't add ANY pcr's??
+                }
 			}
 		}
 
@@ -476,13 +474,13 @@ public class MleBO extends BaseBO {
 				.getManifestList()));
 	}
 
-        /**
-         * 
-         * @param tblMle
-         * @param mleData
-         * @throws NonexistentEntityException
-         * @throws ASDataException 
-         */
+                        /**
+                         * 
+                         * @param tblMle
+                         * @param mleData
+                         * @throws NonexistentEntityException
+                         * @throws ASDataException 
+                         */
 	private void updatePcrManifest(TblMle tblMle, MleData mleData) throws NonexistentEntityException, ASDataException {
 		HashMap<String, String> newPCRMap = getPcrMap(mleData);
 
@@ -491,18 +489,19 @@ public class MleBO extends BaseBO {
 			for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
 				if (newPCRMap.containsKey(pcrManifest.getName())) {
 					log.info(String.format("Updating Pcr manifest value for mle %s  version %s pcr name %s",
-                                                pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),
-						pcrManifest.getName()));
-					pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()));
-                                        // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
-//					pcrManifest.setUpdatedBy(getLoggedInUser());
-//					pcrManifest.setUpdatedOn(today);
+                                                                                                                                        pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),  pcrManifest.getName()));
+					// Bug 375
+                                                                                                                        validateWhitelistValue(pcrManifest.getName(), newPCRMap.get(pcrManifest.getName())); // throws exception if invalid
+                                                                                                                                pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()));
+                                                                                                                        
+                                                                                                                         // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+					// pcrManifest.setUpdatedBy(getLoggedInUser());
+					// pcrManifest.setUpdatedOn(today);
 					pcrManifestJpaController.edit(pcrManifest);
 					newPCRMap.remove(pcrManifest.getName());
 				} else {
 					log.info(String.format("Deleting Pcr manifest value for mle %s  version %s pcr name %s",
-						pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),
-						pcrManifest.getName()));
+						pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),  pcrManifest.getName()));
 					pcrManifestJpaController.destroy(pcrManifest.getId());
 				}
 			}
@@ -511,19 +510,20 @@ public class MleBO extends BaseBO {
 
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(pcrName);
-				pcrManifest.setValue(newPCRMap.get(pcrName));
-                                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
-                                /*
+                                                                                                // Bug 375
+                                                                                                validateWhitelistValue(pcrName, newPCRMap.get(pcrName)); // throws exception if invalid
+                                                                                                        pcrManifest.setValue(newPCRMap.get(pcrName));
+                                                                                                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                                                                                                /*
 				pcrManifest.setCreatedOn(today);
 				pcrManifest.setCreatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedBy(getLoggedInUser());
 				pcrManifest.setUpdatedOn(today);
-                                */
+                                                                                                */
 				pcrManifest.setMleId(tblMle);
 
 				log.info(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s",
-					pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), 
-                                        pcrManifest.getName()));
+					pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
 
 				pcrManifestJpaController.create(pcrManifest);
 			}
@@ -531,11 +531,11 @@ public class MleBO extends BaseBO {
 
 	}
 
-        /**
-         * 
-         * @param mleData
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param mleData
+                         * @return 
+                         */
 	private HashMap<String, String> getPcrMap(MleData mleData) {
 		HashMap<String, String> pcrMap = new HashMap<String, String>();
 
@@ -548,12 +548,12 @@ public class MleBO extends BaseBO {
 		return pcrMap;
 	}
 
-        /**
-         * 
-         * @param osName
-         * @param osVersion
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param osName
+                         * @param osVersion
+                         * @return 
+                         */
 	private TblOs getTblOs(String osName, String osVersion) {
 		TblOs tblOs = new TblOsJpaController(getEntityManagerFactory())
 				.findTblOsByNameVersion(osName, osVersion);
@@ -564,11 +564,11 @@ public class MleBO extends BaseBO {
 		return tblOs;
 	}
 
-        /**
-         * 
-         * @param oemName
-         * @return 
-         */
+                        /**
+                         * 
+                         * @param oemName
+                         * @return 
+                         */
 	private TblOem getTblOem(String oemName) {
 		TblOem tblOem = new TblOemJpaController(getEntityManagerFactory())
 				.findTblOemByName(oemName);
@@ -579,12 +579,12 @@ public class MleBO extends BaseBO {
 		return tblOem;
 	}
 
-        /**
-         * 
-         * @param osName
-         * @param osVersion
-         * @param oemName 
-         */
+                        /**
+                         * 
+                         * @param osName
+                         * @param osVersion
+                         * @param oemName 
+                         */
 	private void validateMleExtraAttributes(String osName, String osVersion, String oemName) {
 		if (StringUtils.isNotBlank(oemName)) {
 			if ((StringUtils.isNotBlank(osName) || StringUtils.isNotBlank(osVersion)))
@@ -596,172 +596,172 @@ public class MleBO extends BaseBO {
 	}
 
         
-        /**
-         * Added By: Sudhir on June 20, 2012
-         * 
-         * Processes the add request for a new PCR white list for the specified MLE.
-         * 
-         * @param pcrData: White list data sent by the user
-         * @return : true if the call is successful or else exception.
-         */
+                        /**
+                         * Added By: Sudhir on June 20, 2012
+                         * 
+                         * Processes the add request for a new PCR white list for the specified MLE.
+                         * 
+                         * @param pcrData: White list data sent by the user
+                         * @return : true if the call is successful or else exception.
+                         */
 	public String addPCRWhiteList(PCRWhiteList pcrData) {
-            TblMle tblMle;
-            TblPcrManifest tblPcr;
-            try {
-                
-                try {
-                    // First check if the entry exists in the MLE table.
-                    tblMle = getMleDetails(pcrData.getMleName(),
-                                    pcrData.getMleVersion(), pcrData.getOsName(),
-                                    pcrData.getOsVersion(), pcrData.getOemName());
-                } catch (NoResultException nre){
-                    throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
-                }
-                
-                // this code was checking for NoResultException but this exception is not thrown... the function findByMleIdName() called inside getPCRWhiteListDetails returns null if the record was not found.
-//                try {
-                    // Now we need to check if PCR is already configured. If yes, then
-                    // we ned to ask the user to use the Update option instead of create
-                    tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
-                    if (tblPcr != null) {
-                        throw new ASException(ErrorCode.WS_PCR_WHITELIST_ALREADY_EXISTS, pcrData.getPcrName());
-                    }
-//                } catch (NoResultException nre) {
-                    // we need to ignore this exception as this is expected. We should not find any new rows already
-                    // existing in the database.
-//                }
-                
-                // In order to reuse the addPCRManifest function, we need to create a list and
-                // add a single entry into it using the manifest data that we got.
-                List<ManifestData> pcrWhiteList = new ArrayList<ManifestData>();
-                pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest()));
-                
-                // Now add the pcr to the database.
-                addPcrManifest(tblMle, pcrWhiteList);
-                
-            } catch (ASException ase) {
-                throw ase;
-            } catch (Exception e) {
-//                throw new ASException(ErrorCode.SYSTEM_ERROR, "Exception while adding PCR white list data. " + e.getMessage(), e);
-                throw new ASException(e);
-            }
-            return "true";
+                                TblMle tblMle;
+                                TblPcrManifest tblPcr;
+                                try {
+
+                                    try {
+                                        // First check if the entry exists in the MLE table.
+                                        tblMle = getMleDetails(pcrData.getMleName(),
+                                                        pcrData.getMleVersion(), pcrData.getOsName(),
+                                                        pcrData.getOsVersion(), pcrData.getOemName());
+                                    } catch (NoResultException nre){
+                                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
+                                    }
+
+                                    // this code was checking for NoResultException but this exception is not thrown... the function findByMleIdName() called inside getPCRWhiteListDetails returns null if the record was not found.
+                    //                try {
+                                        // Now we need to check if PCR is already configured. If yes, then
+                                        // we ned to ask the user to use the Update option instead of create
+                                        tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
+                                        if (tblPcr != null) {
+                                            throw new ASException(ErrorCode.WS_PCR_WHITELIST_ALREADY_EXISTS, pcrData.getPcrName());
+                                        }
+                    //                } catch (NoResultException nre) {
+                                        // we need to ignore this exception as this is expected. We should not find any new rows already
+                                        // existing in the database.
+                    //                }
+
+                                    // In order to reuse the addPCRManifest function, we need to create a list and
+                                    // add a single entry into it using the manifest data that we got.
+                                    List<ManifestData> pcrWhiteList = new ArrayList<ManifestData>();
+                                    pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest()));
+
+                                    // Now add the pcr to the database.
+                                    addPcrManifest(tblMle, pcrWhiteList);
+
+                                } catch (ASException ase) {
+                                    throw ase;
+                                } catch (Exception e) {
+                    //                throw new ASException(ErrorCode.SYSTEM_ERROR, "Exception while adding PCR white list data. " + e.getMessage(), e);
+                                    throw new ASException(e);
+                                }
+                                return "true";
 	}
         
         
-        /**
-         * Added By: Sudhir on June 20, 2012
-         * 
-         * Retrieves the details of the PCR manifest entry if exists.
-         * 
-         * @param mle_id : Identity of the MLE
-         * @param pcrName : Name of the PCR
-         * @return : Data row containing the PCR manifest details.
-         */
+                        /**
+                         * Added By: Sudhir on June 20, 2012
+                         * 
+                         * Retrieves the details of the PCR manifest entry if exists.
+                         * 
+                         * @param mle_id : Identity of the MLE
+                         * @param pcrName : Name of the PCR
+                         * @return : Data row containing the PCR manifest details.
+                         */
 	private TblPcrManifest getPCRWhiteListDetails(Integer mle_id, String pcrName) {
-            TblPcrManifest tblPcr;
-            validateNull("pcrName", pcrName);
-            tblPcr = pcrManifestJpaController.findByMleIdName(mle_id, pcrName);
-            return tblPcr;
+                                TblPcrManifest tblPcr;
+                                validateNull("pcrName", pcrName);
+                                tblPcr = pcrManifestJpaController.findByMleIdName(mle_id, pcrName);
+                                return tblPcr;
 	}
 
         
-        /**
-         * Added By: Sudhir on June 20, 2012
-         * 
-         * Processes the update request for an existing PCR white list for the specified MLE.
-         * 
-         * @param pcrData: White list data sent by the user
-         * @return : true if the call is successful or else exception.
-         */
+                        /**
+                         * Added By: Sudhir on June 20, 2012
+                         * 
+                         * Processes the update request for an existing PCR white list for the specified MLE.
+                         * 
+                         * @param pcrData: White list data sent by the user
+                         * @return : true if the call is successful or else exception.
+                         */
 	public String updatePCRWhiteList(PCRWhiteList pcrData) {
-            TblMle tblMle;
-            TblPcrManifest tblPcr; 
-            
-            try {
-                
-                try {
-                    // First check if the entry exists in the MLE table.
-                    tblMle = getMleDetails(pcrData.getMleName(),
-                                    pcrData.getMleVersion(), pcrData.getOsName(),
-                                    pcrData.getOsVersion(), pcrData.getOemName());
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
-                }
-                
-                try {
-                    // Now we need to check if PCR is already configured. If yes, then
-                    // we ned to ask the user to use the Update option instead of create
-                    tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
-                } catch (NoResultException nre) {
-                    throw new ASException(nre, ErrorCode.WS_PCR_WHITELIST_DOES_NOT_EXIST, pcrData.getPcrName());
-                }
-                                                
-                // Now update the pcr in the database.
-                tblPcr.setValue(pcrData.getPcrDigest());
-                // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
-                /*
-		tblPcr.setUpdatedBy(getLoggedInUser());
-		tblPcr.setUpdatedOn(new Date(System.currentTimeMillis()));
-                */
-                pcrManifestJpaController.edit(tblPcr);
-                
-            } catch (ASException ase) {
-                throw ase;
-            } catch (Exception e) {
-//                throw new ASException(ErrorCode.SYSTEM_ERROR, "Exception while updating PCR white list data. " + e.getMessage(), e);
-                throw new ASException(e);
-            }
-            return "true";
+                                TblMle tblMle;
+                                TblPcrManifest tblPcr; 
+
+                                try {
+
+                                    try {
+                                        // First check if the entry exists in the MLE table.
+                                        tblMle = getMleDetails(pcrData.getMleName(),
+                                                        pcrData.getMleVersion(), pcrData.getOsName(),
+                                                        pcrData.getOsVersion(), pcrData.getOemName());
+                                    } catch (NoResultException nre){
+                                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
+                                    }
+
+                                    try {
+                                        // Now we need to check if PCR is already configured. If yes, then
+                                        // we ned to ask the user to use the Update option instead of create
+                                        tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
+                                    } catch (NoResultException nre) {
+                                        throw new ASException(nre, ErrorCode.WS_PCR_WHITELIST_DOES_NOT_EXIST, pcrData.getPcrName());
+                                    }
+
+                                    // Now update the pcr in the database.
+                                    validateWhitelistValue(pcrData.getPcrName(), pcrData.getPcrDigest()); // throws exception if invalid
+                                        tblPcr.setValue(pcrData.getPcrDigest());
+                                    // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
+                                    /*
+                                    tblPcr.setUpdatedBy(getLoggedInUser());
+                                    tblPcr.setUpdatedOn(new Date(System.currentTimeMillis()));
+                                    */
+                                    pcrManifestJpaController.edit(tblPcr);
+
+                                } catch (ASException ase) {
+                                    throw ase;
+                                } catch (Exception e) {
+                    //                throw new ASException(ErrorCode.SYSTEM_ERROR, "Exception while updating PCR white list data. " + e.getMessage(), e);
+                                    throw new ASException(e);
+                                }
+                                return "true";
 	}
         
         
-        /**
-         * 
-         * Added By: Sudhir on June 20, 2012
-         * 
-         * Processes the delete request for an existing PCR white list for the specified MLE.
-         * 
-         * @param pcrName : Name of the PCR, which is usually the number
-         * @param mleName : Name of the associated MLE
-         * @param mleVersion : Version of the associated MLE
-         * @param osName : OS name associated with the VMM MLE
-         * @param osVersion : OS version associated with the VMM MLE
-         * @param oemName : OEM Name associated with the BIOS MLE
-         * @return 
-         */
-	public String deletePCRWhiteList(String pcrName, String mleName, String mleVersion, String osName,
-			String osVersion, String oemName) {
-            TblPcrManifest tblPcr;
-            TblMle tblMle;
-            try {
-                try {
-                    
-                    tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
-                    
-                } catch (NoResultException nre){
-                    // If the MLE is not configured, then return back a proper error
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST,mleName, mleVersion);
-                }
+                        /**
+                         * 
+                         * Added By: Sudhir on June 20, 2012
+                         * 
+                         * Processes the delete request for an existing PCR white list for the specified MLE.
+                         * 
+                         * @param pcrName : Name of the PCR, which is usually the number
+                         * @param mleName : Name of the associated MLE
+                         * @param mleVersion : Version of the associated MLE
+                         * @param osName : OS name associated with the VMM MLE
+                         * @param osVersion : OS version associated with the VMM MLE
+                         * @param oemName : OEM Name associated with the BIOS MLE
+                         * @return 
+                         */
+	public String deletePCRWhiteList(String pcrName, String mleName, String mleVersion, String osName,  String osVersion, String oemName) {
+                                TblPcrManifest tblPcr;
+                                TblMle tblMle;
+                                try {
+                                    try {
 
-                try {
-                    // Now we need to check if PCR value exists. If it does, then we do delete or else
-                    // we still return true since the data does not exist.
-                        tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrName);
-                } catch (NoResultException nre) {
-                    return "true";
-                }
-                
-                // Delete the PCR white list entry.
-                pcrManifestJpaController.destroy(tblPcr.getId());
+                                        tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
 
-            } catch (ASException ase) {
-                    throw ase;
-            } catch (Exception e) {
-//                    throw new ASException(ErrorCode.SYSTEM_ERROR, "Exception while deleting PCR white list data. " + e.getMessage(), e);
-                throw new ASException(e);
-            }                
-            return "true";
+                                    } catch (NoResultException nre){
+                                        // If the MLE is not configured, then return back a proper error
+                                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST,mleName, mleVersion);
+                                    }
+
+                                    try {
+                                        // Now we need to check if PCR value exists. If it does, then we do delete or else
+                                        // we still return true since the data does not exist.
+                                            tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrName);
+                                    } catch (NoResultException nre) {
+                                        return "true";
+                                    }
+
+                                    // Delete the PCR white list entry.
+                                    pcrManifestJpaController.destroy(tblPcr.getId());
+
+                                } catch (ASException ase) {
+                                        throw ase;
+                                } catch (Exception e) {
+                    //                    throw new ASException(ErrorCode.SYSTEM_ERROR, "Exception while deleting PCR white list data. " + e.getMessage(), e);
+                                    throw new ASException(e);
+                                }                
+                                return "true";
 	}
         
 
@@ -778,6 +778,7 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
+            String fullComponentName = "";
             
             try {
 
@@ -805,9 +806,16 @@ public class MleBO extends BaseBO {
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
                     log.debug("addModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(
-                            tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
-                            moduleData.getEventName());
+
+                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                    if (moduleData.getEventName().contains("Vim25")) {
+                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                    } else {
+                        fullComponentName = moduleData.getComponentName();
+                    }
+                    
+                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                     if (tblModule != null) {
                         throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
@@ -830,9 +838,13 @@ public class MleBO extends BaseBO {
                 newModuleRecord.setMleId(tblMle);
                 newModuleRecord.setEventID(tblEvent);
                 newModuleRecord.setNameSpaceID(nsPackNS);
-                log.debug("MleBO addModuleWhiteList setComponentName {}", tblEvent.getFieldName() + "." + moduleData.getComponentName());
-                newModuleRecord.setComponentName(tblEvent.getFieldName() + "." + moduleData.getComponentName());
-                newModuleRecord.setDigestValue(moduleData.getDigestValue());
+                log.debug("MleBO addModuleWhiteList setComponentName {}", fullComponentName);
+                newModuleRecord.setComponentName(fullComponentName);
+                
+                // Bug 375: If the white list is not valid, then an exception would be thrown.
+                validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
+                        newModuleRecord.setDigestValue(moduleData.getDigestValue());
+                
                 newModuleRecord.setPackageName(moduleData.getPackageName());
                 newModuleRecord.setPackageVendor(moduleData.getPackageVendor());
                 newModuleRecord.setPackageVersion(moduleData.getPackageVersion());
@@ -870,7 +882,8 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
-
+            String fullComponentName = "";
+            
             try {
                 
                 try {
@@ -897,9 +910,16 @@ public class MleBO extends BaseBO {
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
                     log.debug("updateModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(
-                            tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
-                            moduleData.getEventName());
+                   
+                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                    if (moduleData.getEventName().contains("Vim25")) {
+                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                    } else {
+                        fullComponentName = moduleData.getComponentName();
+                    }
+
+                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                 } catch (NoResultException nre){
                     throw new ASException(nre,ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());                    
@@ -907,8 +927,10 @@ public class MleBO extends BaseBO {
                 
                 if(! packageNSJpaController.namespaceExists("Standard_Global_NS"))
                     throw new ASException(ErrorCode.WS_NAME_SPACE_DOES_NOT_EXIST);
-                               
-                tblModule.setDigestValue(moduleData.getDigestValue());
+                
+                validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
+                         tblModule.setDigestValue(moduleData.getDigestValue());
+                
                 tblModule.setDescription(moduleData.getDescription());
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                 /*

@@ -36,14 +36,10 @@ public class TblHostsJpaController implements Serializable {
     private Logger log = LoggerFactory.getLogger(getClass());
 
     private EntityManagerFactory emf = null;
-    private Aes128 cipher = null;
+    
 
-    public TblHostsJpaController(EntityManagerFactory emf, byte[] dataEncryptionKey) throws CryptographyException {
+    public TblHostsJpaController(EntityManagerFactory emf)  {
         this.emf = emf;
-        if( dataEncryptionKey == null ) {
-            throw new IllegalArgumentException("Missing data encryption key: mtwilson.as.dek");
-        }
-        cipher = new Aes128(dataEncryptionKey);
     }
     
     public EntityManager getEntityManager() {
@@ -51,7 +47,8 @@ public class TblHostsJpaController implements Serializable {
     }
 
     public void create(TblHosts tblHosts) throws CryptographyException {
-        log.debug("create tblHosts with policy {} and keystore length {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+        System.err.println("create tblHosts with policy " +  tblHosts.getTlsPolicyName() + " and keystore length " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+       
         if (tblHosts.getTblSamlAssertionCollection() == null) {
             tblHosts.setTblSamlAssertionCollection(new ArrayList<TblSamlAssertion>());
         }
@@ -75,18 +72,9 @@ public class TblHostsJpaController implements Serializable {
             }
             tblHosts.setTblSamlAssertionCollection(attachedTblSamlAssertionCollection);
             
-            // encrypt addon connection string, persist, then restore the plaintext
-            String addOnConnectionString = tblHosts.getAddOnConnectionInfo();
-            if( addOnConnectionString != null ) {
-                log.debug("saving with encrypted connection string");
-                tblHosts.setAddOnConnectionInfo(cipher.encryptString(addOnConnectionString));
-                em.persist(tblHosts);
-                tblHosts.setAddOnConnectionInfo(addOnConnectionString);
-            }
-            else {
-                log.debug("saving without encrypting connection string");
-                em.persist(tblHosts);
-            }
+            System.err.println("tblHosts create before persist");
+            em.persist(tblHosts);
+            System.err.println("tblHosts create after persist");
             
             if (vmmMleId != null) {
                 vmmMleId.getTblHostsCollection().add(tblHosts);
@@ -150,17 +138,9 @@ public class TblHostsJpaController implements Serializable {
             tblSamlAssertionCollectionNew = attachedTblSamlAssertionCollectionNew;
             tblHosts.setTblSamlAssertionCollection(tblSamlAssertionCollectionNew);
 
-            // encrypt addon connection string, persist, then restore the plaintext
-            String addOnConnectionString = tblHosts.getAddOnConnectionInfo();
-            if( addOnConnectionString != null ) {
-                tblHosts.setAddOnConnectionInfo(cipher.encryptString(addOnConnectionString));
-                tblHosts = em.merge(tblHosts);
-                tblHosts.setAddOnConnectionInfo(addOnConnectionString);
-            }
-            else {
-                tblHosts = em.merge(tblHosts);
-            }
-            
+          
+            tblHosts = em.merge(tblHosts);
+                        
             if (vmmMleIdOld != null && !vmmMleIdOld.equals(vmmMleIdNew)) {
                 vmmMleIdOld.getTblHostsCollection().remove(tblHosts);
                 vmmMleIdOld = em.merge(vmmMleIdOld);
@@ -242,25 +222,6 @@ public class TblHostsJpaController implements Serializable {
         }
     }
     
-    private void decryptStrings(List<TblHosts> list) {
-        if( list != null ) {
-            for(TblHosts record : list) {
-                decryptStrings(record);
-            }
-        }
-    }
-    
-    private void decryptStrings(TblHosts record) {
-        if( record != null && record.getAddOnConnectionInfo() != null && !record.getAddOnConnectionInfo().isEmpty() && !record.getAddOnConnectionInfo().startsWith("http") ) {
-            try {
-                String decryptedAddOnConnectionInfo = cipher.decryptString(record.getAddOnConnectionInfo());
-                record.setAddOnConnectionInfo(decryptedAddOnConnectionInfo);
-            } catch (CryptographyException ex) {
-               log.error("Cannot decrypt connection string for {}", record.getName()); // ignore the exception... we're either looking at a plaintext record that doesn't need ot be decrypted (saved from previous release) or we can't do anything about the error here anyway.
-            }
-        }
-    }
-
     public List<TblHosts> findTblHostsEntities() {
         return findTblHostsEntities(true, -1, -1);
     }
@@ -280,7 +241,7 @@ public class TblHostsJpaController implements Serializable {
                 q.setFirstResult(firstResult);
             }
             List<TblHosts> results = q.getResultList();
-            decryptStrings(results);
+           
             return results;
         } finally {
             em.close();
@@ -291,7 +252,7 @@ public class TblHostsJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
             TblHosts result = em.find(TblHosts.class, id);
-            decryptStrings(result);
+           
             return result;
         } finally {
             em.close();
@@ -326,7 +287,7 @@ public class TblHostsJpaController implements Serializable {
 
             if (list != null && list.size() > 0) {
                 host = list.get(0);
-                decryptStrings(host);
+               
             }
         } finally {
                 em.close();
@@ -335,6 +296,30 @@ public class TblHostsJpaController implements Serializable {
         return host;
 
     }
+    
+    public TblHosts findByAikSha1(String fingerprint) {
+
+        TblHosts host = null;
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("TblHosts.findByAikSha1");
+
+            query.setParameter("aikSha1", fingerprint);
+          
+
+            List<TblHosts> list = query.getResultList();
+
+            if (list != null && list.size() > 0) {
+                host = list.get(0);
+            }
+        } finally {
+                em.close();
+        }
+
+        return host;
+
+    }    
 
       public TblHosts findByIPAddress(String ipAddress) {
 
@@ -350,7 +335,7 @@ public class TblHostsJpaController implements Serializable {
 
             if (list != null && list.size() > 0) {
                 host = list.get(0);
-                decryptStrings(host);
+                
             }
         } finally {
                 em.close();
@@ -371,7 +356,7 @@ public class TblHostsJpaController implements Serializable {
             if (query.getResultList() != null && !query.getResultList().isEmpty()) {
                  
                 hostList = query.getResultList();
-                decryptStrings(hostList);
+               
             }
             
         } finally {

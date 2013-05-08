@@ -11,13 +11,40 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
-script_name=''
-package_name=''
-intel_conf_dir=/etc/intel/cloudsecurity
-package_dir=/opt/intel/cloudsecurity/${package_name}
-package_config_filename=${intel_conf_dir}/${package_name}.properties
-package_env_filename=${package_dir}/${package_name}.env
-package_install_filename=${package_dir}/${package_name}.install
+if [ -z "$INSTALL_PKGS" ]; then
+              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ] monit
+ INSTALL_PKGS="postgres java glassfish privacyca SERVICES PORTALS"
+fi
+
+FIRST=0
+#loop through INSTALL_PKG and set each entry to true
+for i in $INSTALL_PKGS; do
+ pkg=`echo $i | tr '[A-Z]' '[a-z]'`
+ eval $pkg="true"
+ if [ $FIRST == 0 ]; then
+  FIRST=1;
+  LIST=$pkg
+ else
+  LIST=$LIST", "$pkg
+ fi
+done
+
+# if a group is defined, then make all sub parts == true
+if [ ! -z "$portals" ]; then
+  #eval mangportal="true"
+  #eval trustportal="true"
+  #eval wlmportal="true"
+  eval mtwportal="true"
+fi
+# if a group is defined, then make all sub parts == true
+if [ ! -z "$services" ]; then
+  eval attservice="true"
+  eval mangservice="true"
+  eval wlmservice="true"
+fi
+
+
+echo "Installing packages: $LIST"
 
 APICLIENT_YUM_PACKAGES="unzip"
 APICLIENT_APT_PACKAGES="unzip"
@@ -25,15 +52,27 @@ APICLIENT_YAST_PACKAGES="unzip"
 APICLIENT_ZYPPER_PACKAGES="unzip"
 auto_install "Installer requirements" "APICLIENT"
 
+# api client: ensure destination exists and clean it before copying
+mkdir -p /usr/local/share/mtwilson/apiclient/java
+rm -rf /usr/local/share/mtwilson/apiclient/java/*
+unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
+
+# setup console: create folder and copy the executable jar
+mkdir -p /opt/intel/cloudsecurity/setup-console
+rm -rf /opt/intel/cloudsecurity/setup-console/*.jar
+cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
+
+# ask about mysql vs postgres
 echo "Supported database systems are:"
 echo "postgres"
 echo "mysql"
-prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-postgres}
+prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
 if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
   DATABASE_VENDOR=postgres
   echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
 fi
 
+#ask about glassfish vs tomcat
 echo "Supported web servers are:"
 echo "tomcat"
 echo "glassfish"
@@ -43,7 +82,9 @@ if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]
   echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
 fi
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+# ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
+
+export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
 if using_glassfish; then
@@ -51,8 +92,6 @@ if using_glassfish; then
 elif using_tomcat; then
   export DEFAULT_API_PORT=$DEFAULT_TOMCAT_API_PORT;
 fi
-
-echo "DEFAULT_API_PORT=$DEFAULT_API_PORT" >> $INSTALL_LOG_FILE
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if [ "$DATABASE_VENDOR" == "mysql" ] ; then
@@ -73,18 +112,18 @@ if [ "$DATABASE_VENDOR" == "mysql" ] ; then
 fi
 
 
-# ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-#if using_mysql; then
-    export MYSQL_REQUIRED_VERSION=${MYSQL_REQUIRED_VERSION:-5.0}
-#elif using_postgres; then
-    export POSTGRES_REQUIRED_VERSION=${POSTGRES_REQUIRED_VERSION:-8.4}
-#fi
-#if using_glassfish; then
-    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
-#elif using_tomcat; then
-    export TOMCAT_REQUIRED_VERSION=${TOMCAT_REQUIRED_VERSION:-6.0}
-#fi
+if using_mysql; then
+    export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
+elif using_postgres; then
+    export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
+fi
+if using_glassfish; then
+    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
+elif using_tomcat; then
+    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
+fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export java_required_version=${JAVA_REQUIRED_VERSION}
 
 
 find_installer() {
@@ -103,6 +142,100 @@ attestation_service=`find_installer AttestationService`
 whitelist_portal=`find_installer WhiteListPortal`
 management_console=`find_installer ManagementConsole`
 trust_dashboard=`find_installer TrustDashBoard`
+mtw_portal=`find_installer mtwilson-portal-installer`
+glassfish_installer=`find_installer glassfish`
+tomcat_installer=`find_installer tomcat`
+
+# Verify the installers we need are present before we start installing
+if [ ! -z "$java" ]; then
+	if [ ! -e $java_installer ]; then
+		echo_warning "Java installer marked for install but missing. Please verify you are using the right installer";
+		exit -1;
+	fi
+fi
+
+if [ ! -e $mtwilson_util ]; then
+	echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
+	exit -1;
+fi
+
+if [ ! -z "$glassfish" ]; then
+	if [ ! -e $glassfish_installer ]; then
+		echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$tomcat" ]; then
+	if [ ! -e $tomcat_installer ]; then
+		echo_warning "Tomcat installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$privacyca" ]; then
+	if [ ! -e $privacyca_service ]; then
+	echo_warning "Privacy CA installer marked for install but missing. Please verify you are using the right installer"
+	exit -1;
+	fi
+fi
+
+if [ ! -z "$attservice" ]; then
+	if [ ! -e $attestation_service ]; then
+		echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+
+if [ ! -z "$mangservice" ]; then
+	if [ ! -e $management_service ]; then
+		echo_warning "Management Service installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$wlmservice" ]; then
+	if [ ! -e $whitelist_service ]; then
+		echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$mangportal" ]; then
+	if [ ! -e $management_console ]; then
+		echo_warning "Management Console installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$wlmportal" ]; then
+	if [ ! -e $whitelist_portal ]; then
+		echo_warning "WhiteList Portal installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$trustportal" ]; then
+	if [ ! -e $trust_dashboard ]; then
+		echo_warning "Trust DashBoard installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$mtwportal" ]; then
+	if [ ! -e $mtw_portal ]; then
+		echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$monit" ]; then
+	if [ ! -e $monit_installer ]; then
+		echo_warning "Monit installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
 
 # Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
 export MTWILSON_SETUP_NODEPLOY=
@@ -122,36 +255,9 @@ export MTWILSON_SERVER
 echo
 
 
-# We need Java up front in order to run the setup-console, which contains code for setting up
-# or upgrading the database schema. So Java and mtwilson utils and setup-console
-# must be done first, before the database and application servers and apps.
-
-# api client: ensure destination exists and clean it before copying
-mkdir -p /usr/local/share/mtwilson/apiclient/java
-rm -rf /usr/local/share/mtwilson/apiclient/java/*
-unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
-
-# setup console: create folder and copy the executable jar
-# this is required before we can run any "mtwilson setup" commands using the "mtwilson" script provided in "mtwilson-util" / "linux-util"
-mkdir -p /opt/intel/cloudsecurity/setup-console
-rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
-cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
-
-
-chmod +x *.bin
-
-if [[ -n "$java_installer" ]]; then
-echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
-./$java_installer
-echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
+if [[ -z "$postgres" && -z "$mysql" ]]; then
+ echo_warning "Relying on an existing database installation"
 fi
-
-if [[ -n "$mtwilson_util" ]]; then
-echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
-./$mtwilson_util  >> $INSTALL_LOG_FILE
-echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
-fi
-
 
 if using_mysql; then
   mysql_userinput_connection_properties
@@ -159,81 +265,105 @@ if using_mysql; then
 
   # Install MySQL server (if user selected localhost)
   if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
-    echo "Installing mysql server..."
-    # when we install mysql server on ubuntu it prompts us for root pw
-    # we preset it so we can send all output to the log
-    aptget_detect; dpkg_detect;
-    if [[ -n "$aptget" ]]; then
-     echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
-     echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
-    fi 
-    mysql_server_install 
-    mysql_start & >> $INSTALL_LOG_FILE
-    echo "Installation of mysql server complete..."
+	if [ ! -z "$mysql" ]; then
+	    # Place mysql server install code here
+		echo "Installing mysql server..."
+		aptget_detect; dpkg_detect;
+		if [[ -n "$aptget" ]]; then
+			echo "mysql-server-5.1 mysql-server/root_password password $MYSQL_PASSWORD" | debconf-set-selections
+			echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
+		fi 
+		mysql_server_install 
+		mysql_start & >> $INSTALL_LOG_FILE
+	    echo "Installation of mysql server complete..."
+		# End mysql server install code here
+	else
+		echo_warning "Using existing mysql install"
+	fi
   fi
+  # mysql client install here
   echo "Installing mysql client..."
   mysql_install  
-  # the mysql_create_database function only creates an empty "mw_as" database so we can connect to it -- it does not use 
-  # any java code 
-  mysql_create_database 
   echo "Installation of mysql client complete..."
+  # mysql client end 
+  
+  if [ -z "$SKIP_DATABASE_INIT" ]; then
+    # mysql db init here
+	mysql_create_database 
+	# mysql db init end
+  else
+    echo_warning "Skipping init of database"
+  fi 
+  
   export is_mysql_available mysql_connection_error
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
-elif using_postgres; then
-  postgres_userinput_connection_properties
-
-  export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
-  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
-  chmod 0600 $HOME/.pgpass
   
-  # Install Postgres server (if user selected localhost)
-  if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
-    echo "Installing postgres server..."
-    # when we install postgres server on ubuntu it prompts us for root pw
-    # we preset it so we can send all output to the log
-    aptget_detect; dpkg_detect; yum_detect;
-    if [[ -n "$aptget" ]]; then
-     echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
-    fi 
-    postgres_server_install 
-    postgres_restart & >> $INSTALL_LOG_FILE
-    sleep 5
-  fi
-  echo "Installing postgres client..."
-  #postgres_install
-  #postgres_restart & >> $INSTALL_LOG_FILE
-  #sleep 10
-  echo "Installation of postgres client complete..."
-
-  postgres_create_database
-
-  export is_postgres_available postgres_connection_error
-  if [ -z "$is_postgres_available" ]; then 
-    echo_warning "Run 'mtwilson setup' after a database is available"; 
-  fi
+elif using_postgres; then
+ if [ ! -z "$postgres" ]; then
+  # postgres server install 
+  echo_warning "Relying on an existing Postgres installation"
+  # postgres server end
+ else
+  echo_warning "Relying on an existing Postgres installation"
+ fi 
+ # postgres client install here
+ 
+ # postgres clinet install end
+ 
+ if [ -z "$SKIP_DATABASE_INIT" ]; then
+    # postgres db init here
+	echo_warning "Init of postgres db currently not supported"
+	# postgress db init end
+  else
+    echo_warning "Skipping init of database"
+  fi 
  
 fi
-
-
 
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
+chmod +x *.bin
+if [ ! -z "$java" ]; then
+	echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
+	./$java_installer
+	echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
+else
+    echo "Using existing java installation" | tee -a  $INSTALL_LOG_FILE
+fi
 
+echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
+./$mtwilson_util  >> $INSTALL_LOG_FILE
+echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
+
+if [[ -z "$glassfish" && -z "$tomcat" ]]; then
+ echo_warning "Relying on an existing webservice installation"
+fi
 
 if using_glassfish; then
-  glassfish_installer=`find_installer glassfish`
-  if [[ -n "$glassfish_installer" ]]; then
-    echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
-    ./$glassfish_installer  >> $INSTALL_LOG_FILE
-    mtwilson glassfish-sslcert
-    echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+  if [ ! -z "$glassfish" ]; then
+  # glassfish install here
+	
+	echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+	./$glassfish_installer  >> $INSTALL_LOG_FILE
+	echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+  # end glassfish installer
+  else
+    echo_warning "Relying on an existing glassfish installation" 
   fi
+  
+  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+    # glassfish init code here
+    mtwilson glassfish-sslcert
+	# glassfish init end
+  else
+    echo_warning "Skipping webservice init"
+  fi
+  # end glassfish setup
 elif using_tomcat; then
-  tomcat_installer=`find_installer tomcat`
-  if [[ -n "$tomcat_installer" ]]; then
-    echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    
+ if [ ! -z "$tomcat" ]; then
+  # tomcat install here
+  echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
     if grep -q MaxPermSize /usr/loca/bin/tomcat_starter.sh; then
      someRand=""
     else
@@ -261,7 +391,14 @@ elif using_tomcat; then
     chmod +x /usr/local/bin/tomcat_starter.sh
 
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
-    
+    echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
+  # end tomcat install
+ else
+  echo_warning "Relying on an existing Tomcat installation"
+ fi
+ 
+ if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+    # tomcat init code here
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
@@ -271,62 +408,73 @@ elif using_tomcat; then
       echo "Starting Tomcat ..."
       /etc/init.d/tomcat.sh start
     fi
-    echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
+	# tomcat init end
+  else
+    echo_warning "Skipping webservice init"
   fi
-fi 
-
-
-if [[ -n "$privacyca_service" ]]; then
-echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
-./$privacyca_service 
-echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
-
-# removing restart because now the pca keys are generated by the installer... so first time it starts it will already have them.
-echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
-/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
-echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
+ 
 fi
 
-if [[ -n "$attestation_service" ]]; then
-echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-./$attestation_service
-echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
+if [ ! -z "$privacyca" ]; then
+	echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
+	./$privacyca_service 
+	echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
+	echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
+	/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
+	echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [[ -n "$management_service" ]]; then
-echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
-./$management_service
-echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
+if [ ! -z "$attservice" ]; then
+	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
+	./$attestation_service 
+	echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [[ -n "$whitelist_service" ]]; then
-echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
-./$whitelist_service >> $INSTALL_LOG_FILE
-echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
+if [ ! -z "$mangservice" ]; then
+	echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
+	./$management_service
+	echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [[ -n "$management_console" ]]; then
-echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
-./$management_console
-echo "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
+if [ ! -z "$wlmservice" ]; then
+	echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
+	./$whitelist_service >> $INSTALL_LOG_FILE
+	echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [[ -n "$whitelist_portal" ]]; then
-echo "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
-./$whitelist_portal >> $INSTALL_LOG_FILE
-echo "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
+#if [ ! -z "$mangportal" ]; then
+#	echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
+#	./$management_console
+#	echo "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
+#fi
+
+#if [ ! -z "$wlmportal" ]; then
+#	echo "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
+#	./$whitelist_portal >> $INSTALL_LOG_FILE
+#	echo "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
+#fi
+
+#if [ ! -z "$trustportal" ]; then
+#	echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
+#	./$trust_dashboard >> $INSTALL_LOG_FILE
+#	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
+#fi
+
+if [ ! -z "$mtwportal" ]; then
+	echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
+	./$mtw_portal 
+	echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [[ -n "$trust_dashboard" ]]; then
-echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
-./$trust_dashboard >> $INSTALL_LOG_FILE
-echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
+#TODO-stdale monitrc needs to be customized depending on what is installed
+if [ ! -z "$monit" ]; then
+	echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
+	./$monit_installer  >> $INSTALL_LOG_FILE 
+	echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [[ -n "$monit_installer" ]]; then
-echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
-./$monit_installer  >> $INSTALL_LOG_FILE
-echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
+if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
+  mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
 if using_glassfish; then
@@ -335,12 +483,15 @@ if using_glassfish; then
   echo "Glassfish restarted..." | tee -a  $INSTALL_LOG_FILE
 else
   if tomcat_running; then 
-      echo "Restarting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
-      tomcat_start
-    fi
+    echo "Restarting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
+    tomcat_restart
+  else
+    echo "Starting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
+    tomcat_start
   fi
+fi
+#  echo "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
+#  /usr/local/bin/asctl restart >> $INSTALL_LOG_FILE
+#  echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"

@@ -9,7 +9,7 @@
     <parent>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>mtwilson-services</artifactId>
-		<version>1.2-SNAPSHOOT</version>
+		<version>1.2-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -25,7 +25,22 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
-        </plugins>
+
+            <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
     </build>
 
 
@@ -83,7 +98,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
-	<dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ASData</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+        <dependency>
 		<groupId>commons-net</groupId>
 		<artifactId>commons-net</artifactId>
 		<version>3.1</version>

@@ -1,41 +1,34 @@
 package com.intel.mountwilson.Service;
 
-import java.io.IOException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.slf4j.LoggerFactory;
-
 import com.intel.mountwilson.common.MCPConfig;
 import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mountwilson.common.ManagementConsolePortalException;
-import com.intel.mountwilson.constant.HelperConstant;
 import com.intel.mountwilson.datamodel.ApiClientDetails;
 import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.ConnectionUtil;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
 import com.intel.mtwilson.ManagementService;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
-import java.util.logging.Level;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ManagementConsoleServicesImpl implements IManagementConsoleServices {
 
-        private static final Logger logger = Logger.getLogger(ManagementConsoleServicesImpl.class.getName());
+        private static final Logger logger = LoggerFactory.getLogger(ManagementConsoleServicesImpl.class.getName());
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
 	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("ASDataPU"));
         private ApiClientX509JpaController apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));
@@ -47,7 +40,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         * @throws ManagementConsolePortalException 
         */
         @Override
-        public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj, HostConfigData hostConfig, ApiClient apiObj)throws ManagementConsolePortalException {           
+        public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj, HostConfigData hostConfig, ApiClient apiObj)
+                throws ManagementConsolePortalException, MalformedURLException {           
                 logger.info("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
                 boolean result = false;                            
                 ManagementService msAPIObj = (ManagementService) apiObj;
@@ -55,15 +49,31 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 // Create the host config object to be sent to the Management API for white list configuration
                 HostConfigData hostConfigObj = hostConfig;
                 TxtHostRecord hostRecord = new TxtHostRecord();
-                if (hostDetailsObj.isVmWareType()) {
-                        hostRecord.HostName = hostDetailsObj.getHostName();
-                        hostRecord.AddOn_Connection_String = hostDetailsObj.getvCenterString();
+                hostRecord.HostName = hostDetailsObj.getHostName();
+                // Bug 614: Using connection strings for all kinds of hosts.
+                ConnectionString connStr = null;
+                if (hostDetailsObj.getHostType().equalsIgnoreCase(Vendor.INTEL.toString())){
+                        connStr = ConnectionString.forIntel(hostDetailsObj.getHostName(), Integer.parseInt(hostDetailsObj.getHostPortNo()));
                 } else {
-                        hostRecord.HostName = hostDetailsObj.getHostName();
-                        hostRecord.IPAddress = hostDetailsObj.getHostName();
-                        hostRecord.Port = Integer.parseInt(hostDetailsObj.getHostPortNo());
+                        // we need to handle both the VMware and Citrix connection strings in the same way. Since the user
+                        // will be providing the entire connection string, we do not need to create one similar to the Intel one.
+                        connStr = ConnectionString.forVendor(Vendor.valueOf(hostDetailsObj.getHostType().toUpperCase()), new URL(hostDetailsObj.getvCenterString()));
                 }
-            
+                hostRecord.AddOn_Connection_String = connStr.getConnectionStringWithPrefix();
+                
+               /* if (hostDetailsObj.isVmWareType()) {
+                        hostRecord.HostName = hostDetailsObj.getHostName();
+                       hostRecord.AddOn_Connection_String = hostDetailsObj.getvCenterString();
+                } else {
+                    if(hostDetailsObj.getHostType().contains("citrix")) {
+                      hostRecord.AddOn_Connection_String = "citrix:" + hostDetailsObj.getvCenterString();  
+                      System.err.println("stdalex saveWhiteListConf type was citrix");
+                    }
+                    hostRecord.HostName = hostDetailsObj.getHostName();
+                    hostRecord.IPAddress = hostDetailsObj.getHostName();
+                    hostRecord.Port = Integer.parseInt(hostDetailsObj.getHostPortNo());
+                } */
+                
                 hostConfigObj.setTxtHostRecord(hostRecord);
             
                 try {
@@ -152,7 +162,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 } catch (Exception e) {
                         logger.info(e.getMessage());
                         // Bug: 441 - We should not be throwing exception here. Instead setting the error correctly
-                        hostDetailList.setStatus(e.getMessage());
+                        
+                        hostDetailList.setStatus(StringEscapeUtils.escapeHtml(e.getMessage()));
                 }
                 
             return hostDetailList;
@@ -359,7 +370,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
          * @throws ManagementConsolePortalException 
          */
         @Override
-        public HostConfigResponseList registerHosts(ApiClient apiObj, List<HostDetails> hostRecords) throws ManagementConsolePortalException {
+        public HostConfigResponseList registerHosts(ApiClient apiObj, List<HostDetails> hostRecords) throws ManagementConsolePortalException, MalformedURLException {
                 logger.info("ManagementConsoleServicesImpl.registerHosts >>");
                 logger.info("# of hosts to be registeredr >> " + hostRecords.size());
                 List<HostConfigData> hostConfigList = new ArrayList<HostConfigData>();
@@ -370,14 +381,25 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 // We now need to create the actual HostConfigData objects using the HostDetail object 
                 for (HostDetails hostRecord: hostRecords) {
                         TxtHostRecord hostTxtObj = new TxtHostRecord();
-                        if (hostRecord.isVmWareType()) {
+                        hostTxtObj.HostName = hostRecord.getHostName();
+                        // Bug 614: Using connection strings for all kinds of hosts.
+                        ConnectionString connStr = null;
+                        if (hostRecord.getHostType().equalsIgnoreCase(Vendor.INTEL.toString())){
+                                connStr = ConnectionString.forIntel(hostRecord.getHostName(), Integer.parseInt(hostRecord.getHostPortNo()));
+                        } else {
+                                // we need to handle both the VMware and Citrix connection strings in the same way. Since the user
+                                // will be providing the entire connection string, we do not need to create one similar to the Intel one.
+                                connStr = ConnectionString.forVendor(Vendor.valueOf(hostRecord.getHostType().toUpperCase()), new URL(hostRecord.getvCenterString()));
+                        }
+                        hostTxtObj.AddOn_Connection_String = connStr.getConnectionStringWithPrefix();
+                        /*if (hostRecord.isVmWareType()) {
                                 hostTxtObj.HostName = hostRecord.getHostName();
                                 hostTxtObj.AddOn_Connection_String = hostRecord.getvCenterString();
                         } else {
                                 hostTxtObj.HostName = hostRecord.getHostName();
                                 hostTxtObj.IPAddress = hostRecord.getHostName();
                                 hostTxtObj.Port = Integer.parseInt(hostRecord.getHostPortNo());
-                        }
+                        }*/
                         HostConfigData configData = new HostConfigData();
                         configData.setBiosWLTarget(HostWhiteListTarget.getBIOSWhiteListTarget(hostRecord.getBiosWLTarget()));
                         configData.setVmmWLTarget(HostWhiteListTarget.getVMMWhiteListTarget(hostRecord.getVmmWLtarget()));

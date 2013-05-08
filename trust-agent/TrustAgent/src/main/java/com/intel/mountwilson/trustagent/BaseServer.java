@@ -63,12 +63,12 @@ public abstract class BaseServer {
 			if (bytes_read < 0) {
 				log.info("Tried to read from socket read() returned < 0,  Closing socket.");
 				writeResponse(sockOutput, CommandUtil
-						.generateErrorResponse(ErrorCode.BAD_REQUEST));
+						.generateErrorResponse(ErrorCode.BAD_REQUEST, "No data"));
 				return;
 
 			}
 			
-			log.info("Received data from socket.");
+			log.info("Received data from socket: {}", new String(buf));
 
 			
 			TrustAgent agent = new TrustAgent();

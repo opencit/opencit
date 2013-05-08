@@ -3,22 +3,20 @@
  */
 package com.intel.mountwilson.controller;
 
+import com.intel.mountwilson.constant.HelperConstant;
+import com.intel.mtwilson.datatypes.HostVMMType;
+import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-
-import com.intel.mountwilson.constant.HelperConstant;
-import com.intel.mtwilson.datatypes.HostVMMType;
-import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 
 /**
  * @author yuvrajsx
@@ -27,7 +25,7 @@ import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 @Controller
 public class ManagementConsoleViewController extends MultiActionController{
 	
-	private static final Logger logger = Logger.getLogger(ManagementConsoleViewController.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(ManagementConsoleViewController.class.getName());
 	
 	public ModelAndView getWhiteListConfigurationPage(HttpServletRequest req,HttpServletResponse res){
 		ModelAndView modelAndView = new ModelAndView("WhiteListConfiguration");
@@ -65,7 +63,7 @@ public class ManagementConsoleViewController extends MultiActionController{
                         modelAndView.addObject("vmmWhiteList",wlVMMList);
 			
 		} catch (Exception e) {
-			logger.severe("Error while Getting Host Entry from Config file."+e.getMessage());
+			logger.error("Error while Getting Host Entry from Config file."+e.getMessage());
 			modelAndView.addObject("result",false);
 			modelAndView.addObject("message","Error while Getting Host Entry from HostVMMType Class.");
 			return modelAndView;

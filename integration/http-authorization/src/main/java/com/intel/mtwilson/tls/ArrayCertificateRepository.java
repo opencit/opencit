@@ -5,7 +5,7 @@
 package com.intel.mtwilson.tls;
 
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.InternetAddress;
+import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.x500.DN;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;

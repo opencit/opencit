@@ -7,8 +7,10 @@ package com.intel.mtwilson;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -27,10 +29,19 @@ public interface AttestationService {
 
     HostTrustResponse getHostTrust(Hostname hostname) throws IOException, ApiException, SignatureException;
 
-    HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException;
+    HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
+    
+    HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
 
-    HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException;
+    HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+    
+    X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
 
+
+    HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
+
+    HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
+    
     HostResponse deleteHost(Hostname hostname) throws IOException, ApiException, SignatureException;
 
     List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException;
@@ -53,6 +64,8 @@ public interface AttestationService {
      * @throws SignatureException 
      */
     String getSamlForHost(Hostname hostname) throws IOException, ApiException, SignatureException;
+    
+    String getSamlForHost(Hostname hostname, boolean forceVerify) throws IOException, ApiException, SignatureException;
 
     List<HostTrustXmlResponse> getSamlForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) throws IOException, ApiException, SignatureException;
 

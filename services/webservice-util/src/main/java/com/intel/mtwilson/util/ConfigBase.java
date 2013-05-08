@@ -27,9 +27,9 @@ public abstract class ConfigBase {
     private Configuration config = null;
     private final String propertyFileName;
     private Properties defaultProperties ;//= new Properties();
-
+    private Properties customProperties = null;
+    
     public Configuration getConfigurationInstance() {
-        if( log == null ) { System.err.println("wtf log is null after constructor"); }
         if( config == null ) {
             defaultProperties = getDefaults();
             config = gatherConfiguration(propertyFileName, defaultProperties);
@@ -40,6 +40,10 @@ public abstract class ConfigBase {
     public ConfigBase(String propertyFileName/*, Properties defaultProperties*/) {
         this.propertyFileName = propertyFileName;
 //        this.defaultProperties = defaultProperties;
+    }
+    public ConfigBase(String propertyFileName, Properties custom) {
+        this.propertyFileName = propertyFileName;
+        this.customProperties = custom;
     }
 
     public Properties getDefaults()  { return new Properties(); }
@@ -65,6 +69,12 @@ public abstract class ConfigBase {
             Properties defaults) {
         CompositeConfiguration composite = new CompositeConfiguration();
 
+        if( customProperties != null ) {
+            MapConfiguration customconfig = new MapConfiguration(customProperties);
+            dumpConfiguration(customconfig, "custom");
+            composite.addConfiguration(customconfig);
+        }
+        
         // first priority are properties defined on the current JVM (-D switch
         // or through web container)
         SystemConfiguration system = new SystemConfiguration();

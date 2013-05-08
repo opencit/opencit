@@ -4,10 +4,7 @@
  */
 package com.intel.mtwilson.client.cmd;
 
-import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.client.AbstractCommand;
-import com.intel.mtwilson.datatypes.HostTrustResponse;
-import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.io.Filename;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

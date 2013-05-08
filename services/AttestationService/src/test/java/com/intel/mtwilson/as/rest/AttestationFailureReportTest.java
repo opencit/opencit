@@ -8,6 +8,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import java.io.File;

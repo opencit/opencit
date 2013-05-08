@@ -70,38 +70,21 @@ mtwilson_saml_cert_report() {
   java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
 }
 
-erase_data_with_user_confirmation() {
-  # WARNING: the following prompt value SHOULD NOT be scripted in an answer file
-  echo_warning "You are about to delete the Mt Wilson database."
-  prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
-  if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
-    mysql_read_connection_properties "${conf_dir}/attestation-service.properties" "mountwilson.as.db"
-    mysql_test_connection
-    if [ -n "$is_mysql_available" ]; then
-      echo "Connected to ${MYSQL_HOSTNAME} as ${MYSQL_USERNAME}. Dropping database..."
-      $mysql_connect --force -e "DROP DATABASE ${MYSQL_DATABASE}"
-    else
-      echo_failure "${mysql_connection_error}"
-    fi
-  fi
-  
-  CONFIRM_ERASE_DATA=
 
-  echo_warning "You are about to delete the Mt Wilson user accounts."
-  prompt_yes_no CONFIRM_ERASE_DATA "Do you want to continue?"
-  if [ "${CONFIRM_ERASE_DATA}" == "yes" ]; then
-   if [ -d /var/opt/intel/management-console/users ]; then
-     for i in `ls -1 /var/opt/intel/management-console/users`; do
-      usr=`echo $i | sed -e s/.jks//g`
-      echo_warning "deleting $usr jks file"
-      rm  /var/opt/intel/management-console/users/$i;
-     done
-     echo_warning "Mt Wilson user accounts deleted."
-   else
-     echo_warning "No Mt Wilson user accounts to delete."
-   fi
+# called by installer to automatically configure the server for localhost integration,
+# if the customer has enabled this option
+# arguments:   currently supports just one optional argument, IP address or hostname, to enable as trusted IN ADDITION TO 127.0.0.1
+mtwilson_localhost_integration() {
+  local iplist;
+  if [ -n "$1" ]; then
+    iplist="127.0.0.1,$1"
+  else
+    iplist="127.0.0.1"
   fi
+  update_property_in_file mtwilson.api.trust /etc/intel/cloudsecurity/management-service.properties "$iplist"
+  update_property_in_file mtwilson.ssl.required /etc/intel/cloudsecurity/management-service.properties "false"
 }
+
 
 setup() {
   java_detect; java_env_report > ${env_dir}/java
@@ -190,6 +173,7 @@ setup_env() {
     echo "postgres=$psql"
   fi
   echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
+  echo "DATABASE_VENDOR=$DATABASE_VENDOR"
   if using_glassfish; then
     glassfish_detect > /dev/null
     echo "GLASSFISH_HOME=$GLASSFISH_HOME"
@@ -265,6 +249,9 @@ case "$1" in
         java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
         java_env_report
         ;;
+  localhost-integration)
+        mtwilson_localhost_integration $@
+        ;;
   api)
         shift
         call_apiclient $@
@@ -294,7 +281,12 @@ case "$1" in
         all_status
         ;;
   erase-data)
-        erase_data_with_user_confirmation
+        call_setupcommand EraseHostRegistrationData
+        call_setupcommand EraseWhitelistData
+        call_setupcommand EraseLogs
+        ;;
+  erase-users)
+        call_setupcommand EraseUserAccounts
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi

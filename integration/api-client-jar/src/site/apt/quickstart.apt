@@ -7,30 +7,30 @@
 
 Background
 
- You can easily integrate with Mt Wilson using the provided API for Java and 
- for .NET. The API package is a single file that you link to your project. The
- Java API also includes a command line utility.
+    You can easily integrate with Mt Wilson using the provided API for Java and 
+for .NET. The API package is a single file that you link to your project. The
+Java API also includes a command line utility.
 
- Before you can make any API calls into Mt Wilson, you need to obtain access.
- This guide will show you how to register with Mt Wilson and how to make API
- calls after your registration is approved. 
+    Before you can make any API calls into Mt Wilson, you need to obtain access.
+This guide will show you how to register with Mt Wilson and how to make API
+calls after your registration is approved. 
 
- <NOTE: Registration is a premium feature. Users of Mt Wilson core can skip
- the registration step and proceed directly to using non-authenticated API's.>
+    <NOTE: Registration is a premium feature. Users of Mt Wilson core can skip
+the registration step and proceed directly to using non-authenticated API's.>
 
- Each section of this guide contains sample code for Java, .NET, and Linux
- shell environments.
+    Each section of this guide contains sample code for Java, .NET, and Linux
+shell environments.
 
- Refer to the Configuration Guide for details on all the possible options
- supported by the API, and to the full API Documentation for details on
- all the available methods.
+    Refer to the Configuration Guide for details on all the possible options
+supported by the API, and to the full API Documentation for details on
+all the available methods.
 
 Registration
 
- The following code will create a keystore "test1.jks" in your home directory.
- The keystore contains an RSA keypair that is used to authenticate your API
- calls to Mt Wilson. It also contains the Mt Wilson SSL certificate and SAML
- signing certificate, which are downloaded from the server.
+    The following code will create a keystore "test1.jks" in your home directory.
+The keystore contains an RSA keypair that is used to authenticate your API
+calls to Mt Wilson. It also contains the Mt Wilson SSL certificate and SAML
+signing certificate, which are downloaded from the server.
 
 * Java
 
@@ -59,21 +59,21 @@ java -jar mtwilson-api.jar \
 
 Using the API
 
- After your registration is approved, you can use the API to access all the
- features Mt Wilson provides such as maintaining a whitelist, adding hosts,
- and obtaining a trust assertion on one or more hosts.
+    After your registration is approved, you can use the API to access all the
+features Mt Wilson provides such as maintaining a whitelist, adding hosts,
+and obtaining a trust assertion on one or more hosts.
 
- To use the API, you need to create an ApiClient object configured with
- your credentials and your Mt Wilson server, then use it to send requests
- to the Mt Wilson server.
+    To use the API, you need to create an ApiClient object configured with
+your credentials and your Mt Wilson server, then use it to send requests
+to the Mt Wilson server.
 
- Notice that the variables directory, username, password, and servers are 
- the same as what you used during registration.
+    Notice that the variables directory, username, password, and servers are 
+the same as what you used during registration.
 
 * Java
 
- All Java examples in this guide assume that you have created an ApiClient object called
- "api". You can use the sample code below to create this object.
+    All Java examples in this guide assume that you have created an ApiClient object called
+"api". You can use the sample code below to create this object.
 
 +---
 File directory = new File(System.getProperty("user.home", "."));
@@ -85,19 +85,19 @@ ApiClient api = KeystoreUtil.clientForUserInDirectory(directory, username, passw
 
 * .NET
 
- All .NET examples in this guide assume that you have created an ApiClient object called
- "api". You can use the sample code below to create this object.
+    All .NET examples in this guide assume that you have created an ApiClient object called
+"api". You can use the sample code below to create this object.
 
 * Linux Shell
 
- All command line examples in this guide assume that you provide parameters
- to configure the client as shown here. They are omitted from the other examples
- for brevity but you need to include them in each command. It may be convenient
- to write a wrapper around it to supply the configuration each time.
+    All command line examples in this guide assume that you provide parameters
+to configure the client as shown here. They are omitted from the other examples
+for brevity but you need to include them in each command. It may be convenient
+to write a wrapper around it to supply the configuration each time.
 
- In this example, the term "command" should be replaced with the API you want
- to call and the term "options..." should be replaced with options specific
- to that command, if any.
+    In this example, the term "command" should be replaced with the API you want
+to call and the term "options..." should be replaced with options specific
+to that command, if any.
 
 +---
 java -jar mtwilson-api.jar \
@@ -109,8 +109,8 @@ java -jar mtwilson-api.jar \
   command options...
 +---
 
- Here is an example of a wrapper for Linux operating systems, which will be
- referred to as "mtwilson-api" in the following examples.
+    Here is an example of a wrapper for Linux operating systems, which will be
+referred to as "mtwilson-api" in the following examples.
 
 +---
 #!/bin/sh
@@ -125,9 +125,9 @@ java -jar mtwilson-api.jar \
 
 Trust Assertions in SAML
 
- If you already have hosts registered with Mt Wilson, you can request a trust
- assertion in SAML format using "getSamlForHost". You can verify the signature
- on the assertion and get easy access to the details using "verifyTrustAssertion".
+    If you already have hosts registered with Mt Wilson, you can request a trust
+assertion in SAML format using "getSamlForHost". You can verify the signature
+on the assertion and get easy access to the details using "verifyTrustAssertion".
 
 * Java
 
@@ -147,13 +147,13 @@ for(String attr : trust.getAttributeNames()) {
 
 * Linux Shell
 
- You can obtain and save the SAML assertion:
+    You can obtain and save the SAML assertion:
 
 +---
 mtwilson-api getSamlForHost 192.168.1.100 > 192.168.1.100.saml
 +---
 
- And you can verify a saved SAML assertion:
+    And you can verify a saved SAML assertion:
 
 +---
 mtwilson-api verifyTrustAssertion < 192.168.1.100.saml

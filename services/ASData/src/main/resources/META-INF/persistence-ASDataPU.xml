@@ -7,6 +7,7 @@
     <class>com.intel.mtwilson.as.data.TblModuleManifest</class>
     <class>com.intel.mtwilson.as.data.TblPcrManifest</class>
     <class>com.intel.mtwilson.as.data.TblRequestQueue</class>
+    <class>com.intel.mtwilson.as.data.MwRequestLog</class>
     <class>com.intel.mtwilson.as.data.TblTaLog</class>
     <class>com.intel.mtwilson.as.data.TblLocationPcr</class>
     <class>com.intel.mtwilson.as.data.TblOs</class>
@@ -31,5 +32,6 @@
     -->
     <class>com.intel.mtwilson.as.data.TblModuleManifestLog</class>
     <class>com.intel.mtwilson.as.data.MwMleSource</class>
+    <class>com.intel.mtwilson.as.data.MwApiClientHttpBasic</class>    
   </persistence-unit>
 </persistence>

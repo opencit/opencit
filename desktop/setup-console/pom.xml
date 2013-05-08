@@ -8,7 +8,7 @@
     <parent>
 		<groupId>com.intel.mtwilson.desktop</groupId>
 		<artifactId>mtwilson-desktop</artifactId>
-		<version>1.2-SNAPSHOOT</version>
+		<version>1.2-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -138,6 +138,11 @@
 		<version>3.1</version>
 	</dependency>
 
+	<dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>my</artifactId>
+		<version>${project.version}</version>
+	</dependency>
                 
 	<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
@@ -151,7 +156,7 @@
 	</dependency>  
 	<dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>vmware-util-jar</artifactId>
+		<artifactId>trust-util-jar</artifactId>
 		<version>${project.version}</version>
 	</dependency>
         
@@ -173,6 +178,12 @@
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>api-client</artifactId>
+	    <version>${project.version}</version>
+	    <type>jar</type>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>my</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>

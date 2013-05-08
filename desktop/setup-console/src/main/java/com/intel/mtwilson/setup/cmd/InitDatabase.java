@@ -41,6 +41,12 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * Bug #509 create java program to handle database updates and ensure that 
  * old updates (already executed) are not executed again
  * 
+ * Added -n (dry run) option on request from the SAM team: provide a way to determine if the
+ * installer is compatible with the database; in other words, can the installer use the existing
+ * database or does it know how to upgrade it as necessary. This is only true if the changelog
+ * in the database is a subset of what is in the installer - in this case return a dry run success. 
+ * If the database has any entries that are not in the installer, return a dry run failure.
+ * 
  * TODO: List each .sql file that is supposed to be run (index them by changelog date), check for
  * current state of database before running scripts (via the mw_changelog table) so we know
  * which scripts to run based on what has already been noted in the mw_changelog.
@@ -55,7 +61,8 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  */
 public class InitDatabase implements Command {
     private SetupContext ctx = null;
-
+    private String databaseVendor = null;
+    
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
@@ -71,11 +78,13 @@ public class InitDatabase implements Command {
     public void execute(String[] args) throws SetupException {
         // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
         if( args.length < 1 ) {
-            throw new SetupException("Usage: InitializeMysqlDatabase mysql|postgres");
+            throw new SetupException("Usage: InitializeMysqlDatabase mysql|postgres [--check]");
         }
         
+        databaseVendor = args[0];
+        
         try {
-            initDatabase(args[0]);
+            initDatabase();
         }
         catch(Exception e) {
             throw new SetupException("Cannot setup database: "+e.toString(), e);
@@ -95,7 +104,7 @@ public class InitDatabase implements Command {
         }
     }
     private String vendor = null;
-    private void initDatabase(String databaseVendor) throws SetupException, IOException, SQLException {
+    private void initDatabase() throws SetupException, IOException, SQLException {
         vendor = databaseVendor;
         Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
         
@@ -103,9 +112,9 @@ public class InitDatabase implements Command {
         DataSource ds = getDataSource();
         Connection c = ds.getConnection();  // username and password should already be set in the datasource
         List<ChangelogEntry> changelog = getChangelog(c);
-        HashMap<Long,String> presentChanges = new HashMap<Long,String>(); // what is already in the database according to the changelog
+        HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
         for(ChangelogEntry entry : changelog) {
-            presentChanges.put(Long.valueOf(entry.id), entry.applied_at);
+            presentChanges.put(Long.valueOf(entry.id), entry);
         }
         
         HashSet<Long> changesToApply = new HashSet<Long>(sql.keySet());
@@ -113,8 +122,27 @@ public class InitDatabase implements Command {
         
         if( changesToApply.isEmpty() ) {
             System.out.println("No database updates available");
+            
+            // At this point we know the database has every schema change that we have - but, does it have any that we don't?  In other words, is the database schema newer than what we know in this installer?
+            if( options.getBoolean("check") ) {
+                HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
+                unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
+                if( !unknownChanges.isEmpty() ) {
+                    // Database has new schema changes we dont' know about
+                    System.out.println("WARNING: Database schema is newer than this version of Mt Wilson");
+                    ArrayList<Long> unknownChangesInOrder = new ArrayList<Long>(unknownChanges);
+                    Collections.sort(unknownChangesInOrder);
+                    for(Long unknownChangeId : unknownChangesInOrder) {
+                        ChangelogEntry entry = presentChanges.get(unknownChangeId);
+                        System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                    }
+                }
+            }
+            
             return;
         }
+        
+        // At this point we know we have some updates to the databaseschema. 
         
         ArrayList<Long> changesToApplyInOrder = new ArrayList<Long>(changesToApply);
         Collections.sort(changesToApplyInOrder);

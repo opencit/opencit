@@ -3,9 +3,10 @@
  */
 package com.intel.mountwilson.controller;
 
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
@@ -16,7 +17,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 public class DemoPortalViewController extends MultiActionController {
 	
 	// variable declaration used for Logging.  
-	private static final Logger logger = Logger.getLogger(DemoPortalViewController.class.getName());
+	private static final Logger logger = LoggerFactory.getLogger(DemoPortalViewController.class.getName());
 	
 	//This method will return home page for TrustDashBoard.
 	public ModelAndView getDashBoardPage(HttpServletRequest req,HttpServletResponse res) {

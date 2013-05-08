@@ -4,27 +4,6 @@
 package com.intel.mountwilson.controller;
 
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.intel.mountwilson.Service.IManagementConsoleServices;
@@ -36,12 +15,32 @@ import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.datatypes.*;
-import java.math.BigInteger;
+import com.intel.mtwilson.datatypes.HostConfigData;
+import com.intel.mtwilson.datatypes.HostVMMType;
+import com.intel.mtwilson.datatypes.HostWhiteListTarget;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.lang.reflect.Type;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import org.apache.commons.codec.binary.Base64;
+import java.util.regex.Pattern;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 /**
  * @author yuvrajsx
  *
@@ -53,85 +52,86 @@ public class ManagementConsoleDataController extends MultiActionController{
         Logger log = LoggerFactory.getLogger(getClass().getName());
 	private IManagementConsoleServices services;
 	
-	/**
-	 * @param HttpServletRequest
-	 * @param HttpServletResponse
-	 * @return
-	 */
-	public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
-		req.getSession().removeAttribute("hostVO");
-		ModelAndView responseView = new ModelAndView(new JSONView());
-		List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
-		
-		// Check that we have a file upload request
-		boolean isRequestMultiType = ServletFileUpload.isMultipartContent(req);
-		System.out.println(isRequestMultiType);
-		if (!isRequestMultiType) {
-			responseView.addObject("result",false);
-			log.error("File Upload is not MultiPart. Please check you File Uploaded Plugin.");
-			return responseView;
-		}
-		
-		// Create a factory for disk-based file items
-		FileItemFactory factory = new DiskFileItemFactory();
+        /**
+         * @param HttpServletRequest
+         * @param HttpServletResponse
+         * @return
+         */
+        public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req, HttpServletResponse res) {
+                log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
+                req.getSession().removeAttribute("hostVO");
+                ModelAndView responseView = new ModelAndView(new JSONView());
+                List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
 
-		// Create a new file upload handler
-		ServletFileUpload upload = new ServletFileUpload(factory);
+                // Check that we have a file upload request
+                boolean isRequestMultiType = ServletFileUpload.isMultipartContent(req);
+                System.out.println(isRequestMultiType);
+                if (!isRequestMultiType) {
+                        responseView.addObject("result", false);
+                        log.error("File Upload is not MultiPart. Please check you File Uploaded Plugin.");
+                        return responseView;
+                }
 
-		// Parse the request
-		try {
-			@SuppressWarnings("unchecked")
-			List<FileItem>  items = upload.parseRequest(req);
-			
-			// Process the uploaded items
-			Iterator<FileItem> iter = items.iterator();
-			while (iter.hasNext()) {
-			    FileItem item = (FileItem) iter.next();
+                // Create a factory for disk-based file items
+                FileItemFactory factory = new DiskFileItemFactory();
 
-			    if (!item.isFormField()) {
-			    	String lines[] = item.getString().split("\\r?\\n");
-			    	for (String values : lines) {
-			    		//Split host name and host value with Separator e.g. |
-			    		if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) > 0) {
-			    			String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
-				    		if (val.length > 1) {
-				    			HostDetails host = new HostDetails();
-				    			host.setHostName(val[0]);
-				    			String portOrVCenter = val[1];
-	                                                
-				    			if (portOrVCenter.toLowerCase().contains(HelperConstant.HINT_FOR_VCENTERSTRING.toLowerCase())) {
-                                        host.setvCenterString(portOrVCenter);
-                                        host.setVmWareType(true);
-							}else {
-                                    host.setHostPortNo(portOrVCenter);
-                                    host.setVmWareType(false);
-							}
-				    			listOfRegisterHost.add(host);
-						}
-					}else {
-						responseView.addObject("result",false);
-						log.info("Please Provide Host name and port/vCenterString seperated by | symbol.");
-						return responseView;
-					}
-				}
-			    }
-			}
-		log.info("Uploaded Content :: "+listOfRegisterHost.toString());
-		req.getSession().setAttribute("hostVO",listOfRegisterHost);
-		responseView.addObject("result",listOfRegisterHost.size() > 0 ? true : false);
-			
-		} catch (FileUploadException e) {
-			e.printStackTrace();
-			responseView.addObject("result",false);
-		}catch (Exception e) {
-			e.printStackTrace();
-			responseView.addObject("result",false);
-		}
-                
-		log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
-		return responseView;		
-	}
+                // Create a new file upload handler
+                ServletFileUpload upload = new ServletFileUpload(factory);
+
+                // Parse the request
+                try {
+                        @SuppressWarnings("unchecked")
+                        List<FileItem> items = upload.parseRequest(req);
+
+                        // Process the uploaded items
+                        Iterator<FileItem> iter = items.iterator();
+                        while (iter.hasNext()) {
+                                FileItem item = (FileItem) iter.next();
+
+                                if (!item.isFormField()) {
+                                        String lines[] = item.getString().split("\\r?\\n");
+                                        for (String values : lines) {
+                                                //Split host name and host value with Separator e.g. |
+                                                if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) > 0) {
+                                                        String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
+                                                        if (val.length == 3) {
+                                                                HostDetails host = new HostDetails();
+                                                                host.setHostType(val[0]);
+                                                                host.setHostName(val[1]);
+                                                                String portOrVCenter = val[2];
+
+                                                                if (portOrVCenter.toLowerCase().contains(HelperConstant.HINT_FOR_VCENTERSTRING.toLowerCase())) {
+                                                                        host.setvCenterString(portOrVCenter);
+                                                                        host.setVmWareType(true);
+                                                                } else {
+                                                                        host.setHostPortNo(portOrVCenter);
+                                                                        host.setVmWareType(false);
+                                                                }
+                                                                listOfRegisterHost.add(host);
+                                                        }
+                                                } else {
+                                                        responseView.addObject("result", false);
+                                                        log.info("Please provide the host details in the format specified.");
+                                                        return responseView;
+                                                }
+                                        }
+                                }
+                        }
+                        log.info("Uploaded Content :: " + listOfRegisterHost.toString());
+                        req.getSession().setAttribute("hostVO", listOfRegisterHost);
+                        responseView.addObject("result", listOfRegisterHost.size() > 0 ? true : false);
+
+                } catch (FileUploadException e) {
+                        e.printStackTrace();
+                        responseView.addObject("result", false);
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        responseView.addObject("result", false);
+                }
+
+                log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
+                return responseView;
+        }
 	
 	/**
 	 * This Method will use to Retrieve the pre-fetched Host to be Register, uploaded with flat file.
@@ -153,7 +153,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 				result = true;
 			} catch (Exception ex) {
 				log.error("Exception Checking for already register host. " + ex.getMessage());
-				responseView.addObject("message","Exception Checking for already register host. " + ex.getMessage());
+				responseView.addObject("message","Exception Checking for already register host. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
 				responseView.addObject("result",result);
 				return responseView;
 			}
@@ -205,7 +205,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			result = true;            
 		} catch (Exception ex) {
 			log.error("Exception during whitelist configuration. " + ex.getMessage());
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
 			responseView.addObject("result",result);
 			return responseView;
 		}
@@ -319,7 +319,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			
 		} catch (Exception ex) {
 			log.error("Exception during whitelist configuration. " + ex.getMessage());
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(ex.getMessage()));
 			responseView.addObject("result",result);
 			return responseView;
 		}
@@ -329,46 +329,52 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	}
 	
-	/**
-	 * This Method is use to get Retrive Host data from VMWare Cluster. using Cluster name and vCenterConnection String.
-	 * 
-	 * @param req
-	 * @param res
-	 * @return
-	 */
-	public ModelAndView retriveHostFromCluster(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.retriveHostFromCluster >>");
-		ModelAndView responseView = new ModelAndView(new JSONView());
-		String clusterName;
-		String vCenterConnection ;
-                
-		try {
-			clusterName = req.getParameter("clusterName");
-			vCenterConnection = req.getParameter("vCentertConnection");
-		} catch (Exception e) {
-			log.error("Error while getting Input parameter from request."+e.getMessage());
-			responseView.addObject("message","Input Parameters are NUll.");
-			responseView.addObject("result",false);
-			return responseView;
-		}
-		
-		try {
-			List<HostDetails> listOfRegisterHost = services.getHostEntryFromVMWareCluster(clusterName,vCenterConnection);
-			if (listOfRegisterHost != null) {
-				responseView = getListofRegisteredHost(listOfRegisterHost,responseView,getApiClientService(req, ApiClient.class));
-			}
-		} catch (Exception e) {
-            log.error("Error while getting data from VMware vCeneter. " + e.getMessage());
-            responseView.addObject("message",e.getMessage());
-            responseView.addObject("result",false);
-            return responseView;
-		}
+        /**
+         * This Method is use to get Retrive Host data from VMWare Cluster.
+         * using Cluster name and vCenterConnection String.
+         *
+         * @param req
+         * @param res
+         * @return
+         */
+        public ModelAndView retriveHostFromCluster(HttpServletRequest req, HttpServletResponse res) {
+                log.info("ManagementConsoleDataController.retriveHostFromCluster >>");
+                ModelAndView responseView = new ModelAndView(new JSONView());
+                String clusterName;
+                String vCenterConnection;
 
-                responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.retriveHostFromCluster <<<");
-		return responseView;
-		
-	}
+                try {
+                        clusterName = req.getParameter("clusterName");
+                        vCenterConnection = req.getParameter("vCentertConnection");
+                } catch (Exception e) {
+                        log.error("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
+                        responseView.addObject("message", "Input Parameters are NUll.");
+                        responseView.addObject("result", false);
+                        return responseView;
+                }
+
+                try {
+                        List<HostDetails> listOfRegisterHost = services.getHostEntryFromVMWareCluster(clusterName, vCenterConnection);
+                        for(HostDetails hostDetail : listOfRegisterHost) {
+                                // Since we have retrieved the hosts from the VMware cluster, we just mark all the hosts as of VMware type
+                                hostDetail.setHostType("vmware");
+                        }
+                        
+                        if (listOfRegisterHost != null) {
+                                responseView = getListofRegisteredHost(listOfRegisterHost, responseView, getApiClientService(req, ApiClient.class));
+                        }
+                } catch (Exception e) {
+                        log.error("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
+                        responseView.addObject("message", e.getMessage());
+                        responseView.addObject("result", false);
+                        return responseView;
+                }
+
+                responseView.addObject("result", true);
+                log.info("ManagementConsoleDataController.retriveHostFromCluster <<<");
+                return responseView;
+
+        }
 	
 	/**
 	 * This Method is use to register multiple host on server..
@@ -400,7 +406,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         responseView.addObject("hostVOs", services.registerHosts(apiObj, hostRecords));
                                 } catch (Exception e) {
                                         log.error("Error while registering the hosts. " + e.getMessage());
-                                        responseView.addObject("message",e.getMessage());
+                                        responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
                                         responseView.addObject("result",false);
                                         return responseView;
                                 }
@@ -430,7 +436,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		} catch (Exception e) {
                     
 			log.error("Error While getting pending requests. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -456,7 +462,7 @@ public class ManagementConsoleDataController extends MultiActionController{
             responseView.addObject("approvedRequests", services.getApiClients(apiObj, ApiClientListType.ALL));
 		} catch (Exception e) {
 			log.error("Error While getting all approved requests. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -486,7 +492,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		} catch (Exception e) {
                     
 			log.error("Error While getting all expiring API clients. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -513,7 +519,7 @@ public class ManagementConsoleDataController extends MultiActionController{
             responseView.addObject("apiClientList", services.getApiClients(apiObj, ApiClientListType.DELETE));
 		} catch (Exception e) {
 			log.error("Error while getting Api clients. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 		}
@@ -546,7 +552,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}catch (Exception ex) {
 			log.error(ex.getMessage());
 			responseView.addObject("result", false);
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
 		}
 		
@@ -581,7 +587,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                     
 			log.error(ex.getMessage());
 			responseView.addObject("result", result);
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
                         
 		}
@@ -616,7 +622,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                     
 			log.error(ex.getMessage());
 			responseView.addObject("result", result);
-			responseView.addObject("message", ex.getMessage());
+			responseView.addObject("message", StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
                         
 		}
@@ -759,7 +765,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		} catch (Exception e) {
 			log.error("Error While getting ca status. "+e.getMessage());
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
@@ -811,7 +817,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		} catch (Exception e) {
 			log.error("Error While getting Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 			
@@ -848,7 +854,7 @@ public class ManagementConsoleDataController extends MultiActionController{
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Root CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  
 		}
@@ -879,7 +885,7 @@ public class ManagementConsoleDataController extends MultiActionController{
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  
 		}
@@ -910,7 +916,7 @@ public class ManagementConsoleDataController extends MultiActionController{
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  
 		}
@@ -947,7 +953,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		} catch (Exception e) {
 			log.error("Error While getting Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",e.getMessage());
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 			

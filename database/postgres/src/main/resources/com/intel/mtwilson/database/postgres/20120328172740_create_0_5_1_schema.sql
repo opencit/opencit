@@ -77,7 +77,7 @@ CREATE TABLE tbl_hosts (
   Port integer NOT NULL,
   Description varchar(100) DEFAULT NULL,
   AddOn_Connection_Info varchar(80) DEFAULT NULL,
-  AIK_Certificate text,
+  AIK_Certificate text DEFAULT NULL,
   Email varchar(45) DEFAULT NULL,
   Error_Code integer DEFAULT NULL,
   Error_Description varchar(100) DEFAULT NULL,

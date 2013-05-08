@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.helper;
 
 import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.business.ReportsBO;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
@@ -13,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * @deprecated we have decided to use a plugin model based on OSGi in a future release instead of this draft factory
  * @author jbuhacoff
  */
 public class ASComponentFactory {
@@ -45,7 +46,12 @@ public class ASComponentFactory {
         }
         String dataEncryptionKeyString = ASConfig.getConfiguration().getString("mtwilson.as.dek");
         if( dataEncryptionKeyString != null ) {
-            bean.setDataEncryptionKey(Base64.decodeBase64(dataEncryptionKeyString));
+            try {
+                bean.setDataEncryptionKey(Base64.decodeBase64(dataEncryptionKeyString));
+            }
+            catch(Exception e) {
+                throw new ASException(e);
+            }
         }
         return bean;
     }

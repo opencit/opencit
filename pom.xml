@@ -3,7 +3,7 @@
 
   <groupId>com.intel.mtwilson</groupId>
   <artifactId>mtwilson</artifactId>
-  <version>1.2-SNAPSHOOT</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Mt Wilson</name>
@@ -17,7 +17,7 @@
       cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
       used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
       assess and provide an Assurance that the security components on the devices are 
-      protecting the assets executing or stored on the devices. 
+      protecting the assets executing or stored on the devices.   
   </description>
   
   <modules>
@@ -69,7 +69,7 @@
       </repository>
       <site>
           <id>cloudsecurity-website</id>
-          <url>dav:http://cloudsecurityportal.intel.com/mtwilson/0.5.4</url>
+          <url>dav:http://cloudsecurityportal.intel.com/mtwilson/${project.version}</url>
           <name>Documentation Site in Cloud Security Portal at Intel</name>
       </site>
   </distributionManagement>
@@ -166,6 +166,21 @@
 			</execution>
 		    </executions>
 		</plugin>
+        
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+        
             
                 <!-- begin website plugin -->
     <plugin>
@@ -199,6 +214,29 @@
                 <configuration>
                   <show>public</show>
                   <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
+                    <includeDependencySources>true</includeDependencySources>
+                    <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
+                    <dependencySourceIncludes>
+                        <!--
+                        <dependencySourceInclude>com.intel.mtwilson.integration:*</dependencySourceInclude>
+                        <dependencySourceInclude>com.intel.mtwilson.common:*</dependencySourceInclude>
+                        -->
+                        <dependencySourceInclude>com.intel.mtwilson.integration:api-datatypes</dependencySourceInclude>
+                        <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
+                    </dependencySourceIncludes>
+                        <!-- the following dependencies are always excluded because source is not available and that causes the javadoc plugin to fail -->
+                    <dependencySourceExcludes>
+                        <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
+                        <dependencySourceExclude>org.apache.santuario:xmlsec</dependencySourceExclude>
+                        <dependencySourceExclude>org.jacorb:jacorb</dependencySourceExclude>
+                        <dependencySourceExclude>org.jacorb:jacorb-idl</dependencySourceExclude>
+                        <dependencySourceExclude>avalon-framework:avalon-framework</dependencySourceExclude>
+                        <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
+                        <dependencySourceExclude>classworlds:classworlds</dependencySourceExclude>
+                        <dependencySourceExclude>velocity:velocity</dependencySourceExclude>
+                        <dependencySourceExclude>commons-logging:commons-logging-api</dependencySourceExclude>
+                        <dependencySourceExcldue>logkit:logkit</dependencySourceExcldue>
+                    </dependencySourceExcludes>
                 </configuration>
                 <!--
                 <dependencies>

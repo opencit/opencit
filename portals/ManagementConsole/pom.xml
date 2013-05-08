@@ -8,13 +8,13 @@
     <parent>
         <groupId>com.intel.mtwilson.portals</groupId>
         <artifactId>mtwilson-portals</artifactId>
-        <version>1.2-SNAPSHOOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
 
     <dependencies>
       <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>vmware-util-jar</artifactId>
+            <artifactId>trust-util-jar</artifactId>
             <version>${project.version}</version>         
       </dependency>        
       <dependency>

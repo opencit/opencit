@@ -5,10 +5,8 @@
 package com.intel.mtwilson.tls;
 
 import com.intel.mtwilson.crypto.NopX509TrustManager;
-import com.intel.mtwilson.datatypes.InternetAddress;
+import com.intel.mtwilson.model.InternetAddress;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.List;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.SSLSocketFactory;

@@ -35,15 +35,15 @@ public class OSClientServiceImpl implements IOSClientService {
 	 */
 	@Override
 	public List<OSDataVO> getAllOS(WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("OSClientServiceImpl.getAllOS >>");
-		List<OSDataVO> list = null;
-       try {
-    	   list =ConverterUtil.getListToOSDataVO(apiClientServices.listAllOS());
-       }catch (Exception e) {
-			throw ConnectionUtil.handleException(e);
-      }
-       log.info("OSClientServiceImpl.getAllOS <<");
-	return list;
+                                log.info("OSClientServiceImpl.getAllOS >>");
+                                List<OSDataVO> list = null;
+                                try {
+                                        list =ConverterUtil.getListToOSDataVO(apiClientServices.listAllOS());
+                                }catch (Exception e) {
+                                                        throw ConnectionUtil.handleException(e);
+                                }
+                                log.info("OSClientServiceImpl.getAllOS <<");
+                                return list;
 	}
 
 	

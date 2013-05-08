@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.intel.mtwilson</groupId>
 		<artifactId>mtwilson</artifactId>
-		<version>1.2-SNAPSHOOT</version>
+		<version>1.2-SNAPSHOT</version>
 	</parent>
   
   <modules>
@@ -20,6 +20,7 @@
     <module>api-datatypes-jar</module>
     <module>api-client-jar</module>
     <module>api-client-jar-jdk15</module>
+    <module>my</module>
   </modules>
 
 

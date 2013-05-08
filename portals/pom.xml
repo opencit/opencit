@@ -10,13 +10,14 @@
 	<parent>
 		<groupId>com.intel.mtwilson</groupId>
 		<artifactId>mtwilson</artifactId>
-		<version>1.2-SNAPSHOOT</version>
+		<version>1.2-SNAPSHOT</version>
 	</parent>
   
   <modules>
         <module>ManagementConsole</module>
 	<module>WhiteListPortal</module>
 	<module>TrustDashBoard</module>
+	<module>mtwilson-portal</module>
   </modules>
 
 </project>

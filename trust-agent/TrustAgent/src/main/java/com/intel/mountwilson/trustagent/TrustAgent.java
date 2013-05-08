@@ -71,7 +71,7 @@ public class TrustAgent {
         } else if (xmlInput.contains("host_info")) {
             return hostInfo(xmlInput);
         } else {
-            return generateErrorResponse(ErrorCode.BAD_REQUEST);
+            return generateErrorResponse(ErrorCode.UNSUPPORTED_OPERATION, xmlInput);
         }
     }
 
@@ -86,6 +86,8 @@ public class TrustAgent {
 
             new CreateNonceFileCmd(context).execute();
             new ReadIdentityCmd(context).execute();
+            // Get the module information
+            new GenerateModulesCmd(context).execute();
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
 

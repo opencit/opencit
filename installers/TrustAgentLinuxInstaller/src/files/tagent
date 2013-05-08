@@ -216,6 +216,9 @@ setup_interactive_install() {
         fi
         # This is the place to do any setup while trust agent is not running
         /usr/local/bin/pcakey
+		if [ $? == 1 ]; then
+			exit 1
+		fi
         # After setup is done, start the trust agent:
 	checkServiceStatus
 	if [ -z "$TRUST_AGENT_RUNNING" ]; then
@@ -261,6 +264,14 @@ function main {
         $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd
         startService
         ;;
+  newid)
+        java_detect > /dev/null
+        if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
+        stopService
+        pcakey
+        $java -cp $CLASSPATH $javaVMArgs -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.CreateIdentityCmd
+        startService
+        ;;
   tpmstatus)
         tpm_owned=`cat /sys/class/misc/tpm0/device/owned`
         tpm_enabled=`cat /sys/class/misc/tpm0/device/enabled`
@@ -288,6 +299,14 @@ function main {
           rm -rf "${package_dir}"
         fi
 	rm /usr/local/bin/${script_name}
+        rm -fr /etc/monit/monitrc
+	echo "Stopping Monit service..."
+	service monit stop &> /dev/null
+	if [ -f /etc/monit/monitrc ]; then
+	 #remove monit config so when it starts back up it has nothing to monitor
+	 # idealy here we should be uninstalling instead
+	 rm -fr /etc/monit/monitrc
+        fi
         ;;
       *)
          echo "Usage: $0 {start|stop|restart|status|setup}"

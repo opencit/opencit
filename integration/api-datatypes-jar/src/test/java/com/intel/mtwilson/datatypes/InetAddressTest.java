@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.model.IPv6Address;
+import com.intel.mtwilson.model.IPv4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import org.junit.Test;

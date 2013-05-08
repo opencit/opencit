@@ -1,29 +1,21 @@
 
 package com.intel.mtwilson.as.rest;
 
-import com.intel.mtwilson.as.business.ReportsBO;
 import com.intel.mountwilson.as.common.ValidationException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
+import com.intel.mtwilson.as.business.ReportsBO;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.AttestationReport;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.security.annotations.*;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ejb.Stateless;
-
-import javax.ws.rs.Path;
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-
-import java.util.List;
-import java.util.ArrayList;
-//import javax.annotation.security.RolesAllowed;
-import com.intel.mtwilson.security.annotations.*;
-import javax.ws.rs.*;
 
 /**
  * REST Web Service

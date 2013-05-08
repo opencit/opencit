@@ -74,5 +74,16 @@ public class DataValidationTest {
         TxtHost hostAddObj = new TxtHost(hostObj);
         assertTrue(hostAddObj.getHostName() != null);
     }
+    
+    @Test
+    public void testSplit() {
+        String text = "KVM|";
+        String[] parts = text.split("[|]");
+        System.out.println(parts.length);
+        
+        String text2 = "KVM";
+        String[] parts2 = text2.split("[|]");
+        System.out.println(parts2.length);
+    }
 
 }

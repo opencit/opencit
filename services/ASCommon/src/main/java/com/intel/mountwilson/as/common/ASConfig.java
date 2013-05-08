@@ -32,10 +32,6 @@ public class ASConfig extends ConfigBase{
     @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
-        defaults.setProperty("mountwilson.as.db.password", "");
-        defaults.setProperty("mountwilson.as.db.user", "root");
-        defaults.setProperty("mountwilson.as.db.host", "localhost");
-        defaults.setProperty("mountwilson.as.db.schema", "mw_as");
         defaults.setProperty("com.intel.mountwilson.as.home", "C:/work/aikverifyhome"); // used by TAHelper
         defaults.setProperty("com.intel.mountwilson.as.openssl.cmd", "openssl.bat"); // used by TAHelper
         defaults.setProperty("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe"); // used by TAHelper
@@ -54,10 +50,11 @@ public class ASConfig extends ConfigBase{
         
         super("attestation-service.properties");
     }
+    public ASConfig(Properties custom) {
+        super("attestation-service.properties", custom);
+    }
 
-    
-    public static Properties getJpaProperties() {
-        Configuration config = getConfiguration();
+    public static Properties getJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.as.db.driver", 
@@ -82,7 +79,11 @@ public class ASConfig extends ConfigBase{
                 config.getString("mountwilson.as.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
-        return prop;    }
+        return prop;
+    }
+    public static Properties getJpaProperties() {
+        return getJpaProperties(getConfiguration());
+    }
     
     public static int getTrustAgentTimeOutinMilliSecs(){
         // Return timeout in milliseconds
