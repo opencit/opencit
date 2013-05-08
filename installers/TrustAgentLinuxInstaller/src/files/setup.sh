@@ -258,7 +258,8 @@ if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
 fi
-cat >> /etc/monit/monitrc << EOF
+if ! grep -q tagent /etc/monit/monitrc; then 
+	cat >> /etc/monit/monitrc << EOF
 ## Monit Process Monitor Config File
 ## Configuration options and examples can be found here:
 ## http://mmonit.com/monit/documentation/monit.html
@@ -270,6 +271,7 @@ check process tagent with pidfile /var/run/tagent.pid
         start program = "/etc/init.d/tagent start" with timeout 30 seconds
         stop program  = "/etc/init.d/tagent stop
 EOF
+fi
 
 chmod 700 /etc/monit/monitrc
 service monit restart
