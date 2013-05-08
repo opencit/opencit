@@ -286,3 +286,10 @@ mw_java_detect() {
         java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
         java_env_report
 }
+
+# Usage: mtwilson java-install <filename> 
+# Example: mtwilson java-install jdk-6u29-linux-x64.bin
+# If Java is already installed the install will be skipped.
+mw_java_install_file() {
+  java_install $@
+}

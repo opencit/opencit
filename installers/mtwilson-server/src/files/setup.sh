@@ -6,7 +6,9 @@
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+chmod +x MtWilsonLinuxUtil.bin
+./MtWilsonLinuxUtil.bin
+if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
 
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi

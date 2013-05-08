@@ -50,13 +50,6 @@
               <outputDirectory>${makeself.directory}</outputDirectory>
 		<resources>
 		    <resource>
-			<directory>src/etc</directory>
-			<includes>
-			    <include>version</include>
-			</includes>
-			<filtering>true</filtering>
-		    </resource>
-		    <resource>
 			<directory>src/files</directory>
 			<includes>
 			    <include>**/*</include>
@@ -118,10 +111,6 @@
                             <artifact>
                                 <file>${project.build.directory}/${project.artifactId}-${project.version}.bin</file>
                                 <type>bin</type>
-                            </artifact>
-                            <artifact>
-                                <file>${makeself.directory}/functions</file>
-                                <type>sh</type>
                             </artifact>
                         </artifacts>
                     </configuration>

@@ -11,10 +11,12 @@ export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+chmod +x MtWilsonLinuxUtil.bin
+./MtWilsonLinuxUtil.bin
+if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
 
 # SCRIPT EXECUTION
-java_install $JAVA_PACKAGE
+mtwilson java-install-file $JAVA_PACKAGE
 
 if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   echo "Replacing java.security file, existing file will be backed up"
