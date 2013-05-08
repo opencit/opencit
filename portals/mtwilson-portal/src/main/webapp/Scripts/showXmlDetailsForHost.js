@@ -1,6 +1,6 @@
 $(function(){ 
     var hostname ="hostName="+$('#hostName').text();
-    sendJSONAjaxRequest(false, "/TrustDashBoard/getData/trustVerificationDetailsXML.html", hostname, showXMLData, null);    
+    sendJSONAjaxRequest(false, "/mtwilson-portal/getData/trustVerificationDetailsXML.html", hostname, showXMLData, null);    
 });
 
 function showXMLData(response){

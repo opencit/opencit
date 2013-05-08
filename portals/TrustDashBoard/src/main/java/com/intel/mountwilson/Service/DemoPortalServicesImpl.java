@@ -182,7 +182,10 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			log.info("Getting trust Information for Host "+hostName);
 			
 			//call to REST Services to get Host Trust status.
-			xmloutput = apiClientServices.getSamlForHost(new Hostname(hostName));
+			//xmloutput = apiClientServices.getSamlForHost(new Hostname(hostName));
+                                    // Calling into the different API where in we can specify to force the attestation. Since this function would be called on the click of the REFRESH button
+                                    // we need to force the complete attestation.                                    
+                                    xmloutput = apiClientServices.getSamlForHost(new Hostname(hostName), true);
 			TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, xmloutput);
 			if( trustAssertion.isValid() ) {
                                                 	             hostVO = ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetailsEntityVO, trustAssertion,null);
@@ -454,6 +457,10 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		try {
 			//get vCenterString from Services for host.
 			vCenterString = service.queryForHosts(hostName).get(0).AddOn_Connection_String;
+                                    //  Since the connection String would have the prefix of vmware
+                                    ConnectionString connString = new ConnectionString(vCenterString);
+                                    vCenterString = connString.getAddOnConnectionString();
+            
 		} catch (Exception e) {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
 			 throw ConnectionUtil.handleException(e);
