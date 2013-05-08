@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <configuration>
     
-    <property name="USER_HOME" value="/usr/share/glassfish3/glassfish/domains/domain1/logs" />
+    <property name="USER_HOME" value="/var/log" />
             
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
         <encoder>
@@ -21,7 +21,7 @@
             <onMismatch>DENY</onMismatch>
             <onMatch>ACCEPT</onMatch>
         </filter>
-        <file>${USER_HOME}/mw_syslog.log</file>        
+        <file>${USER_HOME}/mtwilson.log</file>        
         <encoder>
             <pattern>%date %level [%thread] %logger{10} %msg%n</pattern>
         </encoder>

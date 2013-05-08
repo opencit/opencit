@@ -64,6 +64,8 @@ public interface AttestationService {
      * @throws SignatureException 
      */
     String getSamlForHost(Hostname hostname) throws IOException, ApiException, SignatureException;
+    
+    String getSamlForHost(Hostname hostname, boolean forceVerify) throws IOException, ApiException, SignatureException;
 
     List<HostTrustXmlResponse> getSamlForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) throws IOException, ApiException, SignatureException;
 

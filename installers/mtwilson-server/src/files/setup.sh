@@ -12,7 +12,7 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
-              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal]
+              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ] monit
  INSTALL_PKGS="mysql java glassfish privacyca SERVICES PORTALS"
 fi
 
@@ -31,9 +31,10 @@ done
 
 # if a group is defined, then make all sub parts == true
 if [ ! -z "$portals" ]; then
-  eval mangportal="true"
-  eval trustportal="true"
-  eval wlmportal="true"
+  #eval mangportal="true"
+  #eval trustportal="true"
+  #eval wlmportal="true"
+  eval mtwportal="true"
 fi
 # if a group is defined, then make all sub parts == true
 if [ ! -z "$services" ]; then
@@ -96,6 +97,92 @@ attestation_service=`find_installer AttestationService`
 whitelist_portal=`find_installer WhiteListPortal`
 management_console=`find_installer ManagementConsole`
 trust_dashboard=`find_installer TrustDashBoard`
+mtw_portal=`find_installer mtwilson-portal-installer`
+glassfish_installer=`find_installer glassfish`
+
+# Verify the installers we need are present before we start installing
+if [ ! -z "$java" ]; then
+	if [ ! -e $java_installer ]; then
+		echo_warning "Java installer marked for install but missing. Please verify you are using the right installer";
+		exit -1;
+	fi
+fi
+
+if [ ! -e $mtwilson_util ]; then
+	echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
+	exit -1;
+fi
+
+if [ ! -z "$glassfish" ]; then
+	if [ ! -e $glassfish_installer ]; then
+		echo_warning "Mt Wilson Utils installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$privacyca" ]; then
+	if [ ! -e $privacyca_service ]; then
+	echo_warning "Privacy CA installer marked for install but missing. Please verify you are using the right installer"
+	exit -1;
+	fi
+fi
+
+if [ ! -z "$attservice" ]; then
+	if [ ! -e $attestation_service ]; then
+		echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+
+if [ ! -z "$mangservice" ]; then
+	if [ ! -e $management_service ]; then
+		echo_warning "Management Service installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$wlmservice" ]; then
+	if [ ! -e $whitelist_service ]; then
+		echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$mangportal" ]; then
+	if [ ! -e $management_console ]; then
+		echo_warning "Management Console installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$wlmportal" ]; then
+	if [ ! -e $whitelist_portal ]; then
+		echo_warning "WhiteList Portal installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$trustportal" ]; then
+	if [ ! -e $trust_dashboard ]; then
+		echo_warning "Trust DashBoard installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$mtwportal" ]; then
+	if [ ! -e $mtw_portal ]; then
+		echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
+
+if [ ! -z "$monit" ]; then
+	if [ ! -e $monit_installer ]; then
+		echo_warning "Monit installer marked for install but missing. Please verify you are using the right installer"
+		exit -1;
+	fi
+fi
 
 # Make sure the nodeploy flag is cleared, so service setup commands will deploy their .war files
 export MTWILSON_SETUP_NODEPLOY=
@@ -205,7 +292,7 @@ fi
 if using_glassfish; then
   if [ ! -z "$glassfish" ]; then
   # glassfish install here
-	glassfish_installer=`find_installer glassfish`
+	
 	echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
 	./$glassfish_installer  >> $INSTALL_LOG_FILE
 	echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
@@ -252,7 +339,7 @@ fi
 
 if [ ! -z "$attservice" ]; then
 	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-	./$attestation_service
+	./$attestation_service 
 	echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
@@ -268,28 +355,36 @@ if [ ! -z "$wlmservice" ]; then
 	echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if [ ! -z "$mangportal" ]; then
-	echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
-	./$management_console
-	echo "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
-fi
+#if [ ! -z "$mangportal" ]; then
+#	echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
+#	./$management_console
+#	echo "Management Console installed..." | tee -a  $INSTALL_LOG_FILE
+#fi
 
-if [ ! -z "$wlmportal" ]; then
-	echo "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
-	./$whitelist_portal >> $INSTALL_LOG_FILE
-	echo "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
-fi
+#if [ ! -z "$wlmportal" ]; then
+#	echo "Installing WhiteList Portal..." | tee -a  $INSTALL_LOG_FILE
+#	./$whitelist_portal >> $INSTALL_LOG_FILE
+#	echo "WhiteList Portal installed..." | tee -a  $INSTALL_LOG_FILE
+#fi
 
-if [ ! -z "$trustportal" ]; then
-	echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
-	./$trust_dashboard >> $INSTALL_LOG_FILE
-	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
+#if [ ! -z "$trustportal" ]; then
+#	echo "Installing Trust Dashboard..." | tee -a  $INSTALL_LOG_FILE
+#	./$trust_dashboard >> $INSTALL_LOG_FILE
+#	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
+#fi
+
+if [ ! -z "$mtwportal" ]; then
+	echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
+	./$mtw_portal 
+	echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
 #TODO-stdale monitrc needs to be customized depending on what is installed
-echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
-./$monit_installer  >> $INSTALL_LOG_FILE
-echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
+if [ ! -z "$monit" ]; then
+	echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
+	./$monit_installer  >> $INSTALL_LOG_FILE 
+	echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
+fi
 
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"

@@ -74,12 +74,12 @@ public class HostBO extends BaseBO {
         private byte[] dataEncryptionKey = null;
         private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
         private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
-        private TblHostsJpaController hostController;
+        private TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
         private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
         private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
         private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
 
-        private static class Aes128DataCipher implements DataCipher {
+        public static class Aes128DataCipher implements DataCipher {
             private Logger log = LoggerFactory.getLogger(getClass());
             private Aes128 cipher;
             public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
@@ -117,12 +117,16 @@ public class HostBO extends BaseBO {
                     }      
         }
         
-    public HostBO() {
+    public HostBO()  {
+        
         super();
+       
+   
     }
     
     public HostBO(PersistenceManager pm) {
         super(pm);
+       
     }
         
 	public HostResponse addHost(TxtHost host) {
@@ -131,6 +135,7 @@ public class HostBO extends BaseBO {
             
           TblMle  biosMleId = findBiosMleForHost(host); 
           TblMle  vmmMleId = findVmmMleForHost(host); 
+          Vendor hostType;
 
                 log.error("HOST BO ADD HOST STARTING");
 
@@ -147,6 +152,11 @@ public class HostBO extends BaseBO {
                         tblHosts.setTlsKeystore(null);
                         System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        
+                        // Using the connection string we will find out the type of the host. This information would be used later
+                        ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
+                        hostType = hostConnString.getVendor();
+                        
                         if (host.getHostName() != null) {
                                 tblHosts.setName(host.getHostName().toString());
                         }
@@ -189,7 +199,11 @@ public class HostBO extends BaseBO {
 //                        hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 
 //                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
-                        List<TblHostSpecificManifest>   tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest);
+                        
+                        
+                        // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
+                        List<TblHostSpecificManifest>   tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                        
                         // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
 //                            pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
                         
@@ -285,6 +299,7 @@ public class HostBO extends BaseBO {
 
         public HostResponse updateHost(TxtHost host) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
+                Vendor hostType;
                 try {
 
                         TblHosts tblHosts = getHostByName(host.getHostName()); // datatype.Hostname
@@ -302,6 +317,11 @@ public class HostBO extends BaseBO {
                         }
 //                        tblHosts.setTlsKeystore(null);  // XXX new code to test: it's either null or it's already set so don't change it // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        
+                        // Using the connection string we will find out the type of the host. This information would be used later
+                        ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
+                        hostType = hostConnString.getVendor();
+                        
                         if (host.getHostName() != null) {
                                 tblHosts.setName(host.getHostName().toString());
                         }
@@ -334,7 +354,7 @@ public class HostBO extends BaseBO {
 //                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 //                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
 
-                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest);
+                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                             }
 
                         log.info("Saving Host in database");
@@ -558,16 +578,17 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, Exception {
 		
 		
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-		log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-
+		System.err.println("saveHostInDatabase with tls policy "+ tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 		
-		tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+
+		String cs = host.getAddOn_Connection_String();
+        System.err.println("saveHostInDatabase cs = " + cs);
+		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                 // tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
@@ -576,13 +597,15 @@ public class HostBO extends BaseBO {
                 tblHosts.setEmail(host.getEmail());
                 if (host.getIPAddress() != null) {
                         tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                }else{
+                        tblHosts.setIPAddress(host.getHostName().toString());
                 }
                 tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
 
                 if (host.getPort() != null) {
                         tblHosts.setPort(host.getPort());
                 }
-		tblHosts.setVmmMleId(vmmMleId);
+                tblHosts.setVmmMleId(vmmMleId);
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
@@ -592,8 +615,17 @@ public class HostBO extends BaseBO {
 
                 // create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
-                hostController.create(tblHosts);
-
+                log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
+                          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
+                          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName());
+                try {
+                    hostController.create(tblHosts);
+                }catch (Exception e){
+                    log.error("SaveHostInDatabase caught ex!");
+                    e.printStackTrace();
+                    log.error("end print stack trace");
+                    throw e;
+                }
                 log.info("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
 
@@ -609,43 +641,56 @@ public class HostBO extends BaseBO {
      * and instaed of returning a "host-specific manifest" it should return a list of policies with module-included
      * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
     */
-	private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest) {
-		List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
+    private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) {
+        List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
-		if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19) ) {
+        // Using the connection string, let us first find out the host type
+        
+        if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
-			
-				for (Measurement m : pcrEventLog.getEventLog()) {
-				
-					log.info("getHostSpecificManifest creating host specific manifest for event '"
-							+ m.getInfo().get("EventName") +"' field '"+m.getLabel()+"' component '"+m.getInfo().get("ComponentName") +"'");
 
-					
-                    // we are looking for the "commandline" event specifically  (vmware)
-                    if(  m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails") ) { 
+            for (Measurement m : pcrEventLog.getEventLog()) {
+
+                log.debug("Checking host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                        "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                
+                // we are looking for the "commandline" event specifically  (vmware)
+                if (hostType.equals(Vendor.VMWARE) && m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails")) {
+
+                    log.info("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+
+                    TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
+                            m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
+
+                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                    tblHostSpecificManifests.add(tblHostSpecificManifest);
+                } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
                     
-                        TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
-                                m.getInfo().get("ComponentName"),
-                                m.getInfo().get("EventName"));
+                    log.info("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                    
+                    // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
+                    TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
+                            m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                        TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                        tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                        tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                        tblHostSpecificManifests.add(tblHostSpecificManifest);
-                    }
-					
-				}				
-				
-				return tblHostSpecificManifests;
-			
-		} else {
-			log.warn("No PCR 19 found.SO not saving host specific manifest.");
-			return tblHostSpecificManifests;
-		}
+                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                    tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                }
+            }
 
-
+            return tblHostSpecificManifests;
+            
+        } else {
+            log.warn("No PCR 19 found.SO not saving host specific manifest.");
+            return tblHostSpecificManifests;
         }
+    }
 
         public HostResponse isHostRegistered(String hostnameOrAddress) {
                 try {
@@ -663,8 +708,6 @@ public class HostBO extends BaseBO {
                         return new HostResponse(ErrorCode.AS_HOST_NOT_FOUND);
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }
@@ -753,8 +796,6 @@ public class HostBO extends BaseBO {
                         return txtHostList;
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }

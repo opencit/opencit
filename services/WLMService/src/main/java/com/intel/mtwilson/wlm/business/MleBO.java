@@ -59,14 +59,20 @@ public class MleBO extends BaseBO {
         }
 
                         // This function will be used to validate the white list values. We have seen in some cases where in we would get -1. 
-                        private boolean isWhiteListValid(String componentName, String whiteList) {
+                        private boolean isWhiteListValid(String whiteList) {
                             if( whiteList == null || whiteList.trim().isEmpty() ) { return true; } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
                                 if (whiteList.matches(hexadecimalRegEx)) {
                                         return true;
                                 } else {
-                                        log.error("White list '{0}' specified for '{1}' is not valid.", whiteList, componentName);
-                                        throw new ASException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
+                                    return false;
                                 }
+                        }
+                        
+                        private void validateWhitelistValue(String componentName, String whiteList) {
+                            if(!isWhiteListValid(whiteList)) {
+                                log.error("White list '{0}' specified for '{1}' is not valid.", whiteList, componentName);
+                                throw new ASException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
+                            }
                         }
         
                         // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
@@ -103,6 +109,7 @@ public class MleBO extends BaseBO {
                                                 throw new ASException(ErrorCode.WS_MLE_ALREADY_EXISTS, mleData.getName());
                                         }
 
+                                        // XXX TODO this needs to be refactored into vendor-specific checks
                                         if(mleData.getName().toUpperCase().contains("ESX")){
                                                 String version = getUpperCase(mleData.getVersion()).substring(0, 2);
                                                 if(!version.equals("51") && !version.equals("50")){
@@ -110,8 +117,15 @@ public class MleBO extends BaseBO {
                                                 }
                                         }
                                         tblMle = getTblMle(mleData);
+                                        
+                                        // before we create the MLE, check that the provided PCR values are valid -- if they aren't we abort
+                                        if( mleData.getManifestList() != null ) {
+                                            for(ManifestData pcrData : mleData.getManifestList()) {
+                                                validateWhitelistValue(pcrData.getName(), pcrData.getValue());
+                                            }
+                                        }
                                         mleJpaController.create(tblMle);
-
+                                        // now add the PCRs that were validated above
                                         addPcrManifest(tblMle, mleData.getManifestList());
 
                                 } catch (ASException ase) {
@@ -421,15 +435,15 @@ public class MleBO extends BaseBO {
 		if (mleManifests != null) {
 
 			for (ManifestData manifestData : mleManifests) {
+                try {
                 log.debug("add pcr manifest name: {}", manifestData.getName());
                 log.debug("add pcr manifest value: '{}'", manifestData.getValue());
                 
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(manifestData.getName());
                                                                                                 // Bug: 375. Need to ensure we are accepting only valid hex strings.
-                                                                                                if (isWhiteListValid(manifestData.getName(), manifestData.getValue())) {
+                                                                                                validateWhitelistValue(manifestData.getName(), manifestData.getValue()); // throws exception if invalid
                                                                                                         pcrManifest.setValue(manifestData.getValue());
-                                                                                                }  
                                                                                                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                                                                                                 /*
 				pcrManifest.setCreatedOn(today);
@@ -439,6 +453,11 @@ public class MleBO extends BaseBO {
                                                                                                 */
 				pcrManifest.setMleId(tblMle);
 				pcrManifestJpaController.create(pcrManifest);
+                }
+                catch(Exception e) {
+                    log.error("Cannot add PCR "+manifestData.getName()+" to MLE: "+e.toString());
+                    // XXX should we continue the loop to the next PCR, trying to add as many as we can?  or should we be checking all the PCR values early, and if any one of them is bad don't add ANY pcr's??
+                }
 			}
 		}
 
@@ -472,9 +491,8 @@ public class MleBO extends BaseBO {
 					log.info(String.format("Updating Pcr manifest value for mle %s  version %s pcr name %s",
                                                                                                                                         pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),  pcrManifest.getName()));
 					// Bug 375
-                                                                                                                        if (isWhiteListValid(pcrManifest.getName(), newPCRMap.get(pcrManifest.getName()))) {
+                                                                                                                        validateWhitelistValue(pcrManifest.getName(), newPCRMap.get(pcrManifest.getName())); // throws exception if invalid
                                                                                                                                 pcrManifest.setValue(newPCRMap.get(pcrManifest.getName()));
-                                                                                                                        } 
                                                                                                                         
                                                                                                                          // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
 					// pcrManifest.setUpdatedBy(getLoggedInUser());
@@ -493,9 +511,8 @@ public class MleBO extends BaseBO {
 				TblPcrManifest pcrManifest = new TblPcrManifest();
 				pcrManifest.setName(pcrName);
                                                                                                 // Bug 375
-                                                                                                if (isWhiteListValid(pcrName, newPCRMap.get(pcrName))) {
+                                                                                                validateWhitelistValue(pcrName, newPCRMap.get(pcrName)); // throws exception if invalid
                                                                                                         pcrManifest.setValue(newPCRMap.get(pcrName));
-                                                                                                }
                                                                                                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                                                                                                 /*
 				pcrManifest.setCreatedOn(today);
@@ -681,7 +698,7 @@ public class MleBO extends BaseBO {
                                     }
 
                                     // Now update the pcr in the database.
-                                    if (isWhiteListValid(pcrData.getPcrName(), pcrData.getPcrDigest()))
+                                    validateWhitelistValue(pcrData.getPcrName(), pcrData.getPcrDigest()); // throws exception if invalid
                                         tblPcr.setValue(pcrData.getPcrDigest());
                                     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                                     /*
@@ -761,6 +778,7 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
+            String fullComponentName = "";
             
             try {
 
@@ -788,9 +806,16 @@ public class MleBO extends BaseBO {
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
                     log.debug("addModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(
-                            tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
-                            moduleData.getEventName());
+
+                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                    if (moduleData.getEventName().contains("Vim25")) {
+                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                    } else {
+                        fullComponentName = moduleData.getComponentName();
+                    }
+                    
+                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                     if (tblModule != null) {
                         throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
@@ -813,11 +838,11 @@ public class MleBO extends BaseBO {
                 newModuleRecord.setMleId(tblMle);
                 newModuleRecord.setEventID(tblEvent);
                 newModuleRecord.setNameSpaceID(nsPackNS);
-                log.debug("MleBO addModuleWhiteList setComponentName {}", tblEvent.getFieldName() + "." + moduleData.getComponentName());
-                newModuleRecord.setComponentName(tblEvent.getFieldName() + "." + moduleData.getComponentName());
+                log.debug("MleBO addModuleWhiteList setComponentName {}", fullComponentName);
+                newModuleRecord.setComponentName(fullComponentName);
                 
                 // Bug 375: If the white list is not valid, then an exception would be thrown.
-                if (isWhiteListValid(moduleData.getComponentName(), moduleData.getDigestValue()))
+                validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
                         newModuleRecord.setDigestValue(moduleData.getDigestValue());
                 
                 newModuleRecord.setPackageName(moduleData.getPackageName());
@@ -857,7 +882,8 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
-
+            String fullComponentName = "";
+            
             try {
                 
                 try {
@@ -884,9 +910,16 @@ public class MleBO extends BaseBO {
                     validateNull("ComponentName", moduleData.getComponentName());
                     validateNull("EventName", moduleData.getEventName());
                     log.debug("updateModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(
-                            tblMle.getId(), tblEvent.getFieldName() + "." + moduleData.getComponentName(), 
-                            moduleData.getEventName());
+                   
+                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                    if (moduleData.getEventName().contains("Vim25")) {
+                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                    } else {
+                        fullComponentName = moduleData.getComponentName();
+                    }
+
+                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                 } catch (NoResultException nre){
                     throw new ASException(nre,ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());                    
@@ -895,7 +928,7 @@ public class MleBO extends BaseBO {
                 if(! packageNSJpaController.namespaceExists("Standard_Global_NS"))
                     throw new ASException(ErrorCode.WS_NAME_SPACE_DOES_NOT_EXIST);
                 
-                if (isWhiteListValid(moduleData.getComponentName(), moduleData.getDigestValue()))
+                validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
                          tblModule.setDigestValue(moduleData.getDigestValue());
                 
                 tblModule.setDescription(moduleData.getDescription());

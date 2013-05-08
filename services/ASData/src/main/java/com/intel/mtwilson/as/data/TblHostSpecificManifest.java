@@ -32,6 +32,7 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblHostSpecificManifest.findAll", query = "SELECT t FROM TblHostSpecificManifest t"),
     @NamedQuery(name = "TblHostSpecificManifest.findById", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.id = :id"),
     @NamedQuery(name = "TblHostSpecificManifest.findByHostID", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.hostID = :hostID"),
+    @NamedQuery(name = "TblHostSpecificManifest.findByModuleAndHostID", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.hostID = :hostID AND t.moduleManifestID.id = :Module_Manifest_ID"),
     @NamedQuery(name = "TblHostSpecificManifest.findByDigestValue", query = "SELECT t FROM TblHostSpecificManifest t WHERE t.digestValue = :digestValue")})
 public class TblHostSpecificManifest implements Serializable {
     private static final long serialVersionUID = 1L;

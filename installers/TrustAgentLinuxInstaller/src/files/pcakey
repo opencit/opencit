@@ -54,17 +54,30 @@ if [ -z "${PRIVACYCA_SERVER}" ]; then
   exit 1
 fi
 
+# Try to download the Privacy CA files using TLSv1, then SSLv3, then any protocol (SSLv2 with protocol negotiation allowed, which could still result in a more recent protocol selection)
 echo "Connecting to PCA..."
 zipfile=/tmp/clientfiles.zip
 touch $zipfile
 chmod 600 $zipfile
-wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
+wget --secure-protocol=TLSv1 --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
 if [[ -s $zipfile ]]; then
   unzip -o $zipfile -d /etc/intel/cloudsecurity
   rm $zipfile
 else
-  echo_failure "Unable to download Privacy CA files: try 'pcakey' again, check server address, username, and password"
-  exit 1
+  wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
+  if [[ -s $zipfile ]]; then
+    unzip -o $zipfile -d /etc/intel/cloudsecurity
+    rm $zipfile
+  else
+    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O $zipfile
+    if [[ -s $zipfile ]]; then
+      unzip -o $zipfile -d /etc/intel/cloudsecurity
+      rm $zipfile
+    else
+      echo_failure "Unable to download Privacy CA files: try 'pcakey' again, check server address, username, and password"
+      exit 1
+    fi
+  fi
 fi
 
 chmod 600 /etc/intel/cloudsecurity/hisprovisioner.properties
@@ -89,8 +102,16 @@ generate_ta_ssl() {
 }
 
 get_privacyca_ssl() {
-  openssl s_client -ssl3 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+  openssl s_client -tls1 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
   openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
+  if [ $? == 1 ]; then
+    openssl s_client -ssl3 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+    openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
+    if [ $? == 1 ]; then
+      openssl s_client -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+      openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
+    fi
+  fi
   if [ -f "${package_dir}/cert/privacyca.ssl.crt" ]; then rm ${package_dir}/cert/privacyca.ssl.txt; fi
   echo "Importing Privacy CA SSL Certificate into Trust Agent's Keystore..."
   local datestr=`date +%Y%m%d.%H%M`

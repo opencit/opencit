@@ -128,7 +128,7 @@ function fnUploadWhiteListConfigurationData() {
                             alert("Please enter a valid ip address and try again.");
                         }
 		}
-	}
+	
 	if (validation) {
 		var data = "registerHostVo="+$.toJSON(hostVo)+"&biosWLTagrget="+configurationSaved.biosWLTarget+"&vmmWLTarget="+configurationSaved.vmmWLTarget;
 		var config = new fnWhiteListConfig();
@@ -140,7 +140,7 @@ function fnUploadWhiteListConfigurationData() {
 		}else{
 			$('#mainLoadingDiv').prepend(disabledDiv);
 			sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
-			return false;
+			//return false;
 		}
 	}
 }

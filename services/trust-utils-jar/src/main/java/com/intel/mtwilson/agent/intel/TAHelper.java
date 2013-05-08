@@ -616,7 +616,8 @@ public class TAHelper {
     private static Measurement convertHostTpmEventLogEntryToMeasurement(int extendedToPcr, String moduleName, String moduleHash) {
         HashMap<String, String> info = new HashMap<String, String>();
         info.put("EventName", "OpenSource.EventName");  // For OpenSource since we do not have any events associated, we are creating a dummy one.
-        info.put("ComponentName", "OpenSource." + moduleName); // XXX TODO remove the "componentName." prefix because we are capturing this now in EventType
+        // Removing the prefix of "OpenSource" as it is being captured in the event type
+        info.put("ComponentName", moduleName); // XXX TODO remove the "componentName." prefix because we are capturing this now in EventType
         info.put("PackageName", "");
         info.put("PackageVendor", "");
         info.put("PackageVersion", "");

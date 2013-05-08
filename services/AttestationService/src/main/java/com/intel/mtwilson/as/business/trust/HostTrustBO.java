@@ -488,6 +488,9 @@ public class HostTrustBO extends BaseBO {
                             List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
                             Measurement found = null;
                             for(Measurement a : actualEntries) {
+                                // TODO SUDHIR: This below test is failing for open source since the label in the measurement is set to initrd, where as the pcrManifest is having OpenSource.initrd
+                                // Need to probably change the attestation generator itself.
+                                //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
                                 if( a.getLabel().equals(m.getLabel()) ) {
                                     found = a;
                                 }

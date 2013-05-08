@@ -8,9 +8,13 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -118,8 +122,18 @@ Pcr 23 = 0000000000000000000000000000000000000000
      */
     @Test
     public void getPcrManifestFromXen() throws IOException {
+        X509Certificate aikCertificate = agent.getAikCertificate();
         PcrManifest pcrManifest = agent.getPcrManifest();
         assertNotNull(pcrManifest);
+        
+        if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
+                   PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
+                   for (Measurement m : pcrEventLog.getEventLog()) {
+                       log.debug("Host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                               "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                   }
+        }
+        
         for(int i=0; i<24; i++) {
             Pcr pcr = pcrManifest.getPcr(i);
             log.debug("Pcr {} = {}", i, pcr.getValue().toString());
