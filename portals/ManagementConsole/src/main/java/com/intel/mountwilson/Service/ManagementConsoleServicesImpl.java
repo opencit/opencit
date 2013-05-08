@@ -15,6 +15,7 @@ import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -52,11 +53,11 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 // Bug 614: Using connection strings for all kinds of hosts.
                 ConnectionString connStr = null;
                 if (hostDetailsObj.getHostType().equalsIgnoreCase(Vendor.INTEL.toString())){
-                        connStr = new ConnectionString(Vendor.INTEL, hostDetailsObj.getHostName(), Integer.parseInt(hostDetailsObj.getHostPortNo()));
+                        connStr = ConnectionString.forIntel(hostDetailsObj.getHostName(), Integer.parseInt(hostDetailsObj.getHostPortNo()));
                 } else {
                         // we need to handle both the VMware and Citrix connection strings in the same way. Since the user
                         // will be providing the entire connection string, we do not need to create one similar to the Intel one.
-                        connStr = new ConnectionString(Vendor.valueOf(hostDetailsObj.getHostType().toUpperCase()), hostDetailsObj.getvCenterString());
+                        connStr = ConnectionString.forVendor(Vendor.valueOf(hostDetailsObj.getHostType().toUpperCase()), new URL(hostDetailsObj.getvCenterString()));
                 }
                 hostRecord.AddOn_Connection_String = connStr.getConnectionStringWithPrefix();
                 
@@ -384,11 +385,11 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         // Bug 614: Using connection strings for all kinds of hosts.
                         ConnectionString connStr = null;
                         if (hostRecord.getHostType().equalsIgnoreCase(Vendor.INTEL.toString())){
-                                connStr = new ConnectionString(Vendor.INTEL, hostRecord.getHostName(), Integer.parseInt(hostRecord.getHostPortNo()));
+                                connStr = ConnectionString.forIntel(hostRecord.getHostName(), Integer.parseInt(hostRecord.getHostPortNo()));
                         } else {
                                 // we need to handle both the VMware and Citrix connection strings in the same way. Since the user
                                 // will be providing the entire connection string, we do not need to create one similar to the Intel one.
-                                connStr = new ConnectionString(Vendor.valueOf(hostRecord.getHostType().toUpperCase()), hostRecord.getvCenterString());
+                                connStr = ConnectionString.forVendor(Vendor.valueOf(hostRecord.getHostType().toUpperCase()), new URL(hostRecord.getvCenterString()));
                         }
                         hostTxtObj.AddOn_Connection_String = connStr.getConnectionStringWithPrefix();
                         /*if (hostRecord.isVmWareType()) {
