@@ -107,6 +107,7 @@ function fnUploadWhiteListConfigurationData() {
                      }
 			
 		}else { // TA
+                                                   whiteListOpenSource_Host
                         if(fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
                       
                             var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
