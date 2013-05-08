@@ -6,7 +6,8 @@ var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
 
-var isVMWare = false;
+// 0 = TA,  1 == vmware, 2 == citrix
+var isVMWare = 0;
 
 var JSON = JSON || {};
 JSON.stringify = JSON.stringify || function (obj) {
@@ -242,23 +243,40 @@ function fnSessionExpireLoginAgain() {
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 
-/*Method to change display div while selection of drop down for VMWare or Opensources*/
 function fnChangehostType(element,isWhiteListConfigPage) {
-	var type = "false";
+    //alert($('#MainContent_ddlHOSTType').attr('value') );
+	var type = "";
+    // This code loops through all the options in the host type
+    // drop down box and finds the one thats selected and saves
+    // its name in type variable
+    // choices are VMware, Citrix, KVM|Xen
 	$(element).find('option').each(function() {
 		if ($(this).attr('selected') == 'selected') {
-			type = $(this).attr('type');
+			type = $(this).attr('value');
 		}
 	});
-	if (type == 'false') {
-		isVMWare= false;
-		$('#openSourcesHostType').show();
-		$('#vmwareHostType').hide();
-	}else {
-		isVMWare = true;
+
+	if (type.indexOf("VMware") != -1) {       
+		isVMWare = 1;
+        
 		$('#openSourcesHostType').hide();
+        $('#citrixHostType').hide();
 		$('#vmwareHostType').show();
-	}
+	}else if(type.indexOf("Citrix") != -1) {
+        isVMWare = 2;
+       
+        $('#openSourcesHostType').hide();
+        $('#vmwareHostType').hide();
+		$('#citrixHostType').show();
+        
+	}else{
+        isVMWare= 0;
+        
+        $('#vmwareHostType').hide();
+        $('#citrixHostType').hide();
+		$('#openSourcesHostType').show();
+		
+    }
 	
 	if (isWhiteListConfigPage == true) {
 		$('#whiteListMessage').html('');
@@ -266,7 +284,6 @@ function fnChangehostType(element,isWhiteListConfigPage) {
 		changeRequiredPCR();
 		fnDisableOrEnableUploadButton(false);
 	}
-	
 }
 
 //function to test Validation for given input ID for empty values.
