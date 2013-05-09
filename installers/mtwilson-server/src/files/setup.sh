@@ -63,28 +63,28 @@ rm -rf /opt/intel/cloudsecurity/setup-console/*.jar
 cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 
 # ask about mysql vs postgres
-echo "Supported database systems are:"
-echo "postgres"
-echo "mysql"
-prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
-if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
-  DATABASE_VENDOR=postgres
-  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
-fi
+#echo "Supported database systems are:"
+#echo "postgres"
+#echo "mysql"
+#prompt_with_default DATABASE_VENDOR "Database System:" ${DATABASE_VENDOR:-mysql}
+#if [ "$DATABASE_VENDOR" != "postgres" ] && [ "$DATABASE_VENDOR" != "mysql" ]; then
+#  DATABASE_VENDOR=postgres
+#  echo_warning "Unrecognized selection. Using $DATABASE_VENDOR"
+#fi
 
 #ask about glassfish vs tomcat
-echo "Supported web servers are:"
-echo "tomcat"
-echo "glassfish"
-prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
-if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
-  WEBSERVER_VENDOR=tomcat
-  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
-fi
+#echo "Supported web servers are:"
+#echo "tomcat"
+#echo "glassfish"
+#prompt_with_default WEBSERVER_VENDOR "Web App Server:" ${WEBSERVER_VENDOR:-glassfish}
+#if [ "$WEBSERVER_VENDOR" != "tomcat" ] && [ "$WEBSERVER_VENDOR" != "glassfish" ]; then
+#  WEBSERVER_VENDOR=tomcat
+#  echo_warning "Unrecognized selection. Using $WEBSERVER_VENDOR"
+#fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
 if using_glassfish; then
@@ -301,18 +301,46 @@ if using_mysql; then
 elif using_postgres; then
  if [ ! -z "$postgres" ]; then
   # postgres server install 
-  echo_warning "Relying on an existing Postgres installation"
-  # postgres server end
+  postgres_userinput_connection_properties
+
+  export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+  echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+  chmod 0600 $HOME/.pgpass
+  
+  # Install Postgres server (if user selected localhost)
+  if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
+    echo "Installing postgres server..."
+    # when we install postgres server on ubuntu it prompts us for root pw
+    # we preset it so we can send all output to the log
+    aptget_detect; dpkg_detect; yum_detect;
+    if [[ -n "$aptget" ]]; then
+     echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
+    fi 
+    postgres_server_install 
+    postgres_restart & >> $INSTALL_LOG_FILE
+    sleep 5
+    # postgres server end
+  else 
+    # postgres client install here
+    echo "Installing postgres client..."
+    postgres_install
+    postgres_restart & >> $INSTALL_LOG_FILE
+    sleep 5
+    echo "Installation of postgres client complete..." 
+    # postgres clinet install end
+  fi
  else
   echo_warning "Relying on an existing Postgres installation"
  fi 
- # postgres client install here
- 
- # postgres clinet install end
  
  if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
-	echo_warning "Init of postgres db currently not supported"
+	postgres_create_database
+
+    export is_postgres_available postgres_connection_error
+    if [ -z "$is_postgres_available" ]; then 
+      echo_warning "Run 'mtwilson setup' after a database is available"; 
+    fi
 	# postgress db init end
   else
     echo_warning "Skipping init of database"
