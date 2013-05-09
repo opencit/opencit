@@ -67,6 +67,8 @@ public enum ErrorCode {
     AS_TRUST_AGENT_INVALID_RESPONSE(1025, "Invalid response from host: %s. See the Trust Agent log located at /var/logs/tagent.log for more details."),
     AS_INTEL_TXT_NOT_ENABLED(1026, "Host does not have Intel TXT enabled: %s"),
     AS_INVALID_AIK_CERTIFICATE(1027, "Cannot validate AIK for '%s' against known Privacy CAs"),
+    AS_TPM_NOT_SUPPORTED(1014,"Host '%s' does not support TXT."),
+
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),
