@@ -613,7 +613,7 @@ public class ConnectionString {
                 return parts[1].substring(2); // value after the "u="  for URL like https://vcenter:443/sdk;h=hostname;u=username;p=password or https://vcenter:443/sdk;p=password;u=username;h=hostname
             }
             if( parts[2].startsWith("u=") ) {
-                return parts[1].substring(2); // value after the "u="  for URL like https://vcenter:443/sdk;h=hostname;p=password;u=username
+                return parts[2].substring(2); // value after the "u="  for URL like https://vcenter:443/sdk;h=hostname;p=password;u=username
             }
             return parts[0]; // the first value after semicolon for URL like https://vcenter:443/sdk;username;password;hostname
         }
@@ -662,7 +662,7 @@ public class ConnectionString {
                 return parts[1].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;h=hostname;p=password;u=username or https://vcenter:443/sdk;u=username;p=password;h=hostname
             }
             if( parts[2].startsWith("p=") ) {
-                return parts[1].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;h=hostname;u=username;p=password
+                return parts[2].substring(2); // value after the "p="  for URL like https://vcenter:443/sdk;h=hostname;u=username;p=password
             }
             return parts[1]; // the second value after semicolon for URL like https://vcenter:443/sdk;username;password;hostname
         }
@@ -709,7 +709,7 @@ public class ConnectionString {
                 return parts[1].substring(2); // value after the "h="  for URL like https://vcenter:443/sdk;p=password;h=hostname;u=username or https://vcenter:443/sdk;u=username;h=hostname;p=password
             }
             if( parts[2].startsWith("h=") ) {
-                return parts[1].substring(2); // value after the "h="  for URL like https://vcenter:443/sdk;p=password;u=username;h=hostname
+                return parts[2].substring(2); // value after the "h="  for URL like https://vcenter:443/sdk;p=password;u=username;h=hostname
             }
             return parts[2]; // the third value after semicolon for URL like https://vcenter:443/sdk;username;password;hostname
         }

@@ -24,16 +24,23 @@ import com.intel.mtwilson.validation.ObjectModel;
  * @author jbuhacoff
  */
 public class InternetAddress extends ObjectModel {
-    private String input;
+    private String input = null;
     private transient Format format = null;
     private transient Model formatObject = null;
     
     public InternetAddress(String text) {
-        input = text.trim();
+        if( text != null ) {
+            input = text.trim();
+        }
     }
     
     @Override
     protected void validate() {
+        if( input == null ) {
+            fault("Missing hostname or IP address");
+            return;
+        }
+        
         IPv6Address ipv6 = new IPv6Address(input);
         if( ipv6.isValid() ) { 
             format = Format.IPv6; 
