@@ -33,7 +33,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
 
         private static final Logger logger = LoggerFactory.getLogger(ManagementConsoleServicesImpl.class.getName());
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
-	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("ASDataPU"));
+	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU")); // fix bug 677,  MwPortalUser is in MSDataPU, not in ASDataPU
         private ApiClientX509JpaController apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));
         /**
         * 
