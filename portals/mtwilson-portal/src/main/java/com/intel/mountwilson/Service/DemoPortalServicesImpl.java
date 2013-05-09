@@ -283,16 +283,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		try {
                                     ConnectionString connStr = null;
                                     if (dataVO.getvCenterDetails() == null && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
-                                        System.err.println("saveNewHostData == intel");
+                                       
                                         connStr = new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
-                                        System.err.println("saveNewHostData == vmware");
                                         connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails());
                                     } else if (dataVO.getVmmName().toLowerCase().contains("xenserver")) {
-                                        System.err.println("saveNewHostData == citrix");
                                         connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:",""));
                                     } else {
-                                        System.err.println("saveNewHostData == intel");
                                         connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails());
                                     }
                                     dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());

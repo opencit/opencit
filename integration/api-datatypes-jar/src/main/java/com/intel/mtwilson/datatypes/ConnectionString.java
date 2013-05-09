@@ -59,8 +59,9 @@ public class ConnectionString {
             
             // If there is any issue with the URL format other than the username & password, then the following statement would throw
             // an exception.
-            URL hostURL = new URL(url);
-            
+            if(vendor != Vendor.INTEL){
+                URL hostURL = new URL(url);
+            }
             if (vendor != Vendor.INTEL) {
                 // Now we need to verify if we have both the user name and password specified
                 String[] userParams = addOnConnectionString.substring(addOnConnectionString.indexOf(urlDelimiter) + urlDelimiter.length()).split(";");
