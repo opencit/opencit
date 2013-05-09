@@ -111,24 +111,6 @@
     <!-- UI Portals -->
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>WhiteListPortal</artifactId>
-      <version>${project.version}</version>
-      <type>bin</type>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>ManagementConsole</artifactId>
-      <version>${project.version}</version>
-      <type>bin</type>
-    </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>TrustDashBoard</artifactId>
-      <version>${project.version}</version>
-      <type>bin</type>
-    </dependency>
-	<dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>mtwilson-portal-installer</artifactId>
       <version>${project.version}</version>
       <type>bin</type>
