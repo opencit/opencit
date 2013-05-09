@@ -6,6 +6,7 @@ package com.intel.mtwilson;
 
 import com.intel.mtwilson.api.ClientFactory;
 import com.intel.mtwilson.api.MtWilson;
+import com.intel.mtwilson.io.FileResource;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -41,19 +42,11 @@ public class My {
     public static MtWilson client() throws MalformedURLException, Exception {
         if( client == null ) {
             log.info("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
-            /*
-            client = KeystoreUtil.clientForUserInDirectory(
-                configuration().getKeystoreDir(), 
+            client = ClientFactory.clientForUserInResource(
+                new FileResource(configuration().getKeystoreDir()), 
                 configuration().getKeystoreUsername(),
                 configuration().getKeystorePassword(),
                 configuration().getMtWilsonURL());
-                */
-            client = ClientFactory.loadClient(
-                configuration().getMtWilsonURL(),
-                configuration().getKeystoreDir(), 
-                configuration().getKeystoreUsername(),
-                configuration().getKeystorePassword()
-                    );
         }
         return client;
     }
