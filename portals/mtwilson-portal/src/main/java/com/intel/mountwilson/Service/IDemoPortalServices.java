@@ -13,7 +13,7 @@ import com.intel.mountwilson.datamodel.HostReportTypeVO;
 import com.intel.mountwilson.datamodel.HostVmMappingVO;
 import com.intel.mountwilson.datamodel.TrustedHostVO;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.AttestationService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.PcrLogReport;
 
 /**

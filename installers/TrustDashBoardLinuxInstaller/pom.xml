@@ -17,18 +17,33 @@
     <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
   
-  <dependencies>
-    <dependency>
-      <groupId>com.intel.mtwilson.portals</groupId>
-      <artifactId>TrustDashBoard</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>	
+  <build>
+      <resources>
+          <resource>
+              <directory>src/files</directory>
+          </resource>
+      </resources>
+  </build>
+ 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
+          <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>MtWilsonLinuxUtil</artifactId>
       <version>${project.version}</version>
       <type>sh</type>
+    </dependency>	
+    <dependency>
+      <groupId>com.intel.mtwilson.portals</groupId>
+      <artifactId>TrustDashBoard</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
     </dependency>	
     <!--
     <dependency>
@@ -45,24 +60,9 @@
       <classifier>linux-x64</classifier>
     </dependency>	
     -->
-  </dependencies>
-
-  <build>
-      <resources>
-          <resource>
-              <directory>src/files</directory>
-          </resource>
-      </resources>
-  </build>
- 
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
-  <build>
+              
+          </dependencies>
+          <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
      <plugin>

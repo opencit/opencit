@@ -4,7 +4,7 @@
  */
 package test.io;
 
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.model.Hostname;
 import java.io.IOException;

@@ -8,7 +8,7 @@ import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ManagementService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;

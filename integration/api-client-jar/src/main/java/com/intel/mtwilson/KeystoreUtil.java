@@ -23,6 +23,7 @@ import java.security.cert.X509Certificate;
 import java.util.Properties;
 import java.util.Set;
 import javax.net.ssl.TrustManager;
+import com.intel.mtwilson.api.*;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;

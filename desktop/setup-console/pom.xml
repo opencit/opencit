@@ -142,6 +142,7 @@
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>my</artifactId>
 		<version>${project.version}</version>
+        <scope>test</scope>
 	</dependency>
                 
 	<dependency>
@@ -185,13 +186,7 @@
 	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>my</artifactId>
-	    <version>${project.version}</version>
-	    <type>jar</type>
-	</dependency>
-	<dependency>
-	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>

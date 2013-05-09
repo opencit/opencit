@@ -262,7 +262,7 @@
               <sources>
                   <source>
                       <groupId>com.intel.mtwilson.integration</groupId>
-                      <artifactId>api-datatypes</artifactId>
+                      <artifactId>mtwilson-api</artifactId>
                       <version>${project.version}</version>
                   </source>
               </sources>
@@ -293,7 +293,7 @@
         <!--
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>api-datatypes</artifactId>
+      <artifactId>mtwilson-api</artifactId>
       <version>${project.version}</version>
       <classifier>sources</classifier>
       <scope>compile</scope>
@@ -303,7 +303,7 @@
 
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
 	<dependency>
@@ -416,7 +416,7 @@
 	<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.6</version>
+			<version>1.8</version>
 		</dependency>
 	<dependency>
 			<groupId>commons-lang</groupId>
@@ -557,13 +557,13 @@
             <artifactId>audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+        <!--
         <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-rt</artifactId>
             <version>1.26</version>            
         </dependency>        
-
+-->
         <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
             <artifactId>mtwilson-mysql</artifactId>
