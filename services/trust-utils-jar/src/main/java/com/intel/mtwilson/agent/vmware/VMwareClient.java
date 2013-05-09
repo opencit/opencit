@@ -266,7 +266,7 @@ public class VMwareClient implements TlsClient {
         public String getEndpoint() { return vcenterEndpoint; }
         
 	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, MalformedURLException  {
-        ConnectionString cs = ConnectionString.forVmware(new URL(vCenterConnectionString));
+        //ConnectionString cs = ConnectionString.forVmware(new URL(vCenterConnectionString));
         /*
 		String[] vcenterConn = vCenterConnectionString.split(";");
 		if (vcenterConn.length != 3) {
