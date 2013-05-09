@@ -3,34 +3,22 @@ package com.intel.mtwilson.as.rest;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.ca.TrustAgentCertificateAuthority;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.*;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.List;
 import org.apache.commons.codec.binary.Base64;
-import org.codehaus.enunciate.jaxrs.TypeHint;
+//import org.codehaus.enunciate.jaxrs.TypeHint;
 
 /**
  * REST Web Service

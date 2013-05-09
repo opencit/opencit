@@ -5,8 +5,7 @@
 package test.io;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;

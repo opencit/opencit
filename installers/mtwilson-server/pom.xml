@@ -18,6 +18,24 @@
     <makeself.jdk_glassfish_monit>${project.build.directory}/${project.artifactId}-${project.version}-jdk_glassfish_monit</makeself.jdk_glassfish_monit>
   </properties>
  
+
+ 
+  <build>
+      <resources>
+          <resource>
+              <directory>src/files</directory>
+          </resource>
+      </resources>
+  </build>
+ 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
+          
  <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
   <dependencies>
     <!-- Java and Glassfish -->
@@ -129,23 +147,7 @@
 	<type>sh</type>
     </dependency>    
   </dependencies>
- 
- 
-  <build>
-      <resources>
-          <resource>
-              <directory>src/files</directory>
-          </resource>
-      </resources>
-  </build>
- 
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
+           
   <build>
     <plugins>
         

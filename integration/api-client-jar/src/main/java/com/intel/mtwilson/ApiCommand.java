@@ -10,6 +10,7 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.io.Filename;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.rfc822.Rfc822Date;
 import java.io.*;
 import java.net.InetAddress;

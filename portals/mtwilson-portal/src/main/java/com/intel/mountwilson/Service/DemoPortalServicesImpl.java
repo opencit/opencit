@@ -6,27 +6,25 @@ package com.intel.mountwilson.Service;
 import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mountwilson.common.DemoPortalException;
-import com.intel.mountwilson.common.ManagementConsolePortalException;
 import com.intel.mountwilson.constant.HelperConstant;
 import com.intel.mountwilson.datamodel.*;
 import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mountwilson.util.ConverterUtil;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.AttestationService;
 import com.intel.mtwilson.TrustAssertion;
-import com.intel.mtwilson.WhitelistService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.datatypes.PcrLogReport;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
+import com.intel.mtwilson.model.Hostname;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -283,16 +281,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		try {
                                     ConnectionString connStr = null;
                                     if (dataVO.getvCenterDetails() == null && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
-                                        System.err.println("saveNewHostData == intel");
+                                       
                                         connStr = new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
-                                        System.err.println("saveNewHostData == vmware");
                                         connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails());
                                     } else if (dataVO.getVmmName().toLowerCase().contains("xenserver")) {
-                                        System.err.println("saveNewHostData == citrix");
                                         connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:",""));
                                     } else {
-                                        System.err.println("saveNewHostData == intel");
                                         connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails());
                                     }
                                     dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
