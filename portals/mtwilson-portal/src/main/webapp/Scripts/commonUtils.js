@@ -339,13 +339,6 @@ function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,b
 	this.registerHost = registerHost;
 }
 
-//Function to check all checkbox in table.
-function fnSelectAllCheckBox(status) {
-	$('.registerHostTableContent table tr td').each(function() {
-		$(this).find(':checkbox').attr('checked',status);
-	});
-}
-
 
 /**
  * This will send a AJAX request to Server in Synchronous Mode.
