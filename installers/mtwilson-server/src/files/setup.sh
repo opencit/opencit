@@ -91,7 +91,7 @@ fi
 
 if [ ! -z "$postgres" ]; then
   DATABASE_VENDOR=postgres
-elif if [ ! -z "$mysql" ]; then
+elif [ ! -z "$mysql" ]; then
   DATABASE_VENDOR=mysql
 fi
 
