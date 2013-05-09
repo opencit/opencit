@@ -242,13 +242,14 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                             X509Certificate clientCert = X509Util.decodeDerCertificate(clientRecord.getCertificate());
                             DN dn = new DN(clientCert.getSubjectX500Principal().getName());
                             String username = dn.getCommonName();
-                            List<MwPortalUser> portalUsers = keystoreJpa.findMwPortalUserByUsernameEnabled(username);
+                            MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
+//                            List<MwPortalUser> portalUsers = keystoreJpa.findMwPortalUserByUsernameEnabled(username);
                             // in case there was more than one (shouldn't happen!!) with the same username who is ENABLED, identify the right one via fingerprint
                             // XXX TODO it would be more efficient to add a fingerprint field to the keystore table, then we can look it up by fingerprint and have the right record immediately
-                            for(MwPortalUser portalUser : portalUsers) {
+//                            for(MwPortalUser portalUser : portalUsers) {
                                 // XXX TODO if we don't add teh fingerprintfield, then we need to looka t the cert in the keystore and compare the fingerprints
                                 keystoreJpa.destroy(portalUser.getId());
-                            }
+//                            }
 //                            keystoreJpa.destroy(clientRecord.getId()); // actually deletes the user keystore w/ private key    bug #677 trying to delete a MwPortalUser keystore using the ID of an ApiClientX509 record
                         }
                         
