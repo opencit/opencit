@@ -138,7 +138,11 @@
             <version>${project.version}</version>         
       </dependency>        
                 <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
-        
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
     </dependencies>
 
     <properties>

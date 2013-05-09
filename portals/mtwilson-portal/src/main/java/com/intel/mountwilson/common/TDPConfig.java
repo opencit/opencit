@@ -44,29 +44,60 @@ public class TDPConfig extends ConfigBase {
 	}
 
  
-    public static Properties getJpaProperties() {
+        public static Properties getJpaProperties(Configuration config) {
+        /*
         Configuration config = getConfiguration();
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.tdbp.db.driver", 
+                config.getString("mountwilson.ms.db.driver", 
                 config.getString("mtwilson.db.driver",
                 "com.mysql.jdbc.Driver")));
         prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.tdbp.db.url",
+                config.getString("mountwilson.ms.db.url",
                 config.getString("mtwilson.db.url",
                 String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
-                    config.getString("mountwilson.tdbp.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.tdbp.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.tdbp.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+                    config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
         prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.tdbp.db.user",
+                config.getString("mountwilson.ms.db.user",
                 config.getString("mtwilson.db.user",
                 "root")));
         prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.tdbp.db.password", 
+                config.getString("mountwilson.ms.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
         return prop;
-    }        
+        */
+        
+        Properties prop = new Properties();
+        prop.put("javax.persistence.jdbc.driver", 
+                config.getString("mountwilson.mcp.db.driver", 
+                config.getString("mtwilson.db.driver",
+                "com.mysql.jdbc.Driver")));
+        System.err.println("stdalex mcpConfig getJpaConfig driver == " + config.getString("mountwilson.mcp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+        String dbms = (config.getString("mountwilson.mcp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        System.err.println("stdalex mcpConfig getJpaConfig dbms == " + dbms);
+        prop.put("javax.persistence.jdbc.url" , 
+                config.getString("mountwilson.mcp.db.url",
+                config.getString("mtwilson.db.url",
+                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
+                    config.getString("mountwilson.mcp.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.mcp.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.mcp.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        System.err.println("stdalex msConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
+        prop.put("javax.persistence.jdbc.user",
+                config.getString("mountwilson.mcp.db.user",
+                config.getString("mtwilson.db.user",
+                "root")));
+        prop.put("javax.persistence.jdbc.password", 
+                config.getString("mountwilson.mcp.db.password", 
+                config.getString("mtwilson.db.password", 
+                "password")));
+        return prop;
+    }
+    public static Properties getJpaProperties() {
+        return getJpaProperties(getConfiguration());
+    }
 }
 
