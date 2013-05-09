@@ -124,7 +124,7 @@ public class HostBO extends BaseBO {
                         TblHosts tblHosts = new TblHosts();
                         tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
                         tblHosts.setTlsKeystore(null);
-                        System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
+                        //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
                         
                         // Using the connection string we will find out the type of the host. This information would be used later

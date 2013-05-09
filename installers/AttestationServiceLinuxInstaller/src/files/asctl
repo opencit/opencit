@@ -125,7 +125,7 @@ download_privacyca_certs() {
         rm ${intel_conf_dir}/endorsement.p12
         openssl x509 -inform pem -in ${intel_conf_dir}/privacyca-endorsement.pem -out ${intel_conf_dir}/privacyca-endorsement.crt -outform der
         chmod 600 ${intel_conf_dir}/privacyca-endorsement.crt
-        glassfish_permissions ${intel_conf_dir}/privacyca-endorsement.crt
+        #glassfish_permissions ${intel_conf_dir}/privacyca-endorsement.crt
         rm ${intel_conf_dir}/privacyca-endorsement.pem
       else
         echo_failure "Cannot unzip package from Privacy CA"

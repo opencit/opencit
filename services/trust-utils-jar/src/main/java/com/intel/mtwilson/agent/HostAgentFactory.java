@@ -96,7 +96,7 @@ public class HostAgentFactory {
             // no special case for citrix, since that support was added recently they should always come with citrix: prepended.
             System.out.println("host cs = " + host.getAddOnConnectionInfo());
             String connectionString = getConnectionString(host);
-            System.out.println("stdalex getHostAgent cs =" + connectionString);
+            //System.out.println("stdalex getHostAgent cs =" + connectionString);
             TlsPolicy tlsPolicy = getTlsPolicy(host);
             return getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
         }

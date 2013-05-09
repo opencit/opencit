@@ -409,7 +409,7 @@ elif using_tomcat; then
       #setup the java_opts and tomcat start in the starter file
       if [ ! -f /usr/local/bin/tomcat_starter.sh ]; then
 	    echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
-        echo "export JAVA_OPTS=\"\$JAVA_OPTS -Djava.library.path=/usr/lib -Xms512m -Xmx2560m -XX:MaxPermSize=384m\"" >> /usr/local/bin/tomcat_starter.sh
+        echo "export JAVA_OPTS=\"\$JAVA_OPTS -Djava.library.path=/usr/lib -Xms512m -Xmx2560m -XX:MaxPermSize=2048m\"" >> /usr/local/bin/tomcat_starter.sh
         echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
       fi
       #make the starter file exec on startup
