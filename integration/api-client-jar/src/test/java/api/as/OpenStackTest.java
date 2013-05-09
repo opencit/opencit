@@ -6,10 +6,7 @@ package api.as;
 
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ApiRequest;
-import com.intel.mtwilson.ApiResponse;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;

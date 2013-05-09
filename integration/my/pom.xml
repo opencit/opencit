@@ -41,6 +41,30 @@
         </executions>
       </plugin>
  
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+            <execution>
+                <id>mtwilson-myprefs</id>
+                <phase>package</phase>
+                <goals><goal>shade</goal></goals>
+                <configuration>
+        		<shadedArtifactAttached>true</shadedArtifactAttached>
+                	<shadedClassifierName>with-dependencies</shadedClassifierName>
+                        <transformers>
+                          <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                            <manifestEntries>
+                                <Main-Class>com.intel.mtwilson.MyPrefs</Main-Class>
+                            </manifestEntries>
+                          </transformer>
+                        </transformers>
+                </configuration>
+            </execution>
+            </executions>
+      </plugin>
+                
             
         </plugins>
     </build>
@@ -81,29 +105,69 @@
         
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>api-client</artifactId>
-		<version>${project.version}</version>        
+		<artifactId>mtwilson-api</artifactId>
+		<version>${project.version}</version>
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.common</groupId>
 		<artifactId>mtwilson-jpa</artifactId>
 		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>ASCommon</artifactId>
 		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>MSCommon</artifactId>
 		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>audit-handler</artifactId>
 		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>ASData</artifactId>
+		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>MSData</artifactId>
+		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>audit-data</artifactId>
+		<version>${project.version}</version>        
+        <optional>true</optional>
+        <scope>provided</scope>
+    </dependency>
+    <dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <optional>true</optional>
+        <scope>test</scope>
     </dependency>
         
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-console</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>  
 </project>

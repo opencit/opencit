@@ -79,11 +79,38 @@
         <url>http://cloudsecurityportal.intel.com/redmine/projects/mtw/issues</url>
     </issueManagement>
 
+<!--
+  <reporting>    
+    <plugins>  
+      <plugin>      
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <inherited>true</inherited>          
+      </plugin>
+      <plugin> 
+        <groupId>org.codehaus.mojo</groupId> 
+        <artifactId>surefire-report-maven-plugin</artifactId> 
+        <version>2.0-beta-1</version>
+        <inherited>true</inherited>
+      </plugin>       
+    </plugins>      
+  </reporting>  
+  -->
     <repositories>
 	<repository>
 		<id>cloudsecurityportal.intel.com</id>
 		<name>Cloud Security - Intel Architecture Systems Integration</name>
 		<url>http://cloudsecurityportal.intel.com/maven</url>
+		<layout>default</layout>
+                <snapshots>
+                  <enabled>true</enabled>
+                </snapshots>
+        </repository>
+	<repository>
+		<id>cpg-x</id>
+		<name>Cloud Platform Group</name>
+		<url>http://10.1.71.63/maven/repository</url>
 		<layout>default</layout>
                 <snapshots>
                   <enabled>true</enabled>
@@ -247,11 +274,63 @@
                     </dependency>
                 </dependencies>
                 -->
-            </plugin>                
+            </plugin>           
+            <!-- http://emma.sourceforge.net/maven-emma-plugin/index.html -->
+            <!-- note this is NOT the same as emma-maven-plugin below... this one has a report goal, the other one doesn't -->
+            <!--
+            <plugin>
+                <groupId>emma</groupId>
+                <artifactId>maven-emma-plugin</artifactId> 
+                <version>0.5</version>
+            </plugin>     
+            -->
             </reportPlugins>
         </configuration>  
     </plugin>
                 <!-- end website plugin -->
+                
+                <!--
+                      <plugin>
+                <groupId>emma</groupId>
+                <artifactId>maven-emma-plugin</artifactId> 
+                <version>0.5</version>
+                <executions>
+                    <execution>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>      
+            -->
+                <!--
+      <plugin>      
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>emma-maven-plugin</artifactId>
+        <version>1.0-alpha-3</version>
+        <inherited>true</inherited>          
+        <executions>
+          <execution>
+              <id>emma-instrument</id>
+            <phase>process-classes</phase>               
+            <goals>
+              <goal>instrument</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <forkMode>once</forkMode>
+          <reportFormat>xml</reportFormat>
+          <classesDirectory>${project.build.directory}/generated-classes/emma/classes</classesDirectory>    
+        </configuration>        
+      </plugin>
+                -->
 	</plugins>
 
 	<extensions>

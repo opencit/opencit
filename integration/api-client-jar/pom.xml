@@ -235,7 +235,7 @@
                             <includeDependencySources>true</includeDependencySources>
                             <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                             <dependencySourceIncludes>
-                                <dependencySourceInclude>com.intel.mtwilson.integration:api-datatypes</dependencySourceInclude>
+                                <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
                                 <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
                             </dependencySourceIncludes>
                         </configuration>
@@ -289,6 +289,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>my</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -374,7 +380,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>api-datatypes</artifactId>
+            <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
@@ -407,7 +413,15 @@
             <version>1.6</version>
         </dependency>
         <!-- end httpclient -->
-    
+        
+        
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+        
         <!-- begin jersey  -->
     
         <!-- jersey-core provides MultivaluedMap and MediaType -->

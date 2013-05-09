@@ -7,7 +7,7 @@ import com.intel.mountwilson.common.WLMPortalException;
 import com.intel.mountwilson.datamodel.OSDataVO;
 import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mountwilson.util.ConverterUtil;
-import com.intel.mtwilson.WhitelistService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import java.util.List;
 import org.slf4j.Logger;

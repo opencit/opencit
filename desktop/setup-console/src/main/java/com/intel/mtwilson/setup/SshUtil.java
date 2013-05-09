@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup;
 
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

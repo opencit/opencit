@@ -6,8 +6,7 @@ package com.intel.mtwilson.crypto;
 
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;

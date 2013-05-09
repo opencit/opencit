@@ -5,6 +5,7 @@
 package com.intel.mtwilson.policy.impl;
 
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
@@ -51,6 +52,7 @@ public class JpaPolicyReader {
     private EntityManagerFactory entityManagerFactory;
     private TblMleJpaController mleJpaController;
     private TblPcrManifestJpaController pcrManifestJpaController;
+    private TblHostSpecificManifestJpaController pcrHostSpecificManifestJpaController;
     private TblModuleManifestJpaController moduleManifestJpaController;
     private TblLocationPcrJpaController locationPcrJpaController;
 
@@ -60,6 +62,7 @@ public class JpaPolicyReader {
         pcrManifestJpaController = new TblPcrManifestJpaController(entityManagerFactory);
         moduleManifestJpaController = new TblModuleManifestJpaController(entityManagerFactory);
         locationPcrJpaController = new TblLocationPcrJpaController(entityManagerFactory);
+        pcrHostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(entityManagerFactory);
     }
     
     
@@ -155,28 +158,23 @@ public class JpaPolicyReader {
         throw new UnsupportedOperationException("TODO: add support for checking pcr 22");
     }
 
-    public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo) {
+    public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo, TblHosts host) {
         HashMap<String,String> info = new HashMap<String,String>();
         // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
 
         if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue() ) {
-            Collection<TblHostSpecificManifest> hostSpecificManifest = moduleInfo.getTblHostSpecificManifestCollection(); // XXX it was created as a collection but there should really only be ONE host-specific module value to replace ONE module value for the rule
-            if( hostSpecificManifest.size() > 1 ) {
-                log.error("MULTIPLE HOST-SPECIFIC MODULE VALUES DEFINED FOR SAME MODULE:");
-                for(TblHostSpecificManifest hostSpecificModule : hostSpecificManifest) {
-                    log.error("ID #{}   DIGEST: {}", hostSpecificModule.getId(), hostSpecificModule.getDigestValue());
-                }
+            TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByHostID(host.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
+            if( hostSpecificModule == null ) {
+                log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
+                Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
+                return m;
             }
-            if( hostSpecificManifest.size() > 0 ) {
-                TblHostSpecificManifest hostSpecificModule = hostSpecificManifest.iterator().next(); // just grab the first module in case there are multiple (which would be an error, see above log message)
+            else {
                 Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
                 return m;
             }
-            // if we get here then it's empty... which means the whitelist module defined it as being host specific but no host specific value was recorded...
-            Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
-            return m;
         }
         else {
             // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
@@ -190,10 +188,10 @@ public class JpaPolicyReader {
     }
     
     // creates a rule for checking that ONE module is included in a pcr event log
-    public Rule createPcrEventLogIncludesRuleFromTblModuleManifest(TblModuleManifest moduleInfo, String... markers) {
+    public Rule createPcrEventLogIncludesRuleFromTblModuleManifest(TblModuleManifest moduleInfo, TblHosts host, String... markers) {
         PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
         log.debug("... MODULE for PCR {}", pcrIndex.toString());
-        Measurement m = createMeasurementFromTblModuleManifest(moduleInfo);
+        Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
         PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, m);
         rule.setMarkers(markers);
         return rule;
@@ -201,7 +199,7 @@ public class JpaPolicyReader {
     
     
     // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
-    public Set<Rule> createPcrEventLogIncludesRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, String... markers) {
+    public Set<Rule> createPcrEventLogIncludesRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, TblHosts host, String... markers) {
         HashSet<Rule> list = new HashSet<Rule>();
     // XXX unfortunately because of our database design, we don't know in advance which  pcr's these modules belong to.
         // so we need to collect the set of measurements for each pcr, and then for every pcr that has modules/events, we need to add the rules (second section below)
@@ -213,7 +211,7 @@ public class JpaPolicyReader {
                 measurements.put(pcrIndex, new HashSet<Measurement>());
             }
             
-            Measurement m = createMeasurementFromTblModuleManifest(moduleInfo);
+            Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
             measurements.get(pcrIndex).add(m);
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
@@ -239,13 +237,13 @@ public class JpaPolicyReader {
     public Set<Rule> loadPcrEventLogIncludesRuleForBios(Bios bios, TblHosts tblHosts) {
         TblMle biosMle = mleJpaController.findBiosMle(bios.getName(), bios.getVersion(), bios.getOem());
         Collection<TblModuleManifest> pcrModuleInfoList = biosMle.getTblModuleManifestCollection();  // XXX event logs shouldn't be associated directly to a bios, they should be associated to a specific pcr digest ...
-        return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, TrustMarker.BIOS.name());
+        return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.BIOS.name());
     }
     
     public Set<Rule> loadPcrEventLogIncludesRuleForVmm(Vmm vmm, TblHosts tblHosts) {
         TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
         Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();       // XXX event logs shouldn't be associated directly to a vmm, they should be associated to a specific pcr digest ...  
-        return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, TrustMarker.VMM.name());
+        return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.VMM.name());
     }
     
     

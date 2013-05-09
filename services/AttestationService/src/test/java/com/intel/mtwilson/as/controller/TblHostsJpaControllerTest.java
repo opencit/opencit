@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.controller;
 
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASPersistenceManager;
 
@@ -18,6 +19,7 @@ import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import java.io.IOException;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -42,8 +44,8 @@ public class TblHostsJpaControllerTest {
     }
 
     @Test
-    public void testSomeMethod() throws CryptographyException {
-        TblHostsJpaController jpactl = new TblHostsJpaController(ASPersistenceManager.createEntityManagerFactory("ASDataPU", ASConfig.getJpaProperties()));
+    public void testSomeMethod() throws CryptographyException, IOException {
+        TblHostsJpaController jpactl = My.jpa().mwHosts();
         TblHosts host = jpactl.findByName("127.0.0.1");
         if( host == null ) {
             System.out.println("got null result");

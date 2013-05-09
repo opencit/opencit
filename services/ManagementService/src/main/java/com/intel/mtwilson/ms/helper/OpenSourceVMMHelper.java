@@ -5,7 +5,7 @@
 package com.intel.mtwilson.ms.helper;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.AttestationService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSConfig;

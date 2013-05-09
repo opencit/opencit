@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.NopX509TrustManager;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
