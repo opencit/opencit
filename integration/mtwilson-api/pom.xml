@@ -1,9 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>api-datatypes</artifactId>
-  <packaging>jar</packaging>
-  <name>API Datatypes</name>
+    <artifactId>mtwilson-api</artifactId>
+    <packaging>jar</packaging>
+    <name>Mt Wilson API for Java 6</name>
+    <description>
+        The Mt Wilson API for Java provides an easy-to-use programming interface to access 
+        Mt Wilson services. Using the Mt Wilson API for Java, you can manage the Whitelist,
+        manage the list of hosts being monitored, obtain attestation on the
+        status of those hosts in SAML format, and more. Please see the documentation
+        for complete details.
+    </description>
   
     <parent>
 		<groupId>com.intel.mtwilson.integration</groupId>
@@ -39,6 +46,20 @@
 
 
   <dependencies>
+      
+      
+      <dependency>
+        <groupId>com.intel.mtwilson.common</groupId>
+        <artifactId>mtwilson-io</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>com.intel.mtwilson.common</groupId>
+        <artifactId>mtwilson-crypto</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-validation</artifactId>

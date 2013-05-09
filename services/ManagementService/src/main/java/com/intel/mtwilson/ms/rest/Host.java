@@ -6,7 +6,7 @@ package com.intel.mtwilson.ms.rest;
 
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.helper.MSComponentFactory;
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
 //import javax.annotation.security.RolesAllowed;

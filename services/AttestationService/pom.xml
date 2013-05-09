@@ -262,7 +262,7 @@
               <sources>
                   <source>
                       <groupId>com.intel.mtwilson.integration</groupId>
-                      <artifactId>api-datatypes</artifactId>
+                      <artifactId>mtwilson-api</artifactId>
                       <version>${project.version}</version>
                   </source>
               </sources>
@@ -293,7 +293,7 @@
         <!--
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>api-datatypes</artifactId>
+      <artifactId>mtwilson-api</artifactId>
       <version>${project.version}</version>
       <classifier>sources</classifier>
       <scope>compile</scope>
@@ -303,7 +303,7 @@
 
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
 	<dependency>

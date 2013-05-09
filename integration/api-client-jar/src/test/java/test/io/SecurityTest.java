@@ -6,8 +6,7 @@ package test.io;
 
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ApiResponse;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.HtmlErrorParser;
 import com.intel.mtwilson.MultivaluedMapImpl;
 import com.intel.mtwilson.crypto.RsaCredential;

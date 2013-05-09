@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.StringUtils;
 import com.intel.mtwilson.datatypes.Vendor;
+import com.intel.mtwilson.api.*;
 
 /**
  *

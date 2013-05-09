@@ -5,7 +5,7 @@ package com.intel.mountwilson.Service;
 
 import com.intel.mountwilson.common.WLMPortalException;
 import com.intel.mountwilson.datamodel.MLEDataVO;
-import com.intel.mtwilson.WhitelistService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import java.util.List;
 

@@ -4,8 +4,12 @@
  */
 package com.intel.mtwilson;
 
+import com.intel.mtwilson.api.ClientFactory;
+import com.intel.mtwilson.api.MtWilson;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +26,7 @@ import org.slf4j.LoggerFactory;
 public class My {
     private transient static Logger log = LoggerFactory.getLogger(My.class);
     private static MyConfiguration config = null;
-    private static ApiClient client = null;
+    private static MtWilson client = null;
     private static MyPersistenceManager pm = null;
     private static MyJpa jpa = null;
     private static MyEnvironment env = null;
@@ -34,14 +38,22 @@ public class My {
         return config; 
     }
     
-    public static ApiClient client() throws MalformedURLException, Exception {
+    public static MtWilson client() throws MalformedURLException, Exception {
         if( client == null ) {
             log.info("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
+            /*
             client = KeystoreUtil.clientForUserInDirectory(
                 configuration().getKeystoreDir(), 
                 configuration().getKeystoreUsername(),
                 configuration().getKeystorePassword(),
                 configuration().getMtWilsonURL());
+                */
+            client = ClientFactory.loadClient(
+                configuration().getMtWilsonURL(),
+                configuration().getKeystoreDir(), 
+                configuration().getKeystoreUsername(),
+                configuration().getKeystorePassword()
+                    );
         }
         return client;
     }

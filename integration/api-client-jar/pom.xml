@@ -235,7 +235,7 @@
                             <includeDependencySources>true</includeDependencySources>
                             <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                             <dependencySourceIncludes>
-                                <dependencySourceInclude>com.intel.mtwilson.integration:api-datatypes</dependencySourceInclude>
+                                <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
                                 <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
                             </dependencySourceIncludes>
                         </configuration>
@@ -380,7 +380,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>api-datatypes</artifactId>
+            <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>

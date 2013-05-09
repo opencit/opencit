@@ -4,14 +4,15 @@
  */
 package test.myconfig;
 
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
-import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.api.ClientException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyConfiguration;
+import com.intel.mtwilson.api.ClientFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import java.io.File;
@@ -46,8 +47,8 @@ public class BootstrapApiClient {
             directory.mkdirs();
         }
         // create and register a new api client
-        SimpleKeystore keystore = KeystoreUtil.createUserInDirectory(
-                config.getKeystoreDir(),
+        SimpleKeystore keystore = ClientFactory.createUserInResource(
+                new FileResource(config.getKeystoreDir()),
                 config.getKeystoreUsername(),
                 config.getKeystorePassword(),
                 config.getMtWilsonURL(),

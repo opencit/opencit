@@ -2,7 +2,7 @@
  * Copyright (C) 2011-2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson;
+package com.intel.mtwilson.api;
 
 import com.intel.mtwilson.datatypes.ErrorCode;
 

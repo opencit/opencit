@@ -5,7 +5,7 @@
 package api.as;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.io.ConfigurationUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;

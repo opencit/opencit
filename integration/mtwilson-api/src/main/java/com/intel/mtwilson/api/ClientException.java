@@ -2,7 +2,7 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson;
+package com.intel.mtwilson.api;
 
 /**
  * @since 0.5.4

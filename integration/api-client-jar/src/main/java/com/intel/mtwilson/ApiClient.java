@@ -5,9 +5,11 @@
 package com.intel.mtwilson;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
+import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.HmacCredential;
 import com.intel.mtwilson.crypto.Password;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.SimpleKeystore;
@@ -68,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * @since 0.5.2
  * @author jbuhacoff
  */
-public class ApiClient implements AttestationService, WhitelistService, ManagementService {
+public class ApiClient implements MtWilson, AttestationService, WhitelistService, ManagementService {
     private static Logger log = LoggerFactory.getLogger(ApiClient.class);
 //    private JerseyHttpClient httpClient;
     private ApacheHttpClient httpClient;

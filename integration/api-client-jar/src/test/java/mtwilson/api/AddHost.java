@@ -4,7 +4,7 @@
  */
 package mtwilson.api;
 
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
