@@ -62,8 +62,7 @@ function fnUploadWhiteListConfigurationData() {
 		//hostVo.hostType=$('#MainContent_ddlHOSTType').val();
 		hostVo.status = null;
         // at this point isVMWare = 1 == VMWare, 2 == Citrix, 0 == TA
-		if (isVMWare) {
-            // get citrix values
+        // get citrix values
             if(isVMWare == 2) {
                 if(fnValidateIpAddress($('#whiteListCitrix_Host').val())) {
                     var valid0 = fnValidateEmptyValue('whiteListCitrix_Host');
@@ -83,7 +82,7 @@ function fnUploadWhiteListConfigurationData() {
                 }else{
                     alert("Please enter a valid ip address and try again.");
                 }
-            }else{ // get VMWare values
+            }else if(isVMWare == 1){ // get VMWare values
                      if(fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val())) {
                         var valid0 = fnValidateEmptyValue('whiteListVMware_Host');
                         var valid1 = fnValidateEmptyValue('whiteListVMWare_vCenterServer');
@@ -101,13 +100,9 @@ function fnUploadWhiteListConfigurationData() {
                      }else{
                          alert("Please enter a valid ip address and try again.");
                      }
-            }
-                     }else{
-                         alert("Please enter a valid ip address and try again.");
-                     }
-			
-		}else { // TA
+            }else { // TA
                                                    whiteListOpenSource_Host
+                        
                         if(fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
                       
                             var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
@@ -144,6 +139,7 @@ function fnUploadWhiteListConfigurationData() {
 			//return false;
 		}
 	}
+  }
 }
 
 //This method will set resigterHost option to true for fnWhiteListConfig object and send data to upload White List configuration to server.
