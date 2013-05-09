@@ -85,7 +85,7 @@ cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 if [ ! -z "$glassfish" ]; then
   WEBSERVER_VENDOR=glassfish
-elif if [ ! -z "$tomcat" ]; then
+elif [ ! -z "$tomcat" ]; then
   WEBSERVER_VENDOR=tomcat
 fi
 
