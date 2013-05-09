@@ -1,7 +1,7 @@
 
 function fnforRootCACertificate(){	
 	
-	sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, null);
+	sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, fnRootCADownloadFail);
 }
 
 function fnforPrivacyCACertificate(){	
@@ -56,4 +56,8 @@ function fnRootCADownloadSuccess(responseJSON){
         } else {
 		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
 	}
+}
+function fnRootCADownloadFail(responseJSON){
+    alert(responseJSON);
+    $('#fdownloadRCA').hide();
 }

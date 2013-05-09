@@ -100,7 +100,13 @@ setup_interactive_install() {
   configure_api_baseurl "${package_config_filename}"
   if using_mysql; then   
     if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.mcp.db
       mysql_configure_connection "${package_config_filename}" mountwilson.tdbp.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.wlmp.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.mc.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.as.db
       mysql_create_database
       mtwilson setup InitDatabase mysql
     fi
@@ -111,7 +117,8 @@ setup_interactive_install() {
       postgres_configure_connection "${package_config_filename}" mountwilson.tdbp.db
       postgres_configure_connection "${package_config_filename}" mountwilson.wlmp.db
       postgres_configure_connection "${package_config_filename}" mountwilson.mc.db
-            
+      postgres_configure_connection "${package_config_filename}" mountwilson.ms.db
+      postgres_configure_connection "${package_config_filename}" mountwilson.as.db            
       postgres_create_database
       mtwilson setup InitDatabase postgres
     else
