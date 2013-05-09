@@ -19,12 +19,10 @@
     <module>AttestationServiceLinuxInstaller</module>
     <module>ManagementServiceLinuxInstaller</module>
     <module>WLMServiceLinuxInstaller</module>
-    <module>ManagementConsoleLinuxInstaller</module>
     <module>PrivacyCAServiceLinuxInstaller</module>
     <module>TrustAgentLinuxInstaller</module>
-    <module>TrustDashBoardLinuxInstaller</module>
-    <module>WhiteListPortalLinuxInstaller</module>
     <module>MonitLinuxInstaller</module>
+    <module>mtwilson-portal-installer</module>
     <module>mtwilson-server</module>
   </modules>
 
