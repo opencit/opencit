@@ -32,4 +32,20 @@ public interface VendorHostAgentFactory {
      * @return 
      */
     HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException;
+
+    /**
+     * Revised interface where the host address is embedded in the vendor connection string and it's up 
+     * to the vendor factory class to extract it. The vendorConnectionString is everything after the 
+     * vendor prefix.  
+     * 
+     * For example,  for the connection string vmware:https://vcenter:443/sdk;administrator;password;hostname the 
+     * vendorConnectionString is https://vcenter:443/sdk;administrator;password;hostname 
+     * 
+     * @param vendorConnectionString
+     * @param tlsPolicy
+     * @return
+     * @throws IOException 
+     */
+    HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException;
+
 }

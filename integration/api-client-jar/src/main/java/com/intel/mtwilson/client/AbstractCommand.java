@@ -5,7 +5,7 @@
 package com.intel.mtwilson.client;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.io.ConfigurationUtil;
 import java.io.IOException;
 import org.apache.commons.configuration.Configuration;

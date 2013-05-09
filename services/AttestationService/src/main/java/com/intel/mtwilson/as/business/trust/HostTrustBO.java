@@ -734,6 +734,16 @@ public class HostTrustBO extends BaseBO {
 
     public String getTrustWithSaml(String host, boolean forceVerify) {
         log.info("Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        // Bug: 702: For host not supporting TXT, we need to return back a proper error
+         TblHosts tblHosts = getHostByName(new Hostname((host)));
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(tblHosts);
+       // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
+        
+        if (!agent.isTpmPresent()) {
+            throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, host);
+        }
+                
         if(forceVerify != true){
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
             if(tblSamlAssertion != null){

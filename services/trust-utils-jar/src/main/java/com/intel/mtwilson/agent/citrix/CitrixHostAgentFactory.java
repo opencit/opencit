@@ -24,7 +24,18 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
           return new CitrixHostAgent(client);
         }
         catch(Exception e) {
-            throw new IOException("Cannot get trust agent client for host: "+hostAddress.toString()+": "+e.toString());
+            throw new IOException("Cannot get trust agent client for host: "+hostAddress.toString()+": "+e.toString(), e);
+        }
+    }
+
+    @Override
+    public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
+        try {
+          CitrixClient client = new CitrixClient(new TlsConnection(vendorConnectionString, tlsPolicy));
+          return new CitrixHostAgent(client);
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot get trust agent client for host connection: "+vendorConnectionString+": "+e.toString(), e);
         }
     }
     

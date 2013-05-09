@@ -6,7 +6,7 @@ package test.io;
 
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;

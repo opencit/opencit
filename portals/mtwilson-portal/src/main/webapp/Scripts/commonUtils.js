@@ -5,7 +5,8 @@ var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
-
+var regIPAddress = new RegExp();
+var regPortNo = new RegExp(/^[0-9]+$/);
 // 0 = TA,  1 == vmware, 2 == citrix
 var isVMWare = 0;
 
@@ -338,13 +339,6 @@ function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,b
 	this.registerHost = registerHost;
 }
 
-//Function to check all checkbox in table.
-function fnSelectAllCheckBox(status) {
-	$('.registerHostTableContent table tr td').each(function() {
-		$(this).find(':checkbox').attr('checked',status);
-	});
-}
-
 
 /**
  * This will send a AJAX request to Server in Synchronous Mode.
@@ -486,10 +480,13 @@ return true;
 	
 }
 
+// TODO  this function is being used everywhere but we really need ip address OR hostname validation.
+//       adding hostname validation here sinc
 // stdalex_ validate ip address function
 function fnValidateIpAddress(ipAddress) {
     var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
-    if(checkIp.test(ipAddress)) {
+    var checkHostname = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
+    if(checkIp.test(ipAddress) || checkHostname.test(ipAddress)) {
         return true;
     }else{
         return false;
@@ -919,13 +916,3 @@ function getVCeterHostIpAddress(address){
 	return string.split("/")[0];
 }
 
-// stdalex_ validate ip address function
-function fnValidateIpAddress(ipAddress) {
-    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
-    if(checkIp.test(ipAddress)) {
-        return true;
-    }else{
-        return false;
-    }
-    
-}

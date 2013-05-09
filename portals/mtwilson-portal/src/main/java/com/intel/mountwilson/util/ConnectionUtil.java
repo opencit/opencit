@@ -6,7 +6,7 @@ package com.intel.mountwilson.util;
 import com.intel.mountwilson.common.DemoPortalException;
 import com.intel.mountwilson.common.ManagementConsolePortalException;
 import com.intel.mountwilson.common.WLMPortalException;
-import com.intel.mtwilson.ApiException;
+import com.intel.mtwilson.api.*;
 import com.sun.jersey.api.client.ClientHandlerException;
 import java.io.IOException;
 import org.codehaus.jackson.JsonParseException;

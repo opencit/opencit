@@ -265,3 +265,10 @@ function showHelpForVCenterServer() {
 	}
 	fnOpenDialog(str, "Help", 500, 285,false);
 }
+
+//Function to check all checkbox in table.
+function fnSelectAllCheckBox(status) {
+	$('.registerHostTableContent table tr td').each(function() {
+		$(this).find(':checkbox').attr('checked',status);
+	});
+}

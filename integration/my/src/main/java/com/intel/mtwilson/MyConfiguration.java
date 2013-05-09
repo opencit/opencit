@@ -36,7 +36,7 @@ import java.util.prefs.Preferences;
  *
  * 
  * NOTE:  the default directory to store all your settings is  ~/.mtwilson
- * In order to change it, you have to set your Java Preferences using testSetMyPreferences().
+ * In order to change it, you have to set your Java Preferences using MyPrefs -- see the MyPrefs class for details.
  *
  * @author jbuhacoff
  */
@@ -64,7 +64,7 @@ public class MyConfiguration {
     private Properties getDefaultProperties() {
         Properties p = new Properties();
         // api client
-        p.setProperty("mtwilson.api.username", "anonymous");
+        p.setProperty("mtwilson.api.username", System.getProperty("user.name", "anonymous"));
         p.setProperty("mtwilson.api.password", "password");
         p.setProperty("mtwilson.api.url", "https://127.0.0.1:8181");
         p.setProperty("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
@@ -81,6 +81,10 @@ public class MyConfiguration {
     /**
      * This is the only method that uses the Java Preferences API to get its value. Everything
      * else uses the mtwilson.properties file located the directory returned by this method.
+     * 
+     * You can change your directory path preference from the default to any directory by 
+     * running the MyPrefs command from your shell -- see the MyPrefs class for details
+     * 
      * @return ~/.mtwilson  unless you have changed your preferences (see testSetMyConfigDir)
      */
     public final String getDirectoryPath() {
@@ -105,6 +109,11 @@ public class MyConfiguration {
         }
         return p;
     }
+    
+    public final File getEnvironmentFile() {
+        return new File(getDirectoryPath() + File.separator + "environment.txt");
+    }
+    
     ///////////////////////// api client //////////////////////////////////
     
     public File getKeystoreDir() {
@@ -162,17 +171,5 @@ public class MyConfiguration {
         return conf.getProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==");
     }
     
-    /**
-     * Use this method to set your personal preferences... just run it from a JUnit test and set the directory
-     * where your preferences should be stored, or use null to restore the default.
-     */
-    public void setDirectoryPath(String path) {
-        if( path == null ) {
-            prefs.put("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson"); // reset default to: System.getProperty("user.home") + File.separator + ".mtwilson"
-        }
-        else {
-            prefs.put("mtwilson.config.dir", path);
-        }
-    }
 
 }

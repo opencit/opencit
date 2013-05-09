@@ -5,11 +5,13 @@
 package com.intel.mtwilson.agent.intel;
 
 import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
+import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.IOException;
+import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,21 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
             return new IntelHostAgent(client, hostAddress);
         }
         catch(Exception e) {
-            throw new IOException("Cannot get trust agent client for host: "+hostAddress.toString()+": "+e.toString());
+            throw new IOException("Cannot get trust agent client for host: "+hostAddress.toString()+": "+e.toString(), e);
+        }
+    }
+
+    @Override
+    public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
+        try {
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
+            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString);
+            URL url = new URL(vendorConnectionString);
+            InternetAddress hostAddress = new InternetAddress(url.getHost());
+            return new IntelHostAgent(client, hostAddress);
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot get trust agent client for host connection: "+vendorConnectionString+": "+e.toString(), e);
         }
     }
 }
