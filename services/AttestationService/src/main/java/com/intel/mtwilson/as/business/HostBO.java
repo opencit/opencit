@@ -22,6 +22,7 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.as.helper.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -79,34 +80,7 @@ public class HostBO extends BaseBO {
         private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
         private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
 
-        private static class Aes128DataCipher implements DataCipher {
-            private Logger log = LoggerFactory.getLogger(getClass());
-            private Aes128 cipher;
-            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
-            
-            @Override
-            public String encryptString(String plaintext) {
-                try {
-                    return cipher.encryptString(plaintext);
-                }
-                catch(CryptographyException e) {
-                    log.error("Failed to encrypt data", e);
-                    return null;
-                }
-            }
 
-            @Override
-            public String decryptString(String ciphertext) {
-                try {
-                    return cipher.decryptString(ciphertext);
-                }
-                catch(CryptographyException e) {
-                    log.error("Failed to decrypt data", e);
-                    return null;
-                }
-            }
-            
-        }
         
         public void setDataEncryptionKey(byte[] key) {
                     try {

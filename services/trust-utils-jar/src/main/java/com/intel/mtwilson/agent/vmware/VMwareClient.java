@@ -2,6 +2,7 @@ package com.intel.mtwilson.agent.vmware;
 
 
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.TlsClient;
@@ -9,6 +10,8 @@ import com.intel.mtwilson.tls.TlsPolicy;
 import com.vmware.vim25.*;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -262,7 +265,9 @@ public class VMwareClient implements TlsClient {
         
         public String getEndpoint() { return vcenterEndpoint; }
         
-	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException  {
+	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, MalformedURLException  {
+        ConnectionString cs = ConnectionString.forVmware(new URL(vCenterConnectionString));
+        /*
 		String[] vcenterConn = vCenterConnectionString.split(";");
 		if (vcenterConn.length != 3) {
 			throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING,
@@ -270,6 +275,9 @@ public class VMwareClient implements TlsClient {
 		}
 		// Connect to the vCenter server with the passed in parameters
 		connect(vcenterConn[0], vcenterConn[1], vcenterConn[2]);
+        */
+        ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(new URL(vCenterConnectionString));
+        connect(vmware.toURL().toExternalForm(), vmware.getUsername(), vmware.getPassword());
 	}
 
 	public static byte[] toByteArray(List<Byte> list) {

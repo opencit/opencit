@@ -4,11 +4,14 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
+import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.IOException;
+import java.net.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +31,19 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
             return new VmwareHostAgent(client, hostAddress.toString());
         }
         catch(Exception e) {
-            throw new IOException("Cannot get vmware client for host: "+hostAddress.toString()+": "+e.toString());
+            throw new IOException("Cannot get vmware client for host: "+hostAddress.toString()+": "+e.toString(), e);
+        }
+    }
+
+    @Override
+    public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
+        try {
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
+            ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(new URL(vendorConnectionString));
+            return new VmwareHostAgent(client, vmware.getHost().toString());
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot get vmware client for host connection: "+vendorConnectionString+": "+e.toString(), e);
         }
     }
 }
