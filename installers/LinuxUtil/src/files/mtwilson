@@ -220,6 +220,21 @@ case "$1" in
         glassfish_require
         glassfish_restart
         ;;
+  tomcat-start)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_start_report
+        ;;
+  tomcat-stop)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_shutdown
+        ;;
+  tomcat-restart)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_restart
+        ;;
   glassfish-status)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
         glassfish_require
