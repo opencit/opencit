@@ -5,7 +5,8 @@ var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
-
+var regIPAddress = new RegExp();
+var regPortNo = new RegExp(/^[0-9]+$/);
 // 0 = TA,  1 == vmware, 2 == citrix
 var isVMWare = 0;
 
