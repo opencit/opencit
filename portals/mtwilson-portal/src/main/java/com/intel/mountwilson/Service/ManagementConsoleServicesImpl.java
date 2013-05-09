@@ -10,11 +10,15 @@ import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
+import com.intel.mtwilson.ms.data.MwPortalUser;
+import com.intel.mtwilson.x500.DN;
 import java.net.MalformedURLException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -232,11 +236,23 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                                 throw ex;
                         }
 
-                        result = msAPIObj.deleteApiClient(decodedFP);
+                        // fix bug #677
                         ApiClientX509 clientRecord = apiClientJpa.findApiClientX509ByFingerprint(decodedFP);
                         if(clientRecord != null) {
-                                keystoreJpa.destroy(clientRecord.getId());
+                            X509Certificate clientCert = X509Util.decodeDerCertificate(clientRecord.getCertificate());
+                            DN dn = new DN(clientCert.getSubjectX500Principal().getName());
+                            String username = dn.getCommonName();
+                            List<MwPortalUser> portalUsers = keystoreJpa.findMwPortalUserByUsernameEnabled(username);
+                            // in case there was more than one (shouldn't happen!!) with the same username who is ENABLED, identify the right one via fingerprint
+                            // XXX TODO it would be more efficient to add a fingerprint field to the keystore table, then we can look it up by fingerprint and have the right record immediately
+                            for(MwPortalUser portalUser : portalUsers) {
+                                // XXX TODO if we don't add teh fingerprintfield, then we need to looka t the cert in the keystore and compare the fingerprints
+                                keystoreJpa.destroy(portalUser.getId());
+                            }
+//                            keystoreJpa.destroy(clientRecord.getId()); // actually deletes the user keystore w/ private key    bug #677 trying to delete a MwPortalUser keystore using the ID of an ApiClientX509 record
                         }
+                        
+                        result = msAPIObj.deleteApiClient(decodedFP); // only marks it as deleted (must retain the record for audits)
 
                 } catch (Exception e) {
                         logger.info(e.getMessage());
