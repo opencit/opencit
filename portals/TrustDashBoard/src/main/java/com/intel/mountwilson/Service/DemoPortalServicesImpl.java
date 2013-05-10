@@ -494,6 +494,10 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		try {
 			//Get vCenterString for a Host.
 			vCenterString = service.queryForHosts(sourceHost).get(0).AddOn_Connection_String;
+                                    //  Since the connection String would have the prefix of vmware
+                                    ConnectionString connString = new ConnectionString(vCenterString);
+                                    vCenterString = connString.getAddOnConnectionString();
+            
 		} catch (Exception e) {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
 			 throw ConnectionUtil.handleException(e);
