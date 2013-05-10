@@ -85,6 +85,8 @@ public class ManagementConsoleDataController extends MultiActionController{
 	private IMLEClientService mleClientService;
 	private IOEMClientService oemClientService; 
     
+    private final int DEFAULT_ROWS_PER_PAGE = 10;
+    
         /**
          * @param HttpServletRequest
          * @param HttpServletResponse
@@ -2357,7 +2359,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 		//Get List of all MLE.
 		List<MLEDataVO> dataVOs = mleClientService.getAllMLE(getWhitelistService(req));
-		int no_row_per_page = WLMPConfig.getConfiguration().getInt("mtwilson.wlmp.pagingSize");
+		int no_row_per_page = WLMPConfig.getConfiguration().getInt("mtwilson.wlmp.pagingSize", DEFAULT_ROWS_PER_PAGE);
 		
 		//Divide List of all MLE into a subList based on the value of host per page.
 		List<List<MLEDataVO>> list = Lists.partition(dataVOs, no_row_per_page);
@@ -2389,7 +2391,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 		//Get List of all OS.
 		List<OSDataVO> dataVOs = osClientService.getAllOS(getWhitelistService(req));
-		int no_row_per_page = WLMPConfig.getConfiguration().getInt("mtwilson.wlmp.pagingSize");
+		int no_row_per_page = WLMPConfig.getConfiguration().getInt("mtwilson.wlmp.pagingSize", DEFAULT_ROWS_PER_PAGE);
 		
 		//Divide List of all OS into a subList based on the value of host per page. 
 		List<List<OSDataVO>> list = Lists.partition(dataVOs, no_row_per_page);
@@ -2421,7 +2423,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 		//Get List of all OEM.
 		List<OEMDataVO> dataVOs = oemClientService.getAllOEM(getWhitelistService(req));
-		int no_row_per_page = WLMPConfig.getConfiguration().getInt("mtwilson.wlmp.pagingSize");
+		int no_row_per_page = WLMPConfig.getConfiguration().getInt("mtwilson.wlmp.pagingSize", DEFAULT_ROWS_PER_PAGE);
 		
 		//Divide List of all OEM into a subList based on the value of host per page. 
 		List<List<OEMDataVO>> list = Lists.partition(dataVOs, no_row_per_page);

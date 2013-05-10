@@ -116,7 +116,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
      */
     @Test
     public void testAddCurrentTlsCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
-        String username = "admin";
+        String username = "ManagementServiceAutomation"; // "admin";
         String password = "password";
         MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
         MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
