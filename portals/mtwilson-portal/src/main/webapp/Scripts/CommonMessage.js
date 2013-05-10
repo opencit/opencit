@@ -5,6 +5,11 @@ uploadFileHelp[2]="e.g.   myTrustAgent|9999";
 uploadFileHelp[3]="or for VMWare Type";
 uploadFileHelp[4]="Host_Name|Vmware_Connection_String";
 uploadFileHelp[5]="e.g.   myVmwareHost|https://192.168.1.0/sdk;Administrator;Password";
+uploadFileHelp[6]="or for Citrix Type";
+uploadFileHelp[7]="Host_Name|Citrix_Connection_String";
+uploadFileHelp[8]="e.g.   myCitrixHost|https://192.168.1.0:443;Administrator;Password";
+
+
 
 
 var vCenterStringHelp = [];

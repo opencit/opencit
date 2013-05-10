@@ -141,6 +141,21 @@
 		<artifactId>audit-handler</artifactId>
 		<version>${project.version}</version>        
     </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>ASData</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>MSData</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     
     <dependency>
         <groupId>com.intel.mtwilson.services</groupId>

@@ -325,7 +325,7 @@ case "$1" in
         rm -rf /var/opt/intel
         # control scripts
         echo "Removing Mt Wilson control scripts..."
-        echo asctl wlmctl msctl pcactl mcctl wpctl tdctl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+        echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
 		echo "Stopping Monit service..."
 		service monit stop &> /dev/null
 		if [ -f /etc/monit/monitrc ]; then
