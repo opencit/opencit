@@ -430,8 +430,8 @@ elif using_tomcat; then
     #chmod +x /usr/local/bin/tomcat_starter.sh
 
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
-    echo "export CATALINA_OPTS=\"\$CATALINA_OPTS -Xms512m -Xmx2048m\"" >> $TOMCAT_HOME/bin/setenv.sh
-    chmod +x $TOMCAT_HOME/bin/setenv.sh
+    #echo "export CATALINA_OPTS=\"\$CATALINA_OPTS -Xms512m -Xmx2048m\"" >> $TOMCAT_HOME/bin/setenv.sh
+    
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end tomcat install
  else

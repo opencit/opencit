@@ -20,7 +20,8 @@ if [ ! -d ${TOMCAT_HOME}/endorsed ]; then
  mkdir -p ${TOMCAT_HOME}/endorsed
 fi
 cp *.jar ${TOMCAT_HOME}/endorsed/
-
+cp setenv.sh ${TOMCAT_HOME}/bin/
+chmod +x $TOMCAT_HOME/bin/setenv.sh
 #Create SSL cert
 tomcat_create_ssl_cert $MTWILSON_SERVER
 
