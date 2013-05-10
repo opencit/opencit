@@ -3,7 +3,7 @@
 
         <!--
         XXX TODO   mtwilson-crypto should be refactored into 2 parts:  1) use the cpg-crypto package instead which
-        has most of these classes, 2) mtwilson-specific code.  api-datatypes should be refactored to move some of those
+        has most of these classes, 2) mtwilson-specific code.  mtwilson-api should be refactored to move some of those
         classes into other more suitable packages.  
         -->
 

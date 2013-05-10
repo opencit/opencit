@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import org.codehaus.plexus.util.StringUtils;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.api.*;
+import java.util.Locale;
 
 /**
  *
@@ -1662,11 +1663,11 @@ public class HostBO extends BaseBO {
                                     fullComponentName, moduleObj.getEventName());
                             if (moduleSearchObj == null) {
                                 wlsClient.addModuleWhiteList(moduleObj);
-                                log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                log.info("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
 
                             } else {
                                 wlsClient.updateModuleWhiteList(moduleObj);
-                                log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                log.info("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
                             }
                         }
                     } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) { // pcr information would be available for all the hosts.
@@ -1732,8 +1733,10 @@ public class HostBO extends BaseBO {
 
                                 // TODO : After the integration with the master branch, we need to use the ConnectionString class and determine the type of the vendor
                                 // If the vendor is Citrix, then only we need to write the PCR 19. Otherwise we need to null it out. 
-                                if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
-                                    pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
+                                if (! hostObj.AddOn_Connection_String.toLowerCase().contains("citrix")) {
+                                    if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
+                                        pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
+                                    }
                                 }
 
                                 tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());

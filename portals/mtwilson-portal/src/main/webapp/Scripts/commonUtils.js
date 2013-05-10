@@ -1,11 +1,13 @@
 var disabledDiv = '<div id="disabledDiv" class="disabledDiv"><img class="loadingImageClass" src="images/loading.gif" /></div>';
-var validationDiv = '<div class="errorMessage validationErrorDiv"> Value Can\'t be Empty.</div>';
-var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special Characters are not allowed.</div>';
+var validationDiv = '<div class="errorMessage validationErrorDiv"> Value cannot be empty.</div>';
+var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special characters are not allowed.</div>';
+var validationSpan = '<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>';
+var validationSpecialSpan = '<span class="errorMessage validationErrorDiv" style="float:none">Special characters are not allowed.</span>';
 var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
-var regIPAddress = new RegExp();
+var regIPAddress = new RegExp(/^[0-9_.]+$/);
 var regPortNo = new RegExp(/^[0-9]+$/);
 // 0 = TA,  1 == vmware, 2 == citrix
 var isVMWare = 0;
@@ -706,13 +708,14 @@ function fnGetMleData(isNewMle) {
 
 
 function fnTestValidation(inputID,regExpresion) {
+           // alert($('#'+inputID).val());
 	$('#'+inputID).parent().find('.errorMessage').remove();
 	if ($('#'+inputID).val() == '') {
-		$('#'+inputID).parent().append(validationDiv);
+		$('#'+inputID).parent().append(validationSpan);
 		return false;
 	}else {
 		if (!regExpresion.test($('#'+inputID).val())) {
-			$('#'+inputID).parent().append(validationSpecialDiv);
+			$('#'+inputID).parent().append(validationSpecialSpan);
 			return false;
 		}
 	}

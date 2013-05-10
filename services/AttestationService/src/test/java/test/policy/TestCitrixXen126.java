@@ -11,6 +11,10 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.data.*;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.as.helper.Aes128DataCipher;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
@@ -32,6 +36,7 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * The tests in this class check the functions of the business and data layer directly,
@@ -56,13 +61,18 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  * 
  * @author jbuhacoff
  */
-public class TestLinuxXen169 {
+public class TestCitrixXen126 {
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private transient static com.fasterxml.jackson.databind.ObjectWriter xml = new XmlMapper().writerWithDefaultPrettyPrinter(); 
-    private transient String hostname = "10.1.71.169";
-    private transient String connection = "intel:https://10.1.71.169:9999";
+    private transient String hostname = "10.1.70.126";
+    private transient String connection = "citrix:https://10.1.70.126:443;root;P@ssw0rd";
+    
+    @BeforeClass
+    public static void setMwHostsDek() throws CryptographyException, IOException {
+        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
+    }
     
     /**
      * 
