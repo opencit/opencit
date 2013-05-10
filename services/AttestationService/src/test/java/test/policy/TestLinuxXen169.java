@@ -32,7 +32,6 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import test.util.MyJpaDatastore;
 
 /**
  * The tests in this class check the functions of the business and data layer directly,
@@ -58,7 +57,6 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  * @author jbuhacoff
  */
 public class TestLinuxXen169 {
-    private static MyJpaDatastore pm;
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -66,10 +64,6 @@ public class TestLinuxXen169 {
     private transient String hostname = "10.1.71.169";
     private transient String connection = "intel:https://10.1.71.169:9999";
     
-    @BeforeClass
-    public static void initMyJpaDatastore() throws IOException {
-        pm = new MyJpaDatastore(My.persistenceManager());
-    }
     /**
      * 
      * Example quote request sent to trust agent:
@@ -156,10 +150,10 @@ Pcr 23 = 0000000000000000000000000000000000000000
     @Test
     public void testRegisterXenHostAndWhitelist() throws Exception {
         // first, if it's already registered we need to delete it
-        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        TblHosts host = My.jpa().mwHosts().findByName(hostname);
         if( host != null ) {
             log.debug("Host {} is already in database, deleting", host.getName());
-            pm.getHostsJpa().destroy(host.getId());
+            My.jpa().mwHosts().destroy(host.getId());
         }
         host = initNewHost();
         // now go to the host and fetch the PCR values -- this is similar to what management service does 
@@ -167,15 +161,15 @@ Pcr 23 = 0000000000000000000000000000000000000000
         HostAgent agent = factory.getHostAgent(host);
         TxtHostRecord hostInfo = agent.getHostDetails();
         // whitelist step 1:  create OEM
-        TblOem oem = pm.getOemJpa().findTblOemByName(hostInfo.BIOS_Oem);
+        TblOem oem = My.jpa().mwOem().findTblOemByName(hostInfo.BIOS_Oem);
         if( oem == null ) {
             oem = new TblOem();
             oem.setName(hostInfo.BIOS_Oem);
             oem.setDescription("Automatic whitelist from "+hostname);
-            pm.getOemJpa().create(oem);
+            My.jpa().mwOem().create(oem);
         }
         // whitelist step 2:  create BIOS MLE
-        TblMle bios = pm.getMleJpa().findBiosMle(hostInfo.BIOS_Name, hostInfo.BIOS_Version, hostInfo.BIOS_Oem);
+        TblMle bios = My.jpa().mwMle().findBiosMle(hostInfo.BIOS_Name, hostInfo.BIOS_Version, hostInfo.BIOS_Oem);
         if( bios == null ) {
             bios = new TblMle();
             bios.setAttestationType("PCR");
@@ -185,19 +179,19 @@ Pcr 23 = 0000000000000000000000000000000000000000
             bios.setVersion(hostInfo.BIOS_Version);
             bios.setOemId(oem);
             bios.setRequiredManifestList("0"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
-            pm.getMleJpa().create(bios);
+            My.jpa().mwMle().create(bios);
         }
         // whitelist step 3:  create OS
-        TblOs os = pm.getOsJpa().findTblOsByNameVersion(hostInfo.VMM_OSName, hostInfo.VMM_OSVersion);
+        TblOs os = My.jpa().mwOs().findTblOsByNameVersion(hostInfo.VMM_OSName, hostInfo.VMM_OSVersion);
         if( os == null ) {
             os = new TblOs();
             os.setName(hostInfo.VMM_OSName);
             os.setVersion(hostInfo.VMM_OSVersion);
             os.setDescription("Automatic whitelist from "+hostname);
-            pm.getOsJpa().create(os);
+            My.jpa().mwOs().create(os);
         }
         // whitelist step 4:  create VMM MLE
-        TblMle vmm = pm.getMleJpa().findVmmMle(hostInfo.VMM_Name, hostInfo.VMM_Version, hostInfo.VMM_OSName, hostInfo.VMM_OSVersion);
+        TblMle vmm = My.jpa().mwMle().findVmmMle(hostInfo.VMM_Name, hostInfo.VMM_Version, hostInfo.VMM_OSName, hostInfo.VMM_OSVersion);
         if( vmm == null ) {
             vmm = new TblMle();
             vmm.setAttestationType("PCR");
@@ -207,7 +201,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
             vmm.setVersion(hostInfo.VMM_Version);
             vmm.setOsId(os);
             vmm.setRequiredManifestList("17,18,19"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
-            pm.getMleJpa().create(vmm);
+            My.jpa().mwMle().create(vmm);
         }
         // whitelist step 5: get PCRs
         PcrManifest pcrManifest = agent.getPcrManifest();        
@@ -221,7 +215,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
             pcrWhitelist.setName(pcr.getIndex().toString());
             pcrWhitelist.setValue(pcr.getValue().toString());
             pcrWhitelist.setPCRDescription("Automatic BIOS whitelist from "+hostname);
-            pm.getPcrJpa().create(pcrWhitelist);
+            My.jpa().mwPcrManifest().create(pcrWhitelist);
         }
         // whitelist step 7: create whitelist entries for VMM PCRs
         String[] vmmPcrList = vmm.getRequiredManifestList().split(",");
@@ -233,22 +227,22 @@ Pcr 23 = 0000000000000000000000000000000000000000
             pcrWhitelist.setName(pcr.getIndex().toString());
             pcrWhitelist.setValue(pcr.getValue().toString());
             pcrWhitelist.setPCRDescription("Automatic VMM whitelist from "+hostname);
-            pm.getPcrJpa().create(pcrWhitelist);
+            My.jpa().mwPcrManifest().create(pcrWhitelist);
         }
         // whitelist step 8: document that these mle's came from this host (not necessary for attestation, but to make this example complete)
-        MwMleSource biosMleSource = pm.getMleSourceJpa().findByMleId(bios.getId());
+        MwMleSource biosMleSource = My.jpa().mwMleSource().findByMleId(bios.getId());
         if( biosMleSource == null ) {
             biosMleSource = new MwMleSource();
             biosMleSource.setMleId(bios);
             biosMleSource.setHostName(hostname);
-            pm.getMleSourceJpa().create(biosMleSource);
+            My.jpa().mwMleSource().create(biosMleSource);
         }
-        MwMleSource vmmMleSource = pm.getMleSourceJpa().findByMleId(vmm.getId());
+        MwMleSource vmmMleSource = My.jpa().mwMleSource().findByMleId(vmm.getId());
         if( vmmMleSource == null ) {
             vmmMleSource = new MwMleSource();
             vmmMleSource.setMleId(vmm);
             vmmMleSource.setHostName(hostname);
-            pm.getMleSourceJpa().create(vmmMleSource);
+            My.jpa().mwMleSource().create(vmmMleSource);
         }
         // aik certificate
         if( agent.isAikAvailable() ) {
@@ -269,7 +263,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
         host.setBiosMleId(bios);
         host.setVmmMleId(vmm);
         
-        pm.getHostsJpa().create(host);
+        My.jpa().mwHosts().create(host);
     }
     
     
@@ -310,9 +304,9 @@ Pcr 23 = 0000000000000000000000000000000000000000
      */
     @Test
     public void loadTrustPolicyForHost() throws Exception {
-        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
-        HostTrustPolicyManager hostTrustPolicyFactory = pm.getHostTrustFactory();
+        HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(My.persistenceManager().getASData());
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(host, hostname); // must include both bios and vmm policies
         log.debug(json.writeValueAsString(trustPolicy));
 //        log.debug(xml.writeValueAsString(trustPolicy)); // notice the xml is NOT the same as the json at all... doesn't have all the info, and somehow has mixed "faults" in there somewhere even though the Rule objects do not have a fault method or field...
@@ -442,7 +436,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
      */
     @Test
     public void checkTrustReportForXen() throws Exception {
-        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
         HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
         TrustReport trustReport = hostTrustBO.getTrustReportForHost(host, hostname);        
@@ -515,7 +509,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
      */
     @Test
     public void checkHostTrustStatusForXen() throws Exception {
-        TblHosts host = pm.getHostsJpa().findByName(hostname);
+        TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
         HostTrustBO hostTrustBO = new HostTrustBO(My.persistenceManager());
         HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(host, host.getName());        

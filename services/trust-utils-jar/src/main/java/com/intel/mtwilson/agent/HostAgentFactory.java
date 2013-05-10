@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
+import com.intel.mtwilson.datatypes.ConnectionString;
 
 /**
  * Use this class to instantiate the appropriate agent or client for a given
@@ -173,6 +174,24 @@ public class HostAgentFactory {
                 VendorHostAgentFactory factory = vendorFactoryMap.get(vendor);
                 if( factory != null ) {
                     return factory.getHostAgent(hostAddress, urlpart, tlsPolicy);
+                }
+            }
+        }
+        throw new UnsupportedOperationException("No agent factory registered for this host");
+    }
+    
+    
+    public HostAgent getHostAgent(ConnectionString hostConnection, TlsPolicy tlsPolicy) throws IOException {
+        Vendor[] vendors = Vendor.values();
+        if( hostConnection == null ) {
+            throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
+        }
+        String vendorName = hostConnection.getVendor().name().toLowerCase();
+        for(Vendor vendor : vendors) {
+            if(vendor.name().toLowerCase().equals(vendorName)) { // intel, citrix, vmware
+                VendorHostAgentFactory factory = vendorFactoryMap.get(vendor);
+                if( factory != null ) {
+                    return factory.getHostAgent(hostConnection.getConnectionString(), tlsPolicy);
                 }
             }
         }

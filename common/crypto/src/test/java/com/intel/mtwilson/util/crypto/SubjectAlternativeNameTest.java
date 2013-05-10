@@ -73,6 +73,19 @@ public class SubjectAlternativeNameTest {
     }
     
     @Test
+    public void createCertificateWithAlternativeNameAutodetectType() throws Exception {
+        KeyPair caKeys = RsaUtil.generateRsaKeyPair(1024);
+        X509Certificate caCert = RsaUtil.generateX509Certificate("Test CA Cert", caKeys, 30);
+        KeyPair subjectKeys = RsaUtil.generateRsaKeyPair(1024);
+        // Using the original factory method:  (has limitation on distinguished name, you only provide the value for CN and it automatically adds CN= and also the others)
+        CertificateIssuerName issuerName = new CertificateIssuerName(X500Name.asX500Name(caCert.getSubjectX500Principal()));
+        X509Certificate subjectCertIP = RsaUtil.createX509CertificateWithIssuer(subjectKeys.getPublic(), "test1", "1.2.3.4", 30/*days*/, caKeys.getPrivate(), issuerName);
+        writeCert(subjectCertIP, "testIP.crt");
+        X509Certificate subjectCertDNS = RsaUtil.createX509CertificateWithIssuer(subjectKeys.getPublic(), "test1", "myhost.company.com", 30/*days*/, caKeys.getPrivate(), issuerName);
+        writeCert(subjectCertDNS, "testDNS.crt");
+    }
+
+    @Test
     public void testUsingRsaCredentialX509() throws Exception {
         KeyPair caKeys = RsaUtil.generateRsaKeyPair(1024);
         X509Builder caBuilder = X509Builder.factory().subjectName("CN=Test CA Cert").alternativeName("dns:server.com").expires(30, TimeUnit.DAYS).subjectPublicKey(caKeys.getPublic()).issuerPrivateKey(caKeys.getPrivate()).issuerName("CN=Test CA Cert");

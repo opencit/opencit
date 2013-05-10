@@ -5,8 +5,7 @@
 package security;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyConfiguration;

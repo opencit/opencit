@@ -7,7 +7,7 @@ import com.intel.mountwilson.common.WLMPortalException;
 import com.intel.mountwilson.datamodel.MLEDataVO;
 import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mountwilson.util.ConverterUtil;
-import com.intel.mtwilson.WhitelistService;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.MLESearchCriteria;
 import com.intel.mtwilson.datatypes.MleData;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
