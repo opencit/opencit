@@ -25,10 +25,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "mw_portal_user")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "MwPortalUser.findAll", query = "SELECT a FROM MwPortalUser a"),
-    @NamedQuery(name = "MwPortalUser.findById", query = "SELECT a FROM MwPortalUser a WHERE a.id = :id"),
     @NamedQuery(name = "MwPortalUser.findByUsername", query = "SELECT a FROM MwPortalUser a WHERE a.username = :username"),
     @NamedQuery(name = "MwPortalUser.findByUsernameEnabled", query = "SELECT a FROM MwPortalUser a WHERE a.username = :username AND a.enabled = :enabled"),
+    @NamedQuery(name = "MwPortalUser.findAll", query = "SELECT a FROM MwPortalUser a"),
+    @NamedQuery(name = "MwPortalUser.findById", query = "SELECT a FROM MwPortalUser a WHERE a.id = :id"),
     @NamedQuery(name = "MwPortalUser.findByUsernameLike", query = "SELECT a FROM MwPortalUser a WHERE a.username LIKE :username"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "MwPortalUser.findByCommentLike", query = "SELECT a FROM MwPortalUser a WHERE a.comment LIKE :comment"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "MwPortalUser.findByEnabled", query = "SELECT a FROM MwPortalUser a WHERE a.enabled = :enabled"),

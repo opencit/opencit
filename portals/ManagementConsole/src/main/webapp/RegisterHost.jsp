@@ -14,8 +14,8 @@
 				<div class="labelDiv">Host Provided By : </div>
 				<div class="valueDiv">
 					<select class="textBox_Border" id="MainContent_ddlHOSTProvider" onchange="fnChangehostType(this,false)" >
-						<option type="false" >Flat File</option>
-						<option type="true" >VMware Cluster</option>
+						<option value="Flat File" type="false" >Flat File</option>
+						<option value="VMware Cluster" type="true" >VMware Cluster</option>
 					</select>
 				</div>
 			</div>

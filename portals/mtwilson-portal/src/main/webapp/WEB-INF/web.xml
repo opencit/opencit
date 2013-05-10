@@ -40,13 +40,5 @@
         <description>Cleans up Persistence factory.</description>
         <listener-class>com.intel.mountwilson.common.MCPersistenceManager</listener-class>
     </listener>
-      <listener>
-        <description>Cleans up Persistence factory.</description>
-        <listener-class>com.intel.mountwilson.common.TDPersistenceManager</listener-class>
-    </listener>
-    <listener>
-        <description>Cleans up Persistence factory.</description>
-        <listener-class>com.intel.mountwilson.common.WLMPPersistenceManager</listener-class>
-    </listener>
 
 </web-app>
