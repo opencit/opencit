@@ -426,8 +426,8 @@ elif using_tomcat; then
     #  fi 
     #fi
 
-    chmod +x /etc/init.d/tomcat.sh
-    chmod +x /usr/local/bin/tomcat_starter.sh
+    #chmod +x /etc/init.d/tomcat.sh
+    #chmod +x /usr/local/bin/tomcat_starter.sh
 
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
     echo "export CATALINA_OPTS=\"\$CATALINA_OPTS -Xms512m -Xmx2048m\"" >> $TOMCAT_HOME/bin/setenv.sh
@@ -443,11 +443,10 @@ elif using_tomcat; then
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      /etc/init.d/tomcat.sh stop
-      /etc/init.d/tomcat.sh start
+      tomcat_restart
     else
       echo "Starting Tomcat ..."
-      /etc/init.d/tomcat.sh start
+      tomcat_start
     fi
 	# tomcat init end
   else
