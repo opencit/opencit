@@ -32,14 +32,11 @@ public class BulkHostMgmtBO {
 
     private Logger log = LoggerFactory.getLogger(getClass());
     private HostBO hostBO = new ASComponentFactory().getHostBO();
-    //TODO: Do we need to add this time out setting also in the configuration file?
     private int timeout;
-    //TODO: Add a new setting for host mgmt threads name:bulkmgmt
     private static ExecutorService scheduler = Executors.newFixedThreadPool(ASConfig.getConfiguration().getInt("mtwilson.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
 
     public BulkHostMgmtBO() {
-        //TODO: Do we need to add this time out setting also in the configuration file?
-        timeout = 600;
+        timeout = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.hostmgmt.hostTimeout", 600);
     }
 
     public BulkHostMgmtBO(int timeout) {

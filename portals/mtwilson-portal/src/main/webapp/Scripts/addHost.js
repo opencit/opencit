@@ -303,7 +303,7 @@ function fnGetNewHostData() {
         hostVo.hostPort =$.trim($('#MainContent_tbHostPort').val());
         hostVo.vCenterDetails = "citrix:https://"+$('#MainContent_tbHostIP').val()+":"+$('#MainContent_tbHostPort').val()+
                                              ";"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
-        alert("citrix hostVo cs = " + hostVo.vCenterDetails);
+        
     }
 	
 	//setting unwanted values to null or default

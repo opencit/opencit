@@ -343,7 +343,7 @@ function checkTrustConstrains(element){
         if(($(div).attr('overall') == 'true' && targethostTrust == 'true')){
             trustPL = true;
         }else {
-            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Cannot migrate the VM since the target host does not satisfy the Trust policy.');
+            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Cannot migrate the VM since the target host does not satisfy the trust policy.');
             trustPL = false;
         }
     return trustPL;
@@ -360,7 +360,7 @@ function checkTrustOnlyCurrentHost(element){
         if($(div).attr('overall') == 'true'){
             trustPL = true;
         }else {
-            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Trust policy cannot be applied as the VM is placed on a trusted host.');
+            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Trust policy cannot be applied as the VM is placed on a non-trusted host.');
             trustPL = false;
         }
     return trustPL;
