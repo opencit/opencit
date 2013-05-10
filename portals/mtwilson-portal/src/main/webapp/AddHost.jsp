@@ -16,28 +16,7 @@
 					<input type="text" id="MainContent_tbHostName" class="textBoxClass">
 				</div>
 			</div>
-					
-			<div class="singleDiv">
-				<div class="labelDiv">Host IP Address : </div>
-				<div class="valueDiv">
-					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
-				</div>
-			</div>
-					
-			<div class="singleDiv" id="hostPortDisplayDiv">
-				<div class="labelDiv">Host Port :</div>
-				<div class="valueDiv" >
-					<input type="text" class="textBoxClass" id="MainContent_tbHostPort" value="9999" >
-				</div>
-			</div>
-			
-			<div class="singleDiv">
-				<div class="labelDiv">Description :</div>
-				<div class="valueDiv">
-					<textarea class="textAreaBoxClass" id="MainContent_tbDesc" cols="20" rows="2"></textarea>
-				</div>
-			</div>
-			
+            
 			<div class="singleDiv">
 				<div class="labelDiv">OEM Vendor :</div>
 				<div class="valueDiv">
@@ -61,7 +40,27 @@
 					</select>
 				</div>
 			</div>
-             <div id="citrixStringElement">
+                                    
+                                    <div class="singleDiv">
+				<div class="labelDivgkv" >&nbsp;</div>
+				<div class="labelDivgkv" >&nbsp;</div>
+			</div>
+            
+			<div class="singleDiv">
+				<div class="labelDiv">Host IP Address : </div>
+				<div class="valueDiv">
+					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
+				</div>
+			</div>
+					
+			<div class="singleDiv" id="hostPortDisplayDiv">
+				<div class="labelDiv">Host Port :</div>
+				<div class="valueDiv" >
+					<input type="text" class="textBoxClass" id="MainContent_tbHostPort" value="9999" >
+				</div>
+			</div>
+						            
+                                    <div id="citrixStringElement">
 				<div class="singleDiv">
 					<div class="labelDiv">XenServer Details :</div>
 					<div class="valueDiv">&nbsp;
@@ -108,7 +107,16 @@
 						</div>
 				</div>
 			</div>
+            
+                                    <div class="singleDiv">
+				<div class="labelDiv">Description :</div>
+				<div class="valueDiv">
+					<textarea class="textAreaBoxClass" id="MainContent_tbDesc" cols="20" rows="2"></textarea>
+				</div>
+			</div>
+            
 			<div class="singleDiv">
+                                                <div class="valueDiv">&nbsp; </div>
 				<div class="labelDiv">E-mail Address :</div>
 				<div class="valueDiv">
 					<input type="text" maxlength="200" id="MainContent_tbEmailAddress" class="textBoxClass">
