@@ -79,7 +79,7 @@ public class ConnectionString {
                 String optionsPart = vendorURL.substring(optionStartIndex+1); // skip the delimiter
                 log.debug("URL part: {}", urlPart);
                 log.debug("Options part: {}", optionsPart);
-                vc.url = new URL(urlPart);
+                vc.url = new URL(urlPart); // vendorURL without the options
                 vc.options = parseOptions(optionsPart);
             }
             else {
@@ -220,7 +220,11 @@ public class ConnectionString {
      */
     public String getConnectionStringWithPrefix() {
         if( this.vendor == null ) { return ""; } // XXX should we return null to indicate an error? or maybe this shouldn't even be possible to have a ConnectionString object without a vendor?
-        return String.format("%s:%s", this.vendor.name().toLowerCase(), getConnectionString());
+        String connStr = getConnectionString();
+        if( connStr.toLowerCase().startsWith(this.vendor.name().toLowerCase())) {
+            return connStr;
+        }
+        return String.format("%s:%s", this.vendor.name().toLowerCase(), connStr);
     }
 
     /**
@@ -650,7 +654,7 @@ public class ConnectionString {
         String params = str.substring(str.indexOf(';')+1); // get everything after the first semicolon 
         String[] parts = params.split(";");
         if( parts.length == 1 ) {
-            if( parts[0].startsWith("u=") ) {
+            if( parts[0].toLowerCase().startsWith("u=") ) {
                 return parts[0].substring(2); // value after the "u="  for URL like https://citrix:443;u=username
             }
             return parts[0]; // the only value after semicolon for URL like https://citrix:443;username
@@ -781,16 +785,16 @@ public class ConnectionString {
 
     private static Vendor vendorFromURL(String url) {
         for( Vendor v : Vendor.values() ) {
-            if( url.startsWith(v.name().toLowerCase()+":") ) {
+            if( url.toLowerCase().startsWith(v.name().toLowerCase()+":") ) {
                 return v;
             }
         }
         return null;
     }
     
-    private static String vendorConnectionFromURL(URL url) throws MalformedURLException {
-        return vendorConnectionFromURL(url.toExternalForm());
-    }
+//    private static String vendorConnectionFromURL(URL url) throws MalformedURLException {
+//        return vendorConnectionFromURL(url.toExternalForm());
+//    }
 
     private static String vendorConnectionFromURL(String url) throws MalformedURLException {
         Vendor v = vendorFromURL(url);
