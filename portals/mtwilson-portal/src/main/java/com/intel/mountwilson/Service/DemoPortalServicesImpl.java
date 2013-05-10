@@ -282,13 +282,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                                     ConnectionString connStr = null;
                                     if (dataVO.getvCenterDetails() == null && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
                                        
-                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
+                                        connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
-                                        connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails());
+                                        connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:",""));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("xenserver")) {
                                         connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:",""));
                                     } else {
-                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails());
+                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:",""));
                                     }
                                     dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
                                     TxtHost hostObj = ConverterUtil.getTxtHostFromHostVO(dataVO);
@@ -317,13 +317,13 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		try {
                                     ConnectionString connStr = null;
                                     if (dataVO.getvCenterDetails() == null && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
-                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
+                                        connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
-                                        connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails());
+                                        connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:", ""));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("citrix")) {
-                                        connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails());
+                                        connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:", ""));
                                     } else {
-                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails());
+                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:", ""));
                                     }
                                     dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
                                     TxtHost hostObj = ConverterUtil.getTxtHostFromHostVO(dataVO);

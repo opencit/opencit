@@ -4,14 +4,13 @@
  */
 package test.policy;
 
-import com.intel.mtwilson.as.helper.Aes128DataCipher;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwMleSource;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.as.helper.Aes128DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -30,7 +29,6 @@ import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.*;
-import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -41,10 +39,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.BeforeClass;
 import com.intel.mtwilson.tls.TlsPolicy;
 import org.apache.commons.codec.binary.Base64;
 /**
