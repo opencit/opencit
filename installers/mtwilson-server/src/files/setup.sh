@@ -403,34 +403,35 @@ elif using_tomcat; then
  if [ ! -z "$tomcat" ]; then
   # tomcat install here
   echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    if grep -q MaxPermSize /usr/loca/bin/tomcat_starter.sh; then
-     someRand=""
-    else
-      #setup the java_opts and tomcat start in the starter file
-      if [ ! -f /usr/local/bin/tomcat_starter.sh ]; then
-	    echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
-        #echo "export JAVA_OPTS=\"-Xms512m -Xmx2560m -XX:MaxPermSize=2048m\"" >> /usr/local/bin/tomcat_starter.sh
-        echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
-      fi
-      #make the starter file exec on startup
-      if [ ! -f /etc/init.d/tomcat.sh ]; then
-        echo "#!/bin/bash" >> /etc/init.d/tomcat.sh
-        echo "case \"\$1\" in" >> /etc/init.d/tomcat.sh
-        echo "start)" >> /etc/init.d/tomcat.sh
-        echo "/usr/local/bin/tomcat_starter.sh" >> /etc/init.d/tomcat.sh
-        echo ";;" >> /etc/init.d/tomcat.sh
-        echo "stop)" >> /etc/init.d/tomcat.sh
-        echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh stop" >> /etc/init.d/tomcat.sh
-        echo ";;" >> /etc/init.d/tomcat.sh
-        echo "esac" >> /etc/init.d/tomcat.sh
-      fi 
-    fi
+    #if grep -q MaxPermSize /usr/loca/bin/tomcat_starter.sh; then
+    # someRand=""
+    #else
+    #  #setup the java_opts and tomcat start in the starter file
+    #  if [ ! -f /usr/local/bin/tomcat_starter.sh ]; then
+	#    #echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
+    #    echo "export JAVA_OPTS=\"-Xms512m -Xmx2560m -XX:MaxPermSize=2048m\"" >> /usr/local/bin/tomcat_starter.sh
+    #    echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
+    #  fi
+    #  #make the starter file exec on startup
+    #  if [ ! -f /etc/init.d/tomcat.sh ]; then
+    #    echo "#!/bin/bash" >> /etc/init.d/tomcat.sh
+    #    echo "case \"\$1\" in" >> /etc/init.d/tomcat.sh
+    #    echo "start)" >> /etc/init.d/tomcat.sh
+    #    echo "/usr/local/bin/tomcat_starter.sh" >> /etc/init.d/tomcat.sh
+    #    echo ";;" >> /etc/init.d/tomcat.sh
+    #    echo "stop)" >> /etc/init.d/tomcat.sh
+    #    echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh stop" >> /etc/init.d/tomcat.sh
+    #    echo ";;" >> /etc/init.d/tomcat.sh
+    #    echo "esac" >> /etc/init.d/tomcat.sh
+    #  fi 
+    #fi
 
     chmod +x /etc/init.d/tomcat.sh
     chmod +x /usr/local/bin/tomcat_starter.sh
 
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
-    echo "CATALINA_OPTS=\"\$CATALINA_OPTS -Xms128m -Xmx128m\"" >> $TOMCAT_HOME/bin/catalina.sh
+    echo "export CATALINA_OPTS=\"\$CATALINA_OPTS -Xms512m -Xmx2048m\"" >> $TOMCAT_HOME/bin/setenv.sh
+    chmod +x $TOMCAT_HOME/bin/setenv.sh
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end tomcat install
  else
