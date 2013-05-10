@@ -24,7 +24,7 @@ function fnforTLSCertificate(){
 
 function fnRootCADownloadSuccess(responseJSON){
 	if (responseJSON.result)
-	{ //alert (responseJSON.SAMLcertificate);
+	{ alert (responseJSON.SAMLcertificate);
             if (document.execCommand) {
             /* Start For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */
 	          //  var oWin = window.open("about:blank", "_blank");
