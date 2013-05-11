@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mtwilson.tls.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 

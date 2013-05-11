@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;

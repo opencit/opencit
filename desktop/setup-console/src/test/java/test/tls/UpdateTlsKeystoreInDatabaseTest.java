@@ -8,6 +8,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import org.junit.Test;
 import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
@@ -19,6 +20,7 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.model.Sha1Digest;
@@ -28,10 +30,12 @@ import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -116,7 +120,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
      */
     @Test
     public void testAddCurrentTlsCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
-        String username = "ManagementServiceAutomation"; // "admin";
+        String username = "admin"; // "ManagementServiceAutomation"; 
         String password = "password";
         MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
         MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
@@ -131,9 +135,37 @@ public class UpdateTlsKeystoreInDatabaseTest {
         portalUser.setKeystore(newkeystore);
         keystoreJpa.edit(portalUser);
     }
+
+    @Test
+    public void testAddCurrentTlsCertificateToMyUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
+        FileResource keystoreFile = new FileResource(My.configuration().getKeystoreFile());
+        SimpleKeystore keystore = new SimpleKeystore(keystoreFile, My.configuration().getKeystorePassword());
+        SslUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
+        keystore.save();
+    }
     
     @Test
-    public void testPrintCurrenUserKeystoreContents() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException {
+    public void testAddCurrentSamlCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, MalformedURLException, ApiException, SignatureException, Exception {
+        String username = "admin"; // "ManagementServiceAutomation"; 
+        String password = "password";
+        // get the new saml certificate
+        X509Certificate samlCert = My.client().getSamlCertificate();
+        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
+        MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
+        byte[] oldkeystore = portalUser.getKeystore();
+        log.debug("old keystore: {}", Md5Digest.valueOf(oldkeystore));
+        ByteArrayResource resource = new ByteArrayResource(oldkeystore);
+        SimpleKeystore keystore = new SimpleKeystore(resource, password);
+        keystore.addTrustedSamlCertificate(samlCert, samlCert.getSubjectX500Principal().getName());
+        keystore.save();
+        byte[] newkeystore = resource.toByteArray();
+        log.debug("new keystore: {}", Md5Digest.valueOf(newkeystore));
+        portalUser.setKeystore(newkeystore);
+        keystoreJpa.edit(portalUser);
+    }
+    
+    @Test
+    public void testPrintCurrentUserKeystoreContents() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException {
         String username = "admin";
         String password = "password";
         MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));

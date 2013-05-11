@@ -1,7 +1,7 @@
-package com.intel.mountwilson.as.helper;
+package com.intel.mtwilson.agent.intel;
 
 /**
- *
+ * XXX TODO this needs to move into the com.intel.mtwilson.agent.intel package in trust-utils-jar 
  * @author dsmagadX
  */
 
@@ -32,7 +32,6 @@ import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.Arrays;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;

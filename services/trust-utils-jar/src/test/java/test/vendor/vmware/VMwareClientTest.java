@@ -1,4 +1,4 @@
-package com.intel.mtwilson.as.helper;
+package test.vendor.vmware;
 
 import org.junit.Test;
 //import sun.misc.BASE64Encoder;
