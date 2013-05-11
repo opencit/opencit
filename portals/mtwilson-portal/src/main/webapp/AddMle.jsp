@@ -116,16 +116,14 @@
 				</table>
 				
 			</div>
-			<div id="uploadGkvs" class="manifestListClass" style="display: none;">
-				<div class="singleDivGkv">
-					<div class="labelDivgkv">Required Manifests :</div>
+			<div id="uploadGkvs" class="singleDiv" style="display: none;">
+					<div class="labelDiv">Required Manifests :</div>
 					<div class="valueDiv" id="gkvs_register_checkbox">
 						<input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span>
 						<input type="checkbox" id="MainContent_check_gkvs18" name="18"><span>18</span>
 						<input type="checkbox" id="MainContent_check_gkvs19" name="19"><span>19</span>
 						<input type="checkbox" id="MainContent_check_gkvs20" name="20"><span>20</span>
 					</div>
-				</div>
 				
 				<!-- <div class="singleDiv">
 					<div class="labelDivgkv">Trusted Host for Retrieving GKVs :</div>
