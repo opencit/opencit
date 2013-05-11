@@ -420,6 +420,8 @@ public class HostTrustBO extends BaseBO {
                 // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. XXX TODO  we should not keep two lists... the "Required Manifest List" field should be deleted and it must be up to the whitelist manager to define only the pcrs that should be checked! in a future release (maybe 1.3) we will store a global whitelist with pcr values for known mles, and for specific hosts the trust poilcy will be stored as a set of rules instead of just pcr values for specific hosts and it will be more evident what the trust policy is supposed to be. 
                 if( pcr == null ) {
                     log.error("Trust policy includes PCR {} but MLE does not define it", pcrPolicy.getExpectedPcr().getIndex().toInteger());
+                    // create the missing pcr record in the report so the user will see it in the UI 
+                    pcr = new TblTaLog();
                     // we need to find out if this is a bios pcr or vmm pcr
                     String[] markers = pcrPolicy.getMarkers();
                     List<String> markerList = Arrays.asList(markers);
@@ -434,8 +436,6 @@ public class HostTrustBO extends BaseBO {
                     else {
                         log.error("MLE Type is unknown, markers are: {}", StringUtils.join(markers, ","));
                     }
-                    // create the missing pcr record in the report so the user will see it in the UI 
-                    pcr = new TblTaLog();
                     pcr.setHostID(host.getId());
                     pcr.setUpdatedOn(today);
                     pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
