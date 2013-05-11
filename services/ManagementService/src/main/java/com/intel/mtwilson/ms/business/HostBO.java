@@ -1363,7 +1363,12 @@ public class HostBO extends BaseBO {
 
                 //TODO: After the connectionString class integration change the below code to check for Citrix,which supports only PCR. Remaining host types support
                 // module based attestation.
-                attestationType = "MODULE";
+                ConnectionString connString = new ConnectionString(hostObj.AddOn_Connection_String);
+                if (connString.getVendor() == Vendor.CITRIX) {
+                    attestationType = "PCR";
+                } else {
+                    attestationType = "MODULE";
+                }
 
                 // Update the host object with the names of BIOS and VMM, which is needed during
                 // host registration.
