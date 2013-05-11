@@ -89,7 +89,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -143,7 +143,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
