@@ -280,15 +280,17 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		boolean result = false;
 		try {
                                     ConnectionString connStr = null;
-                                    if (dataVO.getvCenterDetails() == null && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
-                                       log.debug("Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
+                                    if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
+                                       log.debug("saveNewHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
                                         connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
+                                        log.debug("saveNewHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
                                         connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:",""));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("xenserver")) {
+                                        log.debug("saveNewHostData: Using citrix connection string: {}", dataVO.getvCenterDetails());
                                         connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:",""));
                                     } else {
-                                        log.debug("Creating default intel connection string: {}", dataVO.getvCenterDetails());
+                                        log.debug("saveNewHostData: Creating default intel connection string: {}", dataVO.getvCenterDetails());
                                         connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:",""));
                                     }
                                     dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
@@ -317,13 +319,17 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		boolean result = false;
 		try {
                                     ConnectionString connStr = null;
-                                    if (dataVO.getvCenterDetails() == null && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
+                                    if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
+                                       log.debug("updateHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
                                         connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
+                                        log.debug("updateHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
                                         connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:", ""));
                                     } else if (dataVO.getVmmName().toLowerCase().contains("citrix")) {
+                                        log.debug("updateHostData: Using citrix connection string: {}", dataVO.getvCenterDetails());
                                         connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:", ""));
                                     } else {
+                                        log.debug("updateHostData: Creating default intel connection string: {}", dataVO.getvCenterDetails());
                                         connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:", ""));
                                     }
                                     dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
