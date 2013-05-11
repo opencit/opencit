@@ -416,9 +416,12 @@ public class HostTrustBO extends BaseBO {
                 // XXX we can do this because we know the policy passed and it's a constant pcr value... but ideally we need to be logging the host's actual value from its HostReport!!!
                 // find out which MLE this policy corresponds to and then log it
                 TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
-                pcr.setTrustStatus(result.isTrusted());
-                if( !result.isTrusted() ) {
-                    pcr.setError("Incorrect value for PCR "+pcrPolicy.getExpectedPcr().getIndex().toString());
+                // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. XXX TODO  we should not keep two lists... the "Required Manifest List" field should be deleted and it must be up to the whitelist manager to define only the pcrs that should be checked! in a future release (maybe 1.3) we will store a global whitelist with pcr values for known mles, and for specific hosts the trust poilcy will be stored as a set of rules instead of just pcr values for specific hosts and it will be more evident what the trust policy is supposed to be. 
+                if( pcr != null ) {
+                    pcr.setTrustStatus(result.isTrusted());
+                    if( !result.isTrusted() ) {
+                        pcr.setError("Incorrect value for PCR "+pcrPolicy.getExpectedPcr().getIndex().toString());
+                    }
                 }
 //                pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
 //                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString()); 

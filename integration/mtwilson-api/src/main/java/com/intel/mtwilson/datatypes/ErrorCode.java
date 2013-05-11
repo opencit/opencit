@@ -40,7 +40,7 @@ public enum ErrorCode {
     HTTP_NOT_FOUND(404, "HTTP 404 NOT FOUND"),
     HTTP_INTERNAL_SERVER_ERROR(500, "HTTP 500 INTERNAL SERVER ERROR"),
 
-    AS_ASYNC_TIMEOUT(1002,"Asynchronous operation timed out.Time out set to %d seconds"),
+    AS_ASYNC_TIMEOUT(1002,"Asynchronous operation timed out after %d seconds"),
     AS_HOST_NOT_FOUND(1003,"Host '%s' not found."),
     AS_BIOS_INCORRECT(1004,"Bios '%s' or version '%s' is incorrect."),
     AS_VMM_INCORRECT(1004,"VMM '%s' or version '%s' is incorrect."),

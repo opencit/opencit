@@ -40,11 +40,13 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringUtils;
 
@@ -233,11 +235,17 @@ public class UpdateTlsKeystoreInDatabaseTest {
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), My.persistenceManager().getDek());
         */
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"));
-        TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
+        TblHosts host = hostsJpa.findByIPAddress("10.1.70.126");
         SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
-        X509Certificate[] certificates = keystore.getTrustedCertificates("dek-recipient");
+        ArrayList<X509Certificate> certificates = new ArrayList<X509Certificate>();
+        for(String alias : keystore.aliases()) {
+            log.debug("certificate alias {}", alias);
+            certificates.add(keystore.getX509Certificate(alias));
+        }
         for(X509Certificate certificate : certificates) {
-            log.info(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.info(String.format("Subject: %s", certificate.getSubjectX500Principal().getName()));
+            log.info(String.format("Alternative names: %s", X509Util.alternativeNames(certificate).isEmpty() ? "none" : StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.info(String.format("Fingerprint: %s", Hex.encodeHexString(X509Util.sha1fingerprint(certificate))));
         }
     }
     
