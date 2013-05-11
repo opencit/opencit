@@ -428,6 +428,7 @@ public class ConnectionString {
     public static ConnectionString forIntel(Hostname hostname) {
         ConnectionString conn = new ConnectionString();
         conn.vendor = Vendor.INTEL;
+        conn.hostname = new InternetAddress(hostname.toString());
         conn.managementServerName = hostname.toString();
         conn.port = 9999; // default Intel Trust Agent port
         return conn;
@@ -442,6 +443,7 @@ public class ConnectionString {
     public static ConnectionString forIntel(Hostname hostname, Integer port) {
         ConnectionString conn = new ConnectionString();
         conn.vendor = Vendor.INTEL;
+        conn.hostname = new InternetAddress(hostname.toString());
         conn.managementServerName = hostname.toString();
         conn.port = port;
         return conn;
@@ -797,6 +799,7 @@ public class ConnectionString {
 //    }
 
     private static String vendorConnectionFromURL(String url) throws MalformedURLException {
+        log.debug("url: {}", url);
         Vendor v = vendorFromURL(url);
         if( v == null ) {
             return null;
