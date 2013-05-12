@@ -63,7 +63,24 @@
                     </archive>
                 </configuration>
             </plugin>
-                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>regular-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>with-dependencies</shadedClassifierName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                                        
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -77,71 +94,6 @@
                 </configuration>
             </plugin>	    
 		
-            <!-- create a jar-with-dependencies.  see also:
-       	    http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
-       	    -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>regular-jar-with-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>with-dependencies</shadedClassifierName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>shaded-jar-with-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>with-dependencies-shaded</shadedClassifierName> <!-- Any name that makes sense -->
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resource>META-INF/BCKEY.SF</resource>
-                                    <resource>META-INF/BCKEY.DSA</resource>
-                                </transformer>
-                            </transformers>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org</pattern>
-                                    <shadedPattern>com.intel.shaded.org</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>net</pattern>
-                                    <shadedPattern>com.intel.shaded.net</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>javax.activation</pattern>
-                                    <shadedPattern>com.intel.shaded.javax.activation</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>javax.ws</pattern>
-                                    <shadedPattern>com.intel.shaded.javax.ws</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>javax.xml</pattern>
-                                    <shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
-                                </relocation>
-                                <!--
-                          		    <relocation>
-                             			<pattern>com.sun</pattern>
-                             			<shadedPattern>com.intel.shaded.com.sun</shadedPattern>
-                          		    </relocation>
-                                -->
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
       
             <!-- begin copy dependencies plugin (to create zip file) -->
             <plugin>
@@ -219,29 +171,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                            <goal>javadoc</goal>
-                        </goals>
-                        <configuration>
-                            <attach>true</attach>
-                            <includeDependencySources>true</includeDependencySources>
-                            <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
-                            <dependencySourceIncludes>
-                                <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
-                                <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
-                            </dependencySourceIncludes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
         </plugins>      
       
@@ -514,5 +443,97 @@
        	</dependency>-->
         <!-- end Java 1.5 backport dependencies -->
     </dependencies>  
+
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>  <!-- activate this profile with  -Drelease on the command line -->
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                    <goal>javadoc</goal>
+                                </goals>
+                                <configuration>
+                                    <attach>true</attach>
+                                    <includeDependencySources>true</includeDependencySources>
+                                    <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
+                                    <dependencySourceIncludes>
+                                        <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
+                                    </dependencySourceIncludes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- create a shaded jar-with-dependencies.  see also:
+                    http://maven.apache.org/plugins/maven-shade-plugin/examples/includes-excludes.html 
+                    -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>shaded-jar-with-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                                <configuration>
+                                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                                    <shadedClassifierName>with-dependencies-shaded</shadedClassifierName> <!-- Any name that makes sense -->
+                                    <transformers>
+                                        <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                            <resource>META-INF/BCKEY.SF</resource>
+                                            <resource>META-INF/BCKEY.DSA</resource>
+                                        </transformer>
+                                    </transformers>
+                                    <relocations>
+                                        <relocation>
+                                            <pattern>org</pattern>
+                                            <shadedPattern>com.intel.shaded.org</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>net</pattern>
+                                            <shadedPattern>com.intel.shaded.net</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>javax.activation</pattern>
+                                            <shadedPattern>com.intel.shaded.javax.activation</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>javax.ws</pattern>
+                                            <shadedPattern>com.intel.shaded.javax.ws</shadedPattern>
+                                        </relocation>
+                                        <relocation>
+                                            <pattern>javax.xml</pattern>
+                                            <shadedPattern>com.intel.shaded.javax.xml</shadedPattern>
+                                        </relocation>
+                                        <!--
+                                            <relocation>
+                                                <pattern>com.sun</pattern>
+                                                <shadedPattern>com.intel.shaded.com.sun</shadedPattern>
+                                            </relocation>
+                                        -->
+                                    </relocations>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

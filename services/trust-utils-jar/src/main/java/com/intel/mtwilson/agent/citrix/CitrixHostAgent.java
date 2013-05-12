@@ -128,6 +128,7 @@ public class CitrixHostAgent implements HostAgent{
             info = this.client.getHostInfo();
         } catch(Exception ex){
             System.out.println("getHostDetails getHostInfo caught: " + ex.getMessage());
+            throw new IOException("Cannot get Citrix host info: "+ex.getMessage(), ex);
        }
         
         record.HostName = client.hostIpAddress;

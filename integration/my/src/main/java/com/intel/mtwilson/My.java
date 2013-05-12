@@ -43,7 +43,7 @@ public class My {
         if( client == null ) {
             log.info("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
             client = ClientFactory.clientForUserInResource(
-                new FileResource(configuration().getKeystoreDir()), 
+                new FileResource(configuration().getKeystoreFile()), 
                 configuration().getKeystoreUsername(),
                 configuration().getKeystorePassword(),
                 configuration().getMtWilsonURL());

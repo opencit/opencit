@@ -1,11 +1,13 @@
 var disabledDiv = '<div id="disabledDiv" class="disabledDiv"><img class="loadingImageClass" src="images/loading.gif" /></div>';
-var validationDiv = '<div class="errorMessage validationErrorDiv"> Value Can\'t be Empty.</div>';
-var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special Characters are not allowed.</div>';
+var validationDiv = '<div class="errorMessage validationErrorDiv"> Value cannot be empty.</div>';
+var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special characters are not allowed.</div>';
+var validationSpan = '<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>';
+var validationSpecialSpan = '<span class="errorMessage validationErrorDiv" style="float:none">Special characters are not allowed.</span>';
 var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
-var regIPAddress = new RegExp();
+var regIPAddress = new RegExp(/^[0-9_.]+$/);
 var regPortNo = new RegExp(/^[0-9]+$/);
 // 0 = TA,  1 == vmware, 2 == citrix
 var isVMWare = 0;
@@ -87,7 +89,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -141,7 +143,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -678,12 +680,13 @@ function fnGetMleData(isNewMle) {
                         }
 		mleObj.mleDescription = $('#MainContent_tbDesc').val();
 		var mani = [];
-		if ($('#MainContent_ddlAttestationType').val() == "Module" || $('#MainContent_ddlAttestationType').val() == "MODULE") {
+		if (mleObj.attestation_Type == "Module" || mleObj.attestation_Type == "MODULE") {
 			$('#gkvs_register_checkbox input').each(function() {
 				var manifestObj = new manifestList();
 				if($(this).attr('checked') == 'checked'){
 					manifestObj.name = $(this).attr('name');
 					manifestObj.value= $(this).attr('value');
+                                                            // alert("Manifest Name is: " +  manifestObj.name + " Value is: " + manifestObj.value );
 					mani.push(manifestObj);
 				}
 			});
@@ -706,13 +709,14 @@ function fnGetMleData(isNewMle) {
 
 
 function fnTestValidation(inputID,regExpresion) {
+           // alert($('#'+inputID).val());
 	$('#'+inputID).parent().find('.errorMessage').remove();
 	if ($('#'+inputID).val() == '') {
-		$('#'+inputID).parent().append(validationDiv);
+		$('#'+inputID).parent().append(validationSpan);
 		return false;
 	}else {
 		if (!regExpresion.test($('#'+inputID).val())) {
-			$('#'+inputID).parent().append(validationSpecialDiv);
+			$('#'+inputID).parent().append(validationSpecialSpan);
 			return false;
 		}
 	}

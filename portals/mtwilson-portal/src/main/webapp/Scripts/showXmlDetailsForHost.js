@@ -102,6 +102,6 @@ function formatXml(xml) {
         formatted += padding + node + '\r\n';
         pad += indent;
     });
-    alert(formatted);
+   // alert(formatted);
     return formatted;
 }

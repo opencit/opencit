@@ -23,7 +23,6 @@ import org.apache.commons.io.IOUtils;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;

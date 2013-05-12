@@ -50,6 +50,7 @@ import java.util.Set;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import org.apache.commons.configuration.Configuration;
+import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
 import org.slf4j.Logger;
@@ -391,7 +392,7 @@ public class HostTrustBO extends BaseBO {
             pcr.setHostID(host.getId());
             pcr.setMleId(host.getBiosMleId().getId());
             pcr.setUpdatedOn(today);
-            pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults
+            pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(biosPcrIndex);
             pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(biosPcrIndex)), pcr);
@@ -401,7 +402,7 @@ public class HostTrustBO extends BaseBO {
             pcr.setHostID(host.getId());
             pcr.setMleId(host.getVmmMleId().getId());
             pcr.setUpdatedOn(today);
-            pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults
+            pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(vmmPcrIndex);
             pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
@@ -416,6 +417,32 @@ public class HostTrustBO extends BaseBO {
                 // XXX we can do this because we know the policy passed and it's a constant pcr value... but ideally we need to be logging the host's actual value from its HostReport!!!
                 // find out which MLE this policy corresponds to and then log it
                 TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
+                // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. XXX TODO  we should not keep two lists... the "Required Manifest List" field should be deleted and it must be up to the whitelist manager to define only the pcrs that should be checked! in a future release (maybe 1.3) we will store a global whitelist with pcr values for known mles, and for specific hosts the trust poilcy will be stored as a set of rules instead of just pcr values for specific hosts and it will be more evident what the trust policy is supposed to be. 
+                if( pcr == null ) {
+                    log.error("Trust policy includes PCR {} but MLE does not define it", pcrPolicy.getExpectedPcr().getIndex().toInteger());
+                    // create the missing pcr record in the report so the user will see it in the UI 
+                    pcr = new TblTaLog();
+                    // we need to find out if this is a bios pcr or vmm pcr
+                    String[] markers = pcrPolicy.getMarkers();
+                    List<String> markerList = Arrays.asList(markers);
+                    if( markerList.contains("BIOS") ) {
+                        log.error("MLE Type is BIOS");
+                        pcr.setMleId(host.getBiosMleId().getId());
+                    }
+                    else if( markerList.contains("VMM") ) {
+                        log.error("MLE Type is VMM");
+                        pcr.setMleId(host.getVmmMleId().getId());
+                    }
+                    else {
+                        log.error("MLE Type is unknown, markers are: {}", StringUtils.join(markers, ","));
+                    }
+                    pcr.setHostID(host.getId());
+                    pcr.setUpdatedOn(today);
+                    pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
+                    pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
+                    pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
+                    taLogMap.put(pcrPolicy.getExpectedPcr().getIndex(), pcr);
+                }
                 pcr.setTrustStatus(result.isTrusted());
                 if( !result.isTrusted() ) {
                     pcr.setError("Incorrect value for PCR "+pcrPolicy.getExpectedPcr().getIndex().toString());

@@ -50,6 +50,7 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
@@ -86,7 +87,6 @@ public class CitrixClient {
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
-    private EntityManagerFactory entityManagerFactory;
     
     protected static Connection connection;
 	
@@ -94,19 +94,17 @@ public class CitrixClient {
         this.tlsConnection = tlsConnection;
         this.connectionString = tlsConnection.getConnectionString();
         log.info("CitrixClient connectionString == " + connectionString);
-        // connectionString == citrix:https://xenserver:port;username;password
-        String cs = connectionString.substring(8);
-        log.info("ConnectionString cs == " + cs);
-        String[] parts = cs.split(";");
-        // 10.1.70.126:443;root;P@ssw0rd
-                                   
-        String   ipParts = parts[0];
-        String[] ip = ipParts.split(":");
-            
-        this.hostIpAddress = ip[0];
-        this.port = Integer.parseInt(ip[1]);
-        this.userName = parts[1];
-        this.password = parts[2];
+        // connectionString == citrix:https://xenserver:port;username;password  or citrix:https://xenserver:port;u=username;p=password  or the same w/o the citrix prefix
+        try {
+            ConnectionString.CitrixConnectionString citrixConnection = ConnectionString.CitrixConnectionString.forURL(connectionString);
+            hostIpAddress = citrixConnection.getHost().toString();
+            port = citrixConnection.getPort();
+            userName = citrixConnection.getUsername();
+            password = citrixConnection.getPassword();
+        }
+        catch(MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid Citrix Host URL: "+connectionString, e);
+        }
         log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
         Configuration config = ASConfig.getConfiguration();
@@ -137,11 +135,6 @@ public class CitrixClient {
         }    
     }
 	
-    public CitrixClient(EntityManagerFactory entityManagerFactory,TlsConnection tlsConnection) {
-        this(tlsConnection);
-        this.setEntityManagerFactory(entityManagerFactory);
-    }
-    
 	
     
     private String removeTags(String xml) {
@@ -430,16 +423,7 @@ public class CitrixClient {
         return pcrMp;
         
     }
-       
-    public EntityManagerFactory getEntityManagerFactory() {
-		return entityManagerFactory;
-	}
     
-    
-	
-    public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-		this.entityManagerFactory = entityManagerFactory;
-	}    
     
     public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception  {
         log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);

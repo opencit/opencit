@@ -20,7 +20,9 @@
     <module>mtwilson-api</module>
     <module>my</module>
     <module>api-client-jar</module>
+	<!--  we don't need to build this every time, it can be done separately for each release
     <module>api-client-jar-jdk15</module>
+	-->
     <module>mtwilson-autotest</module>
   </modules>
 

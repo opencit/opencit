@@ -254,6 +254,7 @@ h5, h6
 	text-align: center;
 	width: 100%;
 	height: 45px;
+        table-layout: fixed;
 	}
 .tableDisplay thead{
 	background-color: #5D7B9D;
@@ -263,6 +264,8 @@ h5, h6
 .tableDisplay tr td{
     border: 1px solid #6E3F4A;
     empty-cells: show;
+     overflow: hidden;
+     word-wrap: break-word;
 }
 
 .tableBorderClass tr td{
@@ -542,7 +545,7 @@ text-align: center;
 	border:1px solid #3A4F63;
 }
 .textAreaBoxClass{
-	width:240px; 
+	width:300px; 
 	border: 1px solid #3A4F63;
         height: 35px;;
 }
