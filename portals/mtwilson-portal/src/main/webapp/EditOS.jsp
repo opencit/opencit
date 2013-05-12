@@ -8,7 +8,7 @@
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">OS \> Edit OS <span style="float: right"><a href="javascript:fnGetAddOS()">Add OS...</a></span></div>
+		<div class="nagPanel">Whitelist &gt; Edit OS <span style="float: right"><a href="javascript:fnGetAddOS()">Add OS...</a></span></div>
 		<div id="nameOfPage" class="NameHeader">OS/Hypervisor Combination Edit/Delete</div>
 		<div id="mainEditOSDisplayDiv">
 			<div class="tableDiv" style="margin-left: 61px; display: none;" id="mainEditTable">

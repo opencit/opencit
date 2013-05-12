@@ -5,7 +5,7 @@
 <html>
 <body>
 <div class="container">
-		<div class="nagPanel">Update/Delete an existing host </div>
+		<div class="nagPanel">Host Management &gt; Edit Hosts </div> <!-- was: "Update/Delete an existing host" -->
 		<div id="mainAddHostContainer">
 		<div id="mainEditHostDivHidden" style="display: none;" class="mainTableDisplayDiv">
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">

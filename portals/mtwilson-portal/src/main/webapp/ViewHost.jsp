@@ -4,7 +4,7 @@
 <html>
 <body>
 <div class="container">
-		<div class="nagPanel">View an existing host </div>
+		<div class="nagPanel">Host Management &gt; View an existing host </div>
 		<div id="mainViewHostDetailsDiv">
 		<div id="mainViewHostDivHidden" style="display: none;" class="mainTableDisplayDiv">
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">

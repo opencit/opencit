@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">MLE \> Add MLE</div>
+		<div class="nagPanel">Whitelist &gt; Edit MLE &gt; Add MLE</div>
 		<div id="nameOfPage" class="NameHeader">New Measured Launch Environment (MLE) Configuration</div>
 		<div class="dataTableMle" id="mainDataTableMle">
 			<div class="singleDiv">

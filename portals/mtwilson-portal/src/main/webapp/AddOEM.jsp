@@ -8,7 +8,7 @@
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">OEM \> Add OEM</div>
+		<div class="nagPanel">Whitelist &gt; Edit OEM &gt; Add OEM</div>
 		<div id="nameOfPage" class="NameHeader">Add New OEM</div>
 		<div class="tableDiv" style="margin-left: 61px;">
 		

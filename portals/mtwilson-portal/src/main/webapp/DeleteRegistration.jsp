@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Api Client > Delete Request</div>
+		<div class="nagPanel">Administration &gt; Delete User</div>
 		<div id="nameOfPage" class="NameHeader">Delete Currently Registered Api Clients</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="registerHostTable" class="registerHostTable" style="display: none;">
