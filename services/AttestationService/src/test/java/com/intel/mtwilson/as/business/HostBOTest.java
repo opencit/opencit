@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
 package com.intel.mtwilson.as.business;
 
 import com.intel.mountwilson.as.common.ASException;

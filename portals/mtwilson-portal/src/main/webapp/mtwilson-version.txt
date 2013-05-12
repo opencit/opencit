@@ -1,1 +1,2 @@
-Version ${project.version} branch ${git.branch} build ${git.commitTime}
+Version ${project.version} (${git.branch}) on ${git.commit.time}
+<!-- ${git.commit.id} -->

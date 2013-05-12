@@ -4,8 +4,8 @@
  */
 package test.vendor.intel;
 
-import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
+import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;
 import java.io.IOException;

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
 package com.intel.mtwilson.agent.intel;
 
 /**
@@ -9,18 +13,26 @@ package com.intel.mtwilson.agent.intel;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.ClientRequestType;
-
+import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
+import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mountwilson.ta.data.quoterequest.QuoteRequest;
-
+import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.NoRouteToHostException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -31,20 +43,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
 import org.apache.commons.lang.StringUtils;
-
-import com.intel.mtwilson.datatypes.*;
-import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
-import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
-import com.intel.mtwilson.tls.TlsConnection;
-import com.intel.mtwilson.tls.TlsPolicy;
-
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.NoRouteToHostException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import javax.net.ssl.HttpsURLConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TrustAgentSecureClient {
     public static final int DEFAULT_TRUST_AGENT_PORT = 9999;

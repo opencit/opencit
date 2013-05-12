@@ -181,6 +181,21 @@
   <build>
 	<plugins>
                 
+        <!-- the git commit plugin makes available the following properties:
+     branch
+     commit.id
+     commit.id.abbrev
+     commit.id.describe
+     build.user.name
+     build.user.email
+     build.time
+     commit.user.name
+     commit.user.email
+     commit.message.full
+     commit.message.short
+     commit.time
+     remote.origin.url
+        -->
         <plugin>
             <groupId>pl.project13.maven</groupId>
             <artifactId>git-commit-id-plugin</artifactId>
