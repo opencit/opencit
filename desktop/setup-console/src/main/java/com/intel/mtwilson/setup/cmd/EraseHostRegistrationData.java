@@ -50,6 +50,11 @@ public class EraseHostRegistrationData implements Command {
     
     private void deleteHostRegistrationRecords(Configuration conf) throws SetupException, CryptographyException, IllegalOrphanException, NonexistentEntityException {
         ASPersistenceManager pm = new ASPersistenceManager();
+        TblHostSpecificManifestJpaController hsmJpa = new TblHostSpecificManifestJpaController(pm.getEntityManagerFactory("ASDataPU"));
+        List<TblHostSpecificManifest> hsmList = hsmJpa.findTblHostSpecificManifestEntities();
+        for(TblHostSpecificManifest hsm : hsmList) {
+            hsmJpa.destroy(hsm.getId());
+        }
 //        byte[] dek = Base64.decodeBase64(ASConfig.getConfiguration().getString("mtwilson.as.dek"));
         TblHostsJpaController jpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"));
         List<TblHosts> list = jpa.findTblHostsEntities();
@@ -58,11 +63,6 @@ public class EraseHostRegistrationData implements Command {
             jpa.destroy(host.getId());
         }
         
-        TblHostSpecificManifestJpaController hsmJpa = new TblHostSpecificManifestJpaController(pm.getEntityManagerFactory("ASDataPU"));
-        List<TblHostSpecificManifest> hsmList = hsmJpa.findTblHostSpecificManifestEntities();
-        for(TblHostSpecificManifest hsm : hsmList) {
-            hsmJpa.destroy(hsm.getId());
-        }
     }
 
 }
