@@ -48,7 +48,7 @@ public class EraseUserAccounts implements Command {
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
         pm = new MSPersistenceManager();
-        em = pm.getEntityManagerFactory("ASDataPU");
+        em = pm.getEntityManagerFactory("MSDataPU");
         deletePortalUsers();
         deleteApiClients();
     }
