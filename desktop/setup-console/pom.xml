@@ -67,30 +67,7 @@
             </plugin>	    
 		
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-                <!-- <forceCreation>true</forceCreation> --> <!-- should prevent "we have a duplicate class" warnings because classes are already in the jar built from last time, but does not work, we still get the warnings, probably because several dependencies share the same dependencies and it's trying to do each one instead of consolidating first like dependency-tree and picking just one to include -->
-		<shadedArtifactAttached>true</shadedArtifactAttached>
-		<shadedClassifierName>with-dependencies</shadedClassifierName> <!-- Any name that makes sense -->
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.intel.mtwilson.setup.TextConsole</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>      
-      
+
         </plugins>
     </build>
 
@@ -311,6 +288,7 @@
     <!-- to enable aspectj weaving, run maven with -Daspectj option on the command line -->
     <profiles>
         <profile>
+            <id>aspectj</id>
             <activation>
                 <property>
                     <name>aspectj</name>
@@ -353,6 +331,43 @@
       </plugin>	
       
                     
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-shade-plugin</artifactId>
+                      <version>2.0</version>
+                      <executions>
+                        <execution>
+                          <phase>package</phase>
+                          <goals>
+                            <goal>shade</goal>
+                          </goals>
+                          <configuration>
+                              <!-- <forceCreation>true</forceCreation> --> <!-- should prevent "we have a duplicate class" warnings because classes are already in the jar built from last time, but does not work, we still get the warnings, probably because several dependencies share the same dependencies and it's trying to do each one instead of consolidating first like dependency-tree and picking just one to include -->
+                      <shadedArtifactAttached>true</shadedArtifactAttached>
+                      <shadedClassifierName>with-dependencies</shadedClassifierName> <!-- Any name that makes sense -->
+                            <transformers>
+                              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>com.intel.mtwilson.setup.TextConsole</mainClass>
+                              </transformer>
+                            </transformers>
+                          </configuration>
+                        </execution>
+                      </executions>
+                    </plugin>      
+
                 </plugins>
             </build>
         </profile>

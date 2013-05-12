@@ -209,85 +209,7 @@
       </plugin>
         
             
-                <!-- begin website plugin -->
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-            <reportPlugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-project-info-reports-plugin</artifactId>
-              <version>2.5.1</version>
-              <configuration>
-                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-              </configuration>
-              <reports>
-                <report>dependencies</report>
-                <report>dependency-info</report>
-                <report>help</report>
-                <report>index</report>
-                <report>license</report>
-                <report>issue-tracking</report>
-                <report>summary</report>
-              </reports>
-            </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.8.1</version>
-                <configuration>
-                  <show>public</show>
-                  <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
-                    <includeDependencySources>true</includeDependencySources>
-                    <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
-                    <dependencySourceIncludes>
-                        <!--
-                        <dependencySourceInclude>com.intel.mtwilson.integration:*</dependencySourceInclude>
-                        <dependencySourceInclude>com.intel.mtwilson.common:*</dependencySourceInclude>
-                        -->
-                        <dependencySourceInclude>com.intel.mtwilson.integration:api-datatypes</dependencySourceInclude>
-                        <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
-                    </dependencySourceIncludes>
-                        <!-- the following dependencies are always excluded because source is not available and that causes the javadoc plugin to fail -->
-                    <dependencySourceExcludes>
-                        <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
-                        <dependencySourceExclude>org.apache.santuario:xmlsec</dependencySourceExclude>
-                        <dependencySourceExclude>org.jacorb:jacorb</dependencySourceExclude>
-                        <dependencySourceExclude>org.jacorb:jacorb-idl</dependencySourceExclude>
-                        <dependencySourceExclude>avalon-framework:avalon-framework</dependencySourceExclude>
-                        <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
-                        <dependencySourceExclude>classworlds:classworlds</dependencySourceExclude>
-                        <dependencySourceExclude>velocity:velocity</dependencySourceExclude>
-                        <dependencySourceExclude>commons-logging:commons-logging-api</dependencySourceExclude>
-                        <dependencySourceExcldue>logkit:logkit</dependencySourceExcldue>
-                    </dependencySourceExcludes>
-                </configuration>
-                <!--
-                <dependencies>
-                    <dependency>
-                        <groupId>com.intel</groupId>
-                        <artifactId>maven-intel-skin</artifactId>
-                        <version>0.1-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
-                -->
-            </plugin>           
-            <!-- http://emma.sourceforge.net/maven-emma-plugin/index.html -->
-            <!-- note this is NOT the same as emma-maven-plugin below... this one has a report goal, the other one doesn't -->
-            <!--
-            <plugin>
-                <groupId>emma</groupId>
-                <artifactId>maven-emma-plugin</artifactId> 
-                <version>0.5</version>
-            </plugin>     
-            -->
-            </reportPlugins>
-        </configuration>  
-    </plugin>
-                <!-- end website plugin -->
+
                 
                 <!--
                       <plugin>
@@ -461,6 +383,98 @@
         </dependency>        
         </dependencies>
     </dependencyManagement>  
-  
+    
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                                <!-- begin website plugin -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <version>3.1</version>
+                        <configuration>
+                            <reportPlugins>
+                            <plugin>
+                              <groupId>org.apache.maven.plugins</groupId>
+                              <artifactId>maven-project-info-reports-plugin</artifactId>
+                              <version>2.5.1</version>
+                              <configuration>
+                                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                              </configuration>
+                              <reports>
+                                <report>dependencies</report>
+                                <report>dependency-info</report>
+                                <report>help</report>
+                                <report>index</report>
+                                <report>license</report>
+                                <report>issue-tracking</report>
+                                <report>summary</report>
+                              </reports>
+                            </plugin>
+                            <plugin>
+                              <groupId>org.apache.maven.plugins</groupId>
+                              <artifactId>maven-javadoc-plugin</artifactId>
+                              <version>2.8.1</version>
+                                <configuration>
+                                  <show>public</show>
+                                  <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
+                                    <includeDependencySources>true</includeDependencySources>
+                                    <includeTransitiveDependencySources>false</includeTransitiveDependencySources>
+                                    <dependencySourceIncludes>
+                                        <!--
+                                        <dependencySourceInclude>com.intel.mtwilson.integration:*</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.common:*</dependencySourceInclude>
+                                        -->
+                                        <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
+                                    </dependencySourceIncludes>
+                                        <!-- the following dependencies are always excluded because source is not available and that causes the javadoc plugin to fail -->
+                                    <dependencySourceExcludes>
+                                        <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
+                                        <dependencySourceExclude>org.apache.santuario:xmlsec</dependencySourceExclude>
+                                        <dependencySourceExclude>org.jacorb:jacorb</dependencySourceExclude>
+                                        <dependencySourceExclude>org.jacorb:jacorb-idl</dependencySourceExclude>
+                                        <dependencySourceExclude>avalon-framework:avalon-framework</dependencySourceExclude>
+                                        <dependencySourceExclude>com.sun.xml.bind:jaxb</dependencySourceExclude>
+                                        <dependencySourceExclude>classworlds:classworlds</dependencySourceExclude>
+                                        <dependencySourceExclude>velocity:velocity</dependencySourceExclude>
+                                        <dependencySourceExclude>commons-logging:commons-logging-api</dependencySourceExclude>
+                                        <dependencySourceExcldue>logkit:logkit</dependencySourceExcldue>
+                                    </dependencySourceExcludes>
+                                </configuration>
+                                <!--
+                                <dependencies>
+                                    <dependency>
+                                        <groupId>com.intel</groupId>
+                                        <artifactId>maven-intel-skin</artifactId>
+                                        <version>0.1-SNAPSHOT</version>
+                                    </dependency>
+                                </dependencies>
+                                -->
+                            </plugin>           
+                            <!-- http://emma.sourceforge.net/maven-emma-plugin/index.html -->
+                            <!-- note this is NOT the same as emma-maven-plugin below... this one has a report goal, the other one doesn't -->
+                            <!--
+                            <plugin>
+                                <groupId>emma</groupId>
+                                <artifactId>maven-emma-plugin</artifactId> 
+                                <version>0.5</version>
+                            </plugin>     
+                            -->
+                            </reportPlugins>
+                        </configuration>  
+                    </plugin>
+                                <!-- end website plugin -->                    
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
 

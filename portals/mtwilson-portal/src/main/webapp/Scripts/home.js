@@ -467,11 +467,11 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
  
 function updateHostInfo() {
     var ipValid = true;
-        if (isVmware == 'false') {
+        if (isVmware == 0 || isVmware == 2) { // intel and citrix hosts
          if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
              ipValid=false;
          }   
-        }else{
+        }else{ // vmware host
           if(!fnValidateIpAddress($('#MainContent_tbVCenterAddress').val())) {
              ipValid=false;
          }    

@@ -353,7 +353,7 @@ function fnGetMleData(isNewMle) {
                         }
 		mleObj.mleDescription = $('#MainContent_tbDesc').val();
 		var mani = [];
-		if ($('#MainContent_ddlAttestationType').val() == "Module" || $('#MainContent_ddlAttestationType').val() == "MODULE") {
+		if (mleObj.attestation_Type == "Module" || mleObj.attestation_Type == "MODULE") {
 			$('#gkvs_register_checkbox input').each(function() {
 				var manifestObj = new manifestList();
 				if($(this).attr('checked') == 'checked'){

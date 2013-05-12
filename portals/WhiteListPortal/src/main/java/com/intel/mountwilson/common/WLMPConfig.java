@@ -40,6 +40,7 @@ public class WLMPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.wlmp.sessionTimeOut", "1000");
         defaults.setProperty("mtwilson.wlmp.hostTypes", "Xen,KVM,VMWare");
         defaults.setProperty("mtwilson.wlmp.apiKeyExpirationNoticeInMonths", "3");
+        defaults.setProperty("mtwilson.wlmp.pagingSize", "15"); // bug #715, now we provide a default
         return defaults;
 	}
 

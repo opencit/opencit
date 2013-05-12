@@ -9,8 +9,8 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Automation ></div>
-		<div id="nameOfPage" class="NameHeader">White List Configuration</div>
+		<div class="nagPanel">Whitelist &gt;</div> <!-- was: "Automation" -->
+		<div id="nameOfPage" class="NameHeader">Import Whitelist from Trustd Host</div> <!-- was: "White List Configuration" -->
 		<c:set var="Data" value="${result}"></c:set>
 		<c:choose>
 			<c:when test="${Data == true}">
@@ -167,7 +167,7 @@
 					<div class="singleDiv" id="uploadButtonID">
 						<div class="labelDiv">&nbsp;</div>
 						<div class="valueDiv">
-							<input type="button" class="" value="Upload White List" onclick="fnUploadWhiteListConfigurationData()">
+							<input type="button" class="" value="Import White List" onclick="fnUploadWhiteListConfigurationData()"> <!-- was: "Upload White List" -->
 							<input type="button" value="Clear" onclick="fnClearAllFiled()">
 						</div>
 					</div>

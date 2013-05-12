@@ -15,12 +15,13 @@ $(function() {
 		fnTestValidation('MainContent_tbHostName',normalReg);
 	});
 	$('#MainContent_tbHostPort').blur(function() {
-		if (isVmware == 0) {
+                        // Port has to be validated for both Open Source and Citrix
+		if ((isVmware == 0)  || (isVmware ==2)){
 			$('.portNoError').each(function() {
 				$(this).remove();
 			});
 			if (!regPortNo.test($('#MainContent_tbHostPort').val())) {
-				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv portNoError" style="float:none">only Numeric values are allowed.</span>');
+				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv portNoError" style="float:none">Only numeric values are allowed.</span>');
 				return false;
 			}
 			if ($('#MainContent_tbHostPort').val().length > 4 ) {
@@ -30,13 +31,16 @@ $(function() {
 		}
 	});
 	$('#MainContent_tbHostIP').blur(function() {
-		if (isVmware == 0) {
+                        // For both open source and citrix we have to validate IP address since it is mandatory. For VMware we validate only if the user has entered value
+		if ((isVmware == 0) || (isVmware == 2)){
 			fnTestValidation('MainContent_tbHostIP',regIPAddress);
-		}
+		} else if ((isVmware == 1) && ($('#MainContent_tbHostIP').val() != "")) {
+                                    fnTestValidation('MainContent_tbHostIP',regIPAddress);
+                        }
 	});
 	$('#MainContent_tbVCenterAddress').blur(function() {
 		if (isVmware != 0) {
-			fnTestValidation('MainContent_tbVCenterAddress',regVcenterAddress);
+			fnTestValidation('MainContent_tbVCenterAddress',regIPAddress);
 		}
 	});
 	$('#MainContent_tbVCenterLoginId').blur(function() {

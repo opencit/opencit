@@ -114,7 +114,7 @@ public class TxtHost {
         if( connectionString == null) {
             if (ipAddress != null && port != null) {
                 // for backwards compatibility with cilents that don't submit a connection string for intel hosts
-                connStr = new ConnectionString(Vendor.INTEL, ipAddress.toString(), port);
+                connStr = ConnectionString.forIntel(ipAddress.toString(), port);
                 // return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
             }            
         } else {

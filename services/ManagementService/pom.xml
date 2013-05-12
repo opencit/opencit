@@ -65,25 +65,6 @@
                 <version>2.1</version>
             </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8.1</version>
-        <executions>
-            <execution>
-                <phase>prepare-package</phase>
-                <goals>
-<!--                    <goal>jar</goal> -->
-                    <goal>javadoc</goal>
-                </goals>        
-            </execution>
-        </executions>
-        <configuration>
-            <show>public</show>
-            <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
-            <encoding>utf-8</encoding>
-        </configuration>
-      </plugin>
         
         </plugins>
 <!--
@@ -313,4 +294,39 @@
     <properties>
         <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
     </properties>
+    
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-javadoc-plugin</artifactId>
+                      <version>2.8.1</version>
+                      <executions>
+                          <execution>
+                              <phase>prepare-package</phase>
+                              <goals>
+              <!--                    <goal>jar</goal> -->
+                                  <goal>javadoc</goal>
+                              </goals>        
+                          </execution>
+                      </executions>
+                      <configuration>
+                          <show>public</show>
+                          <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
+                          <encoding>utf-8</encoding>
+                      </configuration>
+                    </plugin>
+                    
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
 </project>

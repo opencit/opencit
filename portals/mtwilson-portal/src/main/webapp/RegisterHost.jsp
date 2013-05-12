@@ -7,11 +7,11 @@
 </head>
 <body>
 <div class="container" id="registerHostMainContainer">
-		<div class="nagPanel">Automation ></div>
-		<div id="nameOfPage" class="NameHeader">Register Host</div>
+		<div class="nagPanel">Host Management &gt;</div> <!-- was: "Automation" -->
+		<div id="nameOfPage" class="NameHeader">Host Registration</div> <!-- was: "Register Host" -->
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div class="singleDiv">
-				<div class="labelDiv">Host Provided By : </div>
+				<div class="labelDiv">Import hosts from:</div> <!-- was: "Host Provided By" -->
 				<div class="valueDiv">
 					<select class="textBox_Border" id="MainContent_ddlHOSTProvider" onchange="fnChangehostType(this,false)" >
 						<option value="Flat File" type="false" >Flat File</option>

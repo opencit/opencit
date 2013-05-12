@@ -2,9 +2,9 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mountwilson.as.common;
+package test.vendor.intel;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
+import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;

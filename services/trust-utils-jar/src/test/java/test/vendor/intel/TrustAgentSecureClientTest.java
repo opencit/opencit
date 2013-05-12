@@ -1,18 +1,16 @@
-package com.intel.mtwilson.as.helper;
+package test.vendor.intel;
 
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
-import com.intel.mtwilson.tls.TlsConnection;
-import org.junit.Test;
+import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.tls.*;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import javax.xml.bind.JAXBException;
-import com.intel.mtwilson.agent.*;
-import com.intel.mtwilson.agent.intel.*;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.tls.*;
+import org.junit.Test;
 
 /**
  *
