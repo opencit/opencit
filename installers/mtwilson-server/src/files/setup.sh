@@ -568,20 +568,10 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
 fi
 
 if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
+  glassfish_stop
+  glassfish_start
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
+  mtwilson tomcat-restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
