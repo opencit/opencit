@@ -400,45 +400,19 @@ if using_glassfish; then
   fi
   # end glassfish setup
 elif using_tomcat; then
- if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$tomcat" ]; then
   # tomcat install here
   echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
-    #if grep -q MaxPermSize /usr/loca/bin/tomcat_starter.sh; then
-    # someRand=""
-    #else
-    #  #setup the java_opts and tomcat start in the starter file
-    #  if [ ! -f /usr/local/bin/tomcat_starter.sh ]; then
-	#    #echo "#!/bin/bash" >> /usr/local/bin/tomcat_starter.sh
-    #    echo "export JAVA_OPTS=\"-Xms512m -Xmx2560m -XX:MaxPermSize=2048m\"" >> /usr/local/bin/tomcat_starter.sh
-    #    echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh start"  >> /usr/local/bin/tomcat_starter.sh
-    #  fi
-    #  #make the starter file exec on startup
-    #  if [ ! -f /etc/init.d/tomcat.sh ]; then
-    #    echo "#!/bin/bash" >> /etc/init.d/tomcat.sh
-    #    echo "case \"\$1\" in" >> /etc/init.d/tomcat.sh
-    #    echo "start)" >> /etc/init.d/tomcat.sh
-    #    echo "/usr/local/bin/tomcat_starter.sh" >> /etc/init.d/tomcat.sh
-    #    echo ";;" >> /etc/init.d/tomcat.sh
-    #    echo "stop)" >> /etc/init.d/tomcat.sh
-    #    echo "/usr/share/apache-tomcat-6.0.29/bin/catalina.sh stop" >> /etc/init.d/tomcat.sh
-    #    echo ";;" >> /etc/init.d/tomcat.sh
-    #    echo "esac" >> /etc/init.d/tomcat.sh
-    #  fi 
-    #fi
-
-    #chmod +x /etc/init.d/tomcat.sh
-    #chmod +x /usr/local/bin/tomcat_starter.sh
 
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
-    #echo "export CATALINA_OPTS=\"\$CATALINA_OPTS -Xms512m -Xmx2048m\"" >> $TOMCAT_HOME/bin/setenv.sh
-    
+       
     echo "Tomcat installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end tomcat install
- else
-  echo_warning "Relying on an existing Tomcat installation"
- fi
+  else
+    echo_warning "Relying on an existing Tomcat installation"
+  fi
  
- if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
+  if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
@@ -459,29 +433,90 @@ if [ ! -z "$privacyca" ]; then
 	echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
 	./$privacyca_service 
 	echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
-	echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
-	/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
-	echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
+	#echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
+	#/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
+	#echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
 fi
 
+if using_glassfish; then
+  if [ ! -z "$glassfish" ]; then
+    glassfish_stop
+    glassfish_start
+  fi
+elif using_tomcat; then
+  if [ ! -z "$tomcat" ]; then
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
+  fi
+fi
 if [ ! -z "$attservice" ]; then
 	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
 	./$attestation_service 
 	echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-
+if using_glassfish; then
+  if [ ! -z "$glassfish" ]; then
+    glassfish_stop
+    glassfish_start
+  fi
+elif using_tomcat; then
+  if [ ! -z "$tomcat" ]; then
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
+  fi
+fi
 if [ ! -z "$mangservice" ]; then
 	echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
 	./$management_service
 	echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-
+if using_glassfish; then
+  if [ ! -z "$glassfish" ]; then
+    glassfish_stop
+    glassfish_start
+  fi
+elif using_tomcat; then
+  if [ ! -z "$tomcat" ]; then
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
+  fi
+fi
 if [ ! -z "$wlmservice" ]; then
 	echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
 	./$whitelist_service >> $INSTALL_LOG_FILE
 	echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-
+if using_glassfish; then
+  if [ ! -z "$glassfish" ]; then
+    glassfish_stop
+    glassfish_start
+  fi
+elif using_tomcat; then
+  if [ ! -z "$tomcat" ]; then
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
+  fi
+fi
 #if [ ! -z "$mangportal" ]; then
 #	echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
 #	./$management_console
@@ -505,7 +540,22 @@ if [ ! -z "$mtwportal" ]; then
 	./$mtw_portal 
 	echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-
+if using_glassfish; then
+  if [ ! -z "$glassfish" ]; then
+    glassfish_stop
+    glassfish_start
+  fi
+elif using_tomcat; then
+  if [ ! -z "$tomcat" ]; then
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
+  fi
+fi
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$monit" ]; then
 	echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
@@ -518,20 +568,20 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
 fi
 
 if using_glassfish; then
-  echo "Restarting Glassfish..." | tee -a  $INSTALL_LOG_FILE
-  mtwilson glassfish-restart >> $INSTALL_LOG_FILE
-  echo "Glassfish restarted..." | tee -a  $INSTALL_LOG_FILE
-else
-  if tomcat_running; then 
-    echo "Restarting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
-    tomcat_restart
-  else
-    echo "Starting Tomcat ..." | tee -a  $INSTALL_LOG_FILE
-    tomcat_start
+  if [ ! -z "$glassfish" ]; then
+    glassfish_stop
+    glassfish_start
+  fi
+elif using_tomcat; then
+  if [ ! -z "$tomcat" ]; then
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
   fi
 fi
-#  echo "Restarting Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-#  /usr/local/bin/asctl restart >> $INSTALL_LOG_FILE
-#  echo "Attestation Service restarted..." | tee -a  $INSTALL_LOG_FILE
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
