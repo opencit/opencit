@@ -338,7 +338,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			//Call to Services to Update pre-configure host information.
 			apiClientServices.updateHost(hostObj);
             // now call again to evaluate the host trust status --- we're not going to display it here but the server will cache it so when the user returns to the trust dashboard the host will already be updated
-            apiClientServices.getHostTrust(new Hostname(dataVO.getHostName()));
+            apiClientServices.getSamlForHost(new Hostname(dataVO.getHostName()), true);
 			result = true;
 		} catch (Exception e) {
 			log.error("Errror While Updating Host.");
