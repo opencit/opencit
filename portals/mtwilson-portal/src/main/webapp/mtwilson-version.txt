@@ -1,0 +1,1 @@
+Version ${project.version} branch ${git.branch} build ${git.commitTime}

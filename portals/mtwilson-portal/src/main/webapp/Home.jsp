@@ -185,7 +185,7 @@
 	   <div class="main" id="mainContainer">
 	   </div>
 	   <div class="footer">
-		   	<h4>@ Intel Corp | 2013</h4>
+            <p>&copy; 2012-2013 Intel Corporation.<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
 	   </div>
 </body>
 </html>
