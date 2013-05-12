@@ -4,16 +4,24 @@
  */
 package test.vendor.intel;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
+import java.security.KeyManagementException;
 import java.security.cert.X509Certificate;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
@@ -50,18 +58,15 @@ public class TestIntelHostAgent {
     private static HostAgent agent;
     
     @BeforeClass
-    public static void createHostAgent() {
+    public static void createHostAgent() throws KeyManagementException, IOException {
         agent = getAgent();
     }
     
-    public static HostAgent getAgent() {
-        TblHosts host = new TblHosts();
-        host.setName(hostname);
-        host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
-        host.setTlsKeystore(null);
-        host.setAddOnConnectionInfo(connection);
+    public static HostAgent getAgent() throws KeyManagementException, IOException {
+        SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
+        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
         HostAgentFactory factory = new HostAgentFactory();
-        HostAgent hostAgent = factory.getHostAgent(host);
+        HostAgent hostAgent = factory.getHostAgent(ConnectionString.forIntel(hostname), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;
     }
     

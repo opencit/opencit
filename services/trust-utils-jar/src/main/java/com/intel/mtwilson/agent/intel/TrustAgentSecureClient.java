@@ -44,6 +44,7 @@ import java.net.NoRouteToHostException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import javax.net.ssl.HttpsURLConnection;
 
 public class TrustAgentSecureClient {
     public static final int DEFAULT_TRUST_AGENT_PORT = 9999;
@@ -132,6 +133,7 @@ public class TrustAgentSecureClient {
         	throw new IllegalArgumentException("Attempted to send request without data");
         }
 
+        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
         SSLSocketFactory sslsocketfactory = getSSLContext().getSocketFactory();
         SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
         
