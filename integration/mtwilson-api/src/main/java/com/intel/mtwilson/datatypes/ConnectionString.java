@@ -145,6 +145,12 @@ public class ConnectionString {
         this(vendor.name()+":"+addOnConnectionString);
     }
 
+    /**
+     * URL must be something like https://intelhost.com:9999  or https://citrixhost.com:443  or https://vcenter.com:443/sdk
+     * TODO: should make best effort with and without port numbers
+     * @param url
+     * @return 
+     */
     private static Vendor guessVendorFromURL(String url) {
         Vendor v;
         // In this case we do not have the prefix
@@ -163,6 +169,9 @@ public class ConnectionString {
 
     /**
      * This constructor has to be used to extract individual information from the connection string.
+     * 
+     * For cases where the input connection string may be provided without a prefix, SEE ALSO  ConnectionString.from(TxtHostRecord)
+     * where you can provide additional information to help guess the right connection string.
      *
      * @param connectionString
      */
@@ -810,4 +819,34 @@ public class ConnectionString {
         log.debug("vendor connection: {}", str);
         return str;
     }
+    
+    
+    public static ConnectionString from(TxtHostRecord host) throws MalformedURLException {
+        String connectionString = host.AddOn_Connection_String;
+        if( connectionString == null || connectionString.isEmpty() ) {
+            if( host.IPAddress != null && !host.IPAddress.isEmpty() && host.Port != null ) {
+                connectionString = String.format("intel:https://%s:%d", host.IPAddress, host.Port);
+                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.IPAddress +" and port: "+host.Port);
+            }
+            else if(host.IPAddress != null ) {
+                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
+                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+            }
+            return new ConnectionString(connectionString);
+        }
+        else if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
+            return new ConnectionString(connectionString);
+        }
+        else {
+            // use a combination of connection string and other information in the record (port number, vmm name, ...)
+            // to make a better guess than is possible with just the connection string.
+            // for example:
+            //if( host.Port != null && host.Port == 9999 ) {
+            //    ConnectionString.forIntel(host.HostName);
+            //}
+            return new ConnectionString(connectionString);
+        }
+    }
+
+
 }
