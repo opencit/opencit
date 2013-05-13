@@ -1,36 +1,17 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.wlm.business;
 
-import com.intel.mtwilson.as.controller.TblOsJpaController;
-import com.intel.mtwilson.as.controller.TblPackageNamespaceJpaController;
-import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
-import com.intel.mtwilson.as.controller.TblOemJpaController;
-import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
-import com.intel.mtwilson.as.controller.TblMleJpaController;
-import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
-//import com.intel.mtwilson.as.controller.TblDbPortalUserJpaController;
-import com.intel.mtwilson.as.data.TblPcrManifest;
-import com.intel.mtwilson.as.data.TblEventType;
-import com.intel.mtwilson.as.data.TblModuleManifest;
-import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblPackageNamespace;
-import com.intel.mtwilson.as.data.TblOs;
-import com.intel.mtwilson.as.data.TblOem;
-import com.intel.mtwilson.as.data.TblMle;
-//import com.intel.mtwilson.as.data.TblDbPortalUser;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.controller.*;
-import com.intel.mtwilson.wlm.helper.BaseBO;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.wlm.helper.BaseBO;
 import java.util.*;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 import javax.persistence.NoResultException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

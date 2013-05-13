@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Api Client > Approve Request</div>
+		<div class="nagPanel">Administration &gt; Pending Access Requests</div>
 		<div id="nameOfPage" class="NameHeader">View Pending Registrations</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="approveRegisterHostTable" class="registerHostTable" style="display: none;">

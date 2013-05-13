@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">API Client > View </div>
+		<div class="nagPanel">Administration &gt; View User</div>
 		<div id="nameOfPage" class="NameHeader">View Registered Api Client</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="viewRequestTable" class="registerHostTable" style="display: none;">

@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel" id="mainHeader">New host configuration</div>
+		<div class="nagPanel" id="mainHeader">Host Management &gt; New host configuration</div>
 		<div class="dataTableMle" id="mainAddHostContainer">
 			<div class="singleDiv">
 				<div class="labelDiv">Host Name :</div>

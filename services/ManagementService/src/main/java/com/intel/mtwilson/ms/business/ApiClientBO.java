@@ -1,10 +1,9 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;

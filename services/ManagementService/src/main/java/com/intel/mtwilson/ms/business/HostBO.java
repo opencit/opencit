@@ -1,18 +1,17 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.ms.business;
 
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
-import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
-import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
@@ -24,53 +23,33 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.io.Filename;
-import com.intel.mtwilson.util.MWException;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
-import com.intel.mtwilson.as.data.MwKeystore;
-import com.intel.mtwilson.as.data.helper.DataCipher;
-import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.helper.BaseBO;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.StringReader;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.ResourceBundle;
-import javax.servlet.http.HttpSession;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.codehaus.plexus.util.StringUtils;
-import com.intel.mtwilson.datatypes.Vendor;
-import com.intel.mtwilson.api.*;
-import java.util.Locale;
 
 /**
  *

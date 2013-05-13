@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mountwilson.mscu.common;
 

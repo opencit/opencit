@@ -4,18 +4,14 @@
  */
 package com.intel.mtwilson;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.crypto.NopX509TrustManager;
 import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
-import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.tls.ApacheTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -42,7 +38,6 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
