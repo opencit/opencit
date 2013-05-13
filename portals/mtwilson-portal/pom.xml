@@ -162,6 +162,27 @@
 		    <skip>false</skip>
                 </configuration>
             </plugin>
+            
+            <!-- to create a regular .war file you do not need to list this plugin... it's only here to configure filtering so we can get current build information into the footer of the portal pages -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+          <webResources>
+            <resource>
+              <!-- this is relative to the pom.xml directory -->
+              <directory>src/main/webapp</directory>
+              <filtering>true</filtering>
+              <includes>
+                  <include>mtwilson-version.txt</include>
+              </includes>
+            </resource>
+          </webResources>
+        </configuration>
+      </plugin>
+                        
 	</plugins>	
+    
     </build>
 </project>

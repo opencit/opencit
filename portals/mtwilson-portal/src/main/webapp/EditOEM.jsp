@@ -8,7 +8,7 @@
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">OEM \> Edit OEM   <span style="float: right"><a href="javascript:fnAddOEM()">Add OEM...</a></span></div>
+		<div class="nagPanel">Whitelist &gt; Edit OEM   <span style="float: right"><a href="javascript:fnAddOEM()">Add OEM...</a></span></div>
 		<div id="nameOfPage" class="NameHeader">OEM - Edit/Delete the Values</div>
 		<div id="mainEditOEMDisplayDiv">
 			<div class="tableDiv" style="margin-left: 61px; display: none;" id="mainEditTable">

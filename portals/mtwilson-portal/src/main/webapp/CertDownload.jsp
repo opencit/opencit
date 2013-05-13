@@ -15,7 +15,7 @@ response.setHeader("Content-Disposition",
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Management Console Certificate > View </div>
+		<div class="nagPanel">Administration &gt; View Certificates</div> <!-- was: "Management Console Certificate &gt; View " -->
 		<div id="nameOfPage" class="NameHeader">Certificate Download</div>
 		<div id="mainLoadingDiv" class="mainContainer">
                 <!-- stdalex 1/18 the following downloads are disabled in 1.1 due to the files they require are

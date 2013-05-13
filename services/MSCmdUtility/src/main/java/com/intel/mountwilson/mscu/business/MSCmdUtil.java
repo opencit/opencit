@@ -1,12 +1,12 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mountwilson.mscu.business;
 
 import com.intel.mountwilson.mscu.common.MSCUConfig;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.ManagementService;
 import com.intel.mtwilson.crypto.RsaCredential;

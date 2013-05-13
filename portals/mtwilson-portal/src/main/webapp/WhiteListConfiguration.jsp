@@ -10,7 +10,7 @@
 <body>
 <div class="container">
 		<div class="nagPanel">Whitelist &gt;</div> <!-- was: "Automation" -->
-		<div id="nameOfPage" class="NameHeader">Import Whitelist from Trustd Host</div> <!-- was: "White List Configuration" -->
+		<div id="nameOfPage" class="NameHeader">Import Whitelist from Trusted Host</div> <!-- was: "White List Configuration" -->
 		<c:set var="Data" value="${result}"></c:set>
 		<c:choose>
 			<c:when test="${Data == true}">

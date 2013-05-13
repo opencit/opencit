@@ -1,6 +1,6 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.ms.business;
 
@@ -12,7 +12,6 @@ import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.controller.MwConfigurationJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.helper.BaseBO;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
