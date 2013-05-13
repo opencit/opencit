@@ -951,7 +951,13 @@ public class HostBO extends BaseBO {
                 }
 
                 TxtHostRecord gkvHost = hostConfigObj.getTxtHostRecord();
-
+                
+                if(gkvHost.AddOn_Connection_String == null) {
+                    //System.err.println("configureWhiteListFromCustomData cs == null");
+                    ConnectionString cs = ConnectionString.from(gkvHost);
+                    gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
+                    //System.err.println("configureWhiteListFromCustomData cs now == " + gkvHost.AddOn_Connection_String );
+                }
                 // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
                 tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
