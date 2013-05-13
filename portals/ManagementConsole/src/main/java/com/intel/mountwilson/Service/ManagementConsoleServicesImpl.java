@@ -382,6 +382,11 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 for (HostDetails hostRecord: hostRecords) {
                         TxtHostRecord hostTxtObj = new TxtHostRecord();
                         hostTxtObj.HostName = hostRecord.getHostName();
+                        // Bug:726: Port number was not being displayed in the UI since it was not being set in the Port field. Because of this issue, the port # was not getting stored in the DB.                        
+                        if (hostRecord.getHostPortNo() != null && !hostRecord.getHostPortNo().isEmpty()) {
+                            hostTxtObj.Port = Integer.parseInt(hostRecord.getHostPortNo());
+                        }
+                        
                         // Bug 614: Using connection strings for all kinds of hosts.
                         ConnectionString connStr = null;
                         if (hostRecord.getHostType().equalsIgnoreCase(Vendor.INTEL.toString())){
