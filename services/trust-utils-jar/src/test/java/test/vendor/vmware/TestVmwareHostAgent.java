@@ -7,11 +7,17 @@ package test.vendor.vmware;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,8 +48,10 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  */
 public class TestVmwareHostAgent {
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    private static String hostname = "10.1.71.155";
-    private static String connection = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+    private static String hostname = "10.1.71.175";
+    private static String connection = "vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.175";
+//    private static String hostname = "10.1.71.155";
+//    private static String connection = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
     private static HostAgent agent;
     
     @BeforeClass
@@ -52,6 +60,7 @@ public class TestVmwareHostAgent {
     }
     
     public static HostAgent getAgent() {
+        TblHosts.dataCipher = new DummyCipher();
         TblHosts host = new TblHosts();
         host.setName(hostname);
         host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
@@ -60,6 +69,37 @@ public class TestVmwareHostAgent {
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent hostAgent = factory.getHostAgent(host);
         return hostAgent;
+    }
+
+    public static class DummyCipher implements DataCipher {
+
+        @Override
+        public String encryptString(String plaintext) {
+            return plaintext;
+        }
+
+        @Override
+        public String decryptString(String ciphertext) {
+            return ciphertext;
+        }
+    }
+    
+    @Test
+    public void testGetPcrManifestFrom175() throws MalformedURLException, IOException {
+        /*
+        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new );
+        ConnectionString conn = new ConnectionString("vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.175");
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent hostAgent = factory.getHostAgent(conn, tlsPolicy);        
+        */
+        HostAgent agent = getAgent();
+        PcrManifest pcrManifest = agent.getPcrManifest();
+        for(int i=0; i<24; i++) {
+            PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(i);
+            if( pcrEventLog == null ) {
+                log.debug("no event log for pcr {}",i );
+            }
+        }
     }
     
     /**

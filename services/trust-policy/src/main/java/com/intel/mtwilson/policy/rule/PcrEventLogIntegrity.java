@@ -15,6 +15,7 @@ import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.RuleResult;
+import com.intel.mtwilson.policy.fault.PcrEventLogMissing;
 import com.intel.mtwilson.policy.fault.PcrManifestMissing;
 import com.intel.mtwilson.policy.fault.PcrValueMismatch;
 import com.intel.mtwilson.policy.fault.PcrValueMissing;
@@ -59,11 +60,18 @@ public class PcrEventLogIntegrity extends BaseRule {
             }
             else {
                 PcrEventLog eventLog = hostReport.pcrManifest.getPcrEventLog(pcrIndex);
-                Sha1Digest expectedValue = computeHistory(eventLog.getEventLog()); // calculate expected' based on history
-                
-                // make sure the expected pcr value matches the actual pcr value
-                if( !expectedValue.equals(actualValue.getValue()) ) {
-                    report.fault(new PcrValueMismatch(pcrIndex, expectedValue, actualValue.getValue()) );
+                if( eventLog == null ) {
+                    report.fault(new PcrEventLogMissing(pcrIndex));
+                }
+                else {
+                    List<Measurement> measurements = eventLog.getEventLog();
+                    if( measurements == null || measurements.isEmpty() ) {
+                        Sha1Digest expectedValue = computeHistory(measurements); // calculate expected' based on history
+                        // make sure the expected pcr value matches the actual pcr value
+                        if( !expectedValue.equals(actualValue.getValue()) ) {
+                            report.fault(new PcrValueMismatch(pcrIndex, expectedValue, actualValue.getValue()) );
+                        }
+                    }
                 }
             }
         }

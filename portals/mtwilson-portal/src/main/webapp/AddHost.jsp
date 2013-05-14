@@ -138,6 +138,7 @@
 			</div>
 			
 		</div>
+                        <div class="singleDiv" >&nbsp;</div>
 		<div id="mleMessage" class="errorDiv"></div>
 	</div>
 <script type="text/javascript" src="Scripts/addHost.js"></script>

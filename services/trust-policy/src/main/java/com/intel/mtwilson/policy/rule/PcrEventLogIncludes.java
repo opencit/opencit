@@ -52,16 +52,22 @@ public class PcrEventLogIncludes extends BaseRule {
             report.fault(new PcrEventLogMissing());
         }
         else {
-            List<Measurement> moduleManifest = hostReport.pcrManifest.getPcrEventLog(pcrIndex).getEventLog();
-            if( moduleManifest == null ) {
+            PcrEventLog pcrEventLog = hostReport.pcrManifest.getPcrEventLog(pcrIndex);
+            if( pcrEventLog == null  ) {
                 report.fault(new PcrEventLogMissing(pcrIndex));
             }
             else {
-                HashSet<Measurement> hostActualMissing = new HashSet<Measurement>(expected);
-                hostActualMissing.removeAll(moduleManifest); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
-                if( !hostActualMissing.isEmpty() ) {
-                    report.fault(new PcrEventLogMissingExpectedEntries(pcrIndex, hostActualMissing));
-                }   
+                List<Measurement> moduleManifest = pcrEventLog.getEventLog();
+                if( moduleManifest == null || moduleManifest.isEmpty() ) {
+                    report.fault(new PcrEventLogMissing(pcrIndex));
+                }
+                else {
+                    HashSet<Measurement> hostActualMissing = new HashSet<Measurement>(expected);
+                    hostActualMissing.removeAll(moduleManifest); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
+                    if( !hostActualMissing.isEmpty() ) {
+                        report.fault(new PcrEventLogMissingExpectedEntries(pcrIndex, hostActualMissing));
+                    }   
+                }
             }
         }
         return report;

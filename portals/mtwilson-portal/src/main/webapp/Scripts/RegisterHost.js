@@ -1,13 +1,28 @@
 $(function() {
-	$('#vmwareHostType').find('input:text').each(function() {
+	/*$('#vmwareHostType').find('input:text').each(function() {
 		$(this).blur(function() {
 			fnValidateEmptyValue($(this).attr('id'));
 		});
+	});*/
+    
+	$('#mainRegisterHost_ClusterName').blur(function() {
+                        // Since Cluster name can have any special characters, we are not going to validate it. We will just check for empty value
+		fnMWValidateField('mainRegisterHost_ClusterName',true);
+	});    
+    
+	$('#mainRegisterHost_vCenterServer').blur(function() {
+		fnMWValidateIpAddressOrHostName('mainRegisterHost_vCenterServer',true);
+	});    
+
+        	$('#mainRegisterHost_loginID').blur(function() {
+		fnMWValidateField('mainRegisterHost_loginID', true);
 	});
-	$('#mainRegisterHost_password').blur(function() {
-		fnValidateEmptyValue($(this).attr('id'));
+
+    	$('#mainRegisterHost_password').blur(function() {
+		fnMWValidateField('mainRegisterHost_password', true);
 	});
-	fnChangehostType($('#MainContent_ddlHOSTProvider'),false);
+
+            fnChangehostType($('#MainContent_ddlHOSTProvider'),false);
 });
 
 function fnUploadFlatFile() {
