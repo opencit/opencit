@@ -109,6 +109,11 @@ public class TxtHost {
         return port;
     }
 
+    /**
+     * XXX TODO  the guessing of connection string has now moved to ConnectionString.from()
+     * @return
+     * @throws MalformedURLException 
+     */
     public String getAddOn_Connection_String() throws MalformedURLException {
         ConnectionString connStr = null;
         if( connectionString == null) {

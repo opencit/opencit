@@ -115,4 +115,16 @@ public class ConnectionStringTest {
         log.debug("Management Server: {}", cs.getManagementServerName());
     }
 
+    
+    @Test
+    public void testGuessIntelConnectionStringFromTxtHost() throws MalformedURLException {
+        TxtHostRecord txtHostRecord = new TxtHostRecord();
+        txtHostRecord.AddOn_Connection_String = null;
+        txtHostRecord.IPAddress = "1.2.3.4";
+        txtHostRecord.Port = 9999;
+        ConnectionString cs = ConnectionString.from(txtHostRecord);
+        log.debug("Intel vendor: {}", cs.getVendor());
+        log.debug("Intel url: {}", cs.getConnectionStringWithPrefix());
+    }
+    
 }
