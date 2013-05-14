@@ -399,6 +399,7 @@ public class HostTrustBO extends BaseBO {
             }
             else {
                 pcr.setManifestValue("");
+                pcr.setError("Missing PCR Value");
             }
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(biosPcrIndex)), pcr);
         }
@@ -414,6 +415,7 @@ public class HostTrustBO extends BaseBO {
             }
             else {
                 pcr.setManifestValue("");
+                pcr.setError("Missing PCR Value");
             }
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
         }
@@ -450,7 +452,13 @@ public class HostTrustBO extends BaseBO {
                     pcr.setUpdatedOn(today);
                     pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
                     pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
-                    pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
+                    if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()) != null ) {
+                         pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
+                     }
+                     else {
+                         pcr.setManifestValue("");
+                         pcr.setError("Missing PCR Value");
+                     }
                     taLogMap.put(pcrPolicy.getExpectedPcr().getIndex(), pcr);
                 }
                 pcr.setTrustStatus(result.isTrusted());
@@ -522,14 +530,16 @@ public class HostTrustBO extends BaseBO {
                         Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                         for(Measurement m : missingEntries) {
                             // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
-                            List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
                             Measurement found = null;
-                            for(Measurement a : actualEntries) {
-                                // TODO SUDHIR: This below test is failing for open source since the label in the measurement is set to initrd, where as the pcrManifest is having OpenSource.initrd
-                                // Need to probably change the attestation generator itself.
-                                //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
-                                if( a.getLabel().equals(m.getLabel()) ) {
-                                    found = a;
+                            if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()) != null ) {
+                                List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
+                                for(Measurement a : actualEntries) {
+                                    // TODO SUDHIR: This below test is failing for open source since the label in the measurement is set to initrd, where as the pcrManifest is having OpenSource.initrd
+                                    // Need to probably change the attestation generator itself.
+                                    //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
+                                    if( a.getLabel().equals(m.getLabel()) ) {
+                                        found = a;
+                                    }
                                 }
                             }
                             // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it. 
