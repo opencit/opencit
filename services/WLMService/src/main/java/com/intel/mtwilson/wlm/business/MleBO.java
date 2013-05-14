@@ -795,7 +795,13 @@ public class MleBO extends BaseBO {
                     } else {
                         fullComponentName = moduleData.getComponentName();
                     }
-                    
+                    // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+                    if( fullComponentName != null ) {
+                        log.debug("trimming fullComponentName: " + fullComponentName);
+                        fullComponentName = fullComponentName.trim(); 
+                    }
+                    log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
+
                     tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
                     if (tblModule != null) {
@@ -899,6 +905,12 @@ public class MleBO extends BaseBO {
                     } else {
                         fullComponentName = moduleData.getComponentName();
                     }
+                    // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+                    if( fullComponentName != null ) {
+                        log.debug("trimming fullComponentName: " + fullComponentName);
+                        fullComponentName = fullComponentName.trim(); 
+                    }
+                    log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
 
                     tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
                     
@@ -979,6 +991,15 @@ public class MleBO extends BaseBO {
                     // we need to ask the user to use the Update option instead of create
                     validateNull("ComponentName", componentName);
                     validateNull("EventName", eventName);
+                    String fullComponentName = tblEvent.getFieldName() + "." + componentName;
+                    
+                    // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+                    if( fullComponentName != null ) {
+                        log.debug("trimming fullComponentName: " + fullComponentName);
+                        fullComponentName = fullComponentName.trim(); 
+                    }
+                    log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
+
                     log.debug("deleteModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+componentName+"' event name '"+eventName+"'");
                     tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), 
                             tblEvent.getFieldName() + "." + componentName, eventName);

@@ -1641,7 +1641,12 @@ public class HostBO extends BaseBO {
                             } else {
                                 fullComponentName = moduleObj.getComponentName();
                             }
-
+                            
+                            // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+                            if( fullComponentName != null ) {
+                                log.debug("trimming fullComponentName: " + fullComponentName);
+                                fullComponentName = fullComponentName.trim(); 
+                            }
                             log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
                             TblModuleManifest moduleSearchObj = moduleJpa.findByMleNameEventName(mleSearchObj.getId(),
                                     fullComponentName, moduleObj.getEventName());
