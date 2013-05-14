@@ -152,6 +152,12 @@ public class HostTrustBO extends BaseBO {
 
         TrustReport trustReport = getTrustReportForHost(tblHosts, hostId);
         
+        // XXX TODO whenw e move to complete policy model implementation this check will need to be deleted since we will be able to handle missing information better
+        if( trustReport.getHostReport() == null || trustReport.getHostReport().pcrManifest == null ) {
+            throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+        }
+        
+        
         HostTrustStatus trust = new HostTrustStatus();
         trust.bios = trustReport.isTrustedForMarker(TrustMarker.BIOS.name());
         trust.vmm = trustReport.isTrustedForMarker(TrustMarker.VMM.name());
@@ -394,13 +400,10 @@ public class HostTrustBO extends BaseBO {
             pcr.setUpdatedOn(today);
             pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(biosPcrIndex);
-            if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)) != null ) {
-                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
+            if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)) == null ) {
+                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
             }
-            else {
-                pcr.setManifestValue("");
-                pcr.setError("Missing PCR Value");
-            }
+            pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(biosPcrIndex)), pcr);
         }
         for(String vmmPcrIndex : vmmPcrList) {
@@ -410,13 +413,10 @@ public class HostTrustBO extends BaseBO {
             pcr.setUpdatedOn(today);
             pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(vmmPcrIndex);
-            if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)) != null ) {
-                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
+            if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)) == null ) {
+                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
             }
-            else {
-                pcr.setManifestValue("");
-                pcr.setError("Missing PCR Value");
-            }
+            pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
         }
         
@@ -452,13 +452,10 @@ public class HostTrustBO extends BaseBO {
                     pcr.setUpdatedOn(today);
                     pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
                     pcr.setManifestName(pcrPolicy.getExpectedPcr().getIndex().toString());
-                    if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()) != null ) {
-                         pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
-                     }
-                     else {
-                         pcr.setManifestValue("");
-                         pcr.setError("Missing PCR Value");
-                     }
+                    if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()) == null ) {
+                        throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS); // will cause the host to show up as "unknown" since there will not be any ta log records
+                    }
+                    pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(pcrPolicy.getExpectedPcr().getIndex()).getValue().toString());
                     taLogMap.put(pcrPolicy.getExpectedPcr().getIndex(), pcr);
                 }
                 pcr.setTrustStatus(result.isTrusted());
@@ -530,16 +527,17 @@ public class HostTrustBO extends BaseBO {
                         Set<Measurement> missingEntries = missingEntriesFault.getMissingEntries();
                         for(Measurement m : missingEntries) {
                             // try to find the same module in the host report (hopefully it has the same name , and only the value changed)
+                            if( report.getHostReport().pcrManifest == null || report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()) == null ) {
+                                throw new ASException(ErrorCode.AS_MISSING_PCR_MANIFEST);
+                            }
                             Measurement found = null;
-                            if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()) != null ) {
-                                List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
-                                for(Measurement a : actualEntries) {
-                                    // TODO SUDHIR: This below test is failing for open source since the label in the measurement is set to initrd, where as the pcrManifest is having OpenSource.initrd
-                                    // Need to probably change the attestation generator itself.
-                                    //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
-                                    if( a.getLabel().equals(m.getLabel()) ) {
-                                        found = a;
-                                    }
+                            List<Measurement> actualEntries = report.getHostReport().pcrManifest.getPcrEventLog(missingEntriesFault.getPcrIndex()).getEventLog();
+                            for(Measurement a : actualEntries) {
+                                // TODO SUDHIR: This below test is failing for open source since the label in the measurement is set to initrd, where as the pcrManifest is having OpenSource.initrd
+                                // Need to probably change the attestation generator itself.
+                                //  if( a.getInfo().get("ComponentName").equals(m.getLabel()) ) {
+                                if( a.getLabel().equals(m.getLabel()) ) {
+                                    found = a;
                                 }
                             }
                             // does the host have a module with the same name but different value? if so, we should log it in TblModuleManifestLog... but from here we don't have access to the HostReport.  XXX maybe need to change method signature and get the HostReport as well.  or maybe the TrustReport should include a reference to the host report in it. 
