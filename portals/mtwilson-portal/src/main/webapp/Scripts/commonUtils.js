@@ -12,6 +12,84 @@ var regPortNo = new RegExp(/^[0-9]+$/);
 // 0 = TA,  1 == vmware, 2 == citrix
 var isVMWare = 0;
 
+// Validation functions
+// TODO  this function is being used everywhere but we really need ip address OR hostname validation.
+//       adding hostname validation here sinc
+// stdalex_ validate ip address function
+
+function fnMWValidateIpAddressOrHostName(elementID, isMandatory) {
+    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+    var checkHostname = /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/;
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } else {
+        // Since the user has specified a value, irrespective of whether it is mandatory or not, let us validate it.
+        if(checkIp.test($('#'+elementID).val()) || checkHostname.test($('#'+elementID).val())) {
+            return true;
+        } else {
+            $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value specified is not valid.</span>');
+            return false;
+        }
+    }
+}
+
+function fnMWValidateIpAddress(elementID, isMandatory) {
+    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } else {
+        // Since the user has specified a value, irrespective of whether it is mandatory or not, let us validate it.
+        if(checkIp.test($('#'+elementID).val())) {
+            return true;
+        } else {
+            $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value specified is not valid.</span>');
+            return false;
+        }
+    }
+}
+
+function fnMWValidatePort(elementID, isMandatory) {
+    var checkPort = /^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } else {
+        // Since the user has specified a value, irrespective of whether it is mandatory or not, let us validate it.
+        if(checkPort.test($('#'+elementID).val())) {
+            return true;
+        } else {
+            $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value specified is not valid. Please specify a value between 0 and 65535.</span>');
+            return false;
+        }
+    }
+}
+
+// This function is basically for validating null or empty fields. There are no restrictions on the contents.
+function fnMWValidateField(elementID, isMandatory) {
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } 
+}
+
 var JSON = JSON || {};
 JSON.stringify = JSON.stringify || function (obj) {
 	var t = typeof (obj);
@@ -589,6 +667,11 @@ function clearAllFiled(divID) {
 			$(this).val('');
 		}
 	});
+    	$('#'+divID).find('input:password').each(function() {
+		if ($(this).attr('disabled') != 'disabled') {
+			$(this).val('');
+		}
+	});
 }
 
 function fnGetMleData(isNewMle) {
@@ -916,7 +999,13 @@ function getVCenterServerAddress(inputID) {
 
 function getVCeterHostIpAddress(address){
 	var string = address;
-	string = string.substring(8);
-	return string.split("/")[0];
+	string = string.substring(15);
+            // remove the sdk part
+	string = string.split("/")[0]; 
+            // remove the port # if using default
+            if (string.split(":")[1] == "443")
+                return string.split(":")[0];
+            else
+                return string;
 }
 
