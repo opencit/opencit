@@ -13,9 +13,9 @@ import com.intel.mtwilson.policy.Fault;
  */
 public class PcrEventLogMissing extends Fault {
     public PcrEventLogMissing() {
-        super("Host report does not include a PCR Module Manifest");
+        super("Host report does not include a PCR Event Log");
     }
     public PcrEventLogMissing(PcrIndex pcrIndex) {
-        super("Host report does not include a PCR Module Manifest for PCR %d", pcrIndex.toInteger());
+        super("Host report does not include a PCR Event Log for PCR %d", pcrIndex.toInteger());
     }
 }
