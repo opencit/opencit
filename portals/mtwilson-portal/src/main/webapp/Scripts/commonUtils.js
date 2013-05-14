@@ -999,7 +999,13 @@ function getVCenterServerAddress(inputID) {
 
 function getVCeterHostIpAddress(address){
 	var string = address;
-	string = string.substring(8);
-	return string.split("/")[0];
+	string = string.substring(15);
+            // remove the sdk part
+	string = string.split("/")[0]; 
+            // remove the port # if using default
+            if (string.split(":")[1] == "443")
+                return string.split(":")[0];
+            else
+                return string;
 }
 
