@@ -2319,7 +2319,7 @@ tomcat_create_ssl_cert() {
     
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     cp ${keystore} /root/
-
+    cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
   fi
 }
 

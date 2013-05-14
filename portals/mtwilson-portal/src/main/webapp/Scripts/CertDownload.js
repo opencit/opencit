@@ -1,3 +1,16 @@
+//Check for the existance of the Root CA Cert. If not exists, then hide link. 
+sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnLookForRootCASuccess, null);    
+
+function fnLookForRootCASuccess(responseJSON){
+    if (responseJSON.result)
+    { 
+        $('#fdownloadRCA').show();
+	
+    } else {
+         
+        $('#fdownloadRCA').hide();
+    }
+}
 
 function fnforRootCACertificate(){	
 	

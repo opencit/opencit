@@ -12,8 +12,9 @@ response.setHeader("Content-Disposition",
 <meta http-equiv="Content-Type" content="application/octet-stream; charset=ISO-8859-1">
 
 <title>Download Certificate</title>
+
 </head>
-<body>
+<body onload="fnLookforRootCACertificate()">
 <div class="container">
 		<div class="nagPanel">Administration &gt; View Certificates</div> <!-- was: "Management Console Certificate &gt; View " -->
 		<div id="nameOfPage" class="NameHeader">Certificate Download</div>
