@@ -160,7 +160,7 @@ fix_redhat_libcrypto
   echo "TRUST_AGENT_HOME=${package_dir}" >> ${myinstall}
   echo "TRUST_AGENT_NAME=${ARTIFACT}" >> ${myinstall}
   echo "TRUST_AGENT_VERSION=${VERSION}" >> ${myinstall}
-  echo "TRUST_AGENT_RELEASE=${BUILD}" >> ${myinstall}
+  echo "TRUST_AGENT_RELEASE=\"${BUILD}\"" >> ${myinstall}
 #  echo "TRUST_AGENT_ID=${WAR_NAME}" >> ${myinstall}
 
 
@@ -253,6 +253,10 @@ monit_src_install() {
 }
 
 monit_install $MONIT_PACKAGE
+
+if [ ! -d /etc/monit ]; then
+ mkdir /etc/monit
+fi
 
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
