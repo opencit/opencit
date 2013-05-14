@@ -394,7 +394,12 @@ public class HostTrustBO extends BaseBO {
             pcr.setUpdatedOn(today);
             pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(biosPcrIndex);
-            pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
+            if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)) != null ) {
+                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(biosPcrIndex)).getValue().toString());
+            }
+            else {
+                pcr.setManifestValue("");
+            }
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(biosPcrIndex)), pcr);
         }
         for(String vmmPcrIndex : vmmPcrList) {
@@ -404,7 +409,12 @@ public class HostTrustBO extends BaseBO {
             pcr.setUpdatedOn(today);
             pcr.setTrustStatus(true); // start as true, later we'll change to false if there are any faults // XXX TODO should be the other way, we need to start with false and only set to true if all rules passed
             pcr.setManifestName(vmmPcrIndex);
-            pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
+            if( report.getHostReport().pcrManifest != null && report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)) != null ) {
+                pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
+            }
+            else {
+                pcr.setManifestValue("");
+            }
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
         }
         
