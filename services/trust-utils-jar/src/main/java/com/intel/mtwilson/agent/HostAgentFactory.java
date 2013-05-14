@@ -105,7 +105,12 @@ public class HostAgentFactory {
         }
     }
     
-    // given a host, it returns the complete connection string starting with vendor scheme
+    /*
+     * XXX TODO this functionality moved to ConnectionString.from() , need to change all references & delete this one
+     * given a host, it returns the complete connection string starting with vendor scheme
+     * 
+     * @deprecated
+     */
     public String getConnectionString(TblHosts host) {
         String connectionString = host.getAddOnConnectionInfo();
         if( connectionString == null || connectionString.isEmpty() ) {
