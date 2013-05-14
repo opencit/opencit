@@ -181,6 +181,7 @@ public class HostBO extends BaseBO {
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
 		} catch (ASException ase) {
+            System.err.println("JIM DEBUG"); 
             ase.printStackTrace(System.err);
 
 			throw ase;
@@ -189,6 +190,7 @@ public class HostBO extends BaseBO {
 //                    throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
 //                } 
         catch (Exception e) {
+            System.err.println("JIM DEBUG");
             e.printStackTrace(System.err);
 			throw new ASException(e);
 		}
@@ -370,10 +372,16 @@ public class HostBO extends BaseBO {
 
                         new TblHostsJpaController(getEntityManagerFactory()).destroy(tblHosts.getId());
                 } catch (ASException ase) {
+                        System.err.println("JIM DEBUG"); 
+                        ase.printStackTrace(System.err);
                         throw ase;
                 } catch (CryptographyException e) {
+                        System.err.println("JIM DEBUG"); 
+                        e.printStackTrace(System.err);
                         throw new ASException(ErrorCode.SYSTEM_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage(), e);
                 } catch (Exception e) {
+                        System.err.println("JIM DEBUG"); 
+                        e.printStackTrace(System.err);
                         throw new ASException(e);
                 }
                 return new HostResponse(ErrorCode.OK);

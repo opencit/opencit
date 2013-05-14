@@ -138,6 +138,8 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
 
             log.error("Error while creating the Api Client object. " + ex.getMessage());
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             throw new MSException(ErrorCode.SYSTEM_ERROR, "Error while creating the Api Client object. " + ex.getMessage(), ex);
 
         }
@@ -213,6 +215,8 @@ public class HostBO extends BaseBO {
             throw me;
         } catch (Exception ex) {
             log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
         }
     }
@@ -250,6 +254,8 @@ public class HostBO extends BaseBO {
             throw me;
         } catch (Exception ex) {
             log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
         }
     }
@@ -312,6 +318,8 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
 
             log.error("Unexpected errror during host registration. " + ex.getMessage());
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
         }
         return registerStatus;
@@ -385,6 +393,8 @@ public class HostBO extends BaseBO {
                 } catch (Exception ex) {
 
                         log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+                        System.err.println("JIM DEBUG"); 
+                        ex.printStackTrace(System.err);
                         throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
                 }
         }
@@ -471,6 +481,8 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
 
             log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
         }
     }
@@ -585,6 +597,8 @@ public class HostBO extends BaseBO {
 
         } catch (Exception ex) {
 
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Unexpected errror during host registration. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
         }
@@ -831,7 +845,8 @@ public class HostBO extends BaseBO {
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
 
         } catch (Exception ex) {
-
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Unexpected errror during host update. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host update." + ex.getMessage());
         }
@@ -898,7 +913,8 @@ public class HostBO extends BaseBO {
             throw me;
 
         } catch (Exception ex) {
-
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Unexpected errror during white list configuration. " + ex.toString());
             ex.printStackTrace();
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
@@ -1103,7 +1119,8 @@ public class HostBO extends BaseBO {
                     + ": " + ae.getMessage());
 
         } catch (Exception ex) {
-
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Unexpected errror during white list configuration. " + ex.toString());
             ex.printStackTrace();
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
@@ -1193,7 +1210,8 @@ public class HostBO extends BaseBO {
             throw me;
 
         } catch (Exception ex) {
-
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Unexpected errror during MLE verification of host " + hostConfigObj.getTxtHostRecord().HostName + ". " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Errror during MLE verification for host "
                     + hostConfigObj.getTxtHostRecord().HostName + ". " + ex.getMessage());
@@ -1311,7 +1329,8 @@ public class HostBO extends BaseBO {
                     + ": Error during OEM-BIOS MLE Configuration. " + ae.getMessage());
 
         } catch (Exception ex) {
-
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Unexpected errror during OEM - BIOS MLE configuration. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OEM - BIOS MLE configuration. " + ex.getMessage());
         }
@@ -1431,7 +1450,8 @@ public class HostBO extends BaseBO {
                     + ": Error during OEM-VMM MLE Configuration. " + ae.getMessage());
 
         } catch (Exception ex) {
-
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Error during OS - VMM MLE configuration. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OS - VMM MLE configuration. " + ex.getMessage());
         }
@@ -1499,6 +1519,8 @@ public class HostBO extends BaseBO {
                     + ": Error during MLE white list host mapping. " + ae.getMessage());
 
         } catch (Exception ex) {
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Error during MLE white list host mapping. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE white list host mapping. " + ex.getMessage());
 
@@ -1543,6 +1565,8 @@ public class HostBO extends BaseBO {
                     + ": Error during MLE Deletion. " + ae.getMessage());
 
         } catch (Exception ex) {
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Error during MLE deletion. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE configuration. " + ex.getMessage());
 
@@ -1756,6 +1780,8 @@ public class HostBO extends BaseBO {
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString()
                     + ": Error during White List upload to DB. " + ae.getMessage());
         } catch (Exception ex) {
+            System.err.println("JIM DEBUG"); 
+            ex.printStackTrace(System.err);
             log.error("Error during white list upload to database. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list upload to database. " + ex.getMessage());
         }
