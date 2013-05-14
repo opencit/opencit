@@ -122,6 +122,11 @@ cp pcactl /usr/local/bin
 /usr/local/bin/pcactl setup
 register_startup_script /usr/local/bin/pcactl pcactl >> $INSTALL_LOG_FILE
 
+if [ -f "$intel_conf_dir/PrivacyCA.cer" ]; then
+  openssl x509 -inform der -in "$intel_conf_dir/PrivacyCA.cer" -out "$intel_conf_dir/PrivacyCA.pem"
+else
+ echo_warning "Missing PrivacyCA.cer.  File will not be available via portals"
+fi
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

@@ -22,6 +22,12 @@ function fnforPrivacyCACertificate(){
 	sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificate.html', null, fnRootCADownloadSuccess, null);
 }
 
+function fnforPrivacyCACertificateList(){	
+	
+	sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificateList.html', null, fnRootCADownloadSuccess, null);
+}
+
+
 
 function fnforSAMLCertificate(){	
 	

@@ -2021,7 +2021,8 @@ glassfish_create_ssl_cert() {
      tmpCN="dns:${serverName}"
     fi
     $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
-    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
+    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
+	cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
