@@ -479,14 +479,15 @@ function updateHostInfo() {
 
         if(ipValid == true) {
             if (chechAddHostValidation()) {
-		if (confirm("Are you sure you want to update this Host ?")) {
+                        // Bug: 727
+		//if (confirm("Are you sure you want to update this Host ?")) {
 			var dataToSend = fnGetNewHostData();
 			dataToSend.hostId = selectedHostID;
 			dataToSend = $.toJSON(dataToSend);
 			$('#mainAddHostContainer').prepend(disabledDiv);
 			$('#mleMessage').html('');
 			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+dataToSend+"&newhost=false", fnSaveNewHostInfoSuccess, null,"Host has been successfully updated.");
-		}
+		//}
             }
         }else{
             alert("Please enter a valid IP address and try again.")
