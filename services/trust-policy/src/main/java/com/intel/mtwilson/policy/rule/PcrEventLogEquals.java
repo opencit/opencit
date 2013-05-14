@@ -46,22 +46,28 @@ public class PcrEventLogEquals extends BaseRule {
             report.fault(new PcrEventLogMissing());
         }
         else {
-            List<Measurement> moduleManifest = hostReport.pcrManifest.getPcrEventLog(expected.getPcrIndex()).getEventLog();
-            if( moduleManifest == null ) {
+            PcrEventLog pcrEventLog = hostReport.pcrManifest.getPcrEventLog(expected.getPcrIndex());
+            if( pcrEventLog == null ) {
                 report.fault(new PcrEventLogMissing(expected.getPcrIndex()));
             }
             else {
-                // we check that for the PCR defined in the policy, the HostReport's PcrModuleManifest contains the exact set of expected modules
-                ArrayList<Measurement> hostActualUnexpected = new ArrayList<Measurement>(moduleManifest);
-                hostActualUnexpected.removeAll(expected.getEventLog()); //  hostActualUnexpected = actual modules - expected modules = only extra modules that shouldn't be there;  comparison is done BY HASH VALUE,  not by name or any "other info"
-                if( !hostActualUnexpected.isEmpty() ) {
-                    report.fault(new PcrEventLogContainsUnexpectedEntries(expected.getPcrIndex(), hostActualUnexpected));
+                List<Measurement> moduleManifest = pcrEventLog.getEventLog();
+                if( moduleManifest == null || moduleManifest.isEmpty() ) {
+                    report.fault(new PcrEventLogMissing(expected.getPcrIndex()));
                 }
-                HashSet<Measurement> hostActualMissing = new HashSet<Measurement>(expected.getEventLog());
-                hostActualMissing.removeAll(moduleManifest); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
-                if( !hostActualMissing.isEmpty() ) {
-                    report.fault(new PcrEventLogMissingExpectedEntries(expected.getPcrIndex(), hostActualMissing));
-                }   
+                else {
+                    // we check that for the PCR defined in the policy, the HostReport's PcrModuleManifest contains the exact set of expected modules
+                    ArrayList<Measurement> hostActualUnexpected = new ArrayList<Measurement>(moduleManifest);
+                    hostActualUnexpected.removeAll(expected.getEventLog()); //  hostActualUnexpected = actual modules - expected modules = only extra modules that shouldn't be there;  comparison is done BY HASH VALUE,  not by name or any "other info"
+                    if( !hostActualUnexpected.isEmpty() ) {
+                        report.fault(new PcrEventLogContainsUnexpectedEntries(expected.getPcrIndex(), hostActualUnexpected));
+                    }
+                    HashSet<Measurement> hostActualMissing = new HashSet<Measurement>(expected.getEventLog());
+                    hostActualMissing.removeAll(moduleManifest); // hostActualMissing = expected modules - actual modules = only modules that should be there but aren't 
+                    if( !hostActualMissing.isEmpty() ) {
+                        report.fault(new PcrEventLogMissingExpectedEntries(expected.getPcrIndex(), hostActualMissing));
+                    }   
+                }
             }
         }
         return report;
