@@ -181,12 +181,15 @@ public class HostBO extends BaseBO {
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
 		} catch (ASException ase) {
+            ase.printStackTrace(System.err);
+
 			throw ase;
 		} 
 //                catch(CryptographyException e) {
 //                    throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
 //                } 
         catch (Exception e) {
+            e.printStackTrace(System.err);
 			throw new ASException(e);
 		}
 		return new HostResponse(ErrorCode.OK);
