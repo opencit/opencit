@@ -620,7 +620,9 @@ public class HostBO extends BaseBO {
 
                     log.info("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
                             "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
-
+                    log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                    
                     TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
                             m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
@@ -633,6 +635,8 @@ public class HostBO extends BaseBO {
                     
                     log.info("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
                             "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                    log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
                     
                     // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
                     TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),

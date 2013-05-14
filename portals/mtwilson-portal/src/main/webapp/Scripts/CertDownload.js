@@ -1,7 +1,7 @@
 
 function fnforRootCACertificate(){	
 	
-	sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, fnRootCADownloadFail);
+	sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, null);
 }
 
 function fnforPrivacyCACertificate(){	
@@ -24,7 +24,7 @@ function fnforTLSCertificate(){
 
 function fnRootCADownloadSuccess(responseJSON){
 	if (responseJSON.result)
-	{ alert (responseJSON.SAMLcertificate);
+	{ 
             if (document.execCommand) {
             /* Start For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */
 	          //  var oWin = window.open("about:blank", "_blank");
@@ -54,10 +54,9 @@ function fnRootCADownloadSuccess(responseJSON){
 	
 	
         } else {
+            if (responseJSON.message.search("Root CA") > 0){
+                $('#fdownloadRCA').hide();
+            }
 		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
 	}
-}
-function fnRootCADownloadFail(responseJSON){
-    alert(responseJSON);
-    $('#fdownloadRCA').hide();
 }
