@@ -1348,7 +1348,9 @@ postgres_configure_connection() {
 # requires a postgres connection that can create databases and grant privileges
 # call postgres_configure_connection before calling this function
 postgres_create_database() {
-if [ postgres_server_detect -eq 0 ] ; then
+postgres_server_detect
+result=$?
+if [ $result == 0 ] ; then
   local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
   sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
   echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
