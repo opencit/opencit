@@ -35,6 +35,9 @@ import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostVMMType;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.ms.common.MSConfig;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.cert.X509Certificate;
@@ -45,6 +48,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.ServletContext;
@@ -813,6 +817,18 @@ public class ManagementConsoleDataController extends MultiActionController{
 	}
   //End_Added by Soni-Function for CA
 
+    private String readCertFile(String file ) throws IOException {
+        BufferedReader reader = new BufferedReader( new FileReader (file));
+        String         line = null;
+        StringBuilder  stringBuilder = new StringBuilder();
+        String         ls = System.getProperty("line.separator");
+        while( ( line = reader.readLine() ) != null ) {
+            stringBuilder.append( line );
+            stringBuilder.append( ls );
+        }
+        return stringBuilder.toString();
+    }
+    
     //Begin_Added by Soni-Function to download SAML certificate
     public ModelAndView getSAMLCertificate(HttpServletRequest req,HttpServletResponse res) {
 		log.info("In Data Contoller ManagementConsoleDataController.getSAMLCertificate  >>");
@@ -870,30 +886,31 @@ public class ManagementConsoleDataController extends MultiActionController{
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
-                res.setHeader("Content-Disposition","attachment;filename=mtwilson-rootCA");
+                res.setHeader("Content-Disposition","attachment;filename=MtWilsonRootCA.crt.pem");
 		
 		try {
                     // Now get the API object from the session
-			
-                    ApiClient apiObj = getApiClientService(req, ApiClient.class);
-                    
+			        //ApiClient apiObj = getApiClientService(req, ApiClient.class);
                     //X509Certificate[] certs = (X509Certificate[]) apiObj.getRootCaCertificates().toArray();
-                    Set<X509Certificate> certs = apiObj.getRootCaCertificates();
-                    Iterator i = certs.iterator();
-                    X509Certificate cert = (X509Certificate) i.next();               
-                    String ret = "-----BEGIN CERTIFICATE-----\n";
-                    ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
-                    ret += "\n-----END CERTIFICATE-----";
+                    //Set<X509Certificate> certs = apiObj.getRootCaCertificates();
+                    //Iterator i = certs.iterator();
+                    //X509Certificate cert = (X509Certificate) i.next();               
+                    //String ret = "-----BEGIN CERTIFICATE-----\n";
+                    //ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
+                    //ret += "\n-----END CERTIFICATE-----";
+                     MSConfig msc = new MSConfig();
+                    Properties prop = msc.getDefaults();
+                    String file = prop.getProperty("mtwilson.rootca.certificate.file");                                 
+                    String ret = readCertFile(file);
                     responseView.addObject("Certificate",ret);
                     responseView.addObject("result",true);
-                     log.info("ManagementConsoleDataController.getRootCACertificate <<<");
-  		
-  	         } catch (Exception e) {
-			log.error("Error While getting Root CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
-			responseView.addObject("result",false);
-			return responseView;  
-		}
+                     log.info("ManagementConsoleDataController.getRootCACertificate <<<");  		
+  	    } catch (Exception e) {
+                log.error("Error While getting Root CA Downlaoding Certificate. "+e.getMessage());			
+                responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
+                responseView.addObject("result",false);
+                return responseView;  
+        }
 		return responseView;
 		
 	}
@@ -903,10 +920,11 @@ public class ManagementConsoleDataController extends MultiActionController{
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
-                res.setHeader("Content-Disposition","attachment;filename=mtwilson-rootCA");
+                res.setHeader("Content-Disposition","attachment;filename=PrivacyCA.pem");
 		
 		try {
-                    // Now get the API object from the session
+                    /* old way
+                     Now get the API object from the session
 			
                     ApiClient apiObj = getApiClientService(req, ApiClient.class);
                     Set<X509Certificate> certs = apiObj.getPrivacyCaCertificates();
@@ -918,6 +936,14 @@ public class ManagementConsoleDataController extends MultiActionController{
                     responseView.addObject("Certificate",ret);
                     responseView.addObject("result",true);
                      log.info("ManagementConsoleDataController.getPrivacyCACertificate <<<");
+                     */
+                    MSConfig msc = new MSConfig();
+                    Properties prop = msc.getDefaults();
+                    String file = prop.getProperty("mtwilson.privacyca.certificate.file");                                 
+                    String ret = readCertFile(file);
+                    responseView.addObject("Certificate",ret);
+                    responseView.addObject("result",true);
+                     log.info("ManagementConsoleDataController.getPrivacyCACertificat <<<"); 
   		
   	         } catch (Exception e) {
 			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
@@ -928,13 +954,40 @@ public class ManagementConsoleDataController extends MultiActionController{
 		return responseView;
 		
 	}
+     
+    public ModelAndView getPrivacyCACertificateList(HttpServletRequest req,HttpServletResponse res) {
+		log.info("In Data Contoller ManagementConsoleDataController.getPrivacyCACertificateList  >>");
+		//ModelAndView responseView = new ModelAndView("SAMLDownload");
+		ModelAndView responseView = new ModelAndView(new JSONView());
+		 res.setContentType("application/octet-stream ");
+        res.setHeader("Content-Disposition","attachment;filename=PrivacyCA.p12.pem");
+		
+		try {
+                    // Now get the API object from the session
+                    MSConfig msc = new MSConfig();
+                    Properties prop = msc.getDefaults();
+                    String file = prop.getProperty("mtwilson.privacyca.certificate.list.file");                                 
+                    String ret = readCertFile(file);
+                    responseView.addObject("Certificate",ret);
+                    responseView.addObject("result",true);
+                     log.info("ManagementConsoleDataController.getPrivacyCACertificateList <<<");
+  		
+  	         } catch (Exception e) {
+			log.error("Error While getting Privacy CA List Downlaoding Certificate. "+e.getMessage());			
+			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
+			responseView.addObject("result",false);
+			return responseView;  
+		}
+		return responseView;
+		
+	} 
     
         public ModelAndView getTLSCertificate(HttpServletRequest req,HttpServletResponse res) {
 		log.info("In Data Contoller ManagementConsoleDataController.getTLSCertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
-                res.setHeader("Content-Disposition","attachment;filename=mtwilson-rootCA");
+                res.setHeader("Content-Disposition","attachment;filename=ssl.crt.pem");
 		
 		try {
                     // Now get the API object from the session
@@ -951,7 +1004,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                      log.info("ManagementConsoleDataController.getTLSCertificate <<<");
   		
   	         } catch (Exception e) {
-			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
+			log.error("Error While getting TLS Downlaoding Certificate. "+e.getMessage());			
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;  

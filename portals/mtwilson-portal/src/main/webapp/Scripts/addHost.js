@@ -12,12 +12,12 @@ $(function() {
 	 */
 
 	$('#MainContent_tbHostName').blur(function() {
-		fnTestValidation('MainContent_tbHostName',normalReg);
+		fnMWValidateIpAddressOrHostName('MainContent_tbHostName',false);
 	});
 	$('#MainContent_tbHostPort').blur(function() {
                         // Port has to be validated for both Open Source and Citrix
 		if ((isVmware == 0)  || (isVmware ==2)){
-			$('.portNoError').each(function() {
+			/*$('.portNoError').each(function() {
 				$(this).remove();
 			});
 			if (!regPortNo.test($('#MainContent_tbHostPort').val())) {
@@ -27,30 +27,33 @@ $(function() {
 			if ($('#MainContent_tbHostPort').val().length > 4 ) {
 				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv portNoError" style="float:none">Port NO length should not be greater 4.</span>');
 				return false;
-			}
+			}*/
+                                    fnMWValidatePort('MainContent_tbHostPort', true);
 		}
 	});
 	$('#MainContent_tbHostIP').blur(function() {
                         // For both open source and citrix we have to validate IP address since it is mandatory. For VMware we validate only if the user has entered value
 		if ((isVmware == 0) || (isVmware == 2)){
-			fnTestValidation('MainContent_tbHostIP',regIPAddress);
-		} else if ((isVmware == 1) && ($('#MainContent_tbHostIP').val() != "")) {
-                                    fnTestValidation('MainContent_tbHostIP',regIPAddress);
+			//fnTestValidation('MainContent_tbHostIP',regIPAddress);
+                                    fnMWValidateIpAddress('MainContent_tbHostIP', true);
+		} else if ((isVmware == 1)) {
+                                   // fnTestValidation('MainContent_tbHostIP',regIPAddress);
+                                    fnMWValidateIpAddress('MainContent_tbHostIP', false);                                   
                         }
 	});
 	$('#MainContent_tbVCenterAddress').blur(function() {
-		if (isVmware != 0) {
-			fnTestValidation('MainContent_tbVCenterAddress',regIPAddress);
+		if (isVmware == 1) {
+			fnMWValidateIpAddressOrHostName('MainContent_tbVCenterAddress',true);
 		}
 	});
 	$('#MainContent_tbVCenterLoginId').blur(function() {
-		if (isVmware != 0) {
-			fnTestValidation('MainContent_tbVCenterLoginId',new RegExp());
+		if (isVmware == 1) {
+			fnMWValidateField('MainContent_tbVCenterLoginId',true);
 		}
 	});
 	$('#MainContent_tbVCenterPass').blur(function() {
-		if (isVmware != 0) {
-			fnTestValidation('MainContent_tbVCenterPass',new RegExp());
+		if (isVmware == 1) {
+			fnMWValidateField('MainContent_tbVCenterPass',true);
 		}
 	});
 });

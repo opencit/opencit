@@ -21,11 +21,13 @@ response.setHeader("Content-Disposition",
                
 			<div  id ="fdownload"class="registerUser">Click on Download icon to download Root Ca Certificate
 			<input type="image" onclick="fnforRootCACertificate()" src="images/download.jpg"></div>
-                        <div  id ="fdownload"class="registerUser">Click on Download icon to download Privacy Ca Certificate
+            <div  id ="fdownload"class="registerUser">Click on Download icon to download this hosts Privacy CA Certificate
 			<input type="image" onclick="fnforPrivacyCACertificate()" src="images/download.jpg"></div>
-                        <div  id ="fdownload"class="registerUser">Click on Download icon to download TLS Certificate
+            <div  id ="fdownload"class="registerUser">Click on Download icon to download all trusted Privacy CA Certificates
+			<input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div>
+            <div  id ="fdownload"class="registerUser">Click on Download icon to download TLS Certificate
 			<input type="image" onclick="fnforTLSCertificate()" src="images/download.jpg"></div>
-                        <div  id ="fdownload"class="registerUser">Click on Download icon to download SAML Certificate
+            <div  id ="fdownload"class="registerUser">Click on Download icon to download SAML Certificate
 			<input type="image" onclick="fnforSAMLCertificate()" src="images/download.jpg"></div>
                         
 			<div id="successMessage"></div>
