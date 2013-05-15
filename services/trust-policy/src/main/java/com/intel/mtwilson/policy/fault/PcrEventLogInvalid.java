@@ -12,10 +12,7 @@ import com.intel.mtwilson.policy.Fault;
  * @author jbuhacoff
  */
 public class PcrEventLogInvalid extends Fault {
-    public PcrEventLogInvalid() {
-        super("Host report does not include a PCR Module Manifest");
-    }
     public PcrEventLogInvalid(PcrIndex pcrIndex) {
-        super("Host report does not include a PCR Module Manifest for PCR %d", pcrIndex.toInteger());
+        super("PCR %d Event Log is invalid", pcrIndex.toInteger());
     }
 }

@@ -32,6 +32,7 @@ import java.io.IOException;
  * @author jbuhacoff
  */
 public class MyJpa {
+    private final MyPersistenceManager pm;
     TblApiClientJpaController mwApiClientHmac;
     MwApiClientHttpBasicJpaController mwApiClientHttpBasic;
     ApiClientX509JpaController mwApiClientX509;
@@ -59,105 +60,107 @@ public class MyJpa {
     TblSamlAssertionJpaController mwSamlAssertion;
     TblTaLogJpaController mwTaLog;
 
+    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
+    
     public TblApiClientJpaController mwApiClientHmac() throws IOException {
-		if( mwApiClientHmac == null ) { mwApiClientHmac = new TblApiClientJpaController(My.persistenceManager().getMSData()); }
+		if( mwApiClientHmac == null ) { mwApiClientHmac = new TblApiClientJpaController(pm.getMSData()); }
         return mwApiClientHmac;
 	}
     public MwApiClientHttpBasicJpaController mwApiClientHttpBasic() throws IOException {
-		if( mwApiClientHttpBasic == null ) { mwApiClientHttpBasic = new MwApiClientHttpBasicJpaController(My.persistenceManager().getASData()); }
+		if( mwApiClientHttpBasic == null ) { mwApiClientHttpBasic = new MwApiClientHttpBasicJpaController(pm.getASData()); }
 		return mwApiClientHttpBasic;
 	}
     public ApiClientX509JpaController mwApiClientX509() throws IOException {
-		if( mwApiClientX509 == null ) { mwApiClientX509 = new ApiClientX509JpaController(My.persistenceManager().getMSData()); }
+		if( mwApiClientX509 == null ) { mwApiClientX509 = new ApiClientX509JpaController(pm.getMSData()); }
 		return mwApiClientX509;
 	}
     public ApiRoleX509JpaController mwApiRoleX509() throws IOException {
-		if( mwApiRoleX509 == null ) { mwApiRoleX509 = new ApiRoleX509JpaController(My.persistenceManager().getMSData()); }
+		if( mwApiRoleX509 == null ) { mwApiRoleX509 = new ApiRoleX509JpaController(pm.getMSData()); }
 		return mwApiRoleX509;
 	}
     public AuditLogEntryJpaController mwAuditLogEntry() throws IOException {
-		if( mwAuditLogEntry == null ) { mwAuditLogEntry = new AuditLogEntryJpaController(My.persistenceManager().getAuditData()); }
+		if( mwAuditLogEntry == null ) { mwAuditLogEntry = new AuditLogEntryJpaController(pm.getAuditData()); }
 		return mwAuditLogEntry;
 	}
     public MwCertificateX509JpaController mwCertificateX509() throws IOException {
-		if( mwCertificateX509 == null ) { mwCertificateX509 = new MwCertificateX509JpaController(My.persistenceManager().getASData()); }
+		if( mwCertificateX509 == null ) { mwCertificateX509 = new MwCertificateX509JpaController(pm.getASData()); }
 		return mwCertificateX509;
 	}
     // XXX TODO we don't have a controller for the schema changelog   mw_changelog !!!
     public MwConfigurationJpaController mwConfiguration() throws IOException {
-		if( mwConfiguration == null ) { mwConfiguration = new MwConfigurationJpaController(My.persistenceManager().getMSData()); }
+		if( mwConfiguration == null ) { mwConfiguration = new MwConfigurationJpaController(pm.getMSData()); }
 		return mwConfiguration;
 	}
     public TblEventTypeJpaController mwEventType() throws IOException {
-		if( mwEventType == null ) { mwEventType = new TblEventTypeJpaController(My.persistenceManager().getASData()); }
+		if( mwEventType == null ) { mwEventType = new TblEventTypeJpaController(pm.getASData()); }
 		return mwEventType;
 	}
     public TblHostSpecificManifestJpaController mwHostSpecificManifest() throws IOException {
-		if( mwHostSpecificManifest == null ) { mwHostSpecificManifest = new TblHostSpecificManifestJpaController(My.persistenceManager().getASData()); }
+		if( mwHostSpecificManifest == null ) { mwHostSpecificManifest = new TblHostSpecificManifestJpaController(pm.getASData()); }
 		return mwHostSpecificManifest;
 	}
     public TblHostsJpaController mwHosts() throws IOException, CryptographyException {
-		if( mwHosts == null ) { mwHosts = new TblHostsJpaController(My.persistenceManager().getASData()); }
+		if( mwHosts == null ) { mwHosts = new TblHostsJpaController(pm.getASData()); }
 		return mwHosts;
 	}
     public MwKeystoreJpaController mwKeystore() throws IOException {
-		if( mwKeystore == null ) { mwKeystore = new MwKeystoreJpaController(My.persistenceManager().getASData()); }
+		if( mwKeystore == null ) { mwKeystore = new MwKeystoreJpaController(pm.getASData()); }
 		return mwKeystore;
 	}
     public TblLocationPcrJpaController mwLocationPcr() throws IOException {
-		if( mwLocationPcr == null ) { mwLocationPcr = new TblLocationPcrJpaController(My.persistenceManager().getASData()); }
+		if( mwLocationPcr == null ) { mwLocationPcr = new TblLocationPcrJpaController(pm.getASData()); }
 		return mwLocationPcr;
 	}
     public TblMleJpaController mwMle() throws IOException {
-		if( mwMle == null ) { mwMle = new TblMleJpaController(My.persistenceManager().getASData()); }
+		if( mwMle == null ) { mwMle = new TblMleJpaController(pm.getASData()); }
 		return mwMle;
 	}
     public MwMleSourceJpaController mwMleSource() throws IOException {
-		if( mwMleSource == null ) { mwMleSource = new MwMleSourceJpaController(My.persistenceManager().getASData()); }
+		if( mwMleSource == null ) { mwMleSource = new MwMleSourceJpaController(pm.getASData()); }
 		return mwMleSource;
 	}
     public TblModuleManifestJpaController mwModuleManifest() throws IOException {
-		if( mwModuleManifest == null ) { mwModuleManifest = new TblModuleManifestJpaController(My.persistenceManager().getASData()); }
+		if( mwModuleManifest == null ) { mwModuleManifest = new TblModuleManifestJpaController(pm.getASData()); }
 		return mwModuleManifest;
 	}
     public TblModuleManifestLogJpaController mwModuleManifestLog() throws IOException {
-		if( mwModuleManifestLog == null ) { mwModuleManifestLog = new TblModuleManifestLogJpaController(My.persistenceManager().getASData()); }
+		if( mwModuleManifestLog == null ) { mwModuleManifestLog = new TblModuleManifestLogJpaController(pm.getASData()); }
 		return mwModuleManifestLog;
 	}
     public TblOemJpaController mwOem() throws IOException {
-		if( mwOem == null ) { mwOem = new TblOemJpaController(My.persistenceManager().getASData()); }
+		if( mwOem == null ) { mwOem = new TblOemJpaController(pm.getASData()); }
 		return mwOem;
 	}
     public TblOsJpaController mwOs() throws IOException {
-		if( mwOs == null ) { mwOs = new TblOsJpaController(My.persistenceManager().getASData()); }
+		if( mwOs == null ) { mwOs = new TblOsJpaController(pm.getASData()); }
 		return mwOs;
 	}
     public TblPackageNamespaceJpaController mwPackageNamespace() throws IOException {
-		if( mwPackageNamespace == null ) { mwPackageNamespace = new TblPackageNamespaceJpaController(My.persistenceManager().getASData()); }
+		if( mwPackageNamespace == null ) { mwPackageNamespace = new TblPackageNamespaceJpaController(pm.getASData()); }
 		return mwPackageNamespace;
 	}
     public TblPcrManifestJpaController mwPcrManifest() throws IOException {
-		if( mwPcrManifest == null ) { mwPcrManifest = new TblPcrManifestJpaController(My.persistenceManager().getASData()); }
+		if( mwPcrManifest == null ) { mwPcrManifest = new TblPcrManifestJpaController(pm.getASData()); }
 		return mwPcrManifest;
 	}
     public MwPortalUserJpaController mwPortalUser() throws IOException {
-		if( mwPortalUser == null ) { mwPortalUser = new MwPortalUserJpaController(My.persistenceManager().getMSData()); }
+		if( mwPortalUser == null ) { mwPortalUser = new MwPortalUserJpaController(pm.getMSData()); }
 		return mwPortalUser;
 	}
     public MwRequestLogJpaController mwRequestLog() throws IOException {
-		if( mwRequestLog == null ) { mwRequestLog = new MwRequestLogJpaController(My.persistenceManager().getASData()); }
+		if( mwRequestLog == null ) { mwRequestLog = new MwRequestLogJpaController(pm.getASData()); }
 		return mwRequestLog;
 	}
     public TblRequestQueueJpaController mwRequestQueue() throws IOException {
-		if( mwRequestQueue == null ) { mwRequestQueue = new TblRequestQueueJpaController(My.persistenceManager().getASData()); }
+		if( mwRequestQueue == null ) { mwRequestQueue = new TblRequestQueueJpaController(pm.getASData()); }
 		return mwRequestQueue;
 	}
     public TblSamlAssertionJpaController mwSamlAssertion() throws IOException {
-		if( mwSamlAssertion == null ) { mwSamlAssertion = new TblSamlAssertionJpaController(My.persistenceManager().getASData()); }
+		if( mwSamlAssertion == null ) { mwSamlAssertion = new TblSamlAssertionJpaController(pm.getASData()); }
 		return mwSamlAssertion;
 	}
     public TblTaLogJpaController mwTaLog() throws IOException {
-		if( mwTaLog == null ) { mwTaLog = new TblTaLogJpaController(My.persistenceManager().getASData()); }
+		if( mwTaLog == null ) { mwTaLog = new TblTaLogJpaController(pm.getASData()); }
 		return mwTaLog;
 	}
 
