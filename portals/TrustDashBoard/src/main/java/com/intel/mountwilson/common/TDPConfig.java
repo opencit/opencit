@@ -74,7 +74,7 @@ public class TDPConfig extends ConfigBase {
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.tdbp.db.driver", 
                 config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+                "org.postgresql.Driver")));
         //System.err.println("stdalex tdpConfig getJpaConfig driver == " + config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
         String dbms = (config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         //System.err.println("stdalex tdpConfig getJpaConfig dbms == " + dbms);

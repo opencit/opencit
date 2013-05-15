@@ -91,7 +91,7 @@ public class TestConfig extends ConfigBase{
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.as.db.driver", 
                 config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+                "org.postgresql.Driver")));
         System.err.println("stdalex asConfig getJpaConfig driver == " + config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
         String dbms = (config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         System.err.println("stdalex asconfig getJpaConfig dbms == " + dbms);

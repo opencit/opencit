@@ -76,7 +76,7 @@ public class MCPConfig extends ConfigBase {
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.mc.db.driver", 
                 config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+                "org.postgresql.Driver")));
         String dbms = (config.getString("mountwilson.mc.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.mc.db.url",
