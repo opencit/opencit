@@ -134,7 +134,7 @@ function fnColapse(element){
 function populateVMwareSubgridDetails(responseJSON,div,hostName,hostID) {
 	if(responseJSON.result){
 		var list = responseJSON.VMsForHost;
-		var str = '<tr style="color:White;background-color:#5D7B9D;font-weight:bold;">'+
+		var str = '<tr style="color:White;background-color:#3A4F63;font-weight:bold;">'+
 					'<th class="showVMHostrow1">VM Name</th>'+
 					'<th class="showVMHostrow2">Trusted Host Policy</th>'+
 					'<th class="showVMHostrow3">Location Compliance Policy</th>'+

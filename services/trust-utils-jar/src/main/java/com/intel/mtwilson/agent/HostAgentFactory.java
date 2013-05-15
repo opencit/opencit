@@ -172,13 +172,22 @@ public class HostAgentFactory {
         if( connectionString == null ) {
             throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
         }
+        ConnectionString cs = new ConnectionString(connectionString);
+        String vendorName = cs.getVendor().name(); // INTEL, CITRIX, VMWARE
         for(Vendor vendor : vendors) {
+            /*
             String prefix = vendor.name().toLowerCase()+":"; // "INTEL" becomes "intel:"
             if( connectionString.startsWith(prefix) ) {
                 String urlpart = connectionString.substring(prefix.length());
                 VendorHostAgentFactory factory = vendorFactoryMap.get(vendor);
                 if( factory != null ) {
                     return factory.getHostAgent(hostAddress, urlpart, tlsPolicy);
+                }
+            }*/
+            if( vendor.name().equals(vendorName) ) {
+                VendorHostAgentFactory factory = vendorFactoryMap.get(vendor);
+                if( factory != null ) {
+                    return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
                 }
             }
         }
