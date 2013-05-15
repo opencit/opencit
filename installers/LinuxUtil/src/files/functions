@@ -1355,6 +1355,8 @@ if [ $result == 0 ] ; then
   sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
   echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
   echo listen_addresses = \'*\' >> $postgresc
+  postgres_restart & >> $INSTALL_LOG_FILE
+
   postgres_test_connection
 
   local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
