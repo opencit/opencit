@@ -2164,7 +2164,7 @@ tomcat_version_report() {
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
   local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
-
+echo "min_version for tomcat_detect is $min_version"
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
       fi
@@ -2190,6 +2190,8 @@ tomcat_detect() {
       fi
     fi
   fi
+echo "tomcat variable is $tomcat"
+echo TOMCAT_VERSION is $TOMCAT_VERSION"
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
