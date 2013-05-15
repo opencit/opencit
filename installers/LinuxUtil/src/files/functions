@@ -2191,7 +2191,7 @@ echo "min_version for tomcat_detect is $min_version"
     fi
   fi
 echo "tomcat variable is $tomcat"
-echo TOMCAT_VERSION is $TOMCAT_VERSION"
+echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
