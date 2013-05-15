@@ -12,7 +12,7 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
-              #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ] monit
+              #postgres|mysql java opt_tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ] monit
  INSTALL_PKGS="postgres java glassfish privacyca SERVICES PORTALS"
 fi
 
@@ -85,7 +85,7 @@ cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 if [ ! -z "$glassfish" ]; then
   WEBSERVER_VENDOR=glassfish
-elif [ ! -z "$tomcat" ]; then
+elif [ ! -z "$opt_tomcat" ]; then
   WEBSERVER_VENDOR=tomcat
 fi
 
@@ -177,7 +177,7 @@ if [ ! -z "$glassfish" ]; then
 	fi
 fi
 
-if [ ! -z "$tomcat" ]; then
+if [ ! -z "$opt_tomcat" ]; then
 	if [ ! -e $tomcat_installer ]; then
 		echo_warning "Tomcat installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
@@ -376,7 +376,7 @@ echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
-if [[ -z "$glassfish" && -z "$tomcat" ]]; then
+if [[ -z "$glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
 
@@ -401,7 +401,7 @@ if using_glassfish; then
   fi
   # end glassfish setup
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ]; then
     # tomcat install here
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
@@ -423,7 +423,7 @@ elif using_tomcat; then
       echo "Starting Tomcat ..."
       tomcat_start
     fi
-	# tomcat init end
+	# opt_tomcat init end
   else
     echo_warning "Skipping webservice init"
   fi
@@ -445,7 +445,7 @@ if using_glassfish; then
     glassfish_start
   fi
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
       tomcat_restart
@@ -466,7 +466,7 @@ if using_glassfish; then
     glassfish_start
   fi
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
       tomcat_restart
@@ -487,7 +487,7 @@ if using_glassfish; then
     glassfish_start
   fi
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
       tomcat_restart
@@ -508,7 +508,7 @@ if using_glassfish; then
     glassfish_start
   fi
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
       tomcat_restart
@@ -547,7 +547,7 @@ if using_glassfish; then
     glassfish_start
   fi
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
       tomcat_restart

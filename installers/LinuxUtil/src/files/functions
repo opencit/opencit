@@ -1213,27 +1213,27 @@ echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_F
 
 postgres_server_detect() {
   #find the host file
-  postgresh=""; 
+  postgres_pghb_conf=""; 
   result=`find / -name pg_hba.conf`
   for r in $result; do 
     mytest=`grep "IPv4 local connections" $r`;  
     if [ -n "$mytest" ]; then 
-      postgresh="$r";
+      postgres_pghb_conf="$r";
       break; 
     fi ; 
   done;  
   
   #find the configuration file
-  postgresc="";
+  postgres_conf="";
   result=`find / -name postgresql.conf`
   for r in $result; do 
     mytest=`grep "listen_addresses" $r`;  
     if [ -n "$mytest" ]; then 
-      postgresc="$r";
+      postgres_conf="$r";
       break; 
     fi ; 
   done;
-
+ 
   # see if we have the command path already
   if [[ -n "$postgresd" && -f "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
@@ -1389,8 +1389,17 @@ if [ $result == 0 ] ; then
     echo "Creating database..."
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-    echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-    echo listen_addresses = \'*\' >> $postgresc
+
+    has_host=grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"
+    if [ -z has_host ]; then
+      echo host  all  all  127.0.0.1/32	password >> $postgres_pghb_conf
+    fi
+    
+    has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
+    if [ -z "$has_listen_addresses" ]; then
+       echo listen_addresses = \'127.0.0.1\' >> $postgres_conf
+    fi
+    
     postgres_restart & >> $INSTALL_LOG_FILE
     sleep 5
 
@@ -2069,7 +2078,7 @@ glassfish_create_ssl_cert() {
 tomcat_clear() {
   TOMCAT_HOME=""
   tomcat_bin=""
-  tc=""
+  tomcat=""
 }
 
 
@@ -2088,7 +2097,7 @@ tomcat_ready_report() {
   if [[ -z "$TOMCAT_HOME" ]]; then echo_warning "TOMCAT_HOME variable is not set"; return 1; fi
   if [[ -z "$tomcat_bin" ]]; then echo_warning "Tomcat binary path is not set"; return 1; fi
   if [[ ! -f "$tomcat_bin" ]]; then echo_warning "Cannot find Tomcat binary at $tomcat_bin"; return 1; fi
-  if [[ -z "$tc" ]]; then echo_warning "Tomcat command is not set"; return 1; fi
+  if [[ -z "$tomcat" ]]; then echo_warning "Tomcat command is not set"; return 1; fi
   echo_success "Using Tomcat at $TOMCAT_HOME"
   return 0
 }
@@ -2107,9 +2116,9 @@ tomcat_version() {
   # At least one of these environment variable is needed to run this program
   if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
 
-  if [[ -n "$tc" ]]; then
+  if [[ -n "$tomcat" ]]; then
     # extract the version number from a string like: glassfish version "3.0"
-    local current_tomcat_version=`$tc version 2>&1 | grep -i "^Server version:" | grep -i version | awk -F / '{ print $2 }'`
+    local current_tomcat_version=`$tomcat version 2>&1 | grep -i "^Server version:" | grep -i version | awk -F / '{ print $2 }'`
     if [ -n "$current_tomcat_version" ]; then
       echo "current_tomcat_version: $current_tomcat_version" >> $INSTALL_LOG_FILE
       export TOMCAT_VERSION=$current_tomcat_version
@@ -2165,12 +2174,12 @@ tomcat_detect() {
     if [[ -z "$tomcat_bin" ]]; then
       tomcat_bin="$TOMCAT_HOME/bin/catalina.sh"
     fi
-    if [[ -z "$tc" ]]; then
+    if [[ -z "$tomcat" ]]; then
       if [[ -n "$java" ]]; then    
         # the glassfish admin tool read timeout is in milliseconds, so 900,000 is 900 seconds
-        tc="env PATH=$java_bindir:$PATH $tomcat_bin"
+        tomcat="env PATH=$java_bindir:$PATH $tomcat_bin"
       else
-        tc="$tomcat_bin"
+        tomcat="$tomcat_bin"
       fi
     fi
     if [[ -n "$tomcat" ]]; then
@@ -2187,7 +2196,7 @@ tomcat_detect() {
   echo "debug TOMCAT_CANDIDATES: ${TOMCAT_CANDIDATES}" >> $INSTALL_LOG_FILE
   for c in $TOMCAT_CANDIDATES
   do
-    #echo "debug tc candidate: $c"
+    #echo "debug tomcat candidate: $c"
     if [ -z "$TOMCAT_HOME" ]; then
       local bin_dir=`dirname $c`
       local parent=`dirname $bin_dir`
@@ -2197,9 +2206,9 @@ tomcat_detect() {
         conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
         export TOMCAT_CONF=`dirname $conf_dir`
         tomcat_bin=$parent/bin/catalina.sh
-        tc="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
+        tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
         echo "Found Tomcat: $TOMCAT_HOME" >> $INSTALL_LOG_FILE
-        echo "tc=$tomcat" >> $INSTALL_LOG_FILE
+        echo "tomcat=$tomcat" >> $INSTALL_LOG_FILE
         tomcat_version
         if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
           return 0
@@ -2212,7 +2221,7 @@ tomcat_detect() {
 
 tomcat_install() {
   tomcat_detect
-  if [[ -z "$TOMCAT_HOME" || -z "$tc" ]]; then
+  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     if [[ -n "$TOMCAT_PACKAGE" && -f "$TOMCAT_PACKAGE" ]]; then
       echo "Installing $TOMCAT_PACKAGE"
       #if [ -d "${tomcat_parent_dir}/${tomcat_name}" ]; then
@@ -2232,7 +2241,7 @@ tomcat_install() {
     fi
   fi
   
-  if [[ -z "$TOMCAT_HOME" || -z "$tc" ]]; then
+  if [[ -z "$TOMCAT_HOME" || -z "$tomcat" ]]; then
     echo "Unable to auto-install Tomcat"
     echo "  Tomcat download URL:"
     echo "  http://tomcat.apache.org/"
@@ -2286,23 +2295,23 @@ tomcat_running_report() {
   fi
 }
 tomcat_start() {
-  if [ -n "$tc" ]; then
-      $tc start
+  if [ -n "$tomcat" ]; then
+      $tomcat start
   fi
 }
 tomcat_stop() {
-  if [ -n "$tc" ]; then
-      $tc stop
+  if [ -n "$tomcat" ]; then
+      $tomcat stop
   fi
 }
 tomcat_restart() {
-  if [ -n "$tc" ]; then
+  if [ -n "$tomcat" ]; then
     if tomcat_running; then
-      $tc stop
+      $tomcat stop
       sleep 5
     fi  
   
-    $tc start
+    $tomcat start
     sleep 5
   fi
 }
