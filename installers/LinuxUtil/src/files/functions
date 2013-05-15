@@ -1390,8 +1390,8 @@ if [ $result == 0 ] ; then
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
 
-    has_host=grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"
-    if [ -z has_host ]; then
+    has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
+    if [ -z "$has_host" ]; then
       echo host  all  all  127.0.0.1/32	password >> $postgres_pghb_conf
     fi
     
@@ -2108,7 +2108,7 @@ tomcat_ready() {
   return $?
 }
 
-# How to use;   GLASSFISH_VERSION=`glassfish_version`
+# How to use;   GLASSFISH_VERSION   =`glassfish_version`
 # If you pass a parameter, it is the path to a glassfish "asadmin" binary
 # If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
 tomcat_version() {
