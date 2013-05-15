@@ -34,13 +34,13 @@ if [ ! -z "$opt_portals" ]; then
   #eval mangportal="true"
   #eval trustportal="true"
   #eval wlmportal="true"
-  eval mtwportal="true"
+  eval opt_mtwportal="true"
 fi
 # if a group is defined, then make all sub parts == true
 if [ ! -z "$opt_services" ]; then
-  eval attservice="true"
-  eval mangservice="true"
-  eval wlmservice="true"
+  eval opt_attservice="true"
+  eval opt_mangservice="true"
+  eval opt_wlmservice="true"
 fi
 
 
