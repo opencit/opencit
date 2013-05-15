@@ -1182,11 +1182,7 @@ postgres_server_install(){
     return 1
   fi
 
-  #if we get here postgres was a fresh install. Need to create the account entered by user
-  local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
-  sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-  echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-  echo listen_addresses = \'*\' >> $postgresc
+  
 
 }
 
@@ -1352,6 +1348,11 @@ postgres_configure_connection() {
 # requires a postgres connection that can create databases and grant privileges
 # call postgres_configure_connection before calling this function
 postgres_create_database() {
+if [ postgres_server_detect -eq 0 ] ; then
+  local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
+  sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+  echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+  echo listen_addresses = \'*\' >> $postgresc
   postgres_test_connection
 
   local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
@@ -1379,6 +1380,7 @@ postgres_create_database() {
       return 1
     fi
   fi
+fi
 }
 
 # before using this function, you must first set the connection variables postgres_*
