@@ -483,6 +483,21 @@
 			<scope>test</scope>
 		</dependency>
 
+        <!-- 
+        XXX TODO plugin jars should eventually be installed on filesystem somewhere and added to the application's
+        classpath using a custom class loader... not packaged in the war :)  
+        but as a first step all the plugins are included in attestation service premium 
+        -->
+        <!--
+        <dependency>
+            <groupId>com.intel.mtwilson.plugins</groupId>
+            <artifactId>auto-refresh-trust</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        -->
+        <!-- end plugins -->
+        
+
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>

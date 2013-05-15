@@ -60,9 +60,9 @@ public class My {
         return pm;
     }
     
-    public static MyJpa jpa() {
+    public static MyJpa jpa() throws IOException {
         if( jpa == null ) {
-            jpa = new MyJpa();
+            jpa = new MyJpa(persistenceManager());
         }
         return jpa;
     }

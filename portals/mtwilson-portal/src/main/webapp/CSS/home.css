@@ -250,19 +250,21 @@ h5, h6
 }
 
 .tableDisplay{
-	color: #333333;
+	color: #3A4F63;
 	text-align: center;
 	width: 100%;
-	height: 45px;
+            /* Removed the column height so as to allow the resize automatically */
+	/* height: 40px; */
         table-layout: fixed;
 	}
+    
 .tableDisplay thead{
-	background-color: #5D7B9D;
+	background-color: #3A4F63;
     color: White;
     font-weight: bold;
 }
 .tableDisplay tr td{
-    border: 1px solid #6E3F4A;
+    border: 1px solid #3A4F63;
     empty-cells: show;
      overflow: hidden;
      word-wrap: break-word;
@@ -278,27 +280,32 @@ h5, h6
     empty-cells: show;
     word-wrap: break-word;
 }
+
+/* Commented out the MLE specific table settings since it was causing scroll bars.
 .tableDivMLE{
 	width: 1000px;
    max-height: 350px;
 }
 .tableDivMLE table{
-	border: 1px solid #6E3F4A;
+	border: 1px solid #3A4F63;
 }
 .tableDivMLE table tr{
 	height: 25px;
 }
+
+.tableDivEditMle{
+    max-height: 330px;
+    width: 870px; *
+} */
+
+
 .tableDiv{
    max-height: 330px;
     width: 650px;
 }
-.tableDivEditMle{
-    max-height: 330px;
-   /*  width: 870px; */
-}
 
 .tableDiv table{
-	border: 1px solid #6E3F4A;
+	border: 1px solid #3A4F63;
 }
 
 .tableDiv table tr{

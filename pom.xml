@@ -25,6 +25,7 @@
     <module>database</module>
     <module>integration</module>
     <module>trust-agent</module>
+    <module>plugins</module> <!-- XXX TODO  leads to a circular dependency when we don't have everything properly refactored;  need to work more on plugin api's s othey don't depend on actual attestation service classes -->
     <module>services</module>
     <module>portals</module>
     <module>desktop</module>
