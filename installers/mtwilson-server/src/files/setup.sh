@@ -402,8 +402,8 @@ if using_glassfish; then
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$tomcat" ]; then
-  # tomcat install here
-  echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
+    # tomcat install here
+    echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
     ./$tomcat_installer  >> $INSTALL_LOG_FILE
        
