@@ -22,9 +22,13 @@ public class PluginRegistry {
     private transient static Logger log = LoggerFactory.getLogger(PluginRegistry.class);
     private static final ArrayList<Plugin> plugins = new ArrayList<Plugin>();
     
+    /*
+    // don't do this: you will get IllegalStateException from the container for trying to use the ServiceLoader
+    // API before the web application has completely loaded
     static {
         loadAvailablePlugins();
     }
+    */
     
     public static List<Plugin> getAvailablePlugins() {
         return plugins;
