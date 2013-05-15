@@ -129,6 +129,8 @@ function fnUploadWhiteListConfigurationData() {
 		var data = "registerHostVo="+$.toJSON(hostVo)+"&biosWLTagrget="+configurationSaved.biosWLTarget+"&vmmWLTarget="+configurationSaved.vmmWLTarget;
 		var config = new fnWhiteListConfig();
 		config = configurationSaved.whiteListConfig;
+        //registerHost = $('#RegisterWhiteListHost"').attr('checked') == 'checked'? true : false;
+        //alert("registerHost == " + registerHost);
 		if (selectedBothBiosVMM) {
 			fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
 			/*if(confirm("Do you want Host to be register ?")){
