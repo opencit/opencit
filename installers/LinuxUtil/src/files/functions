@@ -1356,6 +1356,7 @@ if [ $result == 0 ] ; then
   echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
   echo listen_addresses = \'*\' >> $postgresc
   postgres_restart & >> $INSTALL_LOG_FILE
+  sleep 10
 
   postgres_test_connection
 
