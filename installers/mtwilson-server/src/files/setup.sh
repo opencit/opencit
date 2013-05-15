@@ -267,7 +267,7 @@ export MTWILSON_SERVER
 echo
 
 
-if [[ -z "$postgres" && -z "$mysql" ]]; then
+if [[ -z "$opt_postgres" && -z "$opt_mysql" ]]; then
  echo_warning "Relying on an existing database installation"
 fi
 
@@ -318,8 +318,7 @@ elif using_postgres; then
 
   if [ ! -z "$opt_postgres" ]; then
     # postgres server install 
-  
-  
+
     # Install Postgres server (if user selected localhost)
     if [[ "$POSTGRES_HOSTNAME" == "127.0.0.1" || "$POSTGRES_HOSTNAME" == "localhost" || -n `echo "$(hostaddress_list)" | grep "$POSTGRES_HOSTNAME"` ]]; then
       echo "Installing postgres server..."

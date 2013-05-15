@@ -1214,7 +1214,7 @@ echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_F
 postgres_server_detect() {
   #find the host file
   postgres_pghb_conf=""; 
-  result=`find / -name pg_hba.conf`
+  result=`find / -name pg_hba.conf 2>/dev/null`
   for r in $result; do 
     mytest=`grep "IPv4 local connections" $r`;  
     if [ -n "$mytest" ]; then 
@@ -1225,7 +1225,7 @@ postgres_server_detect() {
   
   #find the configuration file
   postgres_conf="";
-  result=`find / -name postgresql.conf`
+  result=`find / -name postgresql.conf 2>/dev/null`
   for r in $result; do 
     mytest=`grep "listen_addresses" $r`;  
     if [ -n "$mytest" ]; then 
@@ -1242,7 +1242,7 @@ postgres_server_detect() {
   
   #if not, find the command file
   postgresd="";
-  result=`find / -name postgresql`
+  result=`find / -name postgresql 2>/dev/null`
   for r in $result; do 
     mytest=`grep 'case "$1"' $r`;  
     if [ -n "$mytest" ]; then 
@@ -1251,7 +1251,7 @@ postgres_server_detect() {
     fi ; 
   done;
 
-  if [[ -n postgresd ]]; then
+  if [[ -n "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
     return 0
   fi
