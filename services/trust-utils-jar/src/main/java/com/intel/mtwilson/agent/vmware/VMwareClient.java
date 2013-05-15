@@ -180,9 +180,9 @@ public class VMwareClient implements TlsClient {
 	public void disconnect() {
 		try {
 			if (isConnected() ) {
+                                                isConnected = false;
 				vimPort.logout(serviceContent.getSessionManager());
-			}
-			isConnected = false;
+			}			
 		} catch (Exception e) {
 			log.error("Error while logging out from VCenter Api.",e);
 		}
