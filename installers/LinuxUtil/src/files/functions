@@ -1219,7 +1219,6 @@ postgres_server_detect() {
     mytest=`grep "IPv4 local connections" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
       postgres_pghb_conf="$r";
-      break; 
     fi ; 
   done;  
   
@@ -1229,8 +1228,7 @@ postgres_server_detect() {
   for r in $result; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
-      postgres_conf="$r";
-      break; 
+      postgres_conf="$r"; 
     fi ; 
   done;
  
@@ -1244,10 +1242,9 @@ postgres_server_detect() {
   postgresd="";
   result=`find / -name postgresql 2>/dev/null`
   for r in $result; do 
-    mytest=`grep 'case "$1"' $r 2>/dev/null`;  
+    mytest=`grep 'case "\$1"' $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
-      postgresd="$r";
-      break; 
+      postgresd="$r"; 
     fi ; 
   done;
 
