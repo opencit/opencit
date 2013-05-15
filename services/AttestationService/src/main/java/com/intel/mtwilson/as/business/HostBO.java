@@ -335,7 +335,7 @@ public class HostBO extends BaseBO {
                         
                         if(tblHostSpecificManifests != null){
                             log.info("Updating Host Specific Manifest in database");
-                            deleteHostSpecificManifest(tblHosts.getId());
+                            deleteHostSpecificManifest(tblHosts);
                             createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
                         }
 
@@ -359,7 +359,7 @@ public class HostBO extends BaseBO {
                         }
                         log.info("Deleting Host from database");
 
-                        deleteHostSpecificManifest(tblHosts.getId());
+                        deleteHostSpecificManifest(tblHosts);
 
                         deleteTALogs(tblHosts.getId());
 
@@ -377,18 +377,23 @@ public class HostBO extends BaseBO {
         }
 
         // PREMIUM FEATURE ? 
-        private void deleteHostSpecificManifest(Integer hostId)
+        private void deleteHostSpecificManifest(TblHosts tblHosts)
                 throws NonexistentEntityException {
                 TblHostSpecificManifestJpaController tblHostSpecificManifestJpaController;
 
                 tblHostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
-                TblHostSpecificManifest hostSpecificManifest =
-                        tblHostSpecificManifestJpaController.findByHostID(hostId);
-
-                if (hostSpecificManifest != null) {
-                        log.info("Deleting Host specific manifest.");
-                        tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());
-                }
+                
+                for(TblModuleManifest moduleManifest : tblHosts.getVmmMleId().getTblModuleManifestCollection()) {
+                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
+                        // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
+                        //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        TblHostSpecificManifest hostSpecificManifest = tblHostSpecificManifestJpaController.findByModuleAndHostID(tblHosts.getId(), moduleManifest.getId());
+                        if (hostSpecificManifest != null) {
+                                log.info("Deleting Host specific manifest." + moduleManifest.getComponentName() + ":" + hostSpecificManifest.getDigestValue());
+                                tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());
+                        }                        
+                    }
+                }                
         }
 
         private void deleteTALogs(Integer hostId) throws IllegalOrphanException {
