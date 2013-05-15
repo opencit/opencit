@@ -129,10 +129,21 @@ function fnUploadWhiteListConfigurationData() {
 		var data = "registerHostVo="+$.toJSON(hostVo)+"&biosWLTagrget="+configurationSaved.biosWLTarget+"&vmmWLTarget="+configurationSaved.vmmWLTarget;
 		var config = new fnWhiteListConfig();
 		config = configurationSaved.whiteListConfig;
-        //registerHost = $('#RegisterWhiteListHost"').attr('checked') == 'checked'? true : false;
-        //alert("registerHost == " + registerHost);
+        var regHost = $('#RegisterWhiteListHost').attr('checked') == 'checked'? true : false ;
+        
 		if (selectedBothBiosVMM) {
-			fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
+			//fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
+            if(regHost){
+                config.registerHost = true;
+                registerHost = true;        
+                $('#mainLoadingDiv').prepend(disabledDiv);
+                sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
+            }else{
+                config.registerHost = false;
+                registerHost = false;        
+                $('#mainLoadingDiv').prepend(disabledDiv);
+                sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
+            }
 			/*if(confirm("Do you want Host to be register ?")){
 			}*/
 		}else{
@@ -143,23 +154,22 @@ function fnUploadWhiteListConfigurationData() {
 	}
   }
 }
-
+// Functions no longer needed because we no longer pop up and ask a user if he wants to register a host
 //This method will set resigterHost option to true for fnWhiteListConfig object and send data to upload White List configuration to server.
-function fnSendWhiteListWithRegisterHostTrue(data,config) {
-	config.registerHost = true;
-        registerHost = true;        
-	$('#mainLoadingDiv').prepend(disabledDiv);
-	sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
-}
-
+//function fnSendWhiteListWithRegisterHostTrue(data,config) {
+//	config.registerHost = true;
+//        registerHost = true;        
+//	$('#mainLoadingDiv').prepend(disabledDiv);
+//	sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
+//}
 //This method will set resigterHost option to false for fnWhiteListConfig object, called when user click NO while confirmation dialog box.
-function fnSendWhiteListWithRegisterHostFalse(data,config) {
-	config.registerHost = false;
-        registerHost = false;        
-	$('#mainLoadingDiv').prepend(disabledDiv);
-	sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
-	
-}
+//function fnSendWhiteListWithRegisterHostFalse(data,config) {
+//	config.registerHost = false;
+//        registerHost = false;        
+//	$('#mainLoadingDiv').prepend(disabledDiv);
+//	sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
+//	
+//}
 
 //called for the response for fnSendWhiteListWithRegisterHostFalse/fnSendWhiteListWithRegisterHostTrue (upload white list button)
 function fnUploadWhiteListSuccess(responseJSON) {
