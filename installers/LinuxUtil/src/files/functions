@@ -1351,24 +1351,23 @@ postgres_create_database() {
 postgres_server_detect
 result=$?
 if [ $result == 0 ] ; then
-  local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
-  sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
-  echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
-  echo listen_addresses = \'*\' >> $postgresc
-  postgres_restart & >> $INSTALL_LOG_FILE
-  sleep 10
-
   postgres_test_connection
-
-  local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
-  local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
-
   if [ -n "$is_postgres_available" ]; then
     echo_success "Database \`${POSTGRES_DATABASE}\` already exists"
     echo_success "Database \`${POSTGRES_DATABASE}\` already exists"   >> $INSTALL_LOG_FILE
     return 0
   else
     echo "Creating database..."    >> $INSTALL_LOG_FILE
+    echo "Creating database..."
+    local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
+    sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
+    echo host  all  all  $MTWILSON_SERVER_IP_ADDRESS/32	password >> $postgresh
+    echo listen_addresses = \'*\' >> $postgresc
+    postgres_restart & >> $INSTALL_LOG_FILE
+    sleep 5
+
+    local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
+    local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
     sudo -u postgres psql postgres -c "${create_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
     postgres_connection_error=`cat /tmp/intel.postgres.err`
     echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
