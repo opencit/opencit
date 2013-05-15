@@ -98,7 +98,7 @@ public class MSConfig extends ConfigBase {
                 config.getString("mtwilson.db.driver",
                 "org.postgresql.Driver")));
         //System.err.println("stdalex msConfig getJpaConfig driver == " + config.getString("mountwilson.ms.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-        String dbms = (config.getString("mountwilson.ms.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        String dbms = (config.getString("mountwilson.ms.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         //System.err.println("stdalex msConfig getJpaConfig dbms == " + dbms);
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.ms.db.url",

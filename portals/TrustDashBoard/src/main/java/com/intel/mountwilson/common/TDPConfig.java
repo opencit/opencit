@@ -22,7 +22,7 @@ public class TDPConfig extends ConfigBase {
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private TDPConfig() {
-        super("trust-dashboard.properties");
+        super("mtwilson-portal.properties");
     }
 
     @Override
@@ -76,7 +76,7 @@ public class TDPConfig extends ConfigBase {
                 config.getString("mtwilson.db.driver",
                 "org.postgresql.Driver")));
         //System.err.println("stdalex tdpConfig getJpaConfig driver == " + config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-        String dbms = (config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        String dbms = (config.getString("mountwilson.tdbp.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         //System.err.println("stdalex tdpConfig getJpaConfig dbms == " + dbms);
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.tdbp.db.url",
