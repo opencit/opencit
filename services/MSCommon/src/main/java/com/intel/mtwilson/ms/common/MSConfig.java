@@ -72,10 +72,20 @@ public class MSConfig extends ConfigBase {
                 config.getString("mountwilson.ms.db.driver", 
                 config.getString("mtwilson.db.driver",
                 "com.mysql.jdbc.Driver")));
+        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+            prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
+        }
+        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+            prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
+        }
+        else {
+            prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
+        }        
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.ms.db.url",
                 config.getString("mtwilson.db.url",
-                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
+                String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
+                    prop.getProperty("javax.persistence.jdbc.scheme"),
                     config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
