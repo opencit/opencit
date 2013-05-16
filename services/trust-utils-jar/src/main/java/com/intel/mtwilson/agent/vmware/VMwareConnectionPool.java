@@ -126,7 +126,7 @@ public class VMwareConnectionPool {
                 throw new Exception("Failed to validate new vmware connection");
             }
         }
-        catch(com.sun.xml.internal.ws.client.ClientTransportException e) {
+        catch(javax.xml.ws.WebServiceException e) {
             // is it because of an ssl failure?  we're looking for this:  com.sun.xml.internal.ws.client.ClientTransportException: HTTP transport error: javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: Server certificate is not trusted
             if( e.getCause() != null && e.getCause() instanceof javax.net.ssl.SSLHandshakeException) {
                 javax.net.ssl.SSLHandshakeException e2 = (javax.net.ssl.SSLHandshakeException)e.getCause();
