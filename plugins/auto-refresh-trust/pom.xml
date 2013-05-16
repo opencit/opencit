@@ -69,19 +69,6 @@
 
 	
 	<dependency>
-		<groupId>com.intel.mtwilson.database</groupId>
-		<artifactId>mtwilson-mysql</artifactId>
-		<version>${project.version}</version>
-	</dependency>
-    <!--  
-	<dependency>
-		<groupId>com.intel.mtwilson.database</groupId>
-		<artifactId>mtwilson-postgres</artifactId>
-		<version>${project.version}</version>
-	</dependency>
-    -->    
-        
-	<dependency>
 		<groupId>org.apache.commons</groupId>
 		<artifactId>commons-io</artifactId>
 		<version>1.3.2</version>

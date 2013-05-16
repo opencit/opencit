@@ -17,6 +17,7 @@ import com.intel.mtwilson.security.annotations.*;
 import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import javax.ws.rs.GET;
 import org.apache.commons.codec.binary.Base64;
 //import org.codehaus.enunciate.jaxrs.TypeHint;
 
@@ -26,9 +27,16 @@ import org.apache.commons.codec.binary.Base64;
  */
 
 @Stateless
-@Path("/ca")
+@Path("/ca2")
 public class CA {
     private TrustAgentCertificateAuthority ca = new TrustAgentCertificateAuthority();
+    
+    
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    public String defaultCaGetAction() {
+        return ""; // note:  we are not doing anything here, this function exists only to work around this error: SEVERE: Conflicting URI templates. The URI template /ca for root resource class com.intel.mtwilson.ms.rest.CA and the URI template /ca transform to the same regular expression /ca(/.*)?
+    }
     
     /**
      * Sign a Trust Agent's SSL Certificate. 
