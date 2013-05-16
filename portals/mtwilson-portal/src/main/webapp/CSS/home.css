@@ -374,7 +374,31 @@ h5, h6
 .manifestModuleTypeRow5{width: 65px;}
 .manifestModuleTypeRow6{width: 75px;}
 
+.manifestModuleTypeTableHeader{
+    table-layout: fixed;
+    text-align: center;
+    width: 98%;
+}
 
+.manifestModuleTypeTableHeader thead{
+/*    background-color: #6E3F4A;*/
+    color: White;
+    font-weight: bold;
+}
+
+.manifestModuleTypeTableContent{
+    text-align: center;
+    overflow: auto;
+    max-height: 461px;
+}
+.manifestModuleTypeTableContent table{
+    table-layout: fixed;
+}
+.manifestModuleTypeTableContent tr td{
+    border: 1px solid #3A4F63;
+    empty-cells: show;
+    word-wrap: break-word;
+}
 
 /* Class for View Pending Registration page */
 .viewRequestRow1{width: 412px;}
