@@ -28,12 +28,14 @@ public class ASConfiguration implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         log.debug("ASConfiguration: context initialized");
+        /*
         PluginRegistry.loadAvailablePlugins();
         List<Plugin> plugins = PluginRegistry.getAvailablePlugins();
         log.info("Loaded {} Mt Wilson Plugins", plugins.size());
         for(Plugin plugin : plugins) {
             log.info("Loaded Mt Wilson Plugin: {}", plugin.getClass().getName());
         }
+        */
     }
 
     @Override
