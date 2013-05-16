@@ -1613,7 +1613,9 @@ public class HostBO extends BaseBO {
 
                         // currently event details would be available for all host except for Citrix Xen. Also we should not process the event log information for all the PCRs. We just 
                         // need to do it for PCR 19
-                        if (pcrsSupportedForEventLog.contains(Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR")))) {
+                        // Bug#: 768: We need to process the modules only if the user has requested for verifying that PCR. If not, we should not process PCR 19 at all.
+                        if ((pcrsSupportedForEventLog.contains(Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR")))) && 
+                                (pcrsToWhiteList.contains(reader.getAttributeValue("", "ExtendedToPCR")))) {
                             ModuleWhiteList moduleObj = new ModuleWhiteList();
                             // bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
                             if (reader.getAttributeValue("", "ComponentName").isEmpty()) {

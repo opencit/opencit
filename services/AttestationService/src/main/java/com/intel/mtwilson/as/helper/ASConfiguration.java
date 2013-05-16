@@ -4,6 +4,13 @@
  */
 package com.intel.mtwilson.as.helper;
 
+import com.intel.mtwilson.plugin.api.Plugin;
+import java.util.List;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Look for required configuration settings. 
  * Generate default settings for missing configuration, if possible.
@@ -15,6 +22,23 @@ package com.intel.mtwilson.as.helper;
  * 
  * @author jbuhacoff
  */
-public class ASConfiguration {
+public class ASConfiguration implements ServletContextListener {
+    private transient static Logger log = LoggerFactory.getLogger(ASConfiguration.class);
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        log.debug("ASConfiguration: context initialized");
+        PluginRegistry.loadAvailablePlugins();
+        List<Plugin> plugins = PluginRegistry.getAvailablePlugins();
+        log.info("Loaded {} Mt Wilson Plugins", plugins.size());
+        for(Plugin plugin : plugins) {
+            log.info("Loaded Mt Wilson Plugin: {}", plugin.getClass().getName());
+        }
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        log.debug("ASConfiguration: context destroyed");
+    }
     
 }

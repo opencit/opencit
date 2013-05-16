@@ -39,6 +39,12 @@ public class SamlCertificate {
      */
     public SamlCertificate() {
     }
+    
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    public String defaultCaGetAction() {
+        return ""; // note:  we are not doing anything here, this function exists only to work around this error: SEVERE: Conflicting URI templates. The URI template /ca for root resource class com.intel.mtwilson.ms.rest.CA and the URI template /ca transform to the same regular expression /ca(/.*)?
+    }
 
     /**
      * Retrieves representation of an instance of

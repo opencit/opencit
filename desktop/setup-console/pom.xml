@@ -149,13 +149,11 @@
 		<artifactId>mtwilson-mysql</artifactId>
 		<version>${project.version}</version>
 	</dependency>
-    <!--  
 	<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-postgres</artifactId>
 		<version>${project.version}</version>
 	</dependency>
-    -->    
 	<dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>trust-util-jar</artifactId>
