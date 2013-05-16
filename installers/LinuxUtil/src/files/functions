@@ -1242,7 +1242,7 @@ postgres_server_detect() {
   postgresd="";
   result=`find / -name postgresql 2>/dev/null`
   for r in $result; do 
-    mytest=`grep 'case "\$1"' $r 2>/dev/null`;  
+    mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
       postgresd="$r"; 
     fi ; 
