@@ -13,14 +13,14 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
               #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ] monit
- INSTALL_PKGS="opt_postgres opt_java opt_glassfish opt_privacyca opt_SERVICES opt_PORTALS"
+ INSTALL_PKGS="postgres java glassfish privacyca SERVICES PORTALS"
 fi
 
 FIRST=0
 #loop through INSTALL_PKG and set each entry to true
 for i in $INSTALL_PKGS; do
  pkg=`echo $i | tr '[A-Z]' '[a-z]'`
- eval $pkg="true"
+ eval opt_$pkg="true"
  if [ $FIRST == 0 ]; then
   FIRST=1;
   LIST=$pkg
