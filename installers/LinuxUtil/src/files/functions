@@ -1212,7 +1212,8 @@ echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_F
 }
 
 postgres_server_detect() {
-  #find the host file
+    IFS=' '
+#find the host file
   postgres_pghb_conf=""; 
   result=`find / -name pg_hba.conf 2>/dev/null`
   for r in $result; do 
@@ -1221,47 +1222,50 @@ postgres_server_detect() {
       postgres_pghb_conf="$r";
     fi ; 
   done;  
-echo postgres_pghb_conf=$postgres_pghb_conf
+echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
   
   #find the configuration file
   postgres_conf="";
-  result=`find / -name postgresql.conf 2>/dev/null`
-echo "find result for postgres_conf=$result"
-  for r in $result; do 
+  result=`find / -name postgresql.conf 2>/dev/null | tr "\n" " "`
+echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
+  for r in ${result}; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
       postgres_conf="$r"; 
     fi ; 
   done;
-echo postgres_conf=$postgres_conf
+echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
 
   # see if we have the command path already
   if [[ -n "$postgres" && -f "$postgres" ]]; then
     echo "Found postgres server: $postgres"
-    return 0
+    IFS=
+    #return 0
   fi
   
   #if not, find the command file
   postgres="";
-  result=`find / -name postgresql 2>/dev/null`
-echo "find result for postgresql=$result"
-  for r in $result
+  result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
+echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
+  for r in ${result}
   do 
     echo "loop item for r in result=$r"
     mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`
-    echo "grep result for loop item r=$mytest"
+    echo "grep result for loop item r=$mytest" >> $INSTALL_LOG_FILE
     if [ -n "$mytest" ]; then 
       postgres="$r" 
     fi
   done
-echo "postgres=$postgres"
+echo "postgres=$postgres" >> $INSTALL_LOG_FILE
 
   if [[ -n "$postgres" ]]; then
     echo "Found postgres server: $postgres"
+    IFS=
     return 0
   fi
 
   echo "Postgres server not found"
+  IFS=
   return 1
 }
 postgres_version(){
