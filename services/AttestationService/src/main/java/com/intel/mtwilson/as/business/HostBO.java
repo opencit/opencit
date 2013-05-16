@@ -556,11 +556,11 @@ public class HostBO extends BaseBO {
 		
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		System.err.println("saveHostInDatabase with tls policy "+ tblHosts.getTlsPolicyName() + " and keystore size " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+		log.info("saveHostInDatabase with tls policy " + tblHosts.getTlsPolicyName() + " and keystore size " +  tblHosts.getTlsKeystore() == null ? "null" : String.valueOf(tblHosts.getTlsKeystore().length));
 		
 
 		String cs = host.getAddOn_Connection_String();
-        System.err.println("saveHostInDatabase cs = " + cs);
+                        log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
