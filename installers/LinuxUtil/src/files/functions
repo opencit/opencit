@@ -1247,6 +1247,7 @@ postgres_server_detect() {
       postgresd="$r"; 
     fi ; 
   done;
+echo postgresd=$postgresd
 
   if [[ -n "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
