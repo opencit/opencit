@@ -77,6 +77,12 @@
         <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
     </listener>
     <!--
+    <listener>
+        <description>Configuration management</description>
+        <listener-class>com.intel.mtwilson.as.helper.ASConfiguration</listener-class>
+    </listener>
+    -->
+    <!--
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>/WEB-INF/applicationContext.xml</param-value>

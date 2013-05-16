@@ -488,7 +488,7 @@
         classpath using a custom class loader... not packaged in the war :)  
         but as a first step all the plugins are included in attestation service premium 
         -->
-        <!--
+        <!-- 
         <dependency>
             <groupId>com.intel.mtwilson.plugins</groupId>
             <artifactId>auto-refresh-trust</artifactId>
