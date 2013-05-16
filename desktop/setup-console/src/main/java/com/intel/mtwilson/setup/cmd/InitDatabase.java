@@ -153,7 +153,7 @@ public class InitDatabase implements Command {
             log.error("Failed to connect to {} with schema", databaseVendor);
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
-        log.debug("Connected to schema: {}", c.getSchema());
+//        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
         for(ChangelogEntry entry : changelog) {
