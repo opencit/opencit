@@ -709,7 +709,7 @@ mysql_write_connection_properties() {
 # - configuration filename (absolute path)
 # - property prefix for settings in the configuration file (java format is assumed, dot will be automatically appended to prefix)
 mysql_userinput_connection_properties() {
-    echo "Configuring MySQL Connection..."
+    echo "Configuring DB Connection..."
     prompt_with_default MYSQL_HOSTNAME "Hostname:" ${DEFAULT_MYSQL_HOSTNAME}
     prompt_with_default MYSQL_PORTNUM "Port Num:" ${DEFAULT_MYSQL_PORTNUM}
     prompt_with_default MYSQL_DATABASE "Database:" ${DEFAULT_MYSQL_DATABASE}
@@ -1212,7 +1212,7 @@ echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_F
 }
 
 postgres_server_detect() {
-    IFS=' '
+    
 #find the host file
   postgres_pghb_conf=""; 
   result=`find / -name pg_hba.conf 2>/dev/null`
@@ -1228,6 +1228,7 @@ echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
   postgres_conf="";
   result=`find / -name postgresql.conf 2>/dev/null | tr "\n" " "`
 echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
+  IFS=' '
   for r in ${result}; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
@@ -1245,17 +1246,21 @@ echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
   
   #if not, find the command file
   postgres="";
-  result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
+  #result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
 echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
-  for r in ${result}
-  do 
-    echo "loop item for r in result=$r"
-    mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`
-    echo "grep result for loop item r=$mytest" >> $INSTALL_LOG_FILE
-    if [ -n "$mytest" ]; then 
-      postgres="$r" 
-    fi
-  done
+  #IFS=' '
+  #for r in ${result}
+  #do 
+  #  echo "loop item for r in result=$r"
+  #  mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`
+  #  echo "grep result for loop item r=$mytest" >> $INSTALL_LOG_FILE
+  #  if [ -n "$mytest" ]; then 
+  #    postgres="$r" 
+  #  fi
+  #done
+  if [[ -f /etc/init.d/postgresql ]]; then
+    postgres="/etc/init.d/postgresql";
+  fi
 echo "postgres=$postgres" >> $INSTALL_LOG_FILE
 
   if [[ -n "$postgres" ]]; then
@@ -1385,9 +1390,7 @@ postgres_configure_connection() {
 # requires a postgres connection that can create databases and grant privileges
 # call postgres_configure_connection before calling this function
 postgres_create_database() {
-postgres_server_detect
-result=$?
-if [ $result == 0 ] ; then
+if postgres_server_detect ; then
   postgres_test_connection
   if [ -n "$is_postgres_available" ]; then
     echo_success "Database \`${POSTGRES_DATABASE}\` already exists"
@@ -1409,7 +1412,7 @@ if [ $result == 0 ] ; then
        echo listen_addresses = \'127.0.0.1\' >> $postgres_conf
     fi
     
-    postgres_restart & >> $INSTALL_LOG_FILE
+    postgres_restart >> $INSTALL_LOG_FILE
     sleep 5
 
     local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
