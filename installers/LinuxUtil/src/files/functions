@@ -1241,7 +1241,7 @@ echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
   if [[ -n "$postgres" && -f "$postgres" ]]; then
     echo "Found postgres server: $postgres"
     IFS=
-    #return 0
+    return 0
   fi
   
   #if not, find the command file
@@ -1331,7 +1331,7 @@ postgres_test_connection() {
   fi
   postgres_connection_error=`cat /tmp/intel.postgres.err`
   
-  #echo "postgres_connection_error: $postgres_connection_error"
+  echo "postgres_connection_error: $postgres_connection_error"
   rm -f /tmp/intel.postgres.err
 }
 
