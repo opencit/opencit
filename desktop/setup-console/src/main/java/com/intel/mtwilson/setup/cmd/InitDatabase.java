@@ -191,7 +191,7 @@ public class InitDatabase implements Command {
         Collections.sort(changesToApplyInOrder);
         
         
-        if( options.getBoolean("check")) {
+        if(options.containsKey("check") && options.getBoolean("check")) {
             System.out.println("Database is compatible");
             System.out.println("The following changes will be applied:");
                     for(Long changeId : changesToApplyInOrder) {
