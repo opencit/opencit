@@ -68,10 +68,20 @@ public class ASConfig extends ConfigBase{
         System.err.println("stdalex asConfig getJpaConfig driver == " + config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
         String dbms = (config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         System.err.println("stdalex asconfig getJpaConfig dbms == " + dbms);
+        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+            prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
+        }
+        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+            prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
+        }
+        else {
+            prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
+        }
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.as.db.url",
                 config.getString("mtwilson.db.url",
-                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
+                String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
+                    prop.get("javax.persistence.jdbc.scheme"),
                     config.getString("mountwilson.as.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
                     config.getString("mountwilson.as.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.as.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));

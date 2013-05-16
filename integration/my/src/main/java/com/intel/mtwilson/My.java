@@ -62,7 +62,7 @@ public class My {
     
     public static MyJpa jpa() throws IOException {
         if( jpa == null ) {
-            jpa = new MyJpa(persistenceManager());
+            jpa = new MyJpa(persistenceManager(), configuration().getDataEncryptionKeyBase64());
         }
         return jpa;
     }

@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Whitelist &gt; Edit MLE    <span style="float: right"><a href="javascript:getAddMLE();">Add MLE...</a></span></div>
+		<div class="nagPanel">Whitelist &gt; Edit MLE    <!--<span style="float: right"><a href="javascript:getAddMLE();">Add MLE...</a></span>--></div>
 		<div id="nameOfPage" class="NameHeader">Edit Measured Launch Environment (MLE) Configuration</div>
 		<div id="mainEditMleDisplayDiv">
 			<div class="tableDivMLE" style="margin-left: 61px;display: none;" id="mainTableDivEditMle">

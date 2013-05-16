@@ -13,7 +13,7 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
               #postgres|mysql java tomcat|glassfish privacyca [SERVICES| attservice mangservice wlmservice] [PORTALS | mangportal trustportal wlmportal mtwportal ] monit
- INSTALL_PKGS="postgres java glassfish privacyca SERVICES PORTALS"
+ INSTALL_PKGS="opt_postgres opt_java opt_glassfish opt_privacyca opt_SERVICES opt_PORTALS"
 fi
 
 FIRST=0
@@ -30,17 +30,17 @@ for i in $INSTALL_PKGS; do
 done
 
 # if a group is defined, then make all sub parts == true
-if [ ! -z "$portals" ]; then
+if [ ! -z "$opt_portals" ]; then
   #eval mangportal="true"
   #eval trustportal="true"
   #eval wlmportal="true"
-  eval mtwportal="true"
+  eval opt_mtwportal="true"
 fi
 # if a group is defined, then make all sub parts == true
-if [ ! -z "$services" ]; then
-  eval attservice="true"
-  eval mangservice="true"
-  eval wlmservice="true"
+if [ ! -z "$opt_services" ]; then
+  eval opt_attservice="true"
+  eval opt_mangservice="true"
+  eval opt_wlmservice="true"
 fi
 
 
@@ -158,7 +158,7 @@ glassfish_installer=`find_installer glassfish`
 tomcat_installer=`find_installer tomcat`
 
 # Verify the installers we need are present before we start installing
-if [ ! -z "$java" ]; then
+if [ ! -z "$opt_java" ]; then
 	if [ ! -e $java_installer ]; then
 		echo_warning "Java installer marked for install but missing. Please verify you are using the right installer";
 		exit -1;
@@ -170,28 +170,20 @@ if [ ! -e $mtwilson_util ]; then
 	exit -1;
 fi
 
-if [ ! -z "$glassfish" ]; then
+if [ ! -z "$opt_glassfish" ]; then
 	if [ ! -e $glassfish_installer ]; then
 		echo_warning "Glassfish installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$tomcat" ]; then
-	if [ ! -e $tomcat_installer ]; then
-		echo_warning "Tomcat installer marked for install but missing. Please verify you are using the right installer"
-		exit -1;
-	fi
-fi
-
-if [ ! -z "$privacyca" ]; then
-	if [ ! -e $privacyca_service ]; then
-	echo_warning "Privacy CA installer marked for install but missing. Please verify you are using the right installer"
+if [ ! -z "$opt_privacyca" ]; then
+	if [ ! -e $privacyca_service ]; then	echo_warning "Privacy CA installer marked for install but missing. Please verify you are using the right installer"
 	exit -1;
 	fi
 fi
 
-if [ ! -z "$attservice" ]; then
+if [ ! -z "$opt_attservice" ]; then
 	if [ ! -e $attestation_service ]; then
 		echo_warning "Attestation Service installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
@@ -199,49 +191,49 @@ if [ ! -z "$attservice" ]; then
 fi
 
 
-if [ ! -z "$mangservice" ]; then
+if [ ! -z "$opt_mangservice" ]; then
 	if [ ! -e $management_service ]; then
 		echo_warning "Management Service installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$wlmservice" ]; then
+if [ ! -z "$opt_wlmservice" ]; then
 	if [ ! -e $whitelist_service ]; then
 		echo_warning "WhiteList Service installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$mangportal" ]; then
+if [ ! -z "$opt_mangportal" ]; then
 	if [ ! -e $management_console ]; then
 		echo_warning "Management Console installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$wlmportal" ]; then
+if [ ! -z "$opt_wlmportal" ]; then
 	if [ ! -e $whitelist_portal ]; then
 		echo_warning "WhiteList Portal installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$trustportal" ]; then
+if [ ! -z "$opt_trustportal" ]; then
 	if [ ! -e $trust_dashboard ]; then
 		echo_warning "Trust DashBoard installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$mtwportal" ]; then
+if [ ! -z "$opt_mtwportal" ]; then
 	if [ ! -e $mtw_portal ]; then
 		echo_warning "Mtw Combined Portal installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
 	fi
 fi
 
-if [ ! -z "$monit" ]; then
+if [ ! -z "$opt_monit" ]; then
 	if [ ! -e $monit_installer ]; then
 		echo_warning "Monit installer marked for install but missing. Please verify you are using the right installer"
 		exit -1;
@@ -266,7 +258,7 @@ export MTWILSON_SERVER
 echo
 
 
-if [[ -z "$postgres" && -z "$mysql" ]]; then
+if [[ -z "$opt_postgres" && -z "$opt_mysql" ]]; then
  echo_warning "Relying on an existing database installation"
 fi
 
@@ -276,7 +268,7 @@ if using_mysql; then
 
   # Install MySQL server (if user selected localhost)
   if [[ "$MYSQL_HOSTNAME" == "127.0.0.1" || "$MYSQL_HOSTNAME" == "localhost" || -n `echo "${hostaddress_list}" | grep "$MYSQL_HOSTNAME"` ]]; then
-	if [ ! -z "$mysql" ]; then
+	if [ ! -z "$opt_mysql" ]; then
 	    # Place mysql server install code here
 		echo "Installing mysql server..."
 		aptget_detect; dpkg_detect;
@@ -310,7 +302,7 @@ if using_mysql; then
   if [ -z "$is_mysql_available" ]; then echo_warning "Run 'mtwilson setup' after a database is available"; fi
   
 elif using_postgres; then
- if [ ! -z "$postgres" ]; then
+ if [ ! -z "$opt_postgres" ]; then
   # postgres server install 
   postgres_userinput_connection_properties
 
@@ -363,7 +355,7 @@ fi
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 chmod +x *.bin
-if [ ! -z "$java" ]; then
+if [ ! -z "$opt_java" ]; then
 	echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
 	./$java_installer
 	echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
@@ -375,12 +367,12 @@ echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 
-if [[ -z "$glassfish" && -z "$tomcat" ]]; then
+if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
 
 if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
+  if [ ! -z "$opt_glassfish" ]; then
   # glassfish install here
 	
 	echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
@@ -400,7 +392,7 @@ if using_glassfish; then
   fi
   # end glassfish setup
 elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
+ if [ ! -z "$opt_tomcat" ]; then
   # tomcat install here
   echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
@@ -429,7 +421,7 @@ elif using_tomcat; then
  
 fi
 
-if [ ! -z "$privacyca" ]; then
+if [ ! -z "$opt_privacyca" ]; then
 	echo "Installing Privacy CA (this can take some time, please do not interrupt installer)..." | tee -a  $INSTALL_LOG_FILE
 	./$privacyca_service 
 	echo "Privacy installation complete..." | tee -a  $INSTALL_LOG_FILE
@@ -438,25 +430,8 @@ if [ ! -z "$privacyca" ]; then
 	#echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
-elif using_tomcat; then
-  if [ ! -z "$tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
-fi
-if [ ! -z "$attservice" ]; then
-	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
-	./$attestation_service 
+if [ ! -z "$opt_attservice" ]; then
+	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE	./$attestation_service 
 	echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 if using_glassfish; then
@@ -475,7 +450,7 @@ elif using_tomcat; then
     fi
   fi
 fi
-if [ ! -z "$mangservice" ]; then
+if [ ! -z "$opt_mangservice" ]; then
 	echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
 	./$management_service
 	echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
@@ -496,7 +471,7 @@ elif using_tomcat; then
     fi
   fi
 fi
-if [ ! -z "$wlmservice" ]; then
+if [ ! -z "$opt_wlmservice" ]; then
 	echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
 	./$whitelist_service >> $INSTALL_LOG_FILE
 	echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
@@ -535,7 +510,7 @@ fi
 #	echo "Trust Dashboard installed..." | tee -a  $INSTALL_LOG_FILE
 #fi
 
-if [ ! -z "$mtwportal" ]; then
+if [ ! -z "$opt_mtwportal" ]; then
 	echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
 	./$mtw_portal 
 	echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
@@ -557,7 +532,7 @@ elif using_tomcat; then
   fi
 fi
 #TODO-stdale monitrc needs to be customized depending on what is installed
-if [ ! -z "$monit" ]; then
+if [ ! -z "$opt_monit" ]; then
 	echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
 	./$monit_installer  >> $INSTALL_LOG_FILE 
 	echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE

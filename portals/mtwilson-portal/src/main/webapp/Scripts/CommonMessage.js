@@ -31,8 +31,8 @@ requiredPCRValuesHelp[6] = "PCR[3]- Option ROM Configuration and Data - measures
 requiredPCRValuesHelp[7] = "PCR[4]- IPL code that performs the initial boot, usually the Master Boot Record (MBR).";
 requiredPCRValuesHelp[8] = "PCR[5]- IPL Configuration and Data (i.e., the configuration and data used by the IPL Code).";
 requiredPCRValuesHelp[9] = "PCR[17]- Code and data associated with the secure launch process.";
-requiredPCRValuesHelp[10] = "PCR[18]- Measurement of the tBoot package.";
-requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the key packages of the of the MLE.";
+requiredPCRValuesHelp[10] = "PCR[18]- Measurement of the MLE [Tboot+ hypervisor]";
+requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the Trusted OS (kernel code, settings, other)";
 
 var applicableWhiteListTargetHelp = [];
 applicableWhiteListTargetHelp[0]="This option allows users to choose how the white list is configured.";

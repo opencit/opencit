@@ -46,12 +46,13 @@ public class TblHostsJpaControllerTest {
     @Test
     public void testSomeMethod() throws CryptographyException, IOException {
         TblHostsJpaController jpactl = My.jpa().mwHosts();
-        TblHosts host = jpactl.findByName("127.0.0.1");
+        TblHosts host = jpactl.findByName("10.1.71.173");
         if( host == null ) {
             System.out.println("got null result");
         }
         else {
             System.out.println("got host "+host.getName());
+            System.out.println("with connection "+host.getAddOnConnectionInfo());
         }
 //        BaseBO config = new BaseBO();
         

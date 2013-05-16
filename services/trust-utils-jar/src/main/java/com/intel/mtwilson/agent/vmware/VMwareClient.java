@@ -8,6 +8,7 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.TlsClient;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.vmware.vim25.*;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -199,7 +200,7 @@ public class VMwareClient implements TlsClient {
 	 * @throws Exception
 	 *             the exception
 	 */
-	public void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
+	public void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, IOException {
                 vcenterEndpoint = url;
                 
                 /*
@@ -228,9 +229,15 @@ public class VMwareClient implements TlsClient {
 
 		serviceContent = vimPort.retrieveServiceContent(SVC_INST_REF);
 		
-		session = vimPort.login(serviceContent.getSessionManager(), userName, password,
-				null);
-		
+        try {
+            log.debug("Login to vcenter with username: {} {}", userName, password == null || password.isEmpty() ? "without password" : "with password");
+            session = vimPort.login(serviceContent.getSessionManager(), userName, password,
+                    null);
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot login to vcenter: "+e.toString(), e);
+        }
+            
 		printSessionDetails();
 		
 		isConnected = true;
@@ -265,7 +272,7 @@ public class VMwareClient implements TlsClient {
         
         public String getEndpoint() { return vcenterEndpoint; }
         
-	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, MalformedURLException  {
+	public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException  {
         //ConnectionString cs = ConnectionString.forVmware(new URL(vCenterConnectionString));
         /*
 		String[] vcenterConn = vCenterConnectionString.split(";");
@@ -277,6 +284,7 @@ public class VMwareClient implements TlsClient {
 		connect(vcenterConn[0], vcenterConn[1], vcenterConn[2]);
         */
         ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
+        log.debug("Connecting to vcenter: {} for host: {}", vmware.getVCenter().toString(), vmware.getHost().toString());
         connect(vmware.toURL().toExternalForm(), vmware.getUsername(), vmware.getPassword());
 	}
 
@@ -659,7 +667,7 @@ public class VMwareClient implements TlsClient {
 	private void setupSslCertificateTrustManager() throws NoSuchAlgorithmException, KeyManagementException {
 		// Create a trust manager that does not validate certificate chains:
 		javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[1];
-                javax.net.ssl.TrustManager tm;
+//                javax.net.ssl.TrustManager tm;
                 /*
                 if( trustManager == null ) {
                     log.warn("SSL Trusted Certificates not set; will accept any certificate");

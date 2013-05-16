@@ -4,11 +4,15 @@
  */
 package com.intel.mtwilson;
 
+import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.as.controller.*;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.audit.controller.*;
+import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.ms.controller.*;
 import java.io.IOException;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * Convenience class to instantiate JPA controllers for the purpose of writing JUnit tests...
@@ -33,6 +37,7 @@ import java.io.IOException;
  */
 public class MyJpa {
     private final MyPersistenceManager pm;
+    private final String dekBase64;
     TblApiClientJpaController mwApiClientHmac;
     MwApiClientHttpBasicJpaController mwApiClientHttpBasic;
     ApiClientX509JpaController mwApiClientX509;
@@ -60,7 +65,19 @@ public class MyJpa {
     TblSamlAssertionJpaController mwSamlAssertion;
     TblTaLogJpaController mwTaLog;
 
-    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
+//    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
+
+    public MyJpa(MyPersistenceManager pm, String dekBase64) { 
+        this.pm = pm; 
+        this.dekBase64 = dekBase64; 
+        try {
+            TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
+        }
+        catch(CryptographyException e) {
+            throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
+        }      
+        
+    }
     
     public TblApiClientJpaController mwApiClientHmac() throws IOException {
 		if( mwApiClientHmac == null ) { mwApiClientHmac = new TblApiClientJpaController(pm.getMSData()); }
