@@ -1165,17 +1165,17 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql"
 
   postgres_server_detect >> $INSTALL_LOG_FILE
-  if [[ -n "$postgresd" ]]; then
+  if [[ -n "$postgres" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
     return;
   fi
-  if [[ -z "$postgresd" ]]; then
+  if [[ -z "$postgres" ]]; then
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
   
-  if [[ -z "$postgresd" ]]; then
+  if [[ -z "$postgres" ]]; then
     echo_failure "Unable to auto-install Postgres server" | tee -a $INSTALL_LOG_FILE
     echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
@@ -1221,37 +1221,43 @@ postgres_server_detect() {
       postgres_pghb_conf="$r";
     fi ; 
   done;  
+echo postgres_pghb_conf=$postgres_pghb_conf
   
   #find the configuration file
   postgres_conf="";
   result=`find / -name postgresql.conf 2>/dev/null`
+echo "find result for postgres_conf=$result"
   for r in $result; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
       postgres_conf="$r"; 
     fi ; 
   done;
- 
+echo postgres_conf=$postgres_conf
+
   # see if we have the command path already
-  if [[ -n "$postgresd" && -f "$postgresd" ]]; then
-    echo "Found postgres server: $postgresd"
+  if [[ -n "$postgres" && -f "$postgres" ]]; then
+    echo "Found postgres server: $postgres"
     return 0
   fi
   
   #if not, find the command file
-  postgresd="";
-  result=`find / -name /etc/init.d/postgresql 2>/dev/null`
-echo "postgresd=$result"
-  for r in $result; do 
-    mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`;  
+  postgres="";
+  result=`find / -name postgresql 2>/dev/null`
+echo "find result for postgresql=$result"
+  for r in $result
+  do 
+    echo "loop item for r in result=$r"
+    mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`
+    echo "grep result for loop item r=$mytest"
     if [ -n "$mytest" ]; then 
-      postgresd="$r"; 
-    fi ; 
-  done;
-echo "postgresd=$postgresd"
+      postgres="$r" 
+    fi
+  done
+echo "postgres=$postgres"
 
-  if [[ -n "$postgresd" ]]; then
-    echo "Found postgres server: $postgresd"
+  if [[ -n "$postgres" ]]; then
+    echo "Found postgres server: $postgres"
     return 0
   fi
 
@@ -1454,8 +1460,8 @@ postgres_install_scripts() {
 
 postgres_running() {  
   POSTGRES_SERVER_RUNNING=''
-  if [ -n "$postgresd" ]; then
-    local is_running=`$postgresd status | grep running`
+  if [ -n "$postgres" ]; then
+    local is_running=`$postgres status | grep running`
     if [ -n "$is_running" ]; then
       POSTGRES_SERVER_RUNNING=yes
     fi
@@ -1472,18 +1478,18 @@ postgres_running_report() {
   fi
 }
 postgres_restart() {
-  if [ -n "$postgresd" ]; then
-      $postgresd restart
+  if [ -n "$postgres" ]; then
+      $postgres restart
   fi
 }
 postgres_start() {
-  if [ -n "$postgresd" ]; then
-      $postgresd start
+  if [ -n "$postgres" ]; then
+      $postgres start
   fi
 }
 postgres_stop() {
-  if [ -n "$postgresd" ]; then
-      $postgresd stop
+  if [ -n "$postgres" ]; then
+      $postgres stop
   fi
 }
 
