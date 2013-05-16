@@ -309,7 +309,7 @@ function main {
         fi
         ;;
       *)
-         echo "Usage: $0 {start|stop|restart|status|setup|uninstall}"
+         echo "Usage: $0 {version|restart|setup|edit|show|fixek|newid|tpmstatus|uninstall}"
          exit 1
          ;;
       esac
