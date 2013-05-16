@@ -1240,14 +1240,15 @@ postgres_server_detect() {
   
   #if not, find the command file
   postgresd="";
-  result=`find / -name postgresql 2>/dev/null`
+  result=`find / -name /etc/init.d/postgresql 2>/dev/null`
+echo "postgresd=$result"
   for r in $result; do 
     mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
       postgresd="$r"; 
     fi ; 
   done;
-echo postgresd=$postgresd
+echo "postgresd=$postgresd"
 
   if [[ -n "$postgresd" ]]; then
     echo "Found postgres server: $postgresd"
