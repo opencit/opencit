@@ -202,7 +202,7 @@ function getModuleTypeMleListSuccess(responseJSON){
     if(responseJSON.result){
         var whiteList = responseJSON.whiteList;
         var str ="";
-        str+='<div style="background-color: #6E3F4A;"><table class="manifestModuleTypeTableHeader" width="100%" cellpadding="0" cellspacing="0">'+
+        str+='<div style="background-color: #3A4F63; color:#FFFFFF;"><table class="manifestModuleTypeTableHeader" width="100%" cellpadding="0" cellspacing="0">'+
               '<thead><tr>'+
               '<th class="manifestModuleTypeRow1">Component Name</th>'+
               '<th class="manifestModuleTypeRow2">Digest Value</th>'+
