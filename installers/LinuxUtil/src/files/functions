@@ -1310,7 +1310,7 @@ postgres_require() {
 # format like this -> psql -h 127.0.0.1 -p 5432 -d mw_as -U root -c "\l"
 postgres_connection() {
   postgres_require
-  postgres_connect="psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}"
+  postgres_connect="$psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}"
   echo "postgres_connect=$postgres_connect" >> $INSTALL_LOG_FILE
 }
 
@@ -1320,17 +1320,21 @@ postgres_connection() {
 postgres_test_connection() {
   postgres_connection
   is_postgres_available=""
-echo "connection test sql=$postgres_connect -c '\l' 2>/tmp/intel.postgres.err | grep ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} | wc -l"
+
   #check if postgres is installed and we can connect with provided credencials
-  local postgres_test_result=`$postgres_connect -c '\l' 2>/tmp/intel.postgres.err | grep ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} | wc -l`
-  echo postgres_test_result=$postgres_test_result  
-  if [ $postgres_test_result -gt 0 ]; then
+
+  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2> /tmp/intel.postgres.err
+  if [ $? ]; then
     is_postgres_available="yes"
+    return 0
   fi
   postgres_connection_error=`cat /tmp/intel.postgres.err`
   
-  echo "postgres_connection_error: $postgres_connection_error"
+  #echo "postgres_connection_error: $postgres_connection_error"
   #rm -f /tmp/intel.postgres.err
+
+  return 1
+
 }
 
 # Environment:
@@ -1408,14 +1412,14 @@ if postgres_server_detect ; then
     postgres_connection_error=`cat /tmp/intel.postgres.err`
     echo "postgres_connection_error: $postgres_connection_error" >> $INSTALL_LOG_FILE
 
-    has_host=`grep "^host" $postgres_pghb_conf | grep "${MTWILSON_SERVER}" | grep -E "password|trust"`
+    has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
     if [ -z "$has_host" ]; then
-      echo host  all  all  ${MTWILSON_SERVER}/32  password >> $postgres_pghb_conf
+      echo host  all  all  127.0.0.1/32  password >> $postgres_pghb_conf
     fi
     
     has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
     if [ -z "$has_listen_addresses" ]; then
-       echo listen_addresses=\'${MTWILSON_SERVER}\' >> $postgres_conf
+       echo listen_addresses=\'127.0.0.1\' >> $postgres_conf
     fi
     
     postgres_restart >> $INSTALL_LOG_FILE

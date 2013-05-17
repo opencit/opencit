@@ -264,7 +264,7 @@ Detected the following options on this server:"
 IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
 prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
 export MTWILSON_SERVER
-DEFAULT_POSTGRES_HOSTNAME=$MTWILSON_SERVER
+
 echo
 
 
