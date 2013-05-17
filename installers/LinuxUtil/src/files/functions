@@ -1165,17 +1165,17 @@ postgres_server_install(){
   POSTGRES_SERVER_APT_PACKAGES="postgresql"
 
   postgres_server_detect >> $INSTALL_LOG_FILE
-  if [[ -n "$postgres" ]]; then
+  if [[ -n "$postgres_com" ]]; then
     echo "Postgres server is already installed" >> $INSTALL_LOG_FILE
     echo "Postgres server is already installed skipping..."
     return;
   fi
-  if [[ -z "$postgres" ]]; then
+  if [[ -z "$postgres_com" ]]; then
     auto_install "Postgres server" "POSTGRES_SERVER"   >> $INSTALL_LOG_FILE
     postgres_server_detect
   fi
   
-  if [[ -z "$postgres" ]]; then
+  if [[ -z "$postgres_com" ]]; then
     echo_failure "Unable to auto-install Postgres server" | tee -a $INSTALL_LOG_FILE
     echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
@@ -1234,14 +1234,14 @@ echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
 echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
 
   # see if we have the command path already
-  if [[ -n "$postgres" && -f "$postgres" ]]; then
-    echo "Found postgres server: $postgres"
+  if [[ -n "$postgres_com" && -f "$postgres_com" ]]; then
+    echo "Found postgres server: $postgres_com"
     IFS=
     return 0
   fi
   
   #if not, find the command file
-  postgres="";
+  postgres_com="";
   result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
 echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
   #IFS=' '
@@ -1251,16 +1251,16 @@ echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
   #  mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`
   #  echo "grep result for loop item r=$mytest" >> $INSTALL_LOG_FILE
   #  if [ -n "$mytest" ]; then 
-  #    postgres="$r" 
+  #    postgres_com="$r" 
   #  fi
   #done
   if [[ -f /etc/init.d/postgresql ]]; then
-    postgres="/etc/init.d/postgresql";
+    postgres_com="/etc/init.d/postgresql";
   fi
-echo "postgres=$postgres" >> $INSTALL_LOG_FILE
+echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
 
-  if [[ -n "$postgres" ]]; then
-    echo "Found postgres server: $postgres"
+  if [[ -n "$postgres_com" ]]; then
+    echo "Found postgres server: $postgres_com"
     IFS=
     return 0
   fi
@@ -1464,8 +1464,8 @@ postgres_install_scripts() {
 
 postgres_running() {  
   POSTGRES_SERVER_RUNNING=''
-  if [ -n "$postgres" ]; then
-    local is_running=`$postgres status | grep running`
+  if [ -n "$postgres_com" ]; then
+    local is_running=`$postgres_com status | grep running`
     if [ -n "$is_running" ]; then
       POSTGRES_SERVER_RUNNING=yes
     fi
@@ -1482,18 +1482,18 @@ postgres_running_report() {
   fi
 }
 postgres_restart() {
-  if [ -n "$postgres" ]; then
-      $postgres restart
+  if [ -n "$postgres_com" ]; then
+      $postgres_com restart
   fi
 }
 postgres_start() {
-  if [ -n "$postgres" ]; then
-      $postgres start
+  if [ -n "$postgres_com" ]; then
+      $postgres_com start
   fi
 }
 postgres_stop() {
-  if [ -n "$postgres" ]; then
-      $postgres stop
+  if [ -n "$postgres_com" ]; then
+      $postgres_com stop
   fi
 }
 

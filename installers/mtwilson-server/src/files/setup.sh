@@ -419,7 +419,13 @@ elif using_tomcat; then
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here
     #mtwilson tomcat-sslcert
-    mtwilson tomcat-restart
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
 	# opt_tomcat init end
   else
     echo_warning "Skipping webservice init"
@@ -438,7 +444,13 @@ fi
 
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    mtwilson tomcat-restart
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
   fi
 fi
 if [ ! -z "opt_attservice" ]; then
@@ -448,7 +460,13 @@ if [ ! -z "opt_attservice" ]; then
 fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    mtwilson tomcat-restart
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
   fi
 fi
 if [ ! -z "$opt_mangservice" ]; then
@@ -458,7 +476,13 @@ if [ ! -z "$opt_mangservice" ]; then
 fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    mtwilson tomcat-restart
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
   fi
 fi
 if [ ! -z "$opt_wlmservice" ]; then
@@ -468,7 +492,13 @@ if [ ! -z "$opt_wlmservice" ]; then
 fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    mtwilson tomcat-restart
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
   fi
 fi
 #if [ ! -z "$mangportal" ]; then
@@ -496,7 +526,13 @@ if [ ! -z "$opt_mtwportal" ]; then
 fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    mtwilson tomcat-restart
+    if tomcat_running; then 
+      echo "Restarting Tomcat ..."
+      tomcat_restart
+    else
+      echo "Starting Tomcat ..."
+      tomcat_start
+    fi
   fi
 fi
 #TODO-stdale monitrc needs to be customized depending on what is installed
