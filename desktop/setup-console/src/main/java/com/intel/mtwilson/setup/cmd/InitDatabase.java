@@ -101,7 +101,7 @@ public class InitDatabase implements Command {
         }
         
         databaseVendor = args[0];
-        
+        vendor = databaseVendor;
         try {
             initDatabase();
         }
