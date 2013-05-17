@@ -553,12 +553,9 @@ public class HostBO extends BaseBO {
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
 	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, Exception {
 		
+		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
+		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		
-		
-		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.info("saveHostInDatabase with tls policy " + tblHosts.getTlsPolicyName() + " and keystore size " +  tblHosts.getTlsKeystore() == null ? "null" : String.valueOf(tblHosts.getTlsKeystore().length));
-		
-
 		String cs = host.getAddOn_Connection_String();
                         log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
