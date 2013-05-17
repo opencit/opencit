@@ -13,7 +13,7 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 if [ -z "$INSTALL_PKGS" ]; then
               #opt_postgres|opt_mysql opt_java opt_tomcat|opt_glassfish opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
- INSTALL_PKGS="opt_mysql opt_java opt_glassfish opt_privacyca opt_SERVICES opt_PORTALS"
+ INSTALL_PKGS="mysql java glassfish privacyca SERVICES PORTALS"
 fi
 
 FIRST=0
