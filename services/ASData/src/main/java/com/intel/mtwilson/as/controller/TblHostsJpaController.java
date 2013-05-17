@@ -47,7 +47,7 @@ public class TblHostsJpaController implements Serializable {
     }
 
     public void create(TblHosts tblHosts) throws CryptographyException {
-        System.err.println("create tblHosts with policy " +  tblHosts.getTlsPolicyName() + " and keystore length " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+        //System.err.println("create tblHosts with policy " +  tblHosts.getTlsPolicyName() + " and keystore length " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
        
         if (tblHosts.getTblSamlAssertionCollection() == null) {
             tblHosts.setTblSamlAssertionCollection(new ArrayList<TblSamlAssertion>());
