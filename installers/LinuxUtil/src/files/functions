@@ -1411,7 +1411,7 @@ if postgres_server_detect ; then
     fi
     
     postgres_restart >> $INSTALL_LOG_FILE
-    sleep 5
+    sleep 10
 
     local create_sql="CREATE DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE};"
     local grant_sql="GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} TO ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME};"
