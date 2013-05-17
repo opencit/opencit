@@ -66,7 +66,7 @@ public class ASConfig extends ConfigBase{
                 config.getString("mtwilson.db.driver",
                 "org.postgresql.Driver")));
         System.err.println("stdalex asConfig getJpaConfig driver == " + config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-        String dbms = (config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        String dbms = (config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         System.err.println("stdalex asconfig getJpaConfig dbms == " + dbms);
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use

@@ -23,7 +23,7 @@ public class WLMPConfig extends ConfigBase {
     public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
         
     private WLMPConfig() {
-        super("whitelist-portal.properties");
+        super("mtwilson-portal.properties");
     }
 
     @Override
@@ -78,7 +78,7 @@ public class WLMPConfig extends ConfigBase {
                 config.getString("mtwilson.db.driver",
                 "org.postgresql.Driver")));
         //System.err.println("stdalex wlmpconfig getJpaConfig driver == " + config.getString("mountwilson.wlmp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-        String dbms = (config.getString("mountwilson.wlmp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        String dbms = (config.getString("mountwilson.wlmp.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
         //System.err.println("stdalex wlmconfig getJpaConfig dbms == " + dbms);
         prop.put("javax.persistence.jdbc.url" , 
                 config.getString("mountwilson.wlmp.db.url",

@@ -96,6 +96,7 @@ public class InitDatabase implements Command {
     public void execute(String[] args) throws SetupException {
         // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
         if( args.length < 1 ) {
+            
             throw new SetupException("Usage: InitDatabase mysql|postgres [--check]");
         }
         
@@ -368,8 +369,10 @@ public class InitDatabase implements Command {
     
     
     private List<String> getTableNames(Connection c) throws SQLException {
+        
        ArrayList<String> list = new ArrayList<String>();
         Statement s = c.createStatement();
+        
         String sql = "";
         if (vendor.equals("mysql")){
             sql = "SHOW TABLES";
