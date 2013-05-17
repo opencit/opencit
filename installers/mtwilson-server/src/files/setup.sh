@@ -20,7 +20,7 @@ FIRST=0
 #loop through INSTALL_PKG and set each entry to true
 for i in $INSTALL_PKGS; do
  pkg=`echo $i | tr '[A-Z]' '[a-z]'`
- eval $pkg="true"
+ eval opt_$pkg="true"
  if [ $FIRST == 0 ]; then
   FIRST=1;
   LIST=$pkg
