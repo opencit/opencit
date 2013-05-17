@@ -1,15 +1,15 @@
 var uploadFileHelp = [];
-uploadFileHelp[0]="Please provide file in following format :";
-uploadFileHelp[1]="Host_Name|Host_Port_no";
-uploadFileHelp[2]="e.g.   myTrustAgent|9999";
-uploadFileHelp[3]="or for VMWare Type";
-uploadFileHelp[4]="Host_Name|Vmware_Connection_String";
-uploadFileHelp[5]="e.g.   myVmwareHost|https://192.168.1.0/sdk;Administrator;Password";
-uploadFileHelp[6]="or for Citrix Type";
-uploadFileHelp[7]="Host_Name|Citrix_Connection_String";
-uploadFileHelp[8]="e.g.   myCitrixHost|https://192.168.1.0:443;Administrator;Password";
-
-
+uploadFileHelp[0]="Provide a plain text file (.txt format) containing a list of hosts to be registered in the following format(S):";
+uploadFileHelp[1]="Agent | Host_Name | connection string";
+uploadFileHelp[2]="For Open Source Based Hosts:";
+uploadFileHelp[3]="intel|Host_Name|Host_Port_no";
+uploadFileHelp[4]="e.g.   intel|myTrustAgent|9999";
+uploadFileHelp[5]="For VMWare Based Hosts:";
+uploadFileHelp[6]="vmware|Host_Name|Vmware_Connection_String";
+uploadFileHelp[7]="e.g. vmware|myVmwareHost|https://192.168.1.0:443/sdk;Administrator;Password";
+uploadFileHelp[8]="For Citrix Type";
+uploadFileHelp[9]="citrix|Host_Name|Citrix_Connection_String";
+uploadFileHelp[10]="e.g.   citrix|myCitrixHost|https://192.168.1.0:443;Administrator;Password";
 
 
 var vCenterStringHelp = [];

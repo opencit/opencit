@@ -69,6 +69,7 @@ public class TrustCaAndVerifyHostnameTlsPolicy implements TlsPolicy, ApacheTlsPo
         List<X509Certificate> trustedCertificates =  repository.getCertificates();
         List<X509Certificate> trustedSubjects = getSubjects(trustedCertificates); //repository.getCertificateForSubject(xcs[i].getSubjectX500Principal().getName());  
         List<X509Certificate> trustedIssuers = getIssuers(trustedCertificates);
+        log.debug("TrustCaAndVerifyHostnameTlsPolicy with {} trusted certificates", trustedCertificates.size());
         for(int i=0; i<xcs.length; i++) {
 //            System.out.println(String.format("xcs[%d] = %s", i, xcs[i].getSubjectX500Principal().getName()));
             // for each certificate in the chain, check if we know it as a trusted cert or if it is signed by one of our trusted certs
@@ -99,7 +100,7 @@ public class TrustCaAndVerifyHostnameTlsPolicy implements TlsPolicy, ApacheTlsPo
                 }
             }
         }
-        throw new CertificateException("Server certificate is not trusted");
+        throw new UnknownCertificateException("Server certificate is not trusted", xcs);
     }
 
     @Override

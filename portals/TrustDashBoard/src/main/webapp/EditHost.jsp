@@ -21,7 +21,7 @@
 						<th class="editRow6">VMM Name</th>
 						<th class="editRow7">VMM Build</th>
 						<th class="editRow8">Email Address</th>
-						<th class="editRow9">VCenter Details</th>
+						<th class="editRow9">Connection Details</th>
 					</tr>
 				</thead>
 				</table>

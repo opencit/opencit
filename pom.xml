@@ -459,6 +459,7 @@
                               <version>2.8.1</version>
                                 <configuration>
                                   <show>public</show>
+                                  <docfilessubdirs>true</docfilessubdirs>
                                   <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
                                     <includeDependencySources>true</includeDependencySources>
                                     <includeTransitiveDependencySources>false</includeTransitiveDependencySources>

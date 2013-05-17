@@ -69,6 +69,7 @@ public class TrustKnownCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
         if( xcs == null || xcs.length == 0 ) { throw new IllegalArgumentException("Server did not present any certificates"); }
         System.out.println("TlsPolicyTrustKnownCertificate(#"+xcs.length+","+string+")");
         List<X509Certificate> trustedCertificates = repository.getCertificates(); //repository.getCertificateForSubject(xcs[i].getSubjectX500Principal().getName());  
+        log.debug("TrustKnownCertificatePolicy with {} trusted certificates", trustedCertificates.size());
         for(int i=0; i<xcs.length; i++) {
             for(X509Certificate trustedCert : trustedCertificates) {
                 if( Arrays.equals(trustedCert.getEncoded(), xcs[i].getEncoded())) {
@@ -83,7 +84,7 @@ public class TrustKnownCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
                 }
             }
         }
-        throw new CertificateException("Server certificate is not trusted");
+        throw new UnknownCertificateException("Server certificate is not trusted", xcs);
     }
 
     @Override

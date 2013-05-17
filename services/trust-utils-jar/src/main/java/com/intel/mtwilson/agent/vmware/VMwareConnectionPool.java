@@ -6,9 +6,15 @@ package com.intel.mtwilson.agent.vmware;
 
 //import java.util.HashMap;
 import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
+import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.tls.TlsConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -69,11 +75,14 @@ public class VMwareConnectionPool {
      * @throws VMwareConnectionException 
      */
     public VMwareClient reuseClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
+        log.debug("VMwareConnectionPool searching for existing connection {}", tlsConnection.getConnectionString());
         VMwareClient client = pool.get(tlsConnection);
         if( client == null ) { return null; }
+        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
 //        lastAccess.put(connectionString, System.currentTimeMillis());
         if( factory.validateObject(tlsConnection, client)) {
             log.info("Reusing vCenter connection for "+client.getEndpoint());
+//            client.setTlsPolicy(tlsConnection.getTlsPolicy());
             return client;                
         }
         log.info("Found stale vCenter connection");
@@ -104,8 +113,10 @@ public class VMwareConnectionPool {
      */
     public VMwareClient createClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
         try {
+            log.debug("VMwareConnectionPool create client for connection {}", tlsConnection.getConnectionString());
             VMwareClient client = factory.makeObject(tlsConnection);
             if( factory.validateObject(tlsConnection, client) ) {
+                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
                 pool.put(tlsConnection, client);
                 // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
                 log.info("Opening new vCenter connection for "+client.getEndpoint());
@@ -115,7 +126,44 @@ public class VMwareConnectionPool {
                 throw new Exception("Failed to validate new vmware connection");
             }
         }
+        catch(javax.xml.ws.WebServiceException e) {
+            // is it because of an ssl failure?  we're looking for this:  com.sun.xml.internal.ws.client.ClientTransportException: HTTP transport error: javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: Server certificate is not trusted
+            if( e.getCause() != null && e.getCause() instanceof javax.net.ssl.SSLHandshakeException) {
+                javax.net.ssl.SSLHandshakeException e2 = (javax.net.ssl.SSLHandshakeException)e.getCause();
+                if( e2.getCause() != null && e2.getCause() instanceof com.intel.mtwilson.tls.UnknownCertificateException ) {
+                    com.intel.mtwilson.tls.UnknownCertificateException e3 = (com.intel.mtwilson.tls.UnknownCertificateException)e2.getCause();
+                    log.debug("Failed to connect to vcenter due to unknown certificate exception: {}", e3.toString());
+                    X509Certificate[] chain = e3.getCertificateChain();
+                    if( chain == null || chain.length == 0 ) {
+                        log.error("Server certificate is missing");
+                    }
+                    else {
+                        for(X509Certificate certificate : chain) {
+                            try {
+                                log.debug("Server certificate fingerprint: {} and subject: {}", new Sha1Digest(X509Util.sha1fingerprint(certificate)), certificate.getSubjectX500Principal().getName());
+                            }
+                            catch(NoSuchAlgorithmException e4) {
+                                log.debug("Cannot read server certificate: {}", e4.toString(), e4);
+                                throw new VMwareConnectionException(e4);
+                            }
+                            catch(CertificateEncodingException e4) {
+                                log.debug("Cannot read server certificate: {}", e4.toString(), e4);
+                                throw new VMwareConnectionException(e4);
+                            }
+                        }
+                        throw new VMwareConnectionException("VMwareConnectionPool not able to read host information: "+ e3.toString());
+                    }
+                }
+                else {
+                    throw new VMwareConnectionException("Failed to connect to vcenter due to SSL handshake exception", e2);
+                }
+            }
+            else {
+                throw new VMwareConnectionException("Failed to connect to vcenter due to exception: "+e.toString(), e);
+            }
+        }
         catch(Exception e) {
+            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString());
             log.error("Failed to connect to vcenter: "+e.toString(),e);
             e.printStackTrace(System.err);
             try {
@@ -124,9 +172,10 @@ public class VMwareConnectionPool {
             }
             catch(MalformedURLException e2) {
                 log.error("Cannot connect to vcenter: Invalid connection string: {}", tlsConnection.getConnectionString());
-                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string", e2);                
+                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string: "+e.toString(), e);                
             }
         }
+        throw new VMwareConnectionException("Failed to connect to vcenter: unknown error");
     }
     
     public void close() {

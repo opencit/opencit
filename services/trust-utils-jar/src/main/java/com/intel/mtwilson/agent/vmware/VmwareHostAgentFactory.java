@@ -37,20 +37,20 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
 
     @Override
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
+        ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
         try {
             log.debug("getHostAgent {}", vendorConnectionString);
             VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
-            ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
             log.debug("vmware host = {}", vmware.getHost().toString());
             log.debug("vmware port = {}", vmware.getPort());
             log.debug("vmware username = {}", vmware.getUsername());
-            log.debug("vmware password = {}", vmware.getPassword());
+//            log.debug("vmware password = {}", vmware.getPassword());
             log.debug("vmware vcenter = {}", vmware.getVCenter().toString());
             log.debug("vmware toURL = {}", vmware.toURL());
             return new VmwareHostAgent(client, vmware.getHost().toString());
         }
         catch(Exception e) {
-            throw new IOException("Cannot get vmware client for host connection: "+vendorConnectionString+": "+e.toString(), e);
+            throw new IOException("Cannot get vmware client for host: "+vmware.getHost().toString()+" at vcenter: "+vmware.getVCenter().toString()+" with username: "+vmware.getUsername()+": "+e.toString(), e);
         }
     }
 }
