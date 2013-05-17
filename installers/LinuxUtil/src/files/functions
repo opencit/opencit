@@ -1418,9 +1418,9 @@ if postgres_server_detect ; then
        echo listen_addresses=\'${MTWILSON_SERVER}\' >> $postgres_conf
     fi
     
-    #postgres_restart >> $INSTALL_LOG_FILE
-    #sleep 10
-    #postgres_test_connection
+    postgres_restart >> $INSTALL_LOG_FILE
+    sleep 10
+    postgres_test_connection
 
     if [ -z "$is_postgres_available" ]; then
       echo_failure "Failed to create database."  | tee -a $INSTALL_LOG_FILE

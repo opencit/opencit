@@ -287,7 +287,7 @@ if using_mysql; then
 			echo "mysql-server-5.1 mysql-server/root_password_again password $MYSQL_PASSWORD" | debconf-set-selections 
 		fi 
 		mysql_server_install 
-		mysql_start & >> $INSTALL_LOG_FILE
+		mysql_start >> $INSTALL_LOG_FILE
 	    echo "Installation of mysql server complete..."
 		# End mysql server install code here
 	else
@@ -330,14 +330,14 @@ elif using_postgres; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
       fi 
       postgres_server_install 
-      postgres_restart & >> $INSTALL_LOG_FILE
+      postgres_restart >> $INSTALL_LOG_FILE
       sleep 10
       # postgres server end
     else 
       # postgres client install here
       echo "Installing postgres client..."
       postgres_install
-      postgres_restart & >> $INSTALL_LOG_FILE
+      postgres_restart >> $INSTALL_LOG_FILE
       sleep 10
       echo "Installation of postgres client complete..." 
       # postgres clinet install end
@@ -349,9 +349,9 @@ elif using_postgres; then
  if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
 	postgres_create_database
-    postgres_restart & >> $INSTALL_LOG_FILE
-    sleep 10
-    export is_postgres_available postgres_connection_error
+    #postgres_restart >> $INSTALL_LOG_FILE
+    #sleep 10
+    #export is_postgres_available postgres_connection_error
     if [ -z "$is_postgres_available" ]; then 
       echo_warning "Run 'mtwilson setup' after a database is available"; 
     fi
@@ -438,6 +438,7 @@ fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     mtwilson tomcat-restart
+  fi
 fi
 if [ ! -z "opt_attservice" ]; then
 	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
@@ -447,6 +448,7 @@ fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     mtwilson tomcat-restart
+  fi
 fi
 if [ ! -z "$opt_mangservice" ]; then
 	echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
@@ -456,6 +458,7 @@ fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     mtwilson tomcat-restart
+  fi
 fi
 if [ ! -z "$opt_wlmservice" ]; then
 	echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
@@ -465,6 +468,7 @@ fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     mtwilson tomcat-restart
+  fi
 fi
 #if [ ! -z "$mangportal" ]; then
 #	echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
@@ -492,6 +496,7 @@ fi
 if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     mtwilson tomcat-restart
+  fi
 fi
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ]; then
