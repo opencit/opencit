@@ -1326,7 +1326,8 @@ postgres_test_connection() {
   is_postgres_available=""
   #check if postgres is installed and we can connect with provided credencials
   local postgres_test_result=`$postgres_connect -c '\l' 2>/tmp/intel.postgres.err | grep ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} | wc -l`
-  if [ $postgres_test_result -gt 0 ]; then
+  echo postgres_test_result=$postgres_test_result  
+if [ $postgres_test_result -gt 0 ]; then
     is_postgres_available="yes"
   fi
   postgres_connection_error=`cat /tmp/intel.postgres.err`
