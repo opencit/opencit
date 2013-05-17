@@ -60,6 +60,7 @@ public class ASConfig extends ConfigBase{
     }
 
     public static Properties getJpaProperties(Configuration config) {
+        /*
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.as.db.driver", 
@@ -86,6 +87,32 @@ public class ASConfig extends ConfigBase{
                     config.getString("mountwilson.as.db.port", config.getString("mtwilson.db.port","3306")),
                     config.getString("mountwilson.as.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
         System.err.println("stdalex as url == " + prop.getProperty("javax.persistence.jdbc.url"));
+        prop.put("javax.persistence.jdbc.user",
+                config.getString("mountwilson.as.db.user",
+                config.getString("mtwilson.db.user",
+                "root")));
+        prop.put("javax.persistence.jdbc.password", 
+                config.getString("mountwilson.as.db.password", 
+                config.getString("mtwilson.db.password", 
+                "password")));
+        return prop;
+        */
+        Properties prop = new Properties();
+        prop.put("javax.persistence.jdbc.driver", 
+                config.getString("mountwilson.as.db.driver", 
+                config.getString("mtwilson.db.driver",
+                "org.postgresql.Driver")));
+        //System.err.println("stdalex msConfig getJpaConfig driver == " + config.getString("mountwilson.ms.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+        String dbms = (config.getString("mountwilson.as.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
+        //System.err.println("stdalex msConfig getJpaConfig dbms == " + dbms);
+        prop.put("javax.persistence.jdbc.url" , 
+                config.getString("mountwilson.as.db.url",
+                config.getString("mtwilson.db.url",
+                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
+                    config.getString("mountwilson.as.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
+                    config.getString("mountwilson.as.db.port", config.getString("mtwilson.db.port","3306")),
+                    config.getString("mountwilson.as.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+        //System.err.println("stdalex msConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
         prop.put("javax.persistence.jdbc.user",
                 config.getString("mountwilson.as.db.user",
                 config.getString("mtwilson.db.user",
