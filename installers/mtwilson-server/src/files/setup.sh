@@ -264,6 +264,7 @@ Detected the following options on this server:"
 IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
 prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
 export MTWILSON_SERVER
+DEFAULT_POSTGRES_HOSTNAME=$MTWILSON_SERVER
 echo
 
 
@@ -349,7 +350,7 @@ elif using_postgres; then
     # postgres db init here
 	postgres_create_database
 
-    export is_postgres_available postgres_connection_error
+    #export is_postgres_available postgres_connection_error
     if [ -z "$is_postgres_available" ]; then 
       echo_warning "Run 'mtwilson setup' after a database is available"; 
     fi
@@ -416,13 +417,7 @@ elif using_tomcat; then
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here
     #mtwilson tomcat-sslcert
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
+    mtwilson tomcat-restart
 	# opt_tomcat init end
   else
     echo_warning "Skipping webservice init"
@@ -439,84 +434,36 @@ if [ ! -z "$opt_privacyca" ]; then
 	#echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
 fi
 
-if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
-elif using_tomcat; then
+if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
+    mtwilson tomcat-restart
 fi
 if [ ! -z "opt_attservice" ]; then
 	echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
 	./$attestation_service 
 	echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
-elif using_tomcat; then
+if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
+    mtwilson tomcat-restart
 fi
 if [ ! -z "$opt_mangservice" ]; then
 	echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
 	./$management_service
 	echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
-elif using_tomcat; then
+if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
+    mtwilson tomcat-restart
 fi
 if [ ! -z "$opt_wlmservice" ]; then
 	echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
 	./$whitelist_service >> $INSTALL_LOG_FILE
 	echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
-elif using_tomcat; then
+if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
+    mtwilson tomcat-restart
 fi
 #if [ ! -z "$mangportal" ]; then
 #	echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
@@ -541,21 +488,9 @@ if [ ! -z "$opt_mtwportal" ]; then
 	./$mtw_portal 
 	echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
 fi
-if using_glassfish; then
-  if [ ! -z "$glassfish" ]; then
-    glassfish_stop
-    glassfish_start
-  fi
-elif using_tomcat; then
+if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
-    fi
-  fi
+    mtwilson tomcat-restart
 fi
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ]; then

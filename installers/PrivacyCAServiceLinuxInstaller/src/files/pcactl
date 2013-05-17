@@ -102,12 +102,12 @@ setup_interactive_install() {
     
     if using_tomcat; then
        # Comment out listener in /var/lib/tomcat6/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml 
-       echo -n "Waiting for PrivacyCA web.xml to finish deploying"
+       echo "Waiting for PrivacyCA web.xml to finish deploying"
        while [ ! -f $TOMCAT_HOME/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml ]; do
-       echo -n ".">> $INSTALL_LOG_FILE
+       echo -n "." >> $INSTALL_LOG_FILE
        sleep 5
        done
-      sed -i.bak '/<listener>/,/<\/listener>/d' /usr/share/apache-tomcat-6.0.29/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
+      sed -i.bak '/<listener>/,/<\/listener>/d' $TOMCAT_HOME/webapps/HisPrivacyCAWebServices2/WEB-INF/web.xml
       
     fi
     
@@ -151,7 +151,7 @@ create_privacyca_keys() {
     # workaround for bug #568 - privacy ca takes 10-15 minutes to start first time, which is caused by key generation blocked due to not enough entropy in /dev/random
     # for production, you just need to wait the 10-15 minutes because you want secure keys. but for automated testing we benefit by getting this done in 1 second instead of 900 seconds
     if [[ "$PRIVACYCA_KEYGEN_URANDOM" == "yes" ]]; then
-      replace_random_until_exists "${intel_conf_dir}/PrivacyCA.p12" &
+      replace_random_until_exists "${intel_conf_dir}/PrivacyCA.p12" 
     fi
     # creates PrivacyCA.p12 and endorsement.p12  (also creates the cacerts and clientfiles dirs)
     local oldpwd=`pwd`

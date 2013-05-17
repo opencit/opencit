@@ -1181,9 +1181,6 @@ postgres_server_install(){
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
     return 1
   fi
-
-  
-
 }
 
 # Environment:
@@ -1212,7 +1209,6 @@ echo "POSTGRES_CLIENT_VERSION_OK: $POSTGRES_CLIENT_VERSION_OK" >> $INSTALL_LOG_F
 }
 
 postgres_server_detect() {
-    
 #find the host file
   postgres_pghb_conf=""; 
   result=`find / -name pg_hba.conf 2>/dev/null`
@@ -1246,7 +1242,7 @@ echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
   
   #if not, find the command file
   postgres="";
-  #result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
+  result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
 echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
   #IFS=' '
   #for r in ${result}
@@ -1315,7 +1311,7 @@ postgres_require() {
 postgres_connection() {
   postgres_require
   postgres_connect="psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME}"
-  echo $postgres_connect >> $INSTALL_LOG_FILE
+  echo "postgres_connect=$postgres_connect" >> $INSTALL_LOG_FILE
 }
 
 # Environment:
@@ -1324,16 +1320,17 @@ postgres_connection() {
 postgres_test_connection() {
   postgres_connection
   is_postgres_available=""
+echo "connection test sql=$postgres_connect -c '\l' 2>/tmp/intel.postgres.err | grep ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} | wc -l"
   #check if postgres is installed and we can connect with provided credencials
   local postgres_test_result=`$postgres_connect -c '\l' 2>/tmp/intel.postgres.err | grep ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} | wc -l`
   echo postgres_test_result=$postgres_test_result  
-if [ $postgres_test_result -gt 0 ]; then
+  if [ $postgres_test_result -gt 0 ]; then
     is_postgres_available="yes"
   fi
   postgres_connection_error=`cat /tmp/intel.postgres.err`
   
   echo "postgres_connection_error: $postgres_connection_error"
-  rm -f /tmp/intel.postgres.err
+  #rm -f /tmp/intel.postgres.err
 }
 
 # Environment:
@@ -1403,7 +1400,7 @@ if postgres_server_detect ; then
     local create_user_sql="CREATE USER ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} WITH PASSWORD '${POSTGRES_PASSWORD:-$DEFAULT_POSTGRES_PASSWORD}';"
     sudo -u postgres psql postgres -c "${create_user_sql}" 2>/tmp/intel.postgres.err    >> $INSTALL_LOG_FILE
 
-    has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
+    has_host=`grep "^host" $postgres_pghb_conf | grep "${MTWILSON_SERVER}" | grep -E "password|trust"`
     if [ -z "$has_host" ]; then
       echo host  all  all  ${MTWILSON_SERVER}/32  password >> $postgres_pghb_conf
     fi
