@@ -326,25 +326,26 @@ elif using_postgres; then
       # when we install postgres server on ubuntu it prompts us for root pw
       # we preset it so we can send all output to the log
       aptget_detect; dpkg_detect; yum_detect;
-     if [[ -n "$aptget" ]]; then
+      if [[ -n "$aptget" ]]; then
        echo "postgresql app-pass password $POSTGRES_PASSWORD" | debconf-set-selections 
       fi 
       postgres_server_install 
       postgres_restart >> $INSTALL_LOG_FILE
       sleep 10
       # postgres server end
-    else 
-      # postgres client install here
+    fi 
+    # postgres client install here
+    #if [ postgres_detect ]; then
       echo "Installing postgres client..."
       postgres_install
       postgres_restart >> $INSTALL_LOG_FILE
       sleep 10
       echo "Installation of postgres client complete..." 
       # postgres clinet install end
-    fi
- else
-  echo_warning "Relying on an existing Postgres installation"
- fi 
+    #fi
+  else
+    echo_warning "Relying on an existing Postgres installation"
+  fi 
  
  if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
