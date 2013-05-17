@@ -41,7 +41,7 @@ function read_local_config() {
     serviceLogFile="/var/log/$serviceNameLo.log"               # log file for StdOut/StdErr
     maxShutdownTime=15                                         # maximum number of seconds to wait for the daemon to terminate normally
     pidFile="/var/run/$serviceNameLo.pid"                      # name of PID file (PID = process ID number)
-    javaVMArgs="-Djavax.net.ssl.trustStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStorePassword=intelinc -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
+    javaVMArgs="-Djavax.net.ssl.trustStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStore=$package_dir/cert/trustagent.jks -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
     javaArgs="-classpath $CLASSPATH com.intel.mountwilson.trustagent.TASecureServer"  # arguments for Java launcher
     javaCommandLine="$java $javaVMArgs  $javaArgs"                       # command line to start the Java service application
     javaCommandLineKeyword="TrustAgent.jar"                   # a keyword that occurs on the commandline, used to detect an already running service process and to distinguish it from others
@@ -75,7 +75,7 @@ function checkProcessIsOurService {
    isTrustAgent=`ps -p $pid -o cmd | grep "$javaCommandLineKeyword" | wc -l`
    if [ "$isTrustAgent" == "0" ]; then return 1; fi
    return 0; }
- 
+
 # Returns 0 when the service is running and sets the variable $pid to the PID.
 function getServicePID {
    if [ ! -f $pidFile ]; then return 1; fi
@@ -215,6 +215,8 @@ setup_interactive_install() {
 	    stopService
         fi
         # This is the place to do any setup while trust agent is not running
+		randPw=`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-16};echo;`
+		update_property_in_file trustagent.keystore.password "${package_config_filename}" $randPw
         /usr/local/bin/pcakey
 		if [ $? == 1 ]; then
 			exit 1
