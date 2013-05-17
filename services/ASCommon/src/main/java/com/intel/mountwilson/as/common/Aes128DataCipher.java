@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.as.helper;
+package com.intel.mountwilson.as.common;
 
 import com.intel.mtwilson.as.data.helper.DataCipher;
 import com.intel.mtwilson.crypto.Aes128;

@@ -18,7 +18,7 @@
 						<th class="viewRow6">VMM Name</th>
 						<th class="viewRow7">VMM Build</th>
 						<th class="viewRow8">Email Address</th>
-						<th class="viewRow9">VCenter Details</th>
+						<th class="viewRow9">Connection Details</th>
 						<th class="viewRow10">Host Description</th>
 					</tr>
 				</thead>

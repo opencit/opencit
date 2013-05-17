@@ -352,7 +352,7 @@ h5, h6
 .tableDivMLE .rowr6{width: 65px;}
 .tableDivMLE .rowr7{width: 90px;}
 
-.row1{width: 20px;}
+/*.row1{width: 20px;}
 .row2{width: 80px;}
 .row3{width: 175px;}
 .row4{width: 80px;}
@@ -363,7 +363,21 @@ h5, h6
 .row9{width: 170px;}
 .row10{width: 110px;}
 .row11{width: 50px;}
-.row5Sub{width: 150px;}
+.row5Sub{width: 150px;}*/
+
+.row1{width: 20px;}
+.row2{width: 80px;}
+.row3{width: 50px;}
+.row4{width: 55px;}
+.row5{width: 60px;}
+.row6{width: 75px;}
+.row7{width: 75px;}
+.row8{width: 80px;}
+.row9{width: 100px;}
+.row10{width: 90px;}
+.row11{width: 65px;}
+.row12{width: 210px;}
+.rowHelp{width:50px; }
 
 /*.row12{width: 50px;}*/
 
@@ -374,7 +388,31 @@ h5, h6
 .manifestModuleTypeRow5{width: 65px;}
 .manifestModuleTypeRow6{width: 75px;}
 
+.manifestModuleTypeTableHeader{
+    table-layout: fixed;
+    text-align: center;
+    width: 98%;
+}
 
+.manifestModuleTypeTableHeader thead{
+/*    background-color: #6E3F4A;*/
+    color: White;
+    font-weight: bold;
+}
+
+.manifestModuleTypeTableContent{
+    text-align: center;
+    overflow: auto;
+    max-height: 461px;
+}
+.manifestModuleTypeTableContent table{
+    table-layout: fixed;
+}
+.manifestModuleTypeTableContent tr td{
+    border: 1px solid #3A4F63;
+    empty-cells: show;
+    word-wrap: break-word;
+}
 
 /* Class for View Pending Registration page */
 .viewRequestRow1{width: 412px;}
@@ -527,12 +565,36 @@ text-align: center;
 
 
 /* --------------- class specific  for Demo Portal --------*/
-.mainTableDiv{
+/*.mainTableDiv{
 	color: black;
     height: 500px;
     padding-left: 35px;
     text-align: center;
     width: 93%;
+}*/
+
+.mainTableDiv{
+	color: black;
+    height: 500px;
+   /*  padding-left: 35px; */
+    /* text-align: center; */
+    /* width: 985px; */
+    /* Soni_Begin_02/10/2012_issue_table aligned at the left  */
+    /*float: left;*/
+    float: center;
+      /* Soni_End_02/10/2012_issue_table aligned at the left  */
+}
+
+.mainTableDisplayDiv{
+    min-width: 1030px;
+}
+
+.mainTableDisplayDiv table{
+	 table-layout: fixed; 
+}
+
+.mainTableDisplayDiv table tr td{
+	word-wrap: break-word;
 }
 
 .subTableDiv{
@@ -662,7 +724,8 @@ text-align: center;
 	margin-top: 10px;
 }
 .registerHostTableContent{
-	max-height: 150px;
+            /* Bug 770: Do not want to restrict the height of the table*/
+	/*max-height: 150px;*/
 	overflow: auto;
 }
 

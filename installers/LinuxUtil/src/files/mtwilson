@@ -309,11 +309,11 @@ case "$1" in
         ;;
   help)
         echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-decect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         ;;
   *)
-        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-decect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+        echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
+             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         exit 1
 esac
 

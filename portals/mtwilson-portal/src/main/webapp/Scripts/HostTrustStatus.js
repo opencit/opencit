@@ -22,11 +22,20 @@ function populateHostTrustDetails(responsJSON) {
 	}else {
                 if(responsJSON.noHosts) {
                     $('#hostTrustPaginationDiv').html('<span>'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
+                }else if(responsJSON.ResetPeer){  // CERT FIX
+                    //fnOpenDialogWithYesNOButton("Do you want to update this hosts cert?", "Confirm", 280, 150, updatePeerCert, updatePeerCertNo);
+                    $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
                 }else{
                     $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
                 }
 	}
 }
+
+function updatePeerCert(responsJSON) {
+    alert("updating cert now");
+}
+
+function updatePeerCertNo(responsJSON){}
 
 /*This Function will create a trust status table based on the host list provided.*/
 function populateHostTrustDataIntoTable(hostDetails) {

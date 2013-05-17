@@ -15,6 +15,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
 import com.intel.mountwilson.common.Config;
+import com.intel.mountwilson.common.TAConfig;
 import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
@@ -28,6 +29,27 @@ public class TASecureServer extends BaseServer {
 
     public TASecureServer(int serverPort) throws Exception {
         try {
+            //619 allow keystore password to be specificed as a env variable
+            String keyPass = System.getProperty("javax.net.ssl.keyStorePassword");
+            if(keyPass == null) {
+                // keystore pass not defined, read it from props and define it
+                String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+            }else if(keyPass.startsWith("env:")) {
+                String[] envVar = keyPass.split(":");
+                if(envVar.length != 2) {
+                    // no env variable name provided, read it from the props file
+                    String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                    System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+                }
+                String newKeyPass = System.getenv(envVar[1]);
+                if(newKeyPass == null){ 
+                    // env variable provided was not defined, read it from the props file
+                    newKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                    System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);
+                }
+                System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);                
+            }
 
             SSLServerSocketFactory sslserversocketfactory =
                     (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();

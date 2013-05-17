@@ -10,7 +10,7 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwMleSource;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.Aes128DataCipher;
+import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;

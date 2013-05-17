@@ -12,7 +12,7 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.as.data.helper.DataCipher;
-import com.intel.mtwilson.as.helper.Aes128DataCipher;
+import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;

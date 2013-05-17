@@ -37,7 +37,7 @@ public class AutoRefreshTrustLoader implements PluginLoader {
         plugin.setBulkHostTrustBO(bulkHostTrustBO);
         
         // before we load the plugin, make sure that we start the background task
-        long interval = ASConfig.getConfiguration().getInt("mtwilson.auto.refresh.trust.interval", 10);
+        long interval = ASConfig.getConfiguration().getInt("mtwilson.auto.refresh.trust.interval", (int)TimeUnit.SECONDS.convert(30, TimeUnit.MINUTES));
         log.debug("Scheduling auto refresh plugin every {} seconds", interval);
         executor.scheduleAtFixedRate(plugin, interval, interval, TimeUnit.SECONDS);
         
