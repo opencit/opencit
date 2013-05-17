@@ -1,15 +1,14 @@
 var uploadFileHelp = [];
-uploadFileHelp[0]="Please provide file in following format :";
-uploadFileHelp[1]="Host_Name|Host_Port_no";
-uploadFileHelp[2]="e.g.   myTrustAgent|9999";
-uploadFileHelp[3]="or for VMWare Type";
-uploadFileHelp[4]="Host_Name|Vmware_Connection_String";
-uploadFileHelp[5]="e.g.   myVmwareHost|https://192.168.1.0/sdk;Administrator;Password";
-uploadFileHelp[6]="or for Citrix Type";
-uploadFileHelp[7]="Host_Name|Citrix_Connection_String";
-uploadFileHelp[8]="e.g.   myCitrixHost|https://192.168.1.0:443;Administrator;Password";
-
-
+uploadFileHelp[0]="Please provide file in following format using a plain text (.txt) file :";
+uploadFileHelp[1]="For Open Source Based Hosts:";
+uploadFileHelp[2]="intel|Host_Name|Host_Port_no";
+uploadFileHelp[3]="e.g.   intel|myTrustAgent|9999";
+uploadFileHelp[4]="For VMWare Based Hosts:";
+uploadFileHelp[5]="vmware|Host_Name|Vmware_Connection_String";
+uploadFileHelp[6]="e.g. vmware|myVmwareHost|https://192.168.1.0/sdk;Administrator;Password";
+uploadFileHelp[7]="For Citrix Type";
+uploadFileHelp[8]="Citrix|Host_Name|Citrix_Connection_String";
+uploadFileHelp[9]="e.g.   myCitrixHost|https://192.168.1.0:443;Administrator;Password";
 
 
 var vCenterStringHelp = [];
