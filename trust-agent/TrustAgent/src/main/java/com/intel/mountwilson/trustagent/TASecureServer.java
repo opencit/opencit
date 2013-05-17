@@ -32,16 +32,22 @@ public class TASecureServer extends BaseServer {
             //619 allow keystore password to be specificed as a env variable
             String keyPass = System.getProperty("javax.net.ssl.keyStorePassword");
             if(keyPass == null) {
+                // keystore pass not defined, read it from props and define it
                 String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
                 System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
             }else if(keyPass.startsWith("env:")) {
                 String[] envVar = keyPass.split(":");
                 if(envVar.length != 2) {
-                    // bad env password provided, read it from the config
+                    // no env variable name provided, read it from the props file
                     String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
                     System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
                 }
                 String newKeyPass = System.getenv(envVar[1]);
+                if(newKeyPass == null){ 
+                    // env variable provided was not defined, read it from the props file
+                    newKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                    System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);
+                }
                 System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);                
             }
 
