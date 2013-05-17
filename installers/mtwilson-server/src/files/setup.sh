@@ -331,14 +331,14 @@ elif using_postgres; then
       fi 
       postgres_server_install 
       postgres_restart & >> $INSTALL_LOG_FILE
-      sleep 5
+      sleep 10
       # postgres server end
     else 
       # postgres client install here
       echo "Installing postgres client..."
       postgres_install
       postgres_restart & >> $INSTALL_LOG_FILE
-      sleep 5
+      sleep 10
       echo "Installation of postgres client complete..." 
       # postgres clinet install end
     fi
@@ -349,8 +349,9 @@ elif using_postgres; then
  if [ -z "$SKIP_DATABASE_INIT" ]; then
     # postgres db init here
 	postgres_create_database
-
-    #export is_postgres_available postgres_connection_error
+    postgres_restart & >> $INSTALL_LOG_FILE
+    sleep 10
+    export is_postgres_available postgres_connection_error
     if [ -z "$is_postgres_available" ]; then 
       echo_warning "Run 'mtwilson setup' after a database is available"; 
     fi
