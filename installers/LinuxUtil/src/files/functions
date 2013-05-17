@@ -1405,12 +1405,12 @@ if postgres_server_detect ; then
 
     has_host=`grep "^host" $postgres_pghb_conf | grep "127.0.0.1" | grep -E "password|trust"`
     if [ -z "$has_host" ]; then
-      echo host  all  all  ${MTWILSON_SERVER}/32	password >> $postgres_pghb_conf
+      echo host  all  all  ${MTWILSON_SERVER}/32  password >> $postgres_pghb_conf
     fi
     
     has_listen_addresses=`grep "^listen_addresses" $postgres_conf`
     if [ -z "$has_listen_addresses" ]; then
-       echo listen_addresses = \'${MTWILSON_SERVER}\' >> $postgres_conf
+       echo listen_addresses=\'${MTWILSON_SERVER}\' >> $postgres_conf
     fi
     
     postgres_restart >> $INSTALL_LOG_FILE
