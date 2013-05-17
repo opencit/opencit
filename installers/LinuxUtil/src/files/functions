@@ -1323,8 +1323,8 @@ postgres_test_connection() {
 
   #check if postgres is installed and we can connect with provided credencials
 
-  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2> /tmp/intel.postgres.err
-  if [ $? ]; then
+  $psql -h ${POSTGRES_HOSTNAME:-$DEFAULT_POSTGRES_HOSTNAME} -p ${POSTGRES_PORTNUM:-$DEFAULT_POSTGRES_PORTNUM} -d ${POSTGRES_DATABASE:-$DEFAULT_POSTGRES_DATABASE} -U ${POSTGRES_USERNAME:-$DEFAULT_POSTGRES_USERNAME} -w -c "select 1" 2>/tmp/intel.postgres.err >/dev/nulll
+   if [ $? -eq 0 ]; then
     is_postgres_available="yes"
     return 0
   fi
@@ -2078,7 +2078,7 @@ glassfish_create_ssl_cert() {
     fi
     $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
-	cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
