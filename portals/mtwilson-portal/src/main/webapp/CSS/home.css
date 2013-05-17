@@ -686,7 +686,8 @@ text-align: center;
 	margin-top: 10px;
 }
 .registerHostTableContent{
-	max-height: 150px;
+            /* Bug 770: Do not want to restrict the height of the table*/
+	/*max-height: 150px;*/
 	overflow: auto;
 }
 
