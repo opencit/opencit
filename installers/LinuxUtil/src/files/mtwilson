@@ -170,7 +170,9 @@ setup_env() {
     #export mysql
   elif using_postgres; then
     postgres_detect > /dev/null
-    echo "postgres=$psql"
+    #echo "postgres=$psql"
+    #the actuall veriable for postgres commands is psql
+    echo "psql=$psql"
   fi
   echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
   echo "DATABASE_VENDOR=$DATABASE_VENDOR"
