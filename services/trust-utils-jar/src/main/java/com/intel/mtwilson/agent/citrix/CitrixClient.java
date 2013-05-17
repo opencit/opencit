@@ -442,32 +442,18 @@ public class CitrixClient {
        // TODO-stdalex:  Do this so we actually check trust
        
        // Create a trust manager that does not validate certificate chains  
-       TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-         @Override 
-         public X509Certificate[] getAcceptedIssuers() {
-          return null;  
-         }  
-         // Trust always  
-         @Override 
-         public void checkClientTrusted(X509Certificate[] certs,  String authType) {}
-	 // Trust always  
-         @Override 
-         public void checkServerTrusted(X509Certificate[] certs, String authType) {}  
-        } 
-       };  
        
+       
+       TrustManager[] trustAllCerts = new TrustManager[] { tlsConnection.getTlsPolicy().getTrustManager() };
+            
        // Install the all-trusting trust manager  
        SSLContext sc = SSLContext.getInstance("SSL");  
        // Create empty HostnameVerifier  
-       HostnameVerifier hv = new HostnameVerifier() {  
-        public boolean verify(String arg0, SSLSession arg1) {  
-         return true;  
-        }  
-       };  
- 
+       HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();  
        sc.init(null, trustAllCerts, new java.security.SecureRandom());  
        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
        HttpsURLConnection.setDefaultHostnameVerifier(hv); 
+       
        log.info( "stdalex-error CitrixClient: attempting connection to "+hostIpAddress + " with values of " +
                   url.toString() + "/" + userName + "/" + password);
        connection = new Connection(url);
@@ -516,32 +502,16 @@ public class CitrixClient {
        // TODO-stdalex:  Do this so we actually check trust
        
        // Create a trust manager that does not validate certificate chains  
-       TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-         @Override 
-         public X509Certificate[] getAcceptedIssuers() {
-          return null;  
-         }  
-         // Trust always  
-         @Override 
-         public void checkClientTrusted(X509Certificate[] certs,  String authType) {}
-	 // Trust always  
-         @Override 
-         public void checkServerTrusted(X509Certificate[] certs, String authType) {}  
-        } 
-       };  
-       
+       TrustManager[] trustAllCerts = new TrustManager[] { tlsConnection.getTlsPolicy().getTrustManager() };
+            
        // Install the all-trusting trust manager  
        SSLContext sc = SSLContext.getInstance("SSL");  
        // Create empty HostnameVerifier  
-       HostnameVerifier hv = new HostnameVerifier() {  
-        public boolean verify(String arg0, SSLSession arg1) {  
-         return true;  
-        }  
-       };  
- 
+       HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();  
        sc.init(null, trustAllCerts, new java.security.SecureRandom());  
        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
        HttpsURLConnection.setDefaultHostnameVerifier(hv); 
+       
        log.info( "stdalex-error CitrixClient: attempting connection to "+hostIpAddress + " with values of " +
                   url.toString() + "/" + userName + "/" + password);
        connection = new Connection(url);
