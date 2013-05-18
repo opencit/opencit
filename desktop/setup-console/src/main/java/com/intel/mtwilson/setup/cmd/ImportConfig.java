@@ -40,7 +40,7 @@ public class ImportConfig implements Command {
     @Override
     public void execute(String[] args) throws Exception {
 
-        if( args.length < 1) { throw new IllegalArgumentException("Usage: ImportConfig <encrypted-file> [--in=<file>] [--env-password=MTWILSON_PASSWORD]"); }   
+        if( args.length < 1) { throw new IllegalArgumentException("Usage: ImportConfig <encrypted-file> [--in=<file>|--stdin] [--env-password=MTWILSON_PASSWORD]"); }   
         String filename = args[0];
         
         String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
@@ -54,8 +54,13 @@ public class ImportConfig implements Command {
             content = IOUtils.toString(in);
             IOUtils.closeQuietly(in);
         }
-        else {
+        else if( options.getBoolean("stdin", false) ) {
             content = IOUtils.toString(System.in);
+        }
+        else {
+            FileInputStream in = new FileInputStream(new File(filename));
+            content = IOUtils.toString(in);
+            IOUtils.closeQuietly(in);
         }
         encryptedFile.saveString(content);
         
