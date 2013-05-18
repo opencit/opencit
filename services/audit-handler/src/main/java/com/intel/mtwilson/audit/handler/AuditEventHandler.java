@@ -6,7 +6,7 @@ package com.intel.mtwilson.audit.handler;
 
 import com.intel.mtwilson.audit.annotations.AuditIgnore;
 import com.intel.mtwilson.audit.api.AuditLogger;
-import com.intel.mtwilson.audit.helper.AuditConfig;
+//import com.intel.mtwilson.audit.helper.AuditConfig;
 import com.intel.mtwilson.audit.helper.AuditEntryType;
 import com.intel.mtwilson.audit.helper.AuditHandlerException;
 import com.intel.mtwilson.audit.data.AuditColumnData;
@@ -43,8 +43,8 @@ public class AuditEventHandler extends DescriptorEventAdapter implements
     private static boolean isUnchangedColumnsRequired = true;
     
     static{
-        isAuditEnabled = AuditConfig.isAuditEnabled();
-        isUnchangedColumnsRequired = AuditConfig.isUnchangedColumnsRequired();
+        isAuditEnabled = true; // AuditConfig.isAuditEnabled();
+        isUnchangedColumnsRequired = false; // AuditConfig.isUnchangedColumnsRequired();
         
         logger.info("Audit - {}",isAuditEnabled );
         logger.info("Log Unchanged Columns  - {}",isUnchangedColumnsRequired);
