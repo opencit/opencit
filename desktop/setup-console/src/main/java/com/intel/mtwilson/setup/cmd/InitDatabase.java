@@ -168,7 +168,7 @@ public class InitDatabase implements Command {
             System.out.println("No database updates available");
             
             // At this point we know the database has every schema change that we have - but, does it have any that we don't?  In other words, is the database schema newer than what we know in this installer?
-            if( options.getBoolean("check") ) {
+            if( options.containsKey("check") && options.getBoolean("check") ) {
                 HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
                 unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
                 if( !unknownChanges.isEmpty() ) {

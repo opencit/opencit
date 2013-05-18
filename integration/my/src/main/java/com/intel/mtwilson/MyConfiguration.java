@@ -309,7 +309,9 @@ public class MyConfiguration {
         Iterator<String> it = conf.getKeys();
         while(it.hasNext()) {
             String name = it.next();
-            p.setProperty(name, conf.getString(name));
+            if(conf.containsKey(name)) {
+                p.setProperty(name, conf.getString(name));
+            }
         }
         return p;
     }
@@ -317,7 +319,9 @@ public class MyConfiguration {
     public Properties getProperties(String... names) {
         Properties p = new Properties();
         for(String name : names) {
-            p.setProperty(name, conf.getString(name));
+            if(conf.containsKey(name)) {
+                p.setProperty(name, conf.getString(name));
+            }
         }
         return p;
     }
