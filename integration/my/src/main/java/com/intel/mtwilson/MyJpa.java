@@ -4,13 +4,14 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mountwilson.as.common.Aes128DataCipher;
+//import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.audit.controller.*;
+//import com.intel.mtwilson.audit.controller.*;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.ms.controller.*;
+import com.intel.mtwilson.util.Aes128DataCipher;
 import java.io.IOException;
 import org.apache.commons.codec.binary.Base64;
 
@@ -42,7 +43,7 @@ public class MyJpa {
     MwApiClientHttpBasicJpaController mwApiClientHttpBasic;
     ApiClientX509JpaController mwApiClientX509;
     ApiRoleX509JpaController mwApiRoleX509;
-    AuditLogEntryJpaController mwAuditLogEntry;
+//    AuditLogEntryJpaController mwAuditLogEntry;
     MwCertificateX509JpaController mwCertificateX509;
     // XXX TODO we don't have a controller for the schema changelog   mw_changelog !!!
     MwConfigurationJpaController mwConfiguration;
@@ -95,10 +96,11 @@ public class MyJpa {
 		if( mwApiRoleX509 == null ) { mwApiRoleX509 = new ApiRoleX509JpaController(pm.getMSData()); }
 		return mwApiRoleX509;
 	}
+    /*
     public AuditLogEntryJpaController mwAuditLogEntry() throws IOException {
 		if( mwAuditLogEntry == null ) { mwAuditLogEntry = new AuditLogEntryJpaController(pm.getAuditData()); }
 		return mwAuditLogEntry;
-	}
+	}*/
     public MwCertificateX509JpaController mwCertificateX509() throws IOException {
 		if( mwCertificateX509 == null ) { mwCertificateX509 = new MwCertificateX509JpaController(pm.getASData()); }
 		return mwCertificateX509;

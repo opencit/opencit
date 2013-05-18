@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.audit.helper.AuditConfig;
+//import com.intel.mountwilson.as.common.ASConfig;
+//import com.intel.mtwilson.audit.helper.AuditConfig;
 import com.intel.mtwilson.jpa.PersistenceManager;
-import com.intel.mtwilson.ms.common.MSConfig;
+//import com.intel.mtwilson.ms.common.MSConfig;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.codec.binary.Base64;
