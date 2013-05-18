@@ -22,7 +22,7 @@ import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
-import com.intel.mountwilson.as.common.Aes128DataCipher;
+import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;

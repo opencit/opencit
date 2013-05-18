@@ -2,9 +2,8 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mountwilson.as.common;
+package com.intel.mtwilson.util;
 
-import com.intel.mtwilson.as.data.helper.DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import org.slf4j.Logger;

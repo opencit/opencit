@@ -115,6 +115,7 @@
         <optional>true</optional>
         <scope>provided</scope>
     </dependency>
+    <!--
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>ASCommon</artifactId>
@@ -136,6 +137,7 @@
         <optional>true</optional>
         <scope>provided</scope>
     </dependency>
+    -->
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>ASData</artifactId>
