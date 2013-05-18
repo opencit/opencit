@@ -19,6 +19,7 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -69,6 +70,7 @@ public class MyConfiguration {
     private Preferences prefs = Preferences.userRoot().node(getClass().getName());
 //    private Properties conf = new Properties();
     private Configuration conf = null;
+    private HashMap<String,String> keySourceMap = new HashMap<String,String>();
     
     // look in default locations
     public MyConfiguration() throws IOException {
@@ -118,6 +120,18 @@ public class MyConfiguration {
     
     private void logConfiguration(String source, Configuration config) {
         log.debug("Loaded configuration keys from {}: {}", source, StringUtils.join(config.getKeys(), ", "));
+        // we log the source of each configuration key;  CompositeConfiguration has a method called getSource() but it throws IllegalArgumentException if more than one child configuration has the key, which is wrong because get*() functions return from the first configuration to have it, and so getSource() should also return the first configuration that has the key... but it doesn't. so we keep track ourselves.
+        Iterator<String> it = config.getKeys();
+        while(it.hasNext()) {
+            String key = it.next();
+            if( !keySourceMap.containsKey(key) ) {
+                keySourceMap.put(key, source);                
+            }
+        }
+    }
+    
+    public String getSource(String key) {
+        return keySourceMap.get(key); // will be null if the key is not defined
     }
     
     private Configuration gatherConfiguration(Properties customProperties) {
