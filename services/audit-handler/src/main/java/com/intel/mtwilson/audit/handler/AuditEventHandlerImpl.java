@@ -33,12 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * NOTE:   this class is attached to ASData/MSData objects through the DescriptorCustomizer 
+ * defined in audit-api;  it loads this class at runtime to attach as a listener.
+ * 
  * @author dsmagadx
  */
-public class AuditEventHandler extends DescriptorEventAdapter implements
-        DescriptorCustomizer {
-    private static Logger logger = LoggerFactory.getLogger(AuditEventHandler.class);
+public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
+    private static Logger logger = LoggerFactory.getLogger(AuditEventHandlerImpl.class);
     private static boolean isAuditEnabled = true;
     private static boolean isUnchangedColumnsRequired = true;
     
@@ -54,11 +55,6 @@ public class AuditEventHandler extends DescriptorEventAdapter implements
      */
 
     private static ObjectMapper mapper = new ObjectMapper();
-
-    @Override
-    public void customize(ClassDescriptor cd) throws Exception {
-        cd.getDescriptorEventManager().addListener(this);
-    }
 
     private AuditColumnData getAuditColumnData(Column col, Field field, Object table, HashMap<String, Object> changedColumns) throws IllegalAccessException, IllegalArgumentException, SecurityException {
         AuditColumnData auditColumnData = new AuditColumnData();
