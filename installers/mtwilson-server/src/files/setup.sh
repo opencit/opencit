@@ -547,8 +547,7 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
 fi
 
 if using_glassfish; then
-  glassfish_stop
-  glassfish_start
+  mtwilson glassfish-restart
 elif using_tomcat; then
   mtwilson tomcat-restart
 fi
