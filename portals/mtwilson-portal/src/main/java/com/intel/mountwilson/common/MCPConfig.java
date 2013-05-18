@@ -39,7 +39,7 @@ public class MCPConfig  {
         defaults.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");  // must be secure out of the box. user registration process should download server ssl certs
         
         // Management Console Portal specific properties
-        defaults.setProperty("mtwilson.mc.sessionTimeOut", "1800");
+//        defaults.setProperty("mtwilson.mc.sessionTimeOut", "1800");
         defaults.setProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
         defaults.setProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3");
         return defaults;
