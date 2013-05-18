@@ -81,13 +81,14 @@
 		<artifactId>slf4j-api</artifactId>
 		<version>1.7.5</version>
     </dependency>
+    <!--
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-simple</artifactId>
 		<version>1.7.5</version>
         <scope>test</scope>
     </dependency>
-    <!--
+    -->
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
@@ -101,7 +102,6 @@
                 <version>1.0.11</version>
                 <scope>test</scope>
         </dependency>
-        -->
         
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
@@ -163,7 +163,23 @@
         <optional>true</optional>
         <scope>test</scope>
     </dependency>
+    <dependency>
+		<groupId>postgresql</groupId>
+		<artifactId>postgresql</artifactId>
+        <optional>true</optional>
+        <scope>test</scope>
+    </dependency>
         
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-crypto</artifactId>
+        <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-io</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-console</artifactId>

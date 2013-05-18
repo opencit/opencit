@@ -4,7 +4,8 @@
  */
 package com.intel.mountwilson.common;
 
-import com.intel.mtwilson.util.ConfigBase;
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -14,19 +15,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class WLMPConfig extends ConfigBase {
+public class WLMPConfig  {
 
     private static final Logger log = LoggerFactory.getLogger(WLMPConfig.class);
     private static final WLMPConfig global = new WLMPConfig();
 //        private final static Properties defaults = new Properties();
 
-    public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-        
-    private WLMPConfig() {
-        super("mtwilson-portal.properties");
-    }
-
-    @Override
+    public static Configuration getConfiguration() { try {
+        return My.configuration().getConfiguration();
+    } catch(IOException e) {
+        log.error("Cannot load configuration: "+e.toString(), e);
+        return null;
+    }}
+       
     public Properties getDefaults() {
         Properties defaults = new Properties();
         
@@ -44,29 +45,4 @@ public class WLMPConfig extends ConfigBase {
 	}
 
 
-   
-    public static Properties getJpaProperties() {
-        Configuration config = getConfiguration();
-        Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.wlmp.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
-        prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.wlmp.db.url",
-                config.getString("mtwilson.db.url",
-                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
-                    config.getString("mountwilson.wlmp.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.wlmp.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.wlmp.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.wlmp.db.user",
-                config.getString("mtwilson.db.user",
-                "root")));
-        prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.wlmp.db.password", 
-                config.getString("mtwilson.db.password", 
-                "password")));
-        return prop;
-    }    
 }

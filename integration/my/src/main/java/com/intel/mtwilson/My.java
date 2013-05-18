@@ -29,6 +29,7 @@ public class My {
     private static MyConfiguration config = null;
     private static MtWilson client = null;
     private static MyPersistenceManager pm = null;
+    private static MyJdbc jdbc = null;
     private static MyJpa jpa = null;
     private static MyEnvironment env = null;
     
@@ -54,10 +55,18 @@ public class My {
     public static MyPersistenceManager persistenceManager() throws IOException {
         if( pm == null ) {
             pm = new MyPersistenceManager(configuration().getProperties(
+                    "mtwilson.db.protocol",
                     "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.user", 
                     "mtwilson.db.password", "mtwilson.db.schema", "mtwilson.as.dek"));
         }
         return pm;
+    }
+    
+    public static MyJdbc jdbc() throws IOException {
+        if( jdbc == null ) {
+            jdbc = new MyJdbc(configuration());
+        }
+        return jdbc;
     }
     
     public static MyJpa jpa() throws IOException {

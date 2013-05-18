@@ -51,6 +51,11 @@
       <artifactId>webservice-util</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>my</artifactId>
+      <version>1.2-SNAPSHOT</version>
+    </dependency>
     <!-- 
     Removed this dependency since it was causing cyclic reference exception and also this project is not
     needed in the Audit Handler.

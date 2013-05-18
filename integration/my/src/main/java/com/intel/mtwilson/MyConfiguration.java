@@ -4,14 +4,36 @@
  */
 package com.intel.mtwilson;
 
+import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
+import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
+import com.intel.dcsg.cpg.io.ExistingFileResource;
+import com.intel.dcsg.cpg.io.Platform;
+import com.intel.dcsg.cpg.io.pem.Pem;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.prefs.Preferences;
+import org.apache.commons.configuration.CompositeConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.EnvironmentConfiguration;
+import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.SystemConfiguration;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This utility class aims to make it possible for developers to all use the same JUnit tests and point them at
@@ -41,24 +63,38 @@ import java.util.prefs.Preferences;
  * @author jbuhacoff
  */
 public class MyConfiguration {
+    private Logger log = LoggerFactory.getLogger(getClass());
+//    private final String PROPERTIES_FILENAME = "mtwilson.properties";
 
     private Preferences prefs = Preferences.userRoot().node(getClass().getName());
-    private Properties conf = new Properties();
+//    private Properties conf = new Properties();
+    private Configuration conf = null;
     
+    // look in default locations
     public MyConfiguration() throws IOException {
+        /*
         File directory = getDirectory();
         if( !directory.exists() && !directory.mkdirs() ) {
             throw new IOException("Cannot create configuration directory: "+directory.getAbsolutePath());
         }
         File file = getConfigFile();
         if( !file.exists() ) {
+            // write a "starter" configuratio file (not encrypted) which the user can then customize and use, or encrypt, etc.
             FileOutputStream out = new FileOutputStream(file);
             getDefaultProperties().store(out, "Default Mt Wilson Settings... Customize for your environment");
             out.close();        
         }
+        // here we load the configuration file, which could be either plain or encrypted
         FileInputStream in = new FileInputStream(file);
         conf.load(in);
         in.close();
+        */
+        conf = gatherConfiguration(null);
+    }
+    
+    public MyConfiguration(Properties custom) {
+        // the custom properties take priority over any other source
+        conf = gatherConfiguration(custom);
     }
     
     private Properties getDefaultProperties() {
@@ -69,13 +105,126 @@ public class MyConfiguration {
         p.setProperty("mtwilson.api.url", "https://127.0.0.1:8181");
         p.setProperty("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
         // database
+        p.setProperty("mtwilson.db.protocol", "postgresql"); // new default in mtwilson 1.2
+        p.setProperty("mtwilson.db.driver", "org.postgresql.Driver"); // new default in mtwilson 1.2
         p.setProperty("mtwilson.db.host", "127.0.0.1");
         p.setProperty("mtwilson.db.schema", "mw_as");
-        p.setProperty("mtwilson.db.user", "root");
-        p.setProperty("mtwilson.db.password", "password");
-        p.setProperty("mtwilson.db.port", "3306");        
-        p.setProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==");                
+        p.setProperty("mtwilson.db.user", ""); // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value; both mysql and postgresql support localhost connection without authentication
+        p.setProperty("mtwilson.db.password", ""); // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value;  both mysql and postgresql support localhost connection without authentication
+        p.setProperty("mtwilson.db.port", "5432"); // in mtwilson 1.2 the default changed from mysql/3306 to postgresql/5432
+        p.setProperty("mtwilson.as.dek", "");   // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value;  we must force customer to create one during install             
         return p;
+    }
+    
+    private void logConfiguration(String source, Configuration config) {
+        log.debug("Loaded configuration keys from {}: {}", source, StringUtils.join(config.getKeys(), ", "));
+    }
+    
+    private Configuration gatherConfiguration(Properties customProperties) {
+        CompositeConfiguration composite = new CompositeConfiguration();
+
+        // first priority: custom properties take priority over any other source
+        if( customProperties != null ) {
+            MapConfiguration customconfig = new MapConfiguration(customProperties);
+            logConfiguration("custom", customconfig);
+            composite.addConfiguration(customconfig);
+        }
+        
+        // second priority are properties defined on the current JVM (-D switch
+        // or through web container)
+        SystemConfiguration system = new SystemConfiguration();
+        logConfiguration("system", system);
+        composite.addConfiguration(system);
+        
+        // third priority: environment variables (regular and also converted from dot-notation to all-caps)
+        EnvironmentConfiguration env = new EnvironmentConfiguration();
+        logConfiguration("environment", env);
+        composite.addConfiguration(env);
+//        AllCapsEnvironmentConfiguration envAllCaps = new AllCapsEnvironmentConfiguration();
+//        logConfiguration("environment_allcaps", envAllCaps);
+//        composite.addConfiguration(envAllCaps);
+        
+        
+        List<File> files = listConfigurationFiles();
+        // add all the files we found so far, in the priority order
+        for (File f : files) {
+//            System.out.println("Looking for "+f.getAbsolutePath());
+            try {
+                if (f.exists() && f.canRead()) {
+                    // first check if the file is encrypted... if it is, we need to decrypt it before loading!
+                    FileInputStream in = new FileInputStream(f);
+                    String content = IOUtils.toString(in);
+                    if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
+                        // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
+                        String password = null;
+                        if( system.containsKey("mtwilson.password") ) {
+                            password = system.getString("mtwilson.password");
+                        }
+                        else if( env.containsKey("MTWILSON_PASSWORD") ) {
+                            password = env.getString("MTWILSON_PASSWORD");
+                        }
+                        else {
+                            log.error("Found encrypted configuration file, but no password was found in system properties or environment");
+                        }
+                        if( password != null ) {
+                            ExistingFileResource resource = new ExistingFileResource(f);
+                            PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
+                            String decryptedContent = encryptedFile.loadString();
+                            Properties p = new Properties();
+                            p.load(new StringReader(decryptedContent));
+                            MapConfiguration encrypted = new MapConfiguration(p);
+                            logConfiguration("encrypted-file:"+f.getAbsolutePath(), encrypted);
+                            composite.addConfiguration(encrypted);
+                        }
+                    }
+                    else {
+                        log.debug("FILE {} IS IN REGULAR PROPERTIES FORMAT", f.getAbsolutePath());
+                        PropertiesConfiguration standard = new PropertiesConfiguration(f);
+                        logConfiguration("file:"+f.getAbsolutePath(), standard);
+                        composite.addConfiguration(standard);
+                    }
+                }
+            } catch (FileNotFoundException ex) { // shouldn't happen since we check for f.exists() first, but must handle it because FileInputStream can throw it
+                log.error("File not found: " + f.getAbsolutePath(), ex);
+            } catch (IOException ex) {
+                log.error("Cannot load configuration: " + f.getAbsolutePath(), ex);
+            } catch (ConfigurationException ex) {
+                log.error("Cannot load configuration from " + f.getAbsolutePath(), ex);
+            }
+        }
+
+        
+        // seventh priority are properties defined on the classpath (for example defaults provided with the application, or placed in the web server container)
+        // XXX should these be reprioritized to be after system properties and before the list of files? that way an application can be packaged with specific
+        // settings that cannot be overridden... but it's easy enough to extract from the jar so that's not likey to stop anyone
+        String propertiesFilename = "mtwilson.properties";
+        InputStream in = getClass().getResourceAsStream(
+                "/" + propertiesFilename);
+        try {
+            // user's home directory (assuming it's on the classpath!)
+            if (in != null) {
+                Properties properties = new Properties();
+                properties.load(in);
+                MapConfiguration classpath = new MapConfiguration(properties);
+                logConfiguration("classpath:"+propertiesFilename, classpath);
+                composite.addConfiguration(classpath);
+            }
+        } catch (IOException ex) {
+            log.info("Did not find [" + propertiesFilename + "] properties on classpath",
+                    ex);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    log.warn("Failed to close input stream for "
+                            + propertiesFilename);
+                }
+            }
+        }
+        
+        
+        return composite;
     }
     
     /**
@@ -93,19 +242,82 @@ public class MyConfiguration {
     public final File getDirectory() {
         return new File(getDirectoryPath());
     }
-
+/* /// this one is a bad idea because the configuration can come from several places, and the config file is not the top priority source,
+ * // so providing this could create a situation where someone think that by writing to this config file they can affect the configuration
+ * // when in reality it may be overridden by a number of sources. 
     public final File getConfigFile() {
         return new File(getDirectoryPath() + File.separator + "mtwilson.properties");
+    }*/
+    
+    /**
+     * The list of files returned is in priority order -- properties defined in the first file override all others.
+     * Note that when actually loading the configuration, system properties and environment variables have a higher
+     * priority than the configuration files.
+     * @return 
+     */
+    public List<File> listConfigurationFiles() {
+        // prepare a list of files to be loaded, in order
+        ArrayList<File> files = new ArrayList<File>();
+        
+        
+        // fourth priority: if there is a custom configuration directory defined by a system property, load configuration from there
+        String customConfigDir = System.getProperty("mtwilson.config.dir", prefs.get("mtwilson.config.dir", ""));
+        if( !customConfigDir.isEmpty() ) {
+            files.add(new File(customConfigDir + File.separator + "mtwilson.properties"));
+        }
+        
+        // fifth priority:  properties defined in user's home directory ~/.mtwilson
+        files.add(new File(System.getProperty("user.home") + File.separator + ".mtwilson" + File.separator + "mtwilson.properties"));
+
+
+        // sixth priority: properties defined in standard install location
+        if( Platform.isWindows() ) {
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "mtwilson.properties"));
+//            files.add(new File(System.getProperty("user.home") + File.separator
+//                    + propertiesFilename));
+
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "management-service.properties"));
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "attestation-service.properties"));
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "audit-handler.properties"));
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "mtwilson-portal.properties"));
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "management-cmdutil.properties"));
+
+        }
+        // linux-specific location
+        if (Platform.isUnix() ) {
+//            files.add(new File("/etc/intel/cloudsecurity/" + propertiesFilename));
+            files.add(new File("/etc/intel/cloudsecurity/mtwilson.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/management-service.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/attestation-service.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/audit-handler.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/mtwilson-portal.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/management-cmdutil.properties"));
+        }
+        return files;
     }
     
+    public Configuration getConfiguration() { return conf; }
+    
     public Properties getProperties() {
-        return conf;
+        Properties p = new Properties();
+        Iterator<String> it = conf.getKeys();
+        while(it.hasNext()) {
+            String name = it.next();
+            p.setProperty(name, conf.getString(name));
+        }
+        return p;
     }
 
     public Properties getProperties(String... names) {
         Properties p = new Properties();
         for(String name : names) {
-            p.setProperty(name, conf.getProperty(name));
+            p.setProperty(name, conf.getString(name));
         }
         return p;
     }
@@ -126,19 +338,19 @@ public class MyConfiguration {
     }
 
     public String getKeystoreUsername() {
-        return conf.getProperty("mtwilson.api.username", System.getProperty("user.name", "anonymous"));
+        return conf.getString("mtwilson.api.username", System.getProperty("user.name", "anonymous"));
     }
 
     public String getKeystorePassword() {
-        return conf.getProperty("mtwilson.api.password", "password");
+        return conf.getString("mtwilson.api.password", conf.getString("KEYSTOREPASSWORD", "password")); // bug #733 XXX the "KEYSTOREPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
     }
 
     public URL getMtWilsonURL() throws MalformedURLException {
-        return new URL(conf.getProperty("mtwilson.api.url", "https://127.0.0.1:8181"));
+        return new URL(conf.getString("mtwilson.api.url", "https://127.0.0.1:8181"));
     }
 
     public String getMtWilsonRoleString() {
-        return conf.getProperty("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
+        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
     }
 
     public String[] getMtWilsonRoleArray() {
@@ -146,30 +358,39 @@ public class MyConfiguration {
     }
 
     ///////////////////////// database //////////////////////////////////
+
+    public String getDatabaseProtocol() {
+        return conf.getString("mtwilson.db.protocol", "postgresql");  // used in the jdbc url, so "postgresql" or "mysql"  as in jdbc:mysql://host:port/schema
+    }
     
     public String getDatabaseHost() {
-        return conf.getProperty("mtwilson.db.host", "127.0.0.1");
+        return conf.getString("mtwilson.db.host", "127.0.0.1");
     }
 
     public String getDatabasePort() {
-        return conf.getProperty("mtwilson.db.port", "3306");
+        return conf.getString("mtwilson.db.port", "5432"); // 5432 is postgresql default, 3306 is mysql default
     }
 
     public String getDatabaseUsername() {
-        return conf.getProperty("mtwilson.db.user", "root");
+        return conf.getString("mtwilson.db.user", ""); // removing default in mtwilson 1.2; was "root"
     }
 
     public String getDatabasePassword() {
-        return conf.getProperty("mtwilson.db.password", "password");
+        return conf.getString("mtwilson.db.password", conf.getString("PGPASSWORD", "")); // removing default in mtwilson 1.2;  was "password";   // bug #733 XXX the "PGPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
     }
 
     public String getDatabaseSchema() {
-        return conf.getProperty("mtwilson.db.schema", "mw_as");
+        return conf.getString("mtwilson.db.schema", "mw_as");
     }
 
     public String getDataEncryptionKeyBase64() {
-        return conf.getProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==");
+        return conf.getString("mtwilson.as.dek", ""); // removing default in mtwilson 1.2;  was "hPKk/2uvMFRAkpJNJgoBwA=="
     }
     
+    ///////////////////////// saml key for attestation service //////////////////////////////////
 
+    public String getSamlKeystorePassword() {
+        return conf.getString("saml.key.password", conf.getString("SAMLPASSWORD", "")); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+    }
+    
 }

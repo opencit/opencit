@@ -252,6 +252,12 @@
 
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>my</artifactId>
+	    <version>1.2-SNAPSHOT</version>
+	    <type>jar</type>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
@@ -552,13 +558,6 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>trust-policy</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>my</artifactId>
-            <version>1.2-SNAPSHOT</version>
-            <scope>test</scope>
             <type>jar</type>
         </dependency>
     </dependencies>
