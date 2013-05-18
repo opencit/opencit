@@ -91,6 +91,11 @@
 	    <version>10.8.2.2</version>
 	    <scope>test</scope>
     </dependency>            
+ 	<dependency>
+	    <groupId>com.intel.mtwilson.services</groupId>
+	    <artifactId>webservice-util</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>
@@ -113,14 +118,8 @@
   	</dependency>
    <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>audit-handler</artifactId>
+      <artifactId>audit-api</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>audit-data</artifactId>
-          <groupId>${project.groupId}</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
    
 

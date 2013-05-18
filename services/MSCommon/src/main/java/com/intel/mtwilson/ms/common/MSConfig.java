@@ -9,27 +9,26 @@ package com.intel.mtwilson.ms.common;
  * @author dsmagadx
  */
 
+import com.intel.mtwilson.My;
 import java.util.Properties;
 
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.intel.mtwilson.util.ConfigBase;
+import java.io.IOException;
 
-public class MSConfig extends ConfigBase {
+public class MSConfig  {
     
     private static Logger log = LoggerFactory.getLogger(MSConfig.class);
     private static final MSConfig global = new MSConfig();
-    public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-    public MSConfig() {
-        super("management-service.properties");
-    }
-    public MSConfig(Properties custom) {
-        super("management-service.properties", custom);
-    }
+    public static Configuration getConfiguration() { try {
+        return My.configuration().getConfiguration();
+    } catch(IOException e) {
+        log.error("Cannot load configuration: "+e.toString(), e);
+        return null;
+    }}
 
-    @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
 
@@ -63,45 +62,5 @@ public class MSConfig extends ConfigBase {
         return defaults;
     }
     
-        /** 
-         * note that there are two levels of defaults:   if we dont' find a property mountwilson.ms.db.X, we look for mtwilson.db.X and THEN to our default
-         */
-    public static Properties getJpaProperties(Configuration config) {
-        Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.ms.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
-        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
-            prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
-        }
-        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
-            prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
-        }
-        else {
-            prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
-        }        
-        prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.ms.db.url",
-                config.getString("mtwilson.db.url",
-                String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
-                    prop.getProperty("javax.persistence.jdbc.scheme"),
-                    config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.ms.db.user",
-                config.getString("mtwilson.db.user",
-                "root")));
-        prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.ms.db.password", 
-                config.getString("mtwilson.db.password", 
-                "password")));
-        return prop;
-        
-    }
-    public static Properties getJpaProperties() {
-        return getJpaProperties(getConfiguration());
-    }
     
 }

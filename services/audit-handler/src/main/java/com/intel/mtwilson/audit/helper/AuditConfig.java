@@ -1,7 +1,8 @@
 package com.intel.mtwilson.audit.helper;
 
 
-import com.intel.mtwilson.util.ConfigBase;
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -25,13 +26,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
-public class AuditConfig extends ConfigBase {
+public class AuditConfig  {
 
-    private static final AuditConfig global = new AuditConfig();
-
-    public static Configuration getConfiguration() {
-        return global.getConfigurationInstance();
-    }
+    public static Configuration getConfiguration() { try {
+        return My.configuration().getConfiguration();
+    } catch(IOException e) {
+        log.error("Cannot load configuration: "+e.toString(), e);
+        return null;
+    }}
     private static final Logger log = LoggerFactory.getLogger(AuditConfig.class);
 
     public static boolean isAsyncEnabled() {
@@ -41,12 +43,7 @@ public class AuditConfig extends ConfigBase {
         return false;        
     }
 
-    private AuditConfig() {
 
-        super("audit-handler.properties");
-    }
-
-    @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
         defaults.setProperty("mountwilson.audit.db.password", "password");
@@ -59,33 +56,7 @@ public class AuditConfig extends ConfigBase {
         return defaults;
     }
 
-    public static Properties getJpaProperties() {
-        return getJpaProperties(getConfiguration());
-    }
 
-    public static Properties getJpaProperties(Configuration config) {
-        Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.audit.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
-        prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.audit.db.url",
-                config.getString("mtwilson.db.url",
-                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
-                    config.getString("mountwilson.audit.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.audit.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.audit.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.audit.db.user",
-                config.getString("mtwilson.db.user",
-                "root")));
-        prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.audit.db.password", 
-                config.getString("mtwilson.db.password", 
-                "password")));
-        return prop;
-    }
     
     public static boolean isAuditEnabled(){
         if(getConfiguration().getString("mountwilson.audit.enabled", "true").equalsIgnoreCase("false") )
