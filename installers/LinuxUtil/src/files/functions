@@ -1224,7 +1224,7 @@ echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
   postgres_conf="";
   result=`find / -name postgresql.conf 2>/dev/null | tr "\n" " "`
 echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
-  IFS=' '
+  #IFS=' '
   for r in ${result}; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
@@ -1236,7 +1236,7 @@ echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
   # see if we have the command path already
   if [[ -n "$postgres_com" && -f "$postgres_com" ]]; then
     echo "Found postgres server: $postgres_com"
-    IFS=
+    #IFS=
     return 0
   fi
   
@@ -1261,12 +1261,12 @@ echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
 
   if [[ -n "$postgres_com" ]]; then
     echo "Found postgres server: $postgres_com"
-    IFS=
+    #IFS=
     return 0
   fi
 
   echo "Postgres server not found"
-  IFS=
+  #IFS=
   return 1
 }
 postgres_version(){
