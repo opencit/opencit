@@ -211,6 +211,9 @@ public class VMwareClient implements TlsClient {
                 else {
                     HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
                 }*/
+                log.debug("Connecting to vcenter with TlsPolicy: {}", tlsPolicy.getClass().getName());
+                log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
+                log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
                 HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
                 
                 setupSslCertificateTrustManager();
