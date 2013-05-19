@@ -27,6 +27,12 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public VmwareHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
+            // If the connection string does not include the host address, add it here so that if there is an exception in the client layer the hostname will appear when printing the connection string
+            ConnectionString.VmwareConnectionString connStr = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
+            if( connStr.getHost() == null ) {
+                connStr.setHost(hostAddress);
+                vendorConnectionString = connStr.toString();
+            }
             // Original call 
             //VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
             VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
