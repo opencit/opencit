@@ -291,6 +291,7 @@ prompt_with_default_password() {
   # here $$
   eval default_value="${3:-$$resultvarname}"
   local default_value_display="********"
+  if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
@@ -298,7 +299,6 @@ prompt_with_default_password() {
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
-  if [ -z "$default_value" ]; then default_value_display=""; fi;
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
   echo -n "$userprompt [$default_value_display] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
