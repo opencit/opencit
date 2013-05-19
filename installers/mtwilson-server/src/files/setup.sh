@@ -335,14 +335,12 @@ elif using_postgres; then
       # postgres server end
     fi 
     # postgres client install here
-    #if [ postgres_detect ]; then
       echo "Installing postgres client..."
       postgres_install
       postgres_restart >> $INSTALL_LOG_FILE
       sleep 10
       echo "Installation of postgres client complete..." 
       # postgres clinet install end
-    #fi
   else
     echo_warning "Relying on an existing Postgres installation"
   fi 
