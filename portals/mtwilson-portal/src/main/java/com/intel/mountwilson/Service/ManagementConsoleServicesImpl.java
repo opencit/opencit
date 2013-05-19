@@ -329,7 +329,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                                 apiListFromDB = msAPIObj.searchApiClients(apiSearchObj);
 
                         } else if (apiType == ApiClientListType.EXPIRING) {
-                                int expirationMonths = MCPConfig.getConfiguration().getInt("mtwilson.mc.apiKeyExpirationNoticeInMonths");
+                                int expirationMonths = MCPConfig.getConfiguration().getInt("mtwilson.mc.apiKeyExpirationNoticeInMonths", 3);
                                 Calendar cal = Calendar.getInstance();
                                 cal.add(Calendar.MONTH, expirationMonths);
                                 apiSearchObj.expiresBefore = cal.getTime();

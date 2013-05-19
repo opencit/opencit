@@ -111,7 +111,7 @@ public class CheckLoginController extends AbstractController {
                 HttpSession session = req.getSession();
                 session.setAttribute("logged-in", true);
                 	session.setAttribute("username", keyAliasName);
-                session.setMaxInactiveInterval(MCPConfig.getConfiguration().getInt("mtwilson.mc.sessionTimeOut"));
+                session.setMaxInactiveInterval(MCPConfig.getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800));
                 
 
                         X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);

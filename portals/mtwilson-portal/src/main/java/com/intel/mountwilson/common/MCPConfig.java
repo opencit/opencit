@@ -4,7 +4,8 @@
  */
 package com.intel.mountwilson.common;
 
-import com.intel.mtwilson.util.ConfigBase;
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -14,19 +15,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class MCPConfig extends ConfigBase {
+public class MCPConfig  {
 
     private static final Logger log = LoggerFactory.getLogger(MCPConfig.class);
     private static final MCPConfig global = new MCPConfig();
 
-    public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
-        
-    private MCPConfig() {
-        
-        super("mtwilson-portal.properties");
-    }
+    public static Configuration getConfiguration() { try {
+        return My.configuration().getConfiguration();
+    } catch(IOException e) {
+        log.error("Cannot load configuration: "+e.toString(), e);
+        return null;
+    }}
 
-    @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
         // Properties for the API Client
@@ -39,68 +39,12 @@ public class MCPConfig extends ConfigBase {
         defaults.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "true");  // must be secure out of the box. user registration process should download server ssl certs
         
         // Management Console Portal specific properties
-        defaults.setProperty("mtwilson.mc.sessionTimeOut", "1800");
+//        defaults.setProperty("mtwilson.mc.sessionTimeOut", "1800");
         defaults.setProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
         defaults.setProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3");
         return defaults;
 	}
 
-    
-    public static Properties getJpaProperties(Configuration config) {
-        /*
-        Configuration config = getConfiguration();
-        Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.ms.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
-        prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.ms.db.url",
-                config.getString("mtwilson.db.url",
-                String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
-                    config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.ms.db.user",
-                config.getString("mtwilson.db.user",
-                "root")));
-        prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.ms.db.password", 
-                config.getString("mtwilson.db.password", 
-                "password")));
-        return prop;
-        */
-        
-        Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.mcp.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "org.postgresql.Driver")));
-        //System.err.println("stdalex mcpConfig getJpaConfig driver == " + config.getString("mountwilson.mcp.db.driver", config.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-        String dbms = (config.getString("mountwilson.mcp.db.driver", config.getString("mtwilson.db.driver", "org.postgresql.Driver")).contains("mysql")) ? "mysql" : "postgresql";
-       //System.err.println("stdalex mcpConfig getJpaConfig dbms == " + dbms);
-        prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.mcp.db.url",
-                config.getString("mtwilson.db.url",
-                String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
-                    config.getString("mountwilson.mcp.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.mcp.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.mcp.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
-        //System.err.println("stdalex msConfig url == " + prop.getProperty("javax.persistence.jdbc.url")); 
-        prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.mcp.db.user",
-                config.getString("mtwilson.db.user",
-                "root")));
-        prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.mcp.db.password", 
-                config.getString("mtwilson.db.password", 
-                "password")));
-        return prop;
-    }
-    public static Properties getJpaProperties() {
-        return getJpaProperties(getConfiguration());
-    }
     
 }
 

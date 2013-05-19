@@ -158,6 +158,11 @@
 	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>my</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>

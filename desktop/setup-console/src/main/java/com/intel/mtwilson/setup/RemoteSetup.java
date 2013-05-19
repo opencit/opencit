@@ -789,7 +789,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     private void importManagementConsoleProperties(Properties asprops, Properties mwprops) {
         ctx.portalUserKeystoreDir = asprops.getProperty("mtwilson.mc.keystore.dir");
         ctx.portalHostTypeList = asprops.getProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
-        ctx.portalSessionTimeout = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.mc.sessionTimeOut", "1800")), TimeUnit.SECONDS);
+        ctx.portalSessionTimeout = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.portal.sessionTimeOut", "1800")), TimeUnit.SECONDS);
         ctx.portalApiKeyExpirationNotice = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3"))*30, TimeUnit.DAYS); // for example 3 months is stored as 90 days, since the TimeUnit type does not have MONTHS
     }
     
