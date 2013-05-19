@@ -31,5 +31,8 @@
         <appender-ref ref="STDOUT" />
         <appender-ref ref="AUDIT_FILE" />
     </root>
+
+    <!-- changing default to DEBUG while we finish testing -->
+    <logger name="com.intel.mtwilson" level="DEBUG" />
     
 </configuration>

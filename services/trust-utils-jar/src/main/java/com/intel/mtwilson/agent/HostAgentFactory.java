@@ -191,7 +191,8 @@ public class HostAgentFactory {
                 }
             }
         }
-        throw new UnsupportedOperationException("No agent factory registered for this host");
+        log.error("HostAgentFactory: Unsupported host type: "+vendorName);
+        throw new UnsupportedOperationException("Unsupported host type: "+vendorName);
     }
     
     

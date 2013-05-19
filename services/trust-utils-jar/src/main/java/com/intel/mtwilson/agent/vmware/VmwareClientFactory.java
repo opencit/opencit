@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
@@ -22,7 +23,8 @@ public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConne
     @Override
     public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {
         VMwareClient client = new VMwareClient();
-        client.setTlsPolicy(tlsConnection.getTlsPolicy());
+//        client.setTlsPolicy(tlsConnection.getTlsPolicy());
+        client.setTlsPolicy(new InsecureTlsPolicy()); // testing to see if ,  now that requests are multithreaded,  the fact that the ssl context is static is causing the problems because of non-synchronized access to the context 
         client.connect(tlsConnection.getConnectionString());        
         return client;
     }

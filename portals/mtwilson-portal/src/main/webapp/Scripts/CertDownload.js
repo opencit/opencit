@@ -79,7 +79,7 @@ function fnTLSDownloadSuccess(responseJSON){
 
 function fnPrivacyCAListDownloadSuccess(responseJSON){
 	if (responseJSON.result)
-	{ 
+	{ //alert (responseJSON.SAMLcertificate);
             if (document.execCommand) {
             /* Start For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */
 	          //  var oWin = window.open("about:blank", "_blank");
@@ -109,9 +109,6 @@ function fnPrivacyCAListDownloadSuccess(responseJSON){
 	
 	
     } else {
-            if (responseJSON.message.search("Root CA") > 0){
-                $('#fdownloadRCA').hide();
-            }
 		$('#successMessage').html('<span class="errorMessage">'+responseJSON.message+'</span>');
 	}
 }

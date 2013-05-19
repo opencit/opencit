@@ -7,7 +7,7 @@ package test.vendor.vmware;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Pcr;

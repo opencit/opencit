@@ -778,7 +778,7 @@ public class HostTrustBO extends BaseBO {
     }
 
     public String getTrustWithSaml(String host, boolean forceVerify) {
-        log.info("Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        log.info("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
          TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
@@ -797,14 +797,14 @@ public class HostTrustBO extends BaseBO {
             }
         }
         
-       log.info("Getting trsut and saml assertion from host.");
+       log.info("Getting trust and saml assertion from host.");
         
 
         return getTrustWithSaml(host);
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
-        log.info("Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        log.info("getTrustWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         try {
             
             if(forceVerify != true){

@@ -1,0 +1,49 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
+package test.portal;
+
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.TrustAssertion;
+import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.ms.data.MwPortalUser;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.security.cert.X509Certificate;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author jbuhacoff
+ */
+public class DashboardTest {
+    private Logger log = LoggerFactory.getLogger(getClass());
+    
+    @Test
+    public void testGetStatusForVmware173() throws Exception {
+        // use the portal user's keystore to validate the saml assertion, since we are getting "invalid saml signature"
+//        List<MwPortalUser> admins = My.jpa().mwPortalUser().findMwPortalUserByUsernameEnabled("admin");
+//        MwPortalUser admin = admins.get(0);
+        MwPortalUser admin = My.jpa().mwPortalUser().findMwPortalUserByUserName("admin");
+        SimpleKeystore keystore = new SimpleKeystore(admin.getKeystoreResource(), My.configuration().getKeystorePassword());
+        for(String alias : keystore.listTrustedSamlCertificates()) {
+            X509Certificate cert = keystore.getX509Certificate(alias);
+            log.debug("trusted cert: {}", Sha1Digest.valueOf(X509Util.sha1fingerprint(cert)).toHexString());
+        }
+        X509Certificate currentSamlCert = My.client().getSamlCertificate();
+        log.debug("current cert: {}", Sha1Digest.digestOf(currentSamlCert.getEncoded()).toHexString());
+        
+        String saml = My.client().getSamlForHost(new Hostname("10.1.71.173"));
+        TrustAssertion trustAssertion = new TrustAssertion(keystore.getTrustedCertificates(SimpleKeystore.SAML), saml);
+        log.debug("Assertion is valid? {}", trustAssertion.isValid());
+        log.debug("Assertion attributes: {}", StringUtils.join(trustAssertion.getAttributeNames(), ", "));
+    }
+}

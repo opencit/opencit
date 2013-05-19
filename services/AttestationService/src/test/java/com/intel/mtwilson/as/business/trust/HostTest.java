@@ -9,6 +9,9 @@ import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
@@ -83,5 +86,22 @@ public class HostTest {
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
         hostBO.addHost(host2);
+    }
+    
+    @Test
+    public void testSplitCSV() {
+        String hosts = ",abc,def,,xyz ,wofj, owa,,";
+        // this apepars in our bulk host trust code:
+                Set<String> hostSet = new HashSet<String>();
+                for(String host : Arrays.asList(hosts.split(","))) {
+            log.debug("Host: '{}'", host);
+            if( !host.trim().isEmpty() ) {
+                hostSet.add(host.trim());
+            }
+                    
+                }
+        for(String host : hostSet) {
+            log.debug("Added Host: '{}'", host);
+        }
     }
 }

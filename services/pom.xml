@@ -18,6 +18,7 @@
     <module>trust-policy</module>
     <module>webservice-util</module>
     <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
+    <module>audit-api</module>
     <module>audit-data</module>
     <module>audit-handler</module>
     <module>ASData</module>

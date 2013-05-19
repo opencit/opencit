@@ -392,6 +392,13 @@ public class ConnectionString {
         public int getPort() { return port; }
         public String getUsername() { return username; }
         public String getPassword() { return password; }
+        
+        public void setVCenter(InternetAddress vcenterAddress) { this.vcenterAddress = vcenterAddress; }
+        public void setHost(InternetAddress hostAddress) { this.hostAddress = hostAddress; }
+        public void setPort(int port) { this.port = port; }
+        public void setUsername(String username) { this.username = username; }
+        public void setPassword(String password) { this.password = password; }
+        
         public URL toURL() {
             try {
                 return new URL(String.format("https://%s:%d/sdk", vcenterAddress.toString(), port));

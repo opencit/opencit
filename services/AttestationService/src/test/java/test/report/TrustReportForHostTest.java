@@ -8,7 +8,7 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mountwilson.as.common.Aes128DataCipher;
+import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.HostTrustStatus;

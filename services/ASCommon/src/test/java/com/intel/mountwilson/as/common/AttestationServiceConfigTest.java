@@ -1,5 +1,7 @@
 package com.intel.mountwilson.as.common;
 
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.DefaultConfigurationBuilder;
@@ -30,11 +32,11 @@ public class AttestationServiceConfigTest {
     }
     
     @Test
-    public void testLoadASConfig() {
+    public void testLoadASConfig() throws IOException {
         Configuration config = ASConfig.getConfiguration();
         assertTrue(config.containsKey("com.intel.mountwilson.as.trustagent.timeout"));
         
-        Properties p = ASConfig.getJpaProperties();
+        Properties p = My.persistenceManager().getASDataJpaProperties(My.configuration().getConfiguration());
         System.out.println("javax.persistence.jdbc.url="+p.getProperty("javax.persistence.jdbc.url"));
         System.out.println("javax.persistence.jdbc.user="+p.getProperty("javax.persistence.jdbc.user"));
         System.out.println("javax.persistence.jdbc.password="+p.getProperty("javax.persistence.jdbc.password"));

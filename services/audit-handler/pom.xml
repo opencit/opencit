@@ -29,6 +29,11 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>audit-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>audit-data</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -54,6 +59,11 @@
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>webservice-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>my</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!-- 

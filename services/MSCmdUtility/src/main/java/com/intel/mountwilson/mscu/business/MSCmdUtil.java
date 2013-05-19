@@ -13,6 +13,7 @@ import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.io.Filename;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -265,6 +266,8 @@ public class MSCmdUtil {
                             try {
                                 // retrieve the details of the hosts configured in the cluster on the specified vCenter server
                                 VMwareClient vmHelperObj = new VMwareClient();
+//                                vmHelperObj.setTlsPolicy(new InsecureTlsPolicy()); //  if you need an insecure policy use InsecureTlsPolicy() instead of making  a separate connect() method in the client;  XXX TODO need to 1) rewrite client methods that reconnect with custom insecure trust manager to use the tls policy provided by setTlsPolicy(), and 2) need to create a separate table in the database to track vcenter tls certificates so they can be used and managed independently of host records.
+//                                vmHelperObj.connect(prodVCenter);
                                 hostList = vmHelperObj.getHostDetailsForCluster(clusterName, prodVCenter);
 
                             } catch (Exception ex) {

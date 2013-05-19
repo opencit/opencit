@@ -15,7 +15,7 @@ import org.apache.commons.configuration.Configuration;
  * @author jbuhacoff
  */
 public class MyPrefs {
-    private static Preferences prefs = Preferences.userRoot().node("com.intel.mtwilson.MyConfiguration"); // using MyConfiguration specifically here... maybe switch to just "com.intel.mtwilson" ?
+    private static Preferences prefs = Preferences.userRoot().node("com.intel.mtwilson"); // should we use systemRoot() instead? userRoot() makes sense for developers, systemRoot() might sense for production systems, except that most sysadmins prefer to have production settings in easy-to-find configuration files rather than in java preferences anyway.
 
     public static void printUsage() {
         System.out.println("Usage: java -cp my.jar com.intel.mtwilson.MyPrefs get <key>");

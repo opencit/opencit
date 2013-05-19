@@ -91,6 +91,7 @@ function getServicePID {
 function startServiceProcess {
    cd $package_dir || return 1
    rm -f $pidFile
+   read_local_config
    makeFileWritable $pidFile || return 1
    makeFileWritable $serviceLogFile || return 1
    cmd="nohup $javaCommandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
