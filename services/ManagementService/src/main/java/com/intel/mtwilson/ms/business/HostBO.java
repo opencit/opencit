@@ -166,7 +166,7 @@ public class HostBO extends BaseBO {
             // Retrieve the host object.
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
             
             // TODO: Check with jonathan on the policy used.
             // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a 
@@ -537,7 +537,7 @@ public class HostBO extends BaseBO {
             /*
             // bug #497   this should be a different object than TblHosts  
             TblHosts tblHosts = new TblHosts();
-            tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
+            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
             tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
@@ -976,8 +976,8 @@ public class HostBO extends BaseBO {
                 }
                 // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
-                tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");  // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default policy (including global default trusted certs or ca's) to choose here and that way instead of us making this assumption, it's the operator who knows the environment.
-                tblHosts.setTlsKeystore(null);
+                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); 
+                tblHosts.setTlsKeystore(null); // XXX previously the default policy name was hardcoded to TRUST_FIRST_CERTIFICATE but is now configurable; but because we are still starting with a null keystore, the only two values that would work as a default are TRUST_FIRST_CERTIFICATE and INSECURE
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
                 tblHosts.setIPAddress(gkvHost.IPAddress);

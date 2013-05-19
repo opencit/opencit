@@ -37,6 +37,21 @@ DEFAULT_GLASSFISH_API_PORT="8181"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
+### FUNCTION LIBRARY: generate random passwords
+
+# generates a random password. default is 32 characters in length.
+# you can pass a single parameter that is the desired length if
+# you want something other than 32.
+# usage examples:
+# mypassword32=`generate_password`
+# mypassword16=`generate_password 16`
+# mypassword32=$(generate_password)
+# mypassword16=$(generate_password 16)
+generate_password() {
+  < /dev/urandom tr -dc _A-Za-z0-9- | head -c${1:-32}
+}
+
+
 ### FUNCTION LIBRARY: terminal display functions
 
 # move to column 60:    term_cursor_movex $TERM_STATUS_COLUMN
