@@ -105,6 +105,12 @@
         
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>api-client</artifactId>
+		<version>${project.version}</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-api</artifactId>
 		<version>${project.version}</version>
     </dependency>

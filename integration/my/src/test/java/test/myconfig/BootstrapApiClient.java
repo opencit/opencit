@@ -41,21 +41,21 @@ public class BootstrapApiClient {
      */
     @Test
     public void testCreateMyUser() throws Exception {
-        MyConfiguration config = new MyConfiguration();
+        MyConfiguration config = My.configuration(); // new MyConfiguration();
         File directory = config.getKeystoreDir();
         if (!directory.exists()) {
             directory.mkdirs();
         }
         // create and register a new api client
         SimpleKeystore keystore = ClientFactory.createUserInResource(
-                new FileResource(config.getKeystoreDir()),
+                new FileResource(config.getKeystoreFile()),
                 config.getKeystoreUsername(),
                 config.getKeystorePassword(),
                 config.getMtWilsonURL(),
                 config.getMtWilsonRoleArray());
         // approve the new api client
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(config.getKeystoreUsername(), config.getKeystorePassword());
-        ApiClientX509JpaController jpaController = new ApiClientX509JpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
+        ApiClientX509JpaController jpaController = My.jpa().mwApiClientX509();
         ApiClientX509 apiClient = jpaController.findApiClientX509ByFingerprint(rsaCredentialX509.identity());
         apiClient.setStatus("Approved");
         apiClient.setEnabled(true);

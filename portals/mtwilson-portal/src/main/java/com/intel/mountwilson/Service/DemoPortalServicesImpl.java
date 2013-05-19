@@ -60,6 +60,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		if (hostList!=null && hostList.size() > 0) {
 			Set<Hostname> listOfHostName = new HashSet<Hostname>();
 			for (HostDetailsEntityVO hostDetailsEntityVO : hostList) {
+                log.debug("getTrustStatusForHost: Adding host to list: {}", hostDetailsEntityVO.getHostName());
                 listOfHostName.add(new Hostname(hostDetailsEntityVO.getHostName()));
                 hostTempMap.put(hostDetailsEntityVO.getHostName(), hostDetailsEntityVO);
 			}
@@ -73,29 +74,30 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                 	//get HostDetailsEntityVO for current host for which we are checking Trust Status.
                 	HostDetailsEntityVO hostDetails = hostTempMap.get(hostTrustXmlResponse.getName());
 	                try {
-	                	log.info("Getting trust Information for Host "+hostTrustXmlResponse.getName());
+	                	log.info("getTrustStatusForHost: Getting trust Information for Host "+hostTrustXmlResponse.getName());
 	                	if (hostTrustXmlResponse.getAssertion() != null) {
 	                		TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, hostTrustXmlResponse.getAssertion());
 	                		if( trustAssertion.isValid() ) {
+                                log.debug("getTrustStatusForHost: Trust assertion is valid");
 	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, trustAssertion,null));
 	                		}
 	                		else {
-	                			log.error("Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ trustAssertion.error().getMessage());
+	                			log.error("getTrustStatusForHost: Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ trustAssertion.error().getMessage());
 	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,trustAssertion.error().getMessage()));
 	                		}
 	                	}else {
-	                		log.error("Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage());
+	                		log.error("getTrustStatusForHost: Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage());
 	                		hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage()));
 	                	}
 	                } catch (Exception e) {
 	                	hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,StringEscapeUtils.escapeHtml(e.getMessage())));
-	                	log.error("Exception while getting trust status "+hostTrustXmlResponse.getName()+". "+ e.getMessage());
+	                	log.error("getTrustStatusForHost: Exception while getting trust status "+hostTrustXmlResponse.getName()+". "+ e.getMessage());
 	                	throw ConnectionUtil.handleDemoPortalException(e);
 	                }
                  }
                 
             } catch (Exception e) {
-                    log.error("Exception while getting trust status All Host."+ e.getMessage());
+                    log.error("getTrustStatusForHost: Exception while getting trust status All Host."+ e.getMessage());
                     throw ConnectionUtil.handleDemoPortalException(e);
             }
 		}else {

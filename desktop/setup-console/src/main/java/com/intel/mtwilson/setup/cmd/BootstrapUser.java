@@ -99,7 +99,7 @@ public class BootstrapUser implements Command {
         
         MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
         if(keyTest != null) {
-          logger.info("An user already exists with the specified User Name. Please select different User Name.");
+          logger.info("A user already exists with the specified User Name. Please select different User Name.");
           throw new SetupException("User account with that name already exists ");
         }
         

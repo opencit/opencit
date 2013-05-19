@@ -190,10 +190,15 @@ public class SslUtil {
         httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
         HttpClient httpClient = new DefaultHttpClient(connectionManager, httpParams);
         log.debug("Saving certificates from server URL: {}", url.toExternalForm());
-        HttpHead request = new HttpHead(url.toExternalForm());
-        HttpResponse response = httpClient.execute(request);
-        log.debug("Server status line: {} {} ({})", new String[]{response.getProtocolVersion().getProtocol(), response.getStatusLine().getReasonPhrase(), String.valueOf(response.getStatusLine().getStatusCode())});
-        httpClient.getConnectionManager().shutdown();
+        try {
+            HttpHead request = new HttpHead(url.toExternalForm());
+            HttpResponse response = httpClient.execute(request);
+            log.debug("Server status line: {} {} ({})", new String[]{response.getProtocolVersion().getProtocol(), response.getStatusLine().getReasonPhrase(), String.valueOf(response.getStatusLine().getStatusCode())});
+            httpClient.getConnectionManager().shutdown();
+        }
+        catch(Exception e) {
+            log.debug("Error while sending https request", e); // not fatal since we may still have the ssl certificate from the handshake, which is all we want here
+        }
         return trustManager.getStoredCertificates();
     }
     

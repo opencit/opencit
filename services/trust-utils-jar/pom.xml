@@ -106,9 +106,32 @@
             <scope>test</scope>
     </dependency>
     <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ASData</artifactId>
             <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>MSData</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-data</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-handler</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
     </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
