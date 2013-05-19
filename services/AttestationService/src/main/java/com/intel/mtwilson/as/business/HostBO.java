@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.business;
 
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
@@ -109,7 +110,7 @@ public class HostBO extends BaseBO {
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-                        tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
                         tblHosts.setTlsKeystore(null);
                         //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
@@ -286,7 +287,7 @@ public class HostBO extends BaseBO {
 
                         // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
                         if (tblHosts.getTlsPolicyName() == null && tblHosts.getTlsPolicyName().isEmpty()) { // XXX new code to test
-                                tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
+                                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
                         }
 //                        tblHosts.setTlsKeystore(null);  // XXX new code to test: it's either null or it's already set so don't change it // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());

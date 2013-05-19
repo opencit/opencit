@@ -103,7 +103,6 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>my</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
     </dependency>
     <dependency>
             <groupId>mysql</groupId>

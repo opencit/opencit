@@ -37,6 +37,21 @@ DEFAULT_GLASSFISH_API_PORT="8181"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
+### FUNCTION LIBRARY: generate random passwords
+
+# generates a random password. default is 32 characters in length.
+# you can pass a single parameter that is the desired length if
+# you want something other than 32.
+# usage examples:
+# mypassword32=`generate_password`
+# mypassword16=`generate_password 16`
+# mypassword32=$(generate_password)
+# mypassword16=$(generate_password 16)
+generate_password() {
+  < /dev/urandom tr -dc _A-Za-z0-9- | head -c${1:-32}
+}
+
+
 ### FUNCTION LIBRARY: terminal display functions
 
 # move to column 60:    term_cursor_movex $TERM_STATUS_COLUMN
@@ -251,7 +266,8 @@ prompt_with_default() {
   local userprompt="${2}"
   local default_value
   # here $$
-  eval default_value="${3:-$$resultvarname}"
+  eval current_value="\$$resultvarname"
+  eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
@@ -274,8 +290,10 @@ prompt_with_default_password() {
   local userprompt="${2:-Password:}"
   local default_value
   # here $$
-  eval default_value="${3:-$$resultvarname}"
+  eval current_value="\$$resultvarname"
+  eval default_value="${3:-$current_value}"
   local default_value_display="********"
+  if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
@@ -283,7 +301,6 @@ prompt_with_default_password() {
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
     return
   fi
-  if [ -z "$default_value" ]; then default_value_display=""; fi;
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
   echo -n "$userprompt [$default_value_display] "
   if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
