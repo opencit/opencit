@@ -102,13 +102,15 @@
                 <version>1.0.11</version>
                 <scope>test</scope>
         </dependency>
-        
+        <!--
+        CANNOT REFER TO API-CLIENT HERE, NOT EVEN IN TEST SCOPE, DUE TO CIRCULAR DEPENDENCY
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>api-client</artifactId>
 		<version>${project.version}</version>
         <scope>test</scope>
     </dependency>
+    -->
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-api</artifactId>
