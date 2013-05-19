@@ -33,6 +33,8 @@ public class My {
     private static MyJpa jpa = null;
     private static MyEnvironment env = null;
     
+    
+    public static void reset() { config = null; jpa = null; }
     public static MyConfiguration configuration() throws IOException { 
         if( config == null ) {
              config = new MyConfiguration();
