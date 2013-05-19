@@ -266,7 +266,8 @@ prompt_with_default() {
   local userprompt="${2}"
   local default_value
   # here $$
-  eval default_value="${3:-$$resultvarname}"
+  eval current_value="\$$resultvarname"
+  eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
@@ -289,7 +290,8 @@ prompt_with_default_password() {
   local userprompt="${2:-Password:}"
   local default_value
   # here $$
-  eval default_value="${3:-$$resultvarname}"
+  eval current_value="\$$resultvarname"
+  eval default_value="${3:-$current_value}"
   local default_value_display="********"
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
