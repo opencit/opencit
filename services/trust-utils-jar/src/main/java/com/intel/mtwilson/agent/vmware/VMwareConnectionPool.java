@@ -15,6 +15,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -150,6 +151,19 @@ public class VMwareConnectionPool {
                                 log.debug("Cannot read server certificate: {}", e4.toString(), e4);
                                 throw new VMwareConnectionException(e4);
                             }
+                        }
+                        try {
+                            log.debug("Trust policy: {}", tlsConnection.getTlsPolicy().getClass().getName());
+                            // now show what is in the trusted keystore... to help understand why it didn't match
+                            List<X509Certificate> trustedCerts = tlsConnection.getTlsPolicy().getCertificateRepository().getCertificates();
+                            log.debug("There are {} trusted certs in the keystore", trustedCerts.size());
+                            for(X509Certificate trustedCert : trustedCerts) {
+                                log.debug("Trusted certificate fingerprint: {} and subject: {}", new Sha1Digest(X509Util.sha1fingerprint(trustedCert)), trustedCert.getSubjectX500Principal().getName());                                
+                            }
+                        }
+                        catch(Exception e5) {
+                            e5.printStackTrace(System.err);
+                            log.error("Cannot enumerate truted certificates: "+e5.toString(), e5);
                         }
                         throw new VMwareConnectionException("VMwareConnectionPool not able to read host information: "+ e3.toString());
                     }
