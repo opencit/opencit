@@ -2080,7 +2080,9 @@ glassfish_create_ssl_cert() {
     fi
     $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
+    openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -out /tmp/mycert.der -outform DER
+    openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
+    
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi

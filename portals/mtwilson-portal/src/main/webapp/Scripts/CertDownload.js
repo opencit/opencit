@@ -7,37 +7,56 @@ function fnLookForRootCASuccess(responseJSON){
         $('#fdownloadRCA').show();
 	
     } else {
-         
         $('#fdownloadRCA').hide();
     }
 }
 
 function fnforRootCACertificate(){	
-	
-	sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, null);
+	var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    base_url = base_url.replace("mtwilson-portal","");
+    //alert("baseurl = " + base_url+"");
+	window.location.replace(base_url + "ManagementService/resources/ca/certificate/rootca/current"); 
+	//sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, null);
 }
 
 function fnforPrivacyCACertificate(){	
-	
-	sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificate.html', null, fnPrivacyCADownloadSuccess, null);
+  var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    base_url = base_url.replace("mtwilson-portal","");
+    //alert("baseurl = " + base_url+"");
+	window.location.replace(base_url + "ManagementService/resources/ca/certificate/privacyca/current"); 
+  //sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificate.html', null, fnPrivacyCADownloadSuccess, null);
 }
 
 function fnforPrivacyCACertificateList(){	
-	
-	sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificateList.html', null, fnRootCAListDownloadSuccess, null);
+	var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    base_url = base_url.replace("mtwilson-portal","");
+    //alert("baseurl = " + base_url+"");
+	window.location.replace(base_url + "ManagementService/resources/ca/certificate/privacyca/current"); 
+	//sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificateList.html', null, fnPrivacyCAListDownloadSuccess, null);
 }
 
 
 
 function fnforSAMLCertificate(){	
-	
-	sendJSONAjaxRequest (false, 'getData/getSamlCertificate.html', null, fnRootCADownloadSuccess, null);
+	var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    base_url = base_url.replace("mtwilson-portal","");
+    //alert("baseurl = " + base_url+"");
+	window.location.replace(base_url + "ManagementService/resources/saml/certificate");
+	//sendJSONAjaxRequest (false, 'getData/getSamlCertificate.html', null, fnRootCADownloadSuccess, null);
 }
 
 
 function fnforTLSCertificate(){	
-	
-	sendJSONAjaxRequest (false, 'getData/getTLSCertificate.html', null, fnRootCADownloadSuccess, null);
+	var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    base_url = base_url.replace("mtwilson-portal","");
+    //alert("baseurl = " + base_url+"");
+	window.location.replace(base_url + "ManagementService/resources/ca/certificate/tls/current");
+	//sendJSONAjaxRequest (false, 'getData/getTLSCertificate.html', null, fnTLSDownloadSuccess, null);
 }
 
 function fnTLSDownloadSuccess(responseJSON){
@@ -46,10 +65,10 @@ function fnTLSDownloadSuccess(responseJSON){
             if (document.execCommand) {
             /* Start For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */
 	          //  var oWin = window.open("about:blank", "_blank");
-    	        var oWin = window.open("ssl.crt.pem", "_blank");
+    	        var oWin = window.open("ssl.crt", "_blank");
 	            oWin.document.write(responseJSON.Certificate);
 	            oWin.document.close();
-                    var fileName = "/ssl.crt.pem";
+                    var fileName = "/ssl.crt";
 	            var success = oWin.document.execCommand('SaveAs','null',fileName);
 	            oWin.close();
 	            /* End For IE below code is for saving contents in a file , file name and type needs to be specified by the user  */
