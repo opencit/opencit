@@ -7,6 +7,7 @@ package com.intel.mtwilson.setup.cmd;
 import com.intel.mtwilson.setup.PropertyHidingConfiguration;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.io.Classpath;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.setup.Command;
@@ -330,7 +331,7 @@ public class InitDatabase implements Command {
      */
     private DataSource getDataSource() throws SetupException {
         try {
-            Properties jpaProperties = My.persistenceManager().getASDataJpaProperties(ASConfig.getConfiguration());
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(ASConfig.getConfiguration());
             log.debug("JDBC URL with schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
             DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {
@@ -353,7 +354,7 @@ public class InitDatabase implements Command {
             confNoSchema.replaceProperty("mtwilson.db.schema","");
             confNoSchema.replaceProperty("mountwilson.as.db.schema","");
             confNoSchema.replaceProperty("mountwilson.ms.db.schema","");
-            Properties jpaProperties = My.persistenceManager().getASDataJpaProperties(confNoSchema);
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(confNoSchema);
             log.debug("JDBC URL without schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
             DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {

@@ -381,6 +381,10 @@ public class MyConfiguration {
         return conf.getString("mtwilson.db.protocol", "postgresql");  // used in the jdbc url, so "postgresql" or "mysql"  as in jdbc:mysql://host:port/schema
     }
     
+    public String getDatabaseDriver() {
+        return conf.getString("mtwilson.db.driver", "org.postgresql.Driver"); // either "org.postgresql.Driver" or "com.mysql.jdbc.Driver"
+    }
+    
     public String getDatabaseHost() {
         return conf.getString("mtwilson.db.host", "127.0.0.1");
     }

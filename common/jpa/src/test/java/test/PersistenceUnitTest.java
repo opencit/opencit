@@ -40,7 +40,7 @@ public class PersistenceUnitTest {
     }
     
     @Test
-    public void testUsePersistenceUnit() throws IOException {
+    public void testUsePersistenceUnitMysql() throws IOException {
         Properties jpaProperties = new Properties();
         jpaProperties.setProperty("javax.persistence.jdbc.driver", "com.mysql.jdbc.Driver");
         jpaProperties.setProperty("javax.persistence.jdbc.url", "jdbc:mysql://10.1.71.80:3306/mw_as");
@@ -53,4 +53,20 @@ public class PersistenceUnitTest {
         System.out.println("Got "+results.size()+" records");
         em.close();
     }
+
+    @Test
+    public void testUsePersistenceUnitPostgres() throws IOException {
+        Properties jpaProperties = new Properties();
+        jpaProperties.setProperty("javax.persistence.jdbc.driver", "org.postgresql.Driver");
+        jpaProperties.setProperty("javax.persistence.jdbc.url", "jdbc:postgresql://10.1.71.227:5432/mw_as");
+        jpaProperties.setProperty("javax.persistence.jdbc.user", "root");
+        jpaProperties.setProperty("javax.persistence.jdbc.password", "password");
+        EntityManagerFactory emf = PersistenceManager.createEntityManagerFactory("ASDataPU", jpaProperties);
+        EntityManager em = emf.createEntityManager();
+        Query q = em.createNativeQuery("SELECT * FROM mw_oem");
+        List results = q.getResultList();
+        System.out.println("Got "+results.size()+" records");
+        em.close();
+    }
+
 }

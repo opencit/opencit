@@ -45,6 +45,7 @@ public class MyPersistenceManager extends PersistenceManager {
         addPersistenceUnit("MSDataPU", getMSDataJpaProperties(c));
         addPersistenceUnit("AuditDataPU", getAuditDataJpaProperties(c));
     }
+    // XXX TODO get dek from MyConfiguration instead of from the jdbcProperties
     public byte[] getDek() {
         return Base64.decodeBase64(jdbcProperties.getProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==")); // arbitrary default dek, since it's a development server it's good to use same as what is configured there, but it doesn't matter as it only affects records we are writing, and hopefully after each test is complete there is zero net effect on the database
     }
@@ -58,7 +59,20 @@ public class MyPersistenceManager extends PersistenceManager {
         return getEntityManagerFactory("AuditDataPU");
     }
     
-    public Properties getASDataJpaProperties(Configuration config) {
+    public static Properties getJpaProperties(MyConfiguration config) {
+        Properties prop = new Properties();
+        prop.put("javax.persistence.jdbc.driver", config.getDatabaseDriver());
+        prop.put("javax.persistence.jdbc.scheme", config.getDatabaseProtocol()); // XXX if everything is working without this now, remove it
+        String url = String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
+                config.getDatabaseProtocol(), config.getDatabaseHost(), 
+                config.getDatabasePort(), config.getDatabaseSchema());
+        prop.put("javax.persistence.jdbc.url", url);
+        prop.put("javax.persistence.jdbc.user", config.getDatabaseUsername());
+        prop.put("javax.persistence.jdbc.password", config.getDatabasePassword());
+        return prop;
+    }
+    
+    public static Properties getASDataJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.as.db.driver", 
@@ -92,7 +106,7 @@ public class MyPersistenceManager extends PersistenceManager {
         return prop;
     }    
     
-    public Properties getMSDataJpaProperties(Configuration config) {
+    public static Properties getMSDataJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.ms.db.driver", 
@@ -128,7 +142,7 @@ public class MyPersistenceManager extends PersistenceManager {
     }
     
     
-    public Properties getAuditDataJpaProperties(Configuration config) {
+    public static Properties getAuditDataJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.audit.db.driver", 
@@ -163,7 +177,7 @@ public class MyPersistenceManager extends PersistenceManager {
         
     }
  
-    public Properties getMCDataJpaProperties(Configuration config) {
+    public static Properties getMCDataJpaProperties(Configuration config) {
         Properties prop = new Properties();
         prop.put("javax.persistence.jdbc.driver", 
                 config.getString("mountwilson.mc.db.driver", 

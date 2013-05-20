@@ -57,7 +57,7 @@ public class My {
     public static MyPersistenceManager persistenceManager() throws IOException {
         if( pm == null ) {
             pm = new MyPersistenceManager(configuration().getProperties(
-                    "mtwilson.db.protocol",
+                    "mtwilson.db.protocol", "mtwilson.db.driver",
                     "mtwilson.db.host", "mtwilson.db.port", "mtwilson.db.user", 
                     "mtwilson.db.password", "mtwilson.db.schema", "mtwilson.as.dek"));
         }

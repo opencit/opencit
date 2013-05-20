@@ -141,7 +141,13 @@
     	<artifactId>mysql-connector-java</artifactId>
         <scope>test</scope>
     </dependency>
-                
+        <dependency>
+    	<groupId>postgresql</groupId>
+    	<artifactId>postgresql</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+                                
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>

@@ -6,6 +6,7 @@ package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.RemoteSetup;
 import com.intel.mtwilson.setup.SetupContext;
@@ -40,7 +41,7 @@ public class CheckConfig implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         if( options.getBoolean("jpa",false) ) {
-            Properties p = My.persistenceManager().getASDataJpaProperties(ASConfig.getConfiguration());
+            Properties p = MyPersistenceManager.getASDataJpaProperties(ASConfig.getConfiguration());
 
             System.out.println("javax.persistence.jdbc.driver = "+p.getProperty("javax.persistence.jdbc.driver"));
             System.out.println("javax.persistence.jdbc.url = "+p.getProperty("javax.persistence.jdbc.url"));

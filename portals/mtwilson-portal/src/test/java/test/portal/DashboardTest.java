@@ -9,11 +9,13 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -45,5 +47,21 @@ public class DashboardTest {
         TrustAssertion trustAssertion = new TrustAssertion(keystore.getTrustedCertificates(SimpleKeystore.SAML), saml);
         log.debug("Assertion is valid? {}", trustAssertion.isValid());
         log.debug("Assertion attributes: {}", StringUtils.join(trustAssertion.getAttributeNames(), ", "));
+    }
+    
+    @Test
+    public void getSamlForMultipleHosts() throws Exception {
+        HashSet<Hostname> hostnames = new HashSet<Hostname>();
+        hostnames.add(new Hostname("10.1.71.173"));
+        hostnames.add(new Hostname("10.1.71.170"));
+        hostnames.add(new Hostname("10.1.71.201"));
+        hostnames.add(new Hostname("10.1.71.174"));
+        hostnames.add(new Hostname("10.1.71.175"));
+        hostnames.add(new Hostname("10.1.71.169"));
+        hostnames.add(new Hostname("10.1.71.126"));
+        hostnames.add(new Hostname("RHEL8"));
+        hostnames.add(new Hostname("10.1.71.172"));
+        hostnames.add(new Hostname("RHEL168"));
+        List<HostTrustXmlResponse> statuslist = My.client().getSamlForMultipleHosts(hostnames, false);
     }
 }

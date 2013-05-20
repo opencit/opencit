@@ -296,11 +296,19 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <!--
 		<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-postgres</artifactId>
 		<version>${project.version}</version>
 	</dependency> 
+        -->
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+            <scope>test</scope>
+        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ASData</artifactId>

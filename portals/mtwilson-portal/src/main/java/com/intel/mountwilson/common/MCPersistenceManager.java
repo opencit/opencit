@@ -5,6 +5,7 @@
 package com.intel.mountwilson.common;
 
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,8 @@ public class MCPersistenceManager extends PersistenceManager {
     @Override
     public void configure() {
         try {
-        addPersistenceUnit("ASDataPU", My.persistenceManager().getASDataJpaProperties(My.configuration().getConfiguration())); // ASConfig.getJpaProperties());
-        addPersistenceUnit("MSDataPU", My.persistenceManager().getMSDataJpaProperties(My.configuration().getConfiguration())); // MSConfig.getJpaProperties());
+        addPersistenceUnit("ASDataPU", MyPersistenceManager.getASDataJpaProperties(My.configuration().getConfiguration())); // ASConfig.getJpaProperties());
+        addPersistenceUnit("MSDataPU", MyPersistenceManager.getMSDataJpaProperties(My.configuration().getConfiguration())); // MSConfig.getJpaProperties());
         }
         catch(Exception e) {
             log.error("Cannot add persistence unit: {}", e.toString(), e);
