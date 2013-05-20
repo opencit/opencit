@@ -42,17 +42,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
 import org.apache.commons.configuration.Configuration;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -777,10 +783,10 @@ public class HostTrustBO extends BaseBO {
         return saml;
     }
 
-    public String getTrustWithSaml(String host, boolean forceVerify) {
+    public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
         log.info("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
-         TblHosts tblHosts = getHostByName(new Hostname((host)));
+        TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
        // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
@@ -792,15 +798,54 @@ public class HostTrustBO extends BaseBO {
         if(forceVerify != true){
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
             if(tblSamlAssertion != null){
-                log.info("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
-                return tblSamlAssertion.getSaml();
+                if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
+                    log.info("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
+                    return tblSamlAssertion.getSaml();
+                }else{
+                    log.debug("Found assertion in cache with error set, returning that.");
+                   throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached)"));
+                }
             }
         }
         
-       log.info("Getting trust and saml assertion from host.");
+        log.info("Getting trust and saml assertion from host.");
         
-
-        return getTrustWithSaml(host);
+        try {
+            return getTrustWithSaml(host);
+        }catch(Exception e) {
+            TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
+            tblSamlAssertion.setHostId(tblHosts);
+            //TxtHost hostTxt = getHostWithTrust(new Hostname(host),tblSamlAssertion); 
+            //TxtHostRecord tmp = new TxtHostRecord();
+            //tmp.HostName = host;
+            //tmp.IPAddress = host;
+            //TxtHost hostTxt = new TxtHost(tmp);
+            
+            tblSamlAssertion.setBiosTrust(false);
+            tblSamlAssertion.setVmmTrust(false);
+            
+            try {
+                log.error("stdalex caught exception, generating saml assertion");
+                tblSamlAssertion.setSaml("");
+                int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
+                tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.SECOND, cacheTimeout);
+                tblSamlAssertion.setExpiryTs(cal.getTime());
+                if(e instanceof ASException){
+                    ASException ase = (ASException) e;
+                    tblSamlAssertion.setErrorCode(String.valueOf(ase.getErrorCode()));
+                }else{
+                    tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.SYSTEM_ERROR.getErrorCode()));
+                }
+                tblSamlAssertion.setErrorMessage(e.getMessage());
+                new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
+            }catch(Exception ex){
+                log.info("getTrustwithSaml caugh exception while generating error saml assertion");
+                throw new ASException(new Exception("stdalex " + ex.getMessage()));
+            } 
+            throw new ASException(new Exception(e.getMessage()));
+        }
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
