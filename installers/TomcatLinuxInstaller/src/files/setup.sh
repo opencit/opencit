@@ -13,8 +13,6 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
 
-tomcat_permissions ${TOMCAT_HOME}
-
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
 if [ ! -d ${TOMCAT_HOME}/endorsed ]; then
  mkdir -p ${TOMCAT_HOME}/endorsed
@@ -59,5 +57,7 @@ cd $TOMCAT_CONF
 cat server.xml | sed '{/<!--*/ {N; /<Connector port=\"8080\"/ {D; }}}' | sed '{/-->/ {N; /<!-- A \"Connector\" using the shared thread pool-->/ {D; }}}' | sed '{/<!--*/ {N; /<Connector port=\"8443\"/ {D; }}}' | sed '{/-->/ {N;N; /<!-- Define an AJP 1.3 Connector on port 8009 -->/ {D; }}}' > server_temp.xml
 mv server_temp.xml server.xml
 sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-6.0.29\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
+
+tomcat_permissions ${TOMCAT_HOME}
 
 echo "Starting Tomcat..."
