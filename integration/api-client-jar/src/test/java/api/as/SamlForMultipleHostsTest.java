@@ -38,7 +38,7 @@ public class SamlForMultipleHostsTest {
         // the response contains "an invalid character" according to IE, so let's check it out:
         for(int i=0; i<responseText.length(); i++) {
             char c = responseText.charAt(i);
-            if( Character.isAlphabetic(c) ) { continue; }
+            if( Character.isLetter(c) ) { continue; }
             if( Character.isDigit(c) ) { continue; }
             if( Character.isWhitespace(c) ) { continue; }
             if( c == '<' || c == '>' || c == '/' || c == ':' || c == '=' || c=='"' || c == '[' || c == ']' || c == '-' || c == '.' || c == '_' ) { continue; }
