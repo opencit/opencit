@@ -64,10 +64,10 @@ chmod 700 logback.xml
 cp logback.xml "${intel_conf_dir}"
 
 # SCRIPT EXECUTION
-if using_mysql; then
-  mysql_server_install
-  mysql_install
-fi
+#if using_mysql; then
+#  mysql_server_install
+#  mysql_install
+#fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 

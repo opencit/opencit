@@ -2383,7 +2383,21 @@ tomcat_create_ssl_cert() {
     cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
   fi
 }
+tomcat_env_report(){
+  echo "TOMCAT_HOME=$TOMCAT_HOME"
+  echo "tomcat_bin=$glassfish_bin"
+  echo "tomcat=\"$tomcat\""
+}
 
+# Must call java_require before calling this.
+# Parameters:
+# - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
+tomcat_sslcert_report() {
+  local alias="${1:-s1as}"
+  local keystorePassword=changeit
+  local keystore=${TOMCAT_HOME}/ssl/.keystore
+  java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
+}
 
 ### FUNCTION LIBRARY: java
 
