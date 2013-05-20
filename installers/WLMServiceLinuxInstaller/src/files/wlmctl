@@ -128,8 +128,8 @@ RETVAL=0
 case "$1" in
   version)
         echo "${package_name}"
-	echo "Version ${VERSION:-Unknown}"
-	echo "Build ${BUILD:-Unknown}"
+  echo "Version ${VERSION:-Unknown}"
+  echo "Build ${BUILD:-Unknown}"
         ;;
   start)
         webservice_start_report "${webservice_application_name}"
@@ -186,7 +186,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-	rm /usr/local/bin/${script_name}
+  rm /usr/local/bin/${script_name}
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"
