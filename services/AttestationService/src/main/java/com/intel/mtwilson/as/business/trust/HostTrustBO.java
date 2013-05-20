@@ -855,8 +855,7 @@ public class HostTrustBO extends BaseBO {
             if(forceVerify != true){
                 TblHosts tblHosts = getHostByName(new Hostname(host));
                 if(tblHosts != null){
-                    TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(
-                            tblHosts.getId() , getCacheStaleAfter() );
+                    TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(tblHosts.getId() , getCacheStaleAfter() );
                     
                     if(tblTaLog != null)
                         return getHostTrustObj(tblTaLog);
