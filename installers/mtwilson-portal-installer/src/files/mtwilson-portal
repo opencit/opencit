@@ -4,7 +4,7 @@
 # *** TABS will cause errors in some linux distributions
 
 # SCRIPT CONFIGURATION:
-script_name=mcctl
+script_name=mpctl
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=mtwilson-portal
 package_dir=/opt/intel/cloudsecurity/${package_name}
@@ -178,7 +178,12 @@ case "$1" in
         webservice_stop_report "${webservice_application_name}"
         ;;
   status)
+      if using_glassfish; then  
         glassfish_running_report
+      elif using_tomcat; then
+        tomcat_running_report
+      fi
+
         webservice_running_report "${webservice_application_name}"
         ;;
   restart)
