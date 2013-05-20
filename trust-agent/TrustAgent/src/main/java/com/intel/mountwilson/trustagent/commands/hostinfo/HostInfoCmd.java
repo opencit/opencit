@@ -44,7 +44,8 @@ public class HostInfoCmd implements ICommand {
                 getVmmAndVersion();
             
             }
-
+            // Retrieve the processor information as well.
+            getProcessorInfo();
 
         } catch (Exception ex) {
             throw new TAException(ErrorCode.ERROR, "Error while getting OS details.", ex);
@@ -142,4 +143,39 @@ public class HostInfoCmd implements ICommand {
         }
     }
 
+    /**
+     * Retrieves the CPU ID of the processor. This is used to identify the processor generation.
+     * 
+     * @throws TAException
+     * @throws IOException 
+     */
+       private void getProcessorInfo() throws TAException, IOException {
+           
+            List<String> result = CommandUtil.runCommand("dmidecode --type processor");
+            String processorInfo = "";
+            
+            // Sample output would look like below for a 2 CPU system. We will extract the processor info between CPU and the @ sign
+            //Processor Information
+            //Socket Designation: CPU1
+            //Type: Central Processor
+            //Family: Xeon
+            //Manufacturer: Intel(R) Corporation
+            //ID: C2 06 02 00 FF FB EB BF -- This is the CPU ID
+            //Signature: Type 0, Family 6, Model 44, Stepping 2
+            
+            for (String entry : result) {
+                if (entry != null && !entry.isEmpty() && entry.trim().startsWith("ID:")) {                    
+                    String[] parts = entry.trim().split(":");
+                     if (parts != null && parts.length > 1) {
+                        processorInfo = parts[1];
+                        break;
+                     }
+                }            
+            }
+            
+            log.info("Processor Information " + processorInfo);
+            context.setProcessorInfo(processorInfo);
+            log.info("Context is being set with processor info: " + context.getProcessorInfo());
+    }
+       
     }

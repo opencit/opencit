@@ -50,6 +50,8 @@ public class TxtHostRecord {
     public String AIK_PublicKey;
     @JsonProperty
     public String AIK_SHA1;
+    @JsonProperty
+    public String Processor_Info;    
     
     public TxtHostRecord() {
         
