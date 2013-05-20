@@ -919,6 +919,19 @@ mysql_server_install() {
     echo_failure "Unable to auto-install MySQL server" | tee -a $INSTALL_LOG_FILE
     echo "MySQL download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.mysql.com/downloads/" >> $INSTALL_LOG_FILE
+  else #create the monitrc script
+    mkdir -p /etc/monit/conf.d
+  if [ ! -a /etc/monit/conf.d/mysql.monitrc ]; then 
+    cat >> /etc/monit/conf.d/mysql.monitrc << EOF
+      # mysql monitor
+      check process mysql matching "mysql"
+      group database
+      start program = "/usr/sbin/service mysql start"
+      stop program = "/usr/sbin/service mysql stop"
+      if failed host 127.0.0.1 port 3306 then restart
+      if 5 restarts within 5 cycles then timeout
+    EOF
+  fi
   fi
 }
 
@@ -1199,6 +1212,19 @@ postgres_server_install(){
     echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
     return 1
+  else
+    mkdir -p /etc/monit/conf.d
+    if [ ! -a /etc/monit/conf.d/postgres.monitrc ]; then 
+      cat >> /etc/monit/conf.d/postgres.monitrc << EOF
+      # postgres monitor
+      check process postgresql matching "postgresql"
+      group database
+      start program = "/usr/sbin/service postgresql start"
+      stop program = "/usr/sbin/service postgresql stop"
+      if failed host 127.0.0.1 port 5432 then restart
+      if 5 restarts within 5 cycles then timeout
+      EOF
+    fi  
   fi
 }
 
@@ -2395,11 +2421,11 @@ tomcat_create_ssl_cert() {
     $mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
-    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem" -outform pem
+    openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
     
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     cp ${keystore} /root/
-    cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
+    #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
   fi
 }
 tomcat_env_report(){
