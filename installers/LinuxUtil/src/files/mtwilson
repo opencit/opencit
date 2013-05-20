@@ -153,6 +153,7 @@ all_status() {
   if [ -n "$mcctl" ]; then $mcctl status; fi
   if [ -n "$wpctl" ]; then $wpctl status; fi
   if [ -n "$tdctl" ]; then $tdctl status; fi
+  if [ -n "$mtwilson-portal" ]; then $tdctl status; fi
 }
 
 
@@ -170,7 +171,9 @@ setup_env() {
     #export mysql
   elif using_postgres; then
     postgres_detect > /dev/null
-    echo "postgres=$psql"
+    #echo "postgres=$psql"
+    #the actuall veriable for postgres commands is psql
+    echo "psql=$psql"
   fi
   echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
   echo "DATABASE_VENDOR=$DATABASE_VENDOR"
@@ -186,6 +189,8 @@ setup_env() {
     echo "tomcat_bin=$tomcat_bin"
     echo "tomcat=\"$tomcat\""
   fi
+  echo "MTWILSON_SERVER=$MTWILSON_SERVER"
+  echo "DEFAULT_API_PORT=$DEFAULT_API_PORT"
 }
 
 RETVAL=0
@@ -220,6 +225,24 @@ case "$1" in
         glassfish_require
         glassfish_restart
         ;;
+  glassfish-status)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        glassfish_require
+        glassfish_running_report
+        glassfish_sslcert_report
+        ;;
+  glassfish-sslcert)
+        #echo_warning "This feature has been disabled: mtwilson glassfish-sslcert"
+        glassfish_create_ssl_cert_prompt
+        ;;
+  glassfish-enable-logging)
+        glassfish_enable_logging
+        ;;
+  tomcat-detect)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_detect ${2:-$TOMCAT_REQUIRED_VERSION}
+        tomcat_env_report
+        ;;
   tomcat-start)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
         tomcat_require
@@ -235,18 +258,11 @@ case "$1" in
         tomcat_require
         tomcat_restart
         ;;
-  glassfish-status)
+ tomcat-status)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        glassfish_require
-        glassfish_running_report
-        glassfish_sslcert_report
-        ;;
-  glassfish-sslcert)
-        #echo_warning "This feature has been disabled: mtwilson glassfish-sslcert"
-        glassfish_create_ssl_cert_prompt
-        ;;
-  glassfish-enable-logging)
-        glassfish_enable_logging
+        tomcat_require
+        tomcat_running_report
+        tomcat_sslcert_report
         ;;
   mysql-detect)
         mysql_detect ${2:-$mysql_required_version}

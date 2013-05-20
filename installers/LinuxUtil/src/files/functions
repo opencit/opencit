@@ -1243,7 +1243,7 @@ echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
   postgres_conf="";
   result=`find / -name postgresql.conf 2>/dev/null | tr "\n" " "`
 echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
-  IFS=' '
+  #IFS=' '
   for r in ${result}; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
@@ -1255,7 +1255,7 @@ echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
   # see if we have the command path already
   if [[ -n "$postgres_com" && -f "$postgres_com" ]]; then
     echo "Found postgres server: $postgres_com"
-    IFS=
+    #IFS=
     return 0
   fi
   
@@ -1280,12 +1280,12 @@ echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
 
   if [[ -n "$postgres_com" ]]; then
     echo "Found postgres server: $postgres_com"
-    IFS=
+    #IFS=
     return 0
   fi
 
   echo "Postgres server not found"
-  IFS=
+  #IFS=
   return 1
 }
 postgres_version(){
@@ -2402,7 +2402,21 @@ tomcat_create_ssl_cert() {
     cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
   fi
 }
+tomcat_env_report(){
+  echo "TOMCAT_HOME=$TOMCAT_HOME"
+  echo "tomcat_bin=$glassfish_bin"
+  echo "tomcat=\"$tomcat\""
+}
 
+# Must call java_require before calling this.
+# Parameters:
+# - certificate alias to report on (default is s1as, the glassfish default ssl cert alias)
+tomcat_sslcert_report() {
+  local alias="${1:-s1as}"
+  local keystorePassword=changeit
+  local keystore=${TOMCAT_HOME}/ssl/.keystore
+  java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
+}
 
 ### FUNCTION LIBRARY: java
 
@@ -2776,7 +2790,7 @@ webservice_start() {
     if using_glassfish; then
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
+      wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
     fi
   fi
 }
@@ -2787,7 +2801,7 @@ webservice_stop() {
     if using_glassfish; then
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED} 
+      wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
     fi
   fi
 }
@@ -2859,7 +2873,7 @@ webservice_install() {
         ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
-        wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED} 
+        wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
       fi
     else
       if using_glassfish; then
@@ -2869,7 +2883,7 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp ${webservice_war_file} $TOMCAT_HOME/webapps/
         
-        #wget -O -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
+        #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
         webservice_running $webservice_application_name
         while [ -z "$WEBSERVICE_RUNNING" ]; do
@@ -2891,7 +2905,7 @@ webservice_uninstall() {
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      wget -O -p --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
+      wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
     fi
   else
     if using_glassfish; then
