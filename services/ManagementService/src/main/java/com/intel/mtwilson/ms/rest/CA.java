@@ -154,7 +154,7 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getPrivacyCaCertificateChain() {
         try {
-            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.file");
+            String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
              if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
             }

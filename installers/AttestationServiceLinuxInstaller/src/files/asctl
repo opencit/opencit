@@ -105,6 +105,14 @@ download_privacyca_certs() {
       mv /tmp/clientfiles.x/PrivacyCA.cer ${intel_conf_dir}/PrivacyCA.cer
       mv /tmp/clientfiles.x/endorsement.p12 ${intel_conf_dir}/endorsement.p12
       rm -r /tmp/clientfiles.x
+
+      # create the PrivacyCA.pem cert so it can be download from the portal
+      if [ -f "$intel_conf_dir/PrivacyCA.cer" ]; then
+        openssl x509 -inform der -in "$intel_conf_dir/PrivacyCA.cer" -out "$intel_conf_dir/PrivacyCA.pem"
+      else
+        echo_warning "Missing PrivacyCA.cer.  File will not be available via portals"
+      fi
+
       # create the list of trusted privacy ca's if it doesn't exist.  the list is in PrivacyCA.p12.pem
       if [ ! -f "${intel_conf_dir}/PrivacyCA.p12.pem" ]; then
           touch "${intel_conf_dir}/PrivacyCA.p12.pem"

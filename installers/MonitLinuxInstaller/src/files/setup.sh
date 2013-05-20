@@ -93,5 +93,64 @@ chmod 700 monitrc
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
+else
+  cp monitrc /etc/monit/monitrc
 fi
-cp monitrc /etc/monit/monitrc
+
+if using_mysql; then
+ cat >> /etc/monit/monitrc << EOF
+	# mysql monitor
+	check process mysql matching "mysql"
+	group database
+	start program = "/usr/sbin/service mysql start"
+	stop program = "/usr/sbin/service mysql stop"
+	if failed host 127.0.0.1 port 3306 then restart
+	if 5 restarts within 5 cycles then timeout
+ EOF
+else
+ cat >> /etc/monit/monitrc << EOF
+    # postgres monitor
+	check process postgresql matching "postgresql"
+	group database
+	start program = "/usr/sbin/service postgresql start"
+	stop program = "/usr/sbin/service postgresql stop"
+	if failed host 127.0.0.1 port 5432 then restart
+	if 5 restarts within 5 cycles then timeout
+ EOF
+fi
+
+if using_glassfish; then
+ cat >> /etc/monit/monitrc << EOF
+	# Monitoring the glassfish java service
+	check process glassfish matching "glassfish.jar"
+	start program = "/usr/local/bin/mtwilson glassfish-start"
+	stop program = "/usr/local/bin/mtwilson glassfish-stop"
+	# Glassfish portal
+	check host mtwilson-portal with address 127.0.0.1
+	start program = "/usr/local/bin/mtwilson-portal start"
+	stop program = "/usr/local/bin/mtwilson-portal stop"
+	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+		and request "/mtwilson-portal/home.html" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+ EOF
+else
+ cat >> /etc/monit/monitrc << EOF
+	#tomcat monitor
+	check host tomcat with address 127.0.0.1
+	start program = "/usr/local/bin/mtwilson tomcat-start"
+	stop program = "/usr/local/bin/mtwilson tomcat-stop"
+	if failed port 8443 TYPE TCP PROTOCOL HTTP
+		and request "/" for 3 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	# tomcat portal
+	check host mtwilson-portal with address 127.0.0.1
+	start program = "/usr/local/bin/mtwilson-portal start"
+	stop program = "/usr/local/bin/mtwilson-portal stop"
+	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+		and request "/mtwilson-portal/home.html" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+ EOF
+fi

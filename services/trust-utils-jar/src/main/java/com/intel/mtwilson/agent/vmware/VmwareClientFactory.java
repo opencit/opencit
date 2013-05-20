@@ -23,8 +23,7 @@ public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConne
     @Override
     public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {
         VMwareClient client = new VMwareClient();
-//        client.setTlsPolicy(tlsConnection.getTlsPolicy());
-        client.setTlsPolicy(new InsecureTlsPolicy()); // testing to see if ,  now that requests are multithreaded,  the fact that the ssl context is static is causing the problems because of non-synchronized access to the context 
+        client.setTlsPolicy(tlsConnection.getTlsPolicy());
         client.connect(tlsConnection.getConnectionString());        
         return client;
     }

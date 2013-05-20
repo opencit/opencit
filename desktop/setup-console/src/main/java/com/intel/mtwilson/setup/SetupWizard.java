@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import java.io.FileInputStream;
@@ -124,12 +125,13 @@ public class SetupWizard {
                 System.out.println(String.format("Generating Data Encryption Key %s...", name));
                 SecretKey dek = Aes128.generateKey();
                 dekBase64 = Base64.encodeBase64String(dek.getEncoded());
-                conf.setProperty(name, dekBase64); // this does not automatically save to the configuration file
+                //conf.setProperty(name, dekBase64); // this does not automatically save to the configuration file
                 // save the new dek to configuration file.    the Properties object inserts backslash-escapes before punctuation like : , = , etc. which affects the values... not sure if they'll be read in properly!!!
                 Properties xxxTodoSubclassConf = new Properties();
                 xxxTodoSubclassConf.load(new FileInputStream("/etc/intel/cloudsecurity/attestation-service.properties"));
                 xxxTodoSubclassConf.setProperty(name, dekBase64);
                 xxxTodoSubclassConf.store(new FileOutputStream("/etc/intel/cloudsecurity/attestation-service.properties"), "auto-saved");
+                My.reset();
             } catch (CryptographyException e) {
                 throw new SetupException(String.format("Cannot create Data Encryption Key %s", name), e);
             } catch (IOException e) {
