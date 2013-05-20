@@ -59,10 +59,10 @@ fi
 
 
 # SCRIPT EXECUTION
-if using_mysql; then
-  mysql_server_install
-  mysql_install
-fi
+#if using_mysql; then
+#  mysql_server_install
+#  mysql_install
+#fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 
