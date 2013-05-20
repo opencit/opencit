@@ -34,8 +34,8 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
                 vendorConnectionString = connStr.toString();
             }
             // Original call 
-            //VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
-            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
+//            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
             return new VmwareHostAgent(client, hostAddress.toString());
         }
         catch(Exception e) {
@@ -48,8 +48,8 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
         ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
         try {
             log.debug("getHostAgent {}", vendorConnectionString);
-            //VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy)); //pool.getClientForConnection(key(vendorConnectionString, tlsPolicy));
-            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
+            VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
+//            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
             log.debug("vmware host = {}", vmware.getHost().toString());
             log.debug("vmware port = {}", vmware.getPort());
             log.debug("vmware username = {}", vmware.getUsername());
