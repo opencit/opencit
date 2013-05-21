@@ -41,7 +41,7 @@ public class SetupWizard {
     
     public Connection getDatabaseConnection() throws SetupException, IOException {
         try {
-            Properties p = MyPersistenceManager.getJpaProperties(My.configuration());
+            Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
             // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
             Class.forName(p.getProperty("javax.persistence.jdbc.driver"));
             String url =  p.getProperty("javax.persistence.jdbc.url");
