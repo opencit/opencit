@@ -60,8 +60,7 @@ sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr
 
 mkdir -p /etc/monit/conf.d
 if [ ! -a /etc/monit/conf.d/tomcat.monitrc ]; then
- echo >> /etc/monit/conf.d/tomcat.monitrc << EOF
-	#tomcat monitor
+ echo "#tomcat monitor
 	check host tomcat with address 127.0.0.1
 	start program = "/usr/local/bin/mtwilson tomcat-start"
 	stop program = "/usr/local/bin/mtwilson tomcat-stop"
@@ -71,13 +70,12 @@ if [ ! -a /etc/monit/conf.d/tomcat.monitrc ]; then
 	if 3 restarts within 10 cycles then timeout
 	# tomcat portal
 	check host mtwilson-portal with address 127.0.0.1
-	start program = "/usr/local/bin/mpctl start"
-	stop program = "/usr/local/bin/mpctl stop"
+	start program = \"/usr/local/bin/mpctl start\"
+	stop program = \"/usr/local/bin/mpctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request "/mtwilson-portal/home.html" for 1 cycles
+		and request \"/mtwilson-portal/home.html\" for 1 cycles
 	then restart
-	if 3 restarts within 10 cycles then timeout
- EOF
+	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/tomcat.monitrc
 fi
 
 tomcat_permissions ${TOMCAT_HOME}

@@ -921,17 +921,15 @@ mysql_server_install() {
     echo "http://www.mysql.com/downloads/" >> $INSTALL_LOG_FILE
   else #create the monitrc script
     mkdir -p /etc/monit/conf.d
-  if [ ! -a /etc/monit/conf.d/mysql.monitrc ]; then 
-    cat >> /etc/monit/conf.d/mysql.monitrc << EOF
-      # mysql monitor
-      check process mysql matching "mysql"
+    if [ ! -a /etc/monit/conf.d/mysql.monitrc ]; then 
+      cat "# mysql monitor
+      check process mysql matching \"mysql\"
       group database
-      start program = "/usr/sbin/service mysql start"
-      stop program = "/usr/sbin/service mysql stop"
+      start program = \"/usr/sbin/service mysql start\"
+      stop program = \"/usr/sbin/service mysql stop\"
       if failed host 127.0.0.1 port 3306 then restart
-      if 5 restarts within 5 cycles then timeout
-    EOF
-  fi
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.monitrc
+    fi
   fi
 }
 
@@ -1215,14 +1213,13 @@ postgres_server_install(){
   else
     mkdir -p /etc/monit/conf.d
     if [ ! -a /etc/monit/conf.d/postgres.monitrc ]; then 
-      cat >> /etc/monit/conf.d/postgres.monitrc << EOF
-      # postgres monitor
-      check process postgresql matching "postgresql"
+      cat "# postgres monitor
+      check process postgresql matching \"postgresql\"
       group database
-      start program = "/usr/sbin/service postgresql start"
-      stop program = "/usr/sbin/service postgresql stop"
+      start program = \"/usr/sbin/service postgresql start\"
+      stop program = \"/usr/sbin/service postgresql stop\"
       if failed host 127.0.0.1 port 5432 then restart
-      if 5 restarts within 5 cycles then timeout
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/postgres.monitrc
       EOF
     fi  
   fi
