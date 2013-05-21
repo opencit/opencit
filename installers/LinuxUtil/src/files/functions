@@ -2415,7 +2415,14 @@ tomcat_create_ssl_cert() {
   else
     echo "Creating SSL Certificate for ${serverName}..."
     #$keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
-    $mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
+    local tmpCN
+    if valid_ip "${serverName}"; then 
+     tmpCN="ip:${serverName}"
+    else
+     tmpCN="dns:${serverName}"
+    fi
+    $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+    #$mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
