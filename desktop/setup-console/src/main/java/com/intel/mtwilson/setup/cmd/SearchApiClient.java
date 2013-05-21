@@ -75,7 +75,7 @@ public class SearchApiClient implements Command {
         System.out.println(String.format("Found record for %s in database [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
     }
     
-    private boolean findApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException {
+    private boolean findApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException, IOException {
         boolean found = false;
         SetupWizard wizard = new SetupWizard(conf);
         try {
