@@ -207,7 +207,7 @@ public class TAHelper {
                     log.debug("getQuoteInformationForHost called with ip address and port {}", connectionString);
                 }
             } else if (connectionString.startsWith("intel:")) {
-                log.debug("getQuoteInformationForHost called with intel connection string: {}", connectionString);
+                //log.debug("getQuoteInformationForHost called with intel connection string: {}", connectionString);
                 connectionString = connectionString.substring(6);
             }
 

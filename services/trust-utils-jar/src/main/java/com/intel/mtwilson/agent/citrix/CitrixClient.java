@@ -105,7 +105,7 @@ public class CitrixClient {
         catch(MalformedURLException e) {
             throw new IllegalArgumentException("Invalid Citrix Host URL: "+connectionString, e);
         }
-        log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+        //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
@@ -426,13 +426,13 @@ public class CitrixClient {
     
     
     public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception  {
-        log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+        //log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
          HostInfo response = new HostInfo();
        
          URL url = null; 
          try { 
                  url = new URL("https://" + hostIpAddress + ":" + port); 
-                 log.info("stdalex-error url generated:" + url.toString());
+                 //log.info("stdalex-error url generated:" + url.toString());
           }catch (Exception e) { 
                log.info("stdalex-error exception while generating URL:" + e.toString());
                throw e;

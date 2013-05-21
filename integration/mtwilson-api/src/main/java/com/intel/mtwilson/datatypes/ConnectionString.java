@@ -60,7 +60,7 @@ public class ConnectionString {
     }
     
     public static VendorConnection parseConnectionString(String connectionString) throws MalformedURLException {
-        log.debug("Connection string: {}", connectionString);
+        //log.debug("Connection string: {}", connectionString);
         VendorConnection vc = new VendorConnection();
         vc.vendor = vendorFromURL(connectionString);
         String vendorURL;
@@ -72,7 +72,7 @@ public class ConnectionString {
             vendorURL = connectionString.substring(vc.vendor.name().length()+1);
         }
         if( vc.vendor != null ) {
-            log.debug("Vendor URL: {}", vendorURL);
+            //log.debug("Vendor URL: {}", vendorURL);
             int optionStartIndex = vendorURL.indexOf(urlOptionsDelimiter);
             if( optionStartIndex > -1 ) {
                 String urlPart = vendorURL.substring(0, optionStartIndex);
