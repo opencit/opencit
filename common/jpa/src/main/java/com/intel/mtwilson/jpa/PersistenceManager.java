@@ -439,7 +439,7 @@ public abstract class PersistenceManager implements ServletContextListener {
 //        ds.setLoginTimeout(30); // in seconds ;   not supported by basicdatasource... and for some reason calls createDataSource() whic hdoesn't make sense
         ds.setMaxActive(50); // max 50 active connections to database
         ds.setMaxIdle(10); // max 10 idle connections in the pool
-        ds.setMaxOpenPreparedStatements(-1); // no limit
+        ds.setMaxOpenPreparedStatements(50); // no limit
         ds.setMaxWait(-1); // wait indefinitely for a new connection from the pool
         ds.setMinEvictableIdleTimeMillis(1000*60*30); // (milliseconds) connection may be idle up to 30 minutes before being evicted
         ds.setMinIdle(5); // min 5 idle connections in the pool
@@ -447,7 +447,7 @@ public abstract class PersistenceManager implements ServletContextListener {
         ds.setPassword(jpaProperties.getProperty("javax.persistence.jdbc.password"));
         ds.setPoolPreparedStatements(true);
         ds.setRemoveAbandoned(true);
-        ds.setRemoveAbandonedTimeout(60*60); // (seconds) connection may be abandoned for up to an hour before being removed
+        ds.setRemoveAbandonedTimeout(60*10); // (seconds) connection may be abandoned for up to 10 minutes before being removed
         ds.setTestOnBorrow(true);
         ds.setTestOnReturn(false);
         ds.setTestWhileIdle(true);
