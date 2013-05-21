@@ -744,7 +744,7 @@ mysql_clear() {
 # Environment:
 # - MYSQL_REQUIRED_VERSION (or provide it as a parameter)
 mysql_version() {
-  local min_version="${1:-${MYSQL_REQUIRED_VERSION}}"
+  local min_version="${1:-${mysql_required_version}}"
   MYSQL_CLIENT_VERSION=""
   MYSQL_CLIENT_VERSION_OK=""
   if [ -n "$mysql" ]; then
@@ -764,14 +764,14 @@ mysql_version_report() {
   if [ "$MYSQL_CLIENT_VERSION_OK" == "yes" ]; then
     echo_success "Mysql client version $MYSQL_CLIENT_VERSION is ok"
   else
-    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${MYSQL_REQUIRED_VERSION}"
+    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${mysql_required_version}"
   fi
 }
 
 # Environment:
 # - MYSQL_REQUIRED_VERSION
 mysql_detect() {
-  local min_version="${1:-${MYSQL_REQUIRED_VERSION}}"
+  local min_version="${1:-${mysql_required_version}}"
   if [[ -n "$MYSQL_HOME" && -n "$mysql" && -f "$mysql" ]]; then
     return
   fi
@@ -819,7 +819,7 @@ mysql_env_report() {
 # Environment:
 # - MYSQL_REQUIRED_VERSION
 mysql_require() {
-  local min_version="${1:-${MYSQL_REQUIRED_VERSION}}"
+  local min_version="${1:-${mysql_required_version}}"
   if [[ -z "$MYSQL_HOME" || -z "$mysql" || ! -f "$mysql" ]]; then
     mysql_detect ${min_version} > /dev/null
   fi
@@ -2139,7 +2139,7 @@ tomcat_clear() {
 
 
 tomcat_require() {
-  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
+  local min_version="${1:-${tomcat_required_version:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
   if not tomcat_ready; then
     tomcat_detect ${min_version} > /dev/null
   fi
@@ -2204,7 +2204,7 @@ tomcat_version() {
 # Environment:
 # - TOMCAT_REQUIRED_VERSION  (default is 6.0.29)
 tomcat_version_report() {
-  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
+  local min_version="${1:-${tomcat_required_version:-$DEFAULT_TOMCAT_REQUIRED_VERSION}}"
   #TOMCAT_VERSION=`tomcat_version`
   tomcat_version
   if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
@@ -2219,7 +2219,7 @@ tomcat_version_report() {
 # detects possible tomcat installations
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
-  local min_version="${1:-${TOMCAT_REQUIRED_VERSION:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
+  local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
 echo "min_version for tomcat_detect is $min_version"
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
