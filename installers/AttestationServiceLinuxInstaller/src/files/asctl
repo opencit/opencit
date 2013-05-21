@@ -190,14 +190,14 @@ create_saml_key() {
 }
 
 create_data_encryption_key() {
-  # first check to see if there is a key already set
-  data_encryption_key=`read_property_from_file mtwilson.as.dek ${package_config_filename}`
-  if [[ -n "${data_encryption_key}" ]]; then
-    echo "Data encryption key already exists"
-  else
-    echo "Creating data encryption key"
+#  # first check to see if there is a key already set
+#  data_encryption_key=`read_property_from_file mtwilson.as.dek ${package_config_filename}`
+#  if [[ -n "${data_encryption_key}" ]]; then
+#    echo "Data encryption key already exists"
+#  else
+#    echo "Creating data encryption key"
     mtwilson setup EncryptDatabase
-  fi
+#  fi
 }
 
 
