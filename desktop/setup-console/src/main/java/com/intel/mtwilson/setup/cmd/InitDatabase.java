@@ -145,7 +145,7 @@ public class InitDatabase implements Command {
         Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
-        DataSource ds = getDataSourceNoSchema();
+        DataSource ds = getDataSource();
         
         log.debug("Connecting to {}", databaseVendor);
         Connection c = null;
