@@ -189,24 +189,6 @@
                   <type>bin</type>
                 </artifactItem>
 		<!-- UI portals -->
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>WhiteListPortal</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>ManagementConsole</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>TrustDashBoard</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
 				<artifactItem>
 					<groupId>com.intel.mtwilson.linux</groupId>
 					<artifactId>mtwilson-portal-installer</artifactId>
@@ -313,18 +295,6 @@
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>WhiteListPortal</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>ManagementConsole</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>TrustDashBoard</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>

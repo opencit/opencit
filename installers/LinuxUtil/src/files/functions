@@ -158,10 +158,10 @@ is_version_at_least() {
        -n "${reqmajor}" && "${hasmajor}" -eq "${reqmajor}" \
        && -n "${reqminor}" && "${hasminor}" -ge "${reqminor}" \
      ]]; then
-    echo "yes"
+    #echo "yes"
     return 0
   else
-    echo "no"
+    #echo "no"
     return 1
   fi  
 }
@@ -2246,8 +2246,8 @@ echo "min_version for tomcat_detect is $min_version"
       fi
     fi
   fi
-echo "tomcat variable is $tomcat"
-echo "TOMCAT_VERSION is $TOMCAT_VERSION"
+#echo "tomcat variable is $tomcat"
+#echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
