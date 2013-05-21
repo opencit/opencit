@@ -113,7 +113,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             }
         }
         EntityManagerFactory factory = createFactory(persistenceUnitName, jpaProperties);
-        log.warn("Created EntityManagerFactory for persistence unit {}", persistenceUnitName);
+        log.debug("Created EntityManagerFactory for persistence unit {}", persistenceUnitName);
         factories.put(persistenceUnitName, factory);
     }
     
