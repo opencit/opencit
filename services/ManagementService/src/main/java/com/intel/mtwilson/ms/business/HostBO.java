@@ -1892,8 +1892,9 @@ public class HostBO extends BaseBO {
             //String hostNames = StringUtils.join(hostsToBeAttested, ",");
             // We don't need to process the output here as we refreshed the status to make sure that the SAML assertion table has the latest data
             // if and when the user requests.
-            List<HostTrustXmlResponse> samlForMultipleHosts = apiClientObj.getSamlForMultipleHosts(hostsToBeAttested, true);
-
+            if(! hostsToBeAttested.isEmpty()) {
+                List<HostTrustXmlResponse> samlForMultipleHosts = apiClientObj.getSamlForMultipleHosts(hostsToBeAttested, true);
+            }
             log.info("Successfully refreshed the status of all the hosts. ");
 
         } catch (MSException me) {
