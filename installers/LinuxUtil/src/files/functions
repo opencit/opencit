@@ -2903,6 +2903,9 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Glassfish..."
         ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
       elif using_tomcat; then
+        if [ ! tomcat_running ]; then
+          tomcat_start
+        fi
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp ${webservice_war_file} $TOMCAT_HOME/webapps/
         
