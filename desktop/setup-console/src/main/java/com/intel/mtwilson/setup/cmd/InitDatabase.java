@@ -140,6 +140,12 @@ public class InitDatabase implements Command {
             }
     }
     
+    private void verbose(String format, Object... args) {
+        if( options.getBoolean("verbose", false) ) {
+            System.out.println(String.format(format, args));
+        }
+    }
+    
     private void initDatabase() throws SetupException, IOException, SQLException {
         log.debug("Loading SQL for {}", databaseVendor);
         Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
@@ -159,8 +165,10 @@ public class InitDatabase implements Command {
 //        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
+        verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
             presentChanges.put(Long.valueOf(entry.id), entry);
+            if( entry != null ) { verbose("%s %s %s", entry.id, entry.applied_at, entry.description); }
         }
         
         HashSet<Long> changesToApply = new HashSet<Long>(sql.keySet());
