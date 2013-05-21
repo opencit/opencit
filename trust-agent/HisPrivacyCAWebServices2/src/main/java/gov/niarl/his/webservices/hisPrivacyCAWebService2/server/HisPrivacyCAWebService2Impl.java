@@ -13,6 +13,7 @@
 
 package gov.niarl.his.webservices.hisPrivacyCAWebService2.server;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.*;
 import java.security.*;
@@ -123,7 +124,7 @@ public class HisPrivacyCAWebService2Impl implements IHisPrivacyCAWebService2 {
 		String P12password = null;
 		int PrivCaCertValiditydays = 0;
 //		String filePath = System.getProperty("catalina.base") + "/webapps/HisPrivacyCAWebServices2/";
-		String propertiesFileName =  "PrivacyCA.properties";
+		// String propertiesFileName =  "PrivacyCA.properties";
 		InputStream PropertyFile = null;
 
 
@@ -132,12 +133,13 @@ public class HisPrivacyCAWebService2Impl implements IHisPrivacyCAWebService2 {
                         {
                         System.out.println("Location " + homeFolder);
 
-			PropertyFile = new FileInputStream(homeFolder +  propertiesFileName);
-			Properties PrivacyCaProperties = new Properties();
-			PrivacyCaProperties.load(PropertyFile);
-			P12filename = PrivacyCaProperties.getProperty(P12_FILE_NAME, null);
-			P12password = PrivacyCaProperties.getProperty(P12_PASSWORD, null);
-			PrivCaCertValiditydays = Integer.parseInt(PrivacyCaProperties.getProperty(PRIVCA_CERT_VALIDITYDAYS, "0"));
+			//PropertyFile = new FileInputStream(homeFolder +  propertiesFileName);
+			//Properties PrivacyCaProperties = new Properties();
+			//PrivacyCaProperties.load(PropertyFile);
+			P12filename = My.configuration().getConfiguration().getString(P12_FILE_NAME, null);
+			P12password = My.configuration().getConfiguration().getString(P12_PASSWORD, null);
+			PrivCaCertValiditydays = My.configuration().getConfiguration().getInt(PRIVCA_CERT_VALIDITYDAYS, 0);
+                    //Integer.parseInt(PrivacyCaProperties.getProperty(PRIVCA_CERT_VALIDITYDAYS, "0"));
 		} catch (FileNotFoundException e) {
 			System.out.println("Error finding Privacy CA properties file: cannot continue. Please place properties file in: home folder." + homeFolder);
 			System.out.println(e.toString());

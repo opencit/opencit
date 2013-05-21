@@ -301,6 +301,8 @@ public class MyConfiguration {
                     + "CloudSecurity" + File.separator + "mtwilson-portal.properties"));
             files.add(new File("C:" + File.separator + "Intel" + File.separator
                     + "CloudSecurity" + File.separator + "management-cmdutil.properties"));
+             files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "PrivacyCA.properties"));
 
         }
         // linux-specific location
@@ -312,6 +314,7 @@ public class MyConfiguration {
             files.add(new File("/etc/intel/cloudsecurity/audit-handler.properties"));
             files.add(new File("/etc/intel/cloudsecurity/mtwilson-portal.properties"));
             files.add(new File("/etc/intel/cloudsecurity/management-cmdutil.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/PrivacyCA.properties"));
         }
         return files;
     }

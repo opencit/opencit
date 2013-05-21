@@ -4,7 +4,9 @@
  */
 package com.intel.mountwilson.files;
 
+import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.mtwilson.util.ResourceFinder;
+import com.intel.mtwilson.My;
 import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.configuration.Configuration;
 
 /**
  *
@@ -24,23 +27,24 @@ import javax.servlet.http.HttpServletResponse;
 public class ClientFilesServlet extends HttpServlet {
 
     private String username = null;
-    private String password = null;
+    private PasswordHash password = null;
     public ClientFilesServlet() {
         super();
         try {
-            File configFile = ResourceFinder.getFile("PrivacyCA.properties");
-            FileInputStream in = new FileInputStream(configFile);
-            Properties p = new Properties();
-            p.load(in);
-            username = p.getProperty("ClientFilesDownloadUsername");
-            password = p.getProperty("ClientFilesDownloadPassword");
-            in.close();
+            //File configFile = ResourceFinder.getFile("PrivacyCA.properties");
+            //FileInputStream in = new FileInputStream(configFile);
+            Configuration myConf = My.configuration().getConfiguration();
+            //Properties p = new Properties();
+            //p.load(in);
+            username = myConf.getString("ClientFilesDownloadUsername");
+            String passwordHashed = myConf.getString("ClientFilesDownloadPassword");
+            password = PasswordHash.valueOf(passwordHashed);
         }
         catch(Exception e) {
             System.err.println("Error while loading PrivacyCA.properties: "+e.getMessage());
         }
         finally {
-            if( username == null || password == null || password.isEmpty() ) {
+            if( username == null || password == null ) {
                 System.err.println("Download username and password not set; client files download disabled");
             }            
         }
@@ -58,8 +62,9 @@ public class ClientFilesServlet extends HttpServlet {
         System.out.println("Client Files request called.");
         String user = request.getParameter("user");
         String pwd = request.getParameter("password");
-        if (username != null && password != null && !password.isEmpty() 
-                && user != null && user.equals(username) && pwd != null && pwd.equals(password)) {
+        try {
+        if (username != null && password != null 
+                && user != null && user.equals(username) && pwd != null && ! pwd.isEmpty() && password.isEqualTo(pwd)) {
 
 
             String setUpFile = ResourceFinder.getFile("privacyca-client.properties").getAbsolutePath();
@@ -92,6 +97,11 @@ public class ClientFilesServlet extends HttpServlet {
 
                 out.write("File not created. Try again later.");
             }
+        }
+        }catch(Exception e){
+            PrintWriter out = response.getWriter();
+            response.setContentType("application/html");
+            out.write("Cannot validate your password");
         }
     }
 

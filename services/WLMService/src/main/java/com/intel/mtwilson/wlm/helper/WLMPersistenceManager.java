@@ -39,9 +39,9 @@ public class WLMPersistenceManager extends com.intel.mtwilson.jpa.PersistenceMan
     public void configure() {
         log.trace("WLMPersistenceManager configure() adding persistence units ASDataPU, MSDataPU and AuditDataPU");
         try {
-        addPersistenceUnit("ASDataPU", MyPersistenceManager.getASDataJpaProperties(My.configuration().getConfiguration())); // ASConfig.getJpaProperties());
-        addPersistenceUnit("MSDataPU", MyPersistenceManager.getMSDataJpaProperties(My.configuration().getConfiguration())); // MSConfig.getJpaProperties());
-        addPersistenceUnit("AuditDataPU", MyPersistenceManager.getAuditDataJpaProperties(My.configuration().getConfiguration())); // AuditConfig.getJpaProperties());
+        addPersistenceUnit("ASDataPU", MyPersistenceManager.getASDataJpaProperties(My.configuration())); // ASConfig.getJpaProperties());
+        addPersistenceUnit("MSDataPU", MyPersistenceManager.getMSDataJpaProperties(My.configuration())); // MSConfig.getJpaProperties());
+        addPersistenceUnit("AuditDataPU", MyPersistenceManager.getAuditDataJpaProperties(My.configuration())); // AuditConfig.getJpaProperties());
         }
         catch(Exception e) {
             log.error("Cannot add persistence unit: {}", e.toString(), e);

@@ -41,7 +41,7 @@ public class CheckConfig implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         if( options.getBoolean("jpa",false) ) {
-            Properties p = MyPersistenceManager.getASDataJpaProperties(ASConfig.getConfiguration());
+            Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
 
             System.out.println("javax.persistence.jdbc.driver = "+p.getProperty("javax.persistence.jdbc.driver"));
             System.out.println("javax.persistence.jdbc.url = "+p.getProperty("javax.persistence.jdbc.url"));
