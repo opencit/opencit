@@ -128,6 +128,7 @@ APICLIENT_YAST_PACKAGES="unzip"
 APICLIENT_ZYPPER_PACKAGES="unzip"
 auto_install "Installer requirements" "APICLIENT"
 
+
 # api client: ensure destination exists and clean it before copying
 mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
@@ -162,6 +163,12 @@ else
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
 fi
+
+# copy default logging settings to /etc
+chmod 700 logback.xml
+cp logback.xml /etc/intel/cloudsecurity
+
+
 
 find_installer() {
   local installer="${1}"

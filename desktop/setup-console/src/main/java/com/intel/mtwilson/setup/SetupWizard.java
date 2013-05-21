@@ -5,6 +5,7 @@
 package com.intel.mtwilson.setup;
 
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import java.io.FileInputStream;
@@ -38,19 +39,14 @@ public class SetupWizard {
         this.conf = conf;
     }
     
-    public Connection getDatabaseConnection() throws SetupException {
+    public Connection getDatabaseConnection() throws SetupException, IOException {
         try {
+            Properties p = MyPersistenceManager.getJpaProperties(My.configuration());
             // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-            Class.forName(conf.getString("mountwilson.as.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-            String dbms = (conf.getString("mountwilson.as.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
-            String url =conf.getString("mountwilson.as.db.url",
-                    conf.getString("mtwilson.db.url",
-                    String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
-                    conf.getString("mountwilson.as.db.host", conf.getString("mtwilson.db.host","127.0.0.1")),
-                    conf.getString("mountwilson.as.db.port", conf.getString("mtwilson.db.port","3306")),
-                    conf.getString("mountwilson.as.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
-            String user = conf.getString("mountwilson.as.db.user", conf.getString("mtwilson.db.user"));
-            String pass = conf.getString("mountwilson.as.db.password", conf.getString("mtwilson.db.password"));
+            Class.forName(p.getProperty("javax.persistence.jdbc.driver"));
+            String url =  p.getProperty("javax.persistence.jdbc.url");
+            String user =  p.getProperty("javax.persistence.jdbc.user");
+            String pass =  p.getProperty("javax.persistence.jdbc.password");
             Connection conn = DriverManager.getConnection(url, user, pass);
             
             return conn;
@@ -106,7 +102,7 @@ public class SetupWizard {
         }
     }
     
-    public void encryptVmwareConnectionStrings() throws SetupException {
+    public void encryptVmwareConnectionStrings() throws SetupException, IOException {
         Connection c = getDatabaseConnection();
         /*
         if( !allNonEmptyFieldsInTableBeginWith(c, "tbl_hosts", "http") ) {

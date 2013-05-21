@@ -5,6 +5,7 @@
 package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
@@ -40,12 +41,12 @@ import org.slf4j.LoggerFactory;
  */
 public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
-    private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
+//    private MwPortalUserJpaController keystoreJpa ;// new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
     private static final Logger logger = LoggerFactory.getLogger(BootstrapUser.class.getName());
     private SetupContext ctx = null;
     public static final Console console = System.console();
     MSPersistenceManager persistenceManager = new MSPersistenceManager();
-    MwPortalUserJpaController jpaController = new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
+    MwPortalUserJpaController portalUserJpa; // new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
     
     @Override
     public void setContext(SetupContext ctx) {
@@ -67,7 +68,8 @@ public class BootstrapUser implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
-        
+//        keystoreJpa = My.jpa().mwKeystore();
+        portalUserJpa = My.jpa().mwPortalUser();
         //File directory;
         //String directoryPath = options.getString("keystore.users.dir", "/var/opt/intel/management-console/users"); //serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
         //if( directoryPath == null || directoryPath.isEmpty() ) {
@@ -97,7 +99,7 @@ public class BootstrapUser implements Command {
             return;
         }
         
-        MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
+        MwPortalUser keyTest = portalUserJpa.findMwPortalUserByUserName(username);
         if(keyTest != null) {
           logger.info("A user already exists with the specified User Name. Please select different User Name.");
           throw new SetupException("User account with that name already exists ");
@@ -121,13 +123,13 @@ public class BootstrapUser implements Command {
         // load the new key
          ByteArrayResource certResource = new ByteArrayResource();
          SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
-         MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);
+         MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);
          if(apiClient == null){
             MwPortalUser keyTable = new MwPortalUser();
             keyTable.setUsername(username);
             keyTable.setKeystore(certResource.toByteArray());
             keyTable.setStatus("PENDING");
-            keystoreJpa.create(keyTable);
+            portalUserJpa.create(keyTable);
          }
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // check database for record
@@ -154,10 +156,10 @@ public class BootstrapUser implements Command {
             c.close();
             */
            
-            MwPortalUser apiClient = jpaController.findMwPortalUserByUserName(username);   
+            MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);   
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
-            jpaController.edit(apiClient);
+            portalUserJpa.edit(apiClient);
             System.err.println(String.format("Attempt to approved %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
             ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
             ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
