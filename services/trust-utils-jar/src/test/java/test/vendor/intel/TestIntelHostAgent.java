@@ -17,6 +17,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
@@ -64,7 +65,7 @@ public class TestIntelHostAgent {
     
     public static HostAgent getAgent() throws KeyManagementException, IOException {
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
-        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+        TlsPolicy tlsPolicy =  new InsecureTlsPolicy(); //new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent hostAgent = factory.getHostAgent(ConnectionString.forIntel(hostname), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;
@@ -170,5 +171,6 @@ AIK Certificate: null
         log.debug("OS Name: {}", hostDetails.VMM_OSName);
         log.debug("OS Version: {}", hostDetails.VMM_OSVersion);
         log.debug("AIK Certificate: {}", hostDetails.AIK_Certificate);
+        log.debug("Processor Info:{}", hostDetails.Processor_Info);
     }
 }

@@ -46,7 +46,8 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			var classValue = null;
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
 			str+='<tr class="'+classValue+'" hostID="'+hostDetails[item].hostID+'" id="host_div_id_'+hostDetails[item].hostName.replace(/\./g,'_')+'">'+
-				'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+                                                //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
 				'<td class="row2">'+hostDetails[item].hostName+'</td>'+
 				'<td align="center" class="row3"><img border="0" src="'+hostDetails[item].osName+'"></td>';
 				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+hostDetails[item].hypervisorName+'">' : '';
@@ -440,7 +441,7 @@ function getFailureReportSuccess(responseJSON) {
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
 			var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
             str+='<tr class="'+classValue+'">'+
-            	'<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+                        '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+            	
             	'<td class="failureReportRow2">'+reportdata[item].name+'</td>'+
                 '<td class="failureReportRow3" style="'+styleUntrusted+'" >'+reportdata[item].value+'</td>'+
                 '<td class="failureReportRow4" >'+reportdata[item].whiteListValue+'</td>'+

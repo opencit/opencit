@@ -289,6 +289,27 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             host.BIOS_Oem = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString();
             host.BIOS_Name = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString(); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
             host.BIOS_Version = vmware.getMORProperty(hostMOR, "hardware.biosInfo.biosVersion").toString();
+            
+            /*
+            // Possible values for this processor Info includes. So, if there is a "-", we are assuming that it is either a Sandy Bridge or a IVY bridge system
+            // For others starting with X56, they are Westmere systems belonging to Thurley platform
+            // Romley: "Intel(R) Xeon(R) CPU E5-2680 0 @ 2.70GHz"
+            // Thurley: "Intel(R) Xeon(R) CPU X5680 @ 3.33GHz"
+            String processorInfo = vmware.getMORProperty(hostMOR, "summary.hardware.cpuModel").toString();
+            processorInfo = processorInfo.substring((processorInfo.indexOf("CPU") + ("CPU").length())).trim();
+            if (processorInfo.contains("-") || processorInfo.contains("-")) {
+                processorInfo = processorInfo.substring(0, processorInfo.indexOf("-"));
+            } else {
+                processorInfo = processorInfo.substring(0, 3);
+            }*/
+            // There is one more attribute in the vCenter that actually provides the processor name directly unlike the open source hosts where we
+            // need to do the mapping
+            // Possible values include: "intel-westmere", "intel-sandybridge"
+             String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString();
+             if (processorInfo.contains("intel")) {
+                 processorInfo = processorInfo.substring( "intel".length()+1);
+             }
+            host.Processor_Info = processorInfo.toUpperCase();
             return host;
         } catch (InvalidPropertyFaultMsg ex) {
             log.error("VCenter host does not support host details property: {}", ex.getLocalizedMessage());

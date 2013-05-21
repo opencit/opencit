@@ -30,6 +30,7 @@ public class MleBO extends BaseBO {
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
         private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
+        private static String invalidWhiteList = "[0]{40}|[F]{40}";
 
         public MleBO() {
                                 mleJpaController = new TblMleJpaController(getEntityManagerFactory());
@@ -42,6 +43,8 @@ public class MleBO extends BaseBO {
                         // This function will be used to validate the white list values. We have seen in some cases where in we would get -1. 
                         private boolean isWhiteListValid(String whiteList) {
                             if( whiteList == null || whiteList.trim().isEmpty() ) { return true; } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
+                            // Bug:775 & 802: If the TPM is reset we have seen that all the PCR values would be set to Fs. So, we need to disallow that since it is invalid. Also, all 0's are also invalid.
+                           if (whiteList.matches(invalidWhiteList)) {return false;}
                                 if (whiteList.matches(hexadecimalRegEx)) {
                                         return true;
                                 } else {

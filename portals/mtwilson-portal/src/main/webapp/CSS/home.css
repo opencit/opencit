@@ -766,3 +766,30 @@ text-align: center;
 .whiteListConfigDropDown{
 	width: 150px;
 }
+
+.failureReportdiv{
+	margin:20px 5px;
+	text-align: center;
+}
+
+.failureReportRow1{width: 20px;}
+.failureReportRow2{width: 100px;}
+.failureReportRow3{width: 390px;}
+.failureReportRow4{}
+
+.subTableDivFailureReport{
+	padding: 10px 15px;
+	widows: 92%;
+}
+
+.subTableDivFailureReport table{
+	border: 1px solid #4B6C9E;
+}
+.subTableDivFailureReport table thead{
+	background-color: #708EAE;
+	color: white;
+}
+.failureReportSubRow1{width: 390px;}
+.failureReportSubRow2{width: 100px;}
+.failureReportSubRow3{width: 390px;}
+

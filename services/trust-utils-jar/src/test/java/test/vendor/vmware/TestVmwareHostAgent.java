@@ -209,5 +209,6 @@ AIK Certificate: null
         log.debug("OS Name: {}", hostDetails.VMM_OSName);
         log.debug("OS Version: {}", hostDetails.VMM_OSVersion);
         log.debug("AIK Certificate: {}", hostDetails.AIK_Certificate);
+        log.debug("Processor Info: {}", hostDetails.Processor_Info);
     }
 }
