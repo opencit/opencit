@@ -60,7 +60,7 @@ public class ConnectionString {
     }
     
     public static VendorConnection parseConnectionString(String connectionString) throws MalformedURLException {
-        log.debug("Connection string: {}", connectionString);
+//        log.debug("Connection string: {}", connectionString);  // do not log this regularly because it may contain a password
         VendorConnection vc = new VendorConnection();
         vc.vendor = vendorFromURL(connectionString);
         String vendorURL;
@@ -72,13 +72,13 @@ public class ConnectionString {
             vendorURL = connectionString.substring(vc.vendor.name().length()+1);
         }
         if( vc.vendor != null ) {
-            log.debug("Vendor URL: {}", vendorURL);
+//            log.debug("Vendor URL: {}", vendorURL); // do not log this regularly because it may contain a password
             int optionStartIndex = vendorURL.indexOf(urlOptionsDelimiter);
             if( optionStartIndex > -1 ) {
                 String urlPart = vendorURL.substring(0, optionStartIndex);
                 String optionsPart = vendorURL.substring(optionStartIndex+1); // skip the delimiter
                 log.debug("URL part: {}", urlPart);
-                log.debug("Options part: {}", optionsPart);
+//                log.debug("Options part: {}", optionsPart);  // do not log this regularly because it may contain a password
                 vc.url = new URL(urlPart); // vendorURL without the options
                 vc.options = parseOptions(optionsPart);
             }
@@ -86,7 +86,7 @@ public class ConnectionString {
                 vc.url = new URL(vendorURL);
                 vc.options = null;
             }
-        }
+        }   
         return vc;
     }
     
@@ -815,15 +815,15 @@ public class ConnectionString {
 //    }
 
     private static String vendorConnectionFromURL(String url) throws MalformedURLException {
-        log.debug("url: {}", url);
+//        log.debug("url: {}", url);  // do not log this regularly because it may contain a password
         Vendor v = vendorFromURL(url);
         if( v == null ) {
             return null;
         }
-        log.debug("vendor name: {}", v.name());
-        log.debug("vendor name length: {}", v.name().length());
+//        log.debug("vendor name: {}", v.name());
+//        log.debug("vendor name length: {}", v.name().length());
         String str = url.substring(v.name().length()+1); // start one character after the vendor prefix (vendor name followed by the colon)
-        log.debug("vendor connection: {}", str);
+//        log.debug("vendor connection: {}", str);
         return str;
     }
     
