@@ -36,7 +36,7 @@ public class HashPassword implements Command {
 
     @Override
     public void execute(String[] args) throws Exception {
-        if( args.length < 1) { throw new IllegalArgumentException("Usage: HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD]"); }          
+        if(! options.containsKey("env-password")) { throw new IllegalArgumentException("Usage: HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD"); }          
         String password = getExistingPassword("the PrivacyCA private key download", "env-password");
         PasswordHash pwHash = new PasswordHash(password);
         System.out.println(pwHash.toString());
