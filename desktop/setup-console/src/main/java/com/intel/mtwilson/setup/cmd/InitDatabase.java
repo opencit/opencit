@@ -125,6 +125,7 @@ public class InitDatabase implements Command {
         }
     }
     private String vendor = null;
+    /*
     private boolean checkDatabaseConnection() throws SetupException, IOException, SQLException {
         
             DataSource ds = getDataSourceNoSchema();
@@ -139,6 +140,7 @@ public class InitDatabase implements Command {
                 return false;
             }
     }
+    */
     
     private void verbose(String format, Object... args) {
         if( options.getBoolean("verbose", false) ) {
@@ -160,6 +162,7 @@ public class InitDatabase implements Command {
         }
         catch(SQLException e) {
             log.error("Failed to connect to {} with schema: error =" + e.getMessage(), databaseVendor); 
+            throw e;
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
 //        log.debug("Connected to schema: {}", c.getSchema());
@@ -354,7 +357,7 @@ public class InitDatabase implements Command {
     }
     
 
-    
+    /*
     private DataSource getDataSourceNoSchema() throws SetupException {
         try {
             PropertyHidingConfiguration confNoSchema = new PropertyHidingConfiguration(ASConfig.getConfiguration());
@@ -375,6 +378,7 @@ public class InitDatabase implements Command {
         }
         
     }
+    */
     
     
     private List<String> getTableNames(Connection c) throws SQLException {
