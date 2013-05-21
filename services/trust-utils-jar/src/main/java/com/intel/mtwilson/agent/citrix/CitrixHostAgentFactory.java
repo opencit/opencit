@@ -21,6 +21,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
           CitrixClient client = new CitrixClient(new TlsConnection(vendorConnectionString, tlsPolicy));
+          client.init();
           return new CitrixHostAgent(client);
         }
         catch(Exception e) {
@@ -32,6 +33,7 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
           CitrixClient client = new CitrixClient(new TlsConnection(vendorConnectionString, tlsPolicy));
+          client.init();
           return new CitrixHostAgent(client);
         }
         catch(Exception e) {

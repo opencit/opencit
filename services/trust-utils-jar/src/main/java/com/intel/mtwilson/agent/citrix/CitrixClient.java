@@ -4,62 +4,46 @@
  */
 package com.intel.mtwilson.agent.citrix;
 
-import java.net.MalformedURLException; 
-import java.net.URL; 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;  
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap; 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
-import javax.net.ssl.HostnameVerifier;  
-import javax.net.ssl.HttpsURLConnection;  
-import javax.net.ssl.SSLContext;  
-import javax.net.ssl.SSLSession;  
-import javax.net.ssl.TrustManager;  
-import javax.net.ssl.X509TrustManager; 
-import javax.persistence.EntityManagerFactory;
-import java.sql.Timestamp;
-import java.util.Date;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.io.IOUtils;
-
+import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mountwilson.as.helper.CommandUtil;
+import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
+import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.mtwilson.tls.TlsConnection;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
 import com.xensource.xenapi.Session;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
-
-
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mountwilson.as.helper.CommandUtil;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
-import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.model.Pcr;
-import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
-import com.intel.mtwilson.tls.TlsConnection;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.configuration.Configuration;
 import org.apache.xmlrpc.XmlRpcException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,6 +98,9 @@ public class CitrixClient {
         opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
         aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
         
+    }
+    
+    public void init() {
         boolean foundAllRequiredFiles = true;
         String required[] = new String[] { aikverifyhome, opensslCmd, aikverifyCmd, aikverifyhomeData };
         for(String filename : required) {
@@ -133,6 +120,7 @@ public class CitrixClient {
         if( !datafolder.canWrite() ) {
             throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));            
         }    
+        
     }
 	
 	
@@ -263,8 +251,8 @@ public class CitrixClient {
             
         } catch (ASException e) {
             throw e;
-        } catch(UnknownHostException e) {
-            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
+//        } catch(UnknownHostException e) {
+//            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }  catch (Exception e) {
             System.err.println("stdalex-error caught exception during login: " + e.toString() + " class: " + e.getClass());
             throw new ASException(e);
