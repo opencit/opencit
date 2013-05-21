@@ -1337,7 +1337,7 @@ public class HostBO extends BaseBO {
 
                 List<ManifestData> biosMFList = new ArrayList<ManifestData>();
                 for (String biosPCR : biosPCRList) {
-                    biosMFList.add(new ManifestData(biosPCR, Sha1Digest.ZERO.toString()));
+                    biosMFList.add(new ManifestData(biosPCR, ""));
                 }
 
                 mleObj.setManifestList(biosMFList);
@@ -1465,7 +1465,7 @@ public class HostBO extends BaseBO {
 
                 List<ManifestData> vmmMFList = new ArrayList<ManifestData>();
                 for (String vmmPCR : vmmPCRList) {
-                    vmmMFList.add(new ManifestData(vmmPCR, Sha1Digest.ZERO.toString())); // whitelist service now allows empty pcr's 
+                    vmmMFList.add(new ManifestData(vmmPCR, "")); // whitelist service now allows empty pcr's 
                 }
 
                 mleVMMObj.setManifestList(vmmMFList);
