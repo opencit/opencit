@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.files;
 
+import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.util.Properties;
 import java.io.File;
@@ -24,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 public class ClientFilesServlet extends HttpServlet {
 
     private String username = null;
-    private String password = null;
+    private PasswordHash password = null;
     public ClientFilesServlet() {
         super();
         try {
@@ -33,14 +34,16 @@ public class ClientFilesServlet extends HttpServlet {
             Properties p = new Properties();
             p.load(in);
             username = p.getProperty("ClientFilesDownloadUsername");
-            password = p.getProperty("ClientFilesDownloadPassword");
+            String passwordHashed = p.getProperty("ClientFilesDownloadPassword");
+            password = PasswordHash.valueOf(passwordHashed);
+            
             in.close();
         }
         catch(Exception e) {
             System.err.println("Error while loading PrivacyCA.properties: "+e.getMessage());
         }
         finally {
-            if( username == null || password == null || password.isEmpty() ) {
+            if( username == null || password == null ) {
                 System.err.println("Download username and password not set; client files download disabled");
             }            
         }
@@ -58,8 +61,9 @@ public class ClientFilesServlet extends HttpServlet {
         System.out.println("Client Files request called.");
         String user = request.getParameter("user");
         String pwd = request.getParameter("password");
-        if (username != null && password != null && !password.isEmpty() 
-                && user != null && user.equals(username) && pwd != null && pwd.equals(password)) {
+        try {
+        if (username != null && password != null 
+                && user != null && user.equals(username) && pwd != null && ! pwd.isEmpty() && password.isEqualTo(pwd)) {
 
 
             String setUpFile = ResourceFinder.getFile("privacyca-client.properties").getAbsolutePath();
@@ -92,6 +96,11 @@ public class ClientFilesServlet extends HttpServlet {
 
                 out.write("File not created. Try again later.");
             }
+        }
+        }catch(Exception e){
+            PrintWriter out = response.getWriter();
+            response.setContentType("application/html");
+            out.write("Cannot validate your password");
         }
     }
 
