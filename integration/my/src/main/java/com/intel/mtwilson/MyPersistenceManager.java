@@ -69,6 +69,7 @@ public class MyPersistenceManager extends PersistenceManager {
         prop.put("javax.persistence.jdbc.url", url);
         prop.put("javax.persistence.jdbc.user", config.getDatabaseUsername());
         prop.put("javax.persistence.jdbc.password", config.getDatabasePassword());
+        System.err.println("getJpaProps Default url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
     }
     
@@ -103,6 +104,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 config.getString("mountwilson.as.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
+        System.err.println("getJpaProps ASdata url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
     }    
     
@@ -137,6 +139,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 config.getString("mountwilson.ms.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
+        System.err.println("getJpaProps MSData url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
     }
@@ -173,6 +176,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 config.getString("mountwilson.audit.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
+        System.err.println("getJpaProps audit url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
     }
@@ -208,6 +212,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 config.getString("mountwilson.mc.db.password", 
                 config.getString("mtwilson.db.password", 
                 "password")));
+        System.err.println("getJpaProps MCData url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
     }    
