@@ -185,7 +185,7 @@ public class VMwareConnectionPool {
                 throw new VMwareConnectionException("Cannot connect to vcenter: "+url.getHost(), e);
             }
             catch(MalformedURLException e2) {
-                log.error("Cannot connect to vcenter: Invalid connection string: {}", tlsConnection.getConnectionString());
+                //log.error("Cannot connect to vcenter: Invalid connection string: {}", tlsConnection.getConnectionString());
                 throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string: "+e.toString(), e);                
             }
         }
