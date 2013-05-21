@@ -20,7 +20,7 @@ public class AuditPersistenceManager extends PersistenceManager {
     @Override
     public void configure() {
         try {
-        addPersistenceUnit("AuditDataPU", MyPersistenceManager.getAuditDataJpaProperties(My.configuration().getConfiguration())); // AuditConfig.getJpaProperties());
+        addPersistenceUnit("AuditDataPU", MyPersistenceManager.getAuditDataJpaProperties(My.configuration())); // AuditConfig.getJpaProperties());
 //        addPersistenceUnit("AuditDataPU", AuditConfig.getJpaProperties());
         } catch(Exception e) {
             log.error("Cannot add persistence unit: {}", e.toString(), e);
