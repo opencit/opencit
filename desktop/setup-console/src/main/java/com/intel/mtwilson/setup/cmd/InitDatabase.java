@@ -145,7 +145,7 @@ public class InitDatabase implements Command {
         Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
-        DataSource ds = getDataSource();
+        DataSource ds = getDataSourceNoSchema();
         
         log.debug("Connecting to {}", databaseVendor);
         Connection c = null;
@@ -153,7 +153,7 @@ public class InitDatabase implements Command {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
         catch(SQLException e) {
-            log.error("Failed to connect to {} with schema", databaseVendor);
+            log.error("Failed to connect to {} with schema", databaseVendor); 
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
 //        log.debug("Connected to schema: {}", c.getSchema());
@@ -342,8 +342,7 @@ public class InitDatabase implements Command {
         }
         catch(IOException e) {
             throw new SetupException("Cannot load persistence unit info", e);
-        }
-        
+        }   
     }
     
 
