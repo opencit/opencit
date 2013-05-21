@@ -21,6 +21,7 @@ import java.util.Properties;
 import javax.crypto.SecretKey;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +128,9 @@ public class SetupWizard {
                 Properties xxxTodoSubclassConf = new Properties();
                 xxxTodoSubclassConf.load(new FileInputStream("/etc/intel/cloudsecurity/attestation-service.properties"));
                 xxxTodoSubclassConf.setProperty(name, dekBase64);
-                xxxTodoSubclassConf.store(new FileOutputStream("/etc/intel/cloudsecurity/attestation-service.properties"), "auto-saved");
+                FileOutputStream out = new FileOutputStream("/etc/intel/cloudsecurity/attestation-service.properties");
+                xxxTodoSubclassConf.store(out, "auto-saved");
+                IOUtils.closeQuietly(out);
                 My.reset();
             } catch (CryptographyException e) {
                 throw new SetupException(String.format("Cannot create Data Encryption Key %s", name), e);
