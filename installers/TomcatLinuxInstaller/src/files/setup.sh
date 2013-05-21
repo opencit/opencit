@@ -62,10 +62,10 @@ mkdir -p /etc/monit/conf.d
 if [ ! -a /etc/monit/conf.d/tomcat.monitrc ]; then
  echo "#tomcat monitor
 	check host tomcat with address 127.0.0.1
-	start program = "/usr/local/bin/mtwilson tomcat-start"
-	stop program = "/usr/local/bin/mtwilson tomcat-stop"
+	start program = \"/usr/local/bin/mtwilson tomcat-start\"
+	stop program = \"/usr/local/bin/mtwilson tomcat-stop\"
 	if failed port 8443 TYPE TCP PROTOCOL HTTP
-		and request "/" for 3 cycles
+		and request \"/\" for 3 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	# tomcat portal
