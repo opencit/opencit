@@ -1653,6 +1653,10 @@ glassfish_ready() {
 # If you pass a parameter, it is the path to a glassfish "asadmin" binary 
 # If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
 glassfish_version() {
+
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+
   if [[ -n "$glassfish" ]]; then
     # extract the version number from a string like: glassfish version "3.0"
     local current_glassfish_version=`$glassfish version 2>&1 | grep -i glassfish | grep -i version | awk '{ print $8 }'`
@@ -1687,6 +1691,9 @@ glassfish_version_report() {
 # - minimum required version
 glassfish_detect() {
   local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
+
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
 
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
@@ -2170,6 +2177,7 @@ tomcat_ready() {
 tomcat_version() {
   # Either the JAVA_HOME or the JRE_HOME environment variable must be defined
   # At least one of these environment variable is needed to run this program
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
   if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
 
   if [[ -n "$tomcat" ]]; then
@@ -2221,6 +2229,10 @@ tomcat_version_report() {
 tomcat_detect() {
   local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
 echo "min_version for tomcat_detect is $min_version"
+
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
       fi
@@ -2290,7 +2302,7 @@ tomcat_install() {
       gunzip -c $TOMCAT_PACKAGE | tar xf - 2>&1  >/dev/null
       local tomcat_folder=`echo $TOMCAT_PACKAGE | awk -F .tgz '{ print $1 }'`
       mv $tomcat_folder /usr/share
-     tomcat_detect
+      tomcat_detect
     else
       TOMCAT_YUM_PACKAGES="tomcat6"
       TOMCAT_APT_PACKAGES="tomcat6"
