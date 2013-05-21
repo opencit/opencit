@@ -6,6 +6,7 @@ package com.intel.mountwilson.files;
 
 import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.mtwilson.util.ResourceFinder;
+import com.intel.mtwilson.My;
 import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.configuration.Configuration;
 
 /**
  *
@@ -29,15 +31,14 @@ public class ClientFilesServlet extends HttpServlet {
     public ClientFilesServlet() {
         super();
         try {
-            File configFile = ResourceFinder.getFile("PrivacyCA.properties");
-            FileInputStream in = new FileInputStream(configFile);
-            Properties p = new Properties();
-            p.load(in);
-            username = p.getProperty("ClientFilesDownloadUsername");
-            String passwordHashed = p.getProperty("ClientFilesDownloadPassword");
+            //File configFile = ResourceFinder.getFile("PrivacyCA.properties");
+            //FileInputStream in = new FileInputStream(configFile);
+            Configuration myConf = My.configuration().getConfiguration();
+            //Properties p = new Properties();
+            //p.load(in);
+            username = myConf.getString("ClientFilesDownloadUsername");
+            String passwordHashed = myConf.getString("ClientFilesDownloadPassword");
             password = PasswordHash.valueOf(passwordHashed);
-            
-            in.close();
         }
         catch(Exception e) {
             System.err.println("Error while loading PrivacyCA.properties: "+e.getMessage());

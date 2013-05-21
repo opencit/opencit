@@ -64,6 +64,13 @@
 	    <classifier>HisWebServices-client</classifier>
         </dependency>
         -->
+		<dependency>
+			<groupId>com.intel.mtwilson.integration</groupId>
+			<artifactId>my</artifactId>
+			<version>1.2-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+	
         <dependency>
             <groupId>gov.niarl.his.webservices</groupId>
             <artifactId>his-clients</artifactId>
