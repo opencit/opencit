@@ -321,6 +321,7 @@ public class TrustAgent {
                 + "<biosVersion> " + context.getBiosVersion()+ "</biosVersion>"
                 + "<vmmName>" + context.getVmmName() + "</vmmName>"
                 + "<vmmVersion>" + context.getVmmVersion() + "</vmmVersion>"
+                + "<processorInfo>" + context.getProcessorInfo() + "</processorInfo>"
                 + "</host_info>";
         return responseXML;
         

@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.business;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.api.*;
+import com.intel.mtwilson.as.controller.MwProcessorMappingJpaController;
 import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
@@ -15,6 +16,7 @@ import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
+import com.intel.mtwilson.as.data.MwProcessorMapping;
 import com.intel.mtwilson.as.data.TblEventType;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblLocationPcr;
@@ -147,6 +149,34 @@ public class HostBO extends BaseBO {
         return rsaApiClient;
     }
 
+    
+    public String getPlatformName(String processorNameOrCPUID) {
+        
+        String platformName = "";
+        try {
+            MwProcessorMappingJpaController jpaController = new MwProcessorMappingJpaController(getASEntityManagerFactory());
+        
+            // Let us first search in the processorName field. If it cannot find, then we will search on the CPU ID field
+            MwProcessorMapping procMap = jpaController.findByProcessorType(processorNameOrCPUID);
+            if (procMap == null) {
+                procMap = jpaController.findByCPUID(processorNameOrCPUID);
+            }
+            
+            if (procMap != null)
+                platformName = procMap.getPlatformName();
+            
+        } catch (MSException me) {
+            log.error("Error during retrieval of platform name details. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+        } catch (Exception ex) {
+            log.error("Unexpected errror during retrieval of platform name details. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of platform name details." + ex.getMessage());
+        }
+        
+        return platformName;
+        
+    }
+    
     /**
      * This is a helper function which if provided the host name and connection
      * string, would retrieve the BIOS & VMM configuration from the host,
@@ -191,6 +221,7 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_Version = hostDetails.VMM_Version;
                 hostObj.VMM_OSName = hostDetails.VMM_OSName;
                 hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
+                hostObj.Processor_Info = hostDetails.Processor_Info;
             } catch (Throwable te) {
                 log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
                 throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
@@ -203,7 +234,7 @@ public class HostBO extends BaseBO {
             
             hostConfigObj.setTxtHostRecord(hostObj);
             log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
-                    + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version);
+                    + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version + ":" + hostObj.Processor_Info);
 
             // Let us first verify if all the configuration details required for host registration already exists. If not, it will throw
             // corresponding exception.
@@ -296,7 +327,7 @@ public class HostBO extends BaseBO {
                 } else {
                     // Assuming INTEL
                     biosPCRs = "0";
-                    vmmPCRs = "17,18,19";                    
+                    vmmPCRs = "17,18";                    
                 }
                 
                 hostConfigObj.setBiosPCRs(biosPCRs);
@@ -366,7 +397,7 @@ public class HostBO extends BaseBO {
                                         } else {
                                             // Assuming INTEL
                                             biosPCRs = "0";
-                                            vmmPCRs = "17,18,19";                    
+                                            vmmPCRs = "17,18";                    
                                         }
 
                                         hostConfigObj.setBiosPCRs(biosPCRs);
@@ -888,7 +919,7 @@ public class HostBO extends BaseBO {
                 } else {
                     // Assuming INTEL
                     biosPCRs = "0";
-                    vmmPCRs = "17,18,19";                    
+                    vmmPCRs = "17,18";                    
                 }
                 
                 hostConfigObj.setTxtHostRecord(gkvHost);
@@ -995,6 +1026,7 @@ public class HostBO extends BaseBO {
                     gkvHost.VMM_Version = gkvHostDetails.VMM_Version;
                     gkvHost.VMM_OSName = gkvHostDetails.VMM_OSName;
                     gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
+                    gkvHost.Processor_Info = gkvHostDetails.Processor_Info;
                 } catch (Throwable te) {
                     log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.toString());
                     te.printStackTrace();
@@ -1011,7 +1043,7 @@ public class HostBO extends BaseBO {
                 hostConfigObj.setTxtHostRecord(gkvHost);
                 System.err.println("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":"
                         + gkvHost.BIOS_Version + ":" + gkvHost.VMM_OSName + ":" + gkvHost.VMM_OSVersion
-                        + ":" + gkvHost.VMM_Version);
+                        + ":" + gkvHost.VMM_Version + ":" + gkvHost.Processor_Info);
 
                 String reqdManifestList = "";
 
@@ -1174,8 +1206,13 @@ public class HostBO extends BaseBO {
 
             // We need to handle the case where the user might want to use the OEM specific White List. By default it is
             // the global value.
+            // Bug 799 & 791: Need to append the platform name too
+            String platformName = getPlatformName(hostObj.Processor_Info);
             if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM) {
-                hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + hostObj.VMM_Name;
+                if (!platformName.isEmpty())
+                    hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
+                else
+                    hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;
             }
 
             TblOem oemTblObj = oemJpa.findTblOemByName(hostObj.BIOS_Oem);
@@ -1401,8 +1438,14 @@ public class HostBO extends BaseBO {
                 if (hostConfigObj != null && value) {
                     hostObj.VMM_Name = hostObj.HostName + "_" + hostObj.VMM_Name;
                 } else if (hostConfigObj != null && value2) {
-                    hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + hostObj.VMM_Name;
+                    // Bug 799 & 791: Need to append the platform name too
+                    String platformName = getPlatformName(hostObj.Processor_Info);
+                    if (!platformName.isEmpty())
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
+                    else
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
                 }
+                
                 // Create the VMM MLE
                 MleData mleVMMObj = new MleData();
                 mleVMMObj.setName(hostObj.VMM_Name);
