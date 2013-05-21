@@ -91,9 +91,9 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.get("javax.persistence.jdbc.scheme"),
-                    myConfig.getString("mountwilson.as.db.host", myConfig.getString("mtwilson.db.host","127.0.0.1")),
-                    myConfig.getString("mountwilson.as.db.port", myConfig.getString("mtwilson.db.port","3306")),
-                    myConfig.getString("mountwilson.as.db.schema", myConfig.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.as.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.as.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.as.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
                 myConfig.getString("mountwilson.as.db.user",
                 myConfig.getString("mtwilson.db.user",
@@ -126,9 +126,9 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    myConfig.getString("mountwilson.ms.db.host", myConfig.getString("mtwilson.db.host","127.0.0.1")),
-                    myConfig.getString("mountwilson.ms.db.port", myConfig.getString("mtwilson.db.port","3306")),
-                    myConfig.getString("mountwilson.ms.db.schema", myConfig.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.ms.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.ms.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.ms.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
                 myConfig.getString("mountwilson.ms.db.user",
                 myConfig.getString("mtwilson.db.user",
@@ -163,9 +163,9 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    myConfig.getString("mountwilson.audit.db.host", myConfig.getString("mtwilson.db.host","127.0.0.1")),
-                    myConfig.getString("mountwilson.audit.db.port", myConfig.getString("mtwilson.db.port","3306")),
-                    myConfig.getString("mountwilson.audit.db.schema", myConfig.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.audit.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.audit.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.audit.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
                 myConfig.getString("mountwilson.audit.db.user",
                 myConfig.getString("mtwilson.db.user",
@@ -199,9 +199,9 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    myConfig.getString("mountwilson.mc.db.host", myConfig.getString("mtwilson.db.host","127.0.0.1")),
-                    myConfig.getString("mountwilson.mc.db.port", myConfig.getString("mtwilson.db.port","3306")),
-                    myConfig.getString("mountwilson.mc.db.schema", myConfig.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.mc.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.mc.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.mc.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
                 myConfig.getString("mountwilson.mc.db.user",
                 myConfig.getString("mtwilson.db.user",
