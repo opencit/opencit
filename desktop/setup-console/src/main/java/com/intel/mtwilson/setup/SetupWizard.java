@@ -61,9 +61,9 @@ public class SetupWizard {
         }
     }
 
-    public Connection getMSDatabaseConnection() throws SetupException {
+    public Connection getMSDatabaseConnection() throws SetupException, IOException {
         try {
-            Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+            Class.forName(conf.getString("mountwilson.ms.db.driver", My.configuration().getDatabaseDriver()));
             /*
              * Class.forName("com.mysql.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
@@ -78,11 +78,11 @@ public class SetupWizard {
             String url =conf.getString("mountwilson.ms.db.url",
                     conf.getString("mtwilson.db.url",
                     String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
-                    conf.getString("mountwilson.ms.db.host", conf.getString("mtwilson.db.host","127.0.0.1")),
-                    conf.getString("mountwilson.ms.db.port", conf.getString("mtwilson.db.port","3306")),
-                    conf.getString("mountwilson.ms.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
-            String user = conf.getString("mountwilson.ms.db.user", conf.getString("mtwilson.db.user"));
-            String pass = conf.getString("mountwilson.ms.db.password", conf.getString("mtwilson.db.password"));
+                    conf.getString("mountwilson.ms.db.host", My.configuration().getDatabaseHost()),
+                    conf.getString("mountwilson.ms.db.port", My.configuration().getDatabasePort()),
+                    conf.getString("mountwilson.ms.db.schema", My.configuration().getDatabaseSchema()))));
+            String user = conf.getString("mountwilson.ms.db.user", My.configuration().getDatabaseUsername());
+            String pass = conf.getString("mountwilson.ms.db.password", My.configuration().getDatabasePassword());
             Connection conn = DriverManager.getConnection(url, user, pass);
             return conn;        }
         catch (ClassNotFoundException e) {
