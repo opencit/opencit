@@ -42,7 +42,7 @@ public class DataEncryptionTest {
         hostnames.add(new Hostname("RHEL8"));
         hostnames.add(new Hostname("10.1.71.172"));
         hostnames.add(new Hostname("RHEL168"));
-        Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration().getConfiguration());
+        Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
         p.store(System.out, "effective jpa config");
         for(Hostname hostname : hostnames) {
             TblHosts host = My.jpa().mwHosts().findByName(hostname.toString());

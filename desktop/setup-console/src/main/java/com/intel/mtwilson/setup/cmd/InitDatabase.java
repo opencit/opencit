@@ -339,7 +339,7 @@ public class InitDatabase implements Command {
      */
     private DataSource getDataSource() throws SetupException {
         try {
-            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(ASConfig.getConfiguration());
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(My.configuration());
             log.debug("JDBC URL with schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
             DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {
