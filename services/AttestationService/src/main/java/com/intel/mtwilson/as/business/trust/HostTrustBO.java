@@ -803,7 +803,7 @@ public class HostTrustBO extends BaseBO {
                     return tblSamlAssertion.getSaml();
                 }else{
                     log.debug("Found assertion in cache with error set, returning that.");
-                   throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached)"));
+                   throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
                 }
             }
         }
