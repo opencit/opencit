@@ -153,7 +153,7 @@ public class InitDatabase implements Command {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
         catch(SQLException e) {
-            log.error("Failed to connect to {} with schema", databaseVendor); 
+            log.error("Failed to connect to {} with schema: error =" + e.getMessage(), databaseVendor); 
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
 //        log.debug("Connected to schema: {}", c.getSchema());
