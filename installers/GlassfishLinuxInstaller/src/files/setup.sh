@@ -53,7 +53,6 @@ if [ ! -a /etc/monit/conf.d/glassfish.monitrc ]; then
 		and request \"/mtwilson-portal/home.html\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/glassfish.monitrc
- EOF
 fi
 
 echo
