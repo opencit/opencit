@@ -47,7 +47,7 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
 			str+='<tr class="'+classValue+'" hostID="'+hostDetails[item].hostID+'" id="host_div_id_'+hostDetails[item].hostName.replace(/\./g,'_')+'">'+
                                                 //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
-				'<td align="center" class="row1"><img class="imageClass" border="0" src="images/blank.jpg"></td>'+
+				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
 				'<td class="row2">'+hostDetails[item].hostName+'</td>'+
 				'<td align="center" class="row3"><img border="0" src="'+hostDetails[item].osName+'"></td>';
 				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+hostDetails[item].hypervisorName+'">' : '';
