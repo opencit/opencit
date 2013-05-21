@@ -47,6 +47,7 @@ public class SetupWizard {
             String url =  p.getProperty("javax.persistence.jdbc.url");
             String user =  p.getProperty("javax.persistence.jdbc.user");
             String pass =  p.getProperty("javax.persistence.jdbc.password");
+            log.debug("getDatabaseConnection using url = " + url + " , user = " + user + " , pass = " + pass);
             Connection conn = DriverManager.getConnection(url, user, pass);
             
             return conn;
