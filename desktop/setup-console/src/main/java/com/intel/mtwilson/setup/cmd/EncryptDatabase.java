@@ -9,6 +9,7 @@ import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
+import java.io.IOException;
 import org.apache.commons.configuration.Configuration;
 
 /**
@@ -30,7 +31,7 @@ public class EncryptDatabase implements Command {
     }
 
     @Override
-    public void execute(String[] args) throws SetupException {
+    public void execute(String[] args) throws Exception {
             Configuration attestationServiceConf = ASConfig.getConfiguration();
             SetupWizard wizard = new SetupWizard(attestationServiceConf);
             wizard.encryptVmwareConnectionStrings();

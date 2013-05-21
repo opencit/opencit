@@ -48,7 +48,7 @@ public class Wizard implements Command {
     }
 
     @Override
-    public void execute(String[] args) throws SetupException {
+    public void execute(String[] args) throws Exception {
         
         // createTextTerminal requires the file stty.exe
         // createUnixTermainal requires the file /bin/sh

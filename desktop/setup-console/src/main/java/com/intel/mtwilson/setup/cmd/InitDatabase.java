@@ -95,7 +95,7 @@ public class InitDatabase implements Command {
     }
 
     @Override
-    public void execute(String[] args) throws SetupException {
+    public void execute(String[] args) throws Exception {
         // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
         if( args.length < 1 ) {
             
