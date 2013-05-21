@@ -101,8 +101,7 @@ function fnUploadWhiteListConfigurationData() {
                          alert("Please enter a valid ip address and try again.");
                      }
             }else { // TA
-                                                   whiteListOpenSource_Host
-                        
+                     
                         if(fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
                       
                             var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
@@ -135,6 +134,7 @@ function fnUploadWhiteListConfigurationData() {
 			//fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
             if(regHost){
                 config.registerHost = true;
+                
                 registerHost = true;        
                 $('#mainLoadingDiv').prepend(disabledDiv);
                 sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
