@@ -44,48 +44,6 @@ if [ ! -z "$opt_services" ]; then
 fi
 
 
-echo "Installing packages: $LIST"
-
-APICLIENT_YUM_PACKAGES="unzip"
-APICLIENT_APT_PACKAGES="unzip"
-APICLIENT_YAST_PACKAGES="unzip"
-APICLIENT_ZYPPER_PACKAGES="unzip"
-auto_install "Installer requirements" "APICLIENT"
-
-# api client: ensure destination exists and clean it before copying
-mkdir -p /usr/local/share/mtwilson/apiclient/java
-rm -rf /usr/local/share/mtwilson/apiclient/java/*
-unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
-
-# setup console: create folder and copy the executable jar
-mkdir -p /opt/intel/cloudsecurity/setup-console
-rm -rf /opt/intel/cloudsecurity/setup-console/*.jar
-cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
-
-# create or update mtwilson.properties
-mkdir -p /etc/intel/cloudsecurity
-if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
-  default_mtwilson_tls_policy_name=`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ -z "$default_mtwilson_tls_policy_name" ]; then
-    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
-    echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
-  fi
-  mtwilson_tls_keystore_password=`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ -z "$mtwilson_tls_keystore_password" ]; then
-    # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
-    # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
-    # in a future release we will have a UI mechanism to manage this.
-  fi
-else
-    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
-    echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
-    # for a new install we generate a random password to protect all the tls keystores. (each host record has a tls policy and tls keystore field)
-    mtwilson_tls_keystore_password=`generate_password 32`
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
-    # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
-    # in a future release we will have a UI mechanism to manage this.
-fi
 
 # ask about mysql vs postgres
 #echo "Supported database systems are:"
@@ -162,9 +120,52 @@ export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
 
+echo "Installing packages: $LIST"
+
+APICLIENT_YUM_PACKAGES="unzip"
+APICLIENT_APT_PACKAGES="unzip"
+APICLIENT_YAST_PACKAGES="unzip"
+APICLIENT_ZYPPER_PACKAGES="unzip"
+auto_install "Installer requirements" "APICLIENT"
+
+# api client: ensure destination exists and clean it before copying
+mkdir -p /usr/local/share/mtwilson/apiclient/java
+rm -rf /usr/local/share/mtwilson/apiclient/java/*
+unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
+
+# setup console: create folder and copy the executable jar
+mkdir -p /opt/intel/cloudsecurity/setup-console
+rm -rf /opt/intel/cloudsecurity/setup-console/*.jar
+cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
+
+# create or update mtwilson.properties
+mkdir -p /etc/intel/cloudsecurity
+if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
+  default_mtwilson_tls_policy_name=`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
+  if [ -z "$default_mtwilson_tls_policy_name" ]; then
+    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
+    echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
+  fi
+  mtwilson_tls_keystore_password=`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
+  if [ -z "$mtwilson_tls_keystore_password" ]; then
+    # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
+    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
+    # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
+    # in a future release we will have a UI mechanism to manage this.
+  fi
+else
+    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
+    echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
+    # for a new install we generate a random password to protect all the tls keystores. (each host record has a tls policy and tls keystore field)
+    mtwilson_tls_keystore_password=`generate_password 32`
+    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "$mtwilson_tls_keystore_password"
+    # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
+    # in a future release we will have a UI mechanism to manage this.
+fi
+
 find_installer() {
   local installer="${1}"
-  binfile=`ls -1 $installer-*.bin | head -n 1`
+  binfile=`ls -1 $installer-*.bin 2>/dev/null | head -n 1`
   echo $binfile
 }
 
@@ -390,7 +391,7 @@ fi
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
 chmod +x *.bin
-if [ ! -z "$opt_java" ]; then
+if [ ! -z "$opt_java" ] && [ -n "$java_installer" ]; then
   echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
   ./$java_installer
   echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
@@ -407,7 +408,7 @@ if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
 fi
 
 if using_glassfish; then
-  if [ ! -z "$opt_glassfish" ]; then
+  if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
   # glassfish install here
   
   echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
@@ -427,7 +428,7 @@ if using_glassfish; then
   fi
   # end glassfish setup
 elif using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
+  if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
     # tomcat install here
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
@@ -559,7 +560,7 @@ if using_tomcat; then
   fi
 fi
 #TODO-stdale monitrc needs to be customized depending on what is installed
-if [ ! -z "$opt_monit" ]; then
+if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
   ./$monit_installer  >> $INSTALL_LOG_FILE 
   echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
