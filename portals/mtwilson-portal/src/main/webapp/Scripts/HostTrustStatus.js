@@ -441,8 +441,7 @@ function getFailureReportSuccess(responseJSON) {
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
 			var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
             str+='<tr class="'+classValue+'">'+
-                        //'<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
-            	'<td align="center" class="failureReportRow1"><img class="imageClass" border="0" src="images/blank.jpg"></td>'+
+                        '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+            	
             	'<td class="failureReportRow2">'+reportdata[item].name+'</td>'+
                 '<td class="failureReportRow3" style="'+styleUntrusted+'" >'+reportdata[item].value+'</td>'+
                 '<td class="failureReportRow4" >'+reportdata[item].whiteListValue+'</td>'+
