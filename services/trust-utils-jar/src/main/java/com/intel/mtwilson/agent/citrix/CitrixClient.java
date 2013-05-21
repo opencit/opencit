@@ -164,14 +164,8 @@ public class CitrixClient {
      
      public keys() {}
     }
-	
-    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
-          System.err.println("stdalex-error getQuoteInformationForHost pcrList == " + pcrList);
-          try {
-            
-            String nonce = generateNonce();
-            String sessionId = generateSessionId();
-
+    
+    public void connect() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XmlRpcException, XmlRpcException {
             URL url = null; 
             try { 
                url = new URL("https://" + hostIpAddress + ":" + port); 
@@ -191,6 +185,27 @@ public class CitrixClient {
             HttpsURLConnection.setDefaultHostnameVerifier(hv); 
 			
             connection = new Connection(url);
+        
+         Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+            
+    }
+	
+    public boolean isConnected() { return connection != null; }
+    
+    public void disconnect() throws BadServerResponse, XenAPIException, XmlRpcException {
+        Session.logout(connection);
+//        connection.dispose();
+    }
+    
+    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
+          System.err.println("stdalex-error getQuoteInformationForHost pcrList == " + pcrList);
+          try {
+            
+              if( !isConnected()) { connect(); }
+              
+            String nonce = generateNonce();
+            String sessionId = generateSessionId();
+
             System.err.println("stdalex-error connecting with " + userName + " " + password);
             Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
 			
@@ -429,35 +444,8 @@ public class CitrixClient {
         log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
          HostInfo response = new HostInfo();
        
-         URL url = null; 
-         try { 
-                 url = new URL("https://" + hostIpAddress + ":" + port); 
-                 log.info("stdalex-error url generated:" + url.toString());
-          }catch (Exception e) { 
-               log.info("stdalex-error exception while generating URL:" + e.toString());
-               throw e;
-          } 
-       
-	 		
-       // TODO-stdalex:  Do this so we actually check trust
-       
-       // Create a trust manager that does not validate certificate chains  
-       
-       
-       TrustManager[] trustAllCerts = new TrustManager[] { tlsConnection.getTlsPolicy().getTrustManager() };
-            
-       // Install the all-trusting trust manager  
-       SSLContext sc = SSLContext.getInstance("SSL");  
-       // Create empty HostnameVerifier  
-       HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();  
-       sc.init(null, trustAllCerts, new java.security.SecureRandom());  
-       HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
-       HttpsURLConnection.setDefaultHostnameVerifier(hv); 
-       
-       log.info( "stdalex-error CitrixClient: attempting connection to "+hostIpAddress + " with values of " +
-                  url.toString() + "/" + userName + "/" + password);
-       connection = new Connection(url);
-       Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+              if( !isConnected()) { connect(); }
+
 			
        log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
 			
@@ -489,34 +477,8 @@ public class CitrixClient {
         String resp = new String();
         log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
-         URL url = null; 
-         try { 
-                 url = new URL("https://" + hostIpAddress + ":" + port); 
-                 log.info("stdalex-error url generated:" + url.toString());
-          }catch (Exception e) { 
-               log.info("stdalex-error exception while generating URL:" + e.toString());
-               throw e;
-          } 
-       
-	 		
-       // TODO-stdalex:  Do this so we actually check trust
-       
-       // Create a trust manager that does not validate certificate chains  
-       TrustManager[] trustAllCerts = new TrustManager[] { tlsConnection.getTlsPolicy().getTrustManager() };
-            
-       // Install the all-trusting trust manager  
-       SSLContext sc = SSLContext.getInstance("SSL");  
-       // Create empty HostnameVerifier  
-       HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();  
-       sc.init(null, trustAllCerts, new java.security.SecureRandom());  
-       HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
-       HttpsURLConnection.setDefaultHostnameVerifier(hv); 
-       
-       log.info( "stdalex-error CitrixClient: attempting connection to "+hostIpAddress + " with values of " +
-                  url.toString() + "/" + userName + "/" + password);
-       connection = new Connection(url);
-       Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
-			
+        if( !isConnected()) { connect(); }
+
        log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
