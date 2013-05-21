@@ -79,8 +79,12 @@
             <version>1.0.1-SNAPSHOT</version>
 	    <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
-
-
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>my</artifactId>
+      <version>1.2-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
  
  
