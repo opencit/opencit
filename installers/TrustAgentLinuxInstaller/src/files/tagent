@@ -219,7 +219,6 @@ setup_interactive_install() {
 	    stopService
         fi
         # This is the place to do any setup while trust agent is not running
-		
         /usr/local/bin/pcakey
 		if [ $? == 1 ]; then
 			exit 1
