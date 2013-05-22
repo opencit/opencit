@@ -2446,7 +2446,7 @@ tomcat_create_ssl_cert() {
 }
 tomcat_env_report(){
   echo "TOMCAT_HOME=$TOMCAT_HOME"
-  echo "tomcat_bin=$glassfish_bin"
+  echo "tomcat_bin=$tomcat_bin"
   echo "tomcat=\"$tomcat\""
 }
 
