@@ -294,7 +294,7 @@ public class CreateIdentity  {
 			
 			
 		}catch(Exception e){
-			throw new PrivacyCAException("FAILED",e);
+			throw new PrivacyCAException("FAILED: " + e.getMessage(),e);
 		}
 		finally{
 			if (pcaFileOut != null)
