@@ -29,11 +29,14 @@ public class HisPrivacyCAWebServices2ClientInvoker {
 
 	public static IHisPrivacyCAWebService2 getHisPrivacyCAWebService2(String url) {
 		try {
+            System.err.println("getHisPrivacyCAWebService2 trying to create service factory!");
 			HisPrivacyCAWebService2FactoryServiceService hisPrivacyCAWebService2FactoryServiceService = new HisPrivacyCAWebService2FactoryServiceService(new URL(url + "/hisPrivacyCAWebService2FactoryService?wsdl"), new QName("http://server.hisPrivacyCAWebService2.webservices.his.niarl.gov/", "HisPrivacyCAWebService2FactoryServiceService"));
+            System.err.println("getHisPrivacyCAWebService2 created it!");
 			HisPrivacyCAWebService2FactoryService hisPrivacyCAWebService2FactoryService = hisPrivacyCAWebService2FactoryServiceService.getHisPrivacyCAWebService2FactoryServicePort();
 			HisPrivacyCAWebService2Service hisPrivacyCAWebService2Service = new HisPrivacyCAWebService2Service(new URL(url + "/hisPrivacyCAWebService2?wsdl"), new QName("http://server.hisPrivacyCAWebService2.webservices.his.niarl.gov/", "HisPrivacyCAWebService2Service"));
 			return new HisPrivacyCAWebServices2ClientImpl(hisPrivacyCAWebService2Service.getPort(hisPrivacyCAWebService2FactoryService.getHisPrivacyCAWebService2(), HisPrivacyCAWebService2.class));
 		} catch (MalformedURLException e) {
+            System.err.println("getHisPrivacyCAWebService2 exception was " + e.getMessage());
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
