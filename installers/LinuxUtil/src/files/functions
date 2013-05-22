@@ -745,7 +745,7 @@ mysql_clear() {
 # Environment:
 # - MYSQL_REQUIRED_VERSION (or provide it as a parameter)
 mysql_version() {
-  local min_version="${1:-${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
   MYSQL_CLIENT_VERSION=""
   MYSQL_CLIENT_VERSION_OK=""
   if [ -n "$mysql" ]; then
@@ -765,14 +765,14 @@ mysql_version_report() {
   if [ "$MYSQL_CLIENT_VERSION_OK" == "yes" ]; then
     echo_success "Mysql client version $MYSQL_CLIENT_VERSION is ok"
   else
-    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}"
+    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${MYSQL_REQUIRED_VERSION:-$DEFAULT_MYSQL_REQUIRED_VERSION}"
   fi
 }
 
 # Environment:
 # - MYSQL_REQUIRED_VERSION
 mysql_detect() {
-  local min_version="${1:-${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
   if [[ -n "$MYSQL_HOME" && -n "$mysql" && -f "$mysql" ]]; then
     return
   fi
@@ -820,7 +820,7 @@ mysql_env_report() {
 # Environment:
 # - MYSQL_REQUIRED_VERSION
 mysql_require() {
-  local min_version="${1:-${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
   if [[ -z "$MYSQL_HOME" || -z "$mysql" || ! -f "$mysql" ]]; then
     mysql_detect ${min_version} > /dev/null
   fi
