@@ -45,11 +45,11 @@
 		<servlet-name>jaxWsServlet</servlet-name>
 		<url-pattern>
             <!-- STDALEX break ? -->
-			/hisPrivacyCAWebService2FactoryService?wsdl
+			/hisPrivacyCAWebService2FactoryService
 		</url-pattern>
 	</servlet-mapping>
 
-        <servlet-mapping>
+     <servlet-mapping>
 		<servlet-name>ClientFilesServlet</servlet-name>
 		<url-pattern>
 			/clientfiles.zip
