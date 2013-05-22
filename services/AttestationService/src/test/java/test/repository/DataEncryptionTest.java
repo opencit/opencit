@@ -43,7 +43,7 @@ public class DataEncryptionTest {
     public void testUsePersistenceUnitPostgres() throws IOException {
         Properties jpaProperties = new Properties();
         jpaProperties.setProperty("javax.persistence.jdbc.driver", "org.postgresql.Driver");
-        jpaProperties.setProperty("javax.persistence.jdbc.url", "jdbc:postgresql://10.1.71.227:5432/mw_as");
+        jpaProperties.setProperty("javax.persistence.jdbc.url", "jdbc:postgresql://10.1.71.209:5432/mw_as");
         jpaProperties.setProperty("javax.persistence.jdbc.user", "root");
         jpaProperties.setProperty("javax.persistence.jdbc.password", "password");
         EntityManagerFactory emf = PersistenceManager.createEntityManagerFactory("ASDataPU", jpaProperties);
