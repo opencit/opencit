@@ -116,7 +116,7 @@ public class TestModelObject {
     public void testUseHashCode() {
         Color color = new Color();
         boolean valid = color.isValid();
-        System.out.println(String.format("testUseHashCode: Valid? %s"+String.valueOf(valid)));
+        System.out.println(String.format("testUseHashCode: Valid? %s",String.valueOf(valid)));
         System.out.println(String.format("testUseHashCode: Hashcode for this object is %d", hashCode()));
     }
 
@@ -124,14 +124,14 @@ public class TestModelObject {
     public void testModelInterface() {
         Color color = new Color("blue", 0, 0, 255);
         boolean valid = color.isValid();
-        System.out.println(String.format("testModelInterface: Valid? %s"+String.valueOf(valid)));
+        System.out.println(String.format("testModelInterface: Valid? %s",String.valueOf(valid)));
     }
     
     @Test
     public void testModelInterfaceWithErrors() {
         Color color = new Color();
         boolean valid = color.isValid();
-        System.out.println(String.format("testModelInterfaceWithErrors: Valid? %s"+String.valueOf(valid)));
+        System.out.println(String.format("testModelInterfaceWithErrors: Valid? %s",String.valueOf(valid)));
     }
     
     @Test

@@ -209,8 +209,11 @@ public class InitDatabase implements Command {
             System.out.println("Database is compatible");
             System.out.println("The following changes will be applied:");
                     for(Long changeId : changesToApplyInOrder) {
+                        /*
                         ChangelogEntry entry = presentChanges.get(changeId);
                         System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                        */
+                        System.out.println(changeId);
                     }
             return;
         }
