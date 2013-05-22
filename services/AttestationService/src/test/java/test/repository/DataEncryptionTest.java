@@ -31,27 +31,11 @@ public class DataEncryptionTest {
     //mtwilson.as.dek=95nBEEFshB6xrjpi5wp8Og\=\=
     @Test
     public void testDecryptionWithProbablyIncorrectKey() throws IOException, CryptographyException {
-        HashSet<Hostname> hostnames = new HashSet<Hostname>();
-        hostnames.add(new Hostname("10.1.71.173"));
-        hostnames.add(new Hostname("10.1.71.170"));
-        hostnames.add(new Hostname("10.1.71.201"));
-        hostnames.add(new Hostname("10.1.71.174"));
-        hostnames.add(new Hostname("10.1.71.175"));
-        hostnames.add(new Hostname("10.1.71.169"));
-        hostnames.add(new Hostname("10.1.71.126"));
-        hostnames.add(new Hostname("RHEL8"));
-        hostnames.add(new Hostname("10.1.71.172"));
-        hostnames.add(new Hostname("RHEL168"));
+        List<TblHosts> hosts = My.jpa().mwHosts().findTblHostsEntities();
         Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
         p.store(System.out, "effective jpa config");
-        for(Hostname hostname : hostnames) {
-            TblHosts host = My.jpa().mwHosts().findByName(hostname.toString());
-            if( host == null ) {
-                log.debug("Host: {} is not found", hostname.toString());
-            }
-            else {
-                log.debug("Host: {}  Connection: {}", hostname.toString(), host.getAddOnConnectionInfo());
-            }
+        for(TblHosts host : hosts) {
+            log.debug("Host: {}  Connection: {}", host.getName(), host.getAddOnConnectionInfo());
         }
     }
 
