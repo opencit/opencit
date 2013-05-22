@@ -22,6 +22,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
+import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
@@ -60,16 +61,16 @@ public class HostBO extends BaseBO {
         private Logger log = LoggerFactory.getLogger(getClass());
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
-        private byte[] dataEncryptionKey = null;
-        private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
-        private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
-        private TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
-        private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
-        private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
-        private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
+//        private byte[] dataEncryptionKey = null;
+//        private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
+//        private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
+//        private TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
+//        private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+//        private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
+//        private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
 
 
-        
+        /*
         public void setDataEncryptionKey(byte[] key) {
                     try {
                         TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
@@ -77,7 +78,7 @@ public class HostBO extends BaseBO {
                     catch(CryptographyException e) {
                         log.error("Cannot initialize data encryption cipher", e);
                     }      
-        }
+        }*/
         
     public HostBO()  {
         
@@ -95,13 +96,15 @@ public class HostBO extends BaseBO {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
+
+                try {
+                    
           TblMle  biosMleId = findBiosMleForHost(host); 
           TblMle  vmmMleId = findVmmMleForHost(host); 
           Vendor hostType;
 
                 log.error("HOST BO ADD HOST STARTING");
-
-                try {
+                    
                         checkForDuplicate(host);
 
                         getBiosAndVMM(host);
@@ -252,20 +255,20 @@ public class HostBO extends BaseBO {
         return validCaSignature;
     }
 
-	private String getLocation(PcrManifest pcrManifest) {
+	private String getLocation(PcrManifest pcrManifest) throws IOException {
         if( pcrManifest == null ) { return null; }
         if( pcrManifest.containsPcr(LOCATION_PCR) ) {
             String value = pcrManifest.getPcr(LOCATION_PCR).getValue().toString();
-            return locationPcrJpaController.findTblLocationPcrByPcrValue(value);
+            return My.jpa().mwLocationPcr().findTblLocationPcrByPcrValue(value);
         }
 		return null;
     }
     
-    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
+    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) throws IOException {
         if (tblHostSpecificManifests != null && !tblHostSpecificManifests.isEmpty()) {
             for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
                     tblHostSpecificManifest.setHostID(tblHosts.getId());
-                    hostSpecificManifestJpaController.create(tblHostSpecificManifest);
+                    My.jpa().mwHostSpecificManifest().create(tblHostSpecificManifest);
             }
         }
     }
@@ -344,7 +347,7 @@ public class HostBO extends BaseBO {
                         tblHosts.setVmmMleId(vmmMleId);
 
 			log.info("Updating Host in database");
-			hostController.edit(tblHosts);
+			My.jpa().mwHosts().edit(tblHosts);
                         
                         if(tblHostSpecificManifests != null){
                             log.info("Updating Host Specific Manifest in database");
@@ -543,17 +546,17 @@ public class HostBO extends BaseBO {
                 }
         }
 
-	private TblMle findBiosMleForHost(TxtHost host) {
+	private TblMle findBiosMleForHost(TxtHost host) throws IOException {
 		
-		TblMle biosMleId = mleController.findBiosMle(host.getBios().getName(),
+		TblMle biosMleId = My.jpa().mwMle().findBiosMle(host.getBios().getName(),
 				host.getBios().getVersion(), host.getBios().getOem());
 		if (biosMleId == null) {
 			throw new ASException(ErrorCode.AS_BIOS_INCORRECT, host.getBios().getName(),host.getBios().getVersion());
 		}
         return biosMleId;
 	}
-	private TblMle findVmmMleForHost(TxtHost host) {
-		TblMle vmmMleId = mleController.findVmmMle(host.getVmm().getName(), host
+	private TblMle findVmmMleForHost(TxtHost host) throws IOException {
+		TblMle vmmMleId = My.jpa().mwMle().findVmmMle(host.getVmm().getName(), host
 				.getVmm().getVersion(), host.getVmm().getOsName(), host
 				.getVmm().getOsVersion());
 		if (vmmMleId == null) {
@@ -601,7 +604,7 @@ public class HostBO extends BaseBO {
                           ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
                           tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName() + ", port=" + tblHosts.getPort());
                 try {
-                    hostController.create(tblHosts);
+                    My.jpa().mwHosts().create(tblHosts);
                 }catch (Exception e){
                     log.error("SaveHostInDatabase caught ex!");
                     e.printStackTrace();
@@ -623,7 +626,7 @@ public class HostBO extends BaseBO {
      * and instaed of returning a "host-specific manifest" it should return a list of policies with module-included
      * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
     */
-    private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) {
+    private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) throws IOException {
         List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
         // Using the connection string, let us first find out the host type
@@ -644,7 +647,7 @@ public class HostBO extends BaseBO {
                     log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
                             "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
                     
-                    TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
+                    TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                             m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
                     TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
@@ -660,7 +663,7 @@ public class HostBO extends BaseBO {
                             "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
                     
                     // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
-                    TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
+                    TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
                             m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
                     TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();

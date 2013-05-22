@@ -38,7 +38,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class MyJpa {
     private final MyPersistenceManager pm;
-    private final String dekBase64;
+//    private final String dekBase64;
     TblApiClientJpaController mwApiClientHmac;
     MwApiClientHttpBasicJpaController mwApiClientHttpBasic;
     ApiClientX509JpaController mwApiClientX509;
@@ -70,7 +70,7 @@ public class MyJpa {
 
     public MyJpa(MyPersistenceManager pm, String dekBase64) { 
         this.pm = pm; 
-        this.dekBase64 = dekBase64; 
+//        this.dekBase64 = dekBase64; 
         try {
             TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
         }

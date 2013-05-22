@@ -45,10 +45,6 @@ public class MyPersistenceManager extends PersistenceManager {
         addPersistenceUnit("MSDataPU", getMSDataJpaProperties(c));
         addPersistenceUnit("AuditDataPU", getAuditDataJpaProperties(c));
     }
-    // XXX TODO get dek from MyConfiguration instead of from the jdbcProperties
-    public byte[] getDek() {
-        return Base64.decodeBase64(jdbcProperties.getProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==")); // arbitrary default dek, since it's a development server it's good to use same as what is configured there, but it doesn't matter as it only affects records we are writing, and hopefully after each test is complete there is zero net effect on the database
-    }
     public EntityManagerFactory getASData() {
         return getEntityManagerFactory("ASDataPU");
     }

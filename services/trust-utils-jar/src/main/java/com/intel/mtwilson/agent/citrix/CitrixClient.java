@@ -77,7 +77,7 @@ public class CitrixClient {
     public CitrixClient(TlsConnection tlsConnection){
         this.tlsConnection = tlsConnection;
         this.connectionString = tlsConnection.getConnectionString();
-        log.info("CitrixClient connectionString == " + connectionString);
+//        log.info("CitrixClient connectionString == " + connectionString);
         // connectionString == citrix:https://xenserver:port;username;password  or citrix:https://xenserver:port;u=username;p=password  or the same w/o the citrix prefix
         try {
             ConnectionString.CitrixConnectionString citrixConnection = ConnectionString.CitrixConnectionString.forURL(connectionString);
@@ -87,7 +87,7 @@ public class CitrixClient {
             password = citrixConnection.getPassword();
         }
         catch(MalformedURLException e) {
-            throw new IllegalArgumentException("Invalid Citrix Host URL: "+connectionString, e);
+            throw new IllegalArgumentException("Invalid Citrix Host URL", e); // NOTE: we are NOT providing the connection string in the error message because, since we can't parse it, we dn't know if there's a password in there. 
         }
         //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
