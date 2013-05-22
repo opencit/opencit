@@ -136,7 +136,7 @@ unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LO
 
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console
-rm -rf /opt/intel/cloudsecurity/setup-console/*.jar
+rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
 cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 
 # create or update mtwilson.properties
