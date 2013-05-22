@@ -29,6 +29,7 @@ DEFAULT_POSTGRES_DATABASE="mw_as"
 DEFAULT_JAVA_REQUIRED_VERSION="1.6"
 DEFAULT_GLASSFISH_REQUIRED_VERSION="3.0"
 DEFAULT_TOMCAT_REQUIRED_VERSION="6.0"
+DEFAULT_MYSQL_REQUIRED_VERSION="5.0"
 
 DEFAULT_MTWILSON_API_BASEURL="http://127.0.0.1:"
 DEFAULT_TOMCAT_API_PORT="8443"
@@ -744,7 +745,7 @@ mysql_clear() {
 # Environment:
 # - MYSQL_REQUIRED_VERSION (or provide it as a parameter)
 mysql_version() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
   MYSQL_CLIENT_VERSION=""
   MYSQL_CLIENT_VERSION_OK=""
   if [ -n "$mysql" ]; then
@@ -764,14 +765,14 @@ mysql_version_report() {
   if [ "$MYSQL_CLIENT_VERSION_OK" == "yes" ]; then
     echo_success "Mysql client version $MYSQL_CLIENT_VERSION is ok"
   else
-    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${mysql_required_version}"
+    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}"
   fi
 }
 
 # Environment:
 # - MYSQL_REQUIRED_VERSION
 mysql_detect() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
   if [[ -n "$MYSQL_HOME" && -n "$mysql" && -f "$mysql" ]]; then
     return
   fi
@@ -819,7 +820,7 @@ mysql_env_report() {
 # Environment:
 # - MYSQL_REQUIRED_VERSION
 mysql_require() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${mysql_required_version:-$DEFAULT_MYSQL_REQUIRED_VERSION}}"
   if [[ -z "$MYSQL_HOME" || -z "$mysql" || ! -f "$mysql" ]]; then
     mysql_detect ${min_version} > /dev/null
   fi
