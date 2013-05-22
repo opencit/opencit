@@ -27,16 +27,13 @@ import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.*;
 import org.apache.commons.dbcp.managed.BasicManagedDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.jotm.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -433,21 +430,21 @@ public abstract class PersistenceManager implements ServletContextListener {
 //        ds.setDefaultTransactionIsolation(0);
         ds.setDriverClassLoader(ClassLoader.getSystemClassLoader());
         ds.setDriverClassName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));
-        ds.setInitialSize(10);
+        ds.setInitialSize(20);
         ds.setLogAbandoned(true);
 //        ds.setLogWriter(null); // null disables logging; TODO: see if we can get a PrintWriter from slf4j... and for some reason calls createDataSource() whic hdoesn't make sense
 //        ds.setLoginTimeout(30); // in seconds ;   not supported by basicdatasource... and for some reason calls createDataSource() whic hdoesn't make sense
-        ds.setMaxActive(50); // max 50 active connections to database
+        ds.setMaxActive(250); // max 50 active connections to database
         ds.setMaxIdle(10); // max 10 idle connections in the pool
         ds.setMaxOpenPreparedStatements(50); // no limit
         ds.setMaxWait(-1); // wait indefinitely for a new connection from the pool
-        ds.setMinEvictableIdleTimeMillis(1000*60*30); // (milliseconds) connection may be idle up to 30 minutes before being evicted
+        ds.setMinEvictableIdleTimeMillis(1000*60*5); // (milliseconds) connection may be idle up to 5 minutes before being evicted
         ds.setMinIdle(5); // min 5 idle connections in the pool
-        ds.setNumTestsPerEvictionRun(10); // how many connections to test each time
+        ds.setNumTestsPerEvictionRun(25); // how many connections to test each time
         ds.setPassword(jpaProperties.getProperty("javax.persistence.jdbc.password"));
         ds.setPoolPreparedStatements(true);
         ds.setRemoveAbandoned(true);
-        ds.setRemoveAbandonedTimeout(60*10); // (seconds) connection may be abandoned for up to 10 minutes before being removed
+        ds.setRemoveAbandonedTimeout(60*5); // (seconds) connection may be abandoned for up to 5 minutes before being removed
         ds.setTestOnBorrow(true);
         ds.setTestOnReturn(false);
         ds.setTestWhileIdle(true);
