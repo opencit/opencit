@@ -352,6 +352,12 @@ case "$1" in
 		 rm -fr /etc/monit/monitrc
 		fi
         # java:  rm -rf /usr/share/jdk1.6.0_29
+        # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
+        java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
+        tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""
+        glassfish_clear; export GLASSFISH_HOME=""; export glassfish_bin=""; export glassfish=""
+        postgres_clear; export POSTGRES_HOME=""; export psql=""
+        mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"
         ;;
   help)
