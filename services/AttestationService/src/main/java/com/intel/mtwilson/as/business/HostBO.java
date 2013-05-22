@@ -381,7 +381,7 @@ public class HostBO extends BaseBO {
 
                         deleteSAMLAssertions(tblHosts);
 
-                        new TblHostsJpaController(getEntityManagerFactory()).destroy(tblHosts.getId());
+                        My.jpa().mwHosts().destroy(tblHosts.getId());
                 } catch (ASException ase) {
                         System.err.println("JIM DEBUG"); 
                         ase.printStackTrace(System.err);
@@ -400,10 +400,8 @@ public class HostBO extends BaseBO {
 
         // PREMIUM FEATURE ? 
         private void deleteHostSpecificManifest(TblHosts tblHosts)
-                throws NonexistentEntityException {
-                TblHostSpecificManifestJpaController tblHostSpecificManifestJpaController;
-
-                tblHostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
+                throws NonexistentEntityException, IOException {
+                TblHostSpecificManifestJpaController tblHostSpecificManifestJpaController = My.jpa().mwHostSpecificManifest();
                 
                 for(TblModuleManifest moduleManifest : tblHosts.getVmmMleId().getTblModuleManifestCollection()) {
                      if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
@@ -418,9 +416,9 @@ public class HostBO extends BaseBO {
                 }                
         }
 
-        private void deleteTALogs(Integer hostId) throws IllegalOrphanException {
+        private void deleteTALogs(Integer hostId) throws IllegalOrphanException, IOException {
 
-                TblTaLogJpaController tblTaLogJpaController = new TblTaLogJpaController(getEntityManagerFactory());
+                TblTaLogJpaController tblTaLogJpaController = My.jpa().mwTaLog(); // new TblTaLogJpaController(getEntityManagerFactory());
 
                 List<TblTaLog> taLogs = tblTaLogJpaController.findLogsByHostId(hostId, new Date());
 
@@ -444,8 +442,8 @@ public class HostBO extends BaseBO {
          *
          * @param hostId
          */
-        private void deleteSAMLAssertions(TblHosts hostId) {
-                TblSamlAssertionJpaController samlJpaController = new TblSamlAssertionJpaController(getEntityManagerFactory());
+        private void deleteSAMLAssertions(TblHosts hostId) throws IOException {
+                TblSamlAssertionJpaController samlJpaController = My.jpa().mwSamlAssertion(); //new TblSamlAssertionJpaController(getEntityManagerFactory());
 
                 List<TblSamlAssertion> hostSAMLAssertions = samlJpaController.findByHostID(hostId);
 
@@ -530,9 +528,8 @@ public class HostBO extends BaseBO {
          * private boolean requiresConnectionString(String vmmName) { if(
          * hostname.contains("ESX") ) { return true; } return false; }
          */
-        private void getBiosAndVMM(TxtHost host) {
-                TblMleJpaController mleController = new TblMleJpaController(
-                        getEntityManagerFactory());
+        private void getBiosAndVMM(TxtHost host) throws IOException {
+                TblMleJpaController mleController = My.jpa().mwMle(); //new TblMleJpaController(getEntityManagerFactory());
                 this.biosMleId = mleController.findBiosMle(host.getBios().getName(),
                         host.getBios().getVersion(), host.getBios().getOem());
                 if (biosMleId == null) {
@@ -683,7 +680,7 @@ public class HostBO extends BaseBO {
 
         public HostResponse isHostRegistered(String hostnameOrAddress) {
                 try {
-                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory());
+                        TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         TblHosts tblHosts = tblHostsJpaController.findByName(hostnameOrAddress);
                         if (tblHosts != null) {
                                 return new HostResponse(ErrorCode.OK); // host name exists in
@@ -702,9 +699,8 @@ public class HostBO extends BaseBO {
                 }
         }
 
-        private void checkForDuplicate(TxtHost host) throws CryptographyException {
-                TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(
-                        getEntityManagerFactory());
+        private void checkForDuplicate(TxtHost host) throws CryptographyException, IOException {
+                TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                 TblHosts tblHosts = tblHostsJpaController.findByName(host.getHostName()
                         .toString()); // datatype.Hostname
                 if (tblHosts != null) {
@@ -736,14 +732,12 @@ public class HostBO extends BaseBO {
          * @return
          * @throws CryptographyException
          */
-        public TblHosts getHostByName(Hostname hostName) throws CryptographyException { // datatype.Hostname
-                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory())
-                        .findByName(hostName.toString());
+        public TblHosts getHostByName(Hostname hostName) throws CryptographyException, IOException { // datatype.Hostname
+                TblHosts tblHosts = My.jpa().mwHosts().findByName(hostName.toString());
                 return tblHosts;
         }
-	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException { // datatype.Hostname
-		TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory())
-				.findByAikSha1(aik.toString());
+	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException, IOException { // datatype.Hostname
+		TblHosts tblHosts = My.jpa().mwHosts().findByAikSha1(aik.toString());
 		return tblHosts;
 	}
 
@@ -759,7 +753,7 @@ public class HostBO extends BaseBO {
          */
         public List<TxtHostRecord> queryForHosts(String searchCriteria) {
                 try {
-                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory());
+                        TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
                         List<TblHosts> tblHostList;
 

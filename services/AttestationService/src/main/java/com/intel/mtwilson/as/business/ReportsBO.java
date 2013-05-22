@@ -246,7 +246,7 @@ public class ReportsBO extends BaseBO {
         }
     }
     
-    public PcrLogReport getPcrManifestLog(TblHosts tblHosts, TblTaLog log, Boolean failureOnly) throws NumberFormatException {
+    public PcrLogReport getPcrManifestLog(TblHosts tblHosts, TblTaLog log, Boolean failureOnly) throws NumberFormatException, IOException {
         TblPcrManifest tblPcrManifest = getPcrModuleManifest(tblHosts,log.getMleId(),log.getManifestName());
         PcrLogReport manifest = new PcrLogReport();
         manifest.setName(Integer.parseInt(log.getManifestName()));
@@ -282,7 +282,7 @@ public class ReportsBO extends BaseBO {
     
     
     // XXX the mw_ta_log and  mw_module_manifest_log tables are not adequate to express the results of policy evaluation... better to just store a serialized copy of the trust report and then read it in once using json mapper, or maybe yaml,  and then have all the info. 
-    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) {
+    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<String, ModuleLogReport>();
         
         if(log.getTblModuleManifestLogCollection() != null){
@@ -301,7 +301,7 @@ public class ReportsBO extends BaseBO {
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
                         // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
                         //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
-                        String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByModuleAndHostID(hostId, moduleManifest.getId()).getDigestValue();
+                        String hostSpecificDigestValue = My.jpa().mwHostSpecificManifest().findByModuleAndHostID(hostId, moduleManifest.getId()).getDigestValue();
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }

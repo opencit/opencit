@@ -65,6 +65,7 @@ public class MyJpa {
     TblRequestQueueJpaController mwRequestQueue;
     TblSamlAssertionJpaController mwSamlAssertion;
     TblTaLogJpaController mwTaLog;
+    MwProcessorMappingJpaController mwProcessorMapping;
 
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
 
@@ -205,6 +206,11 @@ public class MyJpa {
         return new TblTaLogJpaController(pm.getASData());
 //		if( mwTaLog == null ) { mwTaLog = new TblTaLogJpaController(pm.getASData()); }
 //		return mwTaLog;
+	}
+    public MwProcessorMappingJpaController mwProcessorMapping() throws IOException {
+        return new MwProcessorMappingJpaController(pm.getASData());
+//		if( mwProcessorMapping == null ) { mwProcessorMapping = new MwProcessorMappingJpaController(pm.getASData()); }
+//		return mwProcessorMapping;
 	}
 
 }
