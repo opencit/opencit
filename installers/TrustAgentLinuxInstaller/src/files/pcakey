@@ -104,13 +104,14 @@ generate_ta_ssl() {
 }
 
 get_privacyca_ssl() {
-  openssl s_client -tls1 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+  ipPortAddr=`echo ${PRIVACYCA_SERVER} | sed 's/https:\/\///g'`
+  openssl s_client -tls1 -connect $ipPortAddr </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
   openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
   if [ $? == 1 ]; then
-    openssl s_client -ssl3 -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+    openssl s_client -ssl3 -connect $ipPortAddr </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
     openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
     if [ $? == 1 ]; then
-      openssl s_client -connect ${PRIVACYCA_SERVER}:8181 </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
+      openssl s_client -connect $ipPortAddr </dev/null >${package_dir}/cert/privacyca.ssl.txt 2>/dev/null
       openssl x509 -in ${package_dir}/cert/privacyca.ssl.txt -inform pem -out ${package_dir}/cert/privacyca.ssl.crt -outform der
     fi
   fi
