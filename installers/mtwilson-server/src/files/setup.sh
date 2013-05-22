@@ -406,6 +406,8 @@ else
     echo "Using existing java installation" | tee -a  $INSTALL_LOG_FILE
 fi
 
+java_detect
+
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
@@ -425,6 +427,8 @@ if using_glassfish; then
   else
     echo_warning "Relying on an existing glassfish installation" 
   fi
+
+  glassfish_detect
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
@@ -447,6 +451,8 @@ elif using_tomcat; then
     echo_warning "Relying on an existing Tomcat installation"
   fi
  
+  tomcat_detect
+
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # tomcat init code here
     #mtwilson tomcat-sslcert
