@@ -196,7 +196,7 @@
                                     <include>gov/niarl/his/privacyca/**</include>
                                     <include>com/intel/mtwilson/**</include>
                                     <include>com/intel/dcsg/cpg/**</include>
-                                    <!-- <include>org/apache/commons/**</include> -->
+                                    <include>org/apache/commons/**</include>
                                     <include>org/slf4j/**</include>
                                     <include>ch/qos/logback/**</include>
                                     <include>org/bouncycastle/**</include>
