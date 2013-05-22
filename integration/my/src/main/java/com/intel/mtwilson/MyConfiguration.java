@@ -381,6 +381,10 @@ public class MyConfiguration {
         return conf.getString("mtwilson.db.protocol", "postgresql");  // used in the jdbc url, so "postgresql" or "mysql"  as in jdbc:mysql://host:port/schema
     }
     
+    public String getDatabaseDriver() {
+        return conf.getString("mtwilson.db.driver", "org.postgresql.Driver"); // either "org.postgresql.Driver" or "com.mysql.jdbc.Driver"
+    }
+    
     public String getDatabaseHost() {
         return conf.getString("mtwilson.db.host", "127.0.0.1");
     }
@@ -409,6 +413,15 @@ public class MyConfiguration {
 
     public String getSamlKeystorePassword() {
         return conf.getString("saml.key.password", conf.getString("SAMLPASSWORD", "")); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+    }
+    
+    ///////////////////////// tls policy  //////////////////////////////////
+    public String getDefaultTlsPolicyName() {
+        return conf.getString("mtwilson.default.tls.policy.name", "TRUST_FIRST_CERTIFICATE");
+    }
+    
+    public String getTlsKeystorePassword() {
+        return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
     }
     
 }
