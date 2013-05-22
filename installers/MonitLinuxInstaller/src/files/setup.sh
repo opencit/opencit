@@ -93,6 +93,8 @@ chmod 700 monitrc
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
+else
+    cp monitrc /etc/monit/monitrc
 fi
 
 mkdir -p /etc/monit/conf.d
