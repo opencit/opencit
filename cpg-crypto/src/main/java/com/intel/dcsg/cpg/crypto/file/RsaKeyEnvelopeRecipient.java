@@ -19,6 +19,7 @@ import javax.crypto.Cipher;
  * This class uses the algorithm defined by RsaKeyEnvelope. 
  * 
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class RsaKeyEnvelopeRecipient {

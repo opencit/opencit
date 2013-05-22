@@ -9,6 +9,7 @@ import java.security.cert.X509Certificate;
 
 /**
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public interface MutableCertificateRepository extends CertificateRepository {

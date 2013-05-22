@@ -8,8 +8,10 @@ import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.InputModel;
 import com.intel.dcsg.cpg.validation.Model;
+import java.io.BufferedReader;
 import java.io.Console;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,14 +29,35 @@ public class Input {
     private static final IntegerInput INTEGER_INPUT = new IntegerInput();
     private static final StringInput STRING_INPUT = new StringInput();
     
-    public static String getConfirmedPasswordWithPrompt(String prompt) throws IOException {
-        if (console == null) {
-            throw new IOException("no console.");
+    public static char[] readPassword(String format, Object... args) throws IOException {
+        if( console != null ) {
+            return console.readPassword(format, args);
         }
+        // no console, so use system.out
+        System.out.println("Warning: your password will be displayed when you type it");
+        System.out.println(String.format(format, args));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String password = reader.readLine();
+        if( password == null ) { return new char[0]; }
+        return password.toCharArray();
+    }
+
+    public static String readLine(String format, Object... args) throws IOException {
+        if( console != null ) {
+            return console.readLine(format, args);
+        }
+        // no console, so use system.out
+        System.out.println(String.format(format, args));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String input = reader.readLine();
+        return input;
+    }
+    
+    public static String getConfirmedPasswordWithPrompt(String prompt) throws IOException {
         while(true) {
             if( prompt != null && !prompt.isEmpty() ) { System.out.println(prompt); }
-            char[] password = console.readPassword("Password: ");
-            char[] passwordAgain = console.readPassword("Password (again):");
+            char[] password = readPassword("Password: ");
+            char[] passwordAgain = readPassword("Password (again):");
             if( password.length == passwordAgain.length && String.valueOf(password).equals(String.valueOf(passwordAgain)) ) {
                 return String.valueOf(password);
             }
@@ -43,12 +66,9 @@ public class Input {
     }
 
     public static String getRequiredPasswordWithPrompt(String prompt) throws IOException {
-        if (console == null) {
-            throw new IOException("no console.");
-        }
         while(true) {
             if( prompt != null && !prompt.isEmpty() ) { System.out.println(prompt); }
-            char[] password = console.readPassword("Password: ");
+            char[] password = readPassword("Password: ");
             if( password.length > 0 ) {
                 return String.valueOf(password);
             }
@@ -56,15 +76,12 @@ public class Input {
     }
 
     public static int getSelectionFromListWithPrompt(List<String> list, String prompt) throws IOException {
-        if (console == null) {
-            throw new IOException("no console.");
-        }
         while(true) {
             if( prompt != null && !prompt.isEmpty() ) { System.out.println(prompt); }
             for(int i=0; i<list.size(); i++) {
                 System.out.println(String.format("[%2d] %s", i+1, list.get(i)));
             }
-            String selection = console.readLine("Choose 1-%d: ", list.size());
+            String selection = readLine("Choose 1-%d: ", list.size());
             try {
                 Integer value = Integer.valueOf(selection);
                 if( value >=1 && value <= list.size() ) {
@@ -126,12 +143,9 @@ public class Input {
     }
     
     public static <T> T getRequiredInputWithPrompt(InputModel<T> model, String caption, String prompt) throws IOException {
-        if (console == null) {
-            throw new IOException("no console.");
-        }
         while(true) {
             if( caption != null && !caption.isEmpty() ) { System.out.println(caption); }
-            String input = console.readLine(prompt+" ");
+            String input = readLine(prompt+" ");
             model.setInput(input);
             if( model.isValid() ) {
                 return model.value();
@@ -172,12 +186,9 @@ public class Input {
     }
 
     public static <T> T getRequiredInputWithDefaultPrompt(InputModel<T> model, String caption, String prompt, String defaultValue) throws IOException {
-        if (console == null) {
-            throw new IOException("no console.");
-        }
         while(true) {
             if( caption != null && !caption.isEmpty() ) { System.out.println(caption); }
-            String input = console.readLine(prompt+" ["+defaultValue+"] ");
+            String input = readLine(prompt+" ["+defaultValue+"] ");
             if( input == null || input.isEmpty() ) { input = defaultValue; }
             model.setInput(input);
             if( model.isValid() ) {

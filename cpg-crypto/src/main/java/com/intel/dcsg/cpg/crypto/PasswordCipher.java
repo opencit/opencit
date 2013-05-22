@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.ByteArray;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
@@ -20,6 +21,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class for using password-based encryption 
+ * 
+ * Usage example:
+ * PasswordCipher cipher = new PasswordCipher("mypassword");
+ * byte[] ciphertext = cipher.encrypt(plaintextBytes); 
+ * byte[] plaintext = cipher.decrypt(ciphertext);
+ * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class PasswordCipher {
@@ -64,8 +72,28 @@ public class PasswordCipher {
         }        
     }
     
+    /**
+     * 
+     * @return a string like PBEWithMD5AndDES/CBC/PKCS5Padding
+     */
+    public final String getAlgorithm() { return algorithm; }
+    
+    /**
+     * 
+     * @return a string like PBEWithMD5AndDES, PBEWithHmacSHA1AndDESede, PBKDF2WithHmacSHA1, ...
+     */
     public final String getCipherName() { return cipherName; }
+    
+    /**
+     * 
+     * @return a string like CBC, OFB8, ....
+     */
     public final String getCipherMode() { return cipherMode; }
+    
+    /**
+     * 
+     * @return a string like PKCS5Padding, NoPadding, ...
+     */
     public final String getPaddingMode() { return paddingMode; }
     
     
@@ -96,7 +124,7 @@ public class PasswordCipher {
             cipher.init(Cipher.ENCRYPT_MODE, dek, dekParams); // throws InvalidKeyException, InvalidAlgorithmParameterException        
             // encrypt and return the result
             byte[] ciphertext = cipher.doFinal(input); // throws IllegalBlockSizeException, BadPaddingException, we're assuming the signature value is base64-encoded
-            return concat(salt, ciphertext);   // e.header contains the salt
+            return ByteArray.concat(salt, ciphertext);   // e.header contains the salt
         }
         catch(Exception e) {
             throw new CryptographyException(e);
@@ -126,13 +154,6 @@ public class PasswordCipher {
         }
     }
     
-    // XXX duplicated in Aes128
-    private byte[] concat(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
     
     /**
      * Precondition:  the cipherName variable is set to the algorithm name such as "PBEWithMD5AndDES"
@@ -180,7 +201,7 @@ public class PasswordCipher {
     /**
      * 
      * @param cipherInfo the password-based cipher to test (algorithm name, salt size)
-     * @param elapsedTimeTarget the minimum average delay;  the function will try increasingly larger iteration counts until the encryption operations takes MORE THAN this amount of time on average (5 data points in the average)
+     * @param elapsedTimeTarget the minimum average delay, in milliseconds;  the function will try increasingly larger iteration counts until the encryption operations takes MORE THAN this amount of milliseconds on average (5 data points in the average)
      * @return
      * @throws CryptographyException 
      */

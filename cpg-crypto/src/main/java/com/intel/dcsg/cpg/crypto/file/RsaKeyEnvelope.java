@@ -6,6 +6,7 @@ package com.intel.dcsg.cpg.crypto.file;
 
 /**
  * The RsaKeyEnvelope class models an AES key that has been wrapped using an RSA public key. 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class RsaKeyEnvelope extends KeyEnvelope {

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * XXX TODO maybe create a separate class that is simply a container for (PrivateKey,X509Certificate) for situations
  * in which the pair is needed but the identity is customized (not a SHA-256 hash of the certificate) or situations
  * where the signature is not needed. 
- * @since 0.5.2
+ * @since 0.1
  * @author jbuhacoff
  */
 public class RsaCredential implements Credential {

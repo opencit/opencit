@@ -28,7 +28,7 @@ public class Pem {
     private static final String tagStart = "-----BEGIN ([a-zA-Z0-9_ ]+)-----";
     private static final String tagEnd = "-----END ([a-zA-Z0-9_ ]+)-----";
     private static final Pattern contentTagStartPattern = Pattern.compile(tagStart);
-//    private static final Pattern contentTagEndPattern = Pattern.compile(tagEnd);  
+    private static final Pattern contentTagEndPattern = Pattern.compile(tagEnd);  
     private static final String headerAttributeNameEmptyPair = "([a-zA-Z0-9_-]+): ?";
     private static final String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+): (?:([^\"].+)|\"([^\"]+)\")"; // value can be plain, or enclosed in double quotes
     private static final Pattern headerAttributeNameEmptyPairPattern = Pattern.compile(headerAttributeNameEmptyPair);
@@ -119,7 +119,10 @@ public class Pem {
         Matcher tagMatcher = contentTagStartPattern.matcher(input);
         if( tagMatcher.find() ) {
             output.contentType = tagMatcher.group(1);
-            log.debug("PEM content type according to tag: {}", output.contentType);
+//            log.debug("PEM content type according to tag: {}", output.contentType);
+        }
+        else {
+             throw new IllegalArgumentException("Input is not in PEM format");
         }
         // second, there must be a matching end-tag for the start-tag
         if( !input.contains(output.getTagEnd()) ) { throw new IllegalArgumentException("PEM input with content type '"+output.contentType+"' does not have an end tag"); }
@@ -128,30 +131,30 @@ public class Pem {
         String encodedContent = "";
         String lines[] = content.split("\n");
         for(int i=0; i<lines.length; i++) {
-            log.debug("line: {}", lines[i]);
+//            log.debug("line: {}", lines[i]);
             if( lines[i].trim().isEmpty() ) {
-                log.debug("encountered empty line");
+//                log.debug("encountered empty line");
                 // from this point on all the rest of the lines are the base64-encoded encrypted key
                 for(int j=i+1; j<lines.length; j++) {
                     encodedContent += lines[j];
                 }
-                log.debug("base64 content: {}", encodedContent);
+//                log.debug("base64 content: {}", encodedContent);
                 break;
             }
             else {
-                log.debug("non-empty line in header");
+//                log.debug("non-empty line in header");
                 Matcher m = headerAttributeNameValuePairPattern.matcher(lines[i]);
                 if( m.matches() ) {
                     String attributeName = m.group(1);
                     String attributeValue = m.group(2);
-                    log.debug("attr name: {}  value: {}", attributeName, attributeValue);
+//                    log.debug("attr name: {}  value: {}", attributeName, attributeValue);
                     output.headers.put(attributeName, attributeValue);
                 }
                 else {
                     Matcher m2 = headerAttributeNameEmptyPairPattern.matcher(lines[i]);
                     if( m2.matches() ) {
                         String attributeName = m2.group(1);
-                        log.debug("attr name: {} with empty value", attributeName);
+//                        log.debug("attr name: {} with empty value", attributeName);
                         output.headers.put(attributeName, null);        // XXX using null to indicate the attribute was in the file but had no value... consider using empty string instead or not registering it at all
                     }
                     else {
@@ -160,7 +163,7 @@ public class Pem {
                         for(int j=i; j<lines.length; j++) {
                             encodedContent += lines[j];
                         }
-                        log.debug("base64 content: {}", encodedContent);
+//                        log.debug("base64 content: {}", encodedContent);
                         break;                    
                     }
                 }
@@ -168,5 +171,23 @@ public class Pem {
         }
         output.content = Base64.decodeBase64(encodedContent);
         return output;        
+    }
+    
+    public static boolean isPem(String input) {
+        // first, identify the content type of the input using the tags
+        Matcher startTagMatcher = contentTagStartPattern.matcher(input);
+        if( startTagMatcher.find() ) {
+            String startContentType = startTagMatcher.group(1);
+//            log.debug("PEM content type according to start tag: {}", startContentType);
+            Matcher endTagMatcher = contentTagEndPattern.matcher(input);
+            if( endTagMatcher.find() ) {
+                String endContentType = endTagMatcher.group(1);
+//                log.debug("PEM content type according to end tag: {}", endContentType);
+                if( startContentType.equals(endContentType) ) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

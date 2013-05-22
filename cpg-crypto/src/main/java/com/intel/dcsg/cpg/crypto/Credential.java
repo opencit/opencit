@@ -10,7 +10,7 @@ import java.security.SignatureException;
 
 /**
  *
- * @since 0.5.2
+ * @since 0.1
  * @author jbuhacoff
  */
 public interface Credential {

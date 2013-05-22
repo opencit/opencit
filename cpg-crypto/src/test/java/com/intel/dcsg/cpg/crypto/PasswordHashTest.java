@@ -44,4 +44,11 @@ public class PasswordHashTest {
         assertEquals(0, password.getSalt().length); // because it uses 8-byte salts
         assertEquals(32, password.getHash().length); // because it uses sha256
     }
+    
+    @Test
+    public void testHashPasswordIsEqualToInputPassword() throws CryptographyException {
+        PasswordHash password = new PasswordHash("existing password"); // hash a password with random salt
+        assertTrue(password.isEqualTo("existing password"));
+        assertFalse(password.isEqualTo("wrong password"));
+    }
 }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A writable in-memory repository of X509Certificates. You can access the mutable hash set directly via getKeystore()
+ * @since 0.1
  * @author jbuhacoff
  */
 public class HashSetMutableCertificateRepository implements MutableCertificateRepository {

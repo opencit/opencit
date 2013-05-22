@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
  * 
  * See also http://ws.apache.org/wss4j/config.html 
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class SamlUtil {

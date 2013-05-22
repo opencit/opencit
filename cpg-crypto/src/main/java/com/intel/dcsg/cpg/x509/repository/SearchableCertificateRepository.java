@@ -25,6 +25,7 @@ import java.util.Date;
  * Applications should extend this interface to add such search methods for their
  * own use.
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public interface SearchableCertificateRepository {

@@ -15,6 +15,7 @@ package com.intel.dcsg.cpg.crypto;
  * and handle DecoderExceptions directly.
  * 
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public class HexFormatException extends IllegalArgumentException {

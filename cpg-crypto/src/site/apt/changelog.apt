@@ -1,0 +1,9 @@
+
+Version 0.1.1-SNAPSHOT
+* X509Builder now also accepts alternativeName without ip: or dns: hint and tries to autodetect
+
+Version 0.1-SNAPSHOT
+* Fork of Mt Wilson's crypto package
+* Added new features to support Mystery Hill: DataEnvelope, KeyEnvelope, PasswordKeyEnvelope, and CertificateRepository
+  and related classes
+

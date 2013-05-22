@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A read-only repository of X509Certificates.
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class ArrayCertificateRepository implements CertificateRepository {

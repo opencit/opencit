@@ -42,7 +42,7 @@ import sun.security.x509.*;
  * and add them to a keystore file. Set the "mtwilson.api.keystore" property to
  * point to this file (by default keystore.jks)
  *
- * @since 0.5.2
+ * @since 0.1
  * @author jbuhacoff
  */
 public class RsaUtil {

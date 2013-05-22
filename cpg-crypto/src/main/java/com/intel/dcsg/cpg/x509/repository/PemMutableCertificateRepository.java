@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A writable repository of X509Certificates that is saved in a PEM-format file.
+ * @since 0.1
  * @author jbuhacoff
  */
 public class PemMutableCertificateRepository implements MutableCertificateRepository {

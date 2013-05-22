@@ -4,10 +4,12 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.ByteArray;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -33,7 +35,7 @@ import org.apache.commons.codec.binary.Base64;
  * NoSuchAlgorithmException is thrown if SHA-256 is not available
  * UnsupportedEncodingException is thrown if UTF-8 is not available
  * 
- * @since 0.5.3
+ * @since 0.1
  * @author jbuhacoff
  */
 public class PasswordHash {
@@ -52,7 +54,7 @@ public class PasswordHash {
     public PasswordHash(String password) throws CryptographyException  {
         // generate a random 8-byte salt
         salt = new byte[SALT_LENGTH];
-        SecureRandom rnd = new SecureRandom ();
+        SecureRandom rnd = new SecureRandom();
         rnd.nextBytes(salt);
         hash = hash(password);
     }
@@ -62,7 +64,7 @@ public class PasswordHash {
     private byte[] hash(String password) throws CryptographyException {
         try {
             byte[] passwordBytes = password.getBytes("UTF-8"); // UnsupportedEncodingException
-            return sha256(concat(salt,passwordBytes));
+            return sha256(ByteArray.concat(salt,passwordBytes));
         }
         catch(NoSuchAlgorithmException e) {
             throw new CryptographyException(e);
@@ -77,13 +79,6 @@ public class PasswordHash {
         return sha256.digest(data);
     }
     
-    private byte[] concat(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
-
     public byte[] getHash() {
         return hash;
     }
@@ -107,6 +102,11 @@ public class PasswordHash {
     @Override
     public String toString() {
         return getSaltBase64()+":"+getHashBase64();
+    }
+    
+    public boolean isEqualTo(String password) throws CryptographyException {
+        byte[] checkHash = hash(password);
+        return Arrays.equals(hash, checkHash);
     }
     
     /**

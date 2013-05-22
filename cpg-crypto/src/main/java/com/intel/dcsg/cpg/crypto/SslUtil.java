@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author jbuhacoff
- * @since 0.5.4
+ * @since 0.1
  */
 public class SslUtil {
     private static final Logger log = LoggerFactory.getLogger(SslUtil.class);

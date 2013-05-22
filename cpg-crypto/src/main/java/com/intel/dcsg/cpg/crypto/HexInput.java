@@ -21,6 +21,7 @@ import org.apache.commons.codec.binary.Hex;
  *   }
  * }
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class HexInput extends InputModel<byte[]> {

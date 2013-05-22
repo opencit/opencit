@@ -85,13 +85,13 @@ public class PemLikeParser {
      * @return 
      */
     private static ContentInfo parseContent(String[] lines, int start, int count) {
-        log.info("parseContent(lines {}, start {}, count {})", new Object[] { lines.length, start, count });
+//        log.info("parseContent(lines {}, start {}, count {})", new Object[] { lines.length, start, count });
         ContentInfo info = new ContentInfo();
         ContentState s = ContentState.HEADER;
         String lastHeader = null;
         int end = start+count;
         for(int i=start; i<end; i++) {
-            log.debug("Content line: {}", lines[i]);
+//            log.debug("Content line: {}", lines[i]);
             switch(s) {
                 case HEADER:
                     if( lines[i].trim().isEmpty() ) {
@@ -102,7 +102,7 @@ public class PemLikeParser {
                         if( m.matches() ) {
                             String attributeName = m.group(1);
                             String attributeValue = m.group(2);
-                            log.debug("attr name: {}  value: {}", attributeName, attributeValue);
+//                            log.debug("attr name: {}  value: {}", attributeName, attributeValue);
                             info.headers.put(attributeName, attributeValue); 
                             lastHeader = attributeName;
                         }
@@ -110,18 +110,18 @@ public class PemLikeParser {
                             Matcher m2 = headerAttributeNameEmptyPairPattern.matcher(lines[i]);
                             if( m2.matches() ) {
                                 String attributeName = m2.group(1);
-                                log.debug("attr name: {} with empty value", attributeName);
+//                                log.debug("attr name: {} with empty value", attributeName);
                                 info.headers.put(attributeName, null);        // XXX using null to indicate the attribute was in the file but had no value... consider using empty string instead or not registering it at all
                                 lastHeader = attributeName;
                             }
                             else {
                                 if( info.headers.isEmpty() ) {
-                                    log.debug("Found start of body with no headers");
+//                                    log.debug("Found start of body with no headers");
                                     s = ContentState.BODY;
                                     info.body.append(lines[i]);
                                 }
                                 else { // lastHeader guaranteed to be non-null since it is set each time we add a header... so if headers is non-empty, lastHeader is set.
-                                    log.error("Appending unexpected line format in header: {}", lines[i]); // XXX or should we append it to the last header line? (with the assumption that it got wrapped...)
+//                                    log.error("Appending unexpected line format in header: {}", lines[i]); // XXX or should we append it to the last header line? (with the assumption that it got wrapped...)
                                     String attributeValue = info.headers.get(lastHeader);
                                     if( attributeValue == null ) { attributeValue = ""; }
                                     attributeValue = attributeValue.concat(lines[i]); // appends this line "as is" to the last header value... so leading spaces count. for example if the value is base64 data, you want to make sure there are no leading spaces on the extra lines,  unless your base64 parser ignores spaces anyway.
@@ -161,7 +161,7 @@ public class PemLikeParser {
             Matcher tagMatcher = contentTagStartPattern.matcher(input);
             if( tagMatcher.find() ) {
                 startTag = tagMatcher.group(1);
-                log.debug("Found start tag: {}", startTag);
+//                log.debug("Found start tag: {}", startTag);
             }
         }
     }
@@ -193,9 +193,9 @@ public class PemLikeParser {
             Matcher tagMatcher = contentTagEndPattern.matcher(input);
             if( tagMatcher.find() ) {
                 endTag = tagMatcher.group(1);
-                log.debug("Found end tag: {}", endTag);
+//                log.debug("Found end tag: {}", endTag);
                 if( !startTag.equals(endTag) ) {
-                    log.debug("Start tag {} does not match end tag {}, so ignoring end tag", startTag, endTag);
+//                    log.debug("Start tag {} does not match end tag {}, so ignoring end tag", startTag, endTag);
                     endTag = null;
                 }
             }

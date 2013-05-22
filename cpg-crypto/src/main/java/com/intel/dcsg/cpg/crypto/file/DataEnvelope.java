@@ -42,6 +42,7 @@ zoJ/NBdEIMdHNUh0h11GQCXAQXOSL6Fx2hRdcicm6j1CPd3AFrTt9EATmd4Hj+D4
 /b6hcuWyzva895YMUCSyDaLgSsIqRWmXxQV1W2bAgRbs8jD8VF+G9w==
 -----END ENCRYPTED DATA-----
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class DataEnvelope {
@@ -70,7 +71,7 @@ public class DataEnvelope {
     }
     
     public static DataEnvelope fromPem(String input) {
-        Pem pem = Pem.valueOf(input);
+        Pem pem = Pem.valueOf(input); // throws IllegalArgumentException if the input is not in PEM format (has a matching begin/end pair like -----BEGIN DATA----- and -----END DATA-----)
         // XXX not checking the PEM content type (what is next to BEGIN and END tags) 
         DataEnvelope envelope = new DataEnvelope();
         for(String header : pem.getHeaders().keySet()) {

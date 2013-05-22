@@ -5,10 +5,11 @@
 package com.intel.dcsg.cpg.crypto;
 
 import java.util.Arrays;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
 /**
- *
+ * @since 0.1
  * @author jbuhacoff
  */
 public class AbstractDigest {
@@ -42,9 +43,20 @@ public class AbstractDigest {
         return value;
     }
 
+    /**
+     * XXX should this be renamed just toHex() ? by definition hex is a string since it's a textual representation of
+     * binary data
+     * 
+     * @return 
+     */
     public String toHexString() {
         return Hex.encodeHexString(value);
     }
+
+    public String toBase64() {
+        return Base64.encodeBase64String(value);
+    }
+    
     
     @Override
     public String toString() {

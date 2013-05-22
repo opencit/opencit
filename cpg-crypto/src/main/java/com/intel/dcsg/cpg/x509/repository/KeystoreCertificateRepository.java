@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
  * A writable (depending on file permissions) repository of X509Certificates that is saved in a JKS-format file.
  * The repository must already exist.
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class KeystoreCertificateRepository implements MutableCertificateRepository {

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
  * the only thing that can be said is they are necessarily different because the
  * list contents are different.
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public class X509CertificateComparator implements Comparator<X509Certificate> {

@@ -12,6 +12,7 @@ import java.util.Set;
 /**
  * The KeyEnvelope class models a key wrapped (encrypted) with another key.
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class KeyEnvelope {

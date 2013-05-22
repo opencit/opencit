@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Convenience class for reading and writing keys in PKCS#12 format
+ * @since 0.1
  * @author jbuhacoff
  */
 public class Pkcs12 {

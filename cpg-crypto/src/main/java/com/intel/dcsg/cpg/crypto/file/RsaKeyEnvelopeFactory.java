@@ -35,6 +35,7 @@ import javax.crypto.NoSuchPaddingException;
  * SecretKey key = Aes128.generateKey();
  * RsaKeyEnvelope keyEnvelope = factory.seal(key);
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class RsaKeyEnvelopeFactory {

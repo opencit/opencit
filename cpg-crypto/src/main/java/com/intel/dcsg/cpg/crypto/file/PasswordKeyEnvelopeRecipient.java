@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
  * 
  * This class uses the algorithm defined by PasswordKeyEnvelope. 
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class PasswordKeyEnvelopeRecipient {

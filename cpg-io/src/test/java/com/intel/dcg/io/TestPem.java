@@ -34,6 +34,7 @@ QmB5gMsc8ufk9lmcwVHBXHMV50bzLtKD/r+3nn1H1+o=
         rnd.nextBytes(content);
         Pem pem = new Pem("RANDOM DATA", content, null); // XXX TODO should there be a two-argument constructor for callers taht don't need headers?
         log.debug("pem tostring:\n"+pem.toString());
+        log.debug("is pem? {}", Pem.isPem(pem.toString()));
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.ByteArray;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,6 +51,7 @@ import org.apache.commons.io.IOUtils;
  * SecretKey tmp = factory.generateSecret (spec);
  * SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class Aes128 {
@@ -90,6 +92,12 @@ public class Aes128 {
     /**
      * Note:  the cipher algorithm and block size are NOT written to the output.  You must separately track
      * the algorithm name and block size, along with your secret key, in order to reliably decrypt the output later.
+     * 
+     * XXX TODO: there should be a companion class Aes128WithSha256 which does Aes128 encryption AND adds an
+     * integrity check using SHA256 at the end when encrypting, and when decrypting it needs to keep track
+     * of the last two blocks so when it gets to the end, it knows the bytes for the hash that is at the end
+     * and can compare it to the digest of the decrypted text that was being computed as the stream was
+     * read.
      * 
      * @param in the plaintext source ; after the input stream is copied the input stream will be closed by this method
      * @param out the ciphertext destination ; after the input stream is copied the output stream will be closed by this method
@@ -148,7 +156,7 @@ public class Aes128 {
             AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, paramSpec); // throws InvalidAlgorithmParameterException
             byte[] ciphertext = cipher.doFinal(plaintext);
-            return concat(iv, ciphertext);
+            return ByteArray.concat(iv, ciphertext);
         }
         catch(InvalidAlgorithmParameterException e) {
             throw new CryptographyException(e);
@@ -199,13 +207,6 @@ public class Aes128 {
         }
     }
     
-    
-    private byte[] concat(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
     
     private byte[] generateIV() {
         SecureRandom random = new SecureRandom();

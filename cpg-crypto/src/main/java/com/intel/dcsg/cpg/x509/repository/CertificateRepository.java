@@ -25,6 +25,7 @@ import java.util.List;
  * over which certificates are returned, like searching by issuer, subject, validity dates,
  * fingerprints, etc. 
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public interface CertificateRepository {

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @since 0.5.2
+ * @since 0.1
  * @author jbuhacoff
  */
 public class HmacCredential implements Credential {

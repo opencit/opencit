@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  * TODO: Support other keystore providers such as PBE with SHA1 or SHA256 and AES-128.
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class SimpleKeystore {

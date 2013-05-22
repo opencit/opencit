@@ -6,6 +6,7 @@ package com.intel.dcsg.cpg.crypto;
 
 /**
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public class CryptographyException extends Exception {

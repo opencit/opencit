@@ -9,7 +9,9 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 /**
- *
+ *  * XXX TODO should move this into the io package
+
+ * @since 0.1
  * @author jbuhacoff
  */
 public class HexUtil {

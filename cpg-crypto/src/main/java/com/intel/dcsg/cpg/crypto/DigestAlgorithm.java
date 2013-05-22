@@ -6,9 +6,11 @@ package com.intel.dcsg.cpg.crypto;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public enum DigestAlgorithm {
@@ -34,7 +36,14 @@ public enum DigestAlgorithm {
     public boolean isValidHex(String hexValue) {
         if( hexValue == null ) { return false; }
         hexValue = HexUtil.trim(hexValue);
-        return hexValue.length() == length*2 && HexUtil.isHex(hexValue);
+        return (hexValue.length() == length*2) && HexUtil.isHex(hexValue);
+    }
+    
+    public boolean isValidBase64(String base64Value) {
+        if( base64Value == null ) { return false; }
+        base64Value = Base64Util.trim(base64Value);
+        return (base64Value.length() == Math.round(4*Math.ceil(1.0*length/3))) && Base64.isBase64(base64Value);
+//        return Base64.isBase64(base64Value);
     }
     
     /**

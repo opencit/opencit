@@ -30,6 +30,7 @@ import sun.security.x509.GeneralNameInterface;
 
 /**
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public class X509Util {

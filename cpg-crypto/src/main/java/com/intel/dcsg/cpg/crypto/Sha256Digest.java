@@ -3,7 +3,7 @@ package com.intel.dcsg.cpg.crypto;
 /**
  * Representation of a single SHA256 Digest. An SHA256 Digest is a 32-byte value.
  * 
- * @since 0.5.4
+ * @since 0.1
  * @author jbuhacoff
  */
 public class Sha256Digest extends AbstractDigest {
@@ -60,6 +60,14 @@ public class Sha256Digest extends AbstractDigest {
     }
 
     /**
+     * @param base64 value without any punctuation or spaces; can be null
+     * @return true if the value is a valid base64 representation of an SHA256 digest
+     */
+    public static boolean isValidBase64(String base64Value) {
+        return ALGORITHM.isValidBase64(base64Value);
+    }
+    
+    /**
      * Assumes the input represents an SHA256 digest and creates a new instance of Sha256Digest to wrap it.
      * This method does NOT compute a digest. If the input is not a valid SHA256 representation, a null
      * will be returned.
@@ -85,13 +93,38 @@ public class Sha256Digest extends AbstractDigest {
      * 
      * Callers must always check the return value for null. 
      * 
-     * @param hex
+     * The input can be either hex or base64
+     * 
+     * @param text either hex or base64 encoded sha256 digest
      * @return 
      */
-    public static Sha256Digest valueOf(String hex) {
-        if( isValidHex(hex) ) {
+    public static Sha256Digest valueOf(String text) {
+        if( isValidHex(text) ) {
             Sha256Digest digest = new Sha256Digest();
-            digest.value = HexUtil.toByteArray(hex); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            digest.value = HexUtil.toByteArray(text); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            return digest;
+        }
+        if( isValidBase64(text) ) {
+            Sha256Digest digest = new Sha256Digest();
+            digest.value = Base64Util.toByteArray(text); 
+            return digest;
+        }
+        return null;
+    }
+
+    public static Sha256Digest valueOfHex(String text) {
+        if( isValidHex(text) ) {
+            Sha256Digest digest = new Sha256Digest();
+            digest.value = HexUtil.toByteArray(text); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            return digest;
+        }
+        return null;
+    }
+
+    public static Sha256Digest valueOfBase64(String text) {
+        if( isValidBase64(text) ) {
+            Sha256Digest digest = new Sha256Digest();
+            digest.value = Base64Util.toByteArray(text); 
             return digest;
         }
         return null;

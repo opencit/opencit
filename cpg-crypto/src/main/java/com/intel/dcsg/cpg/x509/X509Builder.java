@@ -5,6 +5,7 @@
 package com.intel.dcsg.cpg.x509;
 
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.validation.BuilderModel;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
@@ -50,6 +51,7 @@ import sun.security.x509.X509CertInfo;
  * XXX This class uses Sun internal APIs, which may be removed in a future
  * release.
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class X509Builder extends BuilderModel {
@@ -355,11 +357,24 @@ public class X509Builder extends BuilderModel {
     
     public X509Builder alternativeName(String alternativeName) {
         try {
-            if (alternativeName.startsWith("ip:")) {
+            if(alternativeName.startsWith("ip:")) {
                 ipAlternativeName(alternativeName);
             }
-            if (alternativeName.startsWith("dns:")) {
+            else if(alternativeName.startsWith("dns:")) {
                 dnsAlternativeName(alternativeName);
+            }
+            else {
+                // caller did not provide a hint, so try to automatically detect
+                InternetAddress address = new InternetAddress(alternativeName);
+                if( address.isIPv4() || address.isIPv6() ) {
+                    ipAlternativeName(alternativeName);
+                }
+                else if( address.isHostname() ) {
+                    dnsAlternativeName(alternativeName);
+                }
+                else {
+                    fault("alternativeName(%s) not a valid InternetAddress", alternativeName); // cannot figure out what it is, must alert user
+                }
             }
         }
         catch(Exception e) {

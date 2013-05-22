@@ -12,6 +12,7 @@ import java.security.cert.X509Certificate;
 
 /**
  *
+ * @since 0.1
  * @author jbuhacoff
  */
 public class RsaCredentialX509 extends RsaCredential {

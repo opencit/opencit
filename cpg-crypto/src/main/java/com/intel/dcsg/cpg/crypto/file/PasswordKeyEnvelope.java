@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
  * 
  * XXX TODO look into support for PBKDF2WithHmacSHA1 ... according to Java docs (see Standard Names ref above) it's only available as a parameter to SecretKeyFactory 
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class PasswordKeyEnvelope extends KeyEnvelope {

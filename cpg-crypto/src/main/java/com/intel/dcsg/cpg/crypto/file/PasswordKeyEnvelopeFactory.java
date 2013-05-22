@@ -47,6 +47,7 @@ import javax.crypto.spec.PBEParameterSpec;
  * SecretKey key = Aes128.generateKey();
  * PasswordKeyEnvelope keyEnvelope = factory.seal(key);
  * 
+ * @since 0.1
  * @author jbuhacoff
  */
 public class PasswordKeyEnvelopeFactory {

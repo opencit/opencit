@@ -31,7 +31,7 @@ public class ExistingFileResource implements Resource {
 
     @Override
     public InputStream getInputStream() throws FileNotFoundException {
-        return new FileInputStream(file);                        
+        return new FileInputStream(file);  // will throw FileNotFoundException if the file does not exist
     }
 
     @Override
