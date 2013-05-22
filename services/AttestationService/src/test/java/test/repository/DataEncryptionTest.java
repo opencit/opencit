@@ -31,9 +31,10 @@ public class DataEncryptionTest {
     //mtwilson.as.dek=95nBEEFshB6xrjpi5wp8Og\=\=
     @Test
     public void testDecryptionWithProbablyIncorrectKey() throws IOException, CryptographyException {
-        List<TblHosts> hosts = My.jpa().mwHosts().findTblHostsEntities();
         Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
         p.store(System.out, "effective jpa config");
+        log.debug("dek is {}", My.configuration().getDataEncryptionKeyBase64());
+        List<TblHosts> hosts = My.jpa().mwHosts().findTblHostsEntities();
         for(TblHosts host : hosts) {
             log.debug("Host: {}  Connection: {}", host.getName(), host.getAddOnConnectionInfo());
         }
@@ -43,7 +44,7 @@ public class DataEncryptionTest {
     public void testUsePersistenceUnitPostgres() throws IOException {
         Properties jpaProperties = new Properties();
         jpaProperties.setProperty("javax.persistence.jdbc.driver", "org.postgresql.Driver");
-        jpaProperties.setProperty("javax.persistence.jdbc.url", "jdbc:postgresql://10.1.71.209:5432/mw_as");
+        jpaProperties.setProperty("javax.persistence.jdbc.url", "jdbc:postgresql://10.1.71.88:5432/mw_as");
         jpaProperties.setProperty("javax.persistence.jdbc.user", "root");
         jpaProperties.setProperty("javax.persistence.jdbc.password", "password");
         EntityManagerFactory emf = PersistenceManager.createEntityManagerFactory("ASDataPU", jpaProperties);
