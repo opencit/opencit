@@ -88,7 +88,7 @@ elif using_tomcat; then
 fi
 
 # if customer selected mysql but there is no connector present, we abort the install 
-if [ "$DATABASE_VENDOR" == "mysql" ] ; then
+if using_mysql ; then
   mysqlconnector_file=`ls ~ -1 2>/dev/null | grep -i mysql`
   if [ -n "$mysqlconnector_file" ]; then
     mkdir -p /opt/intel/cloudsecurity/setup-console

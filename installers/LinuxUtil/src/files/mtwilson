@@ -26,6 +26,8 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+
+# XXX TODO can remove this later; converting  all package_required_version variable names to be upper case, which can be defined in mtwilson.env or for which we have a default
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
@@ -267,7 +269,7 @@ case "$1" in
         tomcat_sslcert_report
         ;;
   mysql-detect)
-        mysql_detect ${2:-$mysql_required_version}
+        mysql_detect $2
         mysql_env_report
         ;;
   mysql-sslcert)
@@ -279,7 +281,7 @@ case "$1" in
         mysql_create_ssl "Trust Dashboard"
         ;;
   java-detect)
-        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
+        java_detect $2
         java_env_report
         ;;
   localhost-integration)
