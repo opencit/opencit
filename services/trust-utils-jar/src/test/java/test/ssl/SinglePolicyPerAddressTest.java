@@ -11,6 +11,7 @@ import com.intel.mtwilson.tls.*;
 import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +19,8 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.io.IOUtils;
 //import org.apache.http.conn.scheme.Scheme;
@@ -39,6 +42,7 @@ import org.apache.commons.io.IOUtils;
  * @author jbuhacoff
  */
 public class SinglePolicyPerAddressTest {
+    private Logger log = LoggerFactory.getLogger(getClass());
     
     private ArrayList<String> getTargets() {
         // vmware: 10.1.71.175, 10.1.71.173, 10.1.71.176, 10.1.71.174
@@ -59,6 +63,8 @@ public class SinglePolicyPerAddressTest {
     	SSLContext ctx1 = SSLContext.getInstance("SSL");
     	SSLContext ctx2 = SSLContext.getInstance("SSL");
         assertNotEquals(ctx1,ctx2);
+        log.debug("context 1 hashcode {}", ctx1.hashCode());
+        log.debug("context 2 hashcode {}", ctx2.hashCode());
     }
     
     private void connect(URL url, TlsPolicy tlsPolicy) throws NoSuchAlgorithmException, KeyManagementException, IOException {
@@ -73,15 +79,24 @@ public class SinglePolicyPerAddressTest {
             sr.register(https);            
 */
     	SSLContext ctx = SSLContext.getInstance("SSL");
-        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null);
-        
-                HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
-        SSLSocketFactory sslsocketfactory = ctx.getSocketFactory();
-        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
+        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null); // even with InsecureTlsPolicy we get ERROR: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certificateion path to requested target
+        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier()); // without this, even InsecureTlsPolicy will not prevent java.security.cert.CertificateException: No subject alternative names matching IP address 10.1.71.162 found
+//        SSLSocketFactory sslsocketfactory = ctx.getSocketFactory();
+//        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
         InputStream in = url.openStream();
         String content = IOUtils.toString(in);
         System.out.println("---\n"+url.toString()+"\n---\n"+content+"\n---\n\n");
         
+    }
+    
+    @Test
+    public void testInsecurePolicy() throws MalformedURLException, NoSuchAlgorithmException, KeyManagementException, IOException {
+        TlsPolicy tlsPolicy = new InsecureTlsPolicy();
+        ArrayList<String> targets = getTargets();
+        for(String target : targets) {
+            URL url = new URL(target); // throws MalformedURLException
+            connect(url,tlsPolicy); // throws NoSuchAlgorithmException, KeyManagementException, IOException
+        }
     }
     
     /**

@@ -69,17 +69,11 @@ public class MyJpa {
     MwProcessorMappingJpaController mwProcessorMapping;
 
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
-
-    public MyJpa(MyPersistenceManager pm, String dekBase64) { 
+    
+    public MyJpa(MyPersistenceManager pm) { 
         this.pm = pm; 
 //        this.dekBase64 = dekBase64; 
-        try {
-            ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
-        }
-        catch(CryptographyException e) {
-            throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
-        }      
-        
+//        initDataEncryptionKey(dekBase64);
     }
     
     public TblApiClientJpaController mwApiClientHmac() throws IOException {
