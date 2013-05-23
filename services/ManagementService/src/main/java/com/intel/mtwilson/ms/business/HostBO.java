@@ -947,7 +947,7 @@ public class HostBO extends BaseBO {
         boolean configStatus = false;
 
         try {
-
+            My.initDataEncryptionKey();
             if (gkvHost != null) {
 
                 hostConfigObj = new HostConfigData();
