@@ -1259,7 +1259,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 				responseView.addObject("result",false);
 				responseView.addObject("message",StringEscapeUtils.escapeHtml(e1.getMessage()));
 			}
-		System.out.println(hostObject);
+		//System.out.println(hostObject);
 		ObjectMapper mapper = new ObjectMapper();
 		HostDetailsEntityVO dataVO = new HostDetailsEntityVO();
 		
