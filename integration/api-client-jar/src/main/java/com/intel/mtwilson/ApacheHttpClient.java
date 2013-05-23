@@ -138,7 +138,7 @@ public class ApacheHttpClient implements java.io.Closeable {
                 return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
             }
             else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
-                log.warn("Using TLS Policy TRUST_FIRST_INSECURE");
+                log.warn("Using TLS Policy INSECURE");
                 return new InsecureTlsPolicy();
             }
         }

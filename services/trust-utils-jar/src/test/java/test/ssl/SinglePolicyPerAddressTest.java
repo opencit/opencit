@@ -8,6 +8,20 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.intel.mtwilson.tls.*;
+import static org.junit.Assert.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
+import org.apache.commons.io.IOUtils;
+//import org.apache.http.conn.scheme.Scheme;
+//import org.apache.http.conn.ssl.SSLSocketFactory;
 
 /**
  * This class tests a model where each destination address can have just
@@ -31,13 +45,43 @@ public class SinglePolicyPerAddressTest {
         // citrix: 10.1.71.201, 10.1.71.126
         // intel:  10.1.71.167, 10.1.71.170
         ArrayList<String> targets = new ArrayList<String>();
-        targets.add("https://10.1.71.162/sdk;Administrator;intel123!");
-        targets.add("https://10.1.71.163/sdk;Administrator;intel123!");
-        targets.add("https://10.1.71.201/;Administrator;intel123!");
-        targets.add("https://10.1.71.126/;Administrator;intel123!");
-        targets.add("https://10.1.71.167:9999");
-        targets.add("https://10.1.71.170:9999");
+        targets.add("https://10.1.71.162/sdk"); //;Administrator;intel123!");
+        targets.add("https://10.1.71.163/sdk"); //;Administrator;intel123!");
+        targets.add("https://10.1.71.201/"); // root;P@ssw0rd
+//        targets.add("https://10.1.71.126/;Administrator;intel123!");
+//        targets.add("https://10.1.71.167:9999");
+//        targets.add("https://10.1.71.170:9999");
         return targets;
+    }
+    
+    @Test
+    public void testTwoSslContextInstancesAreDifferent() throws NoSuchAlgorithmException {
+    	SSLContext ctx1 = SSLContext.getInstance("SSL");
+    	SSLContext ctx2 = SSLContext.getInstance("SSL");
+        assertNotEquals(ctx1,ctx2);
+    }
+    
+    private void connect(URL url, TlsPolicy tlsPolicy) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        /*
+            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            sslcontext.init(null, new X509TrustManager[] { tlsPolicy.getTrustManager() }, null); // key manager, trust manager, securerandom
+            SSLSocketFactory sf = new SSLSocketFactory(
+                sslcontext,
+                tlsPolicy.getHostnameVerifier()
+                );
+            Scheme https = new Scheme("https", port, sf); // URl defaults to 443 for https but if user specified a different port we use that instead
+            sr.register(https);            
+*/
+    	SSLContext ctx = SSLContext.getInstance("SSL");
+        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null);
+        
+                HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+        SSLSocketFactory sslsocketfactory = ctx.getSocketFactory();
+        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
+        InputStream in = url.openStream();
+        String content = IOUtils.toString(in);
+        System.out.println("---\n"+url.toString()+"\n---\n"+content+"\n---\n\n");
+        
     }
     
     /**
