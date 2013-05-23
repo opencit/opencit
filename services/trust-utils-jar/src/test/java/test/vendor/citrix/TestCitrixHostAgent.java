@@ -55,7 +55,7 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
 public class TestCitrixHostAgent {
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private static String hostname = "10.1.70.126";
-    private static String connection = "citrix:https://10.1.70.126:443;root;P@ssw0rd";
+    private static String connection = "citrix:https://10.1.70.126:443/;root;P@ssw0rd";
 //    private static String hostname = "10.1.71.201";
 //    private static String connection = "citrix:https://10.1.71.201:443;root;P@ssw0rd";
     private static HostAgent agent;
