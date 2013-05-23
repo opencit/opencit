@@ -5,14 +5,12 @@
 package com.intel.mtwilson.tls;
 
 import com.intel.mtwilson.crypto.NopX509TrustManager;
-import com.intel.mtwilson.crypto.X509Util;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -35,7 +33,7 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
     public static TlsPolicyManager getInstance() { return singleton; }
     private static Logger log = LoggerFactory.getLogger(TlsPolicyManager.class);
     
-    private HashMap<String,TlsPolicy> map = new HashMap<String,TlsPolicy>();
+    private ConcurrentHashMap<String,TlsPolicy> map = new ConcurrentHashMap<String,TlsPolicy>(32); // default capacity 16 but we're starting with 32, default load factor 0.75
     
     public void setTlsPolicy(String address, TlsPolicy tlsPolicy) {
         log.debug("TlsPolicyManager: adding {} with policy: {}", address, tlsPolicy.getClass().toString());
