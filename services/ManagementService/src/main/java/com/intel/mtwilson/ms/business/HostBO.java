@@ -202,7 +202,7 @@ public class HostBO extends BaseBO {
         
         try {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
-        
+             My.initDataEncryptionKey();
             // Retrieve the host object.
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
@@ -947,7 +947,7 @@ public class HostBO extends BaseBO {
         boolean configStatus = false;
 
         try {
-
+           
             if (gkvHost != null) {
 
                 hostConfigObj = new HostConfigData();
@@ -1021,7 +1021,7 @@ public class HostBO extends BaseBO {
         boolean vmmMLEAlreadyExists = false;
 
         try {
-
+             My.initDataEncryptionKey();
             // Let us ensure that the user has specified the PCRs to be used
             if (hostConfigObj != null) {
 
