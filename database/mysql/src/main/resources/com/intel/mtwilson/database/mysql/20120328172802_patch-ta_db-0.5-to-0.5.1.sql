@@ -30,8 +30,8 @@ CREATE TABLE `tbl_host_specific_manifest` (
   CONSTRAINT `Module_Manifest_ID` FOREIGN KEY (`Module_Manifest_ID`) REFERENCES `tbl_module_manifest` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
-ALTER TABLE `tbl_hosts` MODIFY COLUMN `IPAddress` varchar(255) DEFAULT NULL;
-ALTER TABLE `tbl_hosts` ADD COLUMN `IPAddress` varchar(255) DEFAULT NULL;
+ALTER TABLE `tbl_hosts` MODIFY COLUMN `IPAddress` varchar(20) DEFAULT NULL;
+ALTER TABLE `tbl_hosts` ADD COLUMN `IPAddress` varchar(20) DEFAULT NULL;
 ALTER TABLE `tbl_hosts` ADD COLUMN `Location` varchar(200) DEFAULT NULL;
 
 ALTER TABLE `tbl_mle` DROP KEY `MLE_ID`;
