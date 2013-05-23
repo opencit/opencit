@@ -445,7 +445,9 @@ public class CitrixClient {
        Host h = (Host)iter.next();
        
        response.setClientIp(hostIpAddress);
-       
+       // SUDHIR, CPU INFO START HERE
+       //Map<String, String> cpuInfo = h.getCpuInfo(connection);
+       //Map<String, String> cpuConfig = h.getCpuConfiguration(connection);
        Map<String, String> map = h.getSoftwareVersion(connection);
        response.setOsName(map.get("product_brand"));
        response.setOsVersion(map.get("product_version"));
