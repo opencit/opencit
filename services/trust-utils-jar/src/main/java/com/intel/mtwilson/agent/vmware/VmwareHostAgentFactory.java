@@ -47,15 +47,15 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
         try {
-            log.debug("getHostAgent {}", vendorConnectionString);
+//            log.debug("getHostAgent {}", vendorConnectionString);
             VMwareClient client = pool.getClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
 //            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
             log.debug("vmware host = {}", vmware.getHost().toString());
             log.debug("vmware port = {}", vmware.getPort());
-            log.debug("vmware username = {}", vmware.getUsername());
+//            log.debug("vmware username = {}", vmware.getUsername());
 //            log.debug("vmware password = {}", vmware.getPassword());
             log.debug("vmware vcenter = {}", vmware.getVCenter().toString());
-            log.debug("vmware toURL = {}", vmware.toURL());
+//            log.debug("vmware toURL = {}", vmware.toURL());
             return new VmwareHostAgent(client, vmware.getHost().toString());
         }
         catch(Exception e) {

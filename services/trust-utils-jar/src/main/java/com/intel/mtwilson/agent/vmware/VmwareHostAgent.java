@@ -63,7 +63,7 @@ public class VmwareHostAgent implements HostAgent {
         this.hostname = hostname;
         hostMOR = vmwareClient.getManagedObjectReference(hostname);
         vCenterVersion = vmwareClient.getVCenterVersion(); //serviceContent.getAbout().getVersion(); // required so we can choose implementations
-        log.info("VCenter version is {}", vCenterVersion);
+        log.debug("VCenter version is {}", vCenterVersion);
         esxVersion = vmwareClient.getMORProperty(hostMOR, "config.product.version").toString(); // required so we can choose implementations and report on host info
     }
     
@@ -242,7 +242,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
                                         vendorHostReport = toXml(HostTpmAttestationReport.class, report);
-					log.info("Retreived HostTpmAttestationReport.");
+					log.debug("Retreived HostTpmAttestationReport.");
 //					manifestMap = postProcessing.processReport(esxVersion,report);
                     if(esxVersion.contains("5.1")) {
                         pcrManifest = VMWare51Esxi51.createPcrManifest(report);
@@ -257,7 +257,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
                                         vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
 					// Now process the digest information
 					List<HostTpmDigestInfo> htdis = runtimeInfo.getTpmPcrValues();
-					log.info("Retreived HostTpmDigestInfo.");
+					log.debug("Retreived HostTpmDigestInfo.");
                     // ESX 5.0 did not support module measurement so we return only the PCR's
                     pcrManifest = VMWare50Esxi50.createPcrManifest(htdis); // bug #607 new
 //					pcrManifest =  postProcessing.processDigest(esxVersion,htdis);

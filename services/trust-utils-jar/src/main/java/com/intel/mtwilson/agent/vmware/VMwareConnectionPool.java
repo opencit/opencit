@@ -76,10 +76,10 @@ public class VMwareConnectionPool {
      * @throws VMwareConnectionException 
      */
     public VMwareClient reuseClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
-        log.debug("VMwareConnectionPool searching for existing connection {}", tlsConnection.getConnectionString());
+//        log.debug("VMwareConnectionPool searching for existing connection {}", tlsConnection.getConnectionString());
         VMwareClient client = pool.get(tlsConnection);
         if( client == null ) { return null; }
-        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
+//        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
 //        lastAccess.put(connectionString, System.currentTimeMillis());
         if( factory.validateObject(tlsConnection, client)) {
             log.info("Reusing vCenter connection for "+client.getEndpoint());
@@ -114,10 +114,10 @@ public class VMwareConnectionPool {
      */
     public VMwareClient createClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
         try {
-            log.debug("VMwareConnectionPool create client for connection {}", tlsConnection.getConnectionString());
+//            log.debug("VMwareConnectionPool create client for connection {}", tlsConnection.getConnectionString());
             VMwareClient client = factory.makeObject(tlsConnection);
             if( factory.validateObject(tlsConnection, client) ) {
-                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
+//                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
                 pool.put(tlsConnection, client);
                 // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
                 log.info("Opening new vCenter connection for "+client.getEndpoint());
@@ -177,7 +177,7 @@ public class VMwareConnectionPool {
             }
         }
         catch(Exception e) {
-            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString());
+//            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString()); // removed to prevent leaking secrets
             log.error("Failed to connect to vcenter: "+e.toString(),e);
             e.printStackTrace(System.err);
             try {
@@ -186,7 +186,7 @@ public class VMwareConnectionPool {
             }
             catch(MalformedURLException e2) {
                 //log.error("Cannot connect to vcenter: Invalid connection string: {}", tlsConnection.getConnectionString());
-                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string: "+e.toString(), e);                
+                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string", e);                // removed : "+e.toString()  to prevent leaking secrets
             }
         }
         throw new VMwareConnectionException("Failed to connect to vcenter: unknown error");
