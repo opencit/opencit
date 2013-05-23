@@ -305,11 +305,12 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             // There is one more attribute in the vCenter that actually provides the processor name directly unlike the open source hosts where we
             // need to do the mapping
             // Possible values include: "intel-westmere", "intel-sandybridge"
-             String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString();
+             String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
              if (processorInfo.contains("intel")) {
                  processorInfo = processorInfo.substring( "intel".length()+1);
              }
-            host.Processor_Info = processorInfo.toUpperCase();
+            host.Processor_Info = processorInfo.substring(0, 1).toUpperCase() + processorInfo.substring(1);
+            
             return host;
         } catch (InvalidPropertyFaultMsg ex) {
             log.error("VCenter host does not support host details property: {}", ex.getLocalizedMessage());
