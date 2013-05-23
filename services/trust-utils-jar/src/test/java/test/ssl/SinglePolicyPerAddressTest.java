@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import com.intel.mtwilson.tls.*;
+import java.io.FileNotFoundException;
 import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,9 +79,10 @@ public class SinglePolicyPerAddressTest {
             Scheme https = new Scheme("https", port, sf); // URl defaults to 443 for https but if user specified a different port we use that instead
             sr.register(https);            
 */
-    	SSLContext ctx = SSLContext.getInstance("SSL");
-        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null); // even with InsecureTlsPolicy we get ERROR: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certificateion path to requested target
+    	SSLContext ctx = SSLContext.getInstance("SSL"); // it's a factory, returns a new instance
+        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null); 
         HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier()); // without this, even InsecureTlsPolicy will not prevent java.security.cert.CertificateException: No subject alternative names matching IP address 10.1.71.162 found
+        HttpsURLConnection.setDefaultSSLSocketFactory(ctx.getSocketFactory());   // without this, even with InsecureTlsPolicy we get ERROR: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certificateion path to requested target
 //        SSLSocketFactory sslsocketfactory = ctx.getSocketFactory();
 //        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
         InputStream in = url.openStream();
@@ -95,7 +97,12 @@ public class SinglePolicyPerAddressTest {
         ArrayList<String> targets = getTargets();
         for(String target : targets) {
             URL url = new URL(target); // throws MalformedURLException
-            connect(url,tlsPolicy); // throws NoSuchAlgorithmException, KeyManagementException, IOException
+            try {
+                connect(url,tlsPolicy); // throws NoSuchAlgorithmException, KeyManagementException, IOException
+            }
+            catch(FileNotFoundException e) {
+                log.debug("File not found (but ssl connection worked): {}", url.toString());
+            }
         }
     }
     
