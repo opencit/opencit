@@ -575,7 +575,7 @@ public class HostTrustBO extends BaseBO {
         }
     }
 
-    private TblHosts getHostByName(Hostname hostName) { // datatype.Hostname
+    private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
             return hostBO.getHostByName(hostName);
         }
@@ -583,7 +583,7 @@ public class HostTrustBO extends BaseBO {
             throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         }
     }
-    private TblHosts getHostByAik(Sha1Digest fingerprint) { // datatype.Hostname
+    private TblHosts getHostByAik(Sha1Digest fingerprint) throws IOException  { // datatype.Hostname
         try {
             return hostBO.getHostByAik(fingerprint);
         }

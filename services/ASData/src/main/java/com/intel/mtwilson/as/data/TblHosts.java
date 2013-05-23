@@ -8,6 +8,7 @@ import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
+import com.intel.mtwilson.util.ASDataCipher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -45,9 +46,6 @@ import org.slf4j.LoggerFactory;
 public class TblHosts implements Serializable {
     @Transient
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    
-    @Transient
-    public static transient DataCipher dataCipher = null;
     
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
@@ -197,7 +195,7 @@ public class TblHosts implements Serializable {
 
     public String getAddOnConnectionInfo() {
         if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
-            addOnConnectionInfo_plainText = dataCipher.decryptString(addOnConnectionInfo_cipherText);
+            addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
         }
         return addOnConnectionInfo_plainText;
     }
@@ -207,7 +205,7 @@ public class TblHosts implements Serializable {
         // TODO  encrypt it and set addOnConnectionInfo_cipherText
         if( addOnConnectionInfo == null ) { addOnConnectionInfo_cipherText = null; }
         else {
-             addOnConnectionInfo_cipherText = dataCipher.encryptString(addOnConnectionInfo_plainText);
+             addOnConnectionInfo_cipherText = ASDataCipher.cipher.encryptString(addOnConnectionInfo_plainText);
         }
     }
 

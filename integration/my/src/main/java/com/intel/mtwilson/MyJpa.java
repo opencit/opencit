@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 //import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.audit.controller.*;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -73,7 +74,7 @@ public class MyJpa {
         this.pm = pm; 
 //        this.dekBase64 = dekBase64; 
         try {
-            TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
+            ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
         }
         catch(CryptographyException e) {
             throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
