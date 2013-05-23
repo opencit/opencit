@@ -59,7 +59,12 @@ public class CheckConfig implements Command {
         }
         Collections.sort(keys);
         for(String key : keys) {
-            System.out.println(String.format("%s [%s]", key, My.configuration().getSource(key)));
+            if( options.getBoolean("verbose",false)) {
+                System.out.println(String.format("%s=%s [%s]", key,My.configuration().getConfiguration().getString(key), My.configuration().getSource(key)));
+            }
+            else {
+                System.out.println(String.format("%s [%s]", key, My.configuration().getSource(key)));
+            }
         }
     }
     

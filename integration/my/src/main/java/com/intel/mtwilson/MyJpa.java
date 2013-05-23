@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 //import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.audit.controller.*;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -38,7 +39,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class MyJpa {
     private final MyPersistenceManager pm;
-    private final String dekBase64;
+//    private final String dekBase64;
     TblApiClientJpaController mwApiClientHmac;
     MwApiClientHttpBasicJpaController mwApiClientHttpBasic;
     ApiClientX509JpaController mwApiClientX509;
@@ -65,14 +66,15 @@ public class MyJpa {
     TblRequestQueueJpaController mwRequestQueue;
     TblSamlAssertionJpaController mwSamlAssertion;
     TblTaLogJpaController mwTaLog;
+    MwProcessorMappingJpaController mwProcessorMapping;
 
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
 
     public MyJpa(MyPersistenceManager pm, String dekBase64) { 
         this.pm = pm; 
-        this.dekBase64 = dekBase64; 
+//        this.dekBase64 = dekBase64; 
         try {
-            TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
+            ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
         }
         catch(CryptographyException e) {
             throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
@@ -205,6 +207,11 @@ public class MyJpa {
         return new TblTaLogJpaController(pm.getASData());
 //		if( mwTaLog == null ) { mwTaLog = new TblTaLogJpaController(pm.getASData()); }
 //		return mwTaLog;
+	}
+    public MwProcessorMappingJpaController mwProcessorMapping() throws IOException {
+        return new MwProcessorMappingJpaController(pm.getASData());
+//		if( mwProcessorMapping == null ) { mwProcessorMapping = new MwProcessorMappingJpaController(pm.getASData()); }
+//		return mwProcessorMapping;
 	}
 
 }

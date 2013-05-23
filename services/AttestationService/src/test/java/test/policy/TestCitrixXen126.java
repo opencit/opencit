@@ -25,6 +25,7 @@ import com.intel.mtwilson.policy.TrustReport;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
+import com.intel.mtwilson.util.ASDataCipher;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -71,7 +72,7 @@ public class TestCitrixXen126 {
     
     @BeforeClass
     public static void setMwHostsDek() throws CryptographyException, IOException {
-        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
+        ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
     }
     
     /**

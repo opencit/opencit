@@ -37,7 +37,7 @@ public class HostBOTest {
     @BeforeClass
     public static void createBusinessObject() throws CryptographyException  {
         hostBO = new HostBO();
-        hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
+//        hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
     }
 
     @AfterClass

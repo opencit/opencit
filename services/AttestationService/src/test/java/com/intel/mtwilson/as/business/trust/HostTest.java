@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.business.trust;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
@@ -47,8 +48,8 @@ public class HostTest {
 
     
     @Test
-    public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException, MalformedURLException {
-        TblHosts tblHosts = new ASComponentFactory().getHostBO().getHostByName(new Hostname("10.1.71.149"));
+    public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException, IOException, MalformedURLException {
+        TblHosts tblHosts = My.jpa().mwHosts().findByName("10.1.71.149"); //new ASComponentFactory().getHostBO().getHostByName(new Hostname("10.1.71.149"));
         log.debug("tblhosts addon connection string length: {}", tblHosts.getAddOnConnectionInfo() == null ? "NULL" : tblHosts.getAddOnConnectionInfo().length());
         TxtHostRecord txtHostRecord = hostTrustBO.createTxtHostRecord(tblHosts);
         log.debug("txthostrecord addon connection string length: {}", txtHostRecord.AddOn_Connection_String == null ? "NULL" : txtHostRecord.AddOn_Connection_String.length());
