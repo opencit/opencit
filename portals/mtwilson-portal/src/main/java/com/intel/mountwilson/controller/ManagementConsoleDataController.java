@@ -1286,10 +1286,10 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 		try {
 			if (newhost) {
-				System.err.println("dataForNew : "+dataVO);
+				//System.err.println("dataForNew : "+dataVO);
 				responseView.addObject("result",demoPortalServices.saveNewHostData(dataVO,getAttestationService(req,AttestationService.class)));
 			}else {
-				System.err.println("dataForOLD : "+dataVO);
+				//System.err.println("dataForOLD : "+dataVO);
 				responseView.addObject("result", demoPortalServices.updateHostData(dataVO,getAttestationService(req,AttestationService.class)));
 			}
 		} catch (DemoPortalException e) {
