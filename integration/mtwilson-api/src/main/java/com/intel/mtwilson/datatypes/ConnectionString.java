@@ -406,7 +406,7 @@ public class ConnectionString {
         }
         @Override
         public String toString() {
-            return String.format("https://%s:%d;u=%s;p=%s", hostAddress.toString(), port, username, password);
+            return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
             CitrixConnectionString cs = new CitrixConnectionString();
