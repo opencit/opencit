@@ -202,7 +202,7 @@ public class HostBO extends BaseBO {
         
         try {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
-        
+             My.initDataEncryptionKey();
             // Retrieve the host object.
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
