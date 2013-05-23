@@ -26,7 +26,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
-            log.debug("Creating IntelHostAgent for host {} with connection string {}", hostAddress, vendorConnectionString);
+            log.debug("Creating IntelHostAgent for host {}", hostAddress); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             return new IntelHostAgent(client, hostAddress);
         }
         catch(Exception e) {
@@ -38,7 +38,7 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
-            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString);
+//            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             URL url = new URL(vendorConnectionString);
             InternetAddress hostAddress = new InternetAddress(url.getHost());
             return new IntelHostAgent(client, hostAddress);

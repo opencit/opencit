@@ -77,7 +77,7 @@ public class TrustAgentSecureClient {
     public TrustAgentSecureClient(TlsConnection tlsConnection) {
         tlsPolicy = tlsConnection.getTlsPolicy();
         parseConnectionString(tlsConnection.getConnectionString());
-        log.info("TrustAgentSecureClient url({}) hostname({}) port({})", new Object[] { tlsConnection.getConnectionString(), serverHostname, serverPort });
+        log.debug("TrustAgentSecureClient  hostname({}) port({})", new Object[] {  serverHostname, serverPort }); // removed tlsConnection.getConnectionString(), to prevent leaking secrets
     }
 
     // XXX the ipaddress:port format is also parsed somewhere else in the codebase... need to consolidate here.
@@ -142,12 +142,12 @@ public class TrustAgentSecureClient {
             InputStream sockInput = sock.getInputStream();
             OutputStream sockOutput = sock.getOutputStream();
 
-            log.info("About to start reading/writing to/from socket.");
+            log.debug("About to start reading/writing to/from socket.");
             log.debug("Writing: {}", new String(data));
             byte[] buf = new byte[5000];
                 sockOutput.write(data, 0, data.length);
             int bytes_read = sockInput.read(buf);
-            log.info( "Received " + bytes_read + " bytes to server and received them back again, msg = " +StringUtils.replace(new String(buf), "\n", "\n  "));
+            log.debug( "Received " + bytes_read + " bytes to server and received them back again, msg = " +StringUtils.replace(new String(buf), "\n", "\n  "));
             return buf;
         }
         catch(SocketTimeoutException e){
@@ -183,7 +183,7 @@ public class TrustAgentSecureClient {
         try {
             byte buf[] = sendRequestWithSSLSocket();
 
-            log.info("Unmarshalling to Jaxb object.");
+            log.debug("Unmarshalling to Jaxb object.");
             
             JAXBContext jc = JAXBContext.newInstance("com.intel.mountwilson.ta.data");
             assert jc != null;
@@ -200,7 +200,7 @@ public class TrustAgentSecureClient {
             
             checkQuoteError(response);
 
-            log.info("Done reading/writing to/from socket, closing socket.");
+            log.debug("Done reading/writing to/from socket, closing socket.");
             return response;
         } finally {
         }
@@ -275,7 +275,7 @@ public class TrustAgentSecureClient {
     public String getAIKCertificate() {
         try {
 
-            log.info("Sending Generate Identity");
+            log.debug("Sending Generate Identity");
             byte[] identityInput = "<identity_request></identity_request>".getBytes();
             this.data = identityInput;
 
@@ -301,7 +301,7 @@ public class TrustAgentSecureClient {
         quoteRequest.setNonce(nonce);
         this.data = getXml(quoteRequest).getBytes();
         ClientRequestType clientRequestType = sendQuoteRequest();
-        log.info("Got quote from server");
+        log.debug("Got quote from server");
         return clientRequestType;
     }
 
@@ -312,7 +312,7 @@ public class TrustAgentSecureClient {
          marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.marshal(quoteRequest, sw);
         String quoteRequestXml =  sw.toString();
-        log.info("Quote request XML {}", quoteRequestXml);
+        log.debug("Quote request XML {}", quoteRequestXml);
         return quoteRequestXml;
     }
     
