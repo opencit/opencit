@@ -947,7 +947,7 @@ public class HostBO extends BaseBO {
         boolean configStatus = false;
 
         try {
-            My.initDataEncryptionKey();
+           
             if (gkvHost != null) {
 
                 hostConfigObj = new HostConfigData();
@@ -1021,7 +1021,7 @@ public class HostBO extends BaseBO {
         boolean vmmMLEAlreadyExists = false;
 
         try {
-
+             My.initDataEncryptionKey();
             // Let us ensure that the user has specified the PCRs to be used
             if (hostConfigObj != null) {
 
