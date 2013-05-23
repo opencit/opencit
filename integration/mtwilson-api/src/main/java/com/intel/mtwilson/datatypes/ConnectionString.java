@@ -238,7 +238,7 @@ public class ConnectionString {
 
     /**
      * This method returns the formated connection string based on the parameters specified without the prefix of the
-     * vendor. Example of Citrix: citrix:https://xenserver:port;username;password Example of VMware:
+     * vendor. Example of Citrix: https://xenserver:port;username;password Example of VMware:
      * https://vcenterserver:port/sdk;username;password Example of Xen/KVM: https://hostname:9999
      *
      * @return
@@ -254,12 +254,53 @@ public class ConnectionString {
                     String.format("%s", this.addOnConnectionString);
         } else if (this.vendor == Vendor.CITRIX) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
-                    String.format("https://%s:%d;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
+                    String.format("https://%s:%d/;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
                     String.format("%s", this.addOnConnectionString);
         } else {
             connectionString = "";
         }
         return connectionString;
+    }
+    
+    /**
+     * Returns just the URL portion of the connection string without any options.
+     * This is important because for citrix,  the format %s:%d;%s;%s isn't a valid URL. there must be a slash
+     * after the port number.
+     * 
+     * But this is the method that should be used when you want to display a connection string in the UI or logs -  since
+     * this method will not leak any secrets.
+     * 
+     * @return 
+     */
+    public URL getURL() {
+        try {
+            if (this.vendor == Vendor.INTEL) {
+                return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
+            } 
+            else if (this.vendor == Vendor.VMWARE) {
+                if( this.addOnConnectionString.isEmpty() ) {
+                    return new URL(String.format("https://%s:%d/sdk", this.managementServerName, this.port));
+                }
+                else {
+                    return new URL(this.addOnConnectionString);
+                }
+            } 
+            else if (this.vendor == Vendor.CITRIX) {
+                if( this.addOnConnectionString.isEmpty() ) {
+                    return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
+                }
+                else {
+                    return new URL(this.addOnConnectionString);
+                }
+            } else {
+                return null;
+            }
+        }
+        catch(MalformedURLException e) {
+            log.error("ConnectionString.getURL: "+e.toString(), e);
+//            log.debug("Connection string: ", this.addOnConnectionString);
+            throw new IllegalArgumentException("Invalid connection string");
+        }
     }
 
     /**
@@ -365,7 +406,7 @@ public class ConnectionString {
         }
         @Override
         public String toString() {
-            return String.format("https://%s:%d;u=%s;p=%s", hostAddress.toString(), port, username, password);
+            return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
             CitrixConnectionString cs = new CitrixConnectionString();
