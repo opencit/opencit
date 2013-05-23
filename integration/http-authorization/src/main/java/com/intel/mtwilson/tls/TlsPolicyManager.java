@@ -66,6 +66,7 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
         // look up the TLS Policy for the host
         TlsPolicy tlsPolicy = map.get(address);
         try {
+            log.debug("TlsPolicyManager: policy {} for host: {}", tlsPolicy.getClass().getName(), address);
             // get the list of X509 certificates from the remote server
             ArrayList<X509Certificate> x509list = new ArrayList<X509Certificate>();
             Certificate[] certificates = ssls.getPeerCertificates();
@@ -77,8 +78,7 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
                 }
             }
             X509Certificate[] serverCertificates = x509list.toArray(new X509Certificate[x509list.size()]);
-            // verify peer certificates (out of order since in getTrustManager we don't have an opportunity
-            // to get the SSL session.  so it's fixed right nown ad stewart is deploying it for the QA team tomorrow morning.
+            // verify peer certificates (since we skipped it in the trust manager -- because there we don't have the context of which host we are connecting to in order to look up the appropriate tls policy)
             X509TrustManager trustManager = tlsPolicy.getTrustManager();
             try {
                 trustManager.checkServerTrusted(serverCertificates, "RSA");
