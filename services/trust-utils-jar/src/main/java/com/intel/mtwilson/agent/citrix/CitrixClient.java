@@ -72,7 +72,7 @@ public class CitrixClient {
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
     
-    protected static Connection connection;
+    protected Connection connection;
 	
     public CitrixClient(TlsConnection tlsConnection){
         this.tlsConnection = tlsConnection;
@@ -190,20 +190,16 @@ public class CitrixClient {
           try {
             
               // We cannot reuse the connections across different calls since they are tied to a particular host.
-              if( !isConnected()) {
-                  connect(); 
-              } else {
-                  disconnect();
-                  connect();
-              }
+              if( !isConnected()) { connect(); } 
               
             String nonce = generateNonce();
             String sessionId = generateSessionId();
 
-            System.err.println("stdalex-error connecting with " + userName + " " + password);
-            Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+			// We do not need to connect again. So, commenting it out.
+            // System.err.println("stdalex-error connecting with " + userName + " " + password);
+            // Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
 			
-            System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
+            // System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
 			 
             Map<String, String> myMap = new HashMap<String, String>();
             Set<Host> hostList = Host.getAll(connection);
@@ -252,7 +248,6 @@ public class CitrixClient {
             
             System.err.println( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-            disconnect();
             
             return pcrMap;
             
@@ -439,12 +434,7 @@ public class CitrixClient {
         //log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
          HostInfo response = new HostInfo();
          
-         if( !isConnected()) { 
-             connect(); 
-         } else {
-             disconnect();
-             connect();
-         }
+         if( !isConnected()) { connect(); } 
              
        log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
 			
@@ -469,9 +459,7 @@ public class CitrixClient {
        java.util.Date date= new java.util.Date();
        response.setTimeStamp( new Timestamp(date.getTime()).toString());
        log.info("stdalex-error leaving getHostInfo");
-       
-       disconnect();
-       
+              
        return response;
     }
 
@@ -479,12 +467,7 @@ public class CitrixClient {
         String resp = new String();
         log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
-        if( !isConnected()) { 
-            connect(); 
-        } else {
-            disconnect();
-            connect();
-        }
+        if( !isConnected()) { connect(); } 
 
        log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
 			
@@ -512,7 +495,6 @@ public class CitrixClient {
        resp = new String(key.tpmAttKeyPEM);
        
        log.info("stdalex-error getAIKCert: returning back: " + resp);
-       disconnect();
        return resp;
     }
 }
