@@ -309,7 +309,7 @@ function fnGetNewHostData() {
 	}else { // CITRIX
         hostVo.hostPort =$.trim($('#MainContent_tbHostPort').val());
         hostVo.vCenterDetails = "citrix:https://"+$('#MainContent_tbHostIP').val()+":"+$('#MainContent_tbHostPort').val()+
-                                             "/;"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
+                                             ";"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
         
     }
 	
