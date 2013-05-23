@@ -95,7 +95,7 @@ public class HostAgentFactory {
             InternetAddress hostAddress = new InternetAddress(host.getName()); // switching from Hostname to InternetAddress (better support for both hostname and ip address)
             // here we figure out if it's vmware or intel  and ensure we have a valid connection string starting with the vendor scheme.  XXX TODO should not be here, everyone should have valid connection strings like vmware:*, intel:*, citrix:*, etc. 
             // no special case for citrix, since that support was added recently they should always come with citrix: prepended.
-            System.out.println("host cs = " + host.getAddOnConnectionInfo());
+//            System.out.println("host cs = " + host.getAddOnConnectionInfo());
             String connectionString = getConnectionString(host);
             //System.out.println("stdalex getHostAgent cs =" + connectionString);
             TlsPolicy tlsPolicy = getTlsPolicy(host);
@@ -117,12 +117,12 @@ public class HostAgentFactory {
         if( connectionString == null || connectionString.isEmpty() ) {
             if( host.getIPAddress() != null  ) {
                 connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
-                System.out.println("Assuming Intel connection string " + connectionString + " for host " + host.getName());
+                log.debug("Assuming Intel connection string for host " + host.getName());// removed connection string to prevent leaking secrets
             }
         }
         else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
             connectionString = String.format("vmware:%s", connectionString);
-           System.out.println("Assuming Vmware connection string " + connectionString + " for host " + host.getName());
+           log.debug("Assuming Vmware connection string for host " + host.getName()); // removed connection string to prevent leaking secrets
         }        
         return connectionString;
     }

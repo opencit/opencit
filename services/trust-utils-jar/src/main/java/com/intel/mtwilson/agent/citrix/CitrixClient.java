@@ -186,7 +186,7 @@ public class CitrixClient {
     }
     
     public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
-          System.err.println("stdalex-error getQuoteInformationForHost pcrList == " + pcrList);
+          log.debug("getQuoteInformationForHost pcrList == " + pcrList);
           try {
             
               // We cannot reuse the connections across different calls since they are tied to a particular host.
@@ -212,7 +212,7 @@ public class CitrixClient {
             int endP   = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
             // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
             String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(),endP);
-            System.err.println("aikCert == " + cert);
+            log.debug("aikCert == " + cert);
             
             keys key = new keys();
             
@@ -221,32 +221,32 @@ public class CitrixClient {
 			
             String aikCertificate = key.tpmAttKeyPEM;
             
-            System.err.println( "extracted aik cert from response: " + aikCertificate);
+            log.debug( "extracted aik cert from response: " + aikCertificate);
             
             myMap = new HashMap<String, String>();
             myMap.put("nonce",nonce);
             String quote = h.callPlugin(connection, "tpm", "tpm_get_quote", myMap);
 
-            System.err.println("extracted quote from response: "+ quote);
+            log.debug("extracted quote from response: "+ quote);
             //saveFile(getCertFileName(sessionId), Base64.decodeBase64(aikCertificate));
             saveFile(getCertFileName(sessionId),aikCertificate.getBytes());
-            System.err.println( "saved certificate with session id: "+sessionId);
+            log.debug( "saved certificate with session id: "+sessionId);
             
             saveQuote(quote, sessionId);
 
-            System.err.println( "saved quote with session id: "+sessionId);
+            log.debug( "saved quote with session id: "+sessionId);
             
             saveNonce(nonce,sessionId);
             
-            System.err.println( "saved nonce with session id: "+sessionId);
+            log.debug( "saved nonce with session id: "+sessionId);
             
             //createRSAKeyFile(sessionId);
 
-           System.err.println( "created RSA key file for session id: "+sessionId);
+           log.debug( "created RSA key file for session id: "+sessionId);
             
             HashMap<String, Pcr> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
             
-            System.err.println( "Got PCR map");
+            log.debug( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             
             return pcrMap;
@@ -256,7 +256,7 @@ public class CitrixClient {
 //        } catch(UnknownHostException e) {
 //            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }  catch (Exception e) {
-            System.err.println("stdalex-error caught exception during login: " + e.toString() + " class: " + e.getClass());
+            log.debug("caught exception during login: " + e.toString() + " class: " + e.getClass());
             throw new ASException(e);
         }
     }
@@ -314,11 +314,11 @@ public class CitrixClient {
 
     private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
         if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
-            log.info( "adding newlines to certificate BEGIN tag");            
+            log.debug( "adding newlines to certificate BEGIN tag");            
             aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
         }
         if( aikCertificate.indexOf("\n-----END CERTIFICATE-----") < 0 && aikCertificate.indexOf("-----END CERTIFICATE-----") >= 0 ) {
-            log.info( "adding newlines to certificate END tag");            
+            log.debug( "adding newlines to certificate END tag");            
             aikCertificate = aikCertificate.replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----");
         }
 
@@ -334,7 +334,7 @@ public class CitrixClient {
 
         try {
             assert aikverifyhome != null;
-            log.info( String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
+            log.debug( String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
             fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator +fileName);
             assert fileOutputStream != null;
             assert contents != null;
@@ -342,14 +342,14 @@ public class CitrixClient {
             fileOutputStream.flush();
         }
         catch(FileNotFoundException e) {
-            log.info( String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
+            log.warn( String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
             throw e;
         } finally {
             if (fileOutputStream != null) {
                 try {
                     fileOutputStream.close();
                 } catch (IOException ex) {
-                    log.info(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()));
+                    log.warn(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()));
                 }
             }
         }
@@ -372,7 +372,7 @@ public class CitrixClient {
     private void createRSAKeyFile(String sessionId)  {
         
         String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
-        log.info( "RSA Key Command " + command);
+        log.debug( "RSA Key Command " + command);
         CommandUtil.runCommand(command, false, "CreateRsaKey" );
         //log.log(Level.INFO, "Result - {0} ", result);
     }
@@ -383,12 +383,12 @@ public class CitrixClient {
 
     private HashMap<String,Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
         HashMap<String,Pcr> pcrMp = new HashMap<String,Pcr>();
-        System.err.println( "verifyQuoteAndGetPcr for session " + sessionId);
+        log.debug( "verifyQuoteAndGetPcr for session " + sessionId);
         String command = String.format("%s -c %s %s %s",aikverifyCmd, aikverifyhomeData + File.separator+getNonceFileName( sessionId),
                 aikverifyhomeData + File.separator+getCertFileName(sessionId),
                 aikverifyhomeData + File.separator+getQuoteFileName(sessionId)); 
         
-        System.err.println( "Command: " + command);
+        log.debug( "Command: " + command);
         List<String> result = CommandUtil.runCommand(command,true,"VerifyQuote");
         
         // Sample output from command:
@@ -410,14 +410,14 @@ public class CitrixClient {
                 boolean validPcrNumber = pcrNumberPattern.matcher(pcrNumber).matches();
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
                 if( validPcrNumber && validPcrValue ) {
-                	System.err.println("Result PCR "+pcrNumber+": "+pcrValue);
+                	log.debug("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
                             pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
                                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }
             else {
-            	System.err.println( "Result PCR invalid");
+            	log.debug( "Result PCR invalid");
             }
             /*
             if(pcrs.contains(parts[0].trim()))
@@ -436,7 +436,7 @@ public class CitrixClient {
          
          if( !isConnected()) { connect(); } 
              
-       log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
+       log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
        Map<String, String> myMap = new HashMap<String, String>();
@@ -458,18 +458,18 @@ public class CitrixClient {
        
        java.util.Date date= new java.util.Date();
        response.setTimeStamp( new Timestamp(date.getTime()).toString());
-       log.info("stdalex-error leaving getHostInfo");
+//       log.trace("stdalex-error leaving getHostInfo");
               
        return response;
     }
 
     public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception {
         String resp = new String();
-        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+//        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
                
         if( !isConnected()) { connect(); } 
 
-       log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
+       log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
        Map<String, String> myMap = new HashMap<String, String>();
@@ -483,7 +483,7 @@ public class CitrixClient {
        int endP   = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
        // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
        String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(),endP);
-       System.err.println("aikCert == " + cert);
+       log.debug("aikCert == " + cert);
       
             
        keys key = new keys();
@@ -492,9 +492,9 @@ public class CitrixClient {
 
        
        //resp = new String( Base64.decodeBase64(key.tpmAttKeyPEM));
-       resp = new String(key.tpmAttKeyPEM);
+       resp = key.tpmAttKeyPEM;//new String(key.tpmAttKeyPEM);
        
-       log.info("stdalex-error getAIKCert: returning back: " + resp);
+//       log.trace("stdalex-error getAIKCert: returning back: " + resp);
        return resp;
     }
 }
