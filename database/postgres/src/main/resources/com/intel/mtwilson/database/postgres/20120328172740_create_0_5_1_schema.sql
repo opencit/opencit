@@ -72,7 +72,7 @@ CREATE TABLE tbl_hosts (
   ID integer NOT NULL DEFAULT nextval('tbl_hosts_serial'),
   BIOS_MLE_ID integer NOT NULL,
   VMM_MLE_ID integer NOT NULL,
-  Name varchar(40) NOT NULL,
+  Name varchar(255) NOT NULL,
   IPAddress varchar(255) DEFAULT NULL,
   Port integer NOT NULL,
   Description varchar(100) DEFAULT NULL,
