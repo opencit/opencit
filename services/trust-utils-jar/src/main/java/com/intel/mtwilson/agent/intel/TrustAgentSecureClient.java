@@ -76,7 +76,7 @@ public class TrustAgentSecureClient {
     
     public TrustAgentSecureClient(TlsConnection tlsConnection) {
         tlsPolicy = tlsConnection.getTlsPolicy();
-        parseConnectionString(tlsConnection.getConnectionString());
+        parseConnectionString(tlsConnection.getURL().toExternalForm());
         log.debug("TrustAgentSecureClient  hostname({}) port({})", new Object[] {  serverHostname, serverPort }); // removed tlsConnection.getConnectionString(), to prevent leaking secrets
     }
 

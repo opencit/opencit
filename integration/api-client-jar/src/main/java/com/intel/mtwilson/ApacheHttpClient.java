@@ -91,13 +91,17 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( port == -1 ) {
             port = baseURL.getDefaultPort();
         }
+        log.debug("ApacheHttpClient: Protocol: {}", protocol);
+        log.debug("ApacheHttpClient: Port: {}", port);
 
         if( config == null ) {
             config = new SystemConfiguration();
+            log.debug("ApacheHttpClient: using system configuration");
         }
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
         ApacheTlsPolicy tlsPolicy = createTlsPolicy(config, sslKeystore);
+        log.debug("ApacheHttpClient: TLS Policy Name: {}", tlsPolicy.getClass().getName());
         SchemeRegistry sr = initSchemeRegistryWithPolicy(protocol, port, tlsPolicy);
         connectionManager = new PoolingClientConnectionManager(sr);
 
@@ -121,8 +125,8 @@ public class ApacheHttpClient implements java.io.Closeable {
      * @return 
      */
     private ApacheTlsPolicy createTlsPolicy(Configuration config, SimpleKeystore sslKeystore) {
-        String tlsPolicyName = config.getString("mtwilson.api.ssl.policy");
-        if( tlsPolicyName == null ) {
+        String tlsPolicyName = config.getString("mtwilson.api.ssl.policy","");
+        if( tlsPolicyName == null || tlsPolicyName.isEmpty() ) {
             // no 1.1 policy name, so use 1.0-RC2 settings to pick a policy
             boolean requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);

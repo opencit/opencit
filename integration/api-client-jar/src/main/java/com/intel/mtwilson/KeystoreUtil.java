@@ -336,14 +336,26 @@ public class KeystoreUtil {
      */
     public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
+        log.trace("URL Protocol: {}", server.getProtocol());
         if( "https".equals(server.getProtocol()) ) {
             SslUtil.addSslCertificatesToKeystore(keystore, server); //CryptographyException, IOException            
+        }
+        if(log.isTraceEnabled()) {
+            try {
+                String[] aliases = keystore.aliases();
+                for(String alias : aliases) {
+                    log.trace("Certificate: "+keystore.getX509Certificate(alias).getSubjectX500Principal().getName());
+                }
+            }
+            catch(Exception e) {
+                log.trace("cannot display keystore: "+e.toString());
+            }
         }
         ApiClient c = null;
         try {
             // download server's ssl certificates and add them to the keystore
             Properties p = new Properties();
-            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE");
+            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); // XXX TODO it is currently the user's responsibility to verify the ssl certificate after they register;  need to move this out of here and make it controllable via the api;  we should not be embedding a hard-coded policy in a utility function
             Configuration config = new MapConfiguration(p);
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
