@@ -95,6 +95,7 @@ public class My {
     
     public static MyJpa jpa() throws IOException {
         if( jpa == null ) {
+            initDataEncryptionKey();
             jpa = new MyJpa(persistenceManager());
         }
         return jpa;
