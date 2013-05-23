@@ -24,7 +24,7 @@ public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConne
     public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {
         VMwareClient client = new VMwareClient();
         client.setTlsPolicy(tlsConnection.getTlsPolicy());
-        client.connect(tlsConnection.getConnectionString());        
+        client.connect(tlsConnection.getURL().toExternalForm());        
         return client;
     }
     

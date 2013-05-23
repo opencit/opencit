@@ -37,6 +37,7 @@ import com.intel.mtwilson.model.Sha1Digest;
 import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -129,7 +130,9 @@ public class TAHelper {
                 }
             }
 
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
+            URL url = new URL(connectionString);
+            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
 
             String sessionId = generateSessionId();
 
@@ -212,7 +215,9 @@ public class TAHelper {
             }
 
 
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
+            URL url = new URL(connectionString);
+            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
             return getQuoteInformationForHost(tblHosts.getIPAddress(), client);
 

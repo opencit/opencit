@@ -180,14 +180,7 @@ public class VMwareConnectionPool {
 //            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString()); // removed to prevent leaking secrets
             log.error("Failed to connect to vcenter: "+e.toString(),e);
             e.printStackTrace(System.err);
-            try {
-                URL url = new URL(tlsConnection.getConnectionString());
-                throw new VMwareConnectionException("Cannot connect to vcenter: "+url.getHost(), e);
-            }
-            catch(MalformedURLException e2) {
-                //log.error("Cannot connect to vcenter: Invalid connection string: {}", tlsConnection.getConnectionString());
-                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string", e);                // removed : "+e.toString()  to prevent leaking secrets
-            }
+            throw new VMwareConnectionException("Cannot connect to vcenter: "+tlsConnection.getURL().getHost(), e);
         }
         throw new VMwareConnectionException("Failed to connect to vcenter: unknown error");
     }
@@ -200,13 +193,7 @@ public class VMwareConnectionPool {
                 factory.destroyObject(tlsConnection, client);
             }
             catch(Exception e) {
-                try {
-                    URL url = new URL(tlsConnection.getConnectionString());
-                    log.error("Failed to disconnect from vcenter: "+url.getHost(), e);
-                }
-                catch(MalformedURLException e2) {
-                    log.error("Failed to disconnect from venter with invalid connection string", e);
-                }
+                log.error("Failed to disconnect from vcenter: "+tlsConnection.getURL().getHost(), e);
             }
         }
     }

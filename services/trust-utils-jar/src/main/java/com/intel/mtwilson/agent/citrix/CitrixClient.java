@@ -76,7 +76,7 @@ public class CitrixClient {
 	
     public CitrixClient(TlsConnection tlsConnection){
         this.tlsConnection = tlsConnection;
-        this.connectionString = tlsConnection.getConnectionString();
+        this.connectionString = tlsConnection.getURL().toExternalForm();
 //        log.info("CitrixClient connectionString == " + connectionString);
         // connectionString == citrix:https://xenserver:port;username;password  or citrix:https://xenserver:port;u=username;p=password  or the same w/o the citrix prefix
         try {
