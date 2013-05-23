@@ -6,12 +6,14 @@ package com.intel.mtwilson.as.data;
 
 import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.util.ASDataCipher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import javax.crypto.BadPaddingException;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -195,7 +197,20 @@ public class TblHosts implements Serializable {
 
     public String getAddOnConnectionInfo() {
         if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
-            addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
+            try {
+                addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
+            }
+            catch(Exception e) {
+                log.error("Cannot decrypt host connection credentials", e);
+                // this will happen if the data is being decrypted with the wrong key (which will happen if someone reinstalled mt wilson and kept the data but didn't save the data encryption key)
+                // it may also happen if the data wasn't encrypted in the first place
+                if( addOnConnectionInfo_cipherText.startsWith("http") ) {
+                    return addOnConnectionInfo_plainText; // data was not encrypted
+                }
+                else {
+                    throw new IllegalArgumentException("Cannot decrypt host connection credentials; check the key or delete and re-register the host");
+                }
+            }
         }
         return addOnConnectionInfo_plainText;
     }
