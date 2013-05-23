@@ -189,7 +189,13 @@ public class CitrixClient {
           System.err.println("stdalex-error getQuoteInformationForHost pcrList == " + pcrList);
           try {
             
-              if( !isConnected()) { connect(); }
+              // We cannot reuse the connections across different calls since they are tied to a particular host.
+              if( !isConnected()) {
+                  connect(); 
+              } else {
+                  disconnect();
+                  connect();
+              }
               
             String nonce = generateNonce();
             String sessionId = generateSessionId();
@@ -246,6 +252,7 @@ public class CitrixClient {
             
             System.err.println( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
+            disconnect();
             
             return pcrMap;
             
@@ -431,10 +438,14 @@ public class CitrixClient {
     public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception  {
         //log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
          HostInfo response = new HostInfo();
-       
-              if( !isConnected()) { connect(); }
-
-			
+         
+         if( !isConnected()) { 
+             connect(); 
+         } else {
+             disconnect();
+             connect();
+         }
+             
        log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
@@ -458,6 +469,9 @@ public class CitrixClient {
        java.util.Date date= new java.util.Date();
        response.setTimeStamp( new Timestamp(date.getTime()).toString());
        log.info("stdalex-error leaving getHostInfo");
+       
+       disconnect();
+       
        return response;
     }
 
@@ -465,7 +479,12 @@ public class CitrixClient {
         String resp = new String();
         log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
-        if( !isConnected()) { connect(); }
+        if( !isConnected()) { 
+            connect(); 
+        } else {
+            disconnect();
+            connect();
+        }
 
        log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
 			
@@ -493,6 +512,7 @@ public class CitrixClient {
        resp = new String(key.tpmAttKeyPEM);
        
        log.info("stdalex-error getAIKCert: returning back: " + resp);
+       disconnect();
        return resp;
     }
 }
