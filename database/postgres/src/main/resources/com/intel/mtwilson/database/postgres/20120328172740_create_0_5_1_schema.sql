@@ -73,7 +73,7 @@ CREATE TABLE tbl_hosts (
   BIOS_MLE_ID integer NOT NULL,
   VMM_MLE_ID integer NOT NULL,
   Name varchar(40) NOT NULL,
-  IPAddress varchar(20) DEFAULT NULL,
+  IPAddress varchar(255) DEFAULT NULL,
   Port integer NOT NULL,
   Description varchar(100) DEFAULT NULL,
   AddOn_Connection_Info varchar(80) DEFAULT NULL,
