@@ -2,13 +2,27 @@
  * Copyright (C) 2012 Intel Corporation
  * All rights reserved.
  */
-package com.intel.dcsg.cpg.crypto;
+package com.intel.dcsg.cpg.tls.policy;
 
+import com.intel.dcsg.cpg.tls.policy.impl.AllowAllHostnameVerifier;
+import com.intel.dcsg.cpg.tls.policy.impl.CertificateStoringX509TrustManager;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.security.KeyManagementException;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,28 +31,8 @@ import org.slf4j.LoggerFactory;
  * @author jbuhacoff
  * @since 0.1
  */
-public class SslUtil {
-    private static final Logger log = LoggerFactory.getLogger(SslUtil.class);
-    
-    /**
-     * Creates an RSA Keypair with the default key size and expiration date.
-     * @param distinguishedName
-     * @return 
-     */
-    public static RsaCredentialX509 createSelfSignedTlsCredential(String distinguishedName, String hostnameOrIpAddress) throws GeneralSecurityException, CryptographyException {
-        KeyPair keyPair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
-        X509Builder x509 = X509Builder.factory()
-                .subjectName(distinguishedName) // X500Name.asX500Name(ctx.tlsCertificate.getSubjectX500Principal()))
-                .subjectPublicKey(keyPair.getPublic())
-                .expires(3650, TimeUnit.DAYS)
-                .issuerName(distinguishedName)
-                .issuerPrivateKey(keyPair.getPrivate())
-                .keyUsageKeyEncipherment()
-                .keyUsageDataEncipherment()
-                .alternativeName(hostnameOrIpAddress);
-        X509Certificate newTlsCert = x509.build();
-        return new RsaCredentialX509(keyPair.getPrivate(), newTlsCert); // CryptographyException
-    }
+public class TlsUtil {
+    private static final Logger log = LoggerFactory.getLogger(TlsUtil.class);
     
     /*  DEPRECATED, USE TLS-POLICY
     // just a convenience function for extracting trusted certs from a simplekeystore into a java keystore
@@ -155,15 +149,41 @@ public class SslUtil {
     */
 
     /**
-     * XXX TODO      NEEDS A REWRITE AND USE TLS-POLICY
+     * 
+     * NOTE: this function is NOT thread-safe in conjunction with other https requests to hosts using
+     * TlsPolicy. 
      * @param url
      * @return
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
      * @throws IOException 
      */
-    /*
     public static X509Certificate[] getServerCertificates(URL url) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        if (!"https".equals(url.getProtocol())) {
+            throw new IllegalArgumentException("URL scheme must be https");
+        }
+        CertificateStoringX509TrustManager trustManager = new CertificateStoringX509TrustManager();
+        SSLContext sslcontext = SSLContext.getInstance("TLS"); // or "SSL"
+        sslcontext.init(null, new X509TrustManager[]{trustManager}, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslcontext.getSocketFactory());   
+        HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+        log.debug("Saving certificates from server URL: {}", url.toExternalForm());
+        try {
+        InputStream in = url.openStream();
+//        IOUtils.toString(in);
+        in.close();
+        }
+        catch(IOException e) {
+            log.debug("TlsUtil: error while opening stream for getServerCertificates: {}",e.toString());
+            // ignore the exception 
+        }
+        return trustManager.getStoredCertificates();
+    }
+    
+
+
+    /*
+    public static X509Certificate[] getServerCertificatesWithApacheHttpClient(URL url) throws NoSuchAlgorithmException, KeyManagementException, IOException {
         if (!"https".equals(url.getProtocol())) {
             throw new IllegalArgumentException("URL scheme must be https");
         }
@@ -191,4 +211,5 @@ public class SslUtil {
         return trustManager.getStoredCertificates();
     }
     */
+    
 }

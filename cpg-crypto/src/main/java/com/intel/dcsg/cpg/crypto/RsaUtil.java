@@ -5,6 +5,7 @@
 package com.intel.dcsg.cpg.crypto;
 
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.dcsg.cpg.x509.X509Builder;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
@@ -18,6 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.binary.Base64;
@@ -135,7 +137,7 @@ public class RsaUtil {
      * @return
      * @throws GeneralSecurityException
      * @throws IOException
-     * @deprecated use X509Builder instead
+     * @deprecated use X509Builder instead, or RsaUtil.createSelfSignedTlsCredential (not exactly the same but can make a variation of it to cover this function)
      */
     public static X509Certificate createX509CertificateWithIssuer(PublicKey subjectPublicKey, String dn, String alternativeName, int days, PrivateKey issuerPrivateKey, CertificateIssuerName issuerName) throws IOException, CryptographyException {
 //        X509
@@ -227,6 +229,28 @@ public class RsaUtil {
             throw new CryptographyException(e);
         }
     }
+    
+    /**
+     * Creates an RSA Keypair with the default key size and expiration date.
+     * 
+     * @param distinguishedName
+     * @return 
+     */
+    public static RsaCredentialX509 createSelfSignedTlsCredential(String distinguishedName, String hostnameOrIpAddress) throws GeneralSecurityException, CryptographyException {
+        KeyPair keyPair = generateRsaKeyPair(MINIMUM_RSA_KEY_SIZE);
+        X509Builder x509 = X509Builder.factory()
+                .subjectName(distinguishedName) // X500Name.asX500Name(ctx.tlsCertificate.getSubjectX500Principal()))
+                .subjectPublicKey(keyPair.getPublic())
+                .expires(3650, TimeUnit.DAYS)
+                .issuerName(distinguishedName)
+                .issuerPrivateKey(keyPair.getPrivate())
+                .keyUsageKeyEncipherment()
+                .keyUsageDataEncipherment()
+                .alternativeName(hostnameOrIpAddress);
+        X509Certificate newTlsCert = x509.build();
+        return new RsaCredentialX509(keyPair.getPrivate(), newTlsCert); // CryptographyException
+    }
+    
     
     
 }
