@@ -66,7 +66,9 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
         // look up the TLS Policy for the host
         
         TlsPolicy tlsPolicy = map.get(address);
-        
+        if(tlsPolicy == null){
+            throw new TlsPolicyException("Could not find a ssl context mapping",address,null,null);
+        }
         try {
             log.debug("TlsPolicyManager: policy {} for host: {}", tlsPolicy.getClass().getName(), address);
             // get the list of X509 certificates from the remote server
