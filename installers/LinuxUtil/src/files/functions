@@ -2816,8 +2816,8 @@ webservice_running() {
         echo "w=$w" >> $INSTALL_LOG_FILE 
         result=`basename $w .war`
         echo "result=$result" >> $INSTALL_LOG_FILE
-        if [ "$result" == "AttestationService" ]; then
-          WEBSERVICE_DEPLOYED=AttestationService 
+        if [ "$result" == "${webservice_application_name}" ]; then
+          WEBSERVICE_DEPLOYED=${webservice_application_name} 
           echo $WEBSERVICE_DEPLOYED  >> $INSTALL_LOG_FILE 
         fi 
       done
