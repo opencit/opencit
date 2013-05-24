@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.business.trust;
 
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -73,7 +74,18 @@ public class HostTest {
         System.out.println("saml: "+saml);
     }
 
-    
+        @Test
+    public void testGetTrustStatusForKnownHostWithForceVerify() throws IOException {
+        HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
+        String saml = "";
+        try {
+            saml = htbo.getTrustWithSaml(knownHost, false);
+        } catch (ASException ae) {
+            System.out.println(ae.getErrorMessage());
+        }
+        System.out.println("saml: "+saml);
+    }
+
     
     @Test
     public void testAddHost154() throws IOException {
