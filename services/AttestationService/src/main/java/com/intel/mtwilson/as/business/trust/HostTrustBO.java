@@ -862,9 +862,13 @@ public class HostTrustBO extends BaseBO {
                 TblHosts tblHosts = getHostByName(new Hostname(host));
                 if(tblHosts != null){
                     TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(tblHosts.getId() , getCacheStaleAfter() );
-                    
-                    if(tblTaLog != null)
-                        return getHostTrustObj(tblTaLog);
+
+                    // Bug 849: We need to ensure that we add the host name to the response as well. Otherwise it will just contain BIOS and VMM status.
+                    if(tblTaLog != null) {
+                        HostTrust hostTrust = getHostTrustObj(tblTaLog);
+                        hostTrust.setIpAddress(host);
+                        return hostTrust;
+                    }
                 }else{
                     throw new ASException(
                             ErrorCode.AS_HOST_NOT_FOUND,
