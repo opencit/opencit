@@ -115,7 +115,7 @@ public class CitrixClient {
         }
         
         // we must be able to write to the data folder in order to save certificates, nones, public keys, etc.
-        log.info("stdalex-error checking to see if we can write to " + aikverifyhomeData);
+        //log.info("stdalex-error checking to see if we can write to " + aikverifyhomeData);
         File datafolder = new File(aikverifyhomeData);
         if( !datafolder.canWrite() ) {
             throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));            

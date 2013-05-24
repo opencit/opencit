@@ -24,6 +24,9 @@ function populateHostTrustDetails(responsJSON) {
                     $('#hostTrustPaginationDiv').html('<span>'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
                 }else if(responsJSON.ResetPeer){  // CERT FIX
                     //fnOpenDialogWithYesNOButton("Do you want to update this hosts cert?", "Confirm", 280, 150, updatePeerCert, updatePeerCertNo);
+                    /*var name = prompt("Enter your password", "*******");
+                     *get the users pw to be able to open his keystore
+                     */
                     $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
                 }else{
                     $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
