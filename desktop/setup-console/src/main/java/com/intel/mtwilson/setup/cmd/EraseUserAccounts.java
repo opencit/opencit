@@ -15,15 +15,19 @@ import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManagerFactory;
 import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Accepts one option:  --all   indicates that even admin and ManagementServiceAutomation should be removed.
  * @author jbuhacoff
  */
 public class EraseUserAccounts implements Command {
+    private Logger log = LoggerFactory.getLogger(getClass());
     private SetupContext ctx = null;
     private MSPersistenceManager pm;
     private EntityManagerFactory em;
