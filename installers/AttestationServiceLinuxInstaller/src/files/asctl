@@ -72,7 +72,6 @@ download_privacyca_certs() {
   if [ -n "${PRIVACYCA_SERVER}" ]; then
     # check if the privacy ca password is saved in a properties file
     local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
-    local default_privacyca_password=${PRIVACYCA_DOWNLOAD_PASSWORD:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`}
     echo "Login to download the Privacy CA client files"
     if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME}" ]; then
       prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
