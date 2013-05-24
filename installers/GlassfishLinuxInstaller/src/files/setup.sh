@@ -20,6 +20,7 @@ cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
 cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
 cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
 
+
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
 # due to its GPLv2 license we cannot integrate it in any way with what we
@@ -33,6 +34,13 @@ cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
 mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${GLASSFISH_HOME}/modules/
+fi
+
+if using_postgres; then
+ if [ ! -d ${GLASSFISH_HOME}/lib/endorsed ]; then
+  mkdir -p ${GLASSFISH_HOME}/lib/endorsed
+ fi
+ cp *.jar ${GLASSFISH_HOME}/lib/endorsed/
 fi
 
 glassfish_stop

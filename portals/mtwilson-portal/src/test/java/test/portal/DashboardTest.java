@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.List;
+import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -63,5 +64,14 @@ public class DashboardTest {
         hostnames.add(new Hostname("10.1.71.172"));
         hostnames.add(new Hostname("RHEL168"));
         List<HostTrustXmlResponse> statuslist = My.client().getSamlForMultipleHosts(hostnames, false);
+    }
+    
+    @Test
+    public void getKeystoreAndTest() throws Exception {
+        MwPortalUser admin = My.jpa().mwPortalUser().findMwPortalUserByUserName("admin");
+        byte[] bKeystore = admin.getKeystore();
+        
+        SimpleKeystore keystore = new SimpleKeystore(admin.getKeystoreResource(), My.configuration().getKeystorePassword());
+        System.err.println("keystore pass: " + My.configuration().getKeystorePassword() + "\nkeystore size: " + bKeystore.length + "\nkeystore ascii: " + BinaryCodec.toAsciiString(bKeystore) + "\nkeystore contents: " + new String(bKeystore));
     }
 }

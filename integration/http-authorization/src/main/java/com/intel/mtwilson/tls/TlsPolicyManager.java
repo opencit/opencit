@@ -64,7 +64,9 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
     @Override
     public boolean verify(String address, SSLSession ssls) {
         // look up the TLS Policy for the host
+        
         TlsPolicy tlsPolicy = map.get(address);
+        
         try {
             log.debug("TlsPolicyManager: policy {} for host: {}", tlsPolicy.getClass().getName(), address);
             // get the list of X509 certificates from the remote server

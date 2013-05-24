@@ -569,7 +569,7 @@ public class HostBO extends BaseBO {
 		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		
 		String cs = host.getAddOn_Connection_String();
-                        log.info("saveHostInDatabase cs = " + cs);
+        //log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
@@ -597,9 +597,9 @@ public class HostBO extends BaseBO {
 
                 // create the host
                 log.error("COMMITING NEW HOST DO DATABASE");
-                log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
-                          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
-                          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName() + ", port=" + tblHosts.getPort());
+                //log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
+                //          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
+                //          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName() + ", port=" + tblHosts.getPort());
                 try {
                     My.jpa().mwHosts().create(tblHosts);
                 }catch (Exception e){
