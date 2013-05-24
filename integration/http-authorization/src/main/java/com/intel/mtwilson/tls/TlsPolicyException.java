@@ -7,8 +7,9 @@ package com.intel.mtwilson.tls;
 import java.security.cert.X509Certificate;
 
 /**
- * Similar to UnknownCertificateException but extends RuntimExceptino so it can be used from TlsPolicyManager,
- * and includes TlsPolicy and remote address information
+ * Similar to UnknownCertificateException but extends RuntimExceptino so it can be used from TlsPolicyManager, and
+ * includes TlsPolicy and remote address information
+ *
  * @author jbuhacoff
  */
 public class TlsPolicyException extends RuntimeException {
@@ -23,25 +24,24 @@ public class TlsPolicyException extends RuntimeException {
         this.tlsPolicy = tlsPolicy;
         this.chain = chain;
     }
-    
 
     public String getAddress() {
         return address;
     }
-    
+
     /**
-     * 
+     *
      * @return the tls policy that rejected the server certificate
      */
     public TlsPolicy getTlsPolicy() {
-        if(tlsPolicy == null){
+        if (tlsPolicy == null) {
             return null;
         }
         return tlsPolicy;
     }
-    
+
     /**
-     * 
+     *
      * @return the server certificate (part of the chain)
      */
     public X509Certificate getCertificate() {
@@ -52,7 +52,7 @@ public class TlsPolicyException extends RuntimeException {
     }
 
     /**
-     * 
+     *
      * @return the entire chain that was passed in, starting with the server certificate
      */
     public X509Certificate[] getCertificateChain() {
@@ -61,6 +61,4 @@ public class TlsPolicyException extends RuntimeException {
         }
         return chain;
     }
-
-    
 }
