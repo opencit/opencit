@@ -861,7 +861,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("hostName", hostname.toString());
-        HostManifestReportType report = fromXML(httpGet(asurl("/hosts/reports/trust", query)), HostManifestReportType.class);        
+        HostManifestReportType report = fromXML(httpGet(asurl("/hosts/reports/manifest", query)), HostManifestReportType.class);        
         return report;
     }
     
