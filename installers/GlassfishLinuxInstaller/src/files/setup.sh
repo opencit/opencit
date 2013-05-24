@@ -36,12 +36,7 @@ if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${GLASSFISH_HOME}/modules/
 fi
 
-if using_postgres; then
- if [ ! -d ${GLASSFISH_HOME}/lib/endorsed ]; then
-  mkdir -p ${GLASSFISH_HOME}/lib/endorsed
- fi
- cp *.jar ${GLASSFISH_HOME}/lib/endorsed/
-fi
+cp *.jar ${GLASSFISH_HOME}/modules/
 
 glassfish_stop
 glassfish_start
