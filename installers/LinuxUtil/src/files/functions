@@ -2786,9 +2786,14 @@ print_env_summary_report() {
 
 # parameters: webservice_application_name such as "AttestationService"
 webservice_running() {
+  local path=`pwd`
   local webservice_application_name="$1"
+  local wars=`ls $TOMCAT_HOME/webapps/*.war`
+
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
   WEBSERVICE_RUNNING=""
+  WEBSERVICE_DEPLOYED=""
+
   if using_glassfish; then 
     glassfish_running
     if [ -n "$GLASSFISH_RUNNING" ]; then
@@ -2804,15 +2809,40 @@ webservice_running() {
     if [ -n "$TOMCAT_RUNNING" ]; then
       # determine if this app is deployed
       echo "MTWILSON_SERVER: $MTWILSON_SERVER" >> $INSTALL_LOG_FILE
-      WEBSERVICE_DEPLOYED=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "${webservice_application_name}"`
+      for war in $wars 
+      do
+        echo "war=$war" >> $INSTALL_LOG_FILE
+        w=${war##*/}
+        echo "w=$w" >> $INSTALL_LOG_FILE 
+        result=`basename $w .war`
+        echo "result=$result" >> $INSTALL_LOG_FILE
+        if [ "$result" == "AttestationService" ]; then
+          WEBSERVICE_DEPLOYED=AttestationService 
+          echo $WEBSERVICE_DEPLOYED  >> $INSTALL_LOG_FILE 
+        fi 
+      done
+     
+      #WEBSERVICE_DEPLOYED=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "${webservice_application_name}"`
       echo "WEBSERVICE_DEPLOYED=$WEBSERVICE_DEPLOYED" >> $INSTALL_LOG_FILE
+      
       #if deployed, make sure it is runnning
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
+        cd $TOMCAT_HOME/webapps/
+        apps=`ls -d */ | tr -d "/"`
+        for app in $apps 
+        do 
+          echo "app=$app" >> $INSTALL_LOG_FILE
+          if [[ "$app" == "${webservice_application_name}" ]]; then
+            echo "inside webservice running"
+            WEBSERVICE_RUNNING=running 
+          fi 
+        done
+        #WEBSERVICE_RUNNING=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
         echo "WEBSERVICE_RUNNING=$WEBSERVICE_RUNNING" >> $INSTALL_LOG_FILE
       fi
     fi
   fi
+  cd $path
 }
 webservice_running_report() {
   local webservice_application_name="$1"
@@ -2833,7 +2863,10 @@ webservice_start() {
     if using_glassfish; then
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
+      if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
+        rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
+      fi
+      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
     fi
   fi
 }
@@ -2844,7 +2877,10 @@ webservice_stop() {
     if using_glassfish; then
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
+      if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
+        rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
+      fi
+      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
     fi
   fi
 }
@@ -2904,13 +2940,17 @@ webservice_install() {
   webservice_running "${webservice_application_name}"
 
   local WAR_FILE="${webservice_war_file}"
+  local WAR_NAME=${WAR_FILE##*/}
+
     if [ -n "$WEBSERVICE_DEPLOYED" ]; then
       if using_glassfish; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
         ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
-        wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
+        rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
+        cp $WAR_FILE $TOMCAT_HOME/webapps/
+        #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
       fi
     else
       if using_glassfish; then
@@ -2922,7 +2962,7 @@ webservice_install() {
         #  tomcat_start
         #fi
         echo "Deploying ${webservice_application_name} to Tomcat..."
-        cp ${webservice_war_file} $TOMCAT_HOME/webapps/
+        cp $WAR_FILE $TOMCAT_HOME/webapps/
         
         #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
@@ -2930,7 +2970,7 @@ webservice_install() {
         while [ -z "$WEBSERVICE_RUNNING" ]; do
           webservice_running $webservice_application_name >> $INSTALL_LOG_FILE
           echo -n "." >> $INSTALL_LOG_FILE
-          sleep 5
+          sleep 2
         done      
       fi
     fi
@@ -2940,14 +2980,15 @@ webservice_uninstall() {
   local webservice_application_name="$1"
   webservice_running "${webservice_application_name}"
   webservice_require
-  local WAR_NAME="${webservice_application_name}"
+  local WAR_NAME="${webservice_application_name}.war"
   if [ -n "$WEBSERVICE_DEPLOYED" ]; then
     if using_glassfish; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Glassfish..."
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
+      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
+      rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
     fi
   else
     if using_glassfish; then
@@ -2964,6 +3005,7 @@ webservice_require(){
       tomcat_require
   fi
 }
+
 ### FUNCTION LIBRARY: DATABASE FUNCTIONS
 
 database_restart(){
