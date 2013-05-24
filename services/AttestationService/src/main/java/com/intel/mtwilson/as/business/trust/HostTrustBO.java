@@ -831,7 +831,7 @@ public class HostTrustBO extends BaseBO {
             tblSamlAssertion.setVmmTrust(false);
             
             try {
-                log.error("stdalex caught exception, generating saml assertion");
+                log.error("Caught exception, generating saml assertion");
                 tblSamlAssertion.setSaml("");
                 int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
                 tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
@@ -848,7 +848,7 @@ public class HostTrustBO extends BaseBO {
                 new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
             }catch(Exception ex){
                 log.info("getTrustwithSaml caugh exception while generating error saml assertion");
-                throw new ASException(new Exception("stdalex " + ex.getMessage()));
+                throw new ASException(new Exception("getTrustWithSaml " + ex.getMessage()));
             } 
             throw new ASException(new Exception(e.getMessage()));
         }
@@ -862,9 +862,13 @@ public class HostTrustBO extends BaseBO {
                 TblHosts tblHosts = getHostByName(new Hostname(host));
                 if(tblHosts != null){
                     TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(tblHosts.getId() , getCacheStaleAfter() );
-                    
-                    if(tblTaLog != null)
-                        return getHostTrustObj(tblTaLog);
+
+                    // Bug 849: We need to ensure that we add the host name to the response as well. Otherwise it will just contain BIOS and VMM status.
+                    if(tblTaLog != null) {
+                        HostTrust hostTrust = getHostTrustObj(tblTaLog);
+                        hostTrust.setIpAddress(host);
+                        return hostTrust;
+                    }
                 }else{
                     throw new ASException(
                             ErrorCode.AS_HOST_NOT_FOUND,
