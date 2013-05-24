@@ -22,7 +22,9 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
+          
           URL url = new URL(vendorConnectionString);
+          
           TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
           CitrixClient client = new CitrixClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
           client.init();
@@ -36,7 +38,9 @@ public class CitrixHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
+          
           URL url = new URL(vendorConnectionString);
+          
           TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
           CitrixClient client = new CitrixClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
           client.init();

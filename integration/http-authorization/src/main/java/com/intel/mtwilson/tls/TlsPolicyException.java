@@ -34,6 +34,9 @@ public class TlsPolicyException extends RuntimeException {
      * @return the tls policy that rejected the server certificate
      */
     public TlsPolicy getTlsPolicy() {
+        if(tlsPolicy == null){
+            return null;
+        }
         return tlsPolicy;
     }
     

@@ -77,7 +77,7 @@ function fnUploadWhiteListConfigurationData() {
                         hostVo.hostName=$('#whiteListCitrix_Host').val();
                         hostVo.hostPortNo=$('#whiteListCitrix_portNO').val();
                         hostVo.vCenterString="https://"+$('#whiteListCitrix_Host').val()+":"+$('#whiteListCitrix_portNO').val()+
-                                             ";"+$('#whiteListCitrix_userName').val()+";"+$('#whiteListCitrix_password').val();
+                                             "/;"+$('#whiteListCitrix_userName').val()+";"+$('#whiteListCitrix_password').val();
                     }
                 }else{
                     alert("Please enter a valid ip address and try again.");
