@@ -198,6 +198,7 @@ public class TblHosts implements Serializable {
     public String getAddOnConnectionInfo() {
         if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
             try {
+                log.debug("XXX TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
                 addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
             }
             catch(Exception e) {

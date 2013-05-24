@@ -44,7 +44,9 @@ public class My {
 
     public static void initDataEncryptionKey(String dekBase64) {
         try {
+            log.debug("XXX DEK = {}", dekBase64);
             ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
+            log.debug("XXX My ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
         }
         catch(CryptographyException e) {
             throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
@@ -94,8 +96,9 @@ public class My {
     }
     
     public static MyJpa jpa() throws IOException {
+        initDataEncryptionKey();
         if( jpa == null ) {
-            initDataEncryptionKey();
+//            initDataEncryptionKey();  // XXX just trying a fix for bug #810 , maybe another thread is trying to read from host table and it's not getting this; so moved it to happen every time jpa() is called
             jpa = new MyJpa(persistenceManager());
         }
         return jpa;
