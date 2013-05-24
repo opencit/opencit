@@ -577,12 +577,18 @@ public class HostTrustBO extends BaseBO {
 
     private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
-            return hostBO.getHostByName(hostName);
+            TblHosts tblHost = hostBO.getHostByName(hostName);
+            //Bug # 848 Check if the query returned back null or we found the host 
+            if (tblHost == null ){
+                throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
+            }
+            return tblHost;
         }
         catch(CryptographyException e) {
             throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         }
     }
+    
     private TblHosts getHostByAik(Sha1Digest fingerprint) throws IOException  { // datatype.Hostname
         try {
             return hostBO.getHostByAik(fingerprint);
@@ -874,7 +880,7 @@ public class HostTrustBO extends BaseBO {
            hostTrust.setBiosStatus((status.bios)?1:0);
            hostTrust.setVmmStatus((status.vmm)?1:0);
            hostTrust.setIpAddress(host);
-           
+           log.error("JSONTrust is : ", host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
            return hostTrust;
             
         } catch (ASException e) {
