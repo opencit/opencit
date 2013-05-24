@@ -323,7 +323,7 @@ case "$1" in
         call_setupcommand EraseLogs
         ;;
   erase-users)
-        call_setupcommand EraseUserAccounts
+        call_setupcommand EraseUserAccounts $@
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
