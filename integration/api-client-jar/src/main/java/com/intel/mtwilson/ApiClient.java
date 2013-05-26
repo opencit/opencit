@@ -20,6 +20,7 @@ import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
 import com.intel.mtwilson.io.ConfigurationUtil;
 import com.intel.mtwilson.security.http.*;
+import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -214,6 +215,19 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setKeystore(keystore);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
+        }
+        catch(Exception e) {
+            throw new ClientException("Cannot initialize client", e);
+        }
+    }
+
+    public ApiClient(URL baseURL, RsaCredential credential, SimpleKeystore keystore, TlsPolicy tlsPolicy) throws ClientException {
+        try {
+        setBaseURL(baseURL);
+        setKeystore(keystore);
+        log.debug("Base URL: "+baseURL.toExternalForm());
+        httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, tlsPolicy);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {

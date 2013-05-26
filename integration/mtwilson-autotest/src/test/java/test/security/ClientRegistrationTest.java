@@ -2,54 +2,43 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package test.myconfig;
+package test.security;
 
-import com.intel.mtwilson.api.ApiException;
-import com.intel.mtwilson.api.ClientException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyConfiguration;
 import com.intel.mtwilson.api.ClientFactory;
-import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
+import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
+import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
+import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import org.junit.Test;
 
 /**
  *
  * @author jbuhacoff
  */
-public class BootstrapApiClient {
-
-    /**
-     * You should first run testInitMyConfig if you haven't already.
-     *
-     * Creates a local user keystore and registers your new user with Mt Wilson.
-     * Also automatically approves your new user so you can start using it right away
-     * in your JUnit tests using My.client()
-     *
-     * @throws MalformedURLException
-     * @throws IOException
-     * @throws ApiException
-     * @throws ClientException
-     * @throws CryptographyException
-     */
+public class ClientRegistrationTest {
     @Test
-    public void testCreateMyUser() throws Exception {
+    public void testRegisterClient() throws IOException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, IllegalOrphanException, NonexistentEntityException, MSDataException {
+//        My.client().r
+        ByteArrayResource keystoreResource = new ByteArrayResource();
         MyConfiguration config = My.configuration(); // new MyConfiguration();
-        File directory = config.getKeystoreDir();
-        if (!directory.exists()) {
-            directory.mkdirs();
-        }
         // create and register a new api client
         SimpleKeystore keystore = ClientFactory.createUserInResource(
-                new FileResource(config.getKeystoreFile()),
+                keystoreResource,
                 config.getKeystoreUsername(),
                 config.getKeystorePassword(),
                 config.getMtWilsonURL(),
@@ -64,5 +53,7 @@ public class BootstrapApiClient {
         apiClient.setStatus("Approved");
         apiClient.setEnabled(true);
         jpaController.edit(apiClient);
+
     }
+        
 }

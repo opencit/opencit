@@ -59,7 +59,14 @@
         <artifactId>mtwilson-crypto</artifactId>
         <version>${project.version}</version>
       </dependency>
-      
+
+        <!-- for tls-policy -->
+      <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>http-authorization</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+            
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-validation</artifactId>

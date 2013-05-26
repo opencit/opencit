@@ -9,6 +9,7 @@ import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.io.FileResource;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import java.io.File;
@@ -73,7 +74,9 @@ public class My {
                 new FileResource(configuration().getKeystoreFile()), 
                 configuration().getKeystoreUsername(),
                 configuration().getKeystorePassword(),
-                configuration().getMtWilsonURL());
+                configuration().getMtWilsonURL(),
+                new InsecureTlsPolicy() // XXX TODO need to load the policy name, then instantiate the right one using the keystore file 
+                );
         }
         return client;
     }

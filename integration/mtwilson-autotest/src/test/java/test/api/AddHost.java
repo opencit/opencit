@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package mtwilson.api;
+package test.api;
 
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.My;

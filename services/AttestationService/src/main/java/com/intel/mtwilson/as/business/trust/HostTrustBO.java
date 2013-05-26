@@ -122,7 +122,7 @@ public class HostTrustBO extends BaseBO {
      */
     public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
         if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         
         TblHosts tblHosts = getHostByName(hostName);
         return getTrustStatus(tblHosts, hostName.toString());
@@ -183,7 +183,7 @@ public class HostTrustBO extends BaseBO {
         Object[] paramArray = {userName, hostId, trust.bios, trust.vmm};
         log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
         
-        log.info( "Verfication Time {}", (System.currentTimeMillis() - start));
+        log.debug( "Verfication Time {}", (System.currentTimeMillis() - start));
 
         return trust;
     }
@@ -200,12 +200,18 @@ public class HostTrustBO extends BaseBO {
     public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId) throws IOException {
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
+        long getAgentStart = System.currentTimeMillis(); // XXX jonathan performance
         HostAgent agent = factory.getHostAgent(tblHosts);
+        long getAgentStop = System.currentTimeMillis();// XXX jonathan performance
+        log.debug("XXX jonathan performance  get agent: {}", getAgentStop-getAgentStart); // XXX jonathan performance
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
             throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId.toString());
         }
         
+        long getAgentManifestStart = System.currentTimeMillis(); // XXX jonathan performance
         PcrManifest pcrManifest = agent.getPcrManifest();
+        long getAgentManifestStop = System.currentTimeMillis(); // XXX jonathan performance
+        log.debug("XXX jonathan performance  get agent manifest: {}", getAgentManifestStop-getAgentManifestStart); // XXX jonathan performance
         
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = pcrManifest;
@@ -224,10 +230,16 @@ public class HostTrustBO extends BaseBO {
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
 
         
+        long getTrustPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies
+        long getTrustPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
+        log.debug("XXX jonathan performance  load trust policy: {}", getTrustPolicyStop-getTrustPolicyStart); // XXX jonathan performance
 //        trustPolicy.setName(policy for hostId) // do we even need a name? or is that just a management thing for the app?
         PolicyEngine policyEngine = new PolicyEngine();
+        long applyPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+        long applyPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
+        log.debug("XXX jonathan performance  apply trust policy: {}", applyPolicyStop-applyPolicyStart); // XXX jonathan performance
         
         return trustReport;
     }
