@@ -445,9 +445,7 @@ public class CitrixClient {
        Host h = (Host)iter.next();
        
        response.setClientIp(hostIpAddress);
-       // SUDHIR, CPU INFO START HERE
-       //Map<String, String> cpuInfo = h.getCpuInfo(connection);
-       //Map<String, String> cpuConfig = h.getCpuConfiguration(connection);
+
        Map<String, String> map = h.getSoftwareVersion(connection);
        response.setOsName(map.get("product_brand"));
        response.setOsVersion(map.get("product_version"));
@@ -458,6 +456,32 @@ public class CitrixClient {
        response.setBiosOem(map.get("bios-vendor"));
        response.setBiosVersion(map.get("bios-version"));
        
+       map = h.getCpuInfo(connection);
+       int stepping = Integer.parseInt(map.get("stepping"));
+       int model = Integer.parseInt(map.get("model"));
+       int family = Integer.parseInt(map.get("family"));
+       // EAX register contents is used for defining CPU ID and as well as family/model/stepping
+       // 0-3 bits : Stepping
+       // 4-7 bits: Model #
+       // 8-11 bits: Family code
+       // 12 & 13: Processor type, which will always be zero
+       // 14 & 15: Reserved
+       // 16 to 19: Extended model
+       // Below is the sample of the data got from the Citrix API
+       // Model: 45, Stepping:7 and Family: 6
+       // Mapping it to the EAX register we would get
+       // 0-3 bits: 7
+       // 4-7 bits: D (Actually 45 would be 2D. So, we would put D in 4-7 bits and 2 in 16-19 bits
+       // 8-11 bits: 6
+       //12-15 bits: 0
+       // 16-19 bits: 2
+       // 20-31 bits: Extended family and reserved, which will be 0
+       // So, the final content would be : 000206D7
+       // On reversing individual bytes, we would get D7 06 02 00
+       String modelInfo = Integer.toHexString(model);
+       String processorInfo = modelInfo.charAt(1) + Integer.toHexString(stepping) + " " + "0" + Integer.toHexString(family) + " " + "0" + modelInfo.charAt(0);
+       processorInfo = processorInfo.trim().toUpperCase();
+       response.setProcessorInfo(processorInfo);
        java.util.Date date= new java.util.Date();
        response.setTimeStamp( new Timestamp(date.getTime()).toString());
 //       log.trace("stdalex-error leaving getHostInfo");
