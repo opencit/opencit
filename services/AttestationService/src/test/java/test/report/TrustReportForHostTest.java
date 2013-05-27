@@ -15,6 +15,7 @@ import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.policy.Fault;
 import com.intel.mtwilson.policy.RuleResult;
 import com.intel.mtwilson.policy.TrustReport;
+import com.intel.mtwilson.util.ASDataCipher;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
@@ -34,7 +35,7 @@ public class TrustReportForHostTest {
     
     @BeforeClass
     public static void setMwHostsDek() throws CryptographyException, IOException {
-        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
+        ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
     }
     
     @Test

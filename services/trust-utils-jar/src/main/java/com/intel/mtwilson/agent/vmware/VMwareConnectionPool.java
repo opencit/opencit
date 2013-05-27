@@ -15,6 +15,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
@@ -75,10 +76,10 @@ public class VMwareConnectionPool {
      * @throws VMwareConnectionException 
      */
     public VMwareClient reuseClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
-        log.debug("VMwareConnectionPool searching for existing connection {}", tlsConnection.getConnectionString());
+//        log.debug("VMwareConnectionPool searching for existing connection {}", tlsConnection.getConnectionString());
         VMwareClient client = pool.get(tlsConnection);
         if( client == null ) { return null; }
-        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
+//        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
 //        lastAccess.put(connectionString, System.currentTimeMillis());
         if( factory.validateObject(tlsConnection, client)) {
             log.info("Reusing vCenter connection for "+client.getEndpoint());
@@ -113,10 +114,10 @@ public class VMwareConnectionPool {
      */
     public VMwareClient createClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
         try {
-            log.debug("VMwareConnectionPool create client for connection {}", tlsConnection.getConnectionString());
+//            log.debug("VMwareConnectionPool create client for connection {}", tlsConnection.getConnectionString());
             VMwareClient client = factory.makeObject(tlsConnection);
             if( factory.validateObject(tlsConnection, client) ) {
-                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
+//                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
                 pool.put(tlsConnection, client);
                 // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
                 log.info("Opening new vCenter connection for "+client.getEndpoint());
@@ -151,6 +152,19 @@ public class VMwareConnectionPool {
                                 throw new VMwareConnectionException(e4);
                             }
                         }
+                        try {
+                            log.debug("Trust policy: {}", tlsConnection.getTlsPolicy().getClass().getName());
+                            // now show what is in the trusted keystore... to help understand why it didn't match
+                            List<X509Certificate> trustedCerts = tlsConnection.getTlsPolicy().getCertificateRepository().getCertificates();
+                            log.debug("There are {} trusted certs in the keystore", trustedCerts.size());
+                            for(X509Certificate trustedCert : trustedCerts) {
+                                log.debug("Trusted certificate fingerprint: {} and subject: {}", new Sha1Digest(X509Util.sha1fingerprint(trustedCert)), trustedCert.getSubjectX500Principal().getName());                                
+                            }
+                        }
+                        catch(Exception e5) {
+                            e5.printStackTrace(System.err);
+                            log.error("Cannot enumerate truted certificates: "+e5.toString(), e5);
+                        }
                         throw new VMwareConnectionException("VMwareConnectionPool not able to read host information: "+ e3.toString());
                     }
                 }
@@ -163,17 +177,10 @@ public class VMwareConnectionPool {
             }
         }
         catch(Exception e) {
-            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString());
+//            log.debug("VMwareConnectionPool failed to create client for connection {}", tlsConnection.getConnectionString()); // removed to prevent leaking secrets
             log.error("Failed to connect to vcenter: "+e.toString(),e);
             e.printStackTrace(System.err);
-            try {
-                URL url = new URL(tlsConnection.getConnectionString());
-                throw new VMwareConnectionException("Cannot connect to vcenter: "+url.getHost(), e);
-            }
-            catch(MalformedURLException e2) {
-                log.error("Cannot connect to vcenter: Invalid connection string: {}", tlsConnection.getConnectionString());
-                throw new VMwareConnectionException("Cannot connect to vcenter: invalid connection string: "+e.toString(), e);                
-            }
+            throw new VMwareConnectionException("Cannot connect to vcenter: "+tlsConnection.getURL().getHost(), e);
         }
         throw new VMwareConnectionException("Failed to connect to vcenter: unknown error");
     }
@@ -186,13 +193,7 @@ public class VMwareConnectionPool {
                 factory.destroyObject(tlsConnection, client);
             }
             catch(Exception e) {
-                try {
-                    URL url = new URL(tlsConnection.getConnectionString());
-                    log.error("Failed to disconnect from vcenter: "+url.getHost(), e);
-                }
-                catch(MalformedURLException e2) {
-                    log.error("Failed to disconnect from venter with invalid connection string", e);
-                }
+                log.error("Failed to disconnect from vcenter: "+tlsConnection.getURL().getHost(), e);
             }
         }
     }

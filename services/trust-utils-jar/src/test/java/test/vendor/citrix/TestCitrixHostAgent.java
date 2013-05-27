@@ -17,6 +17,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -54,7 +55,9 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
 public class TestCitrixHostAgent {
     private transient Logger log = LoggerFactory.getLogger(getClass());
     private static String hostname = "10.1.70.126";
-    private static String connection = "citrix:https://10.1.70.126:443;root;P@ssw0rd";
+    private static String connection = "citrix:https://10.1.70.126:443/;root;P@ssw0rd";
+//    private static String hostname = "10.1.71.201";
+//    private static String connection = "citrix:https://10.1.71.201:443;root;P@ssw0rd";
     private static HostAgent agent;
     
     @BeforeClass
@@ -65,8 +68,8 @@ public class TestCitrixHostAgent {
     public static HostAgent getAgent() throws KeyManagementException, MalformedURLException, IOException {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
-        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
-        HostAgent hostAgent = hostAgentFactory.getHostAgent(new ConnectionString(connection), tlsPolicy);
+//        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
+        HostAgent hostAgent = hostAgentFactory.getHostAgent(new ConnectionString(connection), new InsecureTlsPolicy());
         return hostAgent;
     }
     

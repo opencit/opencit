@@ -102,7 +102,15 @@
                 <version>1.0.11</version>
                 <scope>test</scope>
         </dependency>
-        
+        <!--
+       API-CLIENT SHOULD STAY IN TEST SCOPE 
+    -->
+    <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>api-client</artifactId>
+		<version>${project.version}</version>
+        <scope>test</scope>
+    </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-api</artifactId>
@@ -171,7 +179,12 @@
         <optional>true</optional>
         <scope>test</scope>
     </dependency>
-        
+	<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+	
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-crypto</artifactId>

@@ -81,7 +81,7 @@ public class HisPrivacyCAWebServices2LoadOnStartup extends HttpServlet{
 //			try{
 				// The functionality from the HisSetup class should be rebuilt here to avoid this call.
 				// Because this function is now only run from here, the HisSetup class is now considered deprecated.
-				HisSetup.main(null);
+				//HisSetup.main(null);
 //				System.setProperty("javax.net.ssl.trustStore", System.getProperty("catalina.base") + "/Certificate/TrustStore.jks");
 //				KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 //				fis = new FileInputStream(System.getProperty("catalina.base") + "/Certificate/TrustStore.jks");

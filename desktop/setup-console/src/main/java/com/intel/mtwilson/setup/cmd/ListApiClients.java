@@ -9,6 +9,7 @@ import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -44,7 +45,7 @@ public class ListApiClients implements Command {
         listApiClientRecords(serviceConf);
     }
     
-    private boolean listApiClientRecords(Configuration conf) throws SetupException {
+    private boolean listApiClientRecords(Configuration conf) throws SetupException, IOException {
         boolean found = false;
         SetupWizard wizard = new SetupWizard(conf);
         try {

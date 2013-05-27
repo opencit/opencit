@@ -37,6 +37,7 @@ import com.intel.mtwilson.model.Sha1Digest;
 import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -129,12 +130,14 @@ public class TAHelper {
                 }
             }
 
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
+            URL url = new URL(connectionString);
+            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
 
             String sessionId = generateSessionId();
 
             // request AIK certificate and CA chain (the AIK Proof File)
-            System.out.println("DAA requesting AIK proof");
+            log.debug("DAA requesting AIK proof");
             String aikproof = client.getAIKCertificate(); // <identity_request></identity_request>
             FileOutputStream outAikProof = new FileOutputStream(new File(getDaaAikProofFileName(sessionId)));
             IOUtils.write(aikproof, outAikProof);
@@ -207,12 +210,14 @@ public class TAHelper {
                     log.debug("getQuoteInformationForHost called with ip address and port {}", connectionString);
                 }
             } else if (connectionString.startsWith("intel:")) {
-                log.debug("getQuoteInformationForHost called with intel connection string: {}", connectionString);
+                //log.debug("getQuoteInformationForHost called with intel connection string: {}", connectionString);
                 connectionString = connectionString.substring(6);
             }
 
 
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(connectionString, tlsPolicy));
+            URL url = new URL(connectionString);
+            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
             return getQuoteInformationForHost(tblHosts.getIPAddress(), client);
 
@@ -236,41 +241,41 @@ public class TAHelper {
         trustedAik = client.getAIKCertificate();
 
         ClientRequestType clientRequestType = client.getQuote(nonce, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
-        log.info("got response from server [" + hostname + "] " + clientRequestType);
+        log.debug("got response from server [" + hostname + "] " + clientRequestType);
 
         String quote = clientRequestType.getQuote();
-        log.info("extracted quote from response: " + quote);
+        log.debug("extracted quote from response: " + quote);
 
         saveQuote(quote, sessionId);
-        log.info("saved quote with session id: " + sessionId);
+        log.debug("saved quote with session id: " + sessionId);
 
         // we only need to save the certificate when registring the host ... when we are just getting a quote we need to verify it using the previously saved AIK.
         if (trustedAik == null) {
             String aikCertificate = clientRequestType.getAikcert();
-            log.info("extracted aik cert from response: " + aikCertificate);
+            log.debug("extracted aik cert from response: " + aikCertificate);
 
             saveCertificate(aikCertificate, sessionId);
-            log.info("saved host-provided AIK certificate with session id: " + sessionId);
+            log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
             saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
-            log.info("saved database-provided trusted AIK certificate with session id: " + sessionId);
+            log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
         saveNonce(nonce, sessionId);
 
-        log.info("saved nonce with session id: " + sessionId);
+        log.debug("saved nonce with session id: " + sessionId);
 
         createRSAKeyFile(sessionId);
 
-        log.info("created RSA key file for session id: " + sessionId);
+        log.debug("created RSA key file for session id: " + sessionId);
         
         String decodedEventLog = new String(Base64.decodeBase64(clientRequestType.getEventLog()));
-        log.info("Event log retrieved from the host consists of: " + decodedEventLog);
+        log.debug("Event log retrieved from the host consists of: " + decodedEventLog);
         
         // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
         PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
 
-        log.info("Got PCR map");
+        log.debug("Got PCR map");
         //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
 
         return pcrManifest;
@@ -364,7 +369,7 @@ public class TAHelper {
 //            nonce = new BASE64Encoder().encode( bytes);
             String nonce = Base64.encodeBase64String(bytes);
 
-            log.info("Nonce Generated {}", nonce);
+            log.debug("Nonce Generated {}", nonce);
             return nonce;
         } catch (NoSuchAlgorithmException e) {
             throw new ASException(e);
@@ -384,7 +389,7 @@ public class TAHelper {
 
         int nextInt = sr.nextInt();
         String sessionId = "" + ((nextInt < 0) ? nextInt * -1 : nextInt);
-        log.info("Session Id Generated [{}]", sessionId);
+        log.debug("Session Id Generated [{}]", sessionId);
 
         return sessionId;
     }
@@ -449,14 +454,14 @@ public class TAHelper {
 
         try {
             assert aikverifyhome != null;
-            log.info(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
+            log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
             fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator + fileName);
             assert fileOutputStream != null;
             assert contents != null;
             fileOutputStream.write(contents);
             fileOutputStream.flush();
         } catch (FileNotFoundException e) {
-            log.info(String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
+            log.debug(String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
             throw e;
         } finally {
             try {
@@ -507,11 +512,11 @@ public class TAHelper {
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
 //        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         PcrManifest pcrManifest = new PcrManifest();
-        log.info("verifyQuoteAndGetPcr for session {}", sessionId);
+        log.debug("verifyQuoteAndGetPcr for session {}", sessionId);
         String command = String.format("%s -c %s %s %s", aikverifyCmd, aikverifyhomeData + File.separator + getNonceFileName(sessionId),
                 aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId), aikverifyhomeData + File.separator + getQuoteFileName(sessionId));
 
-        log.info("Command: {}", command);
+        log.debug("Command: {}", command);
         List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
 
         // Sample output from command:
@@ -529,7 +534,7 @@ public class TAHelper {
                 boolean validPcrNumber = pcrNumberPattern.matcher(pcrNumber).matches();
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
                 if (validPcrNumber && validPcrValue) {
-                    log.info("Result PCR " + pcrNumber + ": " + pcrValue);
+                    log.debug("Result PCR " + pcrNumber + ": " + pcrValue);
 //                	pcrMp.put(pcrNumber, new PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                     pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
                 }
@@ -597,7 +602,7 @@ public class TAHelper {
                 reader.next();
             }
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            log.error(ex.getMessage(), ex);
         }
 
         return pcrManifest;

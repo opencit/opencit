@@ -38,6 +38,9 @@ $(function() {
     $('#citrixHostType').show();
     
 	fnChangehostType($('#MainContent_ddlHOSTType'),true);
+    
+                $('#RegisterWhiteListHost').attr('disabled', 'disabled');
+                $('#RegisterWhiteListHost').attr('checked', false);    
 });
 
 
@@ -77,7 +80,7 @@ function fnUploadWhiteListConfigurationData() {
                         hostVo.hostName=$('#whiteListCitrix_Host').val();
                         hostVo.hostPortNo=$('#whiteListCitrix_portNO').val();
                         hostVo.vCenterString="https://"+$('#whiteListCitrix_Host').val()+":"+$('#whiteListCitrix_portNO').val()+
-                                             ";"+$('#whiteListCitrix_userName').val()+";"+$('#whiteListCitrix_password').val();
+                                             "/;"+$('#whiteListCitrix_userName').val()+";"+$('#whiteListCitrix_password').val();
                     }
                 }else{
                     alert("Please enter a valid ip address and try again.");
@@ -101,8 +104,7 @@ function fnUploadWhiteListConfigurationData() {
                          alert("Please enter a valid ip address and try again.");
                      }
             }else { // TA
-                                                   whiteListOpenSource_Host
-                        
+                     
                         if(fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
                       
                             var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
@@ -135,6 +137,7 @@ function fnUploadWhiteListConfigurationData() {
 			//fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
             if(regHost){
                 config.registerHost = true;
+                
                 registerHost = true;        
                 $('#mainLoadingDiv').prepend(disabledDiv);
                 sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
@@ -349,6 +352,15 @@ function fnChangeApplicableFor(status,selectID,secondCheckBoxID) {
 			fnDisableOrEnableUploadButton(status);
 		}
 	}
+    
+            if (($('#Oem_Bios_Checkbox').attr('checked') == 'checked') && ($('#Hypervisor_Checkbox').attr('checked') == 'checked')) {
+                // Enable the register host checkbox with default value set to unchecked
+                $('#RegisterWhiteListHost').attr('disabled', false);
+            } else {
+                $('#RegisterWhiteListHost').attr('disabled', true);
+                $('#RegisterWhiteListHost').attr('checked', false);
+            }
+                
 }
 
 //function to check the conditions for enabling/disabling "upload white list" button

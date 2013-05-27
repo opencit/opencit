@@ -9,7 +9,7 @@ package_name=attestation-service
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_var_dir=/var/opt/intel/aikverifyhome
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 
@@ -59,15 +59,11 @@ else
   cp "audit-handler.properties" "${intel_conf_dir}/audit-handler.properties"
 fi
 
-# copy default logging settings to /etc
-chmod 700 logback.xml
-cp logback.xml "${intel_conf_dir}"
-
 # SCRIPT EXECUTION
-if using_mysql; then
-  mysql_server_install
-  mysql_install
-fi
+#if using_mysql; then
+#  mysql_server_install
+#  mysql_install
+#fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 
@@ -110,4 +106,9 @@ if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
   glassfish_permissions "${package_var_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
+  tomcat_permissions "${package_var_dir}"
 fi
+

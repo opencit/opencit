@@ -7,6 +7,7 @@ package com.intel.mtwilson.setup.cmd;
 import com.intel.mtwilson.setup.PropertyHidingConfiguration;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.io.Classpath;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.setup.Command;
@@ -94,14 +95,15 @@ public class InitDatabase implements Command {
     }
 
     @Override
-    public void execute(String[] args) throws SetupException {
+    public void execute(String[] args) throws Exception {
         // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
         if( args.length < 1 ) {
+            
             throw new SetupException("Usage: InitDatabase mysql|postgres [--check]");
         }
         
         databaseVendor = args[0];
-        
+        vendor = databaseVendor;
         try {
             initDatabase();
         }
@@ -122,7 +124,8 @@ public class InitDatabase implements Command {
             this.description = description;
         }
     }
-    
+    private String vendor = null;
+    /*
     private boolean checkDatabaseConnection() throws SetupException, IOException, SQLException {
         
             DataSource ds = getDataSourceNoSchema();
@@ -136,6 +139,13 @@ public class InitDatabase implements Command {
                 log.error("Failed to connect to {} without schema", databaseVendor);
                 return false;
             }
+    }
+    */
+    
+    private void verbose(String format, Object... args) {
+        if( options.getBoolean("verbose", false) ) {
+            System.out.println(String.format(format, args));
+        }
     }
     
     private void initDatabase() throws SetupException, IOException, SQLException {
@@ -151,14 +161,17 @@ public class InitDatabase implements Command {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
         catch(SQLException e) {
-            log.error("Failed to connect to {} with schema", databaseVendor);
+            log.error("Failed to connect to {} with schema: error =" + e.getMessage(), databaseVendor); 
+            throw e;
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
 //        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
+        verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
             presentChanges.put(Long.valueOf(entry.id), entry);
+            if( entry != null ) { verbose("%s %s %s", entry.id, entry.applied_at, entry.description); }
         }
         
         HashSet<Long> changesToApply = new HashSet<Long>(sql.keySet());
@@ -196,8 +209,11 @@ public class InitDatabase implements Command {
             System.out.println("Database is compatible");
             System.out.println("The following changes will be applied:");
                     for(Long changeId : changesToApplyInOrder) {
+                        /*
                         ChangelogEntry entry = presentChanges.get(changeId);
                         System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                        */
+                        System.out.println(changeId);
                     }
             return;
         }
@@ -268,6 +284,7 @@ public class InitDatabase implements Command {
         catch(IOException e) {
             throw new SetupException("Error while scanning for SQL files: "+e.getLocalizedMessage(), e);
         }
+        //System.err.println("Number of SQL files: "+sqlmap.size());
         return sqlmap;        
     }
     
@@ -328,7 +345,7 @@ public class InitDatabase implements Command {
      */
     private DataSource getDataSource() throws SetupException {
         try {
-            Properties jpaProperties = My.persistenceManager().getASDataJpaProperties(ASConfig.getConfiguration());
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(My.configuration());
             log.debug("JDBC URL with schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
             DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {
@@ -339,19 +356,18 @@ public class InitDatabase implements Command {
         }
         catch(IOException e) {
             throw new SetupException("Cannot load persistence unit info", e);
-        }
-        
+        }   
     }
     
 
-    
+    /*
     private DataSource getDataSourceNoSchema() throws SetupException {
         try {
             PropertyHidingConfiguration confNoSchema = new PropertyHidingConfiguration(ASConfig.getConfiguration());
             confNoSchema.replaceProperty("mtwilson.db.schema","");
             confNoSchema.replaceProperty("mountwilson.as.db.schema","");
             confNoSchema.replaceProperty("mountwilson.ms.db.schema","");
-            Properties jpaProperties = My.persistenceManager().getASDataJpaProperties(confNoSchema);
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(confNoSchema);
             log.debug("JDBC URL without schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
             DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {
@@ -365,16 +381,28 @@ public class InitDatabase implements Command {
         }
         
     }
+    */
     
     
     private List<String> getTableNames(Connection c) throws SQLException {
-        ArrayList<String> list = new ArrayList<String>();
+        
+       ArrayList<String> list = new ArrayList<String>();
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery("SHOW TABLES");
+        
+        String sql = "";
+        if (vendor.equals("mysql")){
+            sql = "SHOW TABLES";
+        }
+        else if (vendor.equals("postgres")){
+            sql = "SELECT table_name FROM information_schema.tables;";          
+        }
+       
+        ResultSet rs = s.executeQuery(sql);
         while(rs.next()) {
             list.add(rs.getString(1));
         }
         return list;
+
     }
     
     private List<ChangelogEntry> getChangelog(Connection c) throws SQLException {
@@ -398,10 +426,10 @@ public class InitDatabase implements Command {
         String changelogTableName = null;
         // if we have both changelog tables, copy all records from old changelog to new changelog and then use that
         if( hasChangelog && hasMwChangelog ) {
-            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM `mw_changelog` WHERE ID=?");
-            PreparedStatement insert = c.prepareStatement("INSERT INTO `mw_changelog` SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
+            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?");
+            PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
             Statement select = c.createStatement();
-            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM `changelog`");
+            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog");
             while(rs.next()) {
                 check.setLong(1, rs.getLong("ID"));
                 ResultSet rsCheck = check.executeQuery();
@@ -430,7 +458,7 @@ public class InitDatabase implements Command {
         }
         
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM `%s`", changelogTableName));
+        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName));
         while(rs.next()) {
             ChangelogEntry entry = new ChangelogEntry();
             entry.id = rs.getString("ID");

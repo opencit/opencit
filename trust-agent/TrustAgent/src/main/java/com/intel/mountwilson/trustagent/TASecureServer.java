@@ -30,27 +30,39 @@ public class TASecureServer extends BaseServer {
     public TASecureServer(int serverPort) throws Exception {
         try {
             //619 allow keystore password to be specificed as a env variable
+            
             String keyPass = System.getProperty("javax.net.ssl.keyStorePassword");
             if(keyPass == null) {
+                System.err.println("Tagent keystore pw was null, reading it from config file");
                 // keystore pass not defined, read it from props and define it
                 String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                //System.err.println("Tagent keystore from config was " + propKeyPass);
                 System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
             }else if(keyPass.startsWith("env:")) {
                 String[] envVar = keyPass.split(":");
                 if(envVar.length != 2) {
                     // no env variable name provided, read it from the props file
+                    System.err.println("Tagent couldn't figure out env variable, setting from config");
                     String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                    //System.err.println("Tagent keystore from config was " + propKeyPass);
                     System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+                }else {
+                    String newKeyPass = System.getenv(envVar[1]);
+                    if(newKeyPass == null){ 
+                      // env variable provided was not defined, read it from the props file
+                      System.err.println("Tagent couldn't read keystore pw from env, setting from config");
+                      newKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                      //System.err.println("Tagent keystore from config was " + newKeyPass);
+                      System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);
+                    }else{
+                     //System.err.println("Tagent read pw from env, setting it to " + newKeyPass);
+                     System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass); 
+                    }                
                 }
-                String newKeyPass = System.getenv(envVar[1]);
-                if(newKeyPass == null){ 
-                    // env variable provided was not defined, read it from the props file
-                    newKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
-                    System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);
-                }
-                System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);                
             }
-
+            
+            //System.err.println("keystore pw set to " + System.getProperty("javax.net.ssl.keyStorePassword"));
+            
             SSLServerSocketFactory sslserversocketfactory =
                     (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
             serverSock =

@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 //import com.intel.mountwilson.as.common.Aes128DataCipher;
 import com.intel.mtwilson.as.controller.*;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.audit.controller.*;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -38,7 +39,7 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class MyJpa {
     private final MyPersistenceManager pm;
-    private final String dekBase64;
+//    private final String dekBase64;
     TblApiClientJpaController mwApiClientHmac;
     MwApiClientHttpBasicJpaController mwApiClientHttpBasic;
     ApiClientX509JpaController mwApiClientX509;
@@ -65,121 +66,146 @@ public class MyJpa {
     TblRequestQueueJpaController mwRequestQueue;
     TblSamlAssertionJpaController mwSamlAssertion;
     TblTaLogJpaController mwTaLog;
+    MwProcessorMappingJpaController mwProcessorMapping;
 
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
-
-    public MyJpa(MyPersistenceManager pm, String dekBase64) { 
+    
+    public MyJpa(MyPersistenceManager pm) { 
         this.pm = pm; 
-        this.dekBase64 = dekBase64; 
-        try {
-            TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
-        }
-        catch(CryptographyException e) {
-            throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
-        }      
-        
+//        this.dekBase64 = dekBase64; 
+//        initDataEncryptionKey(dekBase64);
     }
     
     public TblApiClientJpaController mwApiClientHmac() throws IOException {
-		if( mwApiClientHmac == null ) { mwApiClientHmac = new TblApiClientJpaController(pm.getMSData()); }
-        return mwApiClientHmac;
+        return new TblApiClientJpaController(pm.getMSData());
+//		if( mwApiClientHmac == null ) { mwApiClientHmac = new TblApiClientJpaController(pm.getMSData()); }
+//        return mwApiClientHmac;
 	}
     public MwApiClientHttpBasicJpaController mwApiClientHttpBasic() throws IOException {
-		if( mwApiClientHttpBasic == null ) { mwApiClientHttpBasic = new MwApiClientHttpBasicJpaController(pm.getASData()); }
-		return mwApiClientHttpBasic;
+        return new MwApiClientHttpBasicJpaController(pm.getASData());
+//		if( mwApiClientHttpBasic == null ) { mwApiClientHttpBasic = new MwApiClientHttpBasicJpaController(pm.getASData()); }
+//		return mwApiClientHttpBasic;
 	}
     public ApiClientX509JpaController mwApiClientX509() throws IOException {
-		if( mwApiClientX509 == null ) { mwApiClientX509 = new ApiClientX509JpaController(pm.getMSData()); }
-		return mwApiClientX509;
+        return new ApiClientX509JpaController(pm.getMSData());
+//		if( mwApiClientX509 == null ) { mwApiClientX509 = new ApiClientX509JpaController(pm.getMSData()); }
+//		return mwApiClientX509;
 	}
     public ApiRoleX509JpaController mwApiRoleX509() throws IOException {
-		if( mwApiRoleX509 == null ) { mwApiRoleX509 = new ApiRoleX509JpaController(pm.getMSData()); }
-		return mwApiRoleX509;
+        return new ApiRoleX509JpaController(pm.getMSData());
+//		if( mwApiRoleX509 == null ) { mwApiRoleX509 = new ApiRoleX509JpaController(pm.getMSData()); }
+//		return mwApiRoleX509;
 	}
     public AuditLogEntryJpaController mwAuditLogEntry() throws IOException {
-		if( mwAuditLogEntry == null ) { mwAuditLogEntry = new AuditLogEntryJpaController(pm.getAuditData()); }
-		return mwAuditLogEntry;
+        return new AuditLogEntryJpaController(pm.getAuditData());
+//		if( mwAuditLogEntry == null ) { mwAuditLogEntry = new AuditLogEntryJpaController(pm.getAuditData()); }
+//		return mwAuditLogEntry;
 	}
     public MwCertificateX509JpaController mwCertificateX509() throws IOException {
-		if( mwCertificateX509 == null ) { mwCertificateX509 = new MwCertificateX509JpaController(pm.getASData()); }
-		return mwCertificateX509;
+        return new MwCertificateX509JpaController(pm.getASData());
+//		if( mwCertificateX509 == null ) { mwCertificateX509 = new MwCertificateX509JpaController(pm.getASData()); }
+//		return mwCertificateX509;
 	}
     // XXX TODO we don't have a controller for the schema changelog   mw_changelog !!!
     public MwConfigurationJpaController mwConfiguration() throws IOException {
-		if( mwConfiguration == null ) { mwConfiguration = new MwConfigurationJpaController(pm.getMSData()); }
-		return mwConfiguration;
+        return new MwConfigurationJpaController(pm.getMSData());
+//		if( mwConfiguration == null ) { mwConfiguration = new MwConfigurationJpaController(pm.getMSData()); }
+//		return mwConfiguration;
 	}
     public TblEventTypeJpaController mwEventType() throws IOException {
-		if( mwEventType == null ) { mwEventType = new TblEventTypeJpaController(pm.getASData()); }
-		return mwEventType;
+        return new TblEventTypeJpaController(pm.getASData());
+//		if( mwEventType == null ) { mwEventType = new TblEventTypeJpaController(pm.getASData()); }
+//		return mwEventType;
 	}
     public TblHostSpecificManifestJpaController mwHostSpecificManifest() throws IOException {
-		if( mwHostSpecificManifest == null ) { mwHostSpecificManifest = new TblHostSpecificManifestJpaController(pm.getASData()); }
-		return mwHostSpecificManifest;
+        return new TblHostSpecificManifestJpaController(pm.getASData());
+//		if( mwHostSpecificManifest == null ) { mwHostSpecificManifest = new TblHostSpecificManifestJpaController(pm.getASData()); }
+//		return mwHostSpecificManifest;
 	}
     public TblHostsJpaController mwHosts() throws IOException, CryptographyException {
-		if( mwHosts == null ) { mwHosts = new TblHostsJpaController(pm.getASData()); }
-		return mwHosts;
+        return new TblHostsJpaController(pm.getASData());
+//		if( mwHosts == null ) { mwHosts = new TblHostsJpaController(pm.getASData()); }
+//		return mwHosts;
 	}
     public MwKeystoreJpaController mwKeystore() throws IOException {
-		if( mwKeystore == null ) { mwKeystore = new MwKeystoreJpaController(pm.getASData()); }
-		return mwKeystore;
+        return new MwKeystoreJpaController(pm.getASData());
+//		if( mwKeystore == null ) { mwKeystore = new MwKeystoreJpaController(pm.getASData()); }
+//		return mwKeystore;
 	}
     public TblLocationPcrJpaController mwLocationPcr() throws IOException {
-		if( mwLocationPcr == null ) { mwLocationPcr = new TblLocationPcrJpaController(pm.getASData()); }
-		return mwLocationPcr;
+        return new TblLocationPcrJpaController(pm.getASData());
+//		if( mwLocationPcr == null ) { mwLocationPcr = new TblLocationPcrJpaController(pm.getASData()); }
+//		return mwLocationPcr;
 	}
     public TblMleJpaController mwMle() throws IOException {
-		if( mwMle == null ) { mwMle = new TblMleJpaController(pm.getASData()); }
-		return mwMle;
+        return new TblMleJpaController(pm.getASData());
+//		if( mwMle == null ) { mwMle = new TblMleJpaController(pm.getASData()); }
+//		return mwMle;
 	}
     public MwMleSourceJpaController mwMleSource() throws IOException {
-		if( mwMleSource == null ) { mwMleSource = new MwMleSourceJpaController(pm.getASData()); }
-		return mwMleSource;
+        return new MwMleSourceJpaController(pm.getASData());
+//		if( mwMleSource == null ) { mwMleSource = new MwMleSourceJpaController(pm.getASData()); }
+//		return mwMleSource;
 	}
     public TblModuleManifestJpaController mwModuleManifest() throws IOException {
-		if( mwModuleManifest == null ) { mwModuleManifest = new TblModuleManifestJpaController(pm.getASData()); }
-		return mwModuleManifest;
+        return new TblModuleManifestJpaController(pm.getASData());
+//		if( mwModuleManifest == null ) { mwModuleManifest = new TblModuleManifestJpaController(pm.getASData()); }
+//		return mwModuleManifest;
 	}
     public TblModuleManifestLogJpaController mwModuleManifestLog() throws IOException {
-		if( mwModuleManifestLog == null ) { mwModuleManifestLog = new TblModuleManifestLogJpaController(pm.getASData()); }
-		return mwModuleManifestLog;
+        return new TblModuleManifestLogJpaController(pm.getASData());
+//		if( mwModuleManifestLog == null ) { mwModuleManifestLog = new TblModuleManifestLogJpaController(pm.getASData()); }
+//		return mwModuleManifestLog;
 	}
     public TblOemJpaController mwOem() throws IOException {
-		if( mwOem == null ) { mwOem = new TblOemJpaController(pm.getASData()); }
-		return mwOem;
+        return new TblOemJpaController(pm.getASData());
+//		if( mwOem == null ) { mwOem = new TblOemJpaController(pm.getASData()); }
+//		return mwOem;
 	}
     public TblOsJpaController mwOs() throws IOException {
-		if( mwOs == null ) { mwOs = new TblOsJpaController(pm.getASData()); }
-		return mwOs;
+        return new TblOsJpaController(pm.getASData());
+//		if( mwOs == null ) { mwOs = new TblOsJpaController(pm.getASData()); }
+//		return mwOs;
 	}
     public TblPackageNamespaceJpaController mwPackageNamespace() throws IOException {
-		if( mwPackageNamespace == null ) { mwPackageNamespace = new TblPackageNamespaceJpaController(pm.getASData()); }
-		return mwPackageNamespace;
+        return new TblPackageNamespaceJpaController(pm.getASData());
+//		if( mwPackageNamespace == null ) { mwPackageNamespace = new TblPackageNamespaceJpaController(pm.getASData()); }
+//		return mwPackageNamespace;
 	}
     public TblPcrManifestJpaController mwPcrManifest() throws IOException {
-		if( mwPcrManifest == null ) { mwPcrManifest = new TblPcrManifestJpaController(pm.getASData()); }
-		return mwPcrManifest;
+        return new TblPcrManifestJpaController(pm.getASData());
+//		if( mwPcrManifest == null ) { mwPcrManifest = new TblPcrManifestJpaController(pm.getASData()); }
+//		return mwPcrManifest;
 	}
     public MwPortalUserJpaController mwPortalUser() throws IOException {
-		if( mwPortalUser == null ) { mwPortalUser = new MwPortalUserJpaController(pm.getMSData()); }
-		return mwPortalUser;
+        return new MwPortalUserJpaController(pm.getMSData());
+//		if( mwPortalUser == null ) { mwPortalUser = new MwPortalUserJpaController(pm.getMSData()); }
+//		return mwPortalUser;
 	}
     public MwRequestLogJpaController mwRequestLog() throws IOException {
-		if( mwRequestLog == null ) { mwRequestLog = new MwRequestLogJpaController(pm.getASData()); }
-		return mwRequestLog;
+        return new MwRequestLogJpaController(pm.getASData()); 
+//		if( mwRequestLog == null ) { mwRequestLog = new MwRequestLogJpaController(pm.getASData()); }
+//		return mwRequestLog;
 	}
     public TblRequestQueueJpaController mwRequestQueue() throws IOException {
-		if( mwRequestQueue == null ) { mwRequestQueue = new TblRequestQueueJpaController(pm.getASData()); }
-		return mwRequestQueue;
+        return new TblRequestQueueJpaController(pm.getASData());
+//		if( mwRequestQueue == null ) { mwRequestQueue = new TblRequestQueueJpaController(pm.getASData()); }
+//		return mwRequestQueue;
 	}
     public TblSamlAssertionJpaController mwSamlAssertion() throws IOException {
-		if( mwSamlAssertion == null ) { mwSamlAssertion = new TblSamlAssertionJpaController(pm.getASData()); }
-		return mwSamlAssertion;
+        return new TblSamlAssertionJpaController(pm.getASData()); 
+//		if( mwSamlAssertion == null ) { mwSamlAssertion = new TblSamlAssertionJpaController(pm.getASData()); }
+//		return mwSamlAssertion;
 	}
     public TblTaLogJpaController mwTaLog() throws IOException {
-		if( mwTaLog == null ) { mwTaLog = new TblTaLogJpaController(pm.getASData()); }
-		return mwTaLog;
+        return new TblTaLogJpaController(pm.getASData());
+//		if( mwTaLog == null ) { mwTaLog = new TblTaLogJpaController(pm.getASData()); }
+//		return mwTaLog;
+	}
+    public MwProcessorMappingJpaController mwProcessorMapping() throws IOException {
+        return new MwProcessorMappingJpaController(pm.getASData());
+//		if( mwProcessorMapping == null ) { mwProcessorMapping = new MwProcessorMappingJpaController(pm.getASData()); }
+//		return mwProcessorMapping;
 	}
 
 }

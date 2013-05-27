@@ -26,12 +26,6 @@ set logfile /var/log/monit.log
 # clientpemfile <pemfile>.pem
 
 
-# Monitoring the glassfish java service
-
-check process glassfish matching "glassfish.jar"
-start program = "/usr/local/bin/mtwilson glassfish-start"
-stop program = "/usr/local/bin/mtwilson glassfish-stop"
-
 # Below are the specific triggers and responses used when 
 # checking the above process.  By default, Intel configures 
 # Monit to detect likely process hangs or nonresponsive portals, 
@@ -43,49 +37,3 @@ if cpu > 80% for 5 cycles then restart
 if totalmem > 2000.0 MB for 5 cycles then restart
 group server
 
-# Monitoring Mysql Service
-
-check process mysql matching "mysql"
-group database
-start program = "/usr/sbin/service mysql start"
-stop program = "/usr/sbin/service mysql stop"
-if failed host 127.0.0.1 port 3306 then restart
-if 5 restarts within 5 cycles then timeout
-
-# Monitoring Mt Wilson portals
-# REMOVE the below sections if not using 
-# the default Mt Wilson portals provided 
-# by Intel
-
-# Management Console
-check host ManagementConsole with address 127.0.0.1
-start program = "/usr/local/bin/mtwilson glassfish-start"
-stop program = "/usr/local/bin/mtwilson glassfish-stop"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request "/ManagementConsole/" for 3 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-
-# Trust Dashboard
-check host TrustDashboard with address 127.0.0.1
-start program = "/usr/local/bin/mtwilson glassfish-start"
-stop program = "/usr/local/bin/mtwilson glassfish-stop"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request "/TrustDashBoard/" for 3 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-
-# Whitelist Portal
-check host WhitelistPortal with address 127.0.0.1
-start program = "/usr/local/bin/mtwilson glassfish-start"
-stop program = "/usr/local/bin/mtwilson glassfish-stop"
-	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request "/WhiteListPortal/" for 3 cycles
-	then restart
-	if 3 restarts within 10 cycles then timeout
-
-
-# You can also include other configuration files via include directives:
-
-# include /etc/monit/default.monitrc
-# include /etc/monit/mysql.monitrc

@@ -12,10 +12,10 @@
         for complete details.
     </description>
   
-    <parent>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>mtwilson-integration</artifactId>
-		<version>1.2-SNAPSHOT</version>
+    <parent> 
+        <groupId>com.intel.mtwilson.integration</groupId> 
+        <artifactId>mtwilson-integration</artifactId> 
+        <version>1.2-SNAPSHOT</version> 
     </parent>
 
 
@@ -53,13 +53,25 @@
         <artifactId>mtwilson-io</artifactId>
         <version>${project.version}</version>
       </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
       
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-crypto</artifactId>
         <version>${project.version}</version>
       </dependency>
-      
+
+        <!-- for tls-policy -->
+      <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>http-authorization</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+            
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-validation</artifactId>

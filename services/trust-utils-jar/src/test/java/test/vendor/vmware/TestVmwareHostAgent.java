@@ -4,9 +4,12 @@
  */
 package test.vendor.vmware;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
@@ -16,8 +19,11 @@ import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
+import com.intel.mtwilson.util.ASDataCipher;
+import com.intel.mtwilson.util.Aes128DataCipher;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import org.apache.commons.codec.binary.Base64;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,12 +61,14 @@ public class TestVmwareHostAgent {
     private static HostAgent agent;
     
     @BeforeClass
-    public static void createHostAgent() {
+    public static void createHostAgent() throws IOException, CryptographyException {
         agent = getAgent();
     }
     
-    public static HostAgent getAgent() {
-        TblHosts.dataCipher = new DummyCipher();
+    
+    public static HostAgent getAgent() throws IOException, CryptographyException {
+        ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
+//        TblHosts.dataCipher = new DummyCipher();
         TblHosts host = new TblHosts();
         host.setName(hostname);
         host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
@@ -85,7 +93,7 @@ public class TestVmwareHostAgent {
     }
     
     @Test
-    public void testGetPcrManifestFrom175() throws MalformedURLException, IOException {
+    public void testGetPcrManifestFrom175() throws MalformedURLException, CryptographyException, IOException {
         /*
         TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new );
         ConnectionString conn = new ConnectionString("vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.175");

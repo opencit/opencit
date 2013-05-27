@@ -36,6 +36,7 @@ import org.junit.runner.JUnitCore;
  * the Mt Wilson sever to test.
  * 
  * When running on a Mt Wilson server, the regular configuration directory /etc/mtwilson
+ * (actually /etc/intel/cloudsecurity)
  * is read to obtain all information about the (localhost) Mt Wilson server being tested.
  * 
  * NOTE: the rule for tests defined in this project is that they must be repeatable - at

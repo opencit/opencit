@@ -9,16 +9,18 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.logging.LogManager;
 import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO:  should deprecate this in favor of com.intel.mtwilson.setup.ui.console.Main
  * @author jbuhacof
  */
 public class TextConsole {
+    private static Logger log = LoggerFactory.getLogger(TextConsole.class);
     public static final Console console = System.console();
     public static final SetupContext ctx = new SetupContext();
     public static void main(String[] args) {
-        
         if( args.length == 0 ) {
             System.err.println("Usage: <command> [args]");
             System.exit(1);
@@ -40,6 +42,8 @@ public class TextConsole {
                 subargs = getopt.getArguments();
                 command.setContext(ctx);
                 command.setOptions(options);
+                log.debug("Number of args: {}", args.length);
+                for(String arg : args) { log.debug("Arg: {}", arg); }
                 command.execute(subargs);
             }
         }

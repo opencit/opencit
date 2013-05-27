@@ -403,11 +403,24 @@
     	<artifactId>mysql-connector-java</artifactId>
     	<version>5.1.22</version>
     </dependency>
-      <dependency>
-		<groupId>postgresql</groupId>
-		<artifactId>postgresql</artifactId>
-                <version>9.1-901.jdbc4</version>
-	</dependency>
+    
+    <!--
+    We cannot use 9.1-jdbc4 because of this error: java.sql.SQLFeatureNotSupportedException: Method org.postgresql.jdbc4.Jdbc4Statement.setQueryTimeout(int) is not yet implemented.
+    In previous postgres release this of course was also not implemented but they silently ignored it, whereas in 9.1 they throw an exception
+    Therefore the most recent versions we can use are  8.2-511.jdbc3 or 8.2-507.jdbc4  , until org.postgresql.jdbc4.Jdbc4Statement.setQueryTimeout(int) is implemenetd. in a future version.
+    From Postgres changelog:
+===
+Version 8.3-603 (2008-01-31):
+...
+Throw an exception if people try to use setQueryTimeout with a non-zero value as it is not implemented. Committed by jurka.
+...
+===    
+    -->
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+        </dependency>
 
     <dependency>
             <groupId>junit</groupId>

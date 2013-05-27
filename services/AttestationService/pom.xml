@@ -296,6 +296,18 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <!--
+		<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency> 
+        -->
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ASData</artifactId>
@@ -533,12 +545,18 @@
             <artifactId>enunciate-rt</artifactId>
             <version>1.26</version>            
         </dependency>        
--->
         <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
             <artifactId>mtwilson-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
+-->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <scope>provided</scope>
+        <optional>true</optional>
+	</dependency>
 
         <dependency>
             <groupId>joda-time</groupId>

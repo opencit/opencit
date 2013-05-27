@@ -9,6 +9,7 @@ import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;
 import java.io.IOException;
+import java.net.URL;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class TrustAgentClientTest {
     
     @Test
     public void testHostInfoCommand() throws IOException {
-        TlsConnection tlsConnection = new TlsConnection("https://10.1.71.169:9999", new InsecureTlsPolicy());
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.169:9999"), new InsecureTlsPolicy());
         TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection);
         HostInfo hostInfo = client.getHostInfo();
         ObjectMapper mapper = new ObjectMapper();

@@ -95,6 +95,11 @@
             <version>2.6</version>
     </dependency>
     <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
@@ -103,12 +108,34 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>my</artifactId>
             <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
     </dependency>
     <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ASData</artifactId>
             <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>MSData</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-data</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-handler</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
     </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

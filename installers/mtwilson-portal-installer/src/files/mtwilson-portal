@@ -4,7 +4,7 @@
 # *** TABS will cause errors in some linux distributions
 
 # SCRIPT CONFIGURATION:
-script_name=mcctl
+script_name=mpctl
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=mtwilson-portal
 package_dir=/opt/intel/cloudsecurity/${package_name}
@@ -12,11 +12,11 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 package_keystore_users_dir=/var/opt/intel/${package_name}/users
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.${package_name}.install.log
-mysql_script_dir=${package_dir}/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=mtwilson-portal
+webservice_application_name=mtwilson-portal
 #java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
@@ -25,24 +25,24 @@ if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_w
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
-configure_api_baseurl() {
-  # setup mtwilson.api.baseurl
-  local input_api_baseurl
-  if [ -n "${MTWILSON_API_BASEURL}" ]; then
-    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
-  else
-    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-    prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
-    if [[ "$input_api_baseurl" == "http*" ]]; then
-      mtwilson_api_baseurl="$input_api_baseurl"
-    else
-      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
-    fi
-  fi
-  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
-}
+#configure_api_baseurl() {
+#  # setup mtwilson.api.baseurl
+#  local input_api_baseurl
+#  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+#    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
+#  elif [ -n "${MTWILSON_SERVER}" ]; then
+#    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
+#  else
+#    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+#    prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
+#    if [[ "$input_api_baseurl" == "http*" ]]; then
+#      mtwilson_api_baseurl="$input_api_baseurl"
+#    else
+#      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
+#    fi
+#  fi
+#  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
+#}
 
 bootstrap_first_user() {
   echo "Configuring Management Console administrator username and password..."
@@ -96,20 +96,53 @@ setup_print_summary() {
 }
 
 setup_interactive_install() {
-  mysql_configure_connection "${intel_conf_dir}/mtwilson.properties" mtwilson.db
   configure_keystore_dir
-  configure_api_baseurl
-  if using_glassfish; then
-    if not glassfish_running; then
-      glassfish_start_report
-    fi    
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
-    else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/mtwilson-portal.war
-      webservice_running_report "${glassfish_application_name}"
+  configure_api_baseurl "${package_config_filename}"
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.mcp.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.tdbp.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.wlmp.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.mc.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+      mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
     fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.mcp.db
+      postgres_configure_connection "${package_config_filename}" mountwilson.tdbp.db
+      postgres_configure_connection "${package_config_filename}" mountwilson.wlmp.db
+      postgres_configure_connection "${package_config_filename}" mountwilson.mc.db
+      postgres_configure_connection "${package_config_filename}" mountwilson.ms.db
+      postgres_configure_connection "${package_config_filename}" mountwilson.as.db            
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
+  fi
+  
+  if [ -n "$GLASSFISH_HOME" ]; then
+    glassfish_running
+    if [ -z "$GLASSFISH_RUNNING" ]; then
+      glassfish_start_report
+    fi
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
+    fi
+  fi  
+ 
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson-portal.war
+    webservice_running_report "${webservice_application_name}"
   fi
   bootstrap_first_user
 }
@@ -119,11 +152,12 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" ]]; then
-      echo_warning "Missing one or more required packages"
-      setup_print_summary
-      exit 1
-  fi
+  java_detect
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+#      echo_warning "Missing one or more required packages"
+#      setup_print_summary
+#      exit 1
+#  fi
   setup_interactive_install
 }
 
@@ -134,23 +168,27 @@ RETVAL=0
 case "$1" in
   version)
         echo "${package_name}"
-	echo "Version ${VERSION:-Unknown}"
-	echo "Build ${BUILD:-Unknown}"
+        echo "Version ${VERSION:-Unknown}"
+        echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
-        glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        if using_glassfish; then  
+          glassfish_running_report
+        elif using_tomcat; then
+          tomcat_running_report
+        fi
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -181,7 +219,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         if [ -f "${package_config_filename}" ]; then
           mkdir -p "${intel_conf_dir}"
           cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
@@ -191,7 +229,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-	rm /usr/local/bin/${script_name}
+        rm /usr/local/bin/${script_name}
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"

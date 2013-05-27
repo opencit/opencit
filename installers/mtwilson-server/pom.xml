@@ -51,7 +51,12 @@
       <version>3.1.1</version>
       <type>bin</type>
     </dependency>
-    <!-- Monit -->
+    <dependency>
+      <groupId>com.intel.mtwilson.linux</groupId>
+      <artifactId>tomcat-installer</artifactId>
+      <version>6.0.29</version>
+      <type>bin</type>
+    </dependency>   <!-- Monit -->
     <dependency>
         <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>monit</artifactId>
@@ -184,24 +189,6 @@
                   <type>bin</type>
                 </artifactItem>
 		<!-- UI portals -->
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>WhiteListPortal</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>ManagementConsole</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>TrustDashBoard</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
 				<artifactItem>
 					<groupId>com.intel.mtwilson.linux</groupId>
 					<artifactId>mtwilson-portal-installer</artifactId>
@@ -250,6 +237,13 @@
                   <artifactId>glassfish</artifactId>
                   <version>3.1.1</version>
                   <type>bin</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>tomcat-installer</artifactId>
+                  <version>6.0.29</version>
+                  <type>bin</type>
+                  <outputDirectory>${makeself.directory}</outputDirectory>
                 </artifactItem>
                 <!-- Monit -->
                 <artifactItem>
@@ -301,18 +295,6 @@
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>WhiteListPortal</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>ManagementConsole</artifactId>
-                  <version>${project.version}</version>
-                  <type>bin</type>
-                </artifactItem>
-                <artifactItem>
-                  <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>TrustDashBoard</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
@@ -437,6 +419,27 @@
             <artifactId>build-helper-maven-plugin</artifactId>
         </plugin>
       <!-- end deploy installers to repository -->
+      
+<!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.1.4</version>
+            <executions>
+                <execution>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>revision</goal>
+                    </goals>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <prefix>git</prefix>
+                        <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+      
     </plugins>
 
 <pluginManagement>

@@ -30,13 +30,14 @@ import org.junit.Test;
  */
 public class HostBOTest {
     //private static final HostTrustBO htbo = new HostTrustBO();
-    private static final String knownHost = "10.1.71.149";
+//    private static final String knownHost = "10.1.71.149";
+    private static final String knownHost = "10.1.71.173";
     private static HostBO hostBO;
     
     @BeforeClass
     public static void createBusinessObject() throws CryptographyException  {
         hostBO = new HostBO();
-        hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
+//        hostBO.setDataEncryptionKey(Base64.decodeBase64("nfiMuLDAdqmu1yqTEcgpng=="));
     }
 
     @AfterClass

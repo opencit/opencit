@@ -211,6 +211,9 @@ public class VMwareClient implements TlsClient {
                 else {
                     HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
                 }*/
+                log.debug("Connecting to vcenter with TlsPolicy: {}", tlsPolicy.getClass().getName());
+                log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
+                log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
                 HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
                 
                 setupSslCertificateTrustManager();
@@ -248,9 +251,9 @@ public class VMwareClient implements TlsClient {
 
 	private void printSessionDetails() {
 		if(session != null){
-			log.info("Logged in Session key " + session.getKey());
+			log.debug("Logged in Session key " + session.getKey());
 		}else{
-			log.info("session is null");
+			log.debug("session is null");
 		}
 		
 	}
@@ -614,11 +617,11 @@ public class VMwareClient implements TlsClient {
 		if (hostObjects != null && hostObjects.length != 0) {
 			for (ManagedObjectReference hostObj : hostObjects) {
 				String hostNameFromVC = getHostInfo(hostObj);
-				log.info(
+				log.debug(
 						"getHostObject - comparing hostNameFromVC {} requested hostName {}",
 						new Object[] { hostNameFromVC, hostName });
 				if (hostNameFromVC.equals(hostName)) {
-					log.info(String.format(
+					log.debug(String.format(
 							"Found Managed Object Reference for host %s ",
 							hostName));
 					return hostObj;
@@ -1998,7 +2001,7 @@ public class VMwareClient implements TlsClient {
          String error = "Error Occured";
          if(fault != null) {
             error = fault.getLocalizedMessage();
-            System.out.println("Message " + fault.getLocalizedMessage());
+            log.error("Message " + fault.getLocalizedMessage());
          }
          return error;
       }

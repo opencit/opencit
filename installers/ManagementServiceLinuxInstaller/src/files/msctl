@@ -12,11 +12,11 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
 package_keystore_users_dir=/var/opt/intel/${package_name}/users
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.${package_name}.install.log
-mysql_script_dir=${package_dir}/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=ManagementService
+webservice_application_name=ManagementService
 #java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
@@ -37,24 +37,25 @@ configure_keystore_dir() {
   mkdir -p ${package_keystore_users_dir}
 }
 
-configure_api_baseurl() {
-  # setup mtwilson.api.baseurl
-  if [ -n "${MTWILSON_API_BASEURL}" ]; then
-    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
-    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:8181"
-  else
-    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-    local input_api_baseurl
-    prompt_with_default input_api_baseurl "Mt Wilson Server:" "${configured_server_url}"
-    if [[ "$input_api_baseurl" == "http*" ]]; then
-      mtwilson_api_baseurl="$input_api_baseurl"
-    else
-      mtwilson_api_baseurl="https://${input_api_baseurl}:8181"
-    fi
-  fi
-  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
-}
+#configure_api_baseurl() {
+#  # setup mtwilson.api.baseurl
+#  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+#    mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
+#  elif [ -n "${MTWILSON_SERVER}" ]; then
+#    if [[
+#    mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
+#  else
+#    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+#    local input_api_baseurl
+#    prompt_with_default input_api_baseurl "Mt Wilson Server:" "${configured_server_url}"
+#    if [[ "$input_api_baseurl" == http* ]]; then
+#      mtwilson_api_baseurl="$input_api_baseurl"
+#    else
+#      mtwilson_api_baseurl="https://${input_api_baseurl}:$DEFAULT_API_PORT"
+#    fi
+#  fi
+#  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${mtwilson_api_baseurl}"
+#}
 
 
 # Must be invoked AFTER mysql_configure_connection
@@ -80,7 +81,7 @@ bootstrap_ms_internal_user() {
   fi
   # passing the password securely to the tool via the environment variable (must be exported)
   # we need to call setup BootstrapUser here so that the key is created in the DB not on disk
-  mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${mtwilson_api_baseurl}" "${ms_key_alias}" env:ms_key_password
+  mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${mtwilson_api_baseurl}" "${ms_key_alias}" env:ms_key_password >> $INSTALL_LOG_FILE
   #mtwilson api CreateUser ${package_keystore_users_dir} ${ms_key_alias} env:ms_key_password
   #mtwilson api RegisterUser ${package_keystore_users_dir}/${ms_key_alias}.jks "${mtwilson_api_baseurl}" Attestation,Whitelist env:ms_key_password
   #bootstrap_ms_approve_user ${package_keystore_users_dir} "${ms_key_alias}" "${ms_key_password}"
@@ -114,34 +115,48 @@ bootstrap_ms_approve_user() {
   local datestr=`date +%Y-%m-%d.%H%M`
   local cert_id=`shasum -a 256 -b ${key_dir}/${encoded_key_alias}.crt | awk '{ print $1 }'`
   echo "UPDATE mw_api_client_x509 SET enabled=b'1', status='APPROVED', comment='Approved by `whoami` @ Management Service; do not remove' WHERE fingerprint=UNHEX('$cert_id')" > ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
-  mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
-  mysql_install_scripts ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
+  #mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+  #mysql_install_scripts ${mysql_script_dir}/ms_apiclient_autoapprove.${datestr}.sql
 }
 
 setup_interactive_install() {
-  if [ -n "$mysql" ]; then
-    mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
-    mysql_create_database
-    #mysql_scripts=`list_mysql_install_scripts`
-    #mysql_install_scripts ${mysql_scripts}
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.ms.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.ms.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
   fi
-  # STDALEX_TODO remove this completly
-  #depreciated; cloudportal database has been dropped as of 1.0-RC2
-  #configure_cloudportal_database
-  configure_api_baseurl
+
+  configure_api_baseurl "${package_config_filename}"
   configure_keystore_dir
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
-    fi    
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
-    else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/ManagementService.war
-      webservice_running_report "${glassfish_application_name}"
     fi
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
+    fi
+  fi
+   
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/ManagementService.war
+    webservice_running_report "${webservice_application_name}"
   fi
   bootstrap_ms_internal_user
 }
@@ -151,11 +166,11 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
-      echo_warning "Missing one or more required packages"
-      print_env_summary_report
-      exit 1
-  fi
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
+#      echo_warning "Missing one or more required packages"
+#      print_env_summary_report
+#      exit 1
+#  fi
   setup_interactive_install
 }
 
@@ -166,23 +181,27 @@ RETVAL=0
 case "$1" in
   version)
         echo "${package_name}"
-	echo "Version ${VERSION:-Unknown}"
-	echo "Build ${BUILD:-Unknown}"
+  echo "Version ${VERSION:-Unknown}"
+  echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
-        glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        if using_glassfish; then  
+          glassfish_running_report
+        elif using_tomcat; then
+          tomcat_running_report
+        fi
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -214,7 +233,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         mkdir -p "${intel_conf_dir}"
         cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
         echo "Saved configuration file in ${intel_conf_dir}/${package_name}.properties.${datestr}"
@@ -222,7 +241,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-	rm /usr/local/bin/${script_name}
+  rm /usr/local/bin/${script_name}
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"

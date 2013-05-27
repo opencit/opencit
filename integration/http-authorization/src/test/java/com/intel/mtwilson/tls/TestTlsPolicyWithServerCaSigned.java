@@ -9,7 +9,7 @@ import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.model.InternetAddress;
+//import com.intel.mtwilson.model.InternetAddress;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -63,7 +63,8 @@ HTTP/1.1 404 Not Found
  * @author jbuhacoff
  */
 public class TestTlsPolicyWithServerCaSigned {
-    private static InternetAddress serverAddress = new InternetAddress("localhost");
+//    private static InternetAddress serverAddress = new InternetAddress("localhost");
+//    private static String serverAddress = "localhost";
     private static String caKeystorePath;
     private static int serverPort = 17443;
     private static Server jetty;

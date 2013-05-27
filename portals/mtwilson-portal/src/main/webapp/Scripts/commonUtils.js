@@ -12,6 +12,7 @@ var regPortNo = new RegExp(/^[0-9]+$/);
 // 0 = TA,  1 == vmware, 2 == citrix
 var isVMWare = 0;
 
+
 // Validation functions
 // TODO  this function is being used everywhere but we really need ip address OR hostname validation.
 //       adding hostname validation here sinc

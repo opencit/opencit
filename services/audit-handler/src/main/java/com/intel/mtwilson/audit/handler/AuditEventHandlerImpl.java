@@ -58,11 +58,11 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
 
     private AuditColumnData getAuditColumnData(Column col, Field field, Object table, HashMap<String, Object> changedColumns) throws IllegalAccessException, IllegalArgumentException, SecurityException {
         AuditColumnData auditColumnData = new AuditColumnData();
-        logger.debug("Column: " + col.name());
+        logger.trace("Column: " + col.name());
         auditColumnData.setName(col.name());
-        logger.debug("Field: " + field.getName());
+        logger.trace("Field: " + field.getName());
         field.setAccessible(true);
-        logger.debug("Value: " + field.get(table));
+        logger.trace("Value: " + field.get(table));
         auditColumnData.setValue(field.get(table));
         field.setAccessible(false);
         auditColumnData.setIsUpdated(changedColumns.containsKey(field.getName()));
@@ -93,8 +93,8 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
         if(isAuditEnabled){
             try {
 
-                logger.debug("Action: " + action);
-                logger.debug("Class: " + event.getObject());
+                logger.trace("Action: " + action);
+                logger.trace("Class: " + event.getObject());
                 
                 AuditLog auditLog = getAuditLog(event,action);
                 
@@ -115,7 +115,7 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
 
         for (Field field : table.getClass().getDeclaredFields()) {
             Column col;
-            logger.debug("Is it required to log this column {}" , field.isAnnotationPresent(AuditIgnore.class));
+            logger.trace("Is it required to log this column {}" , field.isAnnotationPresent(AuditIgnore.class));
             if ((col = field.getAnnotation(Column.class)) != null && !field.isAnnotationPresent(AuditIgnore.class)){
                 
                 if(isUnchangedColumnsRequired || event.getEventCode() != 7){ // Log all columns
@@ -175,9 +175,9 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
         Object table = event.getObject();
         for (Field field : table.getClass().getDeclaredFields()) {
             if ((field.getAnnotation(Id.class)) != null) {
-                logger.debug("ID Column Field: " + field.getName());
+                logger.trace("ID Column Field: " + field.getName());
                 field.setAccessible(true);
-                logger.debug("ID Data Type :" + field.getType() +  "value: " + field.get(table));
+                logger.trace("ID Data Type :" + field.getType() +  "value: " + field.get(table));
                 pk = (Integer) field.get(table);
                 field.setAccessible(false);
             }
