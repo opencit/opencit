@@ -61,14 +61,20 @@ public class VmwareHostAgent implements HostAgent {
     public VmwareHostAgent(VMwareClient vmwareClient, String hostname) throws Exception {
         vmware = vmwareClient;
         this.hostname = hostname;
-        hostMOR = vmwareClient.getManagedObjectReference(hostname);
+        hostMOR = vmwareClient.getHostReference(hostname); // issue #784 using more efficient method of getting a reference to the host  //vmwareClient.getManagedObjectReference(hostname);
         vCenterVersion = vmwareClient.getVCenterVersion(); //serviceContent.getAbout().getVersion(); // required so we can choose implementations
         log.debug("VCenter version is {}", vCenterVersion);
         esxVersion = vmwareClient.getMORProperty(hostMOR, "config.product.version").toString(); // required so we can choose implementations and report on host info
     }
     
+    public VMwareClient getClient() { return vmware; }
     
-    
+    /**
+     * Currently this is getting called every time we request a PcrManifest -- that's not necessary,
+     * we only need to check the host's TPM once when we add it. After that we can assume that it is
+     * there, and only check it again if we get an error while trying to read the PcrManifest.
+     * @return 
+     */
     @Override
     public boolean isTpmPresent() {
             try {
@@ -236,7 +242,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     @Override
     public PcrManifest getPcrManifest() throws IOException {
         try {
-            if( isTpmPresent() ) {
+//            if( isTpmPresent() ) { // issue #784 performance; no need to check if tpm is present, just try to get the report and if there's an error we can run diagnostics after
 				if (vCenterVersion.contains("5.1")) {
 					HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
@@ -262,11 +268,20 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
                     pcrManifest = VMWare50Esxi50.createPcrManifest(htdis); // bug #607 new
 //					pcrManifest =  postProcessing.processDigest(esxVersion,htdis);
 				}
-            }        
+//            }        
         }
         catch(Exception e) {
             log.error("error during getManifest: "+e.toString(), e);
-            throw new IOException("Cannot retrieve PCR Manifest from "+hostname, e);
+            boolean isTpmPresent = false;
+            try {
+                if( isTpmPresent() ) {
+                    isTpmPresent = true;
+                }
+            }
+            catch(Exception e2) {
+                throw new IOException("Cannot retrieve PCR Manifest from "+hostname+": cannot determine if TPM is present");
+            }
+            throw new IOException("Cannot retrieve PCR Manifest from "+hostname+": "+(isTpmPresent?"TPM is present":"TPM is not present")+": "+e.toString(), e);
         }
         return pcrManifest;
     }

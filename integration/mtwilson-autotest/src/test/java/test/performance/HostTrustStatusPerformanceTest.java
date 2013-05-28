@@ -9,8 +9,11 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;
+import com.intel.mtwilson.agent.vmware.*;
 import com.intel.dcsg.cpg.performance.*;
 import com.intel.dcsg.cpg.performance.report.*;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.net.MalformedURLException;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -75,6 +78,30 @@ public class HostTrustStatusPerformanceTest {
             My.client().getHostTrust(new Hostname(getId())); // id is passed to super constructor, which is our hostname
         }
     }
+
+    public static class GetTpmStatusTask extends Task {
+        private HostAgent agent;
+        public GetTpmStatusTask(String hostname, HostAgent agent) {
+            super(hostname);
+            this.agent = agent;
+        }
+        @Override
+        public void execute() throws Exception {
+            agent.isTpmPresent();
+        }
+    }
+
+    public static class GetPcrManifestTask extends Task {
+        private HostAgent agent;
+        public GetPcrManifestTask(String hostname, HostAgent agent) {
+            super(hostname);
+            this.agent = agent;
+        }
+        @Override
+        public void execute() throws Exception {
+            agent.getPcrManifest();
+        }
+    }
     
     private ObjectMapper mapper = new ObjectMapper();
     
@@ -101,4 +128,34 @@ public class HostTrustStatusPerformanceTest {
         log.debug("avg: {}", info.getAverage());
         log.debug("performance info: {}", mapper.writeValueAsString(info));
     }
+    
+    
+    @Test
+    public void testVmwareAgentGetTpmStatusPerformance() throws IOException {
+        VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
+        GetTpmStatusTask task = new GetTpmStatusTask("isTpmPresent-10.1.71.173", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+
+    @Test
+    public void testVmwareAgentGetPcrManifestsPerformance() throws IOException {
+        VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
+        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.173", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+
 }
