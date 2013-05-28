@@ -844,6 +844,8 @@ public class HostTrustBO extends BaseBO {
             
             try {
                 log.error("Caught exception, generating saml assertion");
+                log.error("Printing stacktrace first");
+                e.printStackTrace();
                 tblSamlAssertion.setSaml("");
                 int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
                 tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
