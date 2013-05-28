@@ -133,6 +133,7 @@ auto_install "Installer requirements" "APICLIENT"
 mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
 unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
+mtwilson setup-env > "/usr/local/share/mtwilson/apiclient/apiclient.env"
 
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console
