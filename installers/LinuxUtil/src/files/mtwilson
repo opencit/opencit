@@ -21,7 +21,7 @@ if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-#if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
+if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
@@ -262,12 +262,15 @@ case "$1" in
         tomcat_require
         tomcat_restart
         ;;
- tomcat-status)
+  tomcat-status)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
         tomcat_require
         tomcat_running_report
         tomcat_sslcert_report
         ;;
+  tomcat_sslcert)
+        tomcat_create_ssl_cert_prompt
+        ;;  
   mysql-detect)
         mysql_detect $2
         mysql_env_report
@@ -364,11 +367,11 @@ case "$1" in
         ;;
   help)
         echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         ;;
   *)
         echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         exit 1
 esac
 

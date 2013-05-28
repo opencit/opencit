@@ -2397,6 +2397,18 @@ tomcat_shutdown() {
 tomcat_start_report() {
   action_condition TOMCAT_RUNNING "Starting Tomcat" "tomcat_start > /dev/null; tomcat_running;"
 }
+
+tomcat_create_ssl_cert_prompt() {
+    prompt_yes_no TOMCAT_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Tomcat?"
+    echo
+    if [ "${TOMCAT_CREATE_SSL_CERT}" == "yes" ]; then
+      if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; return 1; fi
+      tomcat_require
+      prompt_with_default TOMCAT_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
+      tomcat_create_ssl_cert "${TOMCAT_SSL_CERT_CN}"
+    fi
+}
+
 # TODO this functionality is moving to the java tool ; completely remove it from here
 # Parameters:
 # - serverName (hostname in the URL, such as 127.0.0.1, 192.168.1.100, my.attestation.com, etc.)
