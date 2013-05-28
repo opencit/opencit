@@ -38,6 +38,9 @@ $(function() {
     $('#citrixHostType').show();
     
 	fnChangehostType($('#MainContent_ddlHOSTType'),true);
+    
+                $('#RegisterWhiteListHost').attr('disabled', 'disabled');
+                $('#RegisterWhiteListHost').attr('checked', false);    
 });
 
 
@@ -349,6 +352,15 @@ function fnChangeApplicableFor(status,selectID,secondCheckBoxID) {
 			fnDisableOrEnableUploadButton(status);
 		}
 	}
+    
+            if (($('#Oem_Bios_Checkbox').attr('checked') == 'checked') && ($('#Hypervisor_Checkbox').attr('checked') == 'checked')) {
+                // Enable the register host checkbox with default value set to unchecked
+                $('#RegisterWhiteListHost').attr('disabled', false);
+            } else {
+                $('#RegisterWhiteListHost').attr('disabled', true);
+                $('#RegisterWhiteListHost').attr('checked', false);
+            }
+                
 }
 
 //function to check the conditions for enabling/disabling "upload white list" button

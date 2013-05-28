@@ -148,6 +148,18 @@
 		<artifactId>mtwilson-mysql</artifactId>
 		<version>${project.version}</version>
 	</dependency>
+    <!-- 
+    ***IMPORTANT NOTE***
+    The MySQL Connector/J is included here with scope "test" so that we can run JUnit tests against
+    a MySQL database. You MUST NOT change the scope to anything that would cause the MySQL Connector/J
+    to be included with the Mt Wilson distribution. Intel does not have a license to redistribute MySQL
+    with Mt Wilson.
+    -->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <scope>test</scope>
+	</dependency>
 	<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-postgres</artifactId>

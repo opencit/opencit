@@ -19,6 +19,20 @@ public class TestSetupCommand {
         InitDatabase cmd = new InitDatabase();
         cmd.execute(null);
     }
+    
+    @Test
+    public void testCheckConfig() throws Exception {
+//        TextConsole.main(new String[] { "CheckConfig" });
+        TextConsole.main(new String[] { "CheckConfig", "--jpa" });
+    }
+    
+    
+    @Test
+    public void testEraseUserAccounts() throws Exception {
+//        TextConsole.main(new String[] { "CheckConfig" });
+        TextConsole.main(new String[] { "EraseUserAccounts", "--all" });
+    }
+    
 
 
     @Test

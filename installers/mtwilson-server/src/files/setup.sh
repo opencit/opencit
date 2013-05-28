@@ -89,7 +89,7 @@ fi
 
 # if customer selected mysql but there is no connector present, we abort the install 
 if using_mysql ; then
-  mysqlconnector_file=`ls ~ -1 2>/dev/null | grep -i mysql`
+  mysqlconnector_file=`ls ~ -1 2>/dev/null | grep -i "^mysql-connector-java"`
   if [ -n "$mysqlconnector_file" ]; then
     mkdir -p /opt/intel/cloudsecurity/setup-console
     cp ~/$mysqlconnector_file /opt/intel/cloudsecurity/setup-console
@@ -295,7 +295,8 @@ echo "Please enter the IP Address or Hostname that will identify the Mt Wilson s
 This address will be used in the server SSL certificate and in all Mt Wilson URLs.
 For example, if you enter localhost then the Mt Wilson URL is https://localhost:8181
 Detected the following options on this server:"
-IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
+#IFS=$'\n'; echo "$(hostaddress_list)"; IFS=' '; hostname;
+for h in $(hostaddress_list); do echo "+ $h"; done; echo "+ " `hostname`
 prompt_with_default MTWILSON_SERVER "Mt Wilson Server:" $MTWILSON_SERVER_IP_ADDRESS
 export MTWILSON_SERVER
 

@@ -220,12 +220,17 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--
+        API-CLIENT MUST *NOT* DEPEND ON "MY", EVEN IN TEST SCOPE, BECAUSE IT WOULD CAUSE A CIRCULAR 
+        DEPENDENCY:  "MY" ALREADY DEPENDS ON "API-CLIENT" FOR TEST SCOPE. 
+        PLACE THE API TESTS IN THE MT WILSON AUTO-TEST MODULE, FROM WHICH YOU CAN USE BOTH "MY" AND "API-CLIENT"
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>my</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

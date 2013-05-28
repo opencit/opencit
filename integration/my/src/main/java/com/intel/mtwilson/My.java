@@ -9,6 +9,7 @@ import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.io.FileResource;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import java.io.File;
@@ -44,7 +45,9 @@ public class My {
 
     public static void initDataEncryptionKey(String dekBase64) {
         try {
+            log.debug("XXX DEK = {}", dekBase64);
             ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
+            log.debug("XXX My ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
         }
         catch(CryptographyException e) {
             throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);
@@ -71,7 +74,9 @@ public class My {
                 new FileResource(configuration().getKeystoreFile()), 
                 configuration().getKeystoreUsername(),
                 configuration().getKeystorePassword(),
-                configuration().getMtWilsonURL());
+                configuration().getMtWilsonURL(),
+                new InsecureTlsPolicy() // XXX TODO need to load the policy name, then instantiate the right one using the keystore file 
+                );
         }
         return client;
     }

@@ -9,6 +9,7 @@ import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.tls.ApacheTlsPolicy;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
@@ -108,7 +109,38 @@ public class ApacheHttpClient implements java.io.Closeable {
         // the http client is re-used for all the requests
         HttpParams httpParams = new BasicHttpParams();
         httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        httpClient = new DefaultHttpClient(connectionManager, httpParams);        
+    }
+    public ApacheHttpClient(URL baseURL, ApacheHttpAuthorization credentials, SimpleKeystore sslKeystore, TlsPolicy tlsPolicy) throws NoSuchAlgorithmException, KeyManagementException {
+        authority = credentials;
+//        keystore = sslKeystore;
+        
+        protocol = baseURL.getProtocol();
+        port = baseURL.getPort();
+        if( port == -1 ) {
+            port = baseURL.getDefaultPort();
+        }
+        log.debug("ApacheHttpClient: Protocol: {}", protocol);
+        log.debug("ApacheHttpClient: Port: {}", port);
+
+//        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
+//        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
+        ApacheTlsPolicy apacheTlsPolicy = createApacheTlsPolicy(tlsPolicy, sslKeystore);
+        log.debug("ApacheHttpClient: TLS Policy Name: {}", tlsPolicy.getClass().getName());
+        SchemeRegistry sr = initSchemeRegistryWithPolicy(protocol, port, apacheTlsPolicy);
+        connectionManager = new PoolingClientConnectionManager(sr);
+
+        // the http client is re-used for all the requests
+        HttpParams httpParams = new BasicHttpParams();
+        httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
         httpClient = new DefaultHttpClient(connectionManager, httpParams);
+    }
+    
+    private ApacheTlsPolicy createApacheTlsPolicy(TlsPolicy tlsPolicy, SimpleKeystore sslKeystore) {
+        if( tlsPolicy instanceof ApacheTlsPolicy ) {
+            return (ApacheTlsPolicy)tlsPolicy;
+        }
+        throw new IllegalArgumentException("Unsupported policy: "+tlsPolicy.getClass().getName());
     }
     
     /**

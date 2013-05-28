@@ -5,9 +5,8 @@
 package com.intel.mtwilson.api;
 
 import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.io.Resource;
-import java.io.File;
+import com.intel.mtwilson.tls.TlsPolicy;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.ServiceConfigurationError;
@@ -28,12 +27,13 @@ com.intel.my.app.MyClientFactory
 public class ClientFactory {
     private static final Logger log = LoggerFactory.getLogger(ClientFactory.class);
     // XXX TODO  add TlsPolicy as a second parameter... after we transition to using cpg-tls-policy with the new factory classes and repositories
-    public static SimpleKeystore createUserInResource(Resource keystore, String username, String password, URL webserviceUrl, String[] roles) {
+    public static SimpleKeystore createUserInResource(Resource keystore, String username, String password, URL webserviceUrl, TlsPolicy tlsPolicy, String[] roles) {
         Iterator<ClientFactorySpi> factories = ServiceLoader.load(ClientFactorySpi.class).iterator();
         while(factories.hasNext()) {
             try {
                 ClientFactorySpi factory = factories.next();
-                SimpleKeystore client = factory.createUserInResource(keystore, username, password, webserviceUrl, roles);
+                log.debug("ClientFactory trying implementation: "+factory.getClass().getName());
+                SimpleKeystore client = factory.createUserInResource(keystore, username, password, webserviceUrl, tlsPolicy, roles);
                 if( client != null ) {
                     return client;
                 }
@@ -42,14 +42,15 @@ public class ClientFactory {
                 log.error(e.toString());
             }
         }
+        log.error("No implementation available for: "+ClientFactorySpi.class.getName());
         return null;
     }
-    public static MtWilson clientForUserInResource(Resource keystore, String username, String password, URL webserviceUrl) {
+    public static MtWilson clientForUserInResource(Resource keystore, String username, String password, URL webserviceUrl, TlsPolicy tlsPolicy) {
         Iterator<ClientFactorySpi> factories = ServiceLoader.load(ClientFactorySpi.class).iterator();
         while(factories.hasNext()) {
             try {
                 ClientFactorySpi factory = factories.next();
-                MtWilson client = factory.clientForUserInResource(keystore, username, password, webserviceUrl);
+                MtWilson client = factory.clientForUserInResource(keystore, username, password, webserviceUrl, tlsPolicy);
                 if( client != null ) {
                     return client;
                 }
@@ -58,6 +59,7 @@ public class ClientFactory {
                 log.error(e.toString());
             }
         }
+        log.error("No implementation available for: "+ClientFactorySpi.class.getName());
         return null;
     }
     

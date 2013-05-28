@@ -48,7 +48,7 @@ configure_privacyca_url() {
   #local privacyca_download_username PRIVACYCA_DOWNLOAD_PASSWORD
   echo "You need to set a username and password for Trust Agents to download the Privacy CA client files."
   prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "PrivacyCA Administrator Username:" admin
-  prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "PrivacyCA Administrator Password:" mountwilson
+  prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "PrivacyCA Administrator Password:"
   export PRIVACYCA_DOWNLOAD_PASSWORD
   PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
   update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"

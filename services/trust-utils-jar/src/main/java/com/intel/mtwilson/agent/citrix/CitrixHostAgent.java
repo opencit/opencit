@@ -142,8 +142,7 @@ public class CitrixHostAgent implements HostAgent{
         record.VMM_OSName = info.getOsName();
         record.VMM_OSVersion = info.getOsVersion();
         record.AddOn_Connection_String = client.connectionString;
-        //TODO : Once Citrix updates their agent, we need to add this information.
-        record.Processor_Info = "";
+        record.Processor_Info = info.getProcessorInfo();
         
         try {
             record.AIK_Certificate = client.getAIKCertificate();
