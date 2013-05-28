@@ -367,7 +367,7 @@ public class SecurityTest {
             signatureBlock.headerNames = new String[] { "X-Nonce", "Date" };
 
             String content = signatureBlock.toString();        
-            log.debug("CUSTOMIZED signed content follows... ("+content.length()+") \n"+content);
+            //log.debug("CUSTOMIZED signed content follows... ("+content.length()+") \n"+content);
 
             byte[] signature = credential.signature(content.getBytes("UTF-8"));
             

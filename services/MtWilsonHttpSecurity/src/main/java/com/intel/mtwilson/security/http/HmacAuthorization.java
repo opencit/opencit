@@ -186,10 +186,10 @@ public class HmacAuthorization {
         signatureBlock.timestamp = timestamp;
         String content = signatureBlock.toString();
         
-        log.debug("signed content follows... ("+content.length()+") \n"+content);
+        //log.debug("signed content follows... ("+content.length()+") \n"+content);
         String signature = sign(content); 
         String authorization = String.format("MtWilson %s", headerParams( httpMethod,  signatureBlock.absoluteUrl,  username,  nonce,  signatureMethod,  timestamp,  realm,  signature));
-        log.debug("authorization: "+authorization);
+        //log.debug("authorization: "+authorization);
         return authorization;
     }
     
