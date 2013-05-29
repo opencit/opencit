@@ -13,7 +13,7 @@
 					<tr>
 						<th class="editRow0"></th>
 						<th class="editRow1">Host Name</th>
-						<th class="editRow2">Host IP Address</th>
+						<!-- <th class="editRow2">Host IP Address</th> -->
 						<th class="editRow3">Host Port</th>
 						<th class="editRow10">Host Description</th>
 						<th class="editRow4">BIOS Name</th>
