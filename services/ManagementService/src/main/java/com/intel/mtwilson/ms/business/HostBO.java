@@ -1105,6 +1105,7 @@ public class HostBO extends BaseBO {
 
                 // Configure the VMM MLE if needed
                 if (hostConfigObj.addVmmWhiteList()) {
+                    // XXX UPDATE-VMM-MLE issue here
                     configureVMMMLE(apiClient, hostConfigObj);
                     if (reqdManifestList.isEmpty()) {
                         reqdManifestList = hostConfigObj.getVmmPCRs();
