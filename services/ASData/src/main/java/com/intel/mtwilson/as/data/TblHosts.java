@@ -200,6 +200,8 @@ public class TblHosts implements Serializable {
             try {
                 log.info("XXX TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
                 addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
+                log.info("XXX TblHosts ASDataCipher plainText = {}", addOnConnectionInfo_plainText);
+                log.info("XXX TblHosts ASDataCipher cipherText = {}", addOnConnectionInfo_cipherText);
             }
             catch(Exception e) {
                 log.error("Cannot decrypt host connection credentials", e);
