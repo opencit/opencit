@@ -873,15 +873,16 @@ public class ConnectionString {
     public static ConnectionString from(TxtHostRecord host) throws MalformedURLException {
         String connectionString = host.AddOn_Connection_String;
         if( connectionString == null || connectionString.isEmpty() ) {
-            if( host.IPAddress != null && !host.IPAddress.isEmpty() && host.Port != null ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.IPAddress +" and port: "+host.Port);
+            if( host.HostName != null && !host.HostName.isEmpty() && host.Port != null ) {
+                connectionString = String.format("intel:https://%s:%d", host.HostName, host.Port);
+                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
+                return new ConnectionString(connectionString);
             }
-            else if(host.IPAddress != null ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
-            }
-            return new ConnectionString(connectionString);
+            //else if(host.IPAddress != null ) {
+            //    connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
+            //    System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+            //}
+            throw new IllegalArgumentException("Host does not have a connection string or hostname set");
         }
         else if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
             return new ConnectionString(connectionString);
