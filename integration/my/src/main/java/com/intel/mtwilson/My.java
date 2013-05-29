@@ -45,9 +45,9 @@ public class My {
 
     public static void initDataEncryptionKey(String dekBase64) {
         try {
-            log.debug("XXX DEK = {}", dekBase64);
+            log.info("XXX DEK = {}", dekBase64);
             ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(dekBase64)));
-            log.debug("XXX My ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
+            log.info("XXX My ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
         }
         catch(CryptographyException e) {
             throw new IllegalArgumentException("Cannot initialize data encryption cipher", e);

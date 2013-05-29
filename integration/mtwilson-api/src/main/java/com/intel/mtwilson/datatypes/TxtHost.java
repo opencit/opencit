@@ -16,7 +16,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class TxtHost {
     private Hostname hostname;
 //    private ServicePort servicePort;
-    private IPAddress ipAddress;
+    private String ipAddress;
     private Integer port;
     private String connectionString;
     private Bios bios;
@@ -54,7 +54,7 @@ public class TxtHost {
         hostname = new Hostname(host.HostName);
         bios = new Bios(host.BIOS_Name, host.BIOS_Version, host.BIOS_Oem);
         vmm = new Vmm(host.VMM_Name, host.VMM_Version, host.VMM_OSName, host.VMM_OSVersion);
-        ipAddress = (host.IPAddress == null || host.IPAddress.isEmpty()) ? null : new IPAddress(host.IPAddress);
+        ipAddress = (host.IPAddress == null || host.IPAddress.isEmpty()) ? null : host.IPAddress;
         port = host.Port;
         connectionString = host.AddOn_Connection_String;
         description = host.Description;
@@ -101,7 +101,7 @@ public class TxtHost {
         return vmm;
     }
 
-    public IPAddress getIPAddress() {
+    public String getIPAddress() {
         return ipAddress;
     }
 

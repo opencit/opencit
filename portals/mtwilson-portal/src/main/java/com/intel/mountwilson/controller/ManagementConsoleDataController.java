@@ -1100,12 +1100,16 @@ public class ManagementConsoleDataController extends MultiActionController{
 			log.error(e.toString());
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             if(e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
                 responseView.addObject("noHosts",true);
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             }else if(e.getMessage().toLowerCase().contains("peer not authenticated")){
                 // PEER NOT AUTH FIX
                 responseView.addObject("ResetPeer",true);
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+            }else if(e.getMessage().toLowerCase().contains("Cannot parse response")) {
+                responseView.addObject("parseError",true);
+                responseView.addObject("message", "There was a error parsing the response from the server.  Please reload the page to fix this issue");
             }
 			return responseView;
 		}
