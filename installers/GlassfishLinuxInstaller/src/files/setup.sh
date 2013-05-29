@@ -43,7 +43,7 @@ glassfish_start
 
 # create the monit rc files
 mkdir -p /etc/monit/conf.d
-if [ ! -a /etc/monit/conf.d/glassfish.monitrc ]; then
+if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
  echo "# Monitoring the glassfish java service
 	check process glassfish matching \"glassfish.jar\"
 	start program = \"/usr/local/bin/mtwilson glassfish-start\"
@@ -55,7 +55,7 @@ if [ ! -a /etc/monit/conf.d/glassfish.monitrc ]; then
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
 		and request \"/mtwilson-portal/home.html\" for 1 cycles
 	then restart
-	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/glassfish.monitrc
+	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/glassfish.mtwilson
 fi
 
 echo
