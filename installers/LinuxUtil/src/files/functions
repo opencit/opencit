@@ -2289,6 +2289,8 @@ echo "min_version for tomcat_detect is $min_version"
       fi
     fi
   done
+
+  return 1
 }
 
 tomcat_install() {

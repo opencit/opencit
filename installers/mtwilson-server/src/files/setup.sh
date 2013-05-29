@@ -420,9 +420,17 @@ fi
 
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-  # glassfish install here
+    if [ glassfish_detect > 0 ]; then
+      portInUse=`netstat -lnput | grep -E "8080|8181"`
+      if [ -n "$portInUse" ]; then 
+        #glassfish ports in use. exit install
+        echo_failure "Glassfish ports in use. Aborting install."
+        exit 1
+      fi
+    fi
   
   echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+  # glassfish install here
   ./$glassfish_installer  >> $INSTALL_LOG_FILE
   echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end glassfish installer
@@ -442,6 +450,16 @@ if using_glassfish; then
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
+    
+    if [ tomcat_detect > 0 ]; then
+      portInUse=`netstat -lnput | grep -E "8080|8443"`
+      if [ -n "$portInUse" ]; then 
+        #tomcat ports in use. exit install
+        echo_failure "Tomcat ports in use. Aborting install."
+        exit 1
+      fi
+    fi
+
     # tomcat install here
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
