@@ -133,7 +133,7 @@ auto_install "Installer requirements" "APICLIENT"
 mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
 unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
-mtwilson setup-env > "/usr/local/share/mtwilson/apiclient/apiclient.env"
+
 
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console
@@ -413,6 +413,7 @@ java_detect
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
+mtwilson setup-env > "/usr/local/share/mtwilson/apiclient/apiclient.env"
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
