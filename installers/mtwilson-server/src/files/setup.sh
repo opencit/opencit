@@ -461,7 +461,7 @@ elif using_tomcat; then
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -486,7 +486,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -502,7 +502,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -518,7 +518,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -534,7 +534,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -568,7 +568,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -590,7 +590,7 @@ echo -n "Restarting Mt Wilson... "
 if using_glassfish; then
   mtwilson glassfish-restart >> $INSTALL_LOG_FILE
 elif using_tomcat; then
-  mtwilson tomcat-restart >> $INSTALL_LOG_FILE
+  mtwilson tomcat-restart >> $INSTALL_LOG_FILE 2>&1
 fi
 echo "Completed!"
 echo "Log file for install is located at $INSTALL_LOG_FILE"
