@@ -259,14 +259,15 @@ BwIDAQAB
         PcrManifest pcrManifest = new PcrManifest();
         String pcrList = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24";
          HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
-            
+         log.debug("CitrixHostAgent: getQuoteInformationForHost done");
          Iterator it = pcrMap.entrySet().iterator();
          while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
                 Pcr pcr = (Pcr)pairs.getValue();
                 pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcr.getIndex().toString())), new Sha1Digest(pcr.getValue().toString())));
-                it.remove(); // avoids a ConcurrentModificationException
+                //it.remove(); // avoids a ConcurrentModificationException
         }
+         log.debug("CitrixHostAgent: created PcrManifest");
        return pcrManifest;
     }
 
