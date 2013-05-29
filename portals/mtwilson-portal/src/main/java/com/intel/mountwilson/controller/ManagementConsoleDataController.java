@@ -1108,6 +1108,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                 responseView.addObject("ResetPeer",true);
                 responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             }else if(e.getMessage().toLowerCase().contains("Cannot parse response")) {
+                responseView.addObject("parseError",true);
                 responseView.addObject("message", "There was a error parsing the response from the server.  Please reload the page to fix this issue");
             }
 			return responseView;
