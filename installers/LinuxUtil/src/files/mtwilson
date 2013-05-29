@@ -353,11 +353,8 @@ case "$1" in
         echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
 		echo "Stopping Monit service..."
 		service monit stop &> /dev/null
-		if [ -f /etc/monit/monitrc ]; then
-		 #remove monit config so when it starts back up it has nothing to monitor
-		 # idealy here we should be uninstalling instead
-		 rm -fr /etc/monit/monitrc
-		fi
+		# only remove the config files we added to conf.d, not anything else
+		rm -fr /etc/monit/conf.d/*.mtwilson
         # java:  rm -rf /usr/share/jdk1.6.0_29
         # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
