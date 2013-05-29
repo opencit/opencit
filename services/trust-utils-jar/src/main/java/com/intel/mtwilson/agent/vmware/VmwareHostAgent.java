@@ -248,7 +248,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
                                         vendorHostReport = toXml(HostTpmAttestationReport.class, report);
-					log.debug("Retreived HostTpmAttestationReport.");
+					log.debug("Retrieved HostTpmAttestationReport.");
 //					manifestMap = postProcessing.processReport(esxVersion,report);
                     if(esxVersion.contains("5.1")) {
                         pcrManifest = VMWare51Esxi51.createPcrManifest(report);

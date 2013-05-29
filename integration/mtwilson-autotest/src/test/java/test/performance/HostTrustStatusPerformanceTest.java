@@ -10,6 +10,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import com.intel.mtwilson.agent.vmware.*;
+import com.intel.mtwilson.agent.citrix.*;
 import com.intel.dcsg.cpg.performance.*;
 import com.intel.dcsg.cpg.performance.report.*;
 import com.intel.mtwilson.agent.HostAgent;
@@ -157,5 +158,22 @@ public class HostTrustStatusPerformanceTest {
         log.debug("avg: {}", info.getAverage());
         log.debug("performance info: {}", mapper.writeValueAsString(info));
     }
+    
+
+    @Test
+    public void testCitrixAgentGetPcrManifestsPerformance() throws IOException {
+        CitrixHostAgentFactory factory = new CitrixHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.201/;root;P@ssw0rd", new InsecureTlsPolicy());
+        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.126", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+    
+    
 
 }
