@@ -104,6 +104,18 @@ public class HostTrustStatusPerformanceTest {
             agent.getPcrManifest();
         }
     }
+
+    public static class GetIntelPcrManifestWithoutCacheTask extends Task {
+        private IntelHostAgentFactory factory = new IntelHostAgentFactory();
+        public GetIntelPcrManifestWithoutCacheTask(String hostname) throws IOException {
+            super(hostname);
+        }
+        @Override
+        public void execute() throws Exception {
+            HostAgent agent = factory.getHostAgent("https://10.1.71.167:9999", new InsecureTlsPolicy());
+            agent.getPcrManifest();
+        }
+    }
     
     private ObjectMapper mapper = new ObjectMapper();
     
@@ -149,8 +161,8 @@ public class HostTrustStatusPerformanceTest {
     @Test
     public void testVmwareAgentGetPcrManifestsPerformance() throws IOException {
         VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
-        HostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
-        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.173", agent);
+        HostAgent agent = factory.getHostAgent("https://10.1.71.93/sdk;Administrator;P@ssw0rd;10.1.71.144", new InsecureTlsPolicy());
+        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.144", agent);
         PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
         long[] data = info.getData();
         log.debug("samples: {}", data.length);
@@ -176,8 +188,12 @@ public class HostTrustStatusPerformanceTest {
     }
     
     
+    /**
+     * The intel agent caches the results so only the first request will take time, and all the others
+     * will immediately return
+     */
     @Test
-    public void testIntelAgentGetPcrManifestsPerformance() throws IOException {
+    public void testIntelAgentGetPcrManifestsPerformanceWithCaching() throws IOException {
         IntelHostAgentFactory factory = new IntelHostAgentFactory();
         HostAgent agent = factory.getHostAgent("https://10.1.71.167:9999", new InsecureTlsPolicy());
         GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.167", agent);
@@ -190,5 +206,22 @@ public class HostTrustStatusPerformanceTest {
         log.debug("performance info: {}", mapper.writeValueAsString(info));
     }
     
+    
+    
+    /**
+     * TO prevent caching you need to either instantiate a new host agent or reset() it (not yet implemented)
+     * @throws IOException 
+     */
+    @Test
+    public void testIntelAgentGetPcrManifestsPerformanceWithoutCaching() throws IOException {
+        GetIntelPcrManifestWithoutCacheTask task = new GetIntelPcrManifestWithoutCacheTask("getPcrManifest-10.1.71.167");
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
 
 }

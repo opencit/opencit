@@ -55,7 +55,7 @@ public class VmwareHostAgent implements HostAgent {
     private String vCenterVersion = null;
     private String esxVersion = null;
     private Boolean isTpmAvailable = null;
-    private String vendorHostReport = null;
+//    private String vendorHostReport = null;
     private PcrManifest pcrManifest = null; 
     
     public VmwareHostAgent(VMwareClient vmwareClient, String hostname) throws Exception {
@@ -247,8 +247,9 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 					HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
-                                        vendorHostReport = toXml(HostTpmAttestationReport.class, report);
 					log.debug("Retrieved HostTpmAttestationReport.");
+//                                        vendorHostReport = toXml(HostTpmAttestationReport.class, report);
+					log.debug("Parsed HostTpmAttestationReport.");
 //					manifestMap = postProcessing.processReport(esxVersion,report);
                     if(esxVersion.contains("5.1")) {
                         pcrManifest = VMWare51Esxi51.createPcrManifest(report);
@@ -260,7 +261,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 				}else{ // XXX TODO should check if it's 5.0 ... because what if it's 5.2 ??? then we need to run code ABOVE
 					
 					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMORProperty(hostMOR, "runtime");
-                                        vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
+//                                        vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
 					// Now process the digest information
 					List<HostTpmDigestInfo> htdis = runtimeInfo.getTpmPcrValues();
 					log.debug("Retreived HostTpmDigestInfo.");
