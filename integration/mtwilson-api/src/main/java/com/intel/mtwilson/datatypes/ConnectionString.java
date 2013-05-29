@@ -215,6 +215,7 @@ public class ConnectionString {
             }
         } catch (MalformedURLException ex) {
             log.error(ex.toString());
+            ex.printStackTrace(System.err);
             throw ex;
         }
     }
