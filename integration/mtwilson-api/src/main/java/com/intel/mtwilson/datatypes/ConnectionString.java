@@ -379,7 +379,7 @@ public class ConnectionString {
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.INTEL ) {
-                throw new IllegalArgumentException("Not an Intel Host URL: "+url);
+                throw new IllegalArgumentException("Not an Intel Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
@@ -413,7 +413,7 @@ public class ConnectionString {
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.CITRIX ) {
-                throw new IllegalArgumentException("Not a Citrix Host URL: "+url);
+                throw new IllegalArgumentException("Not a Citrix Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
@@ -458,7 +458,7 @@ public class ConnectionString {
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.VMWARE ) {
-                throw new IllegalArgumentException("Not a VMware Host URL: "+url);
+                throw new IllegalArgumentException("Not a VMware Host URL: "+info.url.toExternalForm());
             }
             cs.vcenterAddress = new InternetAddress(info.url.getHost());
             cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
