@@ -1702,7 +1702,7 @@ public class HostBO extends BaseBO {
 
             TblMle mleSearchObj = mleJpa.findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
             TblMle mleBiosSearchObj = mleJpa.findBiosMle(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
-            //log.info(String.format("found BIOs MLE: Name=s% Version=s% OEM=s%" , mleBiosSearchObj.getName(), mleBiosSearchObj.getVersion(), mleBiosSearchObj.getOemId().getName()));    
+            log.info(String.format("found BIOs MLE: Name=%s Version=%s OEM=%s" , mleBiosSearchObj.getName(), mleBiosSearchObj.getVersion(), mleBiosSearchObj.getOemId().getName()));    
             // Process all the Event and PCR nodes in the attestation report.
             while (reader.hasNext()) {
                 if (reader.getEventType() == XMLStreamConstants.START_ELEMENT) {
@@ -1796,7 +1796,7 @@ public class HostBO extends BaseBO {
                                     pcrObj.setOsVersion("");
                                     pcrObj.setOemName(hostObj.BIOS_Oem);
                                     mleID = mleBiosSearchObj.getId();
-                                    //log.info(String.format("Adding BiosWhiteList: Name=s% Version=s% OEM=s% mleID=s%",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
+                                    log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
                                         log.info("tblPCR is null. Attempt to create new");
@@ -1830,7 +1830,7 @@ public class HostBO extends BaseBO {
                                     }
                                 }
                             } else if (hostConfigObj.addVmmWhiteList() == true) {
-                                //log.info(String.format("Adding VMM white list: Name=s% Version=s% OsName=s% OsVersion=s% mleID=s%", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
+                                log.info(String.format("Adding VMM white list: Name=%s Version=%s OsName=%s OsVersion=%s mleID=%s", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
                                 pcrObj.setMleName(hostObj.VMM_Name);
                                 pcrObj.setMleVersion(hostObj.VMM_Version);
                                 pcrObj.setOsName(hostObj.VMM_OSName);
