@@ -148,7 +148,6 @@ public class HostBO extends BaseBO {
             throw me;
 
         } catch (Exception ex) {
-
             log.error("Error while creating the Api Client object. " + ex.getMessage());
             ex.printStackTrace(System.err);
             throw new MSException(ErrorCode.SYSTEM_ERROR, "Error while creating the Api Client object. " + ex.getMessage(), ex);
