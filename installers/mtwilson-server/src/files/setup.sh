@@ -478,10 +478,10 @@ elif using_tomcat; then
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart 2>/dev/null
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
-      tomcat_start 2>/dev/null
+      tomcat_start >> $INSTALL_LOG_FILE 2>&1
     fi
   # opt_tomcat init end
   else
@@ -502,10 +502,10 @@ if [ ! -z "$opt_privacyca" ]; then
     if [ ! -z "$opt_tomcat" ]; then
       if tomcat_running; then 
         echo "Restarting Tomcat ..."
-        tomcat_restart 2>/dev/null
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
       else
         echo "Starting Tomcat ..."
-        tomcat_start 2>/dev/null
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
       fi
     fi
   fi
@@ -521,10 +521,10 @@ if [ ! -z "opt_attservice" ]; then
     if [ ! -z "$opt_tomcat" ]; then
       if tomcat_running; then 
         echo "Restarting Tomcat ..."
-        tomcat_restart 2>/dev/null
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
       else
         echo "Starting Tomcat ..."
-        tomcat_start 2>/dev/null
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
       fi
     fi
   fi
@@ -539,10 +539,10 @@ if [ ! -z "$opt_mangservice" ]; then
     if [ ! -z "$opt_tomcat" ]; then
       if tomcat_running; then 
         echo "Restarting Tomcat ..."
-        tomcat_restart 2>/dev/null
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
       else
         echo "Starting Tomcat ..."
-        tomcat_start 2>/dev/null
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
       fi
     fi
   fi
@@ -557,10 +557,10 @@ if [ ! -z "$opt_wlmservice" ]; then
     if [ ! -z "$opt_tomcat" ]; then
       if tomcat_running; then 
         echo "Restarting Tomcat ..."
-        tomcat_restart 2>/dev/null
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
       else
         echo "Starting Tomcat ..."
-        tomcat_start 2>/dev/null
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
       fi
     fi
   fi
@@ -593,10 +593,10 @@ if [ ! -z "$opt_mtwportal" ]; then
     if [ ! -z "$opt_tomcat" ]; then
       if tomcat_running; then 
         echo "Restarting Tomcat ..."
-        tomcat_restart 2>/dev/null
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
       else
         echo "Starting Tomcat ..."
-        tomcat_start 2>/dev/null
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
       fi
     fi
   fi

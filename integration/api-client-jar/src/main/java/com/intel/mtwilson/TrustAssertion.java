@@ -192,6 +192,7 @@ public class TrustAssertion {
     
     public X509Certificate getAikCertificate() throws CertificateException {
         String pem = assertionMap.get("AIK_Certificate");
+        if( pem == null || pem.isEmpty() ) { return null; }
         X509Certificate cert = X509Util.decodePemCertificate(pem);
         return cert;
     }

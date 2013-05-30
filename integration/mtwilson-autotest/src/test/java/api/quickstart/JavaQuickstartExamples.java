@@ -16,24 +16,29 @@ import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.File;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
+import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jbuhacoff
  */
-public class JavaExamples {
+public class JavaQuickstartExamples {
+    private Logger log = LoggerFactory.getLogger(getClass());
     
     @Test
     public void register() throws Exception {
         File directory = new File(System.getProperty("user.home", "."));
-        String username = "test2"; // you choose a username
+        String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
-        URL server = new URL("https://10.1.71.80:8181"); // your Mt Wilson server
+        URL server = new URL("https://10.1.71.230:8443"); // your Mt Wilson server
         String[] roles = new String[] { "Attestation", "Whitelist" };
         KeystoreUtil.createUserInDirectory(directory, username, password, server, roles);
     }
-    
+    /*
     @Test
     public void registerV2() throws Exception {
         ByteArrayResource keystoreResource = new ByteArrayResource();
@@ -47,28 +52,25 @@ public class JavaExamples {
         MtWilson client = factory.clientForUserInResource(keystoreResource, keystoreUsername, keystorePassword, wsUrl, tlsPolicy);
         X509Certificate samlCertificate = client.getSamlCertificate();
         System.out.println("Mt Wilson SAML Certificate: "+samlCertificate.getSubjectX500Principal().getName());
-    }
+    }*/
     
     @Test
-    public void saml() throws Exception {
+    public void testSaml() throws Exception {
         File directory = new File(System.getProperty("user.home", "."));
-        String username = "test1"; // you choose a username
+        String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
-        URL server = new URL("https://10.1.71.212:8181"); // your Mt Wilson server
+        URL server = new URL("https://10.1.71.230:8443"); // your Mt Wilson server
         ApiClient api = KeystoreUtil.clientForUserInDirectory(directory, username, password, server);
-        String saml = api.getSamlForHost(new Hostname("192.168.1.100"));
+        String saml = api.getSamlForHost(new Hostname("10.1.70.142"));
         TrustAssertion trust = api.verifyTrustAssertion(saml);
-        //X509Certificate aik = 
-        trust.getAikCertificate();
-        //Date issued = 
-        trust.getDate();
-        //String issuer = 
-        trust.getIssuer();
-        //String hostname =
-        trust.getSubject();
+        assertNotNull(trust);
+        log.debug("SAML Issuer: {}", trust.getIssuer());
+        log.debug("SAML Issued On: {}", trust.getDate().toString());
+        log.debug("SAML Subject: {}", trust.getSubject());
         for(String attr : trust.getAttributeNames()) {
-            //String signedAttribute = 
-            trust.getStringAttribute(attr);
+            log.debug("Host {}: {}", attr, trust.getStringAttribute(attr));
         }
+        assertNull(trust.getAikCertificate());
+        log.debug("AIK Certificate: {}", trust.getAikCertificate() == null ? "null" : Base64.encodeBase64String(trust.getAikCertificate().getEncoded()));
     }
 }

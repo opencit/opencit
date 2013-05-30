@@ -115,8 +115,8 @@ public class HostAgentFactory {
     public String getConnectionString(TblHosts host) {
         String connectionString = host.getAddOnConnectionInfo();
         if( connectionString == null || connectionString.isEmpty() ) {
-            if( host.getIPAddress() != null  ) {
-                connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
+            if( host.getName() != null  ) {
+                connectionString = String.format("intel:https://%s:%d", host.getName(), host.getPort());
                 log.debug("Assuming Intel connection string for host " + host.getName());// removed connection string to prevent leaking secrets
             }
         }

@@ -910,6 +910,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
             trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
         }
+        catch(NullPointerException e) {
+            throw new ApiException("Cannot load SAML certificates: keystore not loaded", e);
+        }
         catch(KeyStoreException e) {
             throw new ApiException("Cannot load trusted SAML certificates", e);
         }

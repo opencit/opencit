@@ -47,7 +47,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
     }
 
     @Override
-    public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
+    public VmwareHostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         ConnectionString.VmwareConnectionString vmware = ConnectionString.VmwareConnectionString.forURL(vendorConnectionString);
         try {
           URL url = new URL(vendorConnectionString);

@@ -923,14 +923,14 @@ mysql_server_install() {
     echo "http://www.mysql.com/downloads/" >> $INSTALL_LOG_FILE
   else #create the monitrc script
     mkdir -p /etc/monit/conf.d
-    if [ ! -a /etc/monit/conf.d/mysql.monitrc ]; then 
+    if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
       echo "# mysql monitor
       check process mysql matching \"mysql\"
       group database
       start program = \"/usr/sbin/service mysql start\"
       stop program = \"/usr/sbin/service mysql stop\"
       if failed host 127.0.0.1 port 3306 then restart
-      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.monitrc
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.mtwilson
     fi
   fi
 }
@@ -1214,14 +1214,14 @@ postgres_server_install(){
     return 1
   else
     mkdir -p /etc/monit/conf.d
-    if [ ! -a /etc/monit/conf.d/postgres.monitrc ]; then 
+    if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
       echo "# postgres monitor
       check process postgresql matching \"postgresql\"
       group database
       start program = \"/usr/sbin/service postgresql start\"
       stop program = \"/usr/sbin/service postgresql stop\"
       if failed host 127.0.0.1 port 5432 then restart
-      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/postgres.monitrc
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/postgres.mtwilson
     fi  
   fi
 }
@@ -2802,7 +2802,6 @@ print_env_summary_report() {
 webservice_running() {
   local path=`pwd`
   local webservice_application_name="$1"
-  local wars=`ls $TOMCAT_HOME/webapps/*.war`
 
   echo "webservice_application_name: $webservice_application_name" >> $INSTALL_LOG_FILE
   WEBSERVICE_RUNNING=""
@@ -2823,6 +2822,7 @@ webservice_running() {
     if [ -n "$TOMCAT_RUNNING" ]; then
       # determine if this app is deployed
       echo "MTWILSON_SERVER: $MTWILSON_SERVER" >> $INSTALL_LOG_FILE
+      local wars=`ls $TOMCAT_HOME/webapps/*.war`
       for war in $wars 
       do
         echo "war=$war" >> $INSTALL_LOG_FILE
