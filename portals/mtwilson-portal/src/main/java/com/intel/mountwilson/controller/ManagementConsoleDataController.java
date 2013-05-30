@@ -79,7 +79,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 public class ManagementConsoleDataController extends MultiActionController{
 	
 	//private static final Logger log = Logger.getLogger(ManagementConsoleDataController.class.getName());
-        Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass());
 	private IManagementConsoleServices services;
 	
 	//Services Layer object, used to invoke service layer methods.
@@ -727,8 +727,8 @@ public class ManagementConsoleDataController extends MultiActionController{
             	//getting ApiClient Object from Session and downcast that object to Type T.  
                 service = (T) session.getAttribute("api-object");    
             } catch (Exception e) {
-				log.error("Error while creating ApiCliennt Object. "+e.getMessage());
-				throw new ManagementConsolePortalException("Error while creating ApiClient Object. "+e.getMessage(),e);
+				log.error("Error while creating ApiClient Object: "+e.getMessage(), e);
+				throw new ManagementConsolePortalException("Error while creating ApiClient Object: "+e.getMessage(),e);
             }
             
         }

@@ -257,7 +257,7 @@ public class CitrixClient {
 //            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }  catch (Exception e) {
             log.debug("caught exception during login: " + e.toString() + " class: " + e.getClass());
-            throw new ASException(e);
+            throw new ASException(e, ErrorCode.AS_CITRIX_ERROR, e.toString());
         }
     }
 
