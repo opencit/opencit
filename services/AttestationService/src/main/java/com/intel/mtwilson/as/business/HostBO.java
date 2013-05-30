@@ -125,8 +125,8 @@ public class HostBO extends BaseBO {
                         if (host.getHostName() != null) {
                                 tblHosts.setName(host.getHostName().toString());
                         }
-                        if (host.getIPAddress() != null) {
-                                tblHosts.setIPAddress(host.getIPAddress().toString());
+                        if (host.getHostName() != null) {
+                                tblHosts.setIPAddress(host.getHostName().toString());
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
@@ -191,8 +191,8 @@ public class HostBO extends BaseBO {
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
 		} catch (ASException ase) {
-            System.err.println("JIM DEBUG"); 
-            ase.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG"); 
+            //ase.printStackTrace(System.err);
 
 			throw ase;
 		} 
@@ -200,8 +200,8 @@ public class HostBO extends BaseBO {
 //                    throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
 //                } 
         catch (Exception e) {
-            System.err.println("JIM DEBUG");
-            e.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG");
+            //e.printStackTrace(System.err);
 			throw new ASException(e);
 		}
 		return new HostResponse(ErrorCode.OK);
@@ -302,8 +302,8 @@ public class HostBO extends BaseBO {
                         if (host.getHostName() != null) {
                                 tblHosts.setName(host.getHostName().toString());
                         }
-                        if (host.getIPAddress() != null) {
-                                tblHosts.setIPAddress(host.getIPAddress().toString());
+                        if (host.getHostName() != null) {
+                                tblHosts.setIPAddress(host.getHostName().toString());
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
@@ -340,8 +340,8 @@ public class HostBO extends BaseBO {
                         // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
                         tblHosts.setDescription(host.getDescription());
                         tblHosts.setEmail(host.getEmail());
-                        if (host.getIPAddress() != null) {
-                                tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                        if (host.getHostName() != null) {
+                                tblHosts.setIPAddress(host.getHostName().toString()); // datatype.IPAddress
                         }
                         if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }                        
                         tblHosts.setVmmMleId(vmmMleId);
@@ -383,16 +383,16 @@ public class HostBO extends BaseBO {
 
                         My.jpa().mwHosts().destroy(tblHosts.getId());
                 } catch (ASException ase) {
-                        System.err.println("JIM DEBUG"); 
-                        ase.printStackTrace(System.err);
+                        //System.err.println("JIM DEBUG"); 
+                        //ase.printStackTrace(System.err);
                         throw ase;
                 } catch (CryptographyException e) {
-                        System.err.println("JIM DEBUG"); 
-                        e.printStackTrace(System.err);
+                        //System.err.println("JIM DEBUG"); 
+                        //e.printStackTrace(System.err);
                         throw new ASException(ErrorCode.SYSTEM_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage(), e);
                 } catch (Exception e) {
-                        System.err.println("JIM DEBUG"); 
-                        e.printStackTrace(System.err);
+                        //System.err.println("JIM DEBUG"); 
+                        //e.printStackTrace(System.err);
                         throw new ASException(e);
                 }
                 return new HostResponse(ErrorCode.OK);
@@ -577,8 +577,8 @@ public class HostBO extends BaseBO {
                 // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
                 tblHosts.setDescription(host.getDescription());
                 tblHosts.setEmail(host.getEmail());
-                if (host.getIPAddress() != null) {
-                        tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                if (host.getHostName() != null) {
+                        tblHosts.setIPAddress(host.getHostName().toString()); // datatype.IPAddress
                 }else{
                         tblHosts.setIPAddress(host.getHostName().toString());
                 }
@@ -788,7 +788,7 @@ public class HostBO extends BaseBO {
         public TxtHostRecord createTxtHostFromDatabaseRecord(TblHosts tblHost) {
                 TxtHostRecord hostObj = new TxtHostRecord();
                 hostObj.HostName = tblHost.getName();
-                hostObj.IPAddress = tblHost.getIPAddress();
+                hostObj.IPAddress = tblHost.getName();
                 hostObj.Port = tblHost.getPort();
                 hostObj.AddOn_Connection_String = tblHost.getAddOnConnectionInfo();
                 hostObj.Description = tblHost.getDescription();

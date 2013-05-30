@@ -92,7 +92,7 @@ public class HmacRequestVerifier {
             signatureBlock.timestamp = a.timestamp;
             String content = signatureBlock.toString(); // may throw IllegalArgumentException if any required field is null or invalid
 
-            log.debug("VerifyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
+            //log.debug("VerifyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             String username = new String(Base64.decodeBase64(a.username));
             String secretKey = finder.getSecretKeyForUserId(username);
             String signature = null;

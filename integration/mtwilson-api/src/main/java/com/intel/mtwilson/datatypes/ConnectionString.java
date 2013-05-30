@@ -215,6 +215,7 @@ public class ConnectionString {
             }
         } catch (MalformedURLException ex) {
             log.error(ex.toString());
+            ex.printStackTrace(System.err);
             throw ex;
         }
     }
@@ -378,7 +379,7 @@ public class ConnectionString {
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.INTEL ) {
-                throw new IllegalArgumentException("Not an Intel Host URL: "+url);
+                throw new IllegalArgumentException("Not an Intel Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
@@ -412,7 +413,7 @@ public class ConnectionString {
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.CITRIX ) {
-                throw new IllegalArgumentException("Not a Citrix Host URL: "+url);
+                throw new IllegalArgumentException("Not a Citrix Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
@@ -457,7 +458,7 @@ public class ConnectionString {
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.VMWARE ) {
-                throw new IllegalArgumentException("Not a VMware Host URL: "+url);
+                throw new IllegalArgumentException("Not a VMware Host URL: "+info.url.toExternalForm());
             }
             cs.vcenterAddress = new InternetAddress(info.url.getHost());
             cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
@@ -872,15 +873,16 @@ public class ConnectionString {
     public static ConnectionString from(TxtHostRecord host) throws MalformedURLException {
         String connectionString = host.AddOn_Connection_String;
         if( connectionString == null || connectionString.isEmpty() ) {
-            if( host.IPAddress != null && !host.IPAddress.isEmpty() && host.Port != null ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.IPAddress +" and port: "+host.Port);
+            if( host.HostName != null && !host.HostName.isEmpty() && host.Port != null ) {
+                connectionString = String.format("intel:https://%s:%d", host.HostName, host.Port);
+                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
+                return new ConnectionString(connectionString);
             }
-            else if(host.IPAddress != null ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
-            }
-            return new ConnectionString(connectionString);
+            //else if(host.IPAddress != null ) {
+            //    connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
+            //    System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+            //}
+            throw new IllegalArgumentException("Host does not have a connection string or hostname set");
         }
         else if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
             return new ConnectionString(connectionString);

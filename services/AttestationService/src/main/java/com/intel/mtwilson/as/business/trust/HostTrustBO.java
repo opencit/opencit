@@ -2,6 +2,7 @@ package com.intel.mtwilson.as.business.trust;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
@@ -268,7 +269,7 @@ public class HostTrustBO extends BaseBO {
         to.Description = from.getDescription();
         to.Email = from.getEmail();
         to.HostName = from.getName();
-        to.IPAddress = from.getIPAddress();
+        to.IPAddress = from.getName();
         to.Location = from.getLocation();
         to.Port = from.getPort();
         to.VMM_Name = from.getVmmMleId().getName();
@@ -754,6 +755,7 @@ public class HostTrustBO extends BaseBO {
         try {
             //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
             //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
+            
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
 
             TxtHost host = getHostWithTrust(new Hostname(hostName),tblSamlAssertion);
@@ -804,6 +806,8 @@ public class HostTrustBO extends BaseBO {
     public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
         log.info("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
+        // make sure the DEK is set for this thread
+        My.initDataEncryptionKey();
         TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
@@ -844,6 +848,8 @@ public class HostTrustBO extends BaseBO {
             
             try {
                 log.error("Caught exception, generating saml assertion");
+                log.error("Printing stacktrace first");
+                e.printStackTrace();
                 tblSamlAssertion.setSaml("");
                 int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
                 tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
@@ -901,12 +907,12 @@ public class HostTrustBO extends BaseBO {
             
         } catch (ASException e) {
             log.error("Error while getting trust for host " + host,e );
-            System.err.println("JIM DEBUG");
+            //System.err.println("JIM DEBUG");
             return new HostTrust(e.getErrorCode(),e.getErrorMessage(),host,null,null);
         }catch(Exception e){
             log.error("Error while getting trust for host " + host,e );
-            System.err.println("JIM DEBUG"); 
-            e.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG"); 
+            //e.printStackTrace(System.err);
             return new HostTrust(ErrorCode.SYSTEM_ERROR,
                     new AuthResponse(ErrorCode.SYSTEM_ERROR,e.getMessage()).getErrorMessage(),host,null,null);
         }

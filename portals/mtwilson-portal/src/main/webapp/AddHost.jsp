@@ -45,14 +45,14 @@
 				<div class="labelDivgkv" >&nbsp;</div>
 				<div class="labelDivgkv" >&nbsp;</div>
 			</div>
-            
+            <!--
 			<div class="singleDiv">
 				<div class="labelDiv">Host IP Address : </div>
 				<div class="valueDiv">
 					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
 				</div>
 			</div>
-					
+		    -->
 			<div class="singleDiv" id="hostPortDisplayDiv">
 				<div class="labelDiv">Host Port :</div>
 				<div class="valueDiv" >

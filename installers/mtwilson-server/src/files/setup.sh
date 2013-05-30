@@ -134,6 +134,7 @@ mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
 unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
 
+
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console
 rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
@@ -412,6 +413,7 @@ java_detect
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
+mtwilson setup-env > "/usr/local/share/mtwilson/apiclient/apiclient.env"
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
@@ -459,7 +461,7 @@ elif using_tomcat; then
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -484,7 +486,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -500,7 +502,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -516,7 +518,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -532,7 +534,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -566,7 +568,7 @@ if using_tomcat; then
   if [ ! -z "$opt_tomcat" ]; then
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
       tomcat_start
@@ -584,10 +586,11 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
+echo -n "Restarting Mt Wilson... "
 if using_glassfish; then
-  mtwilson glassfish-restart
+  mtwilson glassfish-restart >> $INSTALL_LOG_FILE
 elif using_tomcat; then
-  mtwilson tomcat-restart
+  mtwilson tomcat-restart >> $INSTALL_LOG_FILE 2>&1
 fi
-
+echo "Completed!"
 echo "Log file for install is located at $INSTALL_LOG_FILE"

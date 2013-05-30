@@ -9,8 +9,13 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;
+import com.intel.mtwilson.agent.vmware.*;
+import com.intel.mtwilson.agent.citrix.*;
+import com.intel.mtwilson.agent.intel.*;
 import com.intel.dcsg.cpg.performance.*;
 import com.intel.dcsg.cpg.performance.report.*;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.net.MalformedURLException;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -75,6 +80,42 @@ public class HostTrustStatusPerformanceTest {
             My.client().getHostTrust(new Hostname(getId())); // id is passed to super constructor, which is our hostname
         }
     }
+
+    public static class GetTpmStatusTask extends Task {
+        private HostAgent agent;
+        public GetTpmStatusTask(String hostname, HostAgent agent) {
+            super(hostname);
+            this.agent = agent;
+        }
+        @Override
+        public void execute() throws Exception {
+            agent.isTpmPresent();
+        }
+    }
+
+    public static class GetPcrManifestTask extends Task {
+        private HostAgent agent;
+        public GetPcrManifestTask(String hostname, HostAgent agent) {
+            super(hostname);
+            this.agent = agent;
+        }
+        @Override
+        public void execute() throws Exception {
+            agent.getPcrManifest();
+        }
+    }
+
+    public static class GetIntelPcrManifestWithoutCacheTask extends Task {
+        private IntelHostAgentFactory factory = new IntelHostAgentFactory();
+        public GetIntelPcrManifestWithoutCacheTask(String hostname) throws IOException {
+            super(hostname);
+        }
+        @Override
+        public void execute() throws Exception {
+            HostAgent agent = factory.getHostAgent("https://10.1.71.167:9999", new InsecureTlsPolicy());
+            agent.getPcrManifest();
+        }
+    }
     
     private ObjectMapper mapper = new ObjectMapper();
     
@@ -101,4 +142,86 @@ public class HostTrustStatusPerformanceTest {
         log.debug("avg: {}", info.getAverage());
         log.debug("performance info: {}", mapper.writeValueAsString(info));
     }
+    
+    
+    @Test
+    public void testVmwareAgentGetTpmStatusPerformance() throws IOException {
+        VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
+        GetTpmStatusTask task = new GetTpmStatusTask("isTpmPresent-10.1.71.173", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+
+    @Test
+    public void testVmwareAgentGetPcrManifestsPerformance() throws IOException {
+        VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.93/sdk;Administrator;P@ssw0rd;10.1.71.144", new InsecureTlsPolicy());
+        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.144", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+    
+
+    @Test
+    public void testCitrixAgentGetPcrManifestsPerformance() throws IOException {
+        CitrixHostAgentFactory factory = new CitrixHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.201/;root;P@ssw0rd", new InsecureTlsPolicy());
+        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.201", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+    
+    
+    /**
+     * The intel agent caches the results so only the first request will take time, and all the others
+     * will immediately return
+     */
+    @Test
+    public void testIntelAgentGetPcrManifestsPerformanceWithCaching() throws IOException {
+        IntelHostAgentFactory factory = new IntelHostAgentFactory();
+        HostAgent agent = factory.getHostAgent("https://10.1.71.167:9999", new InsecureTlsPolicy());
+        GetPcrManifestTask task = new GetPcrManifestTask("getPcrManifest-10.1.71.167", agent);
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+    
+    
+    
+    /**
+     * TO prevent caching you need to either instantiate a new host agent or reset() it (not yet implemented)
+     * @throws IOException 
+     */
+    @Test
+    public void testIntelAgentGetPcrManifestsPerformanceWithoutCaching() throws IOException {
+        GetIntelPcrManifestWithoutCacheTask task = new GetIntelPcrManifestWithoutCacheTask("getPcrManifest-10.1.71.167");
+        PerformanceInfo info = PerformanceUtil.measureSingleTask(task, howManyTimes);
+        long[] data = info.getData();
+        log.debug("samples: {}", data.length);
+        log.debug("min: {}", info.getMin());
+        log.debug("max: {}", info.getMax());
+        log.debug("avg: {}", info.getAverage());
+        log.debug("performance info: {}", mapper.writeValueAsString(info));
+    }
+
 }
