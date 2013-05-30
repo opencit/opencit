@@ -1799,12 +1799,12 @@ public class HostBO extends BaseBO {
                                     log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
-                                        log.info("tblPCR is null. Attempt to create new");
+                                        log.debug("tblPCR is null. Attempt to create new");
                                         wlsClient.addPCRWhiteList(pcrObj);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
 
                                     } else {
-                                        log.info("tblPCR is not null. Attempt to update");
+                                        log.debug("tblPCR is not null. Attempt to update");
                                         wlsClient.updatePCRWhiteList(pcrObj);
                                         log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                         isBiosMLEUpdated = true;
@@ -1866,26 +1866,26 @@ public class HostBO extends BaseBO {
             // the list of all the hosts for those MLEs and update their trust status.
             Collection<TblHosts> tblHostsCollection = null;
             if (isBiosMLEUpdated) {
-                log.info("Retrieving the list of hosts to be updated because of BIOS update");
+                log.debug("Retrieving the list of hosts to be updated because of BIOS update");
                 Collection<TblHosts> biosHostCollection = mleBiosSearchObj.getTblHostsCollection1();
                 if (biosHostCollection!= null && !biosHostCollection.isEmpty()) {
-                    log.info("Retrieved {} hosts for updates.", biosHostCollection.size());
+                    log.debug("Retrieved {} hosts for updates.", biosHostCollection.size());
                     tblHostsCollection = biosHostCollection;
                 } else {
-                    log.info("No hosts to be updated because of BIOS MLE update.");
+                    log.debug("No hosts to be updated because of BIOS MLE update.");
                 }
             }
             if (isVmmMLEUpdated) {
-                log.info("Retrieving the list of hosts to be updated because of VMM update");                
+                log.debug("Retrieving the list of hosts to be updated because of VMM update");                
                 Collection<TblHosts> vmmHostCollection = mleSearchObj.getTblHostsCollection();
                 if (vmmHostCollection != null && !vmmHostCollection.isEmpty()) {
-                    log.info("Retrieved {} hosts for updates.", vmmHostCollection.size());                    
+                    log.debug("Retrieved {} hosts for updates.", vmmHostCollection.size());                    
                     if (tblHostsCollection == null)
                         tblHostsCollection = vmmHostCollection;
                     else
                         tblHostsCollection.addAll(vmmHostCollection);
                 } else {
-                        log.info("No hosts to be updated because of VMM MLE update.");
+                        log.debug("No hosts to be updated because of VMM MLE update.");
                 }
             }
             
@@ -1900,14 +1900,14 @@ public class HostBO extends BaseBO {
                 }
             }
             
-            log.info("Refreshing the trust status of the hosts : {}, since their MLE was updated", hostsToBeAttested.toString());
+            log.debug("Refreshing the trust status of the hosts : {}, since their MLE was updated", hostsToBeAttested.toString());
             //String hostNames = StringUtils.join(hostsToBeAttested, ",");
             // We don't need to process the output here as we refreshed the status to make sure that the SAML assertion table has the latest data
             // if and when the user requests.
             if(! hostsToBeAttested.isEmpty()) {
                 List<HostTrustXmlResponse> samlForMultipleHosts = apiClientObj.getSamlForMultipleHosts(hostsToBeAttested, true);
             }
-            log.info("Successfully refreshed the status of all the hosts. ");
+            log.debug("Successfully refreshed the status of all the hosts. ");
 
         } catch (MSException me) {
             log.error("Error during white list upload to database. " + me.getErrorCode() + " :" + me.getErrorMessage());
