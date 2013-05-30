@@ -99,7 +99,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         @Override
         public List<HostDetails> getHostEntryFromVMWareCluster(String clusterName, String vCenterConnection)throws ManagementConsolePortalException {
                 logger.info("ManagementConsoleServicesImpl.getHostEntryFromVMWareCluster >>");
-                logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
+                //logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
                 List<HostDetails> hostVos = null;
 
                 try {
