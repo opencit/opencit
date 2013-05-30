@@ -420,7 +420,7 @@ fi
 
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-    if [ glassfish_detect > 0 ]; then
+    if ! glassfish_detect; then
       portInUse=`netstat -lnput | grep -E "8080|8181"`
       if [ -n "$portInUse" ]; then 
         #glassfish ports in use. exit install
@@ -451,7 +451,7 @@ if using_glassfish; then
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
     
-    if [ tomcat_detect > 0 ]; then
+    if ! tomcat_detect; then
       portInUse=`netstat -lnput | grep -E "8080|8443"`
       if [ -n "$portInUse" ]; then 
         #tomcat ports in use. exit install
@@ -478,10 +478,10 @@ elif using_tomcat; then
     #mtwilson tomcat-sslcert
     if tomcat_running; then 
       echo "Restarting Tomcat ..."
-      tomcat_restart
+      tomcat_restart 2>/dev/null
     else
       echo "Starting Tomcat ..."
-      tomcat_start
+      tomcat_start 2>/dev/null
     fi
   # opt_tomcat init end
   else
@@ -497,67 +497,75 @@ if [ ! -z "$opt_privacyca" ]; then
   #echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
   #/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
   #echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
-fi
 
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart 2>/dev/null
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start 2>/dev/null
+      fi
     fi
   fi
 fi
+
+
 if [ ! -z "opt_attservice" ]; then
   echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart 2>/dev/null
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start 2>/dev/null
+      fi
     fi
   fi
 fi
+
 if [ ! -z "$opt_mangservice" ]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart 2>/dev/null
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start 2>/dev/null
+      fi
     fi
   fi
 fi
+
 if [ ! -z "$opt_wlmservice" ]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart 2>/dev/null
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start 2>/dev/null
+      fi
     fi
   fi
 fi
+
 #if [ ! -z "$mangportal" ]; then
 #  echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
 #  ./$management_console
@@ -580,18 +588,20 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart 2>/dev/null
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start 2>/dev/null
+      fi
     fi
   fi
 fi
+
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE

@@ -2230,7 +2230,7 @@ tomcat_version_report() {
 # does nothing if TOMCAT_HOME is already set; unset before calling to force detection
 tomcat_detect() {
   local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
-echo "min_version for tomcat_detect is $min_version"
+  echo "min_version for tomcat_detect is $min_version" >>  $INSTALL_LOG_FILE
 
   if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
   if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
