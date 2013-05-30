@@ -1193,8 +1193,8 @@ postgres_install() {
 # - POSTGRES_REQUIRED_VERSION
 # installs postgres server 
 postgres_server_install(){
-  POSTGRES_SERVER_YUM_PACKAGES="postgresql"
-  POSTGRES_SERVER_APT_PACKAGES="postgresql"
+  POSTGRES_SERVER_YUM_PACKAGES="postgresql-9.1"
+  POSTGRES_SERVER_APT_PACKAGES="postgresql-9.1"
 
   postgres_server_detect >> $INSTALL_LOG_FILE
   if [[ -n "$postgres_com" ]]; then
