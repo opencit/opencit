@@ -157,7 +157,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         }
                                 }
                         }
-                        log.info("Uploaded Content :: " + listOfRegisterHost.toString());
+                        //log.info("Uploaded Content :: " + listOfRegisterHost.toString());
                         req.getSession().setAttribute("hostVO", listOfRegisterHost);
                         responseView.addObject("result", listOfRegisterHost.size() > 0 ? true : false);
 
@@ -1984,7 +1984,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 					}
 			    }
 			}
-		log.info("Uploaded Content :: "+manifestValue.toString());
+		//log.info("Uploaded Content :: "+manifestValue.toString());
 		req.getSession().setAttribute("manifestValue",manifestValue);
 		/*responseView.addObject("manifestValue",manifestValue);*/
 		responseView.addObject("result",manifestValue.size() > 0 ? true : false);
