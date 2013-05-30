@@ -32,7 +32,7 @@ public class JavaQuickstartExamples {
     @Test
     public void register() throws Exception {
         File directory = new File(System.getProperty("user.home", "."));
-        String username = "test4"; // you choose a username
+        String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
         URL server = new URL("https://10.1.71.230:8443"); // your Mt Wilson server
         String[] roles = new String[] { "Attestation", "Whitelist" };
@@ -57,7 +57,7 @@ public class JavaQuickstartExamples {
     @Test
     public void testSaml() throws Exception {
         File directory = new File(System.getProperty("user.home", "."));
-        String username = "test4"; // you choose a username
+        String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
         URL server = new URL("https://10.1.71.230:8443"); // your Mt Wilson server
         ApiClient api = KeystoreUtil.clientForUserInDirectory(directory, username, password, server);
