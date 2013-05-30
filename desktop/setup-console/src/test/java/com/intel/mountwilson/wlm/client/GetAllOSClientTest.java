@@ -82,7 +82,7 @@ public class GetAllOSClientTest {
     
     @Test
     public void makeOsTest() throws ClientException, IOException, ApiException, SignatureException {
-        log.info("Connecting to {}", baseurl.toExternalForm());
+        log.debug("Connecting to {}", baseurl.toExternalForm());
         Properties p = new Properties();
         p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "false");
         p.setProperty("mtwilson.api.ssl.verifyHostname", "false");

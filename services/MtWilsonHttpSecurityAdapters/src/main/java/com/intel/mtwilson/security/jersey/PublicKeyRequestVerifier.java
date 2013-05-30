@@ -149,7 +149,7 @@ public class PublicKeyRequestVerifier {
             
 
             if( isValid ) {
-                log.info("Request is authenticated");
+                log.debug("Request is authenticated");
                 
                 // check if the request has expired by looking at the HTTP Date header, but only if it was signed.
                 if( signatureBlock.headers.containsKey("Date") ) {
@@ -184,7 +184,7 @@ public class PublicKeyRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.info("Request is NOT AUTHENTICATED");
+        log.debug("Request is NOT AUTHENTICATED");
         return null;
     }
     

@@ -43,7 +43,7 @@ public class CheckLoginController extends AbstractController {
 
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
-            logger.info("CheckLoginController >>");
+            logger.debug("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
             String keystoreFilename = "";
             
