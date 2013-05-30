@@ -202,7 +202,7 @@ public class HostBO extends BaseBO {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
              My.initDataEncryptionKey();
             // Retrieve the host object.
-            System.err.println("JIM DEBUG: Retrieve the host object."); 
+            //System.err.println("JIM DEBUG: Retrieve the host object."); 
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
             tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
@@ -219,7 +219,7 @@ public class HostBO extends BaseBO {
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
             }
-            System.err.println("JIM DEBUG: Get Host Agent.");
+            //System.err.println("JIM DEBUG: Get Host Agent.");
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
             try {
