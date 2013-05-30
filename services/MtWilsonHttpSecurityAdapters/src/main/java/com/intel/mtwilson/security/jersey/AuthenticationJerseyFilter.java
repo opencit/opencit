@@ -78,7 +78,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
      */
     @Override
     public ContainerRequest filter(ContainerRequest request) {
-        log.info("AuthenticationJerseyFilter request for {} {} with Authorization={}", new String[] { request.getMethod(), request.getPath(), request.getHeaderValue("Authorization") });
+        log.debug("AuthenticationJerseyFilter request for {} {} with Authorization={}", new String[] { request.getMethod(), request.getPath(), request.getHeaderValue("Authorization") });
         log.debug("AuthenticationJerseyFilter: HTTP method="+request.getMethod());
         log.debug("AuthenticationJerseyFilter: Request URI="+request.getRequestUri());
         log.debug("AuthenticationJerseyFilter: Secure/https="+request.isSecure());

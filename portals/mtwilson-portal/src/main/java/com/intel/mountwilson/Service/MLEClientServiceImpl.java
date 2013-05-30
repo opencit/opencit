@@ -35,14 +35,14 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public List<MLEDataVO> getAllMLE(WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.getAllMLE >>");
+                                log.debug("MLEClientServiceImpl.getAllMLE >>");
                                 List<MLEDataVO> list = null;
                                 try {
                                         list =ConverterUtil.getListToMLEDataVO(apiClientServices.searchMLE(""));
                                 }catch (Exception e) {
                                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.info("MLEClientServiceImpl.getAllMLE <<");
+                                log.debug("MLEClientServiceImpl.getAllMLE <<");
                                 return list;
 	}
 
@@ -56,7 +56,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public boolean addMLEInfo(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.addMLEInfo >>");
+		log.debug("MLEClientServiceImpl.addMLEInfo >>");
 		boolean result = false;
 		try {
 			result = apiClientServices.addMLE(ConverterUtil.getMleApiClientObject(dataVO));
@@ -64,7 +64,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 			log.error(e.getMessage());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-                                log.info("MLEClientServiceImpl.addMLEInfo <<");
+                                log.debug("MLEClientServiceImpl.addMLEInfo <<");
        	
                                 return result;
 	}
@@ -79,7 +79,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public boolean updateMLEInfo(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.updateMLEInfo >>");
+		log.debug("MLEClientServiceImpl.updateMLEInfo >>");
 		boolean result = false;
 		try {
 			result =apiClientServices.updateMLE(ConverterUtil.getMleApiClientObject(dataVO));
@@ -87,7 +87,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 			log.error(e.getMessage());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-		log.info("MLEClientServiceImpl.updateMLEInfo <<");
+		log.debug("MLEClientServiceImpl.updateMLEInfo <<");
 		return result;
 	}
 
@@ -101,7 +101,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public boolean deleteMLE(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("MLEClientServiceImpl.deleteMLE >>");
+		log.debug("MLEClientServiceImpl.deleteMLE >>");
 		boolean result = false; 
 		try {
 			MLESearchCriteria criteria = new MLESearchCriteria();
@@ -118,10 +118,10 @@ public class MLEClientServiceImpl implements IMLEClientService {
 			}
 			result = apiClientServices.deleteMLE(criteria);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error("Failed to delete MLE: "+e.toString());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-                       log.info("MLEClientServiceImpl.deleteMLE <<");
+                       log.debug("MLEClientServiceImpl.deleteMLE <<");
        	return result;
 	}
 	
@@ -135,7 +135,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public MLEDataVO getSingleMleData(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.getSingleMleData >>");
+                                log.debug("MLEClientServiceImpl.getSingleMleData >>");
                                 MLEDataVO mleObject = null;
                                 try {
                                         MLESearchCriteria criteria = new MLESearchCriteria();
@@ -154,7 +154,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
                                 }catch (Exception e) {
                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.info("MLEClientServiceImpl.getSingleMleData <<");
+                                log.debug("MLEClientServiceImpl.getSingleMleData <<");
                                 return mleObject;
 	}
         
@@ -168,14 +168,14 @@ public class MLEClientServiceImpl implements IMLEClientService {
 	 */
 	@Override
 	public List<ModuleWhiteList> getManifestListForModuleTypeMle(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle >>");
+                                log.debug("MLEClientServiceImpl.ManifestListForModuleTypeMle >>");
                                 List<ModuleWhiteList> moduleManifestList = null;
                                 try {
                                         moduleManifestList =  apiClientServices.listModuleWhiteListForMLE(dataVO.getMleName(), dataVO.getMleVersion(), dataVO.getOsName(), dataVO.getOsVersion(), "");
                                 }catch (Exception e) {
                                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.info("MLEClientServiceImpl.ManifestListForModuleTypeMle <<");
+                                log.debug("MLEClientServiceImpl.ManifestListForModuleTypeMle <<");
                                 return moduleManifestList;
 	}
 
@@ -189,7 +189,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
          */
 	@Override
 	public String getMleSourceHost(MLEDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("MLEClientServiceImpl.getMleSourceHost >>");
+                                log.debug("MLEClientServiceImpl.getMleSourceHost >>");
                                 String hostName;
                                 try {
                                         MleData mleDataObj = ConverterUtil.getMleApiClientObject(dataVO);
@@ -206,7 +206,7 @@ public class MLEClientServiceImpl implements IMLEClientService {
                                 }catch (Exception e) {
                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.info("MLEClientServiceImpl.getMleSourceHost <<");
+                                log.debug("MLEClientServiceImpl.getMleSourceHost <<");
                                 return hostName;
 	}
         
