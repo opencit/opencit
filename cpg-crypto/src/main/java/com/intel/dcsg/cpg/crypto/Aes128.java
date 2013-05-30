@@ -103,7 +103,7 @@ public class Aes128 {
      * @param out the ciphertext destination ; after the input stream is copied the output stream will be closed by this method
      * @throws CryptographyException 
      */
-    public void encryptStream(InputStream in, OutputStream out) throws CryptographyException, IOException {
+    public synchronized void encryptStream(InputStream in, OutputStream out) throws CryptographyException, IOException {
         try {
             byte[] iv = generateIV();
             AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
@@ -127,7 +127,7 @@ public class Aes128 {
      * @param out the plaintext destination ; after the input stream is copied the output stream will be closed by this method
      * @throws CryptographyException 
      */
-    public void decryptStream(InputStream in, OutputStream out) throws CryptographyException, IOException {
+    public synchronized void decryptStream(InputStream in, OutputStream out) throws CryptographyException, IOException {
         try {
             // first read the IV
             byte[] iv = new byte[BLOCK_SIZE];
@@ -150,7 +150,7 @@ public class Aes128 {
     
     
     
-    public byte[] encrypt(byte[] plaintext) throws CryptographyException {
+    public synchronized byte[] encrypt(byte[] plaintext) throws CryptographyException {
         try {
             byte[] iv = generateIV();
             AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
@@ -180,7 +180,7 @@ public class Aes128 {
         }
     }
         
-    public byte[] decrypt(byte[] ciphertext) throws CryptographyException {
+    public synchronized byte[] decrypt(byte[] ciphertext) throws CryptographyException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(ciphertext, 0, BLOCK_SIZE));
             return cipher.doFinal(ciphertext, BLOCK_SIZE, ciphertext.length - BLOCK_SIZE); // skip the first 16 bytes (IV)

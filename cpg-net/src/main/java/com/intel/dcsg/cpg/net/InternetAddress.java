@@ -34,6 +34,11 @@ public class InternetAddress extends ObjectModel {
     
     @Override
     protected void validate() {
+        if( input == null ) {
+            fault("Missing hostname or IP address");
+            return;
+        }
+        
         IPv6Address ipv6 = new IPv6Address(input);
         if( ipv6.isValid() ) { 
             format = Format.IPv6; 

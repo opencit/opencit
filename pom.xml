@@ -36,6 +36,7 @@
   -->
   
   <modules>
+    <module>cpg-performance</module>
     <module>cpg-validation</module>
     <module>cpg-io</module>
     <module>cpg-crypto</module>
