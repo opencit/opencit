@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.setup;
 
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import java.io.FileInputStream;
@@ -19,6 +21,7 @@ import java.util.Properties;
 import javax.crypto.SecretKey;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,17 +40,17 @@ public class SetupWizard {
         this.conf = conf;
     }
     
-    public Connection getDatabaseConnection() throws SetupException {
+    public Connection getDatabaseConnection() throws SetupException, IOException {
         try {
+            Properties p = MyPersistenceManager.getASDataJpaProperties(My.configuration());
             // XXX TODO should be like Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));  or  like           Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection conn = DriverManager.getConnection(
-                    String.format("jdbc:mysql://%s:%d/%s",
-                        conf.getString("mountwilson.as.db.host", conf.getString("mtwilson.db.host", "127.0.0.1")),
-                        conf.getInteger("mountwilson.as.db.port", conf.getInteger("mtwilson.db.port", 3306)),
-                        conf.getString("mountwilson.as.db.schema", conf.getString("mtwilson.db.schema"))),
-                    conf.getString("mountwilson.as.db.user", conf.getString("mtwilson.db.user")),
-                    conf.getString("mountwilson.as.db.password", conf.getString("mtwilson.db.password")));
+            Class.forName(p.getProperty("javax.persistence.jdbc.driver"));
+            String url =  p.getProperty("javax.persistence.jdbc.url");
+            String user =  p.getProperty("javax.persistence.jdbc.user");
+            String pass =  p.getProperty("javax.persistence.jdbc.password");
+            
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            
             return conn;
         }
         catch (ClassNotFoundException e) {
@@ -58,9 +61,9 @@ public class SetupWizard {
         }
     }
 
-    public Connection getMSDatabaseConnection() throws SetupException {
+    public Connection getMSDatabaseConnection() throws SetupException, IOException {
         try {
-            Class.forName(conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")));
+            Class.forName(conf.getString("mountwilson.ms.db.driver", My.configuration().getDatabaseDriver()));
             /*
              * Class.forName("com.mysql.jdbc.Driver");
             Connection conn = DriverManager.getConnection(
@@ -71,17 +74,17 @@ public class SetupWizard {
                     conf.getString("mountwilson.ms.db.user", conf.getString("mtwilson.db.user")),
                     conf.getString("mountwilson.ms.db.password", conf.getString("mtwilson.db.password")));
                     */
+            String dbms = (conf.getString("mountwilson.ms.db.driver", conf.getString("mtwilson.db.driver", "com.mysql.jdbc.Driver")).contains("mysql")) ? "mysql" : "postgresql";
             String url =conf.getString("mountwilson.ms.db.url",
                     conf.getString("mtwilson.db.url",
-                    String.format("jdbc:mysql://%s:%s/%s?autoReconnect=true",
-                    conf.getString("mountwilson.ms.db.host", conf.getString("mtwilson.db.host","127.0.0.1")),
-                    conf.getString("mountwilson.ms.db.port", conf.getString("mtwilson.db.port","3306")),
-                    conf.getString("mountwilson.ms.db.schema", conf.getString("mtwilson.db.schema","mw_as")))));
-            String user = conf.getString("mountwilson.ms.db.user", conf.getString("mtwilson.db.user"));
-            String pass = conf.getString("mountwilson.ms.db.password", conf.getString("mtwilson.db.password"));
-        Connection conn = DriverManager.getConnection(url, user, pass);
-            return conn;
-        }
+                    String.format("jdbc:"+dbms+"://%s:%s/%s?autoReconnect=true",
+                    conf.getString("mountwilson.ms.db.host", My.configuration().getDatabaseHost()),
+                    conf.getString("mountwilson.ms.db.port", My.configuration().getDatabasePort()),
+                    conf.getString("mountwilson.ms.db.schema", My.configuration().getDatabaseSchema()))));
+            String user = conf.getString("mountwilson.ms.db.user", My.configuration().getDatabaseUsername());
+            String pass = conf.getString("mountwilson.ms.db.password", My.configuration().getDatabasePassword());
+            Connection conn = DriverManager.getConnection(url, user, pass);
+            return conn;        }
         catch (ClassNotFoundException e) {
             throw new SetupException("Cannot connect to database", e);
         }
@@ -101,7 +104,7 @@ public class SetupWizard {
         }
     }
     
-    public void encryptVmwareConnectionStrings() throws SetupException {
+    public void encryptVmwareConnectionStrings() throws SetupException, IOException {
         Connection c = getDatabaseConnection();
         /*
         if( !allNonEmptyFieldsInTableBeginWith(c, "tbl_hosts", "http") ) {
@@ -120,12 +123,15 @@ public class SetupWizard {
                 System.out.println(String.format("Generating Data Encryption Key %s...", name));
                 SecretKey dek = Aes128.generateKey();
                 dekBase64 = Base64.encodeBase64String(dek.getEncoded());
-                conf.setProperty(name, dekBase64); // this does not automatically save to the configuration file
+                //conf.setProperty(name, dekBase64); // this does not automatically save to the configuration file
                 // save the new dek to configuration file.    the Properties object inserts backslash-escapes before punctuation like : , = , etc. which affects the values... not sure if they'll be read in properly!!!
                 Properties xxxTodoSubclassConf = new Properties();
                 xxxTodoSubclassConf.load(new FileInputStream("/etc/intel/cloudsecurity/attestation-service.properties"));
                 xxxTodoSubclassConf.setProperty(name, dekBase64);
-                xxxTodoSubclassConf.store(new FileOutputStream("/etc/intel/cloudsecurity/attestation-service.properties"), "auto-saved");
+                FileOutputStream out = new FileOutputStream("/etc/intel/cloudsecurity/attestation-service.properties");
+                xxxTodoSubclassConf.store(out, "auto-saved");
+                IOUtils.closeQuietly(out);
+                My.reset();
             } catch (CryptographyException e) {
                 throw new SetupException(String.format("Cannot create Data Encryption Key %s", name), e);
             } catch (IOException e) {

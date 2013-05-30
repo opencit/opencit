@@ -40,13 +40,10 @@ public class MyPersistenceManager extends PersistenceManager {
     @Override
     public void configure() {
         log.debug("MyPersistenceManager: Database Host: {}", jdbcProperties.getProperty("mtwilson.db.host"));
-        MapConfiguration c = new MapConfiguration(jdbcProperties);
+        MyConfiguration c = new MyConfiguration(jdbcProperties);
         addPersistenceUnit("ASDataPU", getASDataJpaProperties(c));
         addPersistenceUnit("MSDataPU", getMSDataJpaProperties(c));
         addPersistenceUnit("AuditDataPU", getAuditDataJpaProperties(c));
-    }
-    public byte[] getDek() {
-        return Base64.decodeBase64(jdbcProperties.getProperty("mtwilson.as.dek", "hPKk/2uvMFRAkpJNJgoBwA==")); // arbitrary default dek, since it's a development server it's good to use same as what is configured there, but it doesn't matter as it only affects records we are writing, and hopefully after each test is complete there is zero net effect on the database
     }
     public EntityManagerFactory getASData() {
         return getEntityManagerFactory("ASDataPU");
@@ -58,12 +55,24 @@ public class MyPersistenceManager extends PersistenceManager {
         return getEntityManagerFactory("AuditDataPU");
     }
     
-    public Properties getASDataJpaProperties(Configuration config) {
+    public static Properties getJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();
-        prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.as.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+        prop.put("javax.persistence.jdbc.driver", config.getDatabaseDriver());
+        prop.put("javax.persistence.jdbc.scheme", config.getDatabaseProtocol()); // XXX if everything is working without this now, remove it
+        String url = String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
+                config.getDatabaseProtocol(), config.getDatabaseHost(), 
+                config.getDatabasePort(), config.getDatabaseSchema());
+        prop.put("javax.persistence.jdbc.url", url);
+        prop.put("javax.persistence.jdbc.user", config.getDatabaseUsername());
+        prop.put("javax.persistence.jdbc.password", config.getDatabasePassword());
+        //System.err.println("getJpaProps Default url == " + prop.getProperty("javax.persistence.jdbc.url"));
+        return prop;
+    }
+    
+    public static Properties getASDataJpaProperties(MyConfiguration config) {
+        Properties prop = new Properties();
+        Configuration myConfig = config.getConfiguration();
+        prop.put("javax.persistence.jdbc.driver", myConfig.getString("mountwilson.as.db.driver",config.getDatabaseDriver()));
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
@@ -74,30 +83,31 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }
         prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.as.db.url",
-                config.getString("mtwilson.db.url",
+                myConfig.getString("mountwilson.as.db.url",
+                myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.get("javax.persistence.jdbc.scheme"),
-                    config.getString("mountwilson.as.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.as.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.as.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.as.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.as.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.as.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.as.db.user",
-                config.getString("mtwilson.db.user",
+                myConfig.getString("mountwilson.as.db.user",
+                myConfig.getString("mtwilson.db.user",
                 "root")));
         prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.as.db.password", 
-                config.getString("mtwilson.db.password", 
+                myConfig.getString("mountwilson.as.db.password", 
+                myConfig.getString("mtwilson.db.password", 
                 "password")));
+        //System.err.println("getJpaProps ASdata url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
     }    
     
-    public Properties getMSDataJpaProperties(Configuration config) {
+    public static Properties getMSDataJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();
+        Configuration myConfig = config.getConfiguration();
         prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.ms.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+                myConfig.getString("mountwilson.ms.db.driver", 
+               config.getDatabaseDriver()));
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
@@ -108,32 +118,33 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }        
         prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.ms.db.url",
-                config.getString("mtwilson.db.url",
+                myConfig.getString("mountwilson.ms.db.url",
+                myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    config.getString("mountwilson.ms.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.ms.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.ms.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.ms.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.ms.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.ms.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.ms.db.user",
-                config.getString("mtwilson.db.user",
+                myConfig.getString("mountwilson.ms.db.user",
+                myConfig.getString("mtwilson.db.user",
                 "root")));
         prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.ms.db.password", 
-                config.getString("mtwilson.db.password", 
+                myConfig.getString("mountwilson.ms.db.password", 
+                myConfig.getString("mtwilson.db.password", 
                 "password")));
+        //System.err.println("getJpaProps MSData url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
     }
     
     
-    public Properties getAuditDataJpaProperties(Configuration config) {
+    public static Properties getAuditDataJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();
+        Configuration myConfig = config.getConfiguration();
         prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.audit.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+                myConfig.getString("mountwilson.audit.db.driver", 
+                config.getDatabaseDriver()));
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
@@ -144,31 +155,32 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }        
         prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.audit.db.url",
-                config.getString("mtwilson.db.url",
+                myConfig.getString("mountwilson.audit.db.url",
+                myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    config.getString("mountwilson.audit.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.audit.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.audit.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.audit.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.audit.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.audit.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.audit.db.user",
-                config.getString("mtwilson.db.user",
+                myConfig.getString("mountwilson.audit.db.user",
+                myConfig.getString("mtwilson.db.user",
                 "root")));
         prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.audit.db.password", 
-                config.getString("mtwilson.db.password", 
+                myConfig.getString("mountwilson.audit.db.password", 
+                myConfig.getString("mtwilson.db.password", 
                 "password")));
+        //System.err.println("getJpaProps audit url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
     }
  
-    public Properties getMCDataJpaProperties(Configuration config) {
+    public static Properties getMCDataJpaProperties(MyConfiguration config) {
         Properties prop = new Properties();
+        Configuration myConfig = config.getConfiguration();
         prop.put("javax.persistence.jdbc.driver", 
-                config.getString("mountwilson.mc.db.driver", 
-                config.getString("mtwilson.db.driver",
-                "com.mysql.jdbc.Driver")));
+                myConfig.getString("mountwilson.mc.db.driver", 
+                config.getDatabaseDriver()));
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
             prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
         }
@@ -179,21 +191,22 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }        
         prop.put("javax.persistence.jdbc.url" , 
-                config.getString("mountwilson.mc.db.url",
-                config.getString("mtwilson.db.url",
+                myConfig.getString("mountwilson.mc.db.url",
+                myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
                     prop.getProperty("javax.persistence.jdbc.scheme"),
-                    config.getString("mountwilson.mc.db.host", config.getString("mtwilson.db.host","127.0.0.1")),
-                    config.getString("mountwilson.mc.db.port", config.getString("mtwilson.db.port","3306")),
-                    config.getString("mountwilson.mc.db.schema", config.getString("mtwilson.db.schema","mw_as"))))));
+                    myConfig.getString("mountwilson.mc.db.host", config.getDatabaseHost()),
+                    myConfig.getString("mountwilson.mc.db.port", config.getDatabasePort()),
+                    myConfig.getString("mountwilson.mc.db.schema", config.getDatabaseSchema())))));
         prop.put("javax.persistence.jdbc.user",
-                config.getString("mountwilson.mc.db.user",
-                config.getString("mtwilson.db.user",
+                myConfig.getString("mountwilson.mc.db.user",
+                myConfig.getString("mtwilson.db.user",
                 "root")));
         prop.put("javax.persistence.jdbc.password", 
-                config.getString("mountwilson.mc.db.password", 
-                config.getString("mtwilson.db.password", 
+                myConfig.getString("mountwilson.mc.db.password", 
+                myConfig.getString("mtwilson.db.password", 
                 "password")));
+        //System.err.println("getJpaProps MCData url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
     }    

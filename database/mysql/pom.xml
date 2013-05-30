@@ -28,6 +28,7 @@ To dump all the tables into one script, you can use this command:
 	<dependency>
 		<groupId>mysql</groupId>
 		<artifactId>mysql-connector-java</artifactId>
+        <scope>provided</scope>
 	</dependency>
   </dependencies>
 

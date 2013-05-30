@@ -2,6 +2,7 @@ package com.intel.mtwilson.as.business.trust;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
@@ -42,17 +43,23 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+import javax.xml.crypto.MarshalException;
+import javax.xml.crypto.dsig.XMLSignatureException;
 import org.apache.commons.configuration.Configuration;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
+import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -116,7 +123,7 @@ public class HostTrustBO extends BaseBO {
      */
     public HostTrustStatus getTrustStatus(Hostname hostName) throws IOException {
         if( hostName == null ) { throw new IllegalArgumentException("missing hostname"); }
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         
         TblHosts tblHosts = getHostByName(hostName);
         return getTrustStatus(tblHosts, hostName.toString());
@@ -177,7 +184,7 @@ public class HostTrustBO extends BaseBO {
         Object[] paramArray = {userName, hostId, trust.bios, trust.vmm};
         log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
         
-        log.info( "Verfication Time {}", (System.currentTimeMillis() - start));
+        log.debug( "Verfication Time {}", (System.currentTimeMillis() - start));
 
         return trust;
     }
@@ -194,12 +201,18 @@ public class HostTrustBO extends BaseBO {
     public TrustReport getTrustReportForHost(TblHosts tblHosts, String hostId) throws IOException {
         // bug #538 first check if the host supports tpm
         HostAgentFactory factory = new HostAgentFactory();
+        long getAgentStart = System.currentTimeMillis(); // XXX jonathan performance
         HostAgent agent = factory.getHostAgent(tblHosts);
+        long getAgentStop = System.currentTimeMillis();// XXX jonathan performance
+        log.debug("XXX jonathan performance  get agent: {}", getAgentStop-getAgentStart); // XXX jonathan performance
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
             throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId.toString());
         }
         
+        long getAgentManifestStart = System.currentTimeMillis(); // XXX jonathan performance
         PcrManifest pcrManifest = agent.getPcrManifest();
+        long getAgentManifestStop = System.currentTimeMillis(); // XXX jonathan performance
+        log.debug("XXX jonathan performance  get agent manifest: {}", getAgentManifestStop-getAgentManifestStart); // XXX jonathan performance
         
         HostReport hostReport = new HostReport();
         hostReport.pcrManifest = pcrManifest;
@@ -218,10 +231,16 @@ public class HostTrustBO extends BaseBO {
         HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
 
         
+        long getTrustPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, hostId); // must include both bios and vmm policies
+        long getTrustPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
+        log.debug("XXX jonathan performance  load trust policy: {}", getTrustPolicyStop-getTrustPolicyStart); // XXX jonathan performance
 //        trustPolicy.setName(policy for hostId) // do we even need a name? or is that just a management thing for the app?
         PolicyEngine policyEngine = new PolicyEngine();
+        long applyPolicyStart = System.currentTimeMillis(); // XXX jonathan performance
         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+        long applyPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
+        log.debug("XXX jonathan performance  apply trust policy: {}", applyPolicyStop-applyPolicyStart); // XXX jonathan performance
         
         return trustReport;
     }
@@ -250,7 +269,7 @@ public class HostTrustBO extends BaseBO {
         to.Description = from.getDescription();
         to.Email = from.getEmail();
         to.HostName = from.getName();
-        to.IPAddress = from.getIPAddress();
+        to.IPAddress = from.getName();
         to.Location = from.getLocation();
         to.Port = from.getPort();
         to.VMM_Name = from.getVmmMleId().getName();
@@ -569,15 +588,21 @@ public class HostTrustBO extends BaseBO {
         }
     }
 
-    private TblHosts getHostByName(Hostname hostName) { // datatype.Hostname
+    private TblHosts getHostByName(Hostname hostName) throws IOException { // datatype.Hostname
         try {
-            return hostBO.getHostByName(hostName);
+            TblHosts tblHost = hostBO.getHostByName(hostName);
+            //Bug # 848 Check if the query returned back null or we found the host 
+            if (tblHost == null ){
+                throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
+            }
+            return tblHost;
         }
         catch(CryptographyException e) {
             throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         }
     }
-    private TblHosts getHostByAik(Sha1Digest fingerprint) { // datatype.Hostname
+    
+    private TblHosts getHostByAik(Sha1Digest fingerprint) throws IOException  { // datatype.Hostname
         try {
             return hostBO.getHostByAik(fingerprint);
         }
@@ -730,6 +755,7 @@ public class HostTrustBO extends BaseBO {
         try {
             //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
             //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
+            
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
 
             TxtHost host = getHostWithTrust(new Hostname(hostName),tblSamlAssertion);
@@ -777,10 +803,12 @@ public class HostTrustBO extends BaseBO {
         return saml;
     }
 
-    public String getTrustWithSaml(String host, boolean forceVerify) {
-        log.info("Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+    public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
+        log.info("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
-         TblHosts tblHosts = getHostByName(new Hostname((host)));
+        // make sure the DEK is set for this thread
+        My.initDataEncryptionKey();
+        TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
        // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
@@ -792,29 +820,73 @@ public class HostTrustBO extends BaseBO {
         if(forceVerify != true){
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
             if(tblSamlAssertion != null){
-                log.info("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
-                return tblSamlAssertion.getSaml();
+                if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
+                    log.info("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
+                    return tblSamlAssertion.getSaml();
+                }else{
+                    log.debug("Found assertion in cache with error set, returning that.");
+                   throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
+                }
             }
         }
         
-       log.info("Getting trsut and saml assertion from host.");
+        log.info("Getting trust and saml assertion from host.");
         
-
-        return getTrustWithSaml(host);
+        try {
+            return getTrustWithSaml(host);
+        }catch(Exception e) {
+            TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
+            tblSamlAssertion.setHostId(tblHosts);
+            //TxtHost hostTxt = getHostWithTrust(new Hostname(host),tblSamlAssertion); 
+            //TxtHostRecord tmp = new TxtHostRecord();
+            //tmp.HostName = host;
+            //tmp.IPAddress = host;
+            //TxtHost hostTxt = new TxtHost(tmp);
+            
+            tblSamlAssertion.setBiosTrust(false);
+            tblSamlAssertion.setVmmTrust(false);
+            
+            try {
+                log.error("Caught exception, generating saml assertion");
+                log.error("Printing stacktrace first");
+                e.printStackTrace();
+                tblSamlAssertion.setSaml("");
+                int cacheTimeout=ASConfig.getConfiguration().getInt("saml.validity.seconds",3600);
+                tblSamlAssertion.setCreatedTs(Calendar.getInstance().getTime());
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.SECOND, cacheTimeout);
+                tblSamlAssertion.setExpiryTs(cal.getTime());
+                if(e instanceof ASException){
+                    ASException ase = (ASException) e;
+                    tblSamlAssertion.setErrorCode(String.valueOf(ase.getErrorCode()));
+                }else{
+                    tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.SYSTEM_ERROR.getErrorCode()));
+                }
+                tblSamlAssertion.setErrorMessage(e.getMessage());
+                new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
+            }catch(Exception ex){
+                log.info("getTrustwithSaml caugh exception while generating error saml assertion");
+                throw new ASException(new Exception("getTrustWithSaml " + ex.getMessage()));
+            } 
+            throw new ASException(new Exception(e.getMessage()));
+        }
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
-        log.info("Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        log.info("getTrustWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         try {
             
             if(forceVerify != true){
                 TblHosts tblHosts = getHostByName(new Hostname(host));
                 if(tblHosts != null){
-                    TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(
-                            tblHosts.getId() , getCacheStaleAfter() );
-                    
-                    if(tblTaLog != null)
-                        return getHostTrustObj(tblTaLog);
+                    TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(tblHosts.getId() , getCacheStaleAfter() );
+
+                    // Bug 849: We need to ensure that we add the host name to the response as well. Otherwise it will just contain BIOS and VMM status.
+                    if(tblTaLog != null) {
+                        HostTrust hostTrust = getHostTrustObj(tblTaLog);
+                        hostTrust.setIpAddress(host);
+                        return hostTrust;
+                    }
                 }else{
                     throw new ASException(
                             ErrorCode.AS_HOST_NOT_FOUND,
@@ -830,14 +902,17 @@ public class HostTrustBO extends BaseBO {
            hostTrust.setBiosStatus((status.bios)?1:0);
            hostTrust.setVmmStatus((status.vmm)?1:0);
            hostTrust.setIpAddress(host);
-           
+           log.error("JSONTrust is : ", host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
            return hostTrust;
             
         } catch (ASException e) {
             log.error("Error while getting trust for host " + host,e );
+            //System.err.println("JIM DEBUG");
             return new HostTrust(e.getErrorCode(),e.getErrorMessage(),host,null,null);
         }catch(Exception e){
             log.error("Error while getting trust for host " + host,e );
+            //System.err.println("JIM DEBUG"); 
+            //e.printStackTrace(System.err);
             return new HostTrust(ErrorCode.SYSTEM_ERROR,
                     new AuthResponse(ErrorCode.SYSTEM_ERROR,e.getMessage()).getErrorMessage(),host,null,null);
         }

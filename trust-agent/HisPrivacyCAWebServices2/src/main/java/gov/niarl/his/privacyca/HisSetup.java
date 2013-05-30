@@ -12,6 +12,7 @@
  */
 package gov.niarl.his.privacyca;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.*;
 import java.security.cert.X509Certificate;
@@ -351,14 +352,15 @@ public class HisSetup {
 
             // the PrivacyCA.properties file may already exist ; if so we update it with new properties
             Properties privacyCaProperties = new Properties();
-            File privacyCaPropertiesFile = ResourceFinder.getFile(PrivacyCaPropertiesFile);
+            //File privacyCaPropertiesFile = ResourceFinder.getFile(PrivacyCaPropertiesFile);
             String ClientFilesDownloadUsername = "", ClientFilesDownloadPassword = "";
         try {
-            FileInputStream in = new FileInputStream(privacyCaPropertiesFile);
-            privacyCaProperties.load(in);
-            ClientFilesDownloadUsername = privacyCaProperties.getProperty("ClientFilesDownloadUsername");
-            ClientFilesDownloadPassword = privacyCaProperties.getProperty("ClientFilesDownloadPassword");
-            in.close();
+            //FileInputStream in = new FileInputStream(privacyCaPropertiesFile);
+            //privacyCaProperties.load(in);
+            
+            ClientFilesDownloadUsername = My.configuration().getConfiguration().getString("ClientFilesDownloadUsername");
+            ClientFilesDownloadPassword = My.configuration().getConfiguration().getString("ClientFilesDownloadPassword");
+            //in.close();
         }
         catch(Exception e) {
             System.err.println("Error while loading PrivacyCA.properties: "+e.getMessage());

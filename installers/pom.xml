@@ -24,6 +24,8 @@
     <module>MonitLinuxInstaller</module>
     <module>mtwilson-portal-installer</module>
     <module>mtwilson-server</module>
+    <module>TomcatLinuxInstaller</module>
+    <module>PostgresLinuxInstaller</module>
   </modules>
 
   <profiles>

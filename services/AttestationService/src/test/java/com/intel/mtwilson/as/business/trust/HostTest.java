@@ -1,5 +1,7 @@
 package com.intel.mtwilson.as.business.trust;
 
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
@@ -9,6 +11,9 @@ import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
@@ -44,8 +49,8 @@ public class HostTest {
 
     
     @Test
-    public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException, MalformedURLException {
-        TblHosts tblHosts = new ASComponentFactory().getHostBO().getHostByName(new Hostname("10.1.71.149"));
+    public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException, IOException, MalformedURLException {
+        TblHosts tblHosts = My.jpa().mwHosts().findByName("10.1.71.149"); //new ASComponentFactory().getHostBO().getHostByName(new Hostname("10.1.71.149"));
         log.debug("tblhosts addon connection string length: {}", tblHosts.getAddOnConnectionInfo() == null ? "NULL" : tblHosts.getAddOnConnectionInfo().length());
         TxtHostRecord txtHostRecord = hostTrustBO.createTxtHostRecord(tblHosts);
         log.debug("txthostrecord addon connection string length: {}", txtHostRecord.AddOn_Connection_String == null ? "NULL" : txtHostRecord.AddOn_Connection_String.length());
@@ -69,7 +74,18 @@ public class HostTest {
         System.out.println("saml: "+saml);
     }
 
-    
+        @Test
+    public void testGetTrustStatusForKnownHostWithForceVerify() throws IOException {
+        HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
+        String saml = "";
+        try {
+            saml = htbo.getTrustWithSaml(knownHost, false);
+        } catch (ASException ae) {
+            System.out.println(ae.getErrorMessage());
+        }
+        System.out.println("saml: "+saml);
+    }
+
     
     @Test
     public void testAddHost154() throws IOException {
@@ -83,5 +99,22 @@ public class HostTest {
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
         hostBO.addHost(host2);
+    }
+    
+    @Test
+    public void testSplitCSV() {
+        String hosts = ",abc,def,,xyz ,wofj, owa,,";
+        // this apepars in our bulk host trust code:
+                Set<String> hostSet = new HashSet<String>();
+                for(String host : Arrays.asList(hosts.split(","))) {
+            log.debug("Host: '{}'", host);
+            if( !host.trim().isEmpty() ) {
+                hostSet.add(host.trim());
+            }
+                    
+                }
+        for(String host : hostSet) {
+            log.debug("Added Host: '{}'", host);
+        }
     }
 }

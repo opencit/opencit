@@ -24,7 +24,7 @@ function populateEditHostDataIntoTable(hostDetails) {
 		str+='<tr class="'+classValue+'">'+
 			'<td hostID="'+hostDetails[item].hostId+'" class="editRow0"><a href="javascript:;" onclick="fnEditHostInfo(this)"> Edit </a><span> | </span><a href="javascript:;" onclick="fnDeleteHostInfo(this)"> Delete </a></td>'+
 			'<td class="editRow1">'+hostDetails[item].hostName+'</td>'+
-			'<td class="editRow2">'+hostDetails[item].hostIPAddress+'&nbsp;</td>'+
+			//'<td class="editRow2">'+hostDetails[item].hostIPAddress+'&nbsp;</td>'+
 			'<td class="editRow3">'+hostDetails[item].hostPort+'&nbsp;</td>'+
 			'<td class="editRow10">'+hostDetails[item].hostDescription+'&nbsp;</td>'+
 			'<td class="editRow4">'+hostDetails[item].biosName+'&nbsp;</td>'+

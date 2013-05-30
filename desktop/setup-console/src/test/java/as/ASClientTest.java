@@ -65,11 +65,11 @@ public class ASClientTest {
         api = new ApiClient(new MapConfiguration(config));
     }
     
-    
+    /*
     @Test
     public void testSamlAssertion() throws Exception {
         String saml = api.getSamlForHost(new Hostname("1.2.3.4"));
         TrustAssertion assertion = api.verifyTrustAssertion(saml);
         assertion.getAssertion().getIssueInstant().toDate();
-    }
+    }*/
 }

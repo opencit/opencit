@@ -238,8 +238,9 @@ public class CreateIdentity  {
 			
                         
 //                        HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
-                        
+            System.err.println("Create Identity... Calling into HisPriv first time. using url = " + PrivacyCaUrl);
 			IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);
+            System.err.println("Create Identity... Got HisPrivCA ref, making request ize of msg = " + encryptedEkCert.toByteArray().length);
 			byte[] encrypted1 = hisPrivacyCAWebService2.identityRequestGetChallenge(newId.getIdentityRequest(), encryptedEkCert.toByteArray());
 			if(encrypted1.length == 1){
 				throw new PrivacyCAException("Identity request was rejected by Privacy CA in phase 1 of process");
@@ -263,6 +264,7 @@ public class CreateIdentity  {
 				decrypted1 = TpmModule.activateIdentity(ownerAuthRaw, keyAuthRaw, asym1, sym1, HisIdentityIndex);
 			
 			TpmIdentityRequest encryptedChallenge = new TpmIdentityRequest(decrypted1, (RSAPublicKey)pcaCert.getPublicKey(), false);
+            System.err.println("Create Identity... Calling into HisPriv second time, size of msg = " + encryptedChallenge.toByteArray().length);
 			byte[] encrypted2 = hisPrivacyCAWebService2.identityRequestSubmitResponse(encryptedChallenge.toByteArray());
 			if(encrypted2.length == 1){
 				log.warning("Identity request was rejected by Privacy CA in phase 2 of process");
@@ -294,7 +296,7 @@ public class CreateIdentity  {
 			
 			
 		}catch(Exception e){
-			throw new PrivacyCAException("FAILED",e);
+			throw new PrivacyCAException("FAILED: " + e.getMessage(),e);
 		}
 		finally{
 			if (pcaFileOut != null)

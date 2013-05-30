@@ -235,8 +235,8 @@ public class HostDetailsEntityVO implements Serializable {
 				+ ", biosName=" + biosName + ", biosBuildNo=" + biosBuildNo
 				+ ", vmmName=" + vmmName + ", vmmBuildNo=" + vmmBuildNo
 				+ ", updatedOn=" + updatedOn + ", emailAddress=" + emailAddress
-				+ ", location=" + location + ", oemName=" + oemName
-				+ ", vCenterDetails=" + vCenterDetails + "]";
+				+ ", location=" + location + ", oemName=" + oemName + "]";
+				// remove bad logs + ", vCenterDetails=" + vCenterDetails + 
 	}
 
 }

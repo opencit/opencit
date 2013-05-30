@@ -34,8 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -49,7 +49,7 @@ import org.apache.xmlrpc.XmlRpcException;
  */
 public class CitrixHostAgent implements HostAgent{
     private CitrixClient client;
-    
+    private Logger log = LoggerFactory.getLogger(getClass());
     
     public CitrixHostAgent(CitrixClient client) {
      this.client = client;
@@ -127,7 +127,7 @@ public class CitrixHostAgent implements HostAgent{
         try {
             info = this.client.getHostInfo();
         } catch(Exception ex){
-            System.out.println("getHostDetails getHostInfo caught: " + ex.getMessage());
+            log.debug("getHostDetails getHostInfo caught: " + ex.getMessage());
             throw new IOException("Cannot get Citrix host info: "+ex.getMessage(), ex);
        }
         
@@ -142,13 +142,12 @@ public class CitrixHostAgent implements HostAgent{
         record.VMM_OSName = info.getOsName();
         record.VMM_OSVersion = info.getOsVersion();
         record.AddOn_Connection_String = client.connectionString;
-        //TODO : Once Citrix updates their agent, we need to add this information.
-        record.Processor_Info = "";
+        record.Processor_Info = info.getProcessorInfo();
         
         try {
             record.AIK_Certificate = client.getAIKCertificate();
         }  catch(Exception ex){
-            System.out.println("getHostDetails getAikCert caught: " + ex.getMessage());
+            log.debug("getHostDetails getAikCert caught: " + ex.getMessage());
        }
         
         return record;
@@ -199,10 +198,11 @@ public class CitrixHostAgent implements HostAgent{
             attestationReport = sw.toString();
         
         } catch (XMLStreamException ex) {
-            Logger.getLogger(CitrixHostAgent.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(CitrixHostAgent.class.getName()).log(Level.SEVERE, null, ex);
+            log.error("Cannot get host attestation report", ex);
         }
         
-        System.err.println("stdalex-error getHostAttestationReport report:" + attestationReport);
+        log.debug("getHostAttestationReport report:" + attestationReport);
         return attestationReport;
     }
 
@@ -244,11 +244,11 @@ BwIDAQAB
         PublicKey pk = null;
          try {
             String crt  = client.getAIKCertificate();
-            System.out.println(" crt == " + crt);
+            log.debug(" crt == " + crt);
             pk = X509Util.decodePemPublicKey(crt);
             //client.getAIKCertificate().replace(X509Util.BEGIN_PUBLIC_KEY, "").replace(X509Util.END_PUBLIC_KEY, "").replaceAll("\n","").replaceAll("\r","");  
         }  catch(Exception ex){
-            System.out.println("getAik caught: " + ex.getMessage()); 
+            log.debug("getAik caught: " + ex.getMessage()); 
             
         }  
         return pk;
@@ -259,14 +259,15 @@ BwIDAQAB
         PcrManifest pcrManifest = new PcrManifest();
         String pcrList = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24";
          HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
-            
+         log.debug("CitrixHostAgent: getQuoteInformationForHost done");
          Iterator it = pcrMap.entrySet().iterator();
          while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
                 Pcr pcr = (Pcr)pairs.getValue();
                 pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcr.getIndex().toString())), new Sha1Digest(pcr.getValue().toString())));
-                it.remove(); // avoids a ConcurrentModificationException
+                //it.remove(); // avoids a ConcurrentModificationException
         }
+         log.debug("CitrixHostAgent: created PcrManifest");
        return pcrManifest;
     }
 

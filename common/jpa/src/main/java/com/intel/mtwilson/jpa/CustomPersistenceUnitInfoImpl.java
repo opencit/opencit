@@ -6,8 +6,6 @@ package com.intel.mtwilson.jpa;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -17,14 +15,6 @@ import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.apache.commons.dbcp.DataSourceConnectionFactory;
-import org.apache.commons.dbcp.PoolableConnectionFactory;
-import org.apache.commons.dbcp.PoolingDataSource;
-import org.apache.commons.dbcp.managed.BasicManagedDataSource;
-import org.apache.commons.dbcp.managed.ManagedDataSource;
-import org.apache.commons.pool.impl.GenericObjectPool;
-import org.objectweb.jotm.Current;
 //import org.apache.commons.dbcp.PoolingDataSource;
 
 /**

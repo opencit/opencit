@@ -60,6 +60,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		if (hostList!=null && hostList.size() > 0) {
 			Set<Hostname> listOfHostName = new HashSet<Hostname>();
 			for (HostDetailsEntityVO hostDetailsEntityVO : hostList) {
+                log.debug("getTrustStatusForHost: Adding host to list: {}", hostDetailsEntityVO.getHostName());
                 listOfHostName.add(new Hostname(hostDetailsEntityVO.getHostName()));
                 hostTempMap.put(hostDetailsEntityVO.getHostName(), hostDetailsEntityVO);
 			}
@@ -73,29 +74,30 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
                 	//get HostDetailsEntityVO for current host for which we are checking Trust Status.
                 	HostDetailsEntityVO hostDetails = hostTempMap.get(hostTrustXmlResponse.getName());
 	                try {
-	                	log.info("Getting trust Information for Host "+hostTrustXmlResponse.getName());
+	                	log.info("getTrustStatusForHost: Getting trust Information for Host "+hostTrustXmlResponse.getName());
 	                	if (hostTrustXmlResponse.getAssertion() != null) {
 	                		TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, hostTrustXmlResponse.getAssertion());
 	                		if( trustAssertion.isValid() ) {
+                                log.debug("getTrustStatusForHost: Trust assertion is valid");
 	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, trustAssertion,null));
 	                		}
 	                		else {
-	                			log.error("Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ trustAssertion.error().getMessage());
+	                			log.error("getTrustStatusForHost: Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ trustAssertion.error().getMessage());
 	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,trustAssertion.error().getMessage()));
 	                		}
 	                	}else {
-	                		log.error("Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage());
+	                		log.error("getTrustStatusForHost: Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage());
 	                		hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage()));
 	                	}
 	                } catch (Exception e) {
 	                	hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,StringEscapeUtils.escapeHtml(e.getMessage())));
-	                	log.error("Exception while getting trust status "+hostTrustXmlResponse.getName()+". "+ e.getMessage());
+	                	log.error("getTrustStatusForHost: Exception while getting trust status "+hostTrustXmlResponse.getName()+". "+ e.getMessage());
 	                	throw ConnectionUtil.handleDemoPortalException(e);
 	                }
                  }
                 
             } catch (Exception e) {
-                    log.error("Exception while getting trust status All Host."+ e.getMessage());
+                    log.error("getTrustStatusForHost: Exception while getting trust status All Host."+ e.getMessage());
                     throw ConnectionUtil.handleDemoPortalException(e);
             }
 		}else {
@@ -279,22 +281,27 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	public boolean saveNewHostData(HostDetailsEntityVO dataVO,AttestationService apiClientServices)throws DemoPortalException {
 		boolean result = false;
 		try {
-                                    ConnectionString connStr = null;
-                                    if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
-                                       log.debug("saveNewHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
-                                        connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
-                                    } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
-                                        log.debug("saveNewHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
-                                        connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:",""));
-                                    } else if (dataVO.getVmmName().toLowerCase().contains("xenserver")) {
-                                        log.debug("saveNewHostData: Using citrix connection string: {}", dataVO.getvCenterDetails());
-                                        connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:",""));
-                                    } else {
-                                        log.debug("saveNewHostData: Creating default intel connection string: {}", dataVO.getvCenterDetails());
-                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:",""));
-                                    }
-                                    dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
-                                    TxtHost hostObj = ConverterUtil.getTxtHostFromHostVO(dataVO);
+            ConnectionString connStr;
+            if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
+               //log.debug("saveNewHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
+                connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
+            } 
+            else {
+                connStr = new ConnectionString(dataVO.getvCenterDetails());
+            }
+            /*else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
+                //log.debug("saveNewHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
+                connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:",""));
+            } else if (dataVO.getVmmName().toLowerCase().contains("xenserver")) {
+                //log.debug("saveNewHostData: Using citrix connection string: {}", dataVO.getvCenterDetails());
+                connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:",""));
+            } else {
+                //log.debug("saveNewHostData: Creating default intel connection string: {}", dataVO.getvCenterDetails());
+                connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:",""));
+            }
+            */
+            dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
+            TxtHost hostObj = ConverterUtil.getTxtHostFromHostVO(dataVO);
                                     
 			//Call to REST Services to add host information.                                    
 			apiClientServices.addHost(hostObj);
@@ -318,22 +325,26 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	public boolean updateHostData(HostDetailsEntityVO dataVO,AttestationService apiClientServices)throws DemoPortalException {
 		boolean result = false;
 		try {
-                                    ConnectionString connStr = null;
-                                    if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
-                                       log.debug("updateHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
-                                        connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
-                                    } else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
-                                        log.debug("updateHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
-                                        connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:", ""));
-                                    } else if (dataVO.getVmmName().toLowerCase().contains("citrix")) {
-                                        log.debug("updateHostData: Using citrix connection string: {}", dataVO.getvCenterDetails());
-                                        connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:", ""));
-                                    } else {
-                                        log.debug("updateHostData: Creating default intel connection string: {}", dataVO.getvCenterDetails());
-                                        connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:", ""));
-                                    }
-                                    dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
-                                    TxtHost hostObj = ConverterUtil.getTxtHostFromHostVO(dataVO);
+            ConnectionString connStr;
+            if ((dataVO.getvCenterDetails() == null || dataVO.getvCenterDetails().isEmpty()) && dataVO.getHostIPAddress() != null && dataVO.getHostPort() != null) {
+               log.debug("updateHostData: Creating connection string from ip address {} and port {}", dataVO.getHostIPAddress(),dataVO.getHostPort()  );
+                connStr = ConnectionString.forIntel(dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort())); //new ConnectionString(Vendor.INTEL, dataVO.getHostIPAddress(), Integer.parseInt(dataVO.getHostPort()));
+            } 
+            else {
+                connStr = new ConnectionString(dataVO.getvCenterDetails());
+            }
+            /* else if (dataVO.getVmmName().toLowerCase().contains("vmware")) {
+                log.debug("updateHostData: Using vmware connection string: {}", dataVO.getvCenterDetails());
+                connStr = new ConnectionString(Vendor.VMWARE, dataVO.getvCenterDetails().replaceAll("vmware:", ""));
+            } else if (dataVO.getVmmName().toLowerCase().contains("citrix")) {
+                log.debug("updateHostData: Using citrix connection string: {}", dataVO.getvCenterDetails());
+                connStr = new ConnectionString(Vendor.CITRIX, dataVO.getvCenterDetails().replaceAll("citrix:", ""));
+            } else {
+                log.debug("updateHostData: Creating default intel connection string: {}", dataVO.getvCenterDetails());
+                connStr = new ConnectionString(Vendor.INTEL, dataVO.getvCenterDetails().replaceAll("intel:", ""));
+            }*/
+            dataVO.setvCenterDetails(connStr.getConnectionStringWithPrefix());
+            TxtHost hostObj = ConverterUtil.getTxtHostFromHostVO(dataVO);
             
 			//Call to Services to Update pre-configure host information.
 			apiClientServices.updateHost(hostObj);

@@ -8,7 +8,7 @@ intel_conf_dir=/etc/intel/cloudsecurity
 package_name=privacyca
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #tomcat_required_version=6.0.29
@@ -16,7 +16,7 @@ mysql_required_version=5.0
 #tomcat_name=apache-tomcat-6.0.29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev mysql-client-5.1"
-glassfish_application_name=HisPrivacyCAWebServices2
+webservice_application_name=HisPrivacyCAWebServices2
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
@@ -25,7 +25,7 @@ if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
 pcactl=`which pcactl 2>/dev/null`
-if [ -f "$asctl" ]; then
+if [ -f "$pcactl" ]; then
   echo "Uninstalling previous version..."
   $pcactl uninstall
 fi
@@ -45,6 +45,7 @@ cp $WAR_PACKAGE "${package_dir}"
 cp $SETUP_PACKAGE "${package_dir}/HisPrivacyCAWebServices2-setup.jar"
 chmod 600 privacyca-client.properties
 cp privacyca-client.properties "${package_dir}/privacyca-client.properties.example"
+
 
 # copy configuration file template to /etc
 mkdir -p "${intel_conf_dir}"
@@ -121,13 +122,11 @@ cp pcactl /usr/local/bin
 /usr/local/bin/pcactl setup
 register_startup_script /usr/local/bin/pcactl pcactl >> $INSTALL_LOG_FILE
 
-if [ -f "$intel_conf_dir/PrivacyCA.cer" ]; then
-  openssl x509 -inform der -in "$intel_conf_dir/PrivacyCA.cer" -out "$intel_conf_dir/PrivacyCA.pem"
-else
- echo_warning "Missing PrivacyCA.cer.  File will not be available via portals"
-fi
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"
   glassfish_permissions "${package_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
 fi

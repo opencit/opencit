@@ -31,6 +31,7 @@ import com.intel.mountwilson.datamodel.VmmHostDataVo;
 import com.intel.mountwilson.util.JSONView;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostVMMType;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
@@ -889,19 +890,19 @@ public class ManagementConsoleDataController extends MultiActionController{
                 res.setHeader("Content-Disposition","attachment;filename=MtWilsonRootCA.crt.pem");
 		
 		try {
-                    // Now get the API object from the session
-			        //ApiClient apiObj = getApiClientService(req, ApiClient.class);
+                    //Now get the API object from the session
+			        ApiClient apiObj = getApiClientService(req, ApiClient.class);
                     //X509Certificate[] certs = (X509Certificate[]) apiObj.getRootCaCertificates().toArray();
-                    //Set<X509Certificate> certs = apiObj.getRootCaCertificates();
-                    //Iterator i = certs.iterator();
-                    //X509Certificate cert = (X509Certificate) i.next();               
-                    //String ret = "-----BEGIN CERTIFICATE-----\n";
-                    //ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
-                    //ret += "\n-----END CERTIFICATE-----";
-                     MSConfig msc = new MSConfig();
-                    Properties prop = msc.getDefaults();
-                    String file = prop.getProperty("mtwilson.rootca.certificate.file");                                 
-                    String ret = readCertFile(file);
+                    Set<X509Certificate> certs = apiObj.getRootCaCertificates();
+                    Iterator i = certs.iterator();
+                    X509Certificate cert = (X509Certificate) i.next();               
+                    String ret = "-----BEGIN CERTIFICATE-----\n";
+                    ret += DatatypeConverter.printBase64Binary(cert.getEncoded());
+                    ret += "\n-----END CERTIFICATE-----";
+                    // MSConfig msc = new MSConfig();
+                    //Properties prop = msc.getDefaults();
+                    //String file = prop.getProperty("mtwilson.rootca.certificate.file");                                 
+                    //String ret = readCertFile(file);
                     responseView.addObject("Certificate",ret);
                     responseView.addObject("result",true);
                      log.info("ManagementConsoleDataController.getRootCACertificate <<<");  		
@@ -923,9 +924,6 @@ public class ManagementConsoleDataController extends MultiActionController{
                 res.setHeader("Content-Disposition","attachment;filename=PrivacyCA.pem");
 		
 		try {
-                    /* old way
-                     Now get the API object from the session
-			
                     ApiClient apiObj = getApiClientService(req, ApiClient.class);
                     Set<X509Certificate> certs = apiObj.getPrivacyCaCertificates();
                     Iterator i = certs.iterator();
@@ -936,7 +934,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                     responseView.addObject("Certificate",ret);
                     responseView.addObject("result",true);
                      log.info("ManagementConsoleDataController.getPrivacyCACertificate <<<");
-                     */
+                     /*
                     MSConfig msc = new MSConfig();
                     Properties prop = msc.getDefaults();
                     String file = prop.getProperty("mtwilson.privacyca.certificate.file");                                 
@@ -944,12 +942,13 @@ public class ManagementConsoleDataController extends MultiActionController{
                     responseView.addObject("Certificate",ret);
                     responseView.addObject("result",true);
                      log.info("ManagementConsoleDataController.getPrivacyCACertificat <<<"); 
+                     */
   		
-  	         } catch (Exception e) {
-			log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
-			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
-			responseView.addObject("result",false);
-			return responseView;  
+  	    } catch (Exception e) {
+                log.error("Error While getting Privacy CA Downlaoding Certificate. "+e.getMessage());			
+                responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
+                responseView.addObject("result",false);
+                return responseView;  
 		}
 		return responseView;
 		
@@ -982,16 +981,16 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	} 
     
-        public ModelAndView getTLSCertificate(HttpServletRequest req,HttpServletResponse res) {
+    public ModelAndView getTLSCertificate(HttpServletRequest req,HttpServletResponse res) {
 		log.info("In Data Contoller ManagementConsoleDataController.getTLSCertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
-                res.setHeader("Content-Disposition","attachment;filename=ssl.crt.pem");
+                res.setHeader("Content-Disposition","attachment;filename=ssl.crt");
 		
 		try {
                     // Now get the API object from the session
-			
+
                     ApiClient apiObj = getApiClientService(req, ApiClient.class);
                     Set<X509Certificate> certs = apiObj.getTlsCertificates();
                     Iterator i = certs.iterator();
@@ -1002,7 +1001,16 @@ public class ManagementConsoleDataController extends MultiActionController{
                     responseView.addObject("Certificate",ret);
                     responseView.addObject("result",true);
                      log.info("ManagementConsoleDataController.getTLSCertificate <<<");
-  		
+
+                    /*
+                     MSConfig msc = new MSConfig();
+                    Properties prop = msc.getDefaults();
+                    String file = prop.getProperty("mtwilson.tls.certificate.file");                                 
+                    String ret = readCertFile("/etc/intel/cloudsecurity/ssl.crt.pem");
+                    responseView.addObject("Certificate",ret);
+                    responseView.addObject("result",true);
+                     log.info("ManagementConsoleDataController.getPrivacyCACertificat <<<"); 
+                     */
   	         } catch (Exception e) {
 			log.error("Error While getting TLS Downlaoding Certificate. "+e.getMessage());			
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
@@ -1092,11 +1100,16 @@ public class ManagementConsoleDataController extends MultiActionController{
 			log.error(e.toString());
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             if(e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
                 responseView.addObject("noHosts",true);
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             }else if(e.getMessage().toLowerCase().contains("peer not authenticated")){
+                // PEER NOT AUTH FIX
                 responseView.addObject("ResetPeer",true);
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+            }else if(e.getMessage().toLowerCase().contains("Cannot parse response")) {
+                responseView.addObject("parseError",true);
+                responseView.addObject("message", "There was a error parsing the response from the server.  Please reload the page to fix this issue");
             }
 			return responseView;
 		}
@@ -1251,7 +1264,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 				responseView.addObject("result",false);
 				responseView.addObject("message",StringEscapeUtils.escapeHtml(e1.getMessage()));
 			}
-		System.out.println(hostObject);
+		//System.out.println(hostObject);
 		ObjectMapper mapper = new ObjectMapper();
 		HostDetailsEntityVO dataVO = new HostDetailsEntityVO();
 		
@@ -1278,10 +1291,10 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 		try {
 			if (newhost) {
-				System.err.println("dataForNew : "+dataVO);
+				//System.err.println("dataForNew : "+dataVO);
 				responseView.addObject("result",demoPortalServices.saveNewHostData(dataVO,getAttestationService(req,AttestationService.class)));
 			}else {
-				System.err.println("dataForOLD : "+dataVO);
+				//System.err.println("dataForOLD : "+dataVO);
 				responseView.addObject("result", demoPortalServices.updateHostData(dataVO,getAttestationService(req,AttestationService.class)));
 			}
 		} catch (DemoPortalException e) {

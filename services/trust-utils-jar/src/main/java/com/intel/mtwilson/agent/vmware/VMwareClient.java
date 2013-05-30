@@ -5,8 +5,10 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsClient;
 import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.mtwilson.tls.TlsPolicyManager;
 import com.vmware.vim25.*;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -79,88 +81,14 @@ public class VMwareClient implements TlsClient {
             
         }
         
-	private static class TrustAllTrustManager implements javax.net.ssl.TrustManager,
-			javax.net.ssl.X509TrustManager {
-
-		@Override
-		public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-			return null;
-		}
-
-		@Override
-		public void checkServerTrusted(
-				java.security.cert.X509Certificate[] certs, String authType)
-				throws java.security.cert.CertificateException {
-			for (java.security.cert.X509Certificate cert : certs) {
-				cert.checkValidity();
-			}
-
-			return;
-		}
-
-		@Override
-		public void checkClientTrusted(
-				java.security.cert.X509Certificate[] certs, String authType)
-				throws java.security.cert.CertificateException {
-			for (java.security.cert.X509Certificate cert : certs) {
-				cert.checkValidity();
-			}
-			return;
-		}
-	}
-        
-	private static void trustAllHttpsCertificates() throws NoSuchAlgorithmException, KeyManagementException {
-		// Create a trust manager that does not validate certificate chains:
-		javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[1];
-		javax.net.ssl.TrustManager tm = new TrustAllTrustManager();
-		trustAllCerts[0] = tm;
-		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
-				.getInstance("SSL");
-		javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
-		sslsc.setSessionTimeout(0);
-		sc.init(null, trustAllCerts, null);
-		javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc
-				.getSocketFactory());
-	}
         
         // Bug: 579 - This method is added so that we can connect to the vCenter without any TLS policy settings and connection pooling options.
         // This would be needed by the Management Console to retrive the list of hosts from the cluster.
-	protected void connect2(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException {
+	protected void connect2(URL url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, IOException {
+        setTlsPolicy(new InsecureTlsPolicy());
+        TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+        connect(url.toExternalForm(), userName, password);
 
-		HostnameVerifier hostNameVerifier = new HostnameVerifier() {
-
-			@Override
-			public boolean verify(String urlHostName, SSLSession session) {
-				return true;
-			}
-		};
-
-		trustAllHttpsCertificates();
-
-		HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
-
-		SVC_INST_REF.setType(SVC_INST_NAME);
-		SVC_INST_REF.setValue(SVC_INST_NAME);
-
-		vimService = new VimService();
-		vimPort = vimService.getVimPort();
-		Map<String, Object> ctxt = ((BindingProvider) vimPort)
-				.getRequestContext();
-
-		ctxt.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
-		ctxt.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-
-		serviceContent = vimPort.retrieveServiceContent(SVC_INST_REF);
-		
-		session = vimPort.login(serviceContent.getSessionManager(), userName, password,
-				null);
-		
-		printSessionDetails();
-		
-		isConnected = true;
-
-		propCollectorRef = serviceContent.getPropertyCollector();
-		rootRef = serviceContent.getRootFolder();
 	}
         
         /*
@@ -211,9 +139,17 @@ public class VMwareClient implements TlsClient {
                 else {
                     HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
                 }*/
-                HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+                log.debug("Connecting to vcenter with TlsPolicy: {}", tlsPolicy.getClass().getName());
+                log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
+                log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
                 
-                setupSslCertificateTrustManager();
+		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
+				.getInstance("SSL");
+		javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
+		sslsc.setSessionTimeout(0);
+		sc.init(null, new javax.net.ssl.TrustManager[] {tlsPolicy.getTrustManager() }, null);
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
                 
 
 		SVC_INST_REF.setType(SVC_INST_NAME);
@@ -248,9 +184,9 @@ public class VMwareClient implements TlsClient {
 
 	private void printSessionDetails() {
 		if(session != null){
-			log.info("Logged in Session key " + session.getKey());
+			log.debug("Logged in Session key " + session.getKey());
 		}else{
-			log.info("session is null");
+			log.debug("session is null");
 		}
 		
 	}
@@ -296,6 +232,27 @@ public class VMwareClient implements TlsClient {
 		return ret;
 	}
 
+    /**
+     * Issue #784 performance
+     * This method returns just the requested host, in contrast to getEntitiesByType which returns all the hosts
+     * and then we have to query each one to see if it's the one we want
+     */
+	public ManagedObjectReference getHostReference(String hostname) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+		ManagedObjectReference hostRef = null;
+
+        //ManagedObjectReference searchIndex;
+        //vimPort.findByDnsName and vimPort.findByIp ....  first parameter is the searchindex mor, second is datacenter (optional, can be null), , third is the dnsname/ip,  fourth is true for vm or false for host.
+        // page 20: obtain manageed obejct reference by accessor method, for searchindex
+//        ServiceContent sc = vimPort.retrieveServiceContent(hostRef)
+        ManagedObjectReference searchIndex = serviceContent.getSearchIndex();
+        hostRef = vimPort.findByDnsName(searchIndex, null, hostname, false); 
+        if( hostRef == null ) {
+            hostRef = vimPort.findByIp(searchIndex, null, hostname, false); 
+        }
+        return hostRef;
+
+	} 
+    
 	// / <summary>
 	// / Based on the Entity type this function searches through all the objects
 	// and returns
@@ -579,6 +536,7 @@ public class VMwareClient implements TlsClient {
 	// / Retrieves the vCenter version information.
 	// / </summary>
 	// / <returns>Version details.</returns>
+        /*
 	protected String getVCenterVersion(String vcenterString) {
 		try {
 			connect(vcenterString);
@@ -590,7 +548,7 @@ public class VMwareClient implements TlsClient {
 		} finally {
 			disconnect();
 		}
-	}
+	}*/
 
         /**
          * XXX temporary public access until the code is refactored
@@ -602,6 +560,11 @@ public class VMwareClient implements TlsClient {
 	}
 
         /**
+         * performance of this method is very bad, it has been observed at 1 second per iteration of the comparison
+         * loop. see getHostReference for obtaining a managed object reference for a specific host  (instead of for all hosts and then querying each
+         * one for the name)
+         * 
+         * 
          * TODO: this method should return a VCenterHost object, and VCenterHost should provide convenient access
          * to information such as "is tpm enabled" and "get attestation report" for that host, wrapping all of the
          * calls with managed object references to the vmware api. 
@@ -614,11 +577,11 @@ public class VMwareClient implements TlsClient {
 		if (hostObjects != null && hostObjects.length != 0) {
 			for (ManagedObjectReference hostObj : hostObjects) {
 				String hostNameFromVC = getHostInfo(hostObj);
-				log.info(
+				log.debug(
 						"getHostObject - comparing hostNameFromVC {} requested hostName {}",
 						new Object[] { hostNameFromVC, hostName });
 				if (hostNameFromVC.equals(hostName)) {
-					log.info(String.format(
+					log.debug(String.format(
 							"Found Managed Object Reference for host %s ",
 							hostName));
 					return hostObj;
@@ -664,29 +627,6 @@ public class VMwareClient implements TlsClient {
 		}
 	} */
 
-	private void setupSslCertificateTrustManager() throws NoSuchAlgorithmException, KeyManagementException {
-		// Create a trust manager that does not validate certificate chains:
-		javax.net.ssl.TrustManager[] trustAllCerts = new javax.net.ssl.TrustManager[1];
-//                javax.net.ssl.TrustManager tm;
-                /*
-                if( trustManager == null ) {
-                    log.warn("SSL Trusted Certificates not set; will accept any certificate");
-                    tm = new TrustAllTrustManager();
-                }
-                else {
-                    tm = trustManager;
-                }
-		trustAllCerts[0] = tm;
-                */
-                trustAllCerts[0] = tlsPolicy.getTrustManager(); // bug #497
-		javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
-				.getInstance("SSL");
-		javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
-		sslsc.setSessionTimeout(0);
-		sc.init(null, trustAllCerts, null);
-		javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sc
-				.getSocketFactory());
-	}
 
 	public String byteArrayToBase64String(List<Byte> digestValue) {
 		String digest = Base64.encodeBase64String(toByteArray(digestValue));
@@ -833,15 +773,17 @@ public class VMwareClient implements TlsClient {
         ArrayList hostList;
         ArrayList hostDetailList = new ArrayList <TxtHostRecord> ();
         ManagedObjectReference clusterMOR = null;
+        ConnectionString.VmwareConnectionString vmwareURL;
+          try {
+            vmwareURL = ConnectionString.VmwareConnectionString.forURL(connectionString);            
+        }
+          catch(Exception e) {
+              throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING,					connectionString); // XXX could result in a leaked secret
+          }
         try
         {
-            String[] vcenterConn = connectionString.split(";");
-		if (vcenterConn.length != 3) {
-			throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING,
-					connectionString);
-		}
-		// Connect to the vCenter server with the passed in parameters
-		connect2(vcenterConn[0], vcenterConn[1], vcenterConn[2]);            
+                // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet
+                connect2(vmwareURL.toURL(), vmwareURL.getUsername(), vmwareURL.getPassword());            
 
             if(clusterName != null) 
             {
@@ -1998,7 +1940,7 @@ public class VMwareClient implements TlsClient {
          String error = "Error Occured";
          if(fault != null) {
             error = fault.getLocalizedMessage();
-            System.out.println("Message " + fault.getLocalizedMessage());
+            log.error("Message " + fault.getLocalizedMessage());
          }
          return error;
       }

@@ -7,7 +7,7 @@ package com.intel.mtwilson.tls;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.model.InternetAddress;
+//import com.intel.mtwilson.model.InternetAddress;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import static org.junit.Assert.*;
@@ -40,10 +40,12 @@ public class TestTlsPolicy {/*
         // prepare the repository object
         KeystoreCertificateRepository repo = new KeystoreCertificateRepository(keystore);
         // lookup by address can return an exact match on alias, but not a partial match
+        /*
         assertNotNull(repo.getCertificateForAddress(new InternetAddress("test1")));
         assertNull(repo.getCertificateForAddress(new InternetAddress("test1-1")));
         assertNull(repo.getCertificateForAddress(new InternetAddress("test")));
         assertNull(repo.getCertificateForAddress(new InternetAddress("est1")));
+        */
         // lookup by subject and issuer
         assertNotNull(repo.getCertificateForSubject("CN=test1,OU=Mt Wilson,O=Trusted Data Center,C=US"));
         assertEquals(1, repo.getCertificateForSubject("CN=test1,OU=Mt Wilson,O=Trusted Data Center,C=US").size());

@@ -11,7 +11,7 @@ apiclient_java=${apiclient_dir}/java
 env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
 #apiclient_shell=${apiclient_dir}/shell
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 
@@ -21,11 +21,13 @@ if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-#if [ -f ${apiclient_dir}/functions ]; then  . ${apiclient_dir}/functions; else echo "Missing file: ${apiclient_dir}/functions";   exit 1; fi
+if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+
+# XXX TODO can remove this later; converting  all package_required_version variable names to be upper case, which can be defined in mtwilson.env or for which we have a default
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
@@ -46,11 +48,13 @@ call_apiclient() {
   $java -cp "$APICLIENT_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
 }
 
+# The EclipseLink persistence framework sends messages to stdout that start with the text [EL Info] or [EL Warning].
+# We suppress those because they are not useful for the customer, only for debugging.
 call_setupcommand() {
   if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
   SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]"
 }
 
 find_ctl_commands() {
@@ -58,9 +62,10 @@ find_ctl_commands() {
   msctl=`which msctl 2>/dev/null`
   wlmctl=`which wlmctl 2>/dev/null`
   asctl=`which asctl 2>/dev/null`
-  mcctl=`which mcctl 2>/dev/null`
-  wpctl=`which wpctl 2>/dev/null`
-  tdctl=`which tdctl 2>/dev/null`
+  #mcctl=`which mcctl 2>/dev/null`
+  #wpctl=`which wpctl 2>/dev/null`
+  #tdctl=`which tdctl 2>/dev/null`
+  mpctl=`which mpctl 2>/dev/null`
 }
 
 mtwilson_saml_cert_report() {
@@ -107,9 +112,15 @@ Detected the following options on this server:"
   prompt_with_default MTWILSON_SERVER "Mt Wilson Server:"
   export MTWILSON_SERVER
   echo
-
-  mysql_userinput_connection_properties
-  export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
+  if using_mysql; then
+    mysql_userinput_connection_properties
+    export MYSQL_HOSTNAME MYSQL_PORTNUM MYSQL_DATABASE MYSQL_USERNAME MYSQL_PASSWORD
+  elif using_postgres; then
+    postgres_userinput_connection_properties
+    export POSTGRES_HOSTNAME POSTGRES_PORTNUM POSTGRES_DATABASE POSTGRES_USERNAME POSTGRES_PASSWORD
+    echo "$POSTGRES_HOSTNAME:$POSTGRES_PORTNUM:$POSTGRES_DATABASE:$POSTGRES_USERNAME:$POSTGRES_PASSWORD" > $HOME/.pgpass
+    chmod 0600 $HOME/.pgpass
+  fi
 
   # Attestation service auto-configuration
   export PRIVACYCA_SERVER=${MTWILSON_SERVER}
@@ -129,9 +140,10 @@ Detected the following options on this server:"
   if [ -n "$asctl" ]; then $asctl setup; fi
   if [ -n "$msctl" ]; then $msctl setup; fi
   if [ -n "$wlmctl" ]; then $wlmctl setup; fi
-  if [ -n "$mcctl" ]; then $mcctl setup; fi
-  if [ -n "$wpctl" ]; then $wpctl setup; fi
-  if [ -n "$tdctl" ]; then $tdctl setup; fi
+  #if [ -n "$mcctl" ]; then $mcctl setup; fi
+  #if [ -n "$wpctl" ]; then $wpctl setup; fi
+  #if [ -n "$tdctl" ]; then $tdctl setup; fi
+  if [ -n "$mpctl" ]; then $mpctl setup; fi
 
   # java setup tool - right now just checks database encryption, in the future it will take over some of the setup functions from the *ctl scripts which can be done in java
   shift
@@ -144,9 +156,10 @@ all_status() {
   if [ -n "$asctl" ]; then $asctl status; fi
   if [ -n "$msctl" ]; then $msctl status; fi
   if [ -n "$wlmctl" ]; then $wlmctl status; fi
-  if [ -n "$mcctl" ]; then $mcctl status; fi
-  if [ -n "$wpctl" ]; then $wpctl status; fi
-  if [ -n "$tdctl" ]; then $tdctl status; fi
+  #if [ -n "$mcctl" ]; then $mcctl status; fi
+  #if [ -n "$wpctl" ]; then $wpctl status; fi
+  #if [ -n "$tdctl" ]; then $tdctl status; fi
+  if [ -n "$mpctl" ]; then $mpctl status; fi
 }
 
 
@@ -162,6 +175,11 @@ setup_env() {
     mysql_detect > /dev/null
     echo "mysql=$mysql"
     #export mysql
+  elif using_postgres; then
+    postgres_detect > /dev/null
+    #echo "postgres=$psql"
+    #the actuall veriable for postgres commands is psql
+    echo "psql=$psql"
   fi
   echo "WEBSERVER_VENDOR=$WEBSERVER_VENDOR"
   echo "DATABASE_VENDOR=$DATABASE_VENDOR"
@@ -171,7 +189,14 @@ setup_env() {
     echo "glassfish_bin=$glassfish_bin"
     echo "glassfish=\"$glassfish\""
     #export GLASSFISH_HOME glassfish_bin glassfish
+  elif using_tomcat; then
+    tomcat_detect > /dev/null
+    echo "TOMCAT_HOME=$TOMCAT_HOME"
+    echo "tomcat_bin=$tomcat_bin"
+    echo "tomcat=\"$tomcat\""
   fi
+  echo "MTWILSON_SERVER=$MTWILSON_SERVER"
+  echo "DEFAULT_API_PORT=$DEFAULT_API_PORT"
 }
 
 RETVAL=0
@@ -219,8 +244,37 @@ case "$1" in
   glassfish-enable-logging)
         glassfish_enable_logging
         ;;
+  tomcat-detect)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_detect ${2:-$TOMCAT_REQUIRED_VERSION}
+        tomcat_env_report
+        ;;
+  tomcat-start)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_start_report
+        ;;
+  tomcat-stop)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_shutdown
+        ;;
+  tomcat-restart)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_restart
+        ;;
+  tomcat-status)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        tomcat_require
+        tomcat_running_report
+        tomcat_sslcert_report
+        ;;
+  tomcat_sslcert)
+        tomcat_create_ssl_cert_prompt
+        ;;  
   mysql-detect)
-        mysql_detect ${2:-$mysql_required_version}
+        mysql_detect $2
         mysql_env_report
         ;;
   mysql-sslcert)
@@ -232,7 +286,7 @@ case "$1" in
         mysql_create_ssl "Trust Dashboard"
         ;;
   java-detect)
-        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
+        java_detect $2
         java_env_report
         ;;
   localhost-integration)
@@ -272,7 +326,7 @@ case "$1" in
         call_setupcommand EraseLogs
         ;;
   erase-users)
-        call_setupcommand EraseUserAccounts
+        call_setupcommand EraseUserAccounts $@
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
@@ -299,21 +353,24 @@ case "$1" in
         echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
 		echo "Stopping Monit service..."
 		service monit stop &> /dev/null
-		if [ -f /etc/monit/monitrc ]; then
-		 #remove monit config so when it starts back up it has nothing to monitor
-		 # idealy here we should be uninstalling instead
-		 rm -fr /etc/monit/monitrc
-		fi
+		# only remove the config files we added to conf.d, not anything else
+		rm -fr /etc/monit/conf.d/*.mtwilson
         # java:  rm -rf /usr/share/jdk1.6.0_29
+        # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
+        java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
+        tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""
+        glassfish_clear; export GLASSFISH_HOME=""; export glassfish_bin=""; export glassfish=""
+        postgres_clear; export POSTGRES_HOME=""; export psql=""
+        mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"
         ;;
   help)
         echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         ;;
   *)
         echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
         exit 1
 esac
 

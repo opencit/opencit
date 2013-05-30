@@ -43,7 +43,7 @@ public class ASConfig  {
         defaults.setProperty("daa.enabled", "false");
         defaults.setProperty("com.intel.mountwilson.as.trustagent.timeout", "3"); // seconds
         defaults.setProperty("com.intel.mountwilson.as.attestation.hostTimeout","30");  // seconds
-        
+          
         // Setting to control the # of parallel threads & associated time out for supporting multithreading during CRUD operations on hosts
         defaults.setProperty("mtwilson.bulkmgmt.threads.max", "32"); 
         defaults.setProperty("com.intel.mountwilson.as.hostmgmt.hostTimeout","600");          

@@ -429,7 +429,7 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
 		$('#MainContent_tbHostName').val(responseJSON.hostData.hostName);
         $('#MainContent_tbHostName').attr('disabled','disabled');
         var value = responseJSON.hostData.hostIPAddress == 'null' || responseJSON.hostData.hostIPAddress == undefined ? "" : responseJSON.hostData.hostIPAddress;
-		$('#MainContent_tbHostIP').val(value);
+		//$('#MainContent_tbHostIP').val(value);
 		value = responseJSON.hostData.hostPort == 'null' || responseJSON.hostData.hostPort == undefined ? "" : responseJSON.hostData.hostPort;
 		$('#MainContent_tbHostPort').val(value);
 		value = responseJSON.hostData.hostDescription == 'null' || responseJSON.hostData.hostDescription == undefined ? "" : responseJSON.hostData.hostDescription;
@@ -468,9 +468,9 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
 function updateHostInfo() {
     var ipValid = true;
         if (isVmware == 0 || isVmware == 2) { // intel and citrix hosts
-         if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
-             ipValid=false;
-         }   
+         //if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
+         //    ipValid=false;
+         //}   
         }else{ // vmware host
           if(!fnValidateIpAddress($('#MainContent_tbVCenterAddress').val())) {
              ipValid=false;

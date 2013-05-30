@@ -60,7 +60,7 @@ public class ConnectionString {
     }
     
     public static VendorConnection parseConnectionString(String connectionString) throws MalformedURLException {
-        log.debug("Connection string: {}", connectionString);
+//        log.debug("Connection string: {}", connectionString);  // do not log this regularly because it may contain a password
         VendorConnection vc = new VendorConnection();
         vc.vendor = vendorFromURL(connectionString);
         String vendorURL;
@@ -72,13 +72,13 @@ public class ConnectionString {
             vendorURL = connectionString.substring(vc.vendor.name().length()+1);
         }
         if( vc.vendor != null ) {
-            log.debug("Vendor URL: {}", vendorURL);
+//            log.debug("Vendor URL: {}", vendorURL); // do not log this regularly because it may contain a password
             int optionStartIndex = vendorURL.indexOf(urlOptionsDelimiter);
             if( optionStartIndex > -1 ) {
                 String urlPart = vendorURL.substring(0, optionStartIndex);
                 String optionsPart = vendorURL.substring(optionStartIndex+1); // skip the delimiter
                 log.debug("URL part: {}", urlPart);
-                log.debug("Options part: {}", optionsPart);
+//                log.debug("Options part: {}", optionsPart);  // do not log this regularly because it may contain a password
                 vc.url = new URL(urlPart); // vendorURL without the options
                 vc.options = parseOptions(optionsPart);
             }
@@ -86,7 +86,7 @@ public class ConnectionString {
                 vc.url = new URL(vendorURL);
                 vc.options = null;
             }
-        }
+        }   
         return vc;
     }
     
@@ -215,6 +215,7 @@ public class ConnectionString {
             }
         } catch (MalformedURLException ex) {
             log.error(ex.toString());
+            ex.printStackTrace(System.err);
             throw ex;
         }
     }
@@ -238,7 +239,7 @@ public class ConnectionString {
 
     /**
      * This method returns the formated connection string based on the parameters specified without the prefix of the
-     * vendor. Example of Citrix: citrix:https://xenserver:port;username;password Example of VMware:
+     * vendor. Example of Citrix: https://xenserver:port;username;password Example of VMware:
      * https://vcenterserver:port/sdk;username;password Example of Xen/KVM: https://hostname:9999
      *
      * @return
@@ -254,12 +255,53 @@ public class ConnectionString {
                     String.format("%s", this.addOnConnectionString);
         } else if (this.vendor == Vendor.CITRIX) {
             connectionString = (this.addOnConnectionString.isEmpty()) ? 
-                    String.format("https://%s:%d;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
+                    String.format("https://%s:%d/;%s;%s", this.managementServerName, this.port, this.userName, this.password) : 
                     String.format("%s", this.addOnConnectionString);
         } else {
             connectionString = "";
         }
         return connectionString;
+    }
+    
+    /**
+     * Returns just the URL portion of the connection string without any options.
+     * This is important because for citrix,  the format %s:%d;%s;%s isn't a valid URL. there must be a slash
+     * after the port number.
+     * 
+     * But this is the method that should be used when you want to display a connection string in the UI or logs -  since
+     * this method will not leak any secrets.
+     * 
+     * @return 
+     */
+    public URL getURL() {
+        try {
+            if (this.vendor == Vendor.INTEL) {
+                return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
+            } 
+            else if (this.vendor == Vendor.VMWARE) {
+                if( this.addOnConnectionString.isEmpty() ) {
+                    return new URL(String.format("https://%s:%d/sdk", this.managementServerName, this.port));
+                }
+                else {
+                    return new URL(this.addOnConnectionString);
+                }
+            } 
+            else if (this.vendor == Vendor.CITRIX) {
+                if( this.addOnConnectionString.isEmpty() ) {
+                    return new URL(String.format("https://%s:%d", this.managementServerName, this.port));
+                }
+                else {
+                    return new URL(this.addOnConnectionString);
+                }
+            } else {
+                return null;
+            }
+        }
+        catch(MalformedURLException e) {
+            log.error("ConnectionString.getURL: "+e.toString(), e);
+//            log.debug("Connection string: ", this.addOnConnectionString);
+            throw new IllegalArgumentException("Invalid connection string");
+        }
     }
 
     /**
@@ -337,7 +379,7 @@ public class ConnectionString {
             IntelConnectionString cs = new IntelConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.INTEL ) {
-                throw new IllegalArgumentException("Not an Intel Host URL: "+url);
+                throw new IllegalArgumentException("Not an Intel Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
@@ -365,13 +407,13 @@ public class ConnectionString {
         }
         @Override
         public String toString() {
-            return String.format("https://%s:%d;u=%s;p=%s", hostAddress.toString(), port, username, password);
+            return String.format("https://%s:%d/;u=%s;p=%s", hostAddress.toString(), port, username, password);
         }
         public static CitrixConnectionString forURL(String url) throws MalformedURLException {
             CitrixConnectionString cs = new CitrixConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.CITRIX ) {
-                throw new IllegalArgumentException("Not a Citrix Host URL: "+url);
+                throw new IllegalArgumentException("Not a Citrix Host URL: "+info.url.toExternalForm());
             }
             cs.hostAddress = new InternetAddress(info.url.getHost());
             cs.port = portFromURL(info.url);
@@ -392,6 +434,13 @@ public class ConnectionString {
         public int getPort() { return port; }
         public String getUsername() { return username; }
         public String getPassword() { return password; }
+        
+        public void setVCenter(InternetAddress vcenterAddress) { this.vcenterAddress = vcenterAddress; }
+        public void setHost(InternetAddress hostAddress) { this.hostAddress = hostAddress; }
+        public void setPort(int port) { this.port = port; }
+        public void setUsername(String username) { this.username = username; }
+        public void setPassword(String password) { this.password = password; }
+        
         public URL toURL() {
             try {
                 return new URL(String.format("https://%s:%d/sdk", vcenterAddress.toString(), port));
@@ -409,7 +458,7 @@ public class ConnectionString {
             VmwareConnectionString cs = new VmwareConnectionString();
             VendorConnection info = parseConnectionString(url);
             if( info.vendor !=  Vendor.VMWARE ) {
-                throw new IllegalArgumentException("Not a VMware Host URL: "+url);
+                throw new IllegalArgumentException("Not a VMware Host URL: "+info.url.toExternalForm());
             }
             cs.vcenterAddress = new InternetAddress(info.url.getHost());
             cs.hostAddress = new InternetAddress(info.options.getString(OPT_HOSTNAME)); // new InternetAddress(hostnameFromURL(url));
@@ -808,15 +857,15 @@ public class ConnectionString {
 //    }
 
     private static String vendorConnectionFromURL(String url) throws MalformedURLException {
-        log.debug("url: {}", url);
+//        log.debug("url: {}", url);  // do not log this regularly because it may contain a password
         Vendor v = vendorFromURL(url);
         if( v == null ) {
             return null;
         }
-        log.debug("vendor name: {}", v.name());
-        log.debug("vendor name length: {}", v.name().length());
+//        log.debug("vendor name: {}", v.name());
+//        log.debug("vendor name length: {}", v.name().length());
         String str = url.substring(v.name().length()+1); // start one character after the vendor prefix (vendor name followed by the colon)
-        log.debug("vendor connection: {}", str);
+//        log.debug("vendor connection: {}", str);
         return str;
     }
     
@@ -824,15 +873,16 @@ public class ConnectionString {
     public static ConnectionString from(TxtHostRecord host) throws MalformedURLException {
         String connectionString = host.AddOn_Connection_String;
         if( connectionString == null || connectionString.isEmpty() ) {
-            if( host.IPAddress != null && !host.IPAddress.isEmpty() && host.Port != null ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, host.Port);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.IPAddress +" and port: "+host.Port);
+            if( host.HostName != null && !host.HostName.isEmpty() && host.Port != null ) {
+                connectionString = String.format("intel:https://%s:%d", host.HostName, host.Port);
+                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName + " with IP address: "+host.HostName +" and port: "+host.Port);
+                return new ConnectionString(connectionString);
             }
-            else if(host.IPAddress != null ) {
-                connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
-                System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
-            }
-            return new ConnectionString(connectionString);
+            //else if(host.IPAddress != null ) {
+            //    connectionString = String.format("intel:https://%s:%d", host.IPAddress, 9999);
+            //    System.out.println("Assuming Intel connection string " + connectionString + " for host: " + host.HostName +" with IP address: "+host.IPAddress);
+            //}
+            throw new IllegalArgumentException("Host does not have a connection string or hostname set");
         }
         else if (connectionString.startsWith("intel") || connectionString.startsWith("vmware")  || connectionString.startsWith("citrix")) {
             return new ConnectionString(connectionString);

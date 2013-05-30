@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
@@ -23,7 +24,7 @@ public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConne
     public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {
         VMwareClient client = new VMwareClient();
         client.setTlsPolicy(tlsConnection.getTlsPolicy());
-        client.connect(tlsConnection.getConnectionString());        
+        client.connect(tlsConnection.getURL().toExternalForm());        
         return client;
     }
     

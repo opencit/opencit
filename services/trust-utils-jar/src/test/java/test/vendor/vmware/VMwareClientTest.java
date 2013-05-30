@@ -1,6 +1,17 @@
 package test.vendor.vmware;
 
 import org.junit.Test;
+import com.intel.mtwilson.agent.vmware.*;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.vmware.vim25.InvalidLocaleFaultMsg;
+import com.vmware.vim25.InvalidPropertyFaultMsg;
+import com.vmware.vim25.ManagedObjectReference;
+import com.vmware.vim25.RuntimeFaultFaultMsg;
+import java.io.IOException;
+import java.net.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 //import sun.misc.BASE64Encoder;
 //import sun.misc.BASE64Decoder;
 /**
@@ -17,7 +28,7 @@ import org.junit.Test;
  * @author jbuhacoff
  */
 public class VMwareClientTest {
-
+    private Logger log = LoggerFactory.getLogger(getClass());
 	/*
     @Test
     public void commonsEncoderCompatibleWithSun() {
@@ -35,7 +46,7 @@ public class VMwareClientTest {
         assertEquals(sunResult, commonsResult);
     }
     */
-    
+    /*
     @Test
     public void testHelper() {
         try {
@@ -55,6 +66,35 @@ public class VMwareClientTest {
             e.printStackTrace();
         }
 
+    }
+    */
+    
+    @Test
+    public void testConnectAndFindHost() throws Exception {
+        /*
+        VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
+        VmwareHostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
+        log.debug("is tpm present? {}", agent.isTpmPresent());
+        ManagedObjectReference[] array = agent.getClient().getHostReference("10.1.71.173");
+        if( array == null ) {
+            log.debug("did not find any items");
+            return;
+        }
+        log.debug("found {} items", array.length);
+        for(int i=0; i<array.length; i++) {
+            log.debug("item: ", array[i].getType());
+        }*/
+        VMwareClient client = new VMwareClient();
+        client.setTlsPolicy(new InsecureTlsPolicy());
+        client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
+        ManagedObjectReference ref = client.getHostReference("10.1.71.173");
+        if( ref == null ) {
+            log.debug("failed to get reference to host");
+        }
+        else {
+            log.debug("got reference!");
+        }
+        client.disconnect();
     }
     
 }

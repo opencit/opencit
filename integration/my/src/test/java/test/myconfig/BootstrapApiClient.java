@@ -15,6 +15,7 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -41,21 +42,24 @@ public class BootstrapApiClient {
      */
     @Test
     public void testCreateMyUser() throws Exception {
-        MyConfiguration config = new MyConfiguration();
+        MyConfiguration config = My.configuration(); // new MyConfiguration();
         File directory = config.getKeystoreDir();
         if (!directory.exists()) {
             directory.mkdirs();
         }
         // create and register a new api client
         SimpleKeystore keystore = ClientFactory.createUserInResource(
-                new FileResource(config.getKeystoreDir()),
+                new FileResource(config.getKeystoreFile()),
                 config.getKeystoreUsername(),
                 config.getKeystorePassword(),
                 config.getMtWilsonURL(),
-                config.getMtWilsonRoleArray());
+                new InsecureTlsPolicy(),
+                config.getMtWilsonRoleArray()
+                );
         // approve the new api client
+        if( keystore == null ) { throw new IllegalArgumentException("Cannot create user in resource: "+config.getKeystoreFile().getAbsolutePath()); }
         RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(config.getKeystoreUsername(), config.getKeystorePassword());
-        ApiClientX509JpaController jpaController = new ApiClientX509JpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
+        ApiClientX509JpaController jpaController = My.jpa().mwApiClientX509();
         ApiClientX509 apiClient = jpaController.findApiClientX509ByFingerprint(rsaCredentialX509.identity());
         apiClient.setStatus("Approved");
         apiClient.setEnabled(true);

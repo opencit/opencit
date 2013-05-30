@@ -9,6 +9,7 @@ import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.tls.ApacheTlsPolicy;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
@@ -91,20 +92,56 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( port == -1 ) {
             port = baseURL.getDefaultPort();
         }
+        //log.debug("ApacheHttpClient: Protocol: {}", protocol);
+        //log.debug("ApacheHttpClient: Port: {}", port);
 
         if( config == null ) {
             config = new SystemConfiguration();
+            log.debug("ApacheHttpClient: using system configuration");
         }
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
         ApacheTlsPolicy tlsPolicy = createTlsPolicy(config, sslKeystore);
+        //log.debug("ApacheHttpClient: TLS Policy Name: {}", tlsPolicy.getClass().getName());
         SchemeRegistry sr = initSchemeRegistryWithPolicy(protocol, port, tlsPolicy);
         connectionManager = new PoolingClientConnectionManager(sr);
 
         // the http client is re-used for all the requests
         HttpParams httpParams = new BasicHttpParams();
         httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        httpClient = new DefaultHttpClient(connectionManager, httpParams);        
+    }
+    
+    public ApacheHttpClient(URL baseURL, ApacheHttpAuthorization credentials, SimpleKeystore sslKeystore, TlsPolicy tlsPolicy) throws NoSuchAlgorithmException, KeyManagementException {
+        authority = credentials;
+//        keystore = sslKeystore;
+        
+        protocol = baseURL.getProtocol();
+        port = baseURL.getPort();
+        if( port == -1 ) {
+            port = baseURL.getDefaultPort();
+        }
+        //log.debug("ApacheHttpClient: Protocol: {}", protocol);
+        //log.debug("ApacheHttpClient: Port: {}", port);
+
+//        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
+//        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
+        ApacheTlsPolicy apacheTlsPolicy = createApacheTlsPolicy(tlsPolicy, sslKeystore);
+        //log.debug("ApacheHttpClient: TLS Policy Name: {}", tlsPolicy.getClass().getName());
+        SchemeRegistry sr = initSchemeRegistryWithPolicy(protocol, port, apacheTlsPolicy);
+        connectionManager = new PoolingClientConnectionManager(sr);
+
+        // the http client is re-used for all the requests
+        HttpParams httpParams = new BasicHttpParams();
+        httpParams.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
         httpClient = new DefaultHttpClient(connectionManager, httpParams);
+    }
+    
+    private ApacheTlsPolicy createApacheTlsPolicy(TlsPolicy tlsPolicy, SimpleKeystore sslKeystore) {
+        if( tlsPolicy instanceof ApacheTlsPolicy ) {
+            return (ApacheTlsPolicy)tlsPolicy;
+        }
+        throw new IllegalArgumentException("Unsupported policy: "+tlsPolicy.getClass().getName());
     }
     
     /**
@@ -121,8 +158,8 @@ public class ApacheHttpClient implements java.io.Closeable {
      * @return 
      */
     private ApacheTlsPolicy createTlsPolicy(Configuration config, SimpleKeystore sslKeystore) {
-        String tlsPolicyName = config.getString("mtwilson.api.ssl.policy");
-        if( tlsPolicyName == null ) {
+        String tlsPolicyName = config.getString("mtwilson.api.ssl.policy","");
+        if( tlsPolicyName == null || tlsPolicyName.isEmpty() ) {
             // no 1.1 policy name, so use 1.0-RC2 settings to pick a policy
             boolean requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
@@ -138,7 +175,7 @@ public class ApacheHttpClient implements java.io.Closeable {
                 return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
             }
             else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
-                log.warn("Using TLS Policy TRUST_FIRST_INSECURE");
+                log.warn("Using TLS Policy INSECURE");
                 return new InsecureTlsPolicy();
             }
         }
@@ -332,7 +369,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
     
     public ApiResponse get(String requestURL) throws IOException, ApiException, SignatureException {
-        log.debug("GET url: {}", requestURL);        
+        //log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
@@ -345,7 +382,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
 
     public ApiResponse delete(String requestURL) throws IOException, SignatureException {
-        log.debug("DELETE url: {}", requestURL);
+        //log.debug("DELETE url: {}", requestURL);
         HttpDelete request = new HttpDelete(requestURL);
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
@@ -358,8 +395,8 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
     
     public ApiResponse put(String requestURL, ApiRequest message) throws IOException, SignatureException {
-        log.debug("PUT url: {}", requestURL);
-        log.debug("PUT content: {}", message == null ? "(empty)" : message.content);
+        //log.debug("PUT url: {}", requestURL);
+        //log.debug("PUT content: {}", message == null ? "(empty)" : message.content);
         HttpPut request = new HttpPut(requestURL);
         if( message != null && message.content != null ) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
@@ -374,9 +411,9 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
     
     public ApiResponse post(String requestURL, ApiRequest message) throws IOException, SignatureException {
-        log.debug("POST url: {}", requestURL);
-        log.debug("POST content-type: {}", message == null ? "(empty)" : message.content.toString());
-        log.debug("POST content: {}", message == null ? "(empty)" : message.content);
+        //log.debug("POST url: {}", requestURL);
+        //log.debug("POST content-type: {}", message == null ? "(empty)" : message.content.toString());
+        //log.debug("POST content: {}", message == null ? "(empty)" : message.content);
         HttpPost request = new HttpPost(requestURL);
         if( message != null && message.content != null ) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));

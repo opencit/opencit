@@ -301,6 +301,8 @@ public class MyConfiguration {
                     + "CloudSecurity" + File.separator + "mtwilson-portal.properties"));
             files.add(new File("C:" + File.separator + "Intel" + File.separator
                     + "CloudSecurity" + File.separator + "management-cmdutil.properties"));
+             files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "CloudSecurity" + File.separator + "PrivacyCA.properties"));
 
         }
         // linux-specific location
@@ -312,6 +314,7 @@ public class MyConfiguration {
             files.add(new File("/etc/intel/cloudsecurity/audit-handler.properties"));
             files.add(new File("/etc/intel/cloudsecurity/mtwilson-portal.properties"));
             files.add(new File("/etc/intel/cloudsecurity/management-cmdutil.properties"));
+            files.add(new File("/etc/intel/cloudsecurity/PrivacyCA.properties"));
         }
         return files;
     }
@@ -378,19 +381,58 @@ public class MyConfiguration {
     ///////////////////////// database //////////////////////////////////
 
     public String getDatabaseProtocol() {
-        return conf.getString("mtwilson.db.protocol", "postgresql");  // used in the jdbc url, so "postgresql" or "mysql"  as in jdbc:mysql://host:port/schema
+        if( conf.containsKey("mtwilson.db.protocol") ) { conf.getString("mtwilson.db.protocol", "postgresql"); }
+        if( conf.containsKey("mountwilson.as.db.protocol") ) { conf.getString("mountwilson.as.db.protocol", "postgresql"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.ms.db.protocol") ) { conf.getString("mountwilson.ms.db.protocol", "postgresql"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mtwilson.db.driver") ) {
+            String driver = conf.getString("mtwilson.db.driver", "");
+            if( driver.equals("org.postgresql.Driver") ) { return "postgresql"; }
+            if( driver.equals("com.mysql.jdbc.Driver") ) { return "mysql"; }
+        }
+        if( conf.containsKey("mtwilson.db.port") ) {
+            String port = conf.getString("mtwilson.db.port", "");
+            if( port.equals("5432") ) { return "postgresql"; }
+            if( port.equals("3306") ) { return "mysql"; }
+        }
+        return "postgresql";  // used in the jdbc url, so "postgresql" or "mysql"  as in jdbc:mysql://host:port/schema
     }
     
     public String getDatabaseDriver() {
-        return conf.getString("mtwilson.db.driver", "org.postgresql.Driver"); // either "org.postgresql.Driver" or "com.mysql.jdbc.Driver"
+        if( conf.containsKey("mtwilson.db.driver") ) { conf.getString("mtwilson.db.driver", "org.postgresql.Driver"); }
+        if( conf.containsKey("mountwilson.as.db.driver") ) { conf.getString("mountwilson.as.db.driver", "org.postgresql.Driver"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.ms.db.driver") ) { conf.getString("mountwilson.ms.db.driver", "org.postgresql.Driver"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mtwilson.db.protocol") ) {
+            String protocol = conf.getString("mtwilson.db.protocol", "");
+            if( protocol.equals("postgresql") ) { return "org.postgresql.Driver"; }
+            if( protocol.equals("mysql") ) { return "com.mysql.jdbc.Driver"; }
+        }
+        if( conf.containsKey("mtwilson.db.port") ) {
+            String port = conf.getString("mtwilson.db.port", "");
+            if( port.equals("5432") ) { return "org.postgresql.Driver"; }
+            if( port.equals("3306") ) { return "com.mysql.jdbc.Driver"; }
+        }
+        return "org.postgresql.Driver"; // either "org.postgresql.Driver" or "com.mysql.jdbc.Driver"
+    }
+
+    public String getDatabasePort() {
+        if( conf.containsKey("mtwilson.db.port") ) { conf.getString("mtwilson.db.port", "5432"); }
+        if( conf.containsKey("mountwilson.as.db.port") ) { conf.getString("mountwilson.as.db.port", "5432"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.ms.db.port") ) { conf.getString("mountwilson.ms.db.port", "5432"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mtwilson.db.protocol") ) {
+            String protocol = conf.getString("mtwilson.db.protocol", "");
+            if( protocol.equals("postgresql") ) { return "5432"; }
+            if( protocol.equals("mysql") ) { return "3306"; }
+        }
+        if( conf.containsKey("mtwilson.db.driver") ) {
+            String port = conf.getString("mtwilson.db.driver", "");
+            if( port.equals("org.postgresql.Driver") ) { return "5432"; }
+            if( port.equals("com.mysql.jdbc.Driver") ) { return "3306"; }
+        }
+        return "5432"; // 5432 is postgresql default, 3306 is mysql default
     }
     
     public String getDatabaseHost() {
         return conf.getString("mtwilson.db.host", "127.0.0.1");
-    }
-
-    public String getDatabasePort() {
-        return conf.getString("mtwilson.db.port", "5432"); // 5432 is postgresql default, 3306 is mysql default
     }
 
     public String getDatabaseUsername() {

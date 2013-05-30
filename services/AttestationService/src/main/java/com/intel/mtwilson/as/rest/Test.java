@@ -14,6 +14,7 @@ import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -143,7 +144,7 @@ public class Test {
             this.hostname = hostname;
         }
         
-        public void loadConnectionString() throws CryptographyException {
+        public void loadConnectionString() throws IOException, CryptographyException {
             hostRecord = dao.getHostByName(new Hostname(hostname));
 //            this.connectionString = host.getAddOnConnectionInfo();
         }

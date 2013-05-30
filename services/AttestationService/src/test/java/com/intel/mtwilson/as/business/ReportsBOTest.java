@@ -87,7 +87,7 @@ PCR Manifest. PCR: 18  value: 9c65082230f792824eba1c43e3c0fa6255186577   trust: 
         System.out.println("setDataEncryptionKey");
         byte[] key = null;
         ReportsBO instance = new ReportsBO();
-        instance.setDataEncryptionKey(key);
+//        instance.setDataEncryptionKey(key);
         fail("The test case is a prototype.");
     }
 

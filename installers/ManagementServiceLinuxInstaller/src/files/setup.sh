@@ -8,11 +8,11 @@ intel_conf_dir=/etc/intel/cloudsecurity
 package_name=management-service
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-#package_env_filename=${package_name}.env
+package_env_filename=${package_name}.env
 #package_install_filename=${package_name}.install
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
@@ -59,8 +59,10 @@ fi
 
 
 # SCRIPT EXECUTION
-mysql_server_install
-mysql_install
+#if using_mysql; then
+#  mysql_server_install
+#  mysql_install
+#fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 
@@ -72,5 +74,10 @@ cp msctl /usr/local/bin
 /usr/local/bin/msctl setup
 register_startup_script /usr/local/bin/msctl msctl >> $INSTALL_LOG_FILE
 
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
+fi

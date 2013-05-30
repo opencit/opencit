@@ -18,6 +18,7 @@ import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
@@ -43,6 +44,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.intel.mtwilson.tls.TlsPolicy;
 import org.apache.commons.codec.binary.Base64;
+import com.intel.mtwilson.util.ASDataCipher;
+import java.io.IOException;
+import org.junit.BeforeClass;
+
 /**
  *
  * @author jbuhacoff
@@ -55,6 +60,11 @@ public class TestVmwareEsxi51 {
     private transient String connection = "vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.175";
 //    private transient String hostname = "10.1.71.155";
 //    private transient String connection = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+    
+    @BeforeClass
+    public static void setMwHostsDek() throws CryptographyException, IOException {
+        ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
+    }
     
     private TblHosts initNewHost() {
         TblHosts host = new TblHosts();
@@ -333,7 +343,6 @@ public class TestVmwareEsxi51 {
     
     @Test
     public void testApplyPolicyForHost() throws Exception {
-        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
         HostAgentFactory agentFactory = new HostAgentFactory();

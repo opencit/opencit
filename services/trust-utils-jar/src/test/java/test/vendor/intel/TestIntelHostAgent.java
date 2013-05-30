@@ -9,7 +9,10 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.SslUtil;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Measurement;
@@ -22,7 +25,9 @@ import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
+import java.net.URL;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
@@ -53,19 +58,43 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  * @author jbuhacoff
  */
 public class TestIntelHostAgent {
-    private transient Logger log = LoggerFactory.getLogger(getClass());
-    private static String hostname = "10.1.71.169";
-    private static String connection = "intel:https://10.1.71.169:9999";
+    private static transient Logger log = LoggerFactory.getLogger(TestIntelHostAgent.class);
+    private static String hostname = "10.1.71.167";
+    private static String connection = "intel:https://10.1.71.167:9999";
     private static HostAgent agent;
     
     @BeforeClass
-    public static void createHostAgent() throws KeyManagementException, IOException {
+    public static void createHostAgent() throws Exception {
         agent = getAgent();
     }
     
-    public static HostAgent getAgent() throws KeyManagementException, IOException {
+    public static HostAgent getAgent() throws Exception {
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
-        TlsPolicy tlsPolicy =  new InsecureTlsPolicy(); //new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+		TlsPolicy tlsPolicy =  new InsecureTlsPolicy(); //new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+        SslUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
+        keystore.save();
+        /*
+        // make sure that the current certificate for this host, from the database, is in our keystore...
+        TblHosts tblHost = My.jpa().mwHosts().findByName(hostname);
+        SimpleKeystore dbKeystore = new SimpleKeystore(tblHost.getTlsKeystoreResource(), My.configuration().getKeystorePassword());
+        for(String alias : dbKeystore.aliases()) {
+            log.debug("Database-keystore has certificate: {}", alias);
+            X509Certificate cert = dbKeystore.getX509Certificate(alias);
+            log.debug("with subject: {}", cert.getSubjectX500Principal().getName());
+            log.debug("and fingerprint: {}", X509Util.sha1fingerprint(cert));
+            keystore.addTrustedSslCertificate(cert, alias+"-0557");
+            keystore.save();
+        }
+
+        for(String alias : keystore.aliases()) {
+            log.debug("File-keystore has certificate: {}", alias);
+            X509Certificate cert = keystore.getX509Certificate(alias);
+            log.debug("with subject: {}", cert.getSubjectX500Principal().getName());
+            log.debug("and fingerprint: {}", X509Util.sha1fingerprint(cert));
+        }*/
+        
+        
+        //TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent hostAgent = factory.getHostAgent(ConnectionString.forIntel(hostname), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;
