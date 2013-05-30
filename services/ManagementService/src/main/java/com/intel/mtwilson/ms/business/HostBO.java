@@ -215,7 +215,7 @@ public class HostBO extends BaseBO {
             tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
-            tblHosts.setIPAddress(hostObj.IPAddress);
+            tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
             }
@@ -274,9 +274,9 @@ public class HostBO extends BaseBO {
 
             log.info("Processing host {0}.", hostObj.HostName);
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
-            if (hostSearchObj == null) {
-                hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
-            }
+            //if (hostSearchObj == null) {
+            //    hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
+            //}
             if (hostSearchObj != null) {
                 log.info(String.format("Host '%s' is already configured in the system.", hostObj.HostName));
                 isHostConfigured = true;
@@ -572,9 +572,9 @@ public class HostBO extends BaseBO {
 
             // First let us check if the host is already configured.
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
-            if (hostSearchObj == null) {
-                hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
-            }
+            //if (hostSearchObj == null) {
+            //    hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
+            //}
 
             // If the host already exists in the Mt.Wilson, all we will do is check what is the new MLE
             // that the user has opted for, update the host with the corresponding MLEs.
@@ -677,7 +677,7 @@ public class HostBO extends BaseBO {
 
             // Get the current values of the host
             hostObj.HostName = tblHostObj.getName();
-            hostObj.IPAddress = tblHostObj.getIPAddress();
+            hostObj.IPAddress = tblHostObj.getName();
             hostObj.Port = tblHostObj.getPort();
             hostObj.AddOn_Connection_String = tblHostObj.getAddOnConnectionInfo();
             hostObj.Description = tblHostObj.getDescription();
@@ -1050,7 +1050,7 @@ public class HostBO extends BaseBO {
                 tblHosts.setTlsKeystore(null); // XXX previously the default policy name was hardcoded to TRUST_FIRST_CERTIFICATE but is now configurable; but because we are still starting with a null keystore, the only two values that would work as a default are TRUST_FIRST_CERTIFICATE and INSECURE
                 tblHosts.setName(gkvHost.HostName);
                 tblHosts.setAddOnConnectionInfo(gkvHost.AddOn_Connection_String);
-                tblHosts.setIPAddress(gkvHost.IPAddress);
+                tblHosts.setIPAddress(gkvHost.HostName);
                 if (gkvHost.Port != null) {
                     tblHosts.setPort(gkvHost.Port);
                 }
@@ -1143,13 +1143,13 @@ public class HostBO extends BaseBO {
                 if (hostConfigObj.isRegisterHost() == true) {
                     // First let us check if the host is already configured. If yes, we will return back success
                     TblHosts hostSearchObj = hostsJpaController.findByName(gkvHost.HostName);
-                    if (hostSearchObj == null) {
-                        System.err.println("Could not find the host using host name: " + gkvHost.HostName);
-                        hostSearchObj = hostsJpaController.findByIPAddress(gkvHost.IPAddress);
-                    }
+                    //if (hostSearchObj == null) {
+                    //    System.err.println("Could not find the host using host name: " + gkvHost.HostName);
+                    //    hostSearchObj = hostsJpaController.findByIPAddress(gkvHost.IPAddress);
+                    //}
 
                     if (hostSearchObj == null) {
-                        System.err.println("Could not find the host using host IP address: " + gkvHost.IPAddress);
+                        System.err.println("Could not find the host using host IP address: " + gkvHost.HostName);
                         System.err.println("Creating a new host.");
 
                         TxtHost hostObj = new TxtHost(gkvHost);
@@ -1404,8 +1404,8 @@ public class HostBO extends BaseBO {
                     + ": Error during OEM-BIOS MLE Configuration. " + ae.getMessage());
 
         } catch (Exception ex) {
-            System.err.println("JIM DEBUG"); 
-            ex.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG"); 
+            //ex.printStackTrace(System.err);
             log.error("Unexpected errror during OEM - BIOS MLE configuration. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OEM - BIOS MLE configuration. " + ex.getMessage());
         }
@@ -1531,8 +1531,8 @@ public class HostBO extends BaseBO {
                     + ": Error during OEM-VMM MLE Configuration. " + ae.getMessage());
 
         } catch (Exception ex) {
-            System.err.println("JIM DEBUG"); 
-            ex.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG"); 
+            //ex.printStackTrace(System.err);
             log.error("Error during OS - VMM MLE configuration. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OS - VMM MLE configuration. " + ex.getMessage());
         }
@@ -1575,11 +1575,9 @@ public class HostBO extends BaseBO {
             mleSourceObj.setMleData(mleDataObj);
             if (hostObj.HostName != null && !hostObj.HostName.isEmpty()) {
                 mleSourceObj.setHostName(hostObj.HostName);
-            } else {
-                mleSourceObj.setHostName(hostObj.IPAddress);
-            }
+            } 
 
-            log.info("Host details for MLE white list host mapping are: " + hostObj.HostName + ":" + hostObj.IPAddress);
+            log.info("Host details for MLE white list host mapping are: " + hostObj.HostName + ":" + hostObj.HostName);
             // Since this function would be called during both creation and updation, we need to handle both the scenarios.
             try {
                 apiClientObj.addMleSource(mleSourceObj);
@@ -1600,8 +1598,8 @@ public class HostBO extends BaseBO {
                     + ": Error during MLE white list host mapping. " + ae.getMessage());
 
         } catch (Exception ex) {
-            System.err.println("JIM DEBUG"); 
-            ex.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG"); 
+            //ex.printStackTrace(System.err);
             log.error("Error during MLE white list host mapping. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE white list host mapping. " + ex.getMessage());
 
@@ -1646,8 +1644,8 @@ public class HostBO extends BaseBO {
                     + ": Error during MLE Deletion. " + ae.getMessage());
 
         } catch (Exception ex) {
-            System.err.println("JIM DEBUG"); 
-            ex.printStackTrace(System.err);
+            //System.err.println("JIM DEBUG"); 
+            //ex.printStackTrace(System.err);
             log.error("Error during MLE deletion. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE configuration. " + ex.getMessage());
 

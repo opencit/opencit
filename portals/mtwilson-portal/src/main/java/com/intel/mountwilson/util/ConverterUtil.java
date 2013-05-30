@@ -61,7 +61,7 @@ public class ConverterUtil {
 		hostRecord.Description=dataVO.getHostDescription();
 		hostRecord.Email=dataVO.getEmailAddress();
 		hostRecord.HostName=dataVO.getHostName();
-		hostRecord.IPAddress=dataVO.getHostIPAddress();
+		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
 		
 		String[] osVMMInfo = dataVO.getVmmName().split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR));
@@ -208,7 +208,7 @@ public class ConverterUtil {
     	HostDetailsEntityVO entityVO = new HostDetailsEntityVO();
 		entityVO.setHostId(getConvertedHostName(txtHostDetail.HostName));
 		entityVO.setHostName(txtHostDetail.HostName);
-		entityVO.setHostIPAddress(txtHostDetail.IPAddress);
+		entityVO.setHostIPAddress(txtHostDetail.HostName);
 		entityVO.setHostPort(txtHostDetail.Port.toString());
 		entityVO.setHostDescription(txtHostDetail.Description);
 		entityVO.setBiosName(txtHostDetail.BIOS_Name);

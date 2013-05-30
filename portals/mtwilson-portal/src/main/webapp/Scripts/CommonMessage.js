@@ -5,12 +5,12 @@ uploadFileHelp[2]="For Open Source Based Hosts:";
 uploadFileHelp[3]="intel|Host_Name|Host_Port_no";
 uploadFileHelp[4]="e.g.   intel|myTrustAgent|9999";
 uploadFileHelp[5]="For VMWare Based Hosts:";
-uploadFileHelp[6]="vmware|Host_Name|Vmware_Connection_String";
+uploadFileHelp[6]="vmware|Host_Name|Vmware_Connection_String*";
 uploadFileHelp[7]="e.g. vmware|myVmwareHost|https://192.168.1.0:443/sdk;Administrator;Password";
 uploadFileHelp[8]="For Citrix Type";
-uploadFileHelp[9]="citrix|Host_Name|Citrix_Connection_String";
-uploadFileHelp[10]="e.g.   citrix|myCitrixHost|https://192.168.1.0:443;Administrator;Password";
-
+uploadFileHelp[9]="citrix|Host_Name|Citrix_Connection_String*";
+uploadFileHelp[10]="e.g.   citrix|myCitrixHost|https://192.168.1.0:443/;Administrator;Password";
+uploadFileHelp[11]="* connection strings must be valid urls.  Please notice the / after the port number.  That is required"
 
 var vCenterStringHelp = [];
 vCenterStringHelp[0]="Please provide only the IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.";

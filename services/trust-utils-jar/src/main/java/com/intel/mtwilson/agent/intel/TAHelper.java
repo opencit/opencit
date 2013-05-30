@@ -125,8 +125,8 @@ public class TAHelper {
             TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts);
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {
-                if (tblHosts.getIPAddress() != null) {
-                    connectionString = String.format("https://%s:%d", tblHosts.getIPAddress(), tblHosts.getPort()); // without vendor scheme because we are passing directly to TrustAgentSEcureClient  (instead of to HOstAgentFactory)
+                if (tblHosts.getName() != null) {
+                    connectionString = String.format("https://%s:%d", tblHosts.getName(), tblHosts.getPort()); // without vendor scheme because we are passing directly to TrustAgentSEcureClient  (instead of to HOstAgentFactory)
                 }
             }
 
@@ -204,9 +204,9 @@ public class TAHelper {
 
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {
-                if (tblHosts.getIPAddress() != null) {
+                if (tblHosts.getName() != null) {
                     // without vendor scheme because we are passing directly to TrustAgentSEcureClient  (instead of to HOstAgentFactory)
-                    connectionString = String.format("https://%s:%d", tblHosts.getIPAddress(), tblHosts.getPort()); 
+                    connectionString = String.format("https://%s:%d", tblHosts.getName(), tblHosts.getPort()); 
                     log.debug("getQuoteInformationForHost called with ip address and port {}", connectionString);
                 }
             } else if (connectionString.startsWith("intel:")) {
@@ -219,12 +219,12 @@ public class TAHelper {
             TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
             TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
             //  IntelHostAgent agent = new IntelHostAgent(client, new InternetAddress(tblHosts.getIPAddress().toString()));
-            return getQuoteInformationForHost(tblHosts.getIPAddress(), client);
+            return getQuoteInformationForHost(tblHosts.getName(), client);
 
         } catch (ASException e) {
             throw e;
         } catch (UnknownHostException e) {
-            throw new ASException(e, ErrorCode.AS_HOST_COMMUNICATION_ERROR, "Unknown host: " + (tblHosts.getIPAddress() == null ? "missing IP Address" : tblHosts.getIPAddress().toString()));
+            throw new ASException(e, ErrorCode.AS_HOST_COMMUNICATION_ERROR, "Unknown host: " + (tblHosts.getName() == null ? "missing IP Address" : tblHosts.getName().toString()));
         } catch (Exception e) {
             throw new ASException(e);
         }
