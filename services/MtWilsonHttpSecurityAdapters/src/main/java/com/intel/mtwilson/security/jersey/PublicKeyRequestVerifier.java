@@ -104,7 +104,7 @@ public class PublicKeyRequestVerifier {
             signatureBlock.body = requestBody;
             String content = signatureBlock.toString(); // may throw IllegalArgumentException if any required field is null or invalid
 
-            log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
+            //log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             
             // locate the public key or x509 certificate that can verify the signature
             // XXX TODO: need to also load the roles from the database (in case we're successful, so we don't do 2 queries) and also in future versions the roles may be in the x509 certificate so we need to get it directly and save it so we can examine after verifying

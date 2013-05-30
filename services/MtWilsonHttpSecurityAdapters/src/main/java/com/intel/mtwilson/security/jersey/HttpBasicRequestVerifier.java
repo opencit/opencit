@@ -36,7 +36,7 @@ public class HttpBasicRequestVerifier {
         HttpBasicRequestVerifier.Authorization auth = parseAuthorization(authorizationHeader);
 
         String realm = new String(Base64.decodeBase64(auth.realm));
-        log.debug("VerifyAuthorization Header: Signed content (" + realm.length() + ") follows:\n" + realm);
+        //log.debug("VerifyAuthorization Header: Signed content (" + realm.length() + ") follows:\n" + realm);
 
         // In HttpBasic, the user name and password would be separated by :
         String[] loginInfo = realm.split(":");
