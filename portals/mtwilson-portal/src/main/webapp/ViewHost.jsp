@@ -11,7 +11,7 @@
 				<thead>
 					<tr>
 						<th class="viewRow1">Host Name</th>
-						<th class="viewRow2">Host IP Address</th>
+						<!-- <th class="viewRow2">Host IP Address</th> -->
 						<th class="viewRow3">Host Port</th>
 						<th class="viewRow4">BIOS Name</th>
 						<th class="viewRow5">BIOS Build</th>

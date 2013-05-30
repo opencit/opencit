@@ -59,7 +59,7 @@ mv server_temp.xml server.xml
 sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-6.0.29\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
 
 mkdir -p /etc/monit/conf.d
-if [ ! -a /etc/monit/conf.d/tomcat.monitrc ]; then
+if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
  echo "#tomcat monitor
 	check host tomcat with address 127.0.0.1
 	start program = \"/usr/local/bin/mtwilson tomcat-start\"
@@ -75,7 +75,7 @@ if [ ! -a /etc/monit/conf.d/tomcat.monitrc ]; then
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
 		and request \"/mtwilson-portal/home.html\" for 1 cycles
 	then restart
-	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/tomcat.monitrc
+	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/tomcat.mtwilson
 fi
 
 tomcat_permissions ${TOMCAT_HOME}

@@ -79,7 +79,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 public class ManagementConsoleDataController extends MultiActionController{
 	
 	//private static final Logger log = Logger.getLogger(ManagementConsoleDataController.class.getName());
-        Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass());
 	private IManagementConsoleServices services;
 	
 	//Services Layer object, used to invoke service layer methods.
@@ -157,7 +157,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         }
                                 }
                         }
-                        log.info("Uploaded Content :: " + listOfRegisterHost.toString());
+                        //log.info("Uploaded Content :: " + listOfRegisterHost.toString());
                         req.getSession().setAttribute("hostVO", listOfRegisterHost);
                         responseView.addObject("result", listOfRegisterHost.size() > 0 ? true : false);
 
@@ -727,8 +727,8 @@ public class ManagementConsoleDataController extends MultiActionController{
             	//getting ApiClient Object from Session and downcast that object to Type T.  
                 service = (T) session.getAttribute("api-object");    
             } catch (Exception e) {
-				log.error("Error while creating ApiCliennt Object. "+e.getMessage());
-				throw new ManagementConsolePortalException("Error while creating ApiClient Object. "+e.getMessage(),e);
+				log.error("Error while creating ApiClient Object: "+e.getMessage(), e);
+				throw new ManagementConsolePortalException("Error while creating ApiClient Object: "+e.getMessage(),e);
             }
             
         }
@@ -1100,12 +1100,16 @@ public class ManagementConsoleDataController extends MultiActionController{
 			log.error(e.toString());
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             if(e.getMessage().toLowerCase().contains("currently there are no hosts configured")) {
                 responseView.addObject("noHosts",true);
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
             }else if(e.getMessage().toLowerCase().contains("peer not authenticated")){
                 // PEER NOT AUTH FIX
                 responseView.addObject("ResetPeer",true);
+                responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+            }else if(e.getMessage().toLowerCase().contains("Cannot parse response")) {
+                responseView.addObject("parseError",true);
+                responseView.addObject("message", "There was a error parsing the response from the server.  Please reload the page to fix this issue");
             }
 			return responseView;
 		}
@@ -1980,7 +1984,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 					}
 			    }
 			}
-		log.info("Uploaded Content :: "+manifestValue.toString());
+		//log.info("Uploaded Content :: "+manifestValue.toString());
 		req.getSession().setAttribute("manifestValue",manifestValue);
 		/*responseView.addObject("manifestValue",manifestValue);*/
 		responseView.addObject("result",manifestValue.size() > 0 ? true : false);

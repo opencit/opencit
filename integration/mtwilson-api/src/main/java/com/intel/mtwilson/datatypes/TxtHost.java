@@ -54,7 +54,8 @@ public class TxtHost {
         hostname = new Hostname(host.HostName);
         bios = new Bios(host.BIOS_Name, host.BIOS_Version, host.BIOS_Oem);
         vmm = new Vmm(host.VMM_Name, host.VMM_Version, host.VMM_OSName, host.VMM_OSVersion);
-        ipAddress = (host.IPAddress == null || host.IPAddress.isEmpty()) ? null : host.IPAddress;
+        //ipAddress = (host.HostName == null || host.IPAddress.isEmpty()) ? null : host.IPAddress;
+        ipAddress = hostname.toString();
         port = host.Port;
         connectionString = host.AddOn_Connection_String;
         description = host.Description;
