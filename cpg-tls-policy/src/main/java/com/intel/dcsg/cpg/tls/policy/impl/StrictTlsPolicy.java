@@ -19,18 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The difference between TrustKnownCertificateTlsPolicy and StrictTlsPolicy is that
- * the StrictTlsPolicy verifies the hostname, whereas TrustKnownCertificateTlsPolicy allows the
- * trusted certificate to be used with any host and does not verify the hostname. This is useful
- * when a remote host has a certificate without a hostname or subject alternative address and
- * this cannot be changed. 
- * 
- * NOTE: when using TrustKnownCertificateTlsPolicy IT IS HIGHLY RECOMMENDED to maintain a separate
- * certificate repository for every host that requires this policy. This technique prevents an 
- * attacker from stealing a trusted key and certificate from one trusted host and using them in
- * a compromised host.  To implement the technique, load the host's certificate repository and
- * provide it when creating the tls policy. 
- * 
  * This trust policy must be initialized with the server that is being checked
  * and its associated server-specific keystore.
  *
@@ -72,19 +60,19 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jbuhacoff
  */
-public class TrustKnownCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolicy, X509TrustManager {
+public class StrictTlsPolicy implements TlsPolicy, ApacheTlsPolicy, X509TrustManager {
 
     private Logger log = LoggerFactory.getLogger(getClass());
     private transient final CertificateRepository repository;
     private transient final TrustDelegate delegate;
 //    private transient X509Certificate trustedCertificate = null;
 
-    public TrustKnownCertificateTlsPolicy(CertificateRepository repository) {
+    public StrictTlsPolicy(CertificateRepository repository) {
         this.repository = repository;
         this.delegate = null;
     }
 
-    public TrustKnownCertificateTlsPolicy(CertificateRepository repository, TrustDelegate delegate) {
+    public StrictTlsPolicy(CertificateRepository repository, TrustDelegate delegate) {
         this.repository = repository;
         this.delegate = delegate;
     }
@@ -96,12 +84,12 @@ public class TrustKnownCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
 
     @Override
     public HostnameVerifier getHostnameVerifier() {
-        return SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        return SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
     }
 
     @Override
     public X509HostnameVerifier getApacheHostnameVerifier() {
-        return SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        return SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
     }
 
     @Override

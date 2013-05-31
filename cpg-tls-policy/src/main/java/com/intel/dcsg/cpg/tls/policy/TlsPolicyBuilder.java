@@ -5,6 +5,7 @@
 package com.intel.dcsg.cpg.tls.policy;
 
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.StrictTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.TrustKnownCertificateTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.ArrayCertificateRepository;
 import com.intel.dcsg.cpg.x509.repository.CertificateRepository;
@@ -12,7 +13,9 @@ import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 
 /**
  * Use this factory to build a specific TlsPolicy based on
- * your requirements and available configuration.
+ * your requirements and available configuration. For convenience
+ * classes covering the most often used settings, use factory methods
+ * in TlsPolicyCommon.
  * 
  * If you turn off confidentiality, authentication, and integrity,
  * then you will get the InsecureTlsPolicy and all the connections will be insecure.
@@ -62,6 +65,7 @@ import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 public class TlsPolicyBuilder {
     private boolean providesConfidentiality = true;
     private boolean providesAuthentication = true;
+    private boolean hostnameVerification = true; // only considered when providesAuthentication is enabled
     private boolean providesIntegrity = true;
     private CertificateRepository certificateRepository = null;
     private TrustDelegate trustDelegate = null;
@@ -78,6 +82,7 @@ public class TlsPolicyBuilder {
     public TlsPolicyBuilder insecure() {
         providesConfidentiality = false;
         providesAuthentication = false;
+        hostnameVerification = false; // implied when providesAuthentication is false
         providesIntegrity = false;  
         certificateRepository = null;
         trustDelegate = null;
@@ -87,38 +92,27 @@ public class TlsPolicyBuilder {
     /**
      * Require confidentiality, authentication, and integrity. Provide
      * a repository of trusted certificates and do not allow any additions
-     * to it - if a server certificate is not trusted it is rejected
-     * immediately.
+     * to it - if a server certificate is not trusted it is rejected.
+     * To allow user to accept untrusted certificates, you can use:
+     * strict(repository).trustDelegate(delegate).
+     * To allow certificates that don't have the hostname in the common name or
+     * subject alternative name, you can user:
+     * strict(repository).skipHostnameVerification()
+     * And to allow the user to accept such untrusted certificates you can combine these:
+     * strict(repository).skipHostnameVerification().trustDelegate(delegate)
      * @param repository
      * @return 
      */
     public TlsPolicyBuilder strict(CertificateRepository repository) {
         providesConfidentiality = true;
         providesAuthentication = true;
+        hostnameVerification = true;
         providesIntegrity = true;  
         certificateRepository = repository;
         trustDelegate = null;
         return this;
     }
-    
-    /**
-     * Require confidentiality, authentication, and integrity. Provide
-     * a repository of trusted certificates and a delegate to confirm
-     * fingerprints of unknown certificates (and optionally add them to
-     * the trusted certificates repository -- that's up to the delegate).
-     * @param repository
-     * @param delegate
-     * @return 
-     */
-    public TlsPolicyBuilder browser(CertificateRepository repository, TrustDelegate delegate) {
-        providesConfidentiality = true;
-        providesAuthentication = true;
-        providesIntegrity = true;  
-        certificateRepository = repository;
-        trustDelegate = delegate;
-        return this;
-    }
-    
+
     /**
      * Require a policy that provides confidentiality. This is the default.
      * @return 
@@ -146,17 +140,38 @@ public class TlsPolicyBuilder {
      * repository.
      * 
      * If you want to allow the user to accept untrusted certificates "just this once" or "always", then
-     * you need to also set a trust delegate to handle it.  See the trustDelegate method.
+     * you need to also set a trust delegate to handle it.  See the trustDelegate method and the browser
+     * method.
      * 
      * @param repository must not be null; you cannot authenticate a server without a list of trusted identities or CA's
      * @return 
      */
     public TlsPolicyBuilder providesAuthentication(CertificateRepository repository) {
         providesAuthentication = true;
+        hostnameVerification = true;
         certificateRepository = repository;
         return this;
     }
 
+    /**
+     * This should ONLY be used if you maintain a separate repository for each remote host. Otherwise a trusted
+     * certificate and private key from one host can be stolen and used on another host.
+     * How to use it:
+     * 
+     * builder.providesAuthentication(repository).skipHostnameVerification()
+     * 
+     * How revert to enabling hostname verification:
+     * 
+     * builder.providesAuthentication(repository)   automatically enables hostname verification
+     * 
+     * @param repository
+     * @return 
+     */
+    public TlsPolicyBuilder skipHostnameVerification() {
+        hostnameVerification = false;
+        return this;
+    }
+    
     /**
      * Do not require a policy that provides authentication.
      * 
@@ -169,6 +184,7 @@ public class TlsPolicyBuilder {
      */
     public TlsPolicyBuilder noAuthentication() {
         providesAuthentication = false;
+        hostnameVerification = false;
         return this;
     }
 
@@ -226,10 +242,20 @@ public class TlsPolicyBuilder {
         }
         if( providesConfidentiality && providesAuthentication && providesIntegrity ) {
             if( trustDelegate == null ) {
-                return new TrustKnownCertificateTlsPolicy(certificateRepository); // strict mode - trust only certificates in repository and reject all others; do not prompt to accept new certificates.... if certificate repository was set to null, then all connections will be rejected!
+                if( hostnameVerification ) {
+                    return new StrictTlsPolicy(certificateRepository); // strict mode - trust only certificates in repository and reject all others; do not prompt to accept new certificates.... if certificate repository was set to null, then all connections will be rejected!
+                }
+                else {
+                    return new TrustKnownCertificateTlsPolicy(certificateRepository); // strict mode - trust only certificates in repository and reject all others; do not prompt to accept new certificates.... if certificate repository was set to null, then all connections will be rejected!
+                }
             }
             if( trustDelegate != null ) {
-                return new TrustKnownCertificateTlsPolicy(certificateRepository, trustDelegate); // browser mode with initial set of trusted certificates                
+                if( hostnameVerification ) {
+                    return new StrictTlsPolicy(certificateRepository, trustDelegate); // browser mode with initial set of trusted certificates                
+                }
+                else {
+                    return new TrustKnownCertificateTlsPolicy(certificateRepository, trustDelegate); // browser mode with initial set of trusted certificates                
+                }
             }
         }
         if( !providesConfidentiality && providesAuthentication && providesIntegrity ) {

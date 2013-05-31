@@ -32,9 +32,13 @@ public class TlsConnection {
     }
 
     /**
-     * The following elements are considered when calculating hashCode: 1.
-     * connection string 2. tls policy name (obtained from the implementation
-     * class name) 3. contents of certificate repository
+     * The following elements are considered when calculating hashCode: 
+     * 1. url protocol
+     * 2. url host
+     * 3. url port
+     * 4. tls policy name (obtained from the implementation
+     * class name) 
+     * 5. contents of certificate repository
      *
      * @return
      */
@@ -43,14 +47,20 @@ public class TlsConnection {
         if (hashCode != null) {
             return hashCode;
         }
-        return new HashCodeBuilder(19, 47).append(url.toExternalForm()).append(tlsPolicy.getClass().getName()).append(tlsPolicy.getCertificateRepository()).toHashCode();
+        return new HashCodeBuilder(19, 47)
+                .append(url.getProtocol())
+                .append(url.getHost())
+                .append(url.getPort())
+                .append(tlsPolicy.getClass().getName())
+                .append(tlsPolicy.getCertificateRepository())
+                .toHashCode();
     }
 
     /**
      * Two TlsConnection instances are equal if they have the same URLs the
      * same TlsPolicy, and the same contents in their CertificateRepository. 
-     * Note: the URLs are compared as plain strings - the URL.equals() method
-     * is not used because it attempts hostname resolution and may block.
+     * Note: the URLs are compared using protocol, host, and port; all other parameters
+     * are not considered. 
      * the same 
      * @param other
      * @return 
@@ -67,6 +77,12 @@ public class TlsConnection {
             return false;
         }
         TlsConnection rhs = (TlsConnection) other;
-        return new EqualsBuilder().append(url.toExternalForm(), rhs.url.toExternalForm()).append(tlsPolicy.getClass().getName(), rhs.tlsPolicy.getClass().getName()).append(tlsPolicy.getCertificateRepository(), rhs.tlsPolicy.getCertificateRepository()).isEquals(); // XXX TODO see note in hashCode about comparing the tls policy
+        return new EqualsBuilder()
+                .append(url.getProtocol(), rhs.url.getProtocol())
+                .append(url.getHost(), rhs.url.getHost())
+                .append(url.getPort(), rhs.url.getPort())
+                .append(tlsPolicy.getClass().getName(), rhs.tlsPolicy.getClass().getName())
+                .append(tlsPolicy.getCertificateRepository(), rhs.tlsPolicy.getCertificateRepository())
+                .isEquals(); // XXX TODO see note in hashCode about comparing the tls policy
     }
 }

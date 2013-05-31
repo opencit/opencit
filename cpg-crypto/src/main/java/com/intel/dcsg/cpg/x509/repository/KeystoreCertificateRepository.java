@@ -5,11 +5,15 @@
 package com.intel.dcsg.cpg.x509.repository;
 
 import com.intel.dcsg.cpg.crypto.Md5Digest;
+import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.io.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -34,30 +38,71 @@ import org.slf4j.LoggerFactory;
 public class KeystoreCertificateRepository implements MutableCertificateRepository {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    private final String keystorePath;
+    private Resource keystoreResource;
     private final char[] password;
     private final KeyStore keystore;
 
+    /**
+     * If any certificates are added to the keystore, it is the caller's responsibility to later
+     * save them somewhere.
+     * @param keystore
+     * @param keystorePassword 
+     */
+    public KeystoreCertificateRepository(KeyStore keystore, String keystorePassword) {
+        this.keystore = keystore;
+        this.password = keystorePassword.toCharArray();
+    }
+    
     public KeystoreCertificateRepository(String keystorePath, String keystorePassword) throws KeyStoreException, FileNotFoundException, IOException, NoSuchAlgorithmException, CertificateException {
-        this.keystorePath = keystorePath;
-        password = keystorePassword.toCharArray();
-        keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        this(new FileResource(new File(keystorePath)), keystorePassword);
+    }
+    
+    /**
+     * If any certificates are added to the keystore, it will be automatically saved back to the resource.
+     * @param keystoreResource
+     * @param keystorePassword
+     * @throws KeyStoreException
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException I
+     */
+    public KeystoreCertificateRepository(Resource keystoreResource, String keystorePassword) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        this.keystoreResource = keystoreResource;
+        this.password = keystorePassword.toCharArray();
+        this.keystore = KeyStore.getInstance(KeyStore.getDefaultType()); // throws KeyStoreException
+        open();
+    }
+    
+    private void open() throws IOException, NoSuchAlgorithmException, CertificateException {
+        InputStream in = null;
         try {
-            File keystoreFile = new File(keystorePath);
-            if( keystoreFile.exists() ) {
-                FileInputStream in = new FileInputStream(keystoreFile);
-                keystore.load(in, password);
+            in = keystoreResource.getInputStream();
+            if( in == null ) {
+                keystore.load(null, password);   // throws IOException, NoSuchAlgorithmException, CertificateException
             }
             else {
-                keystore.load(null, password);            
+                keystore.load(in, password); // throws IOException, NoSuchAlgorithmException, CertificateException
             }
         }
         catch(Exception e) {
-            log.error("Cannot open keystore: ", e);
-            keystore.load(null, password);            
+            log.error("Cannot open keystore from resource", e);
+            keystore.load(null, password);   // throws IOException, NoSuchAlgorithmException, CertificateException
+        }
+        finally {
+            if( in != null ) {
+                IOUtils.closeQuietly(in);
+            }
         }
     }
     
+    private void save() throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+        if( keystoreResource != null ) {
+            OutputStream out = keystoreResource.getOutputStream(); // throws IOException
+            keystore.store(out, password); // throws NoSuchAlgorithmException, CertificateException, KeyStoreException
+            IOUtils.closeQuietly(out);
+        }
+    }
+        
     public KeyStore getKeystore() {
         return keystore;
     }
@@ -89,12 +134,13 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
     }
 
     /**
-     * Based on the underlying HashSet hashCode
+     * Based on the underlying keystore hashCode:  if the keystores are equal their
+     * hash codes are guaranteed to be the same
      * @return
      */
     @Override
     public int hashCode() {
-        return keystore.hashCode()+1;
+        return keystore.hashCode();
     }
 
     @Override
@@ -130,10 +176,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
             log.debug("Adding certificate to repository: {}", alias);
             keystore.setCertificateEntry(alias, certificate);
             
-            // save the keystore!
-            FileOutputStream out = new FileOutputStream(new File(keystorePath));
-            keystore.store(out, password);
-            IOUtils.closeQuietly(out);
+            save(); // save the keystore!
         }
         catch(Exception e) {
             throw new KeyManagementException("Cannot add certificate", e);
