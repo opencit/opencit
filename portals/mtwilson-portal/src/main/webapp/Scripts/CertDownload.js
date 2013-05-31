@@ -11,12 +11,20 @@ function fnLookForRootCASuccess(responseJSON){
     }
 }
 
+function open_in_new_tab(url )
+{
+  var win=window.open(url, '_blank');
+  win.focus();
+}
+
 function fnforRootCACertificate(){	
 	var l = window.location;
     var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
     base_url = base_url.replace("mtwilson-portal","");
     //alert("baseurl = " + base_url+"");
-	window.location.replace(base_url + "ManagementService/resources/ca/certificate/rootca/current"); 
+    //window.open(base_url + "ManagementService/resources/ca/certificate/rootca/current",'_blank');
+    open_in_new_tab(base_url + "ManagementService/resources/ca/certificate/rootca/current");
+	//window.location.replace(base_url + "ManagementService/resources/ca/certificate/rootca/current"); 
 	//sendJSONAjaxRequest (false, 'getData/getRootCACertificate.html', null, fnRootCADownloadSuccess, null);
 }
 
@@ -25,7 +33,9 @@ function fnforPrivacyCACertificate(){
     var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
     base_url = base_url.replace("mtwilson-portal","");
     //alert("baseurl = " + base_url+"");
-	window.location.replace(base_url + "ManagementService/resources/ca/certificate/privacyca/current"); 
+    //window.open(base_url + "ManagementService/resources/ca/certificate/privacyca/current",'_blank');
+    open_in_new_tab(base_url + "ManagementService/resources/ca/certificate/privacyca/current");
+	//window.location.replace(base_url + "ManagementService/resources/ca/certificate/privacyca/current"); 
   //sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificate.html', null, fnPrivacyCADownloadSuccess, null);
 }
 
@@ -34,7 +44,9 @@ function fnforPrivacyCACertificateList(){
     var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
     base_url = base_url.replace("mtwilson-portal","");
     //alert("baseurl = " + base_url+"");
-	window.location.replace(base_url + "ManagementService/resources/ca/certificate/privacyca/current"); 
+    open_in_new_tab(base_url + "ManagementService/resources/ca/certificate/privacyca/current");
+    // window.open(base_url + "ManagementService/resources/ca/certificate/privacyca/current",'_blank');
+	//window.location.replace(base_url + "ManagementService/resources/ca/certificate/privacyca/current"); 
 	//sendJSONAjaxRequest (false, 'getData/getPrivacyCACertificateList.html', null, fnPrivacyCAListDownloadSuccess, null);
 }
 
@@ -45,7 +57,9 @@ function fnforSAMLCertificate(){
     var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
     base_url = base_url.replace("mtwilson-portal","");
     //alert("baseurl = " + base_url+"");
-	window.location.replace(base_url + "ManagementService/resources/saml/certificate");
+    open_in_new_tab(base_url + "ManagementService/resources/saml/certificate");
+    //window.open(base_url + "ManagementService/resources/saml/certificate",'_blank');
+	//window.location.replace(base_url + "ManagementService/resources/saml/certificate");
 	//sendJSONAjaxRequest (false, 'getData/getSamlCertificate.html', null, fnRootCADownloadSuccess, null);
 }
 
@@ -55,7 +69,8 @@ function fnforTLSCertificate(){
     var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
     base_url = base_url.replace("mtwilson-portal","");
     //alert("baseurl = " + base_url+"");
-	window.location.replace(base_url + "ManagementService/resources/ca/certificate/tls/current");
+    open_in_new_tab(base_url + "ManagementService/resources/ca/certificate/tls/current");
+	//window.location.replace(base_url + "ManagementService/resources/ca/certificate/tls/current");
 	//sendJSONAjaxRequest (false, 'getData/getTLSCertificate.html', null, fnTLSDownloadSuccess, null);
 }
 

@@ -1261,13 +1261,13 @@ postgres_server_detect() {
       postgres_pghb_conf="$r";
     fi ; 
   done;  
-echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
+  echo postgres_pghb_conf=$postgres_pghb_conf >> $INSTALL_LOG_FILE
   
   #find the configuration file
   postgres_conf="";
   result=`find / -name postgresql.conf 2>/dev/null | tr "\n" " "`
-echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
-  #IFS=' '
+  echo "find result for postgres_conf=$result" >> $INSTALL_LOG_FILE
+
   for r in ${result}; do 
     mytest=`grep "listen_addresses" $r 2>/dev/null`;  
     if [ -n "$mytest" ]; then 
@@ -1278,38 +1278,27 @@ echo postgres_conf=$postgres_conf >> $INSTALL_LOG_FILE
 
   # see if we have the command path already
   if [[ -n "$postgres_com" && -f "$postgres_com" ]]; then
-    echo "Found postgres server: $postgres_com"
-    #IFS=
+    echo "Found postgres server: $postgres_com" >> $INSTALL_LOG_FILE
+
     return 0
   fi
   
   #if not, find the command file
   postgres_com="";
   result=`find / -name postgresql 2>/dev/null | tr "\n" " "`
-echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
-  #IFS=' '
-  #for r in ${result}
-  #do 
-  #  echo "loop item for r in result=$r"
-  #  mytest=`grep "start|stop|restart|reload" $r 2>/dev/null`
-  #  echo "grep result for loop item r=$mytest" >> $INSTALL_LOG_FILE
-  #  if [ -n "$mytest" ]; then 
-  #    postgres_com="$r" 
-  #  fi
-  #done
+  echo "find result for postgresql=$result" >> $INSTALL_LOG_FILE
+
   if [[ -f /etc/init.d/postgresql ]]; then
     postgres_com="/etc/init.d/postgresql";
   fi
-echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
+  echo "postgres_com=$postgres_com" >> $INSTALL_LOG_FILE
 
   if [[ -n "$postgres_com" ]]; then
-    echo "Found postgres server: $postgres_com"
-    #IFS=
+    echo "Found postgres server: $postgres_com" >> $INSTALL_LOG_FILE
     return 0
   fi
 
   echo "Postgres server not found"
-  #IFS=
   return 1
 }
 postgres_version(){
@@ -2130,7 +2119,7 @@ glassfish_create_ssl_cert() {
     $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
     #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -out /tmp/mycert.der -outform DER
     #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
-    
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
@@ -2453,7 +2442,7 @@ tomcat_create_ssl_cert() {
     $keytool -export -alias s1as -file "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
     $keytool -import -trustcacerts -alias s1as -file ssl.${serverName}.crt -keystore $keytool -storepass ${keystorePassword}
     openssl x509 -in "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" -inform der -out "/etc/intel/cloudsecurity/ssl.crt.pem" -outform pem
-    
+    cp "${TOMCAT_HOME}/ssl/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
     #sed -i.bak 's/sslProtocol=\"TLS\"/sslProtocol=\"TLS\" SSLCertificateFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt\" SSLCertificateKeyFile=\"${catalina.base}\/ssl\/ssl.${serverName}.crt.pem\"/g' ${TOMCAT_HOME}/conf/server.xml
     cp ${keystore} /root/
     #cp ${TOMCAT_HOME}/ssl/ssl.${serverName}.crt.pem /etc/intel/cloudsecurity/ssl.crt.pem
@@ -2575,7 +2564,7 @@ java_detect() {
           export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME"
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
           if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
             return 0
           fi
@@ -2592,7 +2581,7 @@ java_detect() {
           export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME"
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
           if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
             return 0
           fi
@@ -2610,7 +2599,7 @@ java_detect() {
           export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
-          echo "Found Java: $c"
+          echo "Found Java: $c" >> $INSTALL_LOG_FILE
           if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
             return 0
           fi
@@ -2621,7 +2610,7 @@ java_detect() {
             export JAVA_HOME=`dirname $java_bindir`
             java=$javatarget
             JAVA_VERSION=`java_version`
-            echo "Found Java: $java"
+            echo "Found Java: $java" >> $INSTALL_LOG_FILE
             if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
               return 0
             fi
@@ -2847,7 +2836,7 @@ webservice_running() {
         do 
           echo "app=$app" >> $INSTALL_LOG_FILE
           if [[ "$app" == "${webservice_application_name}" ]]; then
-            echo "inside webservice running"
+            echo "inside webservice running" >> $INSTALL_LOG_FILE
             WEBSERVICE_RUNNING=running 
           fi 
         done
