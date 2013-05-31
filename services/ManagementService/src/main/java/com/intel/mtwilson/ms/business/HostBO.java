@@ -202,7 +202,7 @@ public class HostBO extends BaseBO {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
              My.initDataEncryptionKey();
             // Retrieve the host object.
-            System.err.println("JIM DEBUG: Retrieve the host object."); 
+            //System.err.println("JIM DEBUG: Retrieve the host object."); 
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
             tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
@@ -219,7 +219,7 @@ public class HostBO extends BaseBO {
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
             }
-            System.err.println("JIM DEBUG: Get Host Agent.");
+            //System.err.println("JIM DEBUG: Get Host Agent.");
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
             try {
@@ -1687,7 +1687,7 @@ public class HostBO extends BaseBO {
         // Location PCR (22) is added by default. We will check if PCR 22 is configured or not. If the digest value for PCR 22 exists, then
         // we will configure the location table as well.
         List<String> pcrsToWhiteList = Arrays.asList((hostConfigObj.getBiosPCRs() + "," + hostConfigObj.getVmmPCRs() + "," + "22").split(","));
-        log.info("pcrs to whitelist: {}", pcrsToWhiteList.toString());
+        //log.info("pcrs to whitelist: {}", pcrsToWhiteList.toString());
         try {
 
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
@@ -1702,7 +1702,7 @@ public class HostBO extends BaseBO {
 
             TblMle mleSearchObj = mleJpa.findVmmMle(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
             TblMle mleBiosSearchObj = mleJpa.findBiosMle(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
-            log.info(String.format("found BIOs MLE: Name=%s Version=%s OEM=%s" , mleBiosSearchObj.getName(), mleBiosSearchObj.getVersion(), mleBiosSearchObj.getOemId().getName()));    
+            //log.info(String.format("found BIOs MLE: Name=%s Version=%s OEM=%s" , mleBiosSearchObj.getName(), mleBiosSearchObj.getVersion(), mleBiosSearchObj.getOemId().getName()));    
             // Process all the Event and PCR nodes in the attestation report.
             while (reader.hasNext()) {
                 if (reader.getEventType() == XMLStreamConstants.START_ELEMENT) {
@@ -1776,7 +1776,7 @@ public class HostBO extends BaseBO {
                             }
                         }
                     } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) { // pcr information would be available for all the hosts.
-                        log.info(String.format("Reading PCRInfo node"));
+                        //log.info(String.format("Reading PCRInfo node"));
                         // We need to white list only thos pcrs that were requested by the user. We will ignore the remaining ones
                         if (pcrsToWhiteList.contains(reader.getAttributeValue(null, "ComponentName"))) {
                             TblPcrManifest tblPCR = null;
@@ -1796,15 +1796,15 @@ public class HostBO extends BaseBO {
                                     pcrObj.setOsVersion("");
                                     pcrObj.setOemName(hostObj.BIOS_Oem);
                                     mleID = mleBiosSearchObj.getId();
-                                    log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
+                                    //log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
-                                        log.info("tblPCR is null. Attempt to create new");
+                                        //log.info("tblPCR is null. Attempt to create new");
                                         wlsClient.addPCRWhiteList(pcrObj);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
 
                                     } else {
-                                        log.info("tblPCR is not null. Attempt to update");
+                                        //log.info("tblPCR is not null. Attempt to update");
                                         wlsClient.updatePCRWhiteList(pcrObj);
                                         log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                         isBiosMLEUpdated = true;
@@ -1830,7 +1830,7 @@ public class HostBO extends BaseBO {
                                     }
                                 }
                             } else if (hostConfigObj.addVmmWhiteList() == true) {
-                                log.info(String.format("Adding VMM white list: Name=%s Version=%s OsName=%s OsVersion=%s mleID=%s", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
+                                //log.info(String.format("Adding VMM white list: Name=%s Version=%s OsName=%s OsVersion=%s mleID=%s", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
                                 pcrObj.setMleName(hostObj.VMM_Name);
                                 pcrObj.setMleVersion(hostObj.VMM_Version);
                                 pcrObj.setOsName(hostObj.VMM_OSName);
