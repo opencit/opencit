@@ -47,6 +47,17 @@ public class SamlCertificate {
     }
 
     /**
+     * Same as getSamlCertificate but with suggested filename
+     */
+    @GET
+    @Path("/certificate/mtwilson-saml.crt")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @PermitAll
+    public byte[] getSamlCertificateFilename() {
+        return getSamlCertificate();
+    }    
+    
+    /**
      * Retrieves representation of an instance of
      * com.intel.mountwilson.ms.business.SamlCertificate
      *
