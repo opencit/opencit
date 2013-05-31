@@ -95,7 +95,7 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
     
     private void addServerCertificatesToRepository(X509Certificate[] xcs) {
         for(X509Certificate cert : xcs) {
-            System.out.println("server certificate: "+cert.getSubjectX500Principal().getName());
+            log.debug("server certificate: "+cert.getSubjectX500Principal().getName());
         }
         for(int i=0; i<xcs.length; i++) {
             try {

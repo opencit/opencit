@@ -89,7 +89,7 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
 
     private void handleEvent(String action,
             DescriptorEvent event) {
-        logger.info(Thread.currentThread().getName());
+        logger.trace("Thread: {}",Thread.currentThread().getName());
         if(isAuditEnabled){
             try {
 
