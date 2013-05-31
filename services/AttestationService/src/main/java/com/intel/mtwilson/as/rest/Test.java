@@ -160,7 +160,7 @@ public class Test {
                 hostAgent = hostAgentFactory.getHostAgent(hostRecord);
 //                VMwareClient client = hostAgent.getgetClient(host);
 	                result = hostAgent.getVendorHostReport(); //getHostAttestationReport(host, "0,17,18,20");
-	                log.info("Got response for "+hostname);
+	                log.debug("Got response for "+hostname);
             } catch (Exception ex) {
                 error = ex.toString();
             }

@@ -181,9 +181,9 @@ public class VMwareClient {
 
 	private static void printSessionDetails() {
 		if(session != null){
-			log.info("Logged in Session key " + session.getKey());
+			log.debug("Logged in Session key " + session.getKey());
 		}else{
-			log.info("session is null");
+			log.debug("session is null");
 		}
 		
 	}
@@ -467,10 +467,10 @@ public class VMwareClient {
 		if (hostObjects != null && hostObjects.length != 0) {
 			for (ManagedObjectReference hostObj : hostObjects) {
 				String hostNameFromVC = getHostInfo(hostObj);
-				log.info("getHostObject - comparing hostNameFromVC {0} requested hostName {1}",
+				log.debug("getHostObject - comparing hostNameFromVC {0} requested hostName {1}",
 						new Object[] { hostNameFromVC, hostName });
 				if (hostNameFromVC.equals(hostName)) {
-					log.info(String.format(
+					log.debug(String.format(
 							"Found Managed Object Reference for host %s ",
 							hostName));
 					return hostObj;

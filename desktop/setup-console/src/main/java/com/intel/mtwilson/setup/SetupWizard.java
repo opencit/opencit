@@ -189,7 +189,7 @@ public class SetupWizard {
             while(rs.next()) {
                 String value = rs.getString(fieldName);
                 if( value != null && !value.isEmpty() && value.startsWith("http") ) { // XXX TODO: make the value.startsWith(http) a filter function that can be passed into the method to determine which records should be encrypted
-                    log.info(String.format("Encrypting record %d field %s", rs.getInt("ID"), fieldName)); // do not log the value being encrypted because that leaks sensitive information to log
+                    log.debug(String.format("Encrypting record %d field %s", rs.getInt("ID"), fieldName)); // do not log the value being encrypted because that leaks sensitive information to log
                     String encrypted = aes.encryptString(value);
                     update.setString(1, encrypted);
                     update.setInt(2, rs.getInt("ID"));

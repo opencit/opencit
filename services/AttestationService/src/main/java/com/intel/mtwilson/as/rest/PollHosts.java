@@ -67,7 +67,7 @@ public class PollHosts {
     @Produces({MediaType.APPLICATION_JSON})
     public OpenStackHostTrustLevelReport pollMultipleHosts(OpenStackHostTrustLevelQuery input) {
         try {
-            log.info("PCR Mask {}", input.pcrMask);
+            log.debug("PCR Mask {}", input.pcrMask);
             return new ASComponentFactory().getHostTrustBO().getPollHosts(input);
         }
         catch(ASException e) {
