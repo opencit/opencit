@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
@@ -111,9 +112,12 @@ public class Host {
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
             if( aikId.isValid() ) {
                 TblHosts host = new ASComponentFactory().getHostBO().getHostByAik(aikId);
-                KeystoreCertificateRepository repository = new KeystoreCertificateRepository(new SimpleKeystore(host.getTlsKeystoreResource(),"password")); // XXX the hard-coded "password" is same as in HostAgentFactory... need to make it configurable!!  (or switch to a keystore format w/o a password, like a list of PEM-encoded certificates,  since the attestation service database is trusted and this doesn't need additional protection... and if it did it would have to be either similar to our AES-encryption of the connection string, or something a lot more complicated that involves the api client to control the unlocking)
-                List<X509Certificate> certificates = repository.getCertificates();
+                KeystoreCertificateRepository repository = new KeystoreCertificateRepository(new SimpleKeystore(host.getTlsKeystoreResource(),My.configuration().getTlsKeystorePassword())); // XXX the hard-coded "password" is same as in HostAgentFactory... need to make it configurable!!  (or switch to a keystore format w/o a password, like a list of PEM-encoded certificates,  since the attestation service database is trusted and this doesn't need additional protection... and if it did it would have to be either similar to our AES-encryption of the connection string, or something a lot more complicated that involves the api client to control the unlocking)
+                List<X509Certificate> certificates = repository.getCertificates(); // guaranteed not to be null, but may be empty
                 for(X509Certificate certificate : certificates) {
+                    // XXX TODO currently trust agent does not give us a certificate for each AIK, because multiple AIK support has not been implemented.
+                    //          so there can never be a matching certificate and this method will always throw HTTP_NOT_FOUND until the rest of the
+                    //          necessary ingredients are in place for this to work.
                     // we are looking for a certificate that is marked with the AIK;   the other one is the trust agent's or vcenter's ssl;    for now we are putting the AIK fingerprint in the subject CN
                     if( certificate.getSubjectX500Principal().getName().contains("CN="+aikId.toString()) ) {
                         return certificate.getEncoded();
