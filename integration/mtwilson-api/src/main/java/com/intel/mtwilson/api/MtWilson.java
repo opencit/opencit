@@ -81,6 +81,7 @@ public interface MtWilson {
     HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException;
 
 
+    String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException;
     
     /**
      * Returns an XML document (SAML) describing the trust attributes of the host

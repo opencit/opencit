@@ -905,6 +905,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return saml;
     }
     
+    @Override
+    public String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("force_verify", Boolean.toString(forceVerify));
+        String saml = text(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.saml", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        return saml;
+    }
+    
+    
     public TrustAssertion verifyTrustAssertion(String saml) throws IOException, ApiException, SignatureException {
         X509Certificate[] trustedSamlCertificates;
         try {
