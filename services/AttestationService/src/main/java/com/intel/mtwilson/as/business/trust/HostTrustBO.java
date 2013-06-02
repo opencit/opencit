@@ -715,12 +715,11 @@ public class HostTrustBO extends BaseBO {
      * @param tblSamlAssertion must not be null
      * @return 
      */
-    public TxtHost getHostWithTrust(Hostname hostName, TblSamlAssertion tblSamlAssertion) throws IOException {
-        TblHosts record = getHostByName(hostName);
-        HostTrustStatus trust = getTrustStatus(hostName);
-        TxtHostRecord data = createTxtHostRecord(record);
+    public TxtHost getHostWithTrust(TblHosts tblHosts, String hostId, TblSamlAssertion tblSamlAssertion) throws IOException {
+        HostTrustStatus trust = getTrustStatus(tblHosts, hostId);
+        TxtHostRecord data = createTxtHostRecord(tblHosts);
         TxtHost host = new TxtHost(data, trust);
-        tblSamlAssertion.setHostId(record);
+        tblSamlAssertion.setHostId(tblHosts);
         return host;
     }
 
@@ -1217,14 +1216,14 @@ public class HostTrustBO extends BaseBO {
      * @param hostName
      * @return
      */
-    public String getTrustWithSaml(String hostName) {
+    public String getTrustWithSaml(TblHosts tblHosts, String hostId) {
         try {
             //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
             //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
             
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
 
-            TxtHost host = getHostWithTrust(new Hostname(hostName),tblSamlAssertion);
+            TxtHost host = getHostWithTrust(tblHosts, hostId,tblSamlAssertion);
             
             tblSamlAssertion.setBiosTrust(host.isBiosTrusted());
             tblSamlAssertion.setVmmTrust(host.isVmmTrusted());
@@ -1280,13 +1279,25 @@ public class HostTrustBO extends BaseBO {
         saml.setIssuer(issuer);
         return saml;
     }
+    
+    public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
+        My.initDataEncryptionKey();
+        TblHosts tblHosts = getHostByAik(aik);
+        return getTrustWithSaml(tblHosts, aik.toString(), forceVerify);
+    }
 
     public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
-        log.debug("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        My.initDataEncryptionKey();
+        TblHosts tblHosts = getHostByName(new Hostname((host)));
+        return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify);
+    }
+    
+    public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
+        log.debug("getTrustWithSaml: Getting trust for host: " + tblHosts.getName() + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
         
-
+	// XXX MERGE WARNING
         My.initDataEncryptionKey();
         TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
@@ -1294,11 +1305,11 @@ public class HostTrustBO extends BaseBO {
        // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
         
         if (!agent.isTpmPresent()) {
-            throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, host);
+            throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, hostId);
         }
                 
         if(forceVerify != true){
-            TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
+            TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
@@ -1313,7 +1324,7 @@ public class HostTrustBO extends BaseBO {
         log.debug("Getting trust and saml assertion from host.");
         
         try {
-            return getTrustWithSaml(host);
+            return getTrustWithSaml(tblHosts, hostId);
         }catch(Exception e) {
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
             tblSamlAssertion.setHostId(tblHosts);

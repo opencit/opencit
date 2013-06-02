@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson;
 
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SamlUtil;
 import com.intel.mtwilson.crypto.X509Util;
@@ -11,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStoreException;
+import java.security.PublicKey;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -196,6 +198,46 @@ public class TrustAssertion {
         X509Certificate cert = X509Util.decodePemCertificate(pem);
         return cert;
     }
+
+    public PublicKey getAikPublicKey() throws CryptographyException {
+        // if there's an aik certificate, get the public key from there
+        try {
+            X509Certificate cert = getAikCertificate();
+            if( cert != null ) {
+                return cert.getPublicKey();
+            }
+        }
+        catch(Exception e) {
+            log.debug("Error while getting aik certificate: "+e.toString(), e);
+            // but we keep going to try the aik public key field
+        }
+        // otherwise, look for a public key field
+        String pem = assertionMap.get("AIK_PublicKey");
+        if( pem == null || pem.isEmpty() ) { return null; }
+        PublicKey publicKey = X509Util.decodePemPublicKey(pem);
+        return publicKey;
+    }
+    
+    public boolean isHostTrusted() {
+        String trusted = assertionMap.get("Trusted");
+        return trusted != null && trusted.equalsIgnoreCase("true");
+    }
+
+    public boolean isHostBiosTrusted() {
+        String trusted = assertionMap.get("Trusted_BIOS");
+        return trusted != null && trusted.equalsIgnoreCase("true");
+    }
+
+    public boolean isHostVmmTrusted() {
+        String trusted = assertionMap.get("Trusted_VMM");
+        return trusted != null && trusted.equalsIgnoreCase("true");
+    }
+    
+    public boolean isHostLocationTrusted() {
+        String trusted = assertionMap.get("Trusted_Location");
+        return trusted != null && trusted.equalsIgnoreCase("true");
+    }
+    
     
     private Element readXml(String xml) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance ();
