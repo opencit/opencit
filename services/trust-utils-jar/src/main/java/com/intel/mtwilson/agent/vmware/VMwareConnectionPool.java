@@ -82,11 +82,11 @@ public class VMwareConnectionPool {
 //        log.debug("VMwareConnectionPool validating existing connection for {}", tlsConnection.getConnectionString());
 //        lastAccess.put(connectionString, System.currentTimeMillis());
         if( factory.validateObject(tlsConnection, client)) {
-            log.info("Reusing vCenter connection for "+client.getEndpoint());
+            log.debug("Reusing vCenter connection for "+client.getEndpoint());
 //            client.setTlsPolicy(tlsConnection.getTlsPolicy());
             return client;                
         }
-        log.info("Found stale vCenter connection");
+        log.debug("Found stale vCenter connection");
         try {
             factory.destroyObject(tlsConnection, client);
         }
@@ -120,7 +120,7 @@ public class VMwareConnectionPool {
 //                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
                 pool.put(tlsConnection, client);
                 // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
-                log.info("Opening new vCenter connection for "+client.getEndpoint());
+                log.debug("Opening new vCenter connection for "+client.getEndpoint());
                 return client;
             }
             else {

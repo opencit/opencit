@@ -136,7 +136,7 @@ public class HmacRequestVerifier {
             }
             
             if( signature.equals(a.signature) ) {
-                log.info("Request is authenticated");
+                log.debug("Request is authenticated");
                 
                 try {
                     if( signatureBlock.timestamp == null || isRequestExpired(signatureBlock.timestamp) ) { // may throw ParseException
@@ -166,7 +166,7 @@ public class HmacRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.info("Request is NOT AUTHENTICATED");
+        log.debug("Request is NOT AUTHENTICATED");
         return null;
     }
     

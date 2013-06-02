@@ -155,7 +155,7 @@ public class TblLocationPcrJpaController implements Serializable {
             	TblLocationPcr locationPcr = (TblLocationPcr) query.getSingleResult();
                 String location = locationPcr.getLocation();
                 
-                log.info("PCR Value  " + pcrValue + " location " + location );
+                log.debug("PCR Value  " + pcrValue + " location " + location );
                 
                 return location;
                 

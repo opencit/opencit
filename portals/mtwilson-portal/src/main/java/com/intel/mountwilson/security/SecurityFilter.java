@@ -19,7 +19,7 @@ public class SecurityFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-		log.info("SecurityFilter >>");
+		log.debug("SecurityFilter >>");
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
 		String url = request.getServletPath();
@@ -32,20 +32,20 @@ public class SecurityFilter implements Filter {
 				boolean logged =  (Boolean) obj;
 				System.err.println(logged);
 				if (logged) {
-					log.info("User is logged in, forwarding request to "+url);
+					log.debug("User is logged in, forwarding request to "+url);
 					chain.doFilter(request, response);
 				}else {
-					log.info("User is not logged in or session expired, forwarding request to Login page.");
+					log.debug("User is not logged in or session expired, forwarding request to Login page.");
 					goToLogin(request,response);
 				}
 			}else {
-				log.info("User is not logged in or session expired, forwarding request to Login page.");
+				log.debug("User is not logged in or session expired, forwarding request to Login page.");
 				goToLogin(request,response);
 			}
 			
 			
 		}else {
-			log.info("User's Session expired, forwarding request to Login page.");
+			log.debug("User's Session expired, forwarding request to Login page.");
 			redirectToLogin(request,response);
 		}
 				
