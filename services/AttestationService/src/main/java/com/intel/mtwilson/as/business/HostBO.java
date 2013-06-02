@@ -477,7 +477,6 @@ public class HostBO extends BaseBO {
                     }
                 }
                 else {
-                    // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
                     PublicKey publicKey = agent.getAik();
                     String pem = X509Util.encodePemPublicKey(publicKey); 
                     tblHosts.setAIKCertificate(null);
