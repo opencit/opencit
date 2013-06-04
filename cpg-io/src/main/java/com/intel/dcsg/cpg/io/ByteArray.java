@@ -37,13 +37,28 @@ public class ByteArray {
     public ByteArray subarray(int offset, int length) {
         return new ByteArray(subarray(array, offset, length));
     }
-    
+    /*
     public static byte[] concat(byte[] a, byte[] b) {
         byte[] result = new byte[a.length + b.length];
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);
         return result;
     }
+    */
+    public static byte[] concat(byte[]... arrays) {
+        int resultsize = 0;
+        for(int i=0; i<arrays.length; i++) { 
+            resultsize += arrays[i].length; 
+        }
+        byte[] result = new byte[resultsize];
+        int cursor = 0;
+        for(int i=0; i<arrays.length; i++) {
+            System.arraycopy(arrays[i], 0, result, cursor, arrays[i].length);
+            cursor += arrays[i].length;
+        }
+        return result;
+    }
+    
     
     public static byte[] subarray(byte[] a, int offset) {
         byte[] result = new byte[a.length - offset];

@@ -24,7 +24,7 @@ public class Task implements Runnable {
     private long stopTime = 0;
     
     public Task() {
-        this.id = getClass().getName();
+        this.id = getClass().getSimpleName();
     }
     
     /**
@@ -36,7 +36,7 @@ public class Task implements Runnable {
     }
     
     public Task(Runnable runnable) {
-        this.id = runnable.getClass().getName();
+        this.id = runnable.getClass().getSimpleName();
         this.runnable = runnable;
     }
     

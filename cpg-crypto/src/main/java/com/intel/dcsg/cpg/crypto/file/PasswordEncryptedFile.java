@@ -118,15 +118,21 @@ public class PasswordEncryptedFile {
             
             String integrityAlgorithm = envelope.getHeader(INTEGRITY_ALGORITHM);
             if( integrityAlgorithm.equals(DigestAlgorithm.SHA256.name())) { // SHA256, not SHA-256 ... maybe allow both?
+                log.debug("Integrity algorithm: SHA256");
                 byte[] plaintextAfterIntegrity = getPlaintextWithIntegrity(plaintext, DigestAlgorithm.SHA256);
+                log.debug("Decrypted text length: {}", plaintextAfterIntegrity.length);
                 return new String(plaintextAfterIntegrity);
             }
             else if( integrityAlgorithm.equals(DigestAlgorithm.SHA1.name())) { // SHA1, not SHA-1 ... maybe allow both?
+                log.debug("Integrity algorithm: SHA1");
                 byte[] plaintextAfterIntegrity = getPlaintextWithIntegrity(plaintext, DigestAlgorithm.SHA1);
+                log.debug("Decrypted text length: {}", plaintextAfterIntegrity.length);
                 return new String(plaintextAfterIntegrity);
             }
             else if( integrityAlgorithm.equals(DigestAlgorithm.MD5.name())) { // MD5
+                log.debug("Integrity algorithm: MD5");
                 byte[] plaintextAfterIntegrity = getPlaintextWithIntegrity(plaintext, DigestAlgorithm.MD5);
+                log.debug("Decrypted text length: {}", plaintextAfterIntegrity.length);
                 return new String(plaintextAfterIntegrity);
             }
             else {

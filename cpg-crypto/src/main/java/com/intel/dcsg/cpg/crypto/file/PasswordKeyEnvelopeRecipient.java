@@ -74,7 +74,7 @@ public class PasswordKeyEnvelopeRecipient {
             AlgorithmParameterSpec kekParams = new PBEParameterSpec(envelopePasswordHash.getSalt(), PasswordKeyEnvelopeFactory.PBE_ITERATIONS); // need to define the algorithm parameter specs because the cipher receives the Key interface which is generic... so it doesn't know about the parameters that are embedded in it
             Cipher cipher = Cipher.getInstance(envelope.getEnvelopeAlgorithm()); // NoSuchAlgorithmException, NoSuchPaddingException ; envelopeAlgorithm like "PBEWithHmacSHA1AndDESede/CBC/PKCS5Padding" 
             cipher.init(Cipher.UNWRAP_MODE, kek, kekParams); // InvalidKeyException
-            return cipher.unwrap(envelope.getContent(), envelope.getContentAlgorithm(), Cipher.SECRET_KEY); // contentAlgorithm like "AES"
+            return cipher.unwrap(envelope.getContent(), envelope.getContentAlgorithm(), Cipher.SECRET_KEY); // contentAlgorithm like "AES" or "RSA"
         }
         catch(Exception e) {
             throw new CryptographyException(e);

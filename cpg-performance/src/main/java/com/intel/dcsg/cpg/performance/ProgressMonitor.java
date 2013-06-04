@@ -20,8 +20,14 @@ public class ProgressMonitor {
 //    private Logger log = LoggerFactory.getLogger(getClass());
     private Monitor<Progress> monitor;
     private Progress task;
+    private Observer<Progress> observer;
     public ProgressMonitor(Progress task) {
         this.task = task;
+        this.observer = new ProgressLogObserver();
+    }
+    public ProgressMonitor(Progress task, Observer<Progress> observer) {
+        this.task = task;
+        this.observer = observer;
     }
 
     public static class ProgressValue implements Value<Progress> {
@@ -44,7 +50,7 @@ public class ProgressMonitor {
     }
     
     public void start() {
-        monitor = new Monitor<Progress>(new ProgressValue(task), new ProgressLogObserver(), new AlarmClock());
+        monitor = new Monitor<Progress>(new ProgressValue(task), observer, new AlarmClock());
         monitor.start();
     }
     

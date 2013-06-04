@@ -79,6 +79,9 @@ public class TaskCollection extends Task implements Progress {
         return max;
     }
     
+    @Override
+    public String getId() { if( currentTask == null ) { return ""; } return currentTask.getId(); }
+    
     /**
      * @return the currently running task within the collection, or null if execution either hasn't started or has already ended
      */

@@ -24,6 +24,12 @@
             <artifactId>cpg-net</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-performance</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <optional>true</optional>
+        </dependency>
     <dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>

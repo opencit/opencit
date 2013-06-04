@@ -14,6 +14,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Collection;
 import java.util.Date;
@@ -224,6 +225,17 @@ public class RsaUtil {
             KeyFactory factory = KeyFactory.getInstance("RSA"); // throws NoSuchAlgorithmException
             PublicKey publicKey  = factory.generatePublic(new X509EncodedKeySpec(publicKeyBytes)); // throws InvalidKeySpecException
             return publicKey;
+        }
+        catch(Exception e) {
+            throw new CryptographyException(e);
+        }
+    }
+
+    public static PrivateKey decodeDerPrivateKey(byte[] privateKeyBytes) throws CryptographyException {
+        try {
+            KeyFactory factory = KeyFactory.getInstance("RSA"); // throws NoSuchAlgorithmException
+            PrivateKey privateKey  = factory.generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes)); // throws InvalidKeySpecException
+            return privateKey;
         }
         catch(Exception e) {
             throw new CryptographyException(e);

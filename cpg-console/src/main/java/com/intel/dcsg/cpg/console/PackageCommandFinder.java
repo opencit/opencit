@@ -8,7 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Given a package to search (packageName) and a command name (commandName), this class will attempt
+ * to load packageName.commandName and cast it to a Command interface.
+ * 
+ * For example:
+ * <code>
+ * PackageCommandFinder finder = new PackageCommandFinder("test.cmd");
+ * Command toRun = finder.forName("HelloWorld"); // will search for test.cmd.HelloWorld
+ * </code>
+ * 
  * @author jbuhacoff
  */
 public class PackageCommandFinder implements CommandFinder {
