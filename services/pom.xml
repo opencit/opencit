@@ -16,6 +16,8 @@
   
   <modules>
     <module>trust-policy</module>
+    <module>aikqverify</module>
+    <module>daa</module>
     <module>webservice-util</module>
     <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
     <module>audit-data</module>

@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>aikqverify</artifactId>
+  <artifactId>daa</artifactId>
   <packaging>pom</packaging>
-  <name>aikqverify</name>
+  <name>DAA</name>
   <description>
-      Required by Attestation Service
+      DAA tools for Attestation Service and attested hosts
   </description>
   
     <parent>
@@ -16,13 +16,55 @@
 
     <build>
 	
-
+        <resources>
+            <resource>
+                <directory>src/main/c</directory>
+            </resource>
+        </resources>
+    </build>
+    
+    
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
+          <build>
 		<plugins>
             
     <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
+            <execution>
+                <id>copy-files</id>
+                <phase>generate-resources</phase>
+                <goals>
+                    <goal>run</goal>
+                </goals>
+                <configuration>
+                    <target>
+                        <copy todir="${project.build.directory}/c">
+                            <fileset dir="${basedir}/src/main/c"/>
+                            <fileset dir="${basedir}/src/main/resources"/>
+                        </copy>
+                    </target>
+                </configuration>
+            </execution>
+            <execution>
+                <id>compile-c</id>
+                <phase>compile</phase>
+                <goals>
+                    <goal>run</goal>
+                </goals>
+                <configuration>
+                    <target>
+                        <exec dir="${project.build.directory}/c" executable="make"></exec>
+                    </target>
+                </configuration>
+            </execution>
           <execution>
 	    <id>default-cli</id>
             <phase>package</phase>
@@ -32,6 +74,7 @@
             <configuration>
 		<target>
 	    		<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
+				<fileset dir="${basedir}/src/main/c" prefix="${project.artifactId}-${project.version}"/>
 				<fileset dir="${basedir}/src/main/resources" prefix="${project.artifactId}-${project.version}"/>
 			</zip>
 		</target>
@@ -80,5 +123,7 @@
       
 
     </build>
+      </profile>
+  </profiles>
 
 </project>
