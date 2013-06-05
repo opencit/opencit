@@ -1,0 +1,37 @@
+#!/bin/sh
+
+#env_dir=/usr/local/share/mtwilson/env
+env_dir=/var/mtwilson/env
+
+# this one is defined for use in other scripts... XXX TODO maybe move it somewhere more suitable
+#conf_dir=/etc/intel/cloudsecurity
+conf_dir=/etc/mtwilson
+
+
+# XXX TODO maybe put these in /etc/mtwilson/system.env
+# ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
+export DATABASE_VENDOR=${DATABASE_VENDOR:-mysql}
+export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
+export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
+export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
+export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
+
+
+# REQUIRES: file
+
+# FUNCTION LIBRARY and VERSION INFORMATION
+
+
+### FUNCTION LIBRARY: environment variables
+
+loadenv() {
+  # the file /root/mtwilson.env is typically only used during install but if it happens to stay 
+  # there afterwards, we still load its contents to maintain consistency, for example if part of the
+  # install failed and the admin is running specific setup commands to fix it, those commands should
+  # have access to the same environment variables that were intended for the install
+  shell_include_files /root/mtwilson.env ${conf_dir}/system.env
+  # plugin-specific configuration, such as minimum java version, minimum tomcat version, etc.
+  if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
+  shell_include_files ${env_dir}/*
+}

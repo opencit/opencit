@@ -1,0 +1,135 @@
+#!/bin/sh
+
+
+### FUNCTION LIBRARY: package management
+
+# TODO  replace all the other yum|rpm|...*detect
+# with one function like package_manager_detect() that 
+# detects all of them. then only one function needs to be
+# called at the beginning and the results can be used
+# any time.
+# package_manager_detect() { ... }
+
+# RedHat and CentOS may have yum and rpm
+
+# Output:
+# - variable "yum" contains path to yum or empty
+yum_detect() {
+  yum=`which yum 2>/dev/null`
+  if [ -n "$yum" ]; then return 0; else return 1; fi
+}
+no_yum() {
+  if yum_detect; then return 1; else return 0; fi
+}
+
+# Output:
+# - variable "rpm" contains path to rpm or empty
+rpm_detect() {
+  rpm=`which rpm 2>/dev/null`
+}
+
+# Debian and Ubuntu may have apt-get and dpkg
+# Output:
+# - variable "aptget" contains path to apt-get or empty
+# - variable "aptcache" contains path to apt-cache or empty
+aptget_detect() {
+  aptget=`which apt-get 2>/dev/null`
+  aptcache=`which apt-cache 2>/dev/null`
+}
+# Output:
+# - variable "dpkg" contains path to dpkg or empty
+dpkg_detect() {
+  dpkg=`which dpkg 2>/dev/null`
+}
+
+# SUSE has yast
+# Output:
+# - variable "yast" contains path to yast or empty
+yast_detect() {
+  yast=`which yast 2>/dev/null`
+}
+
+# SUSE has zypper
+# Output:
+# - variable "zypper" contains path to zypper or empty
+zypper_detect() {
+  zypper=`which zypper 2>/dev/null`
+}
+
+# Parameters:
+# - absolute path to startup script to register
+# - the name to use in registration (one word)
+register_startup_script() {
+  local absolute_filename="${1}"
+  local startup_name="${2}"
+
+  # try to install it as a startup script
+  if [ -d /etc/init.d ]; then
+    local prevdir=`pwd`
+    cd /etc/init.d
+    if [ -f "${startup_name}" ]; then rm -f "${startup_name}"; fi
+    ln -s "${absolute_filename}" "${startup_name}"
+    cd "$prevdir"
+  fi
+
+  # RedHat
+  chkconfig=`which chkconfig  2>/dev/null`
+  if [ -n "$chkconfig" ]; then
+    $chkconfig --add "${startup_name}"  2>/dev/null
+  fi
+
+  # Ubuntu
+  updatercd=`which update-rc.d  2>/dev/null`
+  if [ -n "$updatercd" ]; then
+    $updatercd "${startup_name}" defaults  2>/dev/null
+  fi
+
+}
+
+# Ensure the package actually needs to be installed before calling this function.
+# takes arguments: component name (string), package list prefix (string)
+auto_install() {
+  local component=${1}
+  local cprefix=${2}
+  local yum_packages=$(eval "echo \$${cprefix}_YUM_PACKAGES")
+  local apt_packages=$(eval "echo \$${cprefix}_APT_PACKAGES")
+  local yast_packages=$(eval "echo \$${cprefix}_YAST_PACKAGES")
+  local zypper_packages=$(eval "echo \$${cprefix}_ZYPPER_PACKAGES")
+  # detect available package management tools. start with the less likely ones to differentiate.
+  yum_detect; yast_detect; zypper_detect; rpm_detect; aptget_detect; dpkg_detect;
+  if [[ -n "$zypper" && -n "$zypper_packages" ]]; then
+        zypper install $zypper_packages
+  elif [[ -n "$yast" && -n "$yast_packages" ]]; then
+        yast -i $yast_packages
+  elif [[ -n "$yum" && -n "$yum_packages" ]]; then
+        yum -y install $yum_packages
+  elif [[ -n "$aptget" && -n "$apt_packages" ]]; then
+        apt-get -y install $apt_packages
+  fi
+}
+
+# this was used in setup.sh when we installed complete rpm or deb packages via the self-extracting installer.
+# not currently used, but will be used again when we return to rpm and deb package descriptors
+# in conjunction with the self-extracting installer 
+my_service_install() {
+  auto_install "Application requirements" "APPLICATION"
+  if [[ -n "$dpkg" && -n "$aptget" ]]; then
+    is_installed=`$dpkg --get-selections | grep "${package_name_deb}" | awk '{ print $1 }'`
+    if [ -n "$is_installed" ]; then
+      echo "Looks like ${package_name} is already installed. Cleaning..."
+      $dpkg -P ${is_installed}
+    fi
+    echo "Installing $DEB_PACKAGE"
+    $dpkg -i $DEB_PACKAGE
+    $aptget -f install
+  elif [[ -n "$rpm" && -n "$yum" ]]; then
+    is_installed=`$rpm -qa | grep "${package_name_rpm}"`
+    if [ -n "$is_installed" ]; then
+      echo "Looks like ${package_name} is already installed. Cleaning..."
+      $rpm -e ${is_installed}
+    fi
+    echo "Installing $RPM_PACKAGE"
+    $rpm -i $RPM_PACKAGE
+  fi
+  $package_setup_cmd
+}

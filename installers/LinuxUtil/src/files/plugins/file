@@ -1,0 +1,141 @@
+#!/bin/sh
+
+### FUNCTION LIBRARY: file management
+
+# parameter: one or more paths to check for existence
+# output: the first entry found to exist
+# example:
+# mybinary=`first_existing /usr/local/bin/ahctl /usr/bin/ahctl /opt/local/bin/ahctl /opt/bin/ahctl /opt/intel/cloudsecurity/attestation-service/bin/ahctl`
+first_existing() {
+    local search_locations="$@"
+    local file
+    for file in $search_locations
+    do
+      if [[ -e "$file" ]]; then
+        echo "$file"
+        return 0
+      fi
+    done
+    return 1
+}
+
+# parameters: one or more files/directories to check for existence
+# return value: returns 0 if all files are present, 1 if any are missing; displays report on screen
+# example:
+# report_files_exist /etc/file1 /etc/file2
+report_files_exist() {
+    local search_locations="$@"
+    local report_summary=0
+    local file
+    for file in $search_locations
+    do
+      if [[ -e "$file" ]]; then
+        echo_success "$file" exists
+      else
+        echo_failure "$file" missing
+        report_summary=1
+      fi
+    done
+    return $report_summary
+}
+
+# makes a date-stamped backup copy of a file
+backup_file() {
+  local filename="${1}"
+  local datestr=`date +%Y-%m-%d.%H%M`
+  local backup_filename="${filename}.${datestr}"
+  if [[ -n "$filename" && -f "$filename" ]]; then
+    cp ${filename} ${backup_filename}
+    echo "${backup_filename}"
+  fi
+}
+
+# read a property from a property file formatted like NAME=VALUE
+# parameters: property name, filename
+# example: read_property_from_file MYFLAG FILENAME
+# Automatically strips Windows carriage returns from the file
+read_property_from_file() {
+  local property="${1}"
+  local filename="${2}"
+  if [ -f "$filename" ]; then
+    local found=`cat "$filename" | grep "^$property"`
+    if [ -n "$found" ]; then
+      #echo -n `cat "$filename" | tr -d '\r' | grep "^$property" | tr -d '\n' | awk -F '=' '{ print $2 }'`
+      echo `cat "$filename" | tr -d '\r' | grep "^$property" | head -n 1 | awk -F '=' '{ print $2 }'`
+    fi
+  fi
+}
+
+# write a property into a property file, replacing the previous value
+# parameters: property name, filename, new value
+# example: update_property_in_file MYFLAG FILENAME true
+update_property_in_file() {
+  local property="${1}"
+  local filename="${2}"
+  local value="${3}"
+  if [ -f "$filename" ]; then
+  local ispresent=`grep "^${property}" "$filename"`
+  if [ -n "$ispresent" ]; then
+      # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
+      local escaped_value=`echo "${value}" | sed 's/|/\\|/g'`
+      # replace just that line in the file and save the file
+      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${escaped_value}|" "${filename}"`
+      # protect against an error
+      if [ -n "$updatedcontent" ]; then
+        echo "$updatedcontent" > "${filename}"
+      else
+        echo_warning "Cannot write $property to $filename with value: $value"
+        echo -n 'sed -re "s|^('
+        echo -n "${property}"
+        echo -n ')=(.*)|\1='
+        echo -n "${escaped_value}"
+        echo -n '|" "'
+        echo -n "${filename}"
+        echo -n '"'
+        echo
+      fi
+  else
+      # property is not already in file so add it. extra newline in case the last line in the file does not have a newline
+      echo "" >> "${filename}"
+      echo "${property}=${value}" >> "${filename}"
+  fi
+  # test
+  else
+    # file does not exist so create it
+    echo "${property}=${value}" > "${filename}"
+  fi
+}
+
+
+# this command accepts two parameters:  filename, extension
+# the return value is the filename without the extension, or just the filename if it
+# didn't end with the specified extension
+# this command is similar to the 'basename' command, which strips out the path
+# and an optional extension, but does not strip out the path.
+# examples:
+#   basename      /path/to/filename.ext .ext   --> filename
+#   path_basename /path/to/filename.ext .ext   --> /path/to/filename
+#   basename      /path/to/filename.ext1 .ext2 --> filename.ext1
+#   path_basename /path/to/filename.ext1 .ext2 --> /path/to/filename.ext1
+path_basename() {
+  local infiledir=`dirname $1`
+  local infilebasename=`basename $1 $2`
+  local outfile="$infiledir/$infilebasename"
+  echo "$outfile"
+}
+
+
+### SHELL FUNCTIONS
+
+# parameters: space-separated list of files to include (shell functions or configuration)
+# example:  shell_include_files /path/to/file1 /path/to/file2 /path/to/file3 ...
+# if any file does not exist, it is skipped
+shell_include_files() {
+  for filename in "$@"
+  do
+    if [ -f "${filename}" ]; then
+      . ${filename}
+    fi
+  done
+}
+
