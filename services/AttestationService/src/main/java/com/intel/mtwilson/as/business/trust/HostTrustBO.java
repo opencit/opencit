@@ -154,8 +154,8 @@ public class HostTrustBO extends BaseBO {
                     hostId);
         }
         long start = System.currentTimeMillis();
-        log.info( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
-        log.info( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
+        log.debug( "VMM name for host is {}", tblHosts.getVmmMleId().getName());
+        log.debug( "OS name for host is {}", tblHosts.getVmmMleId().getOsId().getName());
 
         TrustReport trustReport = getTrustReportForHost(tblHosts, hostId);
         
@@ -294,7 +294,7 @@ public class HostTrustBO extends BaseBO {
 
         String response = toString(trust);
 
-        log.info("Overall trust status " + response);
+        log.debug("Overall trust status " + response);
 
         return response;
     }
@@ -623,7 +623,7 @@ public class HostTrustBO extends BaseBO {
 
                 String hostTrustStatus = getTrustStatusString(hostName);
 
-                log.info("The trust status of {} is :{}",
+                log.debug("The trust status of {} is :{}",
                         new String[]{hostName.toString(), hostTrustStatus});
 
                 trustLevel = parseTrustStatus(hostTrustStatus);
@@ -716,7 +716,7 @@ public class HostTrustBO extends BaseBO {
             if (hlObj != null && !hlObj.white_list_value.isEmpty()) {
                 TblLocationPcr locPCR = locJpaController.findTblLocationPcrByPcrValueEx(hlObj.white_list_value);
                 if (locPCR != null) {
-                    log.info(String.format("An entry already existing in the location table for the white list specified [%s | %s]"
+                    log.debug(String.format("An entry already existing in the location table for the white list specified [%s | %s]"
                             , locPCR.getLocation(), hlObj.white_list_value));
                     if (locPCR.getLocation().equals(hlObj.location)) {
                         // No need to do anything. Just exit.
@@ -766,7 +766,7 @@ public class HostTrustBO extends BaseBO {
             
             SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host);
 
-            log.info("Expiry {}" , samlAssertion.expiry_ts.toString());
+            log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
 
             tblSamlAssertion.setSaml(samlAssertion.assertion);
             tblSamlAssertion.setExpiryTs(samlAssertion.expiry_ts);
@@ -804,7 +804,7 @@ public class HostTrustBO extends BaseBO {
     }
 
     public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
-        log.info("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        log.debug("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
         My.initDataEncryptionKey();
@@ -821,7 +821,7 @@ public class HostTrustBO extends BaseBO {
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
-                    log.info("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
+                    log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
                     return tblSamlAssertion.getSaml();
                 }else{
                     log.debug("Found assertion in cache with error set, returning that.");
@@ -830,7 +830,7 @@ public class HostTrustBO extends BaseBO {
             }
         }
         
-        log.info("Getting trust and saml assertion from host.");
+        log.debug("Getting trust and saml assertion from host.");
         
         try {
             return getTrustWithSaml(host);
@@ -865,7 +865,7 @@ public class HostTrustBO extends BaseBO {
                 tblSamlAssertion.setErrorMessage(e.getMessage());
                 new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
             }catch(Exception ex){
-                log.info("getTrustwithSaml caugh exception while generating error saml assertion");
+                log.debug("getTrustwithSaml caugh exception while generating error saml assertion");
                 throw new ASException(new Exception("getTrustWithSaml " + ex.getMessage()));
             } 
             throw new ASException(new Exception(e.getMessage()));
@@ -873,7 +873,7 @@ public class HostTrustBO extends BaseBO {
     }
 
     public HostTrust getTrustWithCache(String host, Boolean forceVerify) {
-        log.info("getTrustWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        log.debug("getTrustWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         try {
             
             if(forceVerify != true){
@@ -894,7 +894,7 @@ public class HostTrustBO extends BaseBO {
                 }
             }
         
-           log.info("Getting trust and saml assertion from host.");
+           log.debug("Getting trust and saml assertion from host.");
         
            HostTrustStatus status = getTrustStatus(new Hostname(host));
            

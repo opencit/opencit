@@ -293,7 +293,7 @@ public class ReportsBO extends BaseBO {
         }
         
         if(!failureOnly){
-            logger.info("FailureOnly flag is false. Adding all manifests.");
+            logger.debug("FailureOnly flag is false. Adding all manifests.");
             for(TblModuleManifest moduleManifest : tblPcrManifest.getMleId().getTblModuleManifestCollection()){
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
                         !moduleReports.containsKey(moduleManifest.getComponentName())){

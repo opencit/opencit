@@ -45,7 +45,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         @Override
         public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj, HostConfigData hostConfig, ApiClient apiObj)
                 throws ManagementConsolePortalException, MalformedURLException {           
-                logger.info("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
+                logger.debug("ManagementConsoleServicesImpl.saveWhiteListConfiguration >>");            
                 boolean result = false;                            
                 ManagementService msAPIObj = (ManagementService) apiObj;
            
@@ -83,7 +83,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 try {
                         result = msAPIObj.configureWhiteList(hostConfigObj);
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Failed to configure whitelist: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 return result;
@@ -98,8 +98,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         */
         @Override
         public List<HostDetails> getHostEntryFromVMWareCluster(String clusterName, String vCenterConnection)throws ManagementConsolePortalException {
-                logger.info("ManagementConsoleServicesImpl.getHostEntryFromVMWareCluster >>");
-                logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
+                logger.debug("ManagementConsoleServicesImpl.getHostEntryFromVMWareCluster >>");
+                //logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
                 List<HostDetails> hostVos = null;
 
                 try {
@@ -110,7 +110,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         try {
                         hostList = vmHelperObj.getHostDetailsForCluster(clusterName, vCenterConnection);
                         } catch (Exception e) {
-                                logger.info(e.getMessage());
+                                logger.error("Failed to get host information from vmware cluster: {}", e.getMessage());
                                 throw ConnectionUtil.handleManagementConsoleException(e);
                         }
 
@@ -123,7 +123,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         }
 
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Failed to get host information from vmware cluster: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 return hostVos;
@@ -139,8 +139,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
          */
         @Override
         public HostDetails registerNewHost(HostDetails hostDetailList, ApiClient apiObj)throws ManagementConsolePortalException {
-                logger.info("ManagementConsoleServicesImpl.registerNewHost >>");
-                logger.info("Host To Be Register >>" + hostDetailList);
+                logger.debug("ManagementConsoleServicesImpl.registerNewHost >>");
+                logger.debug("Host To Be Register >>" + hostDetailList);
                 ManagementService msAPIObj = (ManagementService) apiObj;
 
                 // Create the host object to be sent to the Management API for host registration
@@ -164,7 +164,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         if (result)
                                 hostDetailList.setStatus("Successfully registered the host.");
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Failed to register the host: {}", e.getMessage());
                         // Bug: 441 - We should not be throwing exception here. Instead setting the error correctly
                         
                         hostDetailList.setStatus(StringEscapeUtils.escapeHtml(e.getMessage()));
@@ -184,7 +184,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         */
         @Override
         public boolean updateRequest(ApiClientDetails apiClientDetailsObj, ApiClient apiObj, boolean approve)	throws ManagementConsolePortalException {
-                logger.info("ManagementConsoleServicesImpl.updateRequest >>");
+                logger.debug("ManagementConsoleServicesImpl.updateRequest >>");
                 boolean result = false;
 
                 try {
@@ -211,7 +211,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         }
                         result = msAPIObj.updateApiClient(apiUpdateObj);
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Update failed: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
         return result;
@@ -227,8 +227,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         */
         @Override
         public boolean deleteSelectedRequest(String fingerprint, ApiClient apiObj) throws ManagementConsolePortalException {
-                logger.info("ManagementConsoleServicesImpl.deleteSelectedRequest >>");
-                logger.info("API Client being deleted >> " + fingerprint);
+                logger.debug("ManagementConsoleServicesImpl.deleteSelectedRequest >>");
+                logger.debug("API Client being deleted >> " + fingerprint);
                 boolean result = false;
 
                 try {
@@ -261,7 +261,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         result = msAPIObj.deleteApiClient(decodedFP); // only marks it as deleted (must retain the record for audits)
 
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Delete failed: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
             return result;
@@ -274,14 +274,14 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         * @throws ManagementConsolePortalException 
         */
         public Role[] getAllRoles(ApiClient apiObj) throws ManagementConsolePortalException {
-                logger.info("ManagementConsoleServicesImpl.getAllRoles >>");
+                logger.debug("ManagementConsoleServicesImpl.getAllRoles >>");
                 Role[] roleList = null;
 
                 try {
                         ManagementService msAPIObj = (ManagementService) apiObj;
                         roleList = msAPIObj.listAvailableRoles();
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Failed to get list of roles: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 return roleList;
@@ -297,7 +297,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         */
         @Override
         public List<ApiClientDetails> getApiClients(ApiClient apiObj, ApiClientListType apiType )throws ManagementConsolePortalException {
-                logger.info("ManagementConsoleServicesImpl.getApprovedRequest >>");
+                logger.debug("ManagementConsoleServicesImpl.getApprovedRequest >>");
                 List<ApiClientDetails> apiClientList = new ArrayList<ApiClientDetails>();
                 List<ApiClientInfo> apiListFromDB = null;
 
@@ -343,7 +343,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         }
 
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Failed to list API clients: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 try {
@@ -360,7 +360,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                                 apiClientList.add(apiClientDetailObj);
                         }
                 } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error("Failed to compile list of API clients: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 return apiClientList;
@@ -388,8 +388,8 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
          */
         @Override
         public HostConfigResponseList registerHosts(ApiClient apiObj, List<HostDetails> hostRecords) throws ManagementConsolePortalException, MalformedURLException {
-                logger.info("ManagementConsoleServicesImpl.registerHosts >>");
-                logger.info("# of hosts to be registeredr >> " + hostRecords.size());
+                logger.debug("ManagementConsoleServicesImpl.registerHosts >>");
+                logger.debug("# of hosts to be registered >> " + hostRecords.size());
                 List<HostConfigData> hostConfigList = new ArrayList<HostConfigData>();
                 HostConfigDataList hostList = new HostConfigDataList();
                 HostConfigResponseList results = null;
@@ -435,7 +435,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         results = msAPIObj.registerHosts(hostList);
                         
                 }  catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.debug("Failed to register hosts: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
             return results; 

@@ -98,7 +98,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
         SimpleKeystore keystore = new SimpleKeystore(resource, password);
         X509Certificate[] certificates = keystore.getTrustedCertificates("ssl");
         for(X509Certificate certificate : certificates) {
-            log.info(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.debug(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
         }
     }
     
@@ -243,9 +243,9 @@ public class UpdateTlsKeystoreInDatabaseTest {
             certificates.add(keystore.getX509Certificate(alias));
         }
         for(X509Certificate certificate : certificates) {
-            log.info(String.format("Subject: %s", certificate.getSubjectX500Principal().getName()));
-            log.info(String.format("Alternative names: %s", X509Util.alternativeNames(certificate).isEmpty() ? "none" : StringUtils.join(X509Util.alternativeNames(certificate),", ")));
-            log.info(String.format("Fingerprint: %s", Hex.encodeHexString(X509Util.sha1fingerprint(certificate))));
+            log.debug(String.format("Subject: %s", certificate.getSubjectX500Principal().getName()));
+            log.debug(String.format("Alternative names: %s", X509Util.alternativeNames(certificate).isEmpty() ? "none" : StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.debug(String.format("Fingerprint: %s", Hex.encodeHexString(X509Util.sha1fingerprint(certificate))));
         }
     }
     

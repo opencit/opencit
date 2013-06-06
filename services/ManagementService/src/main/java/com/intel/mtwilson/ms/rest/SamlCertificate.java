@@ -47,6 +47,17 @@ public class SamlCertificate {
     }
 
     /**
+     * Same as getSamlCertificate but with suggested filename
+     */
+    @GET
+    @Path("/certificate/mtwilson-saml.crt")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @PermitAll
+    public byte[] getSamlCertificateFilename() {
+        return getSamlCertificate();
+    }    
+    
+    /**
      * Retrieves representation of an instance of
      * com.intel.mountwilson.ms.business.SamlCertificate
      *
@@ -60,7 +71,7 @@ public class SamlCertificate {
 
         try {
             File certFile = ResourceFinder.getFile(MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file", "saml.crt.pem"));
-            log.info("Certificate File " + certFile.getPath());
+            log.debug("Certificate File " + certFile.getPath());
             FileInputStream in = new FileInputStream(certFile);
 //            byte[] certificate = IOUtils.toByteArray(in);
             String certificate = IOUtils.toString(in);
@@ -68,7 +79,7 @@ public class SamlCertificate {
 //            X509Certificate cert = X509Util.decodeDerCertificate(certificate);
             X509Certificate cert = X509Util.decodePemCertificate(certificate); // XXX assuming only one, should assume multiple and decide whetehr to sign first (end-subject) or last (root ca). 
             
-            log.info("Read certificate successfully");
+            log.debug("Read certificate successfully");
 
             return cert.getEncoded();
         } catch (CertificateException e) {
