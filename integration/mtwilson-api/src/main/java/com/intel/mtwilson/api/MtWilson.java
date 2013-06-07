@@ -217,9 +217,72 @@ public interface MtWilson {
      */    
     HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
 
+    /**
+     * 
+     * Retrieves the current trust status of the host by going through a complete attestation cycle. Attestation cycle
+     * includes communicating with the host, retrieving the latest BIOS and Hypervisor measurements and verifying
+     * the same. Since the status is not retrieved from the cache, the performance would be relatively slower than
+     * the getTrustForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) function where the user 
+     * has the option to specify whether to retrieve the trust status from the cache or not. <br>
+     * For users who want to ensure that the trust status indeed came from Mt.Wilson, they need to use 
+     * {@link GetSamlForHost} function.
+     * <p>
+     * <i><u>Roles needed:</u></i>Attestation/Report
+     * <p>
+     * <i><u>Content type returned:</u></i>JSON
+     * <p>
+     * <i><u>Sample REST API call :</u></i><br>
+     * <i>Method Type: GET</i>
+     * https://192.168.1.101:8181/AttestationService/resources/hosts/aik-0de3710ee2f658a382f2531213233024175a63dd/trust.json
+     * <p>
+     * <i><u>Sample Output:</u></i><br>
+     * {"hostname":"10.1.70.126","trust":{"bios":true,"vmm":false,"location":false}}
+     * <p>
+     * <i><u>Sample Java API Call:</u></i><br>
+     * HostTrustResponse hostTrust = apiClientObj.getHostTrustByAik(new Sha1Digest("0de3710ee2f658a382f2531213233024175a63dd"));
+     * System.out.println("BIOS trust status: " + hostTrust.trust.bios + " Hypervisor trust status" + hostTrust.trust.vmm);
+     * <p>
+     * 
+     * @param aikSha1 {@link Sha1Digest} The SHA1 of the AIK Public Key (not certificate) of the host
+     * @return {@link HostTrustResponse} Trust status of BIOS and Hypervisor. Note that the location if for future use.
+     * @throws IOException
+     * @throws ApiException All the errors from the Mt.Wilson system would be thrown as ApiException. Users can access the 
+     * error code and error message for details.
+     * @throws SignatureException 
+     * @since MW 1.0
+     */
     HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
     
-    X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+    /**
+     * Retrieves an X509 certificate for an RSA key that is sealed to the host's trusted platform configuration.
+     * This can be used to authenticate the host in an SSL connection or to send encrypted data to the host
+     * where the host can only receive the data if it is currently in the trusted configuration indicated by
+     * the certificate.
+     * 
+     * <p>
+     * <i><u>Roles needed:</u></i>Attestation/Report
+     * <p>
+     * <i><u>Content type returned:</u></i>JSON
+     * <p>
+     * <i><u>Sample REST API call :</u></i><br>
+     * <i>Method Type: GET</i>
+     * https://192.168.1.101:8181/AttestationService/resources/hosts/aik-0de3710ee2f658a382f2531213233024175a63dd/trustcert.x509
+     * <p>
+     * <i><u>Sample Output:</u></i><br>
+     * application/octet-stream DER-encoded (binary) X509 certificate
+     * <p>
+     * <i><u>Sample Java API Call:</u></i><br>
+     * X509Certificate hostTrustCert = apiClientObj.getCurrentTrustCertificateByAik(new Sha1Digest("0de3710ee2f658a382f2531213233024175a63dd"));
+     * <p>
+     * 
+     * @param aikSha1 {@link Sha1Digest} The SHA1 of the AIK Public Key (not certificate) of the host
+     * @return {@link X509Certificate}
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     * @since MW1.2
+     */
+//    X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
 
 
     /**
