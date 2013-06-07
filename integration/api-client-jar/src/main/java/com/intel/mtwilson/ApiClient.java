@@ -777,11 +777,11 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     
 
-    @Override
+   /* @Override
     public CaInfo getCaStatus() throws IOException, ApiException, SignatureException {
         throw new UnsupportedOperationException("Not supported yet.");
         // TODO: create a CaInfo object, which combines data from two sources:  1) the Mt Wilson CA Certificate, 2) the "ca" user in the HMAC users table
-    }
+    }*/
 
     /**
      * XXX needs a rename, because we're talking about the host provisioning ca specifically
@@ -790,7 +790,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @throws ApiException
      * @throws SignatureException 
      */
-    @Override
+  /*  @Override
     public void enableCaWithPassword(String newPasswordString) throws IOException, ApiException, SignatureException {
         try {
             Password newPassword = new Password(newPasswordString, new byte[0]); // XXX currently using an empty salt, so the user doesn't need to also copy the salt, but maybe we should use a generated salt and return it to the user to paste when using the password....
@@ -801,7 +801,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         catch(CryptographyException e) {
             throw new ApiException("Cannot hash password", e);
         }
-    }
+    }*/
 
     /**
      * XXX needs a rename, because we're talking about the host provisioning ca specifically
@@ -809,12 +809,12 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @throws ApiException
      * @throws SignatureException 
      */
-    @Override
+   /* @Override
     public void disableCa() throws IOException, ApiException, SignatureException {
             //String result = 
             text(httpPost(msurl("/ca/disable"), null));
         // TODO:  an update on the "ca" user in the HMAC users table,  set enabled=false
-    }
+    }*/
 
     @Override
     public List<AuditLogEntry> searchAuditLog(AuditLogSearchCriteria criteria) throws IOException, ApiException, SignatureException {
@@ -953,20 +953,20 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }
     
     /**
-     * @deprecated this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
+     *  this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
      * @param hostname
      * @return
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException 
      */
-    @Override
+    /*@Override
     public String getHostAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("hostName", hostname.toString());
         String attReport = text(httpGet(asurl("/hosts/reports/attestation", query)));
         return attReport;
-    }
+    }*/
 
     // Whitelist Management API
     @Override
@@ -1102,7 +1102,11 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         //return "true".equals(result);        
     }
 
-    
+    @Override
+    public boolean registerApiClient(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException {
+       String result = text(httpPost(msurl("/apiclient/register"), toJSON(apiClient)));
+        return true;        
+    }
     // Credential Management API
     
     // this is required so that the jackson mapper will create an instance of ListOsData (List<OsData>) instead of creating an instance of List<LinkedHashMap>

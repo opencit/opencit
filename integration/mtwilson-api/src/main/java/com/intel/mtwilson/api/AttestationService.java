@@ -71,8 +71,8 @@ public interface AttestationService {
 
     BulkHostTrustResponse getTrustForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) throws IOException, ApiException, SignatureException;
 
-    
-    String getHostAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException;
+    // this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
+    //String getHostAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException; 
     
     AttestationReport getAttestationFailureReport(Hostname hostname)throws IOException, ApiException, SignatureException;
     
