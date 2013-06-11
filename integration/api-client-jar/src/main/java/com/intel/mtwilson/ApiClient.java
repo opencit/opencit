@@ -113,7 +113,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     public ApiClient(Configuration config) throws ClientException {
         try {
         setBaseURL(config.getString("mtwilson.api.baseurl"));
-        log.debug("Base URL: "+baseURL.toExternalForm());
+        //log.debug("Base URL: "+baseURL.toExternalForm());
         /*
         httpClient = new JerseyHttpClient(baseURL.toExternalForm(), config.getString("mtwilson.api.clientId"), config.getString("mtwilson.api.secretKey"));
         */
@@ -910,9 +910,6 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
             trustedSamlCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
         }
-        catch(NullPointerException e) {
-            throw new ApiException("Cannot load SAML certificates: keystore not loaded", e);
-        }
         catch(KeyStoreException e) {
             throw new ApiException("Cannot load trusted SAML certificates", e);
         }
@@ -924,6 +921,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         }
         catch(CertificateEncodingException e) {
             throw new ApiException("Cannot load trusted SAML certificates", e);
+        }
+        catch(Exception e) {
+            throw new ApiException("Cannot load SAML certificates: keystore not loaded", e);
         }
         TrustAssertion trustAssertion = new TrustAssertion(trustedSamlCertificates, saml);
         return trustAssertion;
