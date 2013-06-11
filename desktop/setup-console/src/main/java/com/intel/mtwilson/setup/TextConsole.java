@@ -50,6 +50,9 @@ public class TextConsole {
         catch(ClassNotFoundException e) {
             System.err.println("Unrecognized command");
         }
+        catch(java.lang.SecurityException e){
+            System.err.println("security exception: " + e.getMessage());
+        }
         catch(SetupException e) {
             e.printStackTrace(System.err);
         }
