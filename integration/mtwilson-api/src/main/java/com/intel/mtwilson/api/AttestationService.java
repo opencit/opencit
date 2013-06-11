@@ -35,7 +35,7 @@ public interface AttestationService {
 
     HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
     
-    X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
+    //X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
 
 
     HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;

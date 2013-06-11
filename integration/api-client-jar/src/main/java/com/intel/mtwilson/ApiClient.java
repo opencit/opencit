@@ -827,7 +827,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return trust;
     }
 
-    @Override
+   /* @Override
     public X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
         byte[] trust = binary(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trustcert.x509")));
         try {
@@ -837,7 +837,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         catch(Exception e) {
             throw new IOException("Cannot decode X509 certificate ("+trust.length+" bytes)");
         }
-    }
+    }*/
     
     // this is required so that the jackson mapper will create an instance of ListMleData (List<MleData>) instead of creating an instance of List<LinkedHashMap>
     public static class ListHostData extends ArrayList<TxtHostRecord> { };

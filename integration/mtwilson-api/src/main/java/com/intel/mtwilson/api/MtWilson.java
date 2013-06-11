@@ -236,7 +236,7 @@ public interface MtWilson {
      * https://192.168.1.101:8181/AttestationService/resources/hosts/aik-0de3710ee2f658a382f2531213233024175a63dd/trust.json
      * <p>
      * <i><u>Sample Output:</u></i><br>
-     * {"hostname":"10.1.70.126","trust":{"bios":true,"vmm":false,"location":false}}
+     * {"hostname":"192.168.0.201","trust":{"bios":true,"vmm":false,"location":false}}
      * <p>
      * <i><u>Sample Java API Call:</u></i><br>
      * HostTrustResponse hostTrust = apiClientObj.getHostTrustByAik(new Sha1Digest("0de3710ee2f658a382f2531213233024175a63dd"));
