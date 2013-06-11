@@ -222,8 +222,8 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     //private void getAllPcrAndModuleInformationFromHost() throws RuntimeFaultFaultMsg, InvalidPropertyFaultMsg, JAXBException {
     //}
 
-    
-    private <T> String toXml(Class<T> clazz, T object) throws JAXBException {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning
+    /*private <T> String toXml(Class<T> clazz, T object) throws JAXBException {
         JAXBElement<T> xmlReport = new JAXBElement<T>(new QName("urn:vim25"),clazz,object);
         StringWriter sw = new StringWriter();
         JAXBContext jc = JAXBContext.newInstance("com.vmware.vim25");
@@ -237,7 +237,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
         
         return sw.toString();
         
-    }
+    }*/
 
     @Override
     public PcrManifest getPcrManifest() throws IOException {
