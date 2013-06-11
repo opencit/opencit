@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwApiClientHttpBasic;
 import java.io.Serializable;
@@ -35,25 +36,21 @@ public class MwApiClientHttpBasicJpaController implements Serializable {
     }
 
     public void create(MwApiClientHttpBasic mwApiClientHttpBasic) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwApiClientHttpBasic);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
-    public void edit(MwApiClientHttpBasic mwApiClientHttpBasic) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+    public void edit(MwApiClientHttpBasic mwApiClientHttpBasic) throws NonexistentEntityException, ASDataException {
+        EntityManager em =  getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
-            mwApiClientHttpBasic = em.merge(mwApiClientHttpBasic);
+            em.merge(mwApiClientHttpBasic);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -63,18 +60,15 @@ public class MwApiClientHttpBasicJpaController implements Serializable {
                     throw new NonexistentEntityException("The mwApiClientHttpBasic with id " + id + " no longer exists.");
                 }
             }
-            throw ex;
+            throw new ASDataException(ex);
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(Integer id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             MwApiClientHttpBasic mwApiClientHttpBasic;
             try {
@@ -86,9 +80,7 @@ public class MwApiClientHttpBasicJpaController implements Serializable {
             em.remove(mwApiClientHttpBasic);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
