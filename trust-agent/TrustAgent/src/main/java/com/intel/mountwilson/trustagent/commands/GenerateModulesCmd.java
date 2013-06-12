@@ -58,7 +58,8 @@ public class GenerateModulesCmd implements ICommand {
 
         BufferedReader in = null;
         String str;
-        String content = "";
+        String content;
+        StringBuffer res = new StringBuffer();
         try {
             in = new BufferedReader(new FileReader(context.getMeasureLogXmlFile()));
         } catch (FileNotFoundException e) {
@@ -67,14 +68,15 @@ public class GenerateModulesCmd implements ICommand {
         try {
             if(in != null) {
                 while ((str = in.readLine()) != null) {
-                    content = content + str;
+                    //content = content + str;
+                    res.append(str);
                 }
                 in.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        content = res.toString();
         log.debug("Content of the XML file before getting modules: " + content);
         
         getModulesFromMeasureLogXml(content);
