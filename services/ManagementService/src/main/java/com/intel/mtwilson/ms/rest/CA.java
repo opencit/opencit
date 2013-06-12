@@ -117,11 +117,14 @@ public class CA {
             if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
             }
-            File rootCaPemFile = new File(certFile); 
-            FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
-            String content = IOUtils.toString(in); // IOException
-            IOUtils.closeQuietly(in);
-            return content;
+            if(certFile != null) {
+                File rootCaPemFile = new File(certFile); 
+                FileInputStream in = new FileInputStream(rootCaPemFile); // FileNotFoundException
+                String content = IOUtils.toString(in); // IOException
+                IOUtils.closeQuietly(in);
+                return content;
+            }else throw new FileNotFoundException("Could not obtain Root CA cert location from config");
+                
         } 
         catch (FileNotFoundException e) {
             throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Mt Wilson Root CA certificate file is not found");
@@ -155,11 +158,13 @@ public class CA {
             if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
             }
-            File samlPemFile = new File(certFile);
-            FileInputStream in = new FileInputStream(samlPemFile);
-            String content = IOUtils.toString(in);
-            IOUtils.closeQuietly(in);
-            return content;
+            if(certFile != null) {
+                File samlPemFile = new File(certFile);
+                FileInputStream in = new FileInputStream(samlPemFile);
+                String content = IOUtils.toString(in);
+                IOUtils.closeQuietly(in);
+                return content;
+            }else throw new FileNotFoundException("Could not load Saml Cert location from config");
         }
         catch (FileNotFoundException e) {
             throw new MSException(e, ErrorCode.SYSTEM_ERROR, "SAML certificate file is not found");
@@ -192,11 +197,13 @@ public class CA {
              if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
             }
-           File privacyCaPemFile = new File(certFile); 
-            FileInputStream in = new FileInputStream(privacyCaPemFile);
-            String content = IOUtils.toString(in);
-            IOUtils.closeQuietly(in);
-            return content;
+            if(certFile != null) {
+                File privacyCaPemFile = new File(certFile); 
+                FileInputStream in = new FileInputStream(privacyCaPemFile);
+                String content = IOUtils.toString(in);
+                IOUtils.closeQuietly(in);
+                return content;
+            }else throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
         }
         catch (FileNotFoundException e) {
             throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Privacy CA certificate file is not found");
@@ -219,25 +226,30 @@ public class CA {
             if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
             }
-            if( certFile.endsWith(".pem") ) {
-                File tlsPemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(tlsPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                List<X509Certificate> list = X509Util.decodePemCertificates(content);
-                if( list != null && !list.isEmpty() ) {
-                    return list.get(0).getEncoded(); // first certificate is this host, all others are CA's
+            if(certFile != null) {
+                if( certFile.endsWith(".pem") ) {
+                    File tlsPemFile = new File(certFile);
+                    FileInputStream in = new FileInputStream(tlsPemFile);
+                    String content = IOUtils.toString(in);
+                    IOUtils.closeQuietly(in);
+                    List<X509Certificate> list = X509Util.decodePemCertificates(content);
+                    if( list != null && !list.isEmpty() ) {
+                        return list.get(0).getEncoded(); // first certificate is this host, all others are CA's
+                    }
+                    throw new IOException("Cannot read certificate file: "+certFile);
                 }
-                throw new IOException("Cannot read certificate file: "+certFile);
+                if( certFile.endsWith(".crt") ) {
+                    File tlsPemFile = new File(certFile);
+                    FileInputStream in = new FileInputStream(tlsPemFile);
+                    byte[] content = IOUtils.toByteArray(in);
+                    IOUtils.closeQuietly(in);
+                    return content;
+                }
+                throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
+            }else{
+               throw new FileNotFoundException("Could not obtain Tls Cert location from config");
             }
-            if( certFile.endsWith(".crt") ) {
-                File tlsPemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(tlsPemFile);
-                byte[] content = IOUtils.toByteArray(in);
-                IOUtils.closeQuietly(in);
-                return content;
-            }
-            throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
+            
         }
         catch (FileNotFoundException e) {
             throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Server SSL certificate file is not found");
@@ -266,23 +278,28 @@ public class CA {
             if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
             }
-            if( certFile.endsWith(".pem") ) {
-                File tlsPemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(tlsPemFile);
-                String content = IOUtils.toString(in);
-                IOUtils.closeQuietly(in);
-                return content;
+            if(certFile != null) {
+                if( certFile.endsWith(".pem") ) {
+                    File tlsPemFile = new File(certFile);
+                    FileInputStream in = new FileInputStream(tlsPemFile);
+                    String content = IOUtils.toString(in);
+                    IOUtils.closeQuietly(in);
+                    return content;
+                }
+                if( certFile.endsWith(".crt") ) {
+                    File tlsPemFile = new File(certFile);
+                    FileInputStream in = new FileInputStream(tlsPemFile);
+                    byte[] content = IOUtils.toByteArray(in);
+                    IOUtils.closeQuietly(in);
+                    X509Certificate cert = X509Util.decodeDerCertificate(content);
+                    String pem = X509Util.encodePemCertificate(cert);
+                    return pem;
+                }
+                throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
+            }else{
+                throw new FileNotFoundException("Could not obtain TLS cert chain location from config");
             }
-            if( certFile.endsWith(".crt") ) {
-                File tlsPemFile = new File(certFile);
-                FileInputStream in = new FileInputStream(tlsPemFile);
-                byte[] content = IOUtils.toByteArray(in);
-                IOUtils.closeQuietly(in);
-                X509Certificate cert = X509Util.decodeDerCertificate(content);
-                String pem = X509Util.encodePemCertificate(cert);
-                return pem;
-            }
-            throw new FileNotFoundException("Certificate file is not in .pem or .crt format");
+            
         }
         catch (FileNotFoundException e) {
             throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Server SSL certificate file is not found");

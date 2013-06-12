@@ -50,7 +50,7 @@ public class EraseUserAccounts implements Command {
      */
     @Override
     public void execute(String[] args) throws Exception {
-        Configuration serviceConf = MSConfig.getConfiguration();
+        //Configuration serviceConf = MSConfig.getConfiguration();
         pm = new MSPersistenceManager();
         em = pm.getEntityManagerFactory("MSDataPU");
         deletePortalUsers();

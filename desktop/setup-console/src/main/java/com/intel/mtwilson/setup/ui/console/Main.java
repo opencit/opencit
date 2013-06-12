@@ -87,9 +87,13 @@ public class Main {
             e.printStackTrace();   
         }
         * */
+        catch(java.lang.SecurityException e){
+            System.err.println("Securty Exception: "+ e.getMessage());
+        }
         catch(Exception e) {
             e.printStackTrace(System.err);
         }
+        
         
     }
     

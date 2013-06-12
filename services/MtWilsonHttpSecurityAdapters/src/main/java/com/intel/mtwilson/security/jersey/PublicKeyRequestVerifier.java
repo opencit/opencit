@@ -270,14 +270,15 @@ Authorization: MtWilson
         rsa.update(document);
         return rsa.verify(signature);
     }
-
+    // commenting out unused function (6/11 1.2)
+    /*
     private boolean verifySignature(byte[] document, Certificate certificate, String signatureAlgorithm, byte[] signature) throws NoSuchAlgorithmException,InvalidKeyException, SignatureException {
         Signature rsa = Signature.getInstance(signatureAlgorithm); 
         rsa.initVerify(certificate);
         rsa.update(document);
         return rsa.verify(signature);
     }
-    
+    */
     /**
      * Standardizes signature algorithm names to the Java name.
      * "SHA256withRSA".equals(signatureAlgorithm("RSA-SHA256a")); // true

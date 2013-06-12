@@ -57,7 +57,7 @@ public class GenerateModulesCmd implements ICommand {
         log.info("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
         BufferedReader in = null;
-        String str = "";
+        String str;
         String content = "";
         try {
             in = new BufferedReader(new FileReader(context.getMeasureLogXmlFile()));
@@ -65,10 +65,12 @@ public class GenerateModulesCmd implements ICommand {
             e.printStackTrace();
         }
         try {
-            while ((str = in.readLine()) != null) {
-                content = content + str;
+            if(in != null) {
+                while ((str = in.readLine()) != null) {
+                    content = content + str;
+                }
+                in.close();
             }
-            in.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

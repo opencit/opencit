@@ -151,6 +151,8 @@ public class SetupWizard {
      * @return
      * @throws SetupException 
      */
+    // commenting oput unused function (6/11 1.2)
+    /*
     private boolean allNonEmptyFieldsInTableBeginWith(Connection c, String tableName, String beginWith) throws SetupException {
         try {
             boolean condition = true;
@@ -171,6 +173,7 @@ public class SetupWizard {
             throw new SetupException(String.format("Cannot check contents of table %s", tableName), e);
         }
     }
+    */
     
     /**
      * TODO: fix update statement assumes an "ID" column
