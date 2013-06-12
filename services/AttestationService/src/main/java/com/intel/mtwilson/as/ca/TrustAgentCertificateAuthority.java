@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.ca;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.mtwilson.as.helper.BaseBO;
@@ -34,6 +35,7 @@ import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.crypto.X509Util;
+import java.security.cert.CertificateException;
 /**
  * The Trust Agent Certificate Authority is an RSA key pair that signs SSL
  * certificates during Trust Agent installs.
@@ -101,7 +103,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
      * @throws NonexistentEntityException
      * @throws Exception 
      */
-    public void setup() throws CryptographyException, GeneralSecurityException, IOException, NonexistentEntityException, Exception {
+    public void setup() throws CryptographyException, GeneralSecurityException, IOException, NonexistentEntityException, KeyStoreException, NoSuchAlgorithmException, CertificateException, ASDataException {
         setupConfiguration();
         setupKeystore();
         setupCACert();        
@@ -179,7 +181,8 @@ public class TrustAgentCertificateAuthority extends BaseBO {
      * @throws NonexistentEntityException
      * @throws Exception 
      */
-    private void setupCACert() throws CryptographyException, GeneralSecurityException, IOException, NonexistentEntityException, Exception {
+    private void setupCACert() throws CryptographyException, GeneralSecurityException, IOException, NonexistentEntityException, KeyStoreException, 
+            NoSuchAlgorithmException, CertificateException, ASDataException {
         if( !isCACertCreated() ) {
             createCA();
             saveKeystore();
@@ -271,7 +274,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
         }
     }
     
-    private void saveKeystore() throws NonexistentEntityException, Exception {
+    private void saveKeystore() throws NonexistentEntityException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException,NonexistentEntityException, ASDataException {
         keystore.save(); // makes the keystore available in mwKeystoreResource.toByteArray()
         if( mwKeystore == null ) {
             mwKeystore = new MwKeystore();
