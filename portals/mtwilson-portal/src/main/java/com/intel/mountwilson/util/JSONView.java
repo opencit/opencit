@@ -5,6 +5,7 @@
 package com.intel.mountwilson.util;
 
 import com.google.gson.Gson;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ public class JSONView implements View {
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void render(Map jsonDetailsMap, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void render(Map jsonDetailsMap, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setContentType(getContentType());
 		if(isKeyRequired){
 			response.getWriter().write(new Gson().toJson(jsonDetailsMap));
