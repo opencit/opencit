@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
 public class LoginController extends AbstractController {
 
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
+	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res)  {
 
 		//setting a header value to true to tell ajax request that return page is login page.
 		//this variable is used in commonUtil.js file while getting a AJAX response. If this variable is true it will show a pop-up to user to inform that session is expired. 

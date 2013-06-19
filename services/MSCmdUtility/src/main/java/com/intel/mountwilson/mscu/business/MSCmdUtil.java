@@ -242,6 +242,7 @@ public class MSCmdUtil {
                                                 newHostObj.HostName + ". Details: " + ex.getMessage());
                                     }                               
                                 }
+                                hfr.close();
                             } catch (Exception ex) {
 
                                 // We get here if there is some kind of IOException or the file format is not right
@@ -338,10 +339,15 @@ public class MSCmdUtil {
         if (MSCUConfig.getConfiguration().getString("mtwilson.mscu.userApprovalRequired").equalsIgnoreCase("true")) {
                 System.out.print(printMessage);
                 userInput = br.readLine();
-                if (userInput.isEmpty())
+                if(userInput !=  null) {
+                    if (userInput.isEmpty())
+                        userInput = defaultValue;
+                }else{
                     userInput = defaultValue;
-            } else
+                }
+            } else{
                 userInput = defaultValue;
+            }
         } catch (Exception ex) {
             userInput = defaultValue;
         }

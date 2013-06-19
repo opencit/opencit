@@ -1,0 +1,244 @@
+                        ------------------------
+                        Mt Wilson API Quickstart
+                        ------------------------
+                        ------------------------
+                        2012-09-21
+                        ------------------------
+
+Background
+
+    Mt. Wilson(MTW) is the code name for the Remote Trust Attestation Solution
+that would provide a secure mechanism in a Data Center to attest to the  Trust
+of different hypervisors and Operating systems on multiple devices including 
+Servers, Clients, Network and Storage components.  The primary purpose of this 
+attestation is for Trust Verification, Remediation, Reporting, and Compliance 
+in a Data Center and Cloud environments.
+
+	Whether it is public cloud, private cloud, hybrid or Enterprise cloud,  
+the Attestation Solution would be used by Cloud/Virtualization  Resource Schedulers,  
+SIEMs, Policy Engines and  GRC tools, to assess and provide an Assurance that the 
+security components on the devices are protecting the assets executing or stored 
+on the devices.  This assurance would then drive policy decisions for
+
+	[[1]]On boarding Virtual Machines.
+	
+	[[2]]Launching Virtual machines on Trusted h/w.
+	
+	[[3]]Secure/trusted migrations.
+	
+	[[4]]Meeting Compliance and Regulatory requirements.
+	
+	[]
+
+	Here are some key aspects of the Attestation solution:
+
+	[[1]]The first generation solution would be targeted to 'Attest to' the trust of the Platform (Firmware and BIOS) and Hypervisor/OS, on Intel Architecture-based Servers that have a 'Measured Launch' of the OS/Hypervisor using Intel TXT.  Future versions would support the attestation of IA-based Network and Storage devices (OpenFiler, OpenNFS running on IA-based Servers), and Clients (TXT-based).
+	
+	[[2]]The Attestation Architecture would be capable of handling Hardware or Software-based based Root-of-Trust for Measurement (RTM) mechanisms, as long as a TPM (Trusted Platform Module) is used for root-of-Trust for Storage and Reporting (RTS and RTR).
+	
+	[[3]]Future generations of the Attestation solution would be capable of attesting to the Trust of Virtual Machines (VMs), Applications, Identity, and geo-location compliance of workloads and data.
+	
+	[[4]]Architecture is flexible to support additional Cloud security use-cases  with Data confidentiality and protection
+	
+	[]
+
+	MTW is delivered as a Virtual Appliance (VM) for ESX, Xen or KVM formats. All MTW APIs are REST-based. There are 2 options for the users to call into the REST APIs of Mt.Wilson:
+
+	[[1]]Directly calling into the REST APIs.
+	
+	[[2]]Using the API CLient Toolkit.
+	
+	[]
+	
+*Directly calling into the REST APIs
+
+	If the user is calling into the REST APIs directly or wants to skip the security (probably all the components would be integrated into a single host/virtual machine), then the user has to ensure that the IP address of the client is added to the trusted IP list on MTW server. This can be accomplished by adding the 
+	
+	mtwilson.api.trust=127.0.0.1 //For localhost integration
+
+	to the mtwilson.properties file. When MTW sees that the API call is being made from a client that is trusted, then further authentication is skipped. If the trusted IP is not configured then the user has to implement API signing and other security features into the code before calling into MTW APIs. The javadoc has examples for each of the APIs.
+	
+*Using the API CLient Toolkit
+
+	In order to simplify the invocation of these APIs, MTW also provides an APIClient Toolkit which encapsulates multiple API calls, creation and handling of RSA keys and certificates,  authentication and processing of API responses (which are SAML signed assertions). The APICLient JAR file is provided as part of the APIClient ToolKit. 
+	
+	You can easily integrate with Mt Wilson using the provided API for Java and for .NET. The API package is a single file that you link to your project. The Java API also includes a command line utility.There are 3 different options for the JAR file:
+
+	[[1]]Zip file containing the api-client.jar and related dependencies.
+	
+	[[2]]Single jar-with-dependencies.
+	
+	[[3]]Single jar-with-dependencies shaded to prevent conflicts with other libraries.
+	
+	[]
+
+Getting started with the SDK 
+
+	Below diagram shows the high level steps that are needed to get the MTW system up and running in your environment.
+	
+[images/mtw_sdk_steps.jpg] Installation-Configuration steps
+
+	After the installation of Mt.Wilson Server and trust agent on the hosts (required only for Xen/KVM hosts), users need to include the MTW Jar file in their project and import the following packages:
+	
++---
+import com.intel.mtwilson.*;
+import com.intel.mtwilson.crypto.*;
+import com.intel.mtwilson.datatypes.*;
+import java.io.File;
+import java.net.URL;
++---
+
+    Before you can make any API calls into Mt Wilson, you need to register and obtain access. Below steps will show you how to register with Mt Wilson and how to make API calls after your registration is approved. 
+
+    <NOTE: Registration is a premium feature. Users of Mt Wilson core can skip the registration step and proceed directly to using non-authenticated API's.>
+
+    Each section of this guide contains sample code for Java and Linux shell environments. Refer to the full API Documentation for details on all the available methods.
+
+* Registration
+
+    The following code will create a keystore "test1.jks" in your home directory.
+The keystore contains an RSA keypair that is used to authenticate your API
+calls to Mt Wilson. It also contains the Mt Wilson SSL certificate and SAML
+signing certificate, which are downloaded from the server.
+
+** Java
+
++---
+File directory = new File(System.getProperty("user.home", "."));
+String username = "test1"; // you choose a username
+String password = "changeit"; // you choose a password
+URL server = new URL("https://mtwilson.example.com:8181"); // your Mt Wilson server
+String[] roles = new String[] { "Attestation", "Whitelist" };
+KeystoreUtil.createUserInDirectory(directory, username, password, server, roles);
++---
+
+** Linux Shell
+
++---
+java -jar mtwilson-api.jar \
+  -Dmtwilson.api.keystore=/path/to/test1.jks \
+  -Dmtwilson.api.keystore.password=changeit \
+  -Dmtwilson.api.key.alias=test1 \
+  -Dmtwilson.api.key.password=changeit \
+  -Dmtwilson.api.baseurl=https://mtwilson.example.com:8181 \
+  CreateUser roles=Attestation,Whitelist
++---
+
+*Instantiating the API Object
+
+    After the request is created, contact the Mt Wilson administrator to approve your access request (offline step). After your registration is approved, you can use the API to access all the features Mt Wilson provides such as maintaining a whitelist, adding hosts,and obtaining a trust assertion on one or more hosts. To use the API, you need to create an ApiClient object configured with your credentials and your Mt Wilson server, then use it to send requests to the Mt Wilson server. Notice that the variables directory, username, password, and servers are the same as what you used during registration.
+
+** Java
+
+    All Java examples in this guide assume that you have created an ApiClient object called "apiClientObj". You can use the sample code below to create this object.
+
++---
+File directory = new File(System.getProperty("user.home", "."));
+String username = "test1"; // username created during registration
+String password = "changeit"; // password created during registration
+URL server = new URL("https://mtwilson.example.com:8181"); // your Mt Wilson server
+ApiClient apiClientObj = KeystoreUtil.clientForUserInDirectory(directory, username, password, server);
++---
+
+** Linux Shell
+
+    All command line examples in this guide assume that you provide parameters
+to configure the client as shown here. They are omitted from the other examples
+for brevity but you need to include them in each command. It may be convenient
+to write a wrapper around it to supply the configuration each time.
+
+    In this example, the term "command" should be replaced with the API you want
+to call and the term "options..." should be replaced with options specific
+to that command, if any.
+
++---
+java -jar mtwilson-api.jar \
+  -Dmtwilson.api.keystore=/path/to/test1.jks \
+  -Dmtwilson.api.keystore.password=changeit \
+  -Dmtwilson.api.key.alias=test1 \
+  -Dmtwilson.api.key.password=changeit \
+  -Dmtwilson.api.baseurl=https://mtwilson.example.com \
+  command options...
++---
+
+    Here is an example of a wrapper for Linux operating systems, which will be
+referred to as "mtwilson-api" in the following examples.
+
++---
+#!/bin/sh
+java -jar mtwilson-api.jar \
+  -Dmtwilson.api.keystore=/path/to/test1.jks \
+  -Dmtwilson.api.keystore.password=changeit \
+  -Dmtwilson.api.key.alias=test1 \
+  -Dmtwilson.api.key.password=changeit \
+  -Dmtwilson.api.baseurl=https://mtwilson.example.com \
+  $@
++---
+
+*Provisioning white lists / good known measurements
+
+	Now that the environment is setup, we can proceed to the 2nd step in the diagram, which is provisioning. Before we can register the host and verify the trust status of the same, we need to provison the white lists (good known values). The measurements retrieved from the hosts that would be registered would be compared against these white list values for attestation. So, we need to create white lists for each unique BIOS & OS/Hypervisor that is installed on the hosts in the datacenter. We can configure these white lists manually or through automation APIs. In case of automation APIs, we would provide a host, which is known to be in a good state. The measurements retrieved from this good known host would be considered as white lists. Ideally these hosts from which the white lists are retrieved should be in a isolated environment.
+	
+	In the below example we will use a VMware ESXi host. Please refer to the javadocs for the connection string formats for other types of hosts and also other options for configuring the white lists. 
+	
+** Java
+
++---
+TxtHostRecord gkvHostObj = new TxtHostRecord();
+gkvHostObj.HostName = "hostname-in-vcenter";
+gkvHostObj.AddOn_Connection_String = "vmware:https://vcenter.example.com:443/sdk;Username;Password";
+boolean configureWhiteList = apiClientObj.configureWhiteList(gkvHostObj);
++---
+
+** Linux Shell
+
++---
+mtwilson-api configureWhiteList 192.168.1.100
++---
+
+*Host Registration
+
+	Now that the provisioning has been completed, we can register the host(s) for attestation. In the example below we are registering the same host that we used for white listing.
+
+** Java
+
++---
+boolean registerHost = apiClientObj.registerHost(gkvHostObj);
++---
+
+** Linux Shell
+
++---
+mtwilson-api registerHost 192.168.1.100 vmware:https://vcenter.example.com:443/sdk;Username;Password
++---
+
+*Trust verification
+
+    If you already have hosts registered with Mt Wilson, you can request a trust assertion in SAML format using "getSamlForHost". You can verify the signature on the assertion and get easy access to the details using "verifyTrustAssertion". Note that if you are directly calling into the REST APIs, you need to implement the verification of the SAML assertion using the SAML certificate that needs to be downloaded explicity. The API Toolkit downloads this certificate as part of the registration itself.
+
+** Java
+
++---
+String samlForHost = apiClientObj.getSamlForHost(new Hostname("hostname-in-vcenter"));
+TrustAssertion trustAssertion = apiClientObj.verifyTrustAssertion(samlForHost);
+if(trustAssertion.isValid()) {
+for(String attr : trustAssertion.getAttributeNames())
+	System.out.println("Attr:"+attr+":"+trustAssertion.getStringAttribute(attr));
+}
++---
+
+** Linux Shell
+
+    You can obtain and save the SAML assertion:
+
++---
+mtwilson-api getSamlForHost hostname-in-vcenter > hostname-in-vcenter.saml
++---
+
+    And you can verify a saved SAML assertion:
+
++---
+mtwilson-api verifyTrustAssertion < hostname-in-vcenter.saml
++---
+ 
+

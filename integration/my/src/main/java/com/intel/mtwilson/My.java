@@ -67,7 +67,7 @@ public class My {
         return config; 
     }
     
-    public static MtWilson client() throws MalformedURLException, Exception {
+    public static MtWilson client() throws MalformedURLException, IOException {
         if( client == null ) {
             log.info("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
             client = ClientFactory.clientForUserInResource(

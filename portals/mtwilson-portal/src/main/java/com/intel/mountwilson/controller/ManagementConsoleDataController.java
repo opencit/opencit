@@ -132,7 +132,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         String lines[] = item.getString().split("\\r?\\n");
                                         for (String values : lines) {
                                                 //Split host name and host value with Separator e.g. |
-                                                if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) > 0) {
+                                                if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) >= 0) {
                                                         String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
                                                         if (val.length == 3) {
                                                                 HostDetails host = new HostDetails();
@@ -300,7 +300,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	}*/
 	
-	private HostWhiteListTarget getBiosWhiteListTarget(String target) throws Exception{
+	private HostWhiteListTarget getBiosWhiteListTarget(String target) {
 		List<HostWhiteListTarget> biosTargetList = new ArrayList<HostWhiteListTarget>();
 		biosTargetList.add(HostWhiteListTarget.BIOS_HOST);
 		biosTargetList.add(HostWhiteListTarget.BIOS_OEM);
@@ -312,7 +312,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		return null;
 	}
 	
-	private HostWhiteListTarget getVmmWhiteListTarget(String target) throws Exception{
+	private HostWhiteListTarget getVmmWhiteListTarget(String target) {
 		List<HostWhiteListTarget> vmmTargetList = new ArrayList<HostWhiteListTarget>();
 		vmmTargetList.add(HostWhiteListTarget.VMM_OEM);
 		vmmTargetList.add(HostWhiteListTarget.VMM_HOST);
@@ -325,7 +325,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		return null;
 	}
 	
-	private HostVMMType getHostVmmTypeTarget(String target) throws Exception{
+	private HostVMMType getHostVmmTypeTarget(String target) {
 		for (HostVMMType hostVmmType : HostVMMType.values()){
 			if (hostVmmType.getValue().equals(target)){	
 				return hostVmmType; 
@@ -827,6 +827,7 @@ public class ManagementConsoleDataController extends MultiActionController{
             stringBuilder.append( line );
             stringBuilder.append( ls );
         }
+        reader.close();
         return stringBuilder.toString();
     }
     
@@ -1395,7 +1396,6 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 			Map<String, HostVmMappingVO> vmMappingData = getHostVmMappingdata();
 			HostVmMappingVO hostVmMappingVO = vmMappingData.get(hostID+HelperConstant.VM_HOST_MAPPING_SEPERATOR+vmName);
-	        
 	        hostVmMappingVO.setTrustedHostPolicy(trustPolicy);
 	        hostVmMappingVO.setLocationPolicy(locationPloicy);
 	        if (isPowerOnCommand) {

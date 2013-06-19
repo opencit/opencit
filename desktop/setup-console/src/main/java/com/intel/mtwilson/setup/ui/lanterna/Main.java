@@ -40,7 +40,7 @@ public class Main  {
         
         // createTextTerminal requires the file stty.exe
         // createUnixTermainal requires the file /bin/sh
-        Terminal terminal = null;
+        Terminal terminal ;
         if( Platform.isWindows() ) {
             terminal = TerminalFacade.createSwingTerminal();
         }

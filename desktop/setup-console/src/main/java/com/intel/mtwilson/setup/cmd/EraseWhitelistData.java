@@ -56,7 +56,7 @@ public class EraseWhitelistData implements Command {
      */
     @Override
     public void execute(String[] args) throws Exception {
-        Configuration serviceConf = ASConfig.getConfiguration();
+        //Configuration serviceConf = ASConfig.getConfiguration();
         pm = new ASPersistenceManager();
         em = pm.getEntityManagerFactory("ASDataPU");
         deleteMleSource();

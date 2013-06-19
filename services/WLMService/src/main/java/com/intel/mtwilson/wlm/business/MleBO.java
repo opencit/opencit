@@ -762,7 +762,7 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
-            String fullComponentName = "";
+            String fullComponentName ;
             
             try {
 
@@ -872,7 +872,7 @@ public class MleBO extends BaseBO {
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
-            String fullComponentName = "";
+            String fullComponentName;
             
             try {
                 
@@ -1112,7 +1112,7 @@ public class MleBO extends BaseBO {
          */
         public String addMleSource(MleSource mleSourceObj) {
             TblMle tblMle;
-            MleData mleData = null;
+            MleData mleData = null ;
             try {
 
                 try {
@@ -1158,7 +1158,7 @@ public class MleBO extends BaseBO {
          */
         public String updateMleSource(MleSource mleSourceObj) {
             TblMle tblMle;
-            MleData mleData = null;
+            MleData mleData = null ;
             try {
 
                 try {
@@ -1240,7 +1240,7 @@ public class MleBO extends BaseBO {
          */
         public String getMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
             TblMle tblMle;
-            String hostName = null;
+            String hostName ;
             try {
                 
                 try {

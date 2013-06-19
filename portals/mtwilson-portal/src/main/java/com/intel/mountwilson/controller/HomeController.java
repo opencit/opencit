@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.AbstractController;
 public class HomeController extends AbstractController {
 
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
+	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res)  {
 		return new ModelAndView("Home");
 	}
 	

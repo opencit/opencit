@@ -13,6 +13,8 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -42,10 +44,10 @@ public class CheckLoginController extends AbstractController {
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
+	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws MalformedURLException, IOException {
             logger.debug("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
-            String keystoreFilename = "";
+            
             
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
