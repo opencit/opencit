@@ -134,7 +134,6 @@ mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
 unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
 
-
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console
 rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
@@ -413,7 +412,6 @@ java_detect
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
-mtwilson setup-env > "/usr/local/share/mtwilson/apiclient/apiclient.env"
 
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
@@ -421,9 +419,17 @@ fi
 
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-  # glassfish install here
+    if ! glassfish_detect; then
+      portInUse=`netstat -lnput | grep -E "8080|8181"`
+      if [ -n "$portInUse" ]; then 
+        #glassfish ports in use. exit install
+        echo_failure "Glassfish ports in use. Aborting install."
+        exit 1
+      fi
+    fi
   
   echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+  # glassfish install here
   ./$glassfish_installer  >> $INSTALL_LOG_FILE
   echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
   # end glassfish installer
@@ -443,6 +449,16 @@ if using_glassfish; then
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
+    
+    if ! tomcat_detect; then
+      portInUse=`netstat -lnput | grep -E "8080|8443"`
+      if [ -n "$portInUse" ]; then 
+        #tomcat ports in use. exit install
+        echo_failure "Tomcat ports in use. Aborting install."
+        exit 1
+      fi
+    fi
+
     # tomcat install here
     echo "Installing Tomcat..." | tee -a  $INSTALL_LOG_FILE
 
@@ -464,7 +480,7 @@ elif using_tomcat; then
       tomcat_restart >> $INSTALL_LOG_FILE 2>&1
     else
       echo "Starting Tomcat ..."
-      tomcat_start
+      tomcat_start >> $INSTALL_LOG_FILE 2>&1
     fi
   # opt_tomcat init end
   else
@@ -480,67 +496,75 @@ if [ ! -z "$opt_privacyca" ]; then
   #echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
   #/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
   #echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
-fi
 
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
+      fi
     fi
   fi
 fi
+
+
 if [ ! -z "opt_attservice" ]; then
   echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
+      fi
     fi
   fi
 fi
+
 if [ ! -z "$opt_mangservice" ]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
+      fi
     fi
   fi
 fi
+
 if [ ! -z "$opt_wlmservice" ]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
+      fi
     fi
   fi
 fi
+
 #if [ ! -z "$mangportal" ]; then
 #  echo "Installing Management Console..." | tee -a  $INSTALL_LOG_FILE
 #  ./$management_console
@@ -563,18 +587,20 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
-fi
-if using_tomcat; then
-  if [ ! -z "$opt_tomcat" ]; then
-    if tomcat_running; then 
-      echo "Restarting Tomcat ..."
-      tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-    else
-      echo "Starting Tomcat ..."
-      tomcat_start
+
+  if using_tomcat; then
+    if [ ! -z "$opt_tomcat" ]; then
+      if tomcat_running; then 
+        echo "Restarting Tomcat ..."
+        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
+      else
+        echo "Starting Tomcat ..."
+        tomcat_start >> $INSTALL_LOG_FILE 2>&1
+      fi
     fi
   fi
 fi
+
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
@@ -586,11 +612,10 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
-echo -n "Restarting Mt Wilson... "
 if using_glassfish; then
-  mtwilson glassfish-restart >> $INSTALL_LOG_FILE
+  mtwilson glassfish-restart
 elif using_tomcat; then
-  mtwilson tomcat-restart >> $INSTALL_LOG_FILE 2>&1
+  mtwilson tomcat-restart
 fi
-echo "Completed!"
+
 echo "Log file for install is located at $INSTALL_LOG_FILE"

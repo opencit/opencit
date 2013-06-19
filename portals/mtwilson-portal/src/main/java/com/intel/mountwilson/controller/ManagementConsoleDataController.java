@@ -79,7 +79,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 public class ManagementConsoleDataController extends MultiActionController{
 	
 	//private static final Logger log = Logger.getLogger(ManagementConsoleDataController.class.getName());
-        Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass());
 	private IManagementConsoleServices services;
 	
 	//Services Layer object, used to invoke service layer methods.
@@ -98,7 +98,7 @@ public class ManagementConsoleDataController extends MultiActionController{
          * @return
          */
         public ModelAndView uploadFlatFileRegisterHost(HttpServletRequest req, HttpServletResponse res) {
-                log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
+                log.debug("ManagementConsoleDataController.uploadFlatFileRegisterHost >>");
                 req.getSession().removeAttribute("hostVO");
                 ModelAndView responseView = new ModelAndView(new JSONView());
                 List<HostDetails> listOfRegisterHost = new ArrayList<HostDetails>();
@@ -157,7 +157,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         }
                                 }
                         }
-                        log.info("Uploaded Content :: " + listOfRegisterHost.toString());
+                        //log.info("Uploaded Content :: " + listOfRegisterHost.toString());
                         req.getSession().setAttribute("hostVO", listOfRegisterHost);
                         responseView.addObject("result", listOfRegisterHost.size() > 0 ? true : false);
 
@@ -169,7 +169,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         responseView.addObject("result", false);
                 }
 
-                log.info("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
+                log.debug("ManagementConsoleDataController.uploadFlatFileRegisterHost <<<");
                 return responseView;
         }
 	
@@ -181,7 +181,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getUploadedRegisterHostValues(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getUploadedRegisterHostValues >>");
+		log.debug("ManagementConsoleDataController.getUploadedRegisterHostValues >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		@SuppressWarnings("unchecked")
 		List<HostDetails> listOfRegisterHost = (List<HostDetails>)req.getSession().getAttribute("hostVO");
@@ -199,7 +199,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			}
 		}
 		responseView.addObject("result",result);
-		log.info("ManagementConsoleDataController.getUploadedRegisterHostValues <<<");
+		log.debug("ManagementConsoleDataController.getUploadedRegisterHostValues <<<");
 		return responseView;
 		
 	}
@@ -212,7 +212,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView uploadWhiteListConfiguration(HttpServletRequest req, HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.uploadWhiteListConfiguration >>");
+		log.debug("ManagementConsoleDataController.uploadWhiteListConfiguration >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		String hostVOString = req.getParameter("registerHostVo");
 		boolean result = false;
@@ -250,7 +250,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("result",result);
-		log.info("ManagementConsoleDataController.uploadWhiteListConfiguration <<<");
+		log.debug("ManagementConsoleDataController.uploadWhiteListConfiguration <<<");
 		return responseView;
 		
 	}
@@ -342,7 +342,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getDefinedWhiteListConfig(HttpServletRequest req, HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getDefinedWhiteListConfig >>");
+		log.debug("ManagementConsoleDataController.getDefinedWhiteListConfig >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		boolean result = false;
 		HostConfigData whiteList;
@@ -364,7 +364,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("result",result);
-		log.info("ManagementConsoleDataController.getDefinedWhiteListConfig <<<");
+		log.debug("ManagementConsoleDataController.getDefinedWhiteListConfig <<<");
 		return responseView;
 		
 	}
@@ -378,7 +378,7 @@ public class ManagementConsoleDataController extends MultiActionController{
          * @return
          */
         public ModelAndView retriveHostFromCluster(HttpServletRequest req, HttpServletResponse res) {
-                log.info("ManagementConsoleDataController.retriveHostFromCluster >>");
+                log.debug("ManagementConsoleDataController.retriveHostFromCluster >>");
                 ModelAndView responseView = new ModelAndView(new JSONView());
                 String clusterName;
                 String vCenterConnection;
@@ -411,7 +411,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                 }
 
                 responseView.addObject("result", true);
-                log.info("ManagementConsoleDataController.retriveHostFromCluster <<<");
+                log.debug("ManagementConsoleDataController.retriveHostFromCluster <<<");
                 return responseView;
 
         }
@@ -424,14 +424,14 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView registerMultipleHost(HttpServletRequest req,HttpServletResponse res) {
-                                log.info("ManagementConsoleDataController.registerMultipleHost >>");
+                                log.debug("ManagementConsoleDataController.registerMultipleHost >>");
                                 ModelAndView responseView = new ModelAndView(new JSONView());	
                                 String hostListString;
 
                                 if(req.getParameter("hostToBeRegister") != null) {
                                         hostListString = req.getParameter("hostToBeRegister");
                                 } else {
-                                        log.info("hostToBeRegister parameter is Null");
+                                        log.debug("hostToBeRegister parameter is Null");
                                         responseView.addObject("result",false);
                                         responseView.addObject("message","Input Parameters are NULL.");
                                         return responseView;
@@ -445,14 +445,14 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         hostRecords = new Gson().fromJson(hostListString, listType);
                                         responseView.addObject("hostVOs", services.registerHosts(apiObj, hostRecords));
                                 } catch (Exception e) {
-                                        log.error("Error while registering the hosts. " + e.getMessage());
+                                        log.error("Error while registering the hosts: {}", e.getMessage());
                                         responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
                                         responseView.addObject("result",false);
                                         return responseView;
                                 }
 		
                                 responseView.addObject("result",true);
-                                log.info("ManagementConsoleDataController.registerMultipleHost <<<");
+                                log.debug("ManagementConsoleDataController.registerMultipleHost <<<");
                                 return responseView;	
 	}
 	
@@ -464,7 +464,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getAllPendingRegistrationRequest(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getAllPendingRegistrationRequest >>");
+		log.debug("ManagementConsoleDataController.getAllPendingRegistrationRequest >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		try {
@@ -482,7 +482,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		}
 		responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.getAllPendingRegistrationRequest <<<");
+		log.debug("ManagementConsoleDataController.getAllPendingRegistrationRequest <<<");
 		return responseView;
 	}
 	
@@ -493,7 +493,7 @@ public class ManagementConsoleDataController extends MultiActionController{
          * @return 
          */
 	public ModelAndView getAllApprovedRequests(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getAllApprovedRequests >>");
+		log.debug("ManagementConsoleDataController.getAllApprovedRequests >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		try {
@@ -508,7 +508,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 		}
 		responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.getAllApprovedRequests <<<");
+		log.debug("ManagementConsoleDataController.getAllApprovedRequests <<<");
 		return responseView;
 	}
 
@@ -519,7 +519,7 @@ public class ManagementConsoleDataController extends MultiActionController{
          * @return 
          */
 	public ModelAndView getAllExpiringApiClients(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getAllExpiringApiClients >>");
+		log.debug("ManagementConsoleDataController.getAllExpiringApiClients >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		try {
@@ -531,14 +531,14 @@ public class ManagementConsoleDataController extends MultiActionController{
                     
 		} catch (Exception e) {
                     
-			log.error("Error While getting all expiring API clients. "+e.getMessage());
+			log.error("Error While getting all expiring API clients: {}",e.getMessage());
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
                         
 		}
 		responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.getAllExpiringApiClients <<<");
+		log.debug("ManagementConsoleDataController.getAllExpiringApiClients <<<");
 		return responseView;
 	}
 
@@ -549,7 +549,7 @@ public class ManagementConsoleDataController extends MultiActionController{
          * @return 
          */
 	public ModelAndView getApiClientsForDelete(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getApiClientsForDelete >>");
+		log.debug("ManagementConsoleDataController.getApiClientsForDelete >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		try {
@@ -558,13 +558,13 @@ public class ManagementConsoleDataController extends MultiActionController{
             
             responseView.addObject("apiClientList", services.getApiClients(apiObj, ApiClientListType.DELETE));
 		} catch (Exception e) {
-			log.error("Error while getting Api clients. "+e.getMessage());
+			log.error("Error while getting Api clients: {}",e.getMessage());
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			responseView.addObject("result",false);
 			return responseView;
 		}
 		responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.getApiClientsForDelete <<<");
+		log.debug("ManagementConsoleDataController.getApiClientsForDelete <<<");
 		return responseView;
 	}
 
@@ -576,7 +576,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView approveSelectedRequest(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.approveSelectedRequest >>");
+		log.debug("ManagementConsoleDataController.approveSelectedRequest >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		String hostDetailsString;
 		ApiClientDetails apiClientDetailsObj;
@@ -590,14 +590,14 @@ public class ManagementConsoleDataController extends MultiActionController{
             apiClientDetailsObj = getObjectFromJSONString(hostDetailsString,ApiClientDetails.class);
             result = services.updateRequest(apiClientDetailsObj, apiObj, true);
 		}catch (Exception ex) {
-			log.error(ex.getMessage());
+			log.error("Error approving access request: {}", ex.getMessage());
 			responseView.addObject("result", false);
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(ex.getMessage()));
 			return responseView;
 		}
 		
                 responseView.addObject("result", result);
-		log.info("ManagementConsoleDataController.approveSelectedRequest <<<");
+		log.debug("ManagementConsoleDataController.approveSelectedRequest <<<");
 		return responseView;
 	}
 	
@@ -610,7 +610,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView rejectSelectedRequest(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.rejectSelectedRequest >>");
+		log.debug("ManagementConsoleDataController.rejectSelectedRequest >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		String hostDetailsString;
 		ApiClientDetails apiClientDetailsObj;
@@ -633,7 +633,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 
         responseView.addObject("result",result);
-		log.info("ManagementConsoleDataController.rejectSelectedRequest <<<");
+		log.debug("ManagementConsoleDataController.rejectSelectedRequest <<<");
 		return responseView;
 	}
 		
@@ -645,7 +645,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView deleteSelectedRequest(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.deleteSelectedRequest >>");
+		log.debug("ManagementConsoleDataController.deleteSelectedRequest >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
                 String fingerprint;
                 boolean result = false;
@@ -668,13 +668,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
                 
 		responseView.addObject("result",result);
-		log.info("ManagementConsoleDataController.deleteSelectedRequest <<<");
+		log.debug("ManagementConsoleDataController.deleteSelectedRequest <<<");
 		return responseView;
 	}
 
     
 	public ModelAndView logOutUser(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.logOutUser >>");
+		log.debug("ManagementConsoleDataController.logOutUser >>");
 		ModelAndView responseView = new ModelAndView("Login");
 		try {
 			HttpSession session = req.getSession(false);
@@ -685,7 +685,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			log.error(e.getMessage());
 			e.printStackTrace();
 		}
-		log.info("ManagementConsoleDataController.logOutUser <<");
+		log.debug("ManagementConsoleDataController.logOutUser <<");
 		return responseView;
 	}
 	
@@ -727,8 +727,8 @@ public class ManagementConsoleDataController extends MultiActionController{
             	//getting ApiClient Object from Session and downcast that object to Type T.  
                 service = (T) session.getAttribute("api-object");    
             } catch (Exception e) {
-				log.error("Error while creating ApiCliennt Object. "+e.getMessage());
-				throw new ManagementConsolePortalException("Error while creating ApiClient Object. "+e.getMessage(),e);
+				log.error("Error while creating ApiClient Object: "+e.getMessage(), e);
+				throw new ManagementConsolePortalException("Error while creating ApiClient Object: "+e.getMessage(),e);
             }
             
         }
@@ -795,7 +795,7 @@ public class ManagementConsoleDataController extends MultiActionController{
     
     //Begin_Added by Soni-Function for CA
     public ModelAndView getAllCAStatus(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.getAllCAStatus >>");
+		log.debug("ManagementConsoleDataController.getAllCAStatus >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		try {
@@ -813,7 +813,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result",true);
 		
-		log.info("ManagementConsoleDataController.getAllCAStatus <<<");
+		log.debug("ManagementConsoleDataController.getAllCAStatus <<<");
 		return responseView;
 	}
   //End_Added by Soni-Function for CA
@@ -832,7 +832,7 @@ public class ManagementConsoleDataController extends MultiActionController{
     
     //Begin_Added by Soni-Function to download SAML certificate
     public ModelAndView getSAMLCertificate(HttpServletRequest req,HttpServletResponse res) {
-		log.info("In Data Contoller ManagementConsoleDataController.getSAMLCertificate  >>");
+		log.debug("In Data Contoller ManagementConsoleDataController.getSAMLCertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
@@ -861,7 +861,7 @@ public class ManagementConsoleDataController extends MultiActionController{
           
           responseView.addObject("SAMLcertificate", apiObj.getSamlCertificate().getEncoded());
           responseView.addObject("result",true);
-          log.info("ManagementConsoleDataController.getSAMLCertificate <<<");
+          log.debug("ManagementConsoleDataController.getSAMLCertificate <<<");
   		
   	/*	 in.close();
          out.flush();
@@ -883,7 +883,7 @@ public class ManagementConsoleDataController extends MultiActionController{
    
    //Begin_Added by stdale-Function to download MC certificate
     public ModelAndView getRootCACertificate(HttpServletRequest req,HttpServletResponse res) {
-		log.info("In Data Contoller ManagementConsoleDataController.getRootCACertificate  >>");
+		log.debug("In Data Contoller ManagementConsoleDataController.getRootCACertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
@@ -917,7 +917,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	}
     
      public ModelAndView getPrivacyCACertificate(HttpServletRequest req,HttpServletResponse res) {
-		log.info("In Data Contoller ManagementConsoleDataController.getPrivacyCACertificate  >>");
+		log.debug("In Data Contoller ManagementConsoleDataController.getPrivacyCACertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
@@ -955,7 +955,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	}
      
     public ModelAndView getPrivacyCACertificateList(HttpServletRequest req,HttpServletResponse res) {
-		log.info("In Data Contoller ManagementConsoleDataController.getPrivacyCACertificateList  >>");
+		log.debug("In Data Contoller ManagementConsoleDataController.getPrivacyCACertificateList  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
@@ -982,7 +982,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	} 
     
     public ModelAndView getTLSCertificate(HttpServletRequest req,HttpServletResponse res) {
-		log.info("In Data Contoller ManagementConsoleDataController.getTLSCertificate  >>");
+		log.debug("In Data Contoller ManagementConsoleDataController.getTLSCertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
@@ -1022,7 +1022,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	}     
           //Begin_Added by Soni-Function to download SAML certificate
     public ModelAndView getSamlCertificate(HttpServletRequest req,HttpServletResponse res) {
-		log.info("In Data Contoller ManagementConsoleDataController.getSAMLCertificate  >>");
+		log.debug("In Data Contoller ManagementConsoleDataController.getSAMLCertificate  >>");
 		//ModelAndView responseView = new ModelAndView("SAMLDownload");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		 res.setContentType("application/octet-stream ");
@@ -1063,11 +1063,11 @@ public class ManagementConsoleDataController extends MultiActionController{
     //End_Added by stdale-Function to download RootCA certificate
     
 	public ModelAndView dummyPostbackFunction(HttpServletRequest req,HttpServletResponse res) {
-		log.info("ManagementConsoleDataController.dummyPostbackFunction >>");
+		log.debug("ManagementConsoleDataController.dummyPostbackFunction >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		responseView.addObject("result",true);
-		log.info("ManagementConsoleDataController.dummyPostbackFunction <<<");
+		log.debug("ManagementConsoleDataController.dummyPostbackFunction <<<");
 		return responseView;
 	}
     
@@ -1084,7 +1084,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getDashBoardData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getDashBoardData >>");
+		log.debug("DemoPortalDataController.getDashBoardData >>");
 		Map<Integer, List<HostDetailsEntityVO>> map =null; 
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
@@ -1115,7 +1115,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getDashBoardData <<<");
+		log.debug("DemoPortalDataController.getDashBoardData <<<");
 		return responseView;
 	}
 	
@@ -1128,7 +1128,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getHostTrustSatusForPageNo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getHostTrustSatusForPageNo >>");
+		log.debug("DemoPortalDataController.getHostTrustSatusForPageNo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			//getting selected Page No.
@@ -1151,7 +1151,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getHostTrustSatusForPageNo <<");
+		log.debug("DemoPortalDataController.getHostTrustSatusForPageNo <<");
 		return responseView;
 	}
 	
@@ -1161,7 +1161,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getVMwareSubGridData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getVMwareSubGridData >>");
+		log.debug("DemoPortalDataController.getVMwareSubGridData >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			Map<String, HostVmMappingVO> vmMappingData = getHostVmMappingdata();
@@ -1176,7 +1176,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getVMwareSubGridData <<<");
+		log.debug("DemoPortalDataController.getVMwareSubGridData <<<");
 		return responseView;
 	}
 	
@@ -1186,7 +1186,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getHostTrustStatus(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getHostTrustStatus >>");
+		log.debug("DemoPortalDataController.getHostTrustStatus >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			responseView.addObject("hostVo", demoPortalServices.getSingleHostTrust(req.getParameter("hostName"),getAttestationService(req,AttestationService.class),getTrustedCertificates(req)));
@@ -1200,7 +1200,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getHostTrustStatus <<<");
+		log.debug("DemoPortalDataController.getHostTrustStatus <<<");
 		return responseView;
 	}
 	
@@ -1210,7 +1210,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getAllOemInfo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getAllOemInfo >>");
+		log.debug("DemoPortalDataController.getAllOemInfo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			responseView.addObject("oemInfo", demoPortalServices.getAllOemInfo(getAttestationService(req,ApiClient.class)));
@@ -1224,7 +1224,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getAllOemInfo <<<");
+		log.debug("DemoPortalDataController.getAllOemInfo <<<");
 		return responseView;
 	}
 	
@@ -1234,7 +1234,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getOSVMMInfo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getOSVMMInfo >>");
+		log.debug("DemoPortalDataController.getOSVMMInfo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			responseView.addObject("osInfo", demoPortalServices.getOSAndVMMInfo(getAttestationService(req,ApiClient.class)));
@@ -1248,12 +1248,12 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getOSVMMInfo <<<");
+		log.debug("DemoPortalDataController.getOSVMMInfo <<<");
 		return responseView;
 	}
 	
 	public ModelAndView saveNewHostInfo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.saveNewHostInfo >>");
+		log.debug("WLMDataController.saveNewHostInfo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		String hostObject = null;
 		boolean newhost = false;
@@ -1303,7 +1303,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 			return responseView;
 		}
-		log.info("WLMDataController.saveNewHostInfo <<<");
+		log.debug("WLMDataController.saveNewHostInfo <<<");
 		return responseView;
 		
 	}
@@ -1314,7 +1314,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getInfoForHostID(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getInfoForHostID >>");
+		log.debug("DemoPortalDataController.getInfoForHostID >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			String hostName = req.getParameter("hostName");
@@ -1329,7 +1329,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getInfoForHostID <<<");
+		log.debug("DemoPortalDataController.getInfoForHostID <<<");
 		return responseView;
 	}
 	
@@ -1340,7 +1340,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView deleteHostDetails(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.deleteHostDetails >>");
+		log.debug("DemoPortalDataController.deleteHostDetails >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		int selectedPage ;
 		try {
@@ -1370,7 +1370,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.deleteHostDetails<<<");
+		log.debug("DemoPortalDataController.deleteHostDetails<<<");
 		return responseView;
 	}
 	
@@ -1380,7 +1380,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView powerOnOffVM(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.powerOnOffVM >>");
+		log.debug("DemoPortalDataController.powerOnOffVM >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			
@@ -1414,7 +1414,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.powerOnOffVM<<<");
+		log.debug("DemoPortalDataController.powerOnOffVM<<<");
 		return responseView;
 	}
 	
@@ -1424,7 +1424,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView migrateVMToHost(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.migrateVMToHost >>");
+		log.debug("DemoPortalDataController.migrateVMToHost >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			
@@ -1456,7 +1456,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.migrateVMToHost<<<");
+		log.debug("DemoPortalDataController.migrateVMToHost<<<");
 		return responseView;
 	}
 	
@@ -1468,7 +1468,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getAllHostForView(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getAllHostForView >>");
+		log.debug("DemoPortalDataController.getAllHostForView >>");
 		Map<Integer, List<HostDetailsEntityVO>> map =null; 
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
@@ -1486,7 +1486,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getAllHostForView<<<");
+		log.debug("DemoPortalDataController.getAllHostForView<<<");
 		return responseView;
 	}
 	
@@ -1498,7 +1498,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getHostForViewForPage(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getHostForViewForPage >>");
+		log.debug("DemoPortalDataController.getHostForViewForPage >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			int selectedPage = Integer.parseInt(req.getParameter("pageNo"));
@@ -1516,7 +1516,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getHostForViewForPage<<<");
+		log.debug("DemoPortalDataController.getHostForViewForPage<<<");
 		return responseView;
 	}
 	
@@ -1529,7 +1529,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView trustVerificationDetailsXML(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.trustVerificationDetailsXML >>");
+		log.debug("DemoPortalDataController.trustVerificationDetailsXML >>");
                 ModelAndView responseView = new ModelAndView(new JSONView());
                 String hostName = req.getParameter("hostName");
 		try {
@@ -1557,7 +1557,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView updateTrustForSelected(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.updateTrustForSelected >>");
+		log.debug("DemoPortalDataController.updateTrustForSelected >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		String hostList = req.getParameter("selectedHost");
 		List<String> hosts = null; 
@@ -1576,7 +1576,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.updateTrustForSelected<<<");
+		log.debug("DemoPortalDataController.updateTrustForSelected<<<");
 		return responseView;
 	}
         
@@ -1588,7 +1588,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getHostsReport(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getHostsReport >>");
+		log.debug("DemoPortalDataController.getHostsReport >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
                
                 String[] list = req.getParameterValues("selectedHost");
@@ -1609,14 +1609,14 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getHostsReport<<<");
+		log.debug("DemoPortalDataController.getHostsReport<<<");
 		return responseView;
 	}
         
 	
 	
 	public ModelAndView getFailurereportForHost(HttpServletRequest req,HttpServletResponse res) {
-		log.info("DemoPortalDataController.getFailurereportForHost >>");
+		log.debug("DemoPortalDataController.getFailurereportForHost >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			responseView.addObject("reportdata", demoPortalServices.getFailureReportData(req.getParameter("hostName"),getAttestationService(req,ApiClient.class)));
@@ -1628,7 +1628,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		responseView.addObject("message", "");
-		log.info("DemoPortalDataController.getFailurereportForHost <<");
+		log.debug("DemoPortalDataController.getFailurereportForHost <<");
 		return responseView;
 	}
 	
@@ -1750,7 +1750,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView addOSData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.addOSData >>");
+		log.debug("WLMDataController.addOSData >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			OSDataVO dataVONew = new OSDataVO();
@@ -1767,7 +1767,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
-		log.info("WLMDataController.addOSData <<<");
+		log.debug("WLMDataController.addOSData <<<");
 		return responseView;
 	}
 	
@@ -1779,7 +1779,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView updateOSData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.updateOSData >>");
+		log.debug("WLMDataController.updateOSData >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		int selectedPage ;
 		try {
@@ -1815,7 +1815,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
-		log.info("WLMDataController.updateOSData <<<");
+		log.debug("WLMDataController.updateOSData <<<");
 		return responseView;
 	}
 	
@@ -1825,7 +1825,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView deleteOSData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.deleteOSData >>");
+		log.debug("WLMDataController.deleteOSData >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		int selectedPage ;
 		try {
@@ -1856,13 +1856,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
-		log.info("WLMDataController.deleteOSData <<<");
+		log.debug("WLMDataController.deleteOSData <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView getHostOSForVMM(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getHostOSForVMM >>");
+		log.debug("WLMDataController.getHostOSForVMM >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		List<VmmHostDataVo> list = new ArrayList<VmmHostDataVo>();
 		VmmHostDataVo dataVo =null;
@@ -1896,13 +1896,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		responseView.addObject("HostList",list);
 		responseView.addObject("result",true);
 		responseView.addObject("message","");
-		log.info("WLMDataController.getHostOSForVMM <<<");
+		log.debug("WLMDataController.getHostOSForVMM <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView getHostOSForBios(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getHostOSForBios >>");
+		log.debug("WLMDataController.getHostOSForBios >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		List<OEMDataVO> list = null;
@@ -1917,13 +1917,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		responseView.addObject("HostList",list);
 		responseView.addObject("message","");
 		
-		log.info("WLMDataController.getHostOSForBios <<<");
+		log.debug("WLMDataController.getHostOSForBios <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView getUploadedMenifestFile(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getUploadedMenifestFile >>");
+		log.debug("WLMDataController.getUploadedMenifestFile >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		Object manifest = req.getSession().getAttribute("manifestValue");
 		boolean result = false;
@@ -1932,20 +1932,20 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("manifestValue",manifest);
 		}
 		responseView.addObject("result",result);
-		log.info("WLMDataController.getUploadedMenifestFile <<<");
+		log.debug("WLMDataController.getUploadedMenifestFile <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView uploadManifest(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.uploadManifest >>");
+		log.debug("WLMDataController.uploadManifest >>");
 		req.getSession().removeAttribute("manifestValue");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		List<Map<String, String>> manifestValue = new ArrayList<Map<String,String>>();
 		
 		// Check that we have a file upload request
 		boolean isMultipart = ServletFileUpload.isMultipartContent(req);
-		System.out.println(isMultipart);
+		log.debug("Is content multipart? {}", isMultipart);
 		if (!isMultipart) {
 			responseView.addObject("result",false);
 			return responseView;
@@ -1984,7 +1984,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 					}
 			    }
 			}
-		log.info("Uploaded Content :: "+manifestValue.toString());
+		//log.info("Uploaded Content :: "+manifestValue.toString());
 		req.getSession().setAttribute("manifestValue",manifestValue);
 		/*responseView.addObject("manifestValue",manifestValue);*/
 		responseView.addObject("result",manifestValue.size() > 0 ? true : false);
@@ -1997,13 +1997,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 		}
 		
-		log.info("WLMDataController.uploadManifest <<<");
+		log.debug("WLMDataController.uploadManifest <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView viewSingleMLEData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.viewSingleMLEData>>");
+		log.debug("WLMDataController.viewSingleMLEData>>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		MLEDataVO dataVO = new MLEDataVO();
                 MLEDataVO detailMLEVO = null;
@@ -2054,7 +2054,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	}
         
         public ModelAndView getWhiteListForMle(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getWhiteListForMle>>");
+		log.debug("WLMDataController.getWhiteListForMle>>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		MLEDataVO dataVO = new MLEDataVO();
 		try {
@@ -2085,14 +2085,14 @@ public class ManagementConsoleDataController extends MultiActionController{
 			log.error(e.toString());
 		}
 		
-		log.info("WLMDataController.getWhiteListForMle <<<");
+		log.debug("WLMDataController.getWhiteListForMle <<<");
 		return responseView;
 		
 	}
 	
 	@SuppressWarnings("serial")
 	public ModelAndView getAddMle(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getAddMle>>");
+		log.debug("WLMDataController.getAddMle>>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		String mleOb = null;
 		boolean newMle = false;
@@ -2104,7 +2104,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 			responseView.addObject("message","Error While request parameters are Null. Please check.");
 		}
-		System.out.println(mleOb);
+		log.debug("Adding MLE: {}", mleOb);
 		MLEDataVO dataVO = new MLEDataVO();
 		
 		
@@ -2131,13 +2131,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		
-		log.info("WLMDataController.getAddMle <<<");
+		log.debug("WLMDataController.getAddMle <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView deleteMLEData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.deleteMLEData>>");
+		log.debug("WLMDataController.deleteMLEData>>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		MLEDataVO dataVO = new MLEDataVO();
 		int selectedPage ;
@@ -2181,13 +2181,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 			return responseView;
 		}
 		
-		log.info("WLMDataController.deleteMLEData <<<");
+		log.debug("WLMDataController.deleteMLEData <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView addOEMData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.addOEMData>>");
+		log.debug("WLMDataController.addOEMData>>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		
 		try {
@@ -2204,13 +2204,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
 		
-		log.info("WLMDataController.addOEMData <<<");
+		log.debug("WLMDataController.addOEMData <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView updateOEMData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.updateOEMData >>");
+		log.debug("WLMDataController.updateOEMData >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		int selectedPage ;
 		try {
@@ -2233,13 +2233,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 			responseView.addObject("message",StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
-		log.info("WLMDataController.updateOEMData <<<");
+		log.debug("WLMDataController.updateOEMData <<<");
 		return responseView;
 		
 	}
 	
 	public ModelAndView deleteOEMData(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.deleteOEMData >>");
+		log.debug("WLMDataController.deleteOEMData >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		int selectedPage ;
 		try {
@@ -2264,7 +2264,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 			responseView.addObject("result",false);
 			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
 		}
-		log.info("WLMDataController.deleteOEMData <<<");
+		log.debug("WLMDataController.deleteOEMData <<<");
 		return responseView;
 		
 	}
@@ -2274,7 +2274,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * Method to get All MLE Data for Pagination
 	 */
 	public ModelAndView getViewMle(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getViewMle >>");
+		log.debug("WLMDataController.getViewMle >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			Map<Integer, List<MLEDataVO>> map = getPartitionListOfAllMle(req);
@@ -2291,14 +2291,14 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("WLMDataController.getViewMle <<");
+		log.debug("WLMDataController.getViewMle <<");
 		return responseView;
 	}
 	
 	
 	@SuppressWarnings("unchecked")
 	public ModelAndView getViewMleForPageNo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getViewMleForPageNo >>");
+		log.debug("WLMDataController.getViewMleForPageNo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			HttpSession session = req.getSession();
@@ -2314,13 +2314,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("WLMDataController.getViewMleForPageNo <<");
+		log.debug("WLMDataController.getViewMleForPageNo <<");
 		return responseView;
 	}
 	
 	/*Methods to get data for pagination for OS Component */
 	public ModelAndView getAllOSList(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getAllOSList >>");
+		log.debug("WLMDataController.getAllOSList >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			Map<Integer, List<OSDataVO>> map = getPartitionListOfAllOS(req);
@@ -2337,13 +2337,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("WLMDataController.getAllOSList <<");
+		log.debug("WLMDataController.getAllOSList <<");
 		return responseView;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public ModelAndView getViewOSForPageNo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getViewOSForPageNo >>");
+		log.debug("WLMDataController.getViewOSForPageNo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			HttpSession session = req.getSession();
@@ -2359,13 +2359,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("WLMDataController.getViewOSForPageNo <<");
+		log.debug("WLMDataController.getViewOSForPageNo <<");
 		return responseView;
 	}
 	
 	/*Methods to get data for pagination for OEM Component */
 	public ModelAndView getAllOEMList(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getAllOEMList >>");
+		log.debug("WLMDataController.getAllOEMList >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			Map<Integer, List<OEMDataVO>> map= getPartitionListOfAllOEM(req);
@@ -2382,13 +2382,13 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("WLMDataController.getAllOEMList <<");
+		log.debug("WLMDataController.getAllOEMList <<");
 		return responseView;
 	}
 	
 	@SuppressWarnings("unchecked")
 	public ModelAndView getViewOEMForPageNo(HttpServletRequest req,HttpServletResponse res) {
-		log.info("WLMDataController.getViewOEMForPageNo >>");
+		log.debug("WLMDataController.getViewOEMForPageNo >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
 		try {
 			HttpSession session = req.getSession();
@@ -2404,7 +2404,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		}
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
-		log.info("WLMDataController.getViewOEMForPageNo <<");
+		log.debug("WLMDataController.getViewOEMForPageNo <<");
 		return responseView;
 	}
     

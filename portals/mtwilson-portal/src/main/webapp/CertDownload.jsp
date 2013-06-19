@@ -3,7 +3,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
 <%
-response.setContentType("application/octet-stream ");
+response.setContentType("application/octet-stream");
 response.setHeader("Content-Disposition",
 "attachment;filename=mtwilson-rootCA");
 %>
@@ -25,7 +25,7 @@ response.setHeader("Content-Disposition",
               
             <div  id ="fdownloadRCA"class="registerUser">Click on Download icon to download Root Ca Certificate
 			<input type="image" onclick="fnforRootCACertificate()" src="images/download.jpg"></div>
-            <div  id ="fdownload"class="registerUser">Click on Download icon to download this hosts Privacy CA Certificate
+            <div  id ="fdownload"class="registerUser">Click on Download icon to download the Privacy CA Certificates
 			<input type="image" onclick="fnforPrivacyCACertificate()" src="images/download.jpg"></div>
             <!-- <div  id ="fdownload"class="registerUser">Click on Download icon to download all trusted Privacy CA Certificates
 			<input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div> -->

@@ -25,13 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yuvrajsx
  *
  */
 public class CheckLoginController extends AbstractController {
-
+    private Logger log = LoggerFactory.getLogger(getClass());
 	
 	// variable declaration used during Processing data. 
         private static final Logger logger = LoggerFactory.getLogger(CheckLoginController.class.getName());       
@@ -41,7 +43,7 @@ public class CheckLoginController extends AbstractController {
 
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
-            logger.info("CheckLoginController >>");
+            logger.debug("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
             String keystoreFilename = "";
             
@@ -104,6 +106,7 @@ public class CheckLoginController extends AbstractController {
                 try {
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                 } catch (ClientException e) {
+                    log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
                 }
                 

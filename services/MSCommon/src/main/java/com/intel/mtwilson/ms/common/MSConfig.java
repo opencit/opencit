@@ -54,7 +54,7 @@ public class MSConfig  {
         // mtwilson.privacyca.certificate.list.file=PrivacyCA.p12.pem
         // default props used by CA rest service
         // XXX-TODO generate the ssl file name based on ip address during install
-        defaults.setProperty("mtwilson.tls.certificate.file", "/etc/intel/ssl.crt.pem");
+        defaults.setProperty("mtwilson.tls.certificate.file", "/etc/intel/cloudsecurity/ssl.crt.pem");
         defaults.setProperty("mtwilson.privacyca.cert.file", "/etc/intel/cloudsecurity/PrivacyCA.pem");
         defaults.setProperty("mtwilson.rootca.certficate.file", "/etc/intel/cloudsecurity/MtWilsonRootCA.crt.pem"); 
         defaults.setProperty("mtwilson.saml.certificate.file", "/etc/intel/cloudsecurity/saml.crt.pem");
