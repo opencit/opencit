@@ -148,7 +148,7 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
     }
     
      public MwPortalUser findMwPortalUserByUserName(String name) {
-        MwPortalUser mwKeystoreObj = null;
+        MwPortalUser mwKeystoreObj;
         EntityManager em = getEntityManager();
         Query query = em.createNamedQuery("MwPortalUser.findByUsername");
         query.setParameter("username", name);

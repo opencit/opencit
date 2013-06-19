@@ -88,7 +88,7 @@ public class CreateIdentity  {
 	 * Entry point into the program. See class description for required properties file elements.
 	 * 
 	 */
-	public static void createIdentity() throws Exception{
+	public static void createIdentity() throws PrivacyCAException{
 		//Properties file
 		// Define properties file strings
 		final String OWNER_AUTH = "TpmOwnerAuth";
