@@ -25,6 +25,9 @@ public interface ManagementService {
 
     ApiClientInfo getApiClientInfo(byte[] fingerprint) throws IOException, ApiException, SignatureException;
     
+    // Adding back this interface for the completeness even though we have the register method in ApiClient.java
+    boolean registerApiClient(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException;
+    
     boolean updateApiClient(ApiClientUpdateRequest info) throws IOException, ApiException, SignatureException;
     
     boolean deleteApiClient(byte[] fingerprint) throws IOException, ApiException, SignatureException;
@@ -50,11 +53,11 @@ public interface ManagementService {
     
     Set<X509Certificate> getTlsCertificates() throws IOException, ApiException, SignatureException;
 
-    CaInfo getCaStatus() throws IOException, ApiException, SignatureException;
+    //CaInfo getCaStatus() throws IOException, ApiException, SignatureException;
     
-    void enableCaWithPassword(String newPassword) throws IOException, ApiException, SignatureException;
+   // void enableCaWithPassword(String newPassword) throws IOException, ApiException, SignatureException;
     
-    void disableCa() throws IOException, ApiException, SignatureException;
+   // void disableCa() throws IOException, ApiException, SignatureException;
     
     // New functions to support multiple host registration/update
     HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;

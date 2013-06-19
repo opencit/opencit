@@ -201,7 +201,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             log.error("Cannot load JDBC Driver for persistence unit", ex);
         }
         
-        PersistenceUnitInfo persistenceUnitInfo = null;
+        PersistenceUnitInfo persistenceUnitInfo;
         try {
             persistenceUnitInfo = getPersistenceUnitInfo(persistenceUnitName, jpaProperties);
         }
@@ -212,7 +212,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             throw new PersistenceException("Cannot find PersistenceUnit named "+persistenceUnitName);
         }
 
-        EntityManagerFactory emf = null;
+        EntityManagerFactory emf;
         PersistenceProviderResolver resolver = PersistenceProviderResolverHolder.getPersistenceProviderResolver();
 
         List<PersistenceProvider> providers = resolver.getPersistenceProviders();

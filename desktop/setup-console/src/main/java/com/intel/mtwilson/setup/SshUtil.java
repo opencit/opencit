@@ -104,7 +104,7 @@ public class SshUtil {
      * @throws ApiException
      * @throws SignatureException 
      */
-    public static void executeRemoteCommand(String ipAddress, String rootPassword, SshRemoteCommand command) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException, ApiException, SignatureException, Exception {
+    public static void executeRemoteCommand(String ipAddress, String rootPassword, SshRemoteCommand command) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException, ApiException, SignatureException {
         SSHClient ssh = new SSHClient();
         //ssh.loadKnownHosts(); // this is only if we have a known_hosts file...
         //ssh.addHostKeyVerifier("..."); // this is only if we know the fingerprint of the remote host we're connecting to
@@ -132,7 +132,7 @@ public class SshUtil {
     
     
     public static interface SshRemoteCommand {
-        void execute(SSHClient ssh) throws Exception;
+        void execute(SSHClient ssh) throws IOException;
     }
     
     private static class ShowTrustHosts implements SshRemoteCommand {
@@ -141,7 +141,7 @@ public class SshUtil {
             this.args = args;
         }
         @Override
-        public void execute(SSHClient ssh) throws Exception {
+        public void execute(SSHClient ssh) throws IOException  {
 
             // find out what is the previous list of trusted hosts
             String previousWhitelistString = remote(ssh, "msctl show mtwilson.api.trust");
@@ -155,7 +155,7 @@ public class SshUtil {
             this.args = args;
         }
         @Override
-        public void execute(SSHClient ssh) throws Exception {
+        public void execute(SSHClient ssh) throws IOException {
             
             // find out what is the previous list of trusted hosts
             String previousWhitelistString = remote(ssh, "msctl show mtwilson.api.trust");
@@ -179,7 +179,7 @@ public class SshUtil {
             this.args = args;
         }
         @Override
-        public void execute(SSHClient ssh) throws Exception {
+        public void execute(SSHClient ssh) throws IOException  {
             // whitelist should be in args[2]
             String previousWhitelistString = args[2];
             
@@ -207,7 +207,7 @@ public class SshUtil {
      * 
      * @param args 
      */
-    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, Exception {
+    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException {
         
             for(int i=0;  i<args.length ;i++) {
                 System.out.println("RemoteCommand ARG "+i+" = "+args[i]);

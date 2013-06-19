@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.mtwilson.jpa.GenericJpaController;
@@ -49,12 +50,12 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
         }
     }
 
-    public void edit(MwKeystore mwKeystore) throws NonexistentEntityException, Exception {
+    public void edit(MwKeystore mwKeystore) throws NonexistentEntityException, ASDataException {
         EntityManager em = getEntityManager();
         try {
             
             em.getTransaction().begin();
-            mwKeystore = em.merge(mwKeystore);
+            em.merge(mwKeystore);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -64,7 +65,7 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
                     throw new NonexistentEntityException("The mwKeystore with id " + id + " no longer exists.");
                 }
             }
-            throw ex;
+            throw new ASDataException(ex);
         } finally {
             em.close();
         }
@@ -148,7 +149,7 @@ public class MwKeystoreJpaController extends GenericJpaController<MwKeystore> im
         //    return null;
         //}
         //return list.get(0);
-        MwKeystore mwKeystoreObj = null;
+        MwKeystore mwKeystoreObj;
         EntityManager em = getEntityManager();
         Query query = em.createNamedQuery("MwKeystore.findByName");
         query.setParameter("name", name);

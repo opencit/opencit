@@ -118,13 +118,14 @@ public class SearchApiClient implements Command {
         if (console == null) {
             throw new IOException("no console.");
         }
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		//BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s: ", prompt));
         String input = console.readLine();
 //        in.close(); // don't close System.in !!
         return input;
     }
-
+    // comment out unused function (6/11 1.2)
+    /*
     private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
         
         if (console == null) {
@@ -139,7 +140,9 @@ public class SearchApiClient implements Command {
         }
         return input;
     }
-    
+    */
+    // commenting out unused function (6/11 1.2)
+    /*
     private String firstNonEmpty(String[] values) {
         for(String value : values) {
             if( value != null && !value.isEmpty() ) {
@@ -148,4 +151,5 @@ public class SearchApiClient implements Command {
         }
         return null;
     }
+    */
 }

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwCertificateX509;
 import com.intel.mtwilson.jpa.GenericJpaController;
@@ -46,12 +47,12 @@ public class MwCertificateX509JpaController extends GenericJpaController<MwCerti
         }
     }
 
-    public void edit(MwCertificateX509 mwCertificateX509) throws NonexistentEntityException, Exception {
+    public void edit(MwCertificateX509 mwCertificateX509) throws NonexistentEntityException, ASDataException {
         EntityManager em = getEntityManager();
         try {
             
             em.getTransaction().begin();
-            mwCertificateX509 = em.merge(mwCertificateX509);
+            em.merge(mwCertificateX509);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -61,7 +62,7 @@ public class MwCertificateX509JpaController extends GenericJpaController<MwCerti
                     throw new NonexistentEntityException("The mwCertificateX509 with id " + id + " no longer exists.");
                 }
             }
-            throw ex;
+            throw new ASDataException(ex);
         } finally {
                 em.close();
         }

@@ -269,14 +269,16 @@ Authorization: X509
     
     
 
-
+    // commenting out unused function (6/11 1.2)
+    /*
     private boolean verifySignature(byte[] document, PublicKey publicKey, String signatureAlgorithm, byte[] signature) throws NoSuchAlgorithmException,InvalidKeyException, SignatureException {
         Signature rsa = Signature.getInstance(signatureAlgorithm); 
         rsa.initVerify(publicKey);
         rsa.update(document);
         return rsa.verify(signature);
     }
-
+    */
+    
     private boolean verifySignature(byte[] document, Certificate certificate, String signatureAlgorithm, byte[] signature) throws NoSuchAlgorithmException,InvalidKeyException, SignatureException {
         Signature rsa = Signature.getInstance(signatureAlgorithm); 
         rsa.initVerify(certificate);

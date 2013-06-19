@@ -43,9 +43,11 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.xml.bind.PropertyException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.lang.ArrayUtils;
@@ -200,6 +202,7 @@ public class TAHelper {
             // going to IntelHostAgent directly because 1) we are TAHelper so we know we need intel trust agents,  2) the HostAgent interface isn't ready yet for full generic usage,  
             // 3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
             HostAgentFactory factory = new HostAgentFactory();
+            
             TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
 
             String connectionString = tblHosts.getAddOnConnectionInfo();
@@ -230,7 +233,8 @@ public class TAHelper {
         }
     }
 
-    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws Exception {
+    public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException, 
+            UnknownHostException, IOException, KeyManagementException, CertificateException  {
         //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT   
         String nonce = generateNonce();
 
@@ -284,7 +288,7 @@ public class TAHelper {
 
     // hostName == internetAddress.toString() or Hostname.toString() or IPAddress.toString()
     // vmmName == tblHosts.getVmmMleId().getName()
-    public String getHostAttestationReport(String hostName, PcrManifest pcrManifest, String vmmName) throws Exception {
+    public String getHostAttestationReport(String hostName, PcrManifest pcrManifest, String vmmName) throws XMLStreamException {
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw;
         StringWriter sw = new StringWriter();
@@ -465,7 +469,9 @@ public class TAHelper {
             throw e;
         } finally {
             try {
-                fileOutputStream.close();
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
             } catch (IOException ex) {
                 log.error(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()), ex);
             }
