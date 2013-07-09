@@ -5,6 +5,7 @@
 package com.intel.mtwilson.api;
 
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
+import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientInfo;
@@ -85,7 +86,7 @@ public interface MtWilson {
      * <i><u>Content type returned:</u></i>JSON
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: GET</i>
+     * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/AttestationService/resources/hosts/trust?hostName=10.1.70.126
      * <p>
      * <i><u>Sample Output:</u></i><br>
@@ -122,6 +123,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/AttestationService/resources/host<br>
+     * <p>
      * <i>Sample Input</i><br>
      * {"HostName":"192.168.1.201","IPAddress":"192.168.1.201","Port":9999,"BIOS_Name":"Intel_Corp.","BIOS_Version":"T060","BIOS_Oem":"Intel Corp.","VMM_Name":"Intel_Thurley_Xen","VMM_Version":"11-4.1.0","VMM_OSName":"SUSE_LINUX","VMM_OSVersion":"11","AddOn_Connection_String":"intel:https://192.168.1.201:9999","Description":"","Email":"","Location":null,"AIK_Certificate":null,"AIK_PublicKey":null,"AIK_SHA1":null,"Processor_Info":null}
      * {"BIOS_WhiteList_Target":"BIOS_OEM","VMM_WhiteList_Target":"VMM_OEM", "TXT_Host_Record":{"HostName":"192.168.201","AddOn_Connection_String":"intel:https://192.168.1.201:9999"}} <br>
@@ -155,7 +157,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see MtWilson#registerHost(com.intel.mtwilson.datatypes.TxtHostRecord) for automation of host registration.
+     * @see MtWilson#registerHost(com.intel.mtwilson.datatypes.TxtHostRecord) registerHost function for automation of host registration.
      * @since MW 1.0 
      */    
     HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
@@ -175,6 +177,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/AttestationService/resources/hosts/bulk<br>
+     * <p>
      * <i>Sample Input</i><br>
      * {"HostRecords":[{"HostName":"192.168.1.201","BIOS_Name":"Intel_Corp.","BIOS_Version":"T060","BIOS_Oem":"Intel Corp.",
      * "VMM_Name":"Intel_Thurley_Xen","VMM_Version":"11-4.1.0","VMM_OSName":"SUSE_LINUX","VMM_OSVersion":"11","AddOn_Connection_String":"intel:https://192.168.1.201:9999"},
@@ -212,7 +215,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) for automation of host registration.
+     * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) registerHosts function for automation of host registration.
      * @since MW 1.2
      */    
     HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
@@ -299,8 +302,9 @@ public interface MtWilson {
      * <i><u>Output content type:</u></i>Application/JSON
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
+     * <i>Method Type: PUT</i><br>
      * https://192.168.1.101:8181/AttestationService/resources/host<br>
+	 * <p>
      * <i>Sample Input</i><br>
      * {"HostName":"192.168.1.201","BIOS_Name":"Intel_Corp.","BIOS_Version":"T060","BIOS_Oem":"Intel Corp.","VMM_Name":"Intel_Thurley_Xen",
      * "VMM_Version":"11-4.1.0","VMM_OSName":"SUSE_LINUX","VMM_OSVersion":"11","AddOn_Connection_String":"intel:https://10.1.71.169:9999",
@@ -333,7 +337,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see MtWilson#registerHost(com.intel.mtwilson.datatypes.TxtHostRecord) for automation of host updates.
+     * @see MtWilson#registerHost(com.intel.mtwilson.datatypes.TxtHostRecord) registerHost function for automation of host updates.
      * @since MW 1.0 
      */    
     HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
@@ -351,6 +355,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: PUT</i><br>
      * https://192.168.1.101:8181/AttestationService/resources/hosts/bulk<br>
+	 * <p>
      * <i>Sample Input</i><br>
      * {"HostRecords":[{"HostName":"192.168.1.201","BIOS_Name":"Intel_Corp.","BIOS_Version":"T060","BIOS_Oem":"Intel Corp.",
      * "VMM_Name":"Intel_Thurley_Xen","VMM_Version":"11-4.1.0","VMM_OSName":"SUSE_LINUX","VMM_OSVersion":"11","AddOn_Connection_String":"intel:https://192.168.1.201:9999","Description":"Host updated"},
@@ -387,7 +392,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) for automation of host registration.
+     * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) registerHosts function for automation of host registration.
      * @since MW 1.2 
      */    
     HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
@@ -448,8 +453,7 @@ public interface MtWilson {
     List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException;
 
     /**
-     * Updates the list of hosts specified. Whenever the host is updated with a BIOS or OS patch/upgrade, it has to be re-registered
-     * or updated with the updated MLEs. Otherwise the attestation will fail.
+     * Retrives the trust status of the list of hosts specified. This API is added for the OpenStack integration.
      * <p>
      * <i><u>Roles needed:</u></i>Attestation/Report
      * <p>
@@ -460,6 +464,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/AttestationService/resources/PollHosts<br>
+     * <p>
      * <i>Sample Input</i><br>
      * {"hosts":["192.168.1.201","192.168.1.202"]}
      * <p>
@@ -479,7 +484,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) for automation of host registration.
      * @since MW 1.0
      */    
     OpenStackHostTrustLevelReport pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException;
@@ -522,7 +526,7 @@ public interface MtWilson {
             }<br>
      * <p>
      * @param hostnames  {@link Hostname} List of the host names for which we need the trust report
-     * @return {@link HostsTrustReportType} List of {@link HostType} HostType object with the details of the last 5 attestations.
+     * @return {@link HostsTrustReportType} List of {@link HostType} objects with the details of the last 5 attestations.
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException
@@ -565,7 +569,7 @@ public interface MtWilson {
             }<br>
      * <p>
      * @param hostName  {@link Hostname} Name of the host for which we need the manifest/pcr report.
-     * @return {@link HostManifestReportType} List of {@link ManifestType} ManifestType for each of the PCRs verified for the host.
+     * @return {@link HostManifestReportType} List of {@link ManifestType} for each of the PCRs verified for the host.
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException
@@ -913,7 +917,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @see {@link ManagementService} for automation APIs
      * @since MW 1.0 
      */
     AttestationReport getAttestationFailureReport(Hostname hostname)throws IOException, ApiException, SignatureException;
@@ -951,7 +954,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @see {@link ManagementService} for automation APIs
      * @since MW 1.0 
      */
     AttestationReport getAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException;
@@ -1035,7 +1037,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @see {@link ManagementService} for automation APIs
      * @since MW 1.0 
      */
     boolean addMLE(MleData mle) throws IOException, ApiException, SignatureException;
@@ -1081,7 +1082,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @see ManagementService for automation APIs
      * @since MW 1.0 
      */
     boolean updateMLE(MleData mle) throws IOException, ApiException, SignatureException;
@@ -1222,7 +1222,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 Core/Premium
+     * @since MW 1.0 
      */    
     List<OemData> listAllOEM() throws IOException, ApiException, SignatureException;
 
@@ -1240,6 +1240,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/WLMService/resources/oem <br>
+     * <p>
      * <i>Sample Input</i><br>
      * {"Name":"INTEL","Description":"Intel OEM"}
      * <p>
@@ -1258,7 +1259,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution like OEM already exists or so, this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 Core/Premium
+     * @since MW 1.0 
      */
     boolean addOEM(OemData oem) throws IOException, ApiException, SignatureException;
 
@@ -1276,6 +1277,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: PUT</i><br>
      * https://192.168.1.101:8181/WLMService/resources/oem <br>
+     * <p>
      * <i>Sample Input</i><br>
      * {"Name":"INTEL","Description":"Updated description"}
      * <p>
@@ -1408,6 +1410,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/WLMService/resources/os <br>
+     * <p>
      * <i>Sample Input</i><br>
      * {"Name":"RHEL","Version":"6.1","Description":"RHEL"}
      * <p>
@@ -1460,7 +1463,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 Core/Premium
+     * @since MW 1.0 
      */         
     boolean deleteOS(OsData os) throws IOException, ApiException, SignatureException;
 
@@ -1468,7 +1471,8 @@ public interface MtWilson {
     /**
      * Creates a new PCR white list for the MLE specified. When the MLE is created, PCR white list entries are also added. 
      * So, if the white list values need to be updated, then the user need to call (@link updatePCRWhiteList} function. <br>
-     * Creation of PCR white lists could be automated using the APIs in {@link ManagementService}
+     * Creation of PCR white lists could be automated using the APIs {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.TxtHostRecord)} or
+     * {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.HostConfigData)}
      * <p>
      * <i><u>Roles needed:</u></i>Whitelist
      * <p>
@@ -1507,14 +1511,14 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see ManagementService for automation APIs
      * @since MW 1.0
      */
     boolean addPCRWhiteList(PCRWhiteList pcrObj) throws IOException, ApiException, SignatureException;
     
     /**
      * Updates the white list of the specified PCR for the MLE.  <br>
-     * Updation of PCR white lists could be automated using the APIs in {@link ManagementService}
+     * Updates to the PCR white lists could be automated using the APIs {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.TxtHostRecord)} or
+     * {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.HostConfigData)}
      * <p>
      * <i><u>Roles needed:</u></i>Whitelist
      * <p>
@@ -1551,7 +1555,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @see ManagementService for automation APIs
      * @since MW 1.0
      */    
     boolean updatePCRWhiteList(PCRWhiteList pcrObj) throws IOException, ApiException, SignatureException;
@@ -1600,7 +1603,8 @@ public interface MtWilson {
      * module based attestation. When the MLE is created, for hypervisors supporting MODULE
      * based attestation, PCR 19 would be set to empty. Using this API all the modules that get extended to PCR 19 should 
      * be configured. Since Module based attestation is supported only for PCR 19, it is not applicable for BIOS type MLEs. <br>
-     * Creation of Module white lists could be automated using the APIs in {@link ManagementService#configureWhiteList(com.intel.mtwilson.datatypes.HostConfigData) }
+     * Creation of Module white lists could be automated using the APIs {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.TxtHostRecord)} or
+     * {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.HostConfigData)}
      * <p>
      * <i><u>Roles needed:</u></i>Whitelist
      * <p>
@@ -1643,7 +1647,8 @@ public interface MtWilson {
     
     /**
      * Updates the module white list for the MLE specified. Only digest value and description fields are allowed to be updated. <br>
-     * Updation of Module white lists could be automated using the APIs in {@link ManagementService#configureWhiteList(com.intel.mtwilson.datatypes.HostConfigData) }
+     * Updates to the module white lists could be automated using the APIs {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.TxtHostRecord)} or
+     * {@link MtWilson#configureWhiteList(com.intel.mtwilson.datatypes.HostConfigData)}
      * <p>
      * <i><u>Roles needed:</u></i>Whitelist
      * <p>
@@ -1764,6 +1769,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/WLMService/resources/mles/source<br>
+     * <p>
      * <i>Sample Input.</i><br>
      * {"hostName":"192.168.1.202","mleData":{"Name":"Intel_BIOS_MLE","Version":"T060","MLE_Type":"BIOS","OsName":"","OsVersion":"","OemName":"INTEL"}} <br>
      * If a host is already mapped to the MLE, then an appropriate error would be returned back to the caller.<br>
@@ -1807,6 +1813,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: PUT</i><br>
      * https://192.168.1.101:8181/WLMService/resources/mles/source<br>
+     * <p>
      * <i>Sample Input.</i><br>
      * {"hostName":"192.168.1.203","mleData":{"Name":"Intel_BIOS_MLE","Version":"T060","MLE_Type":"BIOS","OsName":"","OsVersion":"","OemName":"INTEL"}} <br>
      * If a host is not mapped to the MLE, then an appropriate error would be returned back to the caller.<br>
@@ -1848,6 +1855,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: DELETE</i><br>
      * https://192.168.1.101:8181/WLMService/resources/mles/source?mleName=Intel_BIOS_MLE&mleVersion=T060&osName=&osVersion=&oemName=INTEL<br>
+     * <p>
      * <i><u>Sample Output:</u></i><br>
      * true<br>
      * <p>
@@ -1880,6 +1888,7 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/WLMService/resources/mles/source?mleName=Intel_BIOS_MLE&mleVersion=T060&osName=&osVersion=&oemName=INTEL<br>
+     * <p>
      * <i><u>Sample Output:</u></i><br>
      * 192.168.1.102<br>
      * <p>
@@ -1918,7 +1927,7 @@ public interface MtWilson {
      * https://192.168.1.101:8181/ManagementService/resources/apiclient/search?statusEqualTo=APPROVED<br>
      *  https://192.168.1.101:8181/ManagementService/resources/apiclient/search?
      * <p>
-     * <i><u>Sample JSON Output:</u></i><br>
+     * <i><u>Sample Output:</u></i><br>
      * [{"name":"CN=ManagementServiceAutomation,OU=Mt Wilson,O=Trusted Data Center,C=US","certificate":"MIIDSjCCA.....",
      * "fingerprint":"EiI/zmVY0vUr5Q6RdalS55mNcyZD7Pt5oFDRUmUOPkQ=","issuer":"CN=ManagementServiceAutomation, 
      * OU=Mt Wilson, O=Trusted Data Center, C=US","serialNumber":1093506352,"expires":1683687684000,"enabled":true,
@@ -1939,7 +1948,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @see ApiClientInfo
      * @since MW 1.0
      */            
     List<ApiClientInfo> searchApiClients(ApiClientSearchCriteria criteria) throws IOException, ApiException, SignatureException;
@@ -1965,7 +1973,7 @@ public interface MtWilson {
      * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/apiclient/search?statusEqualTo=Pending<br>
      * <p>
-     * <i><u>Sample JSON Output:</u></i><br>
+     * <i><u>Sample Output:</u></i><br>
      * [{"name":"CN=testuser,OU=Mt Wilson,O=Trusted Data Center,C=US","certificate":"MIIDJ..."UY=",
      * ,"fingerprint":"e5/MoypC6GxC1Dh+nvKwOm7/Fj/O2av4MmZtx2MemUY=","issuer":"CN=testuser, OU=Mt Wilson, 
      * O=Trusted Data Center, C=US","serialNumber":1072669869, "expires":1684143856000,"enabled":false,
@@ -1980,7 +1988,6 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @see ApiClientInfo
      * @since MW 1.0
      */            
     List<ApiClientInfo> listPendingAccessRequests() throws IOException, ApiException, SignatureException;
@@ -1998,7 +2005,7 @@ public interface MtWilson {
      * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/apiclient/search?fingerprintEqualTo=3efcf2652ae8211bb870af071ab1bdf8270913da8225b7728e3f086993f732ec<br>
      * <p>
-     * <i><u>Sample JSON Output:</u></i><br>
+     * <i><u>Sample Output:</u></i><br>
      * [{"name":"CN=testuser,OU=Mt Wilson,O=Trusted Data Center,C=US","certificate":"MIIDJ..."UY=",
      * ,"fingerprint":"e5/MoypC6GxC1Dh+nvKwOm7/Fj/O2av4MmZtx2MemUY=","issuer":"CN=testuser, OU=Mt Wilson, 
      * O=Trusted Data Center, C=US","serialNumber":1072669869, "expires":1684143856000,"enabled":false,
@@ -2036,7 +2043,6 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/apiclient/<br>
-     * <i>Sample Input</i> <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
      * true<br>
@@ -2074,7 +2080,6 @@ public interface MtWilson {
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: PUT</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/apiclient/<br>
-     * <i>Sample Input</i> <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
      * true<br>
@@ -2113,7 +2118,7 @@ public interface MtWilson {
      * <i>Method Type: DELETE</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/apiclient?fingerprint=3efcf2652ae8211bb870af071ab1bdf8270913da8225b7728e3f086993f732ec<br>
      * <p>
-     * <i><u>Sample JSON Output:</u></i><br>
+     * <i><u>Sample Output:</u></i><br>
      * true
      * <p>
      *  <i><u>Sample Java API Call:</u></i><br>
@@ -2224,7 +2229,7 @@ public interface MtWilson {
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
      * <i>Method Type: POST</i><br>
-     * https://192.168.1.101:8181/ManagementService/resources/host<br>
+     * https://192.168.1.101:8181/ManagementService/resources/host/custom<br>
      * <i>Sample Input</i><br>
      * {"BIOS_WhiteList_Target":"BIOS_OEM","VMM_WhiteList_Target":"VMM_OEM", "TXT_Host_Record":{"HostName":"192.168.201","AddOn_Connection_String":"intel:https://192.168.1.201:9999"}}
      * <p>
@@ -2376,7 +2381,7 @@ public interface MtWilson {
      * <i><u>Output content type:</u></i>Text/Plain
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
+     * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/ca/certificate/saml/current <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
@@ -2405,7 +2410,7 @@ public interface MtWilson {
      * <i><u>Output content type:</u></i>Text/Plain
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
+     * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/ca/certificate/rootca/current <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
@@ -2435,7 +2440,7 @@ public interface MtWilson {
      * <i><u>Output content type:</u></i>Text/Plain
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
+     * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/ca/certificate/privacyca/current <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
@@ -2464,7 +2469,7 @@ public interface MtWilson {
      * <i><u>Output content type:</u></i>Text/Plain
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
+     * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/ca/certificate/saml/current <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
@@ -2492,7 +2497,7 @@ public interface MtWilson {
      * <i><u>Output content type:</u></i>Text/Plain
      * <p>
      * <i><u>Sample REST API call :</u></i><br>
-     * <i>Method Type: POST</i><br>
+     * <i>Method Type: GET</i><br>
      * https://192.168.1.101:8181/ManagementService/resources/ca/certificate/tls/current <br>
      * <p>
      * <i><u>Sample Output:</u></i><br>
