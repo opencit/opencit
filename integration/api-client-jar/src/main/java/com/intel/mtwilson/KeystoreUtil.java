@@ -457,7 +457,7 @@ public class KeystoreUtil {
      * @return an ApiClient object configured with the credentials in the keystore
      * @throws Exception 
      */
-    public static ApiClient clientForUserInDirectory(File directory, String username, String password, URL server) throws Exception {
+    public static ApiClient clientForUserInDirectory(File directory, String username, String password, URL server) throws ClientException, ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException   {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
@@ -477,11 +477,11 @@ public class KeystoreUtil {
      * @throws Exception 
      * @since 0.5.4
      */
-    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server) throws Exception {
+    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException {
         return clientForUserInResource(resource, username, password, server, new InsecureTlsPolicy());
     }
     
-    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy) throws Exception {
+    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException  {
         SimpleKeystore keystore = new SimpleKeystore(resource, password);
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
         ApiClient c = new ApiClient(server, rsaCredential, keystore, tlsPolicy);

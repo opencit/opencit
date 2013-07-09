@@ -87,8 +87,8 @@ public class BootstrapUser implements Command {
             baseurl = readInputStringWithPromptAndDefault("Mt Wilson URL", baseurl);
         }
         
-        String username = null;
-        String password = null;
+        String username ;
+        String password ;
         if( args.length > 0 ) { username = args[0]; } else { username = readInputStringWithPrompt("Username"); }
         if( args.length > 1 ) { password = args[1]; } else { password = readInputStringWithPrompt("Password"); }
         if( password != null && password.startsWith("env:") && password.length() > 4 ) {
@@ -143,7 +143,7 @@ public class BootstrapUser implements Command {
     }
     
     private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
-        SetupWizard wizard = new SetupWizard(conf);
+        //SetupWizard wizard = new SetupWizard(conf);
         try {
             // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
             /*

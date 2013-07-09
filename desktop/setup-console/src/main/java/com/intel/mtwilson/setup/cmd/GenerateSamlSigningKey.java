@@ -8,6 +8,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
@@ -183,7 +184,7 @@ public class GenerateSamlSigningKey implements Command {
      * @throws NonexistentEntityException
      * @throws Exception 
      */
-    private void createKeystore() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, NonexistentEntityException, Exception {
+    private void createKeystore() throws NoSuchAlgorithmException, GeneralSecurityException, IOException, NonexistentEntityException, CryptographyException {
         keystoreResource = new ByteArrayResource();
         // generate an RSA keypair and certificate
         KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE); // NoSuchAlgorithmException

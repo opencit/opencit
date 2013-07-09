@@ -347,6 +347,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 try {
+                    if(apiListFromDB != null) {
                         for (ApiClientInfo apiClientObj : apiListFromDB) {
                                 ApiClientDetails apiClientDetailObj = new ApiClientDetails();
                                 apiClientDetailObj.setName(apiClientObj.name);
@@ -359,6 +360,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
 
                                 apiClientList.add(apiClientDetailObj);
                         }
+                    }
                 } catch (Exception e) {
                         logger.error("Failed to compile list of API clients: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);

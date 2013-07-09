@@ -37,7 +37,7 @@ public class Bootstrap {
     public static Configuration config;
     
     @BeforeClass
-    public static void configure() throws Exception {
+    public static void configure() throws IOException {
         System.setProperty("com.intel.level", "FINEST");
         log = LoggerFactory.getLogger(Bootstrap.class);
         
@@ -54,7 +54,7 @@ public class Bootstrap {
      * certificate to the keystore file.
      */
     @Test
-    public void addServerSslCertUsingSimpleKeystore() throws Exception {
+    public void addServerSslCertUsingSimpleKeystore() throws KeyManagementException, KeyStoreException, MalformedURLException, IOException, Exception {
         // create new keystore (if file does not exist and is writable it will be created when we save)
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         printKeystoreContents(keystore); // list certificates
@@ -68,7 +68,7 @@ public class Bootstrap {
      * @throws Exception 
      */
     @Test
-    public void addNewApiClientKeypairUsingSimpleKeystore() throws Exception {
+    public void addNewApiClientKeypairUsingSimpleKeystore() throws KeyManagementException, Exception {
         // create new keystore (if file does not exist and is writable it will be created when we save)
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         createNewApiClientKeypair(keystore);
@@ -82,7 +82,7 @@ public class Bootstrap {
      * @throws Exception 
      */
     @Test
-    public void registerExistingApiClient() throws Exception {
+    public void registerExistingApiClient() throws KeyManagementException, Exception {
         // create new keystore (if file does not exist and is writable it will be created when we save)
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         registerNewApiClientKeypair(keystore);
@@ -121,7 +121,7 @@ public class Bootstrap {
      * Fails if the keystore does not have the server's SSL certificate
      */
     @Test
-    public void executeApiCall() throws Exception {
+    public void executeApiCall() throws ClientException, IOException, IOException, ApiException, SignatureException {
         // test an API call to see if things are working.
         ApiClient c = new ApiClient(config);
         List<OsData> list = c.listAllOS();
@@ -146,7 +146,7 @@ public class Bootstrap {
      * @param keystore
      * @throws Exception 
      */
-    private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore) throws Exception {
+    private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore) throws NoSuchAlgorithmException, KeyManagementException, KeyManagementException, IOException, CertificateEncodingException, CertificateEncodingException {
         X509Certificate[] certs = SslUtil.getServerCertificates(server);
         String aliasBasename = server.getHost();
         if( certs.length == 1 ) {
@@ -171,7 +171,7 @@ public class Bootstrap {
     }
     
     
-    private void createNewApiClientKeypair(SimpleKeystore keystore) throws Exception {
+    private void createNewApiClientKeypair(SimpleKeystore keystore) throws KeyStoreException, NoSuchAlgorithmException, CryptographyException, IOException, KeyManagementException {
         // create a new private key and certificate only if it does not already exist in the keystore
         String[] aliases = keystore.aliases();
         if( ArrayUtils.contains(aliases, config.getString("mtwilson.api.key.alias")) ) {
@@ -185,7 +185,7 @@ public class Bootstrap {
     }
     
         // register the new key with Mt Wilson (should be done AFTER adding the ssl certs to keystore)
-    private void registerNewApiClientKeypair(SimpleKeystore keystore) throws Exception {
+    private void registerNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
         ApiClient c = new ApiClient(config);
         ApiClientCreateRequest me = new ApiClientCreateRequest();
@@ -207,7 +207,7 @@ public class Bootstrap {
      * @param keystore
      * @throws Exception 
      */
-    private void selfApproveNewApiClientKeypair(SimpleKeystore keystore) throws Exception {
+    private void selfApproveNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
         ApiClient c = new ApiClient(config); // KeyManagementException, [MalformedURLException], [UnsupportedEncodingException]
         ApiClientUpdateRequest update = new ApiClientUpdateRequest();
