@@ -150,6 +150,7 @@ function SetRequired(element) {
 		});
 		$('#vcenterStringElement').hide();
 		$('#citrixStringElement').hide();
+                $('#MainContent_tbHostPort').val("9999");
 	}else if(isVmware == 1){  // VMWARE
         
 		$('#vcenterStringElement').find('input').each(function() {
@@ -165,19 +166,19 @@ function SetRequired(element) {
       
 		$('#citrixStringElement').hide();
 	}else { //CITRIX
-        
-        $('#hostPortDisplayDiv').show();
-        //$('#MainContent_tbHostIP').parent().append(reqStr);
+                $('#hostPortDisplayDiv').show();
+                //$('#MainContent_tbHostIP').parent().append(reqStr);
 		$('#MainContent_tbHostPort').parent().append(reqStr);
-        $('#vcenterStringElement').find('input').each(function() {
-			$(this).parent().find('.validationErrorDiv').remove();
-		});
-		$('#vcenterStringElement').hide();
-        
-        $('#citrixStringElement').find('input').each(function() {
-			$(this).parent().append(reqStr);
-		});
-		$('#citrixStringElement').show();       
+                $('#vcenterStringElement').find('input').each(function() {
+                    $(this).parent().find('.validationErrorDiv').remove();
+                });
+                $('#vcenterStringElement').hide();
+                
+                $('#citrixStringElement').find('input').each(function() {
+                    $(this).parent().append(reqStr);
+                });
+                $('#citrixStringElement').show();
+                $('#MainContent_tbHostPort').val("443");
     }
 }
 
