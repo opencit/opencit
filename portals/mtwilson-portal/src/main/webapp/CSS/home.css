@@ -428,6 +428,18 @@ h5, h6
 .deleteRequestRow4Header{width: 189px;}
 
 
+/* Class for View Host page */
+.vh_viewRow1{width: 100px;}
+.vh_viewRow2{width: 100px;}
+.vh_viewRow3{width: 50px;}
+.vh_viewRow4{width: 70px;}
+.vh_viewRow5{width: 50px;}
+.vh_viewRow6{width: 150px;}
+.vh_viewRow7{width: 60px;}
+.vh_viewRow8{width: 70px;}
+.vh_viewRow9{width: 100px;}
+.vh_viewRow10{width: 70px;}
+
 /* Class for View Request page */
 .viewRow1{width: 260px;}
 .viewRow2{width: 120px;}
@@ -739,7 +751,7 @@ text-align: center;
 
 #retriveHostButton{
 	float: left;
-	margin-left: 30px;
+	margin-left: 1px;
 }
 
 .requestedRolesDispaly{ 
