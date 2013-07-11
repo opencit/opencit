@@ -89,6 +89,66 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 return result;
         }
 
+    /**
+     *
+     * @param vCenterConnection
+     * @return
+     * @throws ManagementConsolePortalException
+     */
+    @Override
+    public List<String> getDatacenters(String vCenterConnection) throws ManagementConsolePortalException {
+        logger.debug("ManagementConsoleServicesImpl.getDatacenters >>");
+        //logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
+        List<String> datacenters = null;
+
+        try {
+            datacenters = new ArrayList<String>();
+            VMwareClient vmHelperObj = new VMwareClient();
+
+            try {
+                datacenters = vmHelperObj.getDatacenterNames(vCenterConnection);
+            } catch (Exception e) {
+                logger.error("Failed to get datacenter information from vmware: {}", e.getMessage());
+                throw ConnectionUtil.handleManagementConsoleException(e);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get datacenter information from vmware: {}", e.getMessage());
+            throw ConnectionUtil.handleManagementConsoleException(e);
+        }
+        return datacenters;
+    }
+    
+    /**
+     *
+     * @param datacenter
+     * @param vCenterConnection
+     * @return
+     * @throws ManagementConsolePortalException
+     */
+    @Override
+    public List<String> getClusters(String vCenterConnection, String datacenter) throws ManagementConsolePortalException {
+        logger.debug("ManagementConsoleServicesImpl.getClusters >>");
+        //logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
+        List<String> clusters = null;
+
+        try {
+            clusters = new ArrayList<String>();
+            VMwareClient vmHelperObj = new VMwareClient();
+
+            try {
+                clusters = vmHelperObj.getClusterNames(vCenterConnection, datacenter);
+            } catch (Exception e) {
+                logger.error("Failed to get cluster information from vmware: {}", e.getMessage());
+                throw ConnectionUtil.handleManagementConsoleException(e);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get cluster information from vmware: {}", e.getMessage());
+            throw ConnectionUtil.handleManagementConsoleException(e);
+        }
+        return clusters;
+    }
+        
+        
         /**
         * 
         * @param clusterName

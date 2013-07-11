@@ -554,6 +554,13 @@ h5, h6
 	height: 20px;
 }
 
+.ddlBox_Border{
+    border: 1px solid #7A5660;
+    width: 503px;
+    height: 24px;
+    float: left;
+}
+
 .uploadButton{
 	float: left;
 	margin-right: 5px;
@@ -676,6 +683,8 @@ text-align: center;
 	float: left;
 	font-size: small;
 	margin-left: 4px;
+        display:inline-block;
+	width:10px;
 }
 
 #moduleTypeAttestationMez{
@@ -751,7 +760,12 @@ text-align: center;
 
 #retriveHostButton{
 	float: left;
-	margin-left: 1px;
+	margin-left: 10px;
+}
+
+#retrieveDatacentersButton{
+	float: left;
+	margin-left: 10px;
 }
 
 .requestedRolesDispaly{ 
