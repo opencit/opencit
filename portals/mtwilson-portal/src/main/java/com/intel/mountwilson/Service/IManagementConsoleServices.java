@@ -22,6 +22,10 @@ public interface IManagementConsoleServices {
 	
         public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj,HostConfigData hostConfig, ApiClient apiObj) throws ManagementConsolePortalException, MalformedURLException;
 
+        public List<String> getDatacenters(String vCenterConnection)throws ManagementConsolePortalException;
+        
+        public List<String> getClusters(String vCenterConnection, String datacenter)throws ManagementConsolePortalException;
+        
         public List<HostDetails> getHostEntryFromVMWareCluster(String clusterName,String vCenterConnection)throws ManagementConsolePortalException;
 
         public HostDetails registerNewHost(HostDetails hostDetailList, ApiClient apiObj)throws ManagementConsolePortalException;

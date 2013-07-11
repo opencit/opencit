@@ -332,6 +332,7 @@ function fnChangehostType(element,isWhiteListConfigPage) {
     // drop down box and finds the one thats selected and saves
     // its name in type variable
     // choices are VMware, Citrix, KVM|Xen
+    cleanUpAllDivs();
 	$(element).find('option').each(function() {
 		if ($(this).attr('selected') == 'selected') {
 			type = $(this).attr('value');
