@@ -407,8 +407,11 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<HostVmMappingVO> getVMsForHost(String hostName,String hostID,Map<String, HostVmMappingVO> vmMappingData,AttestationService service)throws DemoPortalException {
+                // Removing the dependency on the local version of the VMwareClient.java
+                throw new UnsupportedOperationException("Not supported.");
+                /*
 		log.debug("DemoPortalServicesImpl.getVMsForHost >>");
-        List<String> vms = null;
+                        List<String> vms = null;
 		String vCenterString;
 		try {
 			//get vCenterString of Host.
@@ -427,14 +430,14 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 				log.debug("Host {} currently does not have any virtual machines configured.", hostName);
                 
 				//Delete all entries from HOST VM Mapping for corresponding HOST
-            	for (Entry<String, HostVmMappingVO> vmMap : vmMappingData.entrySet()) {
+                                                for (Entry<String, HostVmMappingVO> vmMap : vmMappingData.entrySet()) {
 					HostVmMappingVO hostVmMappingVO = vmMap.getValue();
 					if (hostVmMappingVO.getHostId().equals(hostID)) {
 						vmMappingData.remove(vmMap.getKey());
 					}
 				}
             	
-            	//throw Exception back to controller.
+                                                //throw Exception back to controller.
 				throw new DemoPortalException("Host currently does not have any virtual machines configured.");
 			}
 			
@@ -443,9 +446,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 				addVMDetailsToHostVmMapping(hostID,vms,vmMappingData);
 			}catch(Exception e){
 				log.error("Error while getting data from Host mapping table, cause is "+e.getMessage());
-				/* Soni_Begin_18/09/2012_issue_for_consistent_Error_Message  */
 				 throw ConnectionUtil.handleDemoPortalException(e);
-				/* Soni_End_18/09/2012_issue_for_consistent_Error_Message  */
 				//throw new DemoPortalException("Error while getting data from Host mapping table, cause is "+e.getMessage(),e);
 			}
 			
@@ -455,6 +456,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		}
 		//Get the list of All VM with all predefine policy information.
 		return getVMFromHostVmMapping(hostID,vms,vmMappingData);
+        */
 	}
 
 	/**
@@ -470,6 +472,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean powerOnOffHostVMs(String hostName, String vmName,String hostID, boolean isPowerOnCommand,AttestationService service) throws DemoPortalException {
+                // Removing the dependency on the local version of the VMwareClient.java
+                throw new UnsupportedOperationException("Not supported.");
+                /*
 		log.debug("DemoPortalServicesImpl.powerOnOffHostVMs >>");
 		String vCenterString;
 		try {
@@ -492,6 +497,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			 throw ConnectionUtil.handleDemoPortalException(e);
 		}
 		return true;
+        */
 	}
 
 	/**
@@ -507,6 +513,9 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean migrateVMToHost(String vmName,String sourceHost, String hostToTransfer, String hostID,AttestationService service)throws DemoPortalException {
+                // Removing the dependency on the local version of the VMwareClient.java
+                throw new UnsupportedOperationException("Not supported.");
+                /*
 		log.debug("DemoPortalServicesImpl.migrateVMToHost >>");
 		String vCenterString;
 		try {
@@ -529,6 +538,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			 throw ConnectionUtil.handleDemoPortalException(e);
 		}
 		return true;
+        */
 	}
 
 	/**
