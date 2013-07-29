@@ -262,6 +262,7 @@ if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
 fi
+
 if ! grep -q tagent /etc/monit/monitrc; then 
 	cat >> /etc/monit/monitrc << EOF
 ## Monit Process Monitor Config File
@@ -270,7 +271,25 @@ if ! grep -q tagent /etc/monit/monitrc; then
 set daemon 60
 # Set path to log file
 set logfile /var/log/monit.log
-# TA monitoring
+include /etc/monit/conf.d/*
+EOF
+fi
+
+if [ ! -d /etc/monit/conf.d ]; then
+ mkdir -p /etc/monit/conf.d
+fi
+
+if grep -q "/etc/monit/conf.d/*" /etc/monit/monitrc; then
+ testInclude=`grep "/etc/monit/conf.d/*" /etc/monit/monitrc`
+ if grep -q "#" <<< $testInclude; then
+  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+ fi
+else
+ echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+fi
+
+if [ ! -f /etc/monit/conf.d/ta.monit ]; then
+ cat >>> /etc/monit/conf.d/ta.monit <<< EOF
 check process tagent with pidfile /var/run/tagent.pid
         start program = "/etc/init.d/tagent start" with timeout 30 seconds
         stop program  = "/etc/init.d/tagent stop
