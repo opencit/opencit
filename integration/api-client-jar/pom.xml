@@ -15,7 +15,7 @@
     <parent> 
         <groupId>com.intel.mtwilson.integration</groupId> 
         <artifactId>mtwilson-integration</artifactId> 
-        <version>1.2-SNAPSHOT</version> 
+        <version>1.2.1-RELEASE</version> 
     </parent>
 
     <build>
@@ -128,7 +128,7 @@
                                 <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
                                     <fileset dir="${project.build.directory}/jars" />
                                     <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
-                                    <fileset dir="${basedir}" includes="pom.xml"/>
+                                    <fileset dir="${basedir}" includes="pom.xml" />
                                 </zip>
                             </target>
                         </configuration>
