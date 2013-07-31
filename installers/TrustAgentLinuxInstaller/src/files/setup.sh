@@ -48,7 +48,7 @@ JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 
-
+saveD=`pwd`
 # copy application files to /opt
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
@@ -254,6 +254,7 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
+cd $saveD
 if [ ! -d /etc/monit ]; then
  mkdir /etc/monit
 fi
@@ -261,39 +262,16 @@ fi
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
-fi
-
-if ! grep -q tagent /etc/monit/monitrc; then 
-	cat >> /etc/monit/monitrc << EOF
-## Monit Process Monitor Config File
-## Configuration options and examples can be found here:
-## http://mmonit.com/monit/documentation/monit.html
-set daemon 60
-# Set path to log file
-set logfile /var/log/monit.log
-include /etc/monit/conf.d/*
-EOF
+else
+    cp monitrc /etc/monit/monitrc
 fi
 
 if [ ! -d /etc/monit/conf.d ]; then
  mkdir -p /etc/monit/conf.d
 fi
 
-if grep -q "/etc/monit/conf.d/*" /etc/monit/monitrc; then
- testInclude=`grep "/etc/monit/conf.d/*" /etc/monit/monitrc`
- if grep -q "#" <<< $testInclude; then
-  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
- fi
-else
- echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
-fi
-
 if [ ! -f /etc/monit/conf.d/ta.monit ]; then
- cat >>> /etc/monit/conf.d/ta.monit <<< EOF
-check process tagent with pidfile /var/run/tagent.pid
-        start program = "/etc/init.d/tagent start" with timeout 30 seconds
-        stop program  = "/etc/init.d/tagent stop
-EOF
+ cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
 chmod 700 /etc/monit/monitrc
