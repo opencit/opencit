@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>cpg-io</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>cpg-io</name>
   <description>File and network related objects</description>
@@ -73,6 +73,14 @@
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
+        <scope>provided</scope>
+    </dependency>
+    <!-- see also: jackson 2.0 explanation http://www.cowtowncoder.com/blog/archives/2012/03/entry_466.html -->
+    <dependency>
+    	<groupId>com.fasterxml.jackson.core</groupId>
+    	<artifactId>jackson-annotations</artifactId>
+    	<version>2.2.2</version>
+        <scope>provided</scope>
     </dependency>
 
   </dependencies>  

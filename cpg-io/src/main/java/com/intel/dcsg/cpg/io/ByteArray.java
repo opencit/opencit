@@ -4,12 +4,19 @@
  */
 package com.intel.dcsg.cpg.io;
 
+import java.math.BigInteger;
+import java.util.Scanner;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * @since 0.1
  * @author jbuhacoff
  */
 public class ByteArray {
+    public static final ByteArray EMPTY = new ByteArray(); // for convenience
     private byte[] array;
+    
     public ByteArray() {
         array = new byte[0];
     }
@@ -22,9 +29,46 @@ public class ByteArray {
         }
     }
     
+    /**
+     * If the big integer is positive and 128 bits long, the resulting byte array will be 17 bytes not 16 because it will have
+     * a leading zero to indicate the integer is positive. That way when you convert the array back to BigInteger you will
+     * get the correct result. If we were to strip off the leading zero then when ou convert back to BigInteger you will get
+     * something negative which would not be the same as the original BigInteger. 
+     * Therefore callers should be aware that when processing 128-bit big integers (well anytime they are the size of the boundary)
+     * the array will have a leading zero for the sign bit, and if callers already know the big integer is positive the 
+     * callers can strip off the sign bit.
+     * @since 0.1.1
+     * @param number 
+     */
+    public ByteArray(BigInteger number) {
+        this(number.toByteArray());
+    }
+    
     public byte[] getBytes() { return array; }
     
     public int length() { return array.length; }
+    
+    /**
+     * @since 0.1.1
+     * @return 
+     */
+    public BigInteger toBigInteger() {
+        return new BigInteger(1, array);
+    }
+    
+    /**
+     * @since 0.1.1
+     * @return 
+     */
+    public String toHexString() {
+        if( array.length == 0 ) { return ""; } // for ByteArray.EMPTY
+        BigInteger value = toBigInteger();
+        String hex = String.format("%0"+(array.length*2)+"x", value); // length is in bytes, hex is 2 characters per byte
+        if( hex.length() > array.length*2 ) {
+            throw new IllegalArgumentException(String.format("Overflow: hex %x does not fit in %d bytes", value, array.length));
+        }
+        return hex;
+    }
     
     public ByteArray append(byte[] more) {
         return new ByteArray(concat(array, more));
@@ -59,6 +103,25 @@ public class ByteArray {
         return result;
     }
     
+    /**
+     * @since 0.1.1
+     * @param arrays
+     * @return 
+     */
+    public static byte[] concat(ByteArray... arrays) {
+        int resultsize = 0;
+        for(int i=0; i<arrays.length; i++) { 
+            resultsize += arrays[i].length(); 
+        }
+        byte[] result = new byte[resultsize];
+        int cursor = 0;
+        for(int i=0; i<arrays.length; i++) {
+            System.arraycopy(arrays[i].getBytes(), 0, result, cursor, arrays[i].length());
+            cursor += arrays[i].length();
+        }
+        return result;        
+    }
+    
     
     public static byte[] subarray(byte[] a, int offset) {
         byte[] result = new byte[a.length - offset];
@@ -72,5 +135,41 @@ public class ByteArray {
         return result;
     }
 
+    /**
+     * @since 0.1.1
+     * @param text hex string representing the byte array
+     * @return 
+     */
+    public static ByteArray fromHex(String text) {
+        Scanner scanner = new Scanner(text);
+        ByteArray data = new ByteArray(scanner.nextBigInteger(16));
+        scanner.close();
+        return data;
+    }
+    
+    
+    /**
+     * @since 0.1.1
+     * @param other
+     * @return 
+     */
+    @Override
+    public boolean equals(Object other) {
+        if( other == null ) { return false; }
+        if( other == this ) { return true; }
+        if( other.getClass() != this.getClass() ) { return false; }
+        ByteArray rhs = (ByteArray)other;
+        return new EqualsBuilder().append(array, rhs.array).isEquals();
+    }
+    
+    /**
+     * 
+     * @since 0.1.1
+     * @return 
+     */
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(13,25).append(array).toHashCode();
+    }
     
 }
