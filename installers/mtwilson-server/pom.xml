@@ -292,18 +292,20 @@
                   <type>bin</type>
                 </artifactItem>
 		<!-- UI portals -->
+                <!-- 
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>WhiteListPortal</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
-				 <artifactItem>
-					<groupId>com.intel.mtwilson.linux</groupId>
-					<artifactId>mtwilson-portal-installer</artifactId>
-					<version>${project.version}</version>
-					<type>bin</type>
-				</artifactItem>
+                -->
+		<artifactItem>
+			<groupId>com.intel.mtwilson.linux</groupId>
+			<artifactId>mtwilson-portal-installer</artifactId>
+			<version>${project.version}</version>
+			<type>bin</type>
+		</artifactItem>
                 <!-- setup console --> 
                 <artifactItem>
                   <groupId>com.intel.mtwilson.desktop</groupId>

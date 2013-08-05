@@ -307,7 +307,6 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             host.BIOS_Oem = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString();
             host.BIOS_Name = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString(); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
             host.BIOS_Version = vmware.getMORProperty(hostMOR, "hardware.biosInfo.biosVersion").toString();
-            
             host.Processor_Info = "";
             
             log.debug("About to retrieve the EAX contents for {}.", host.HostName);
@@ -330,7 +329,6 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
                 log.debug("CPU ID for {} is {}.", host.HostName, cpuIDInHex);
                 host.Processor_Info = cpuIDInHex;
             }
-
             /*
             // Possible values for this processor Info includes. So, if there is a "-", we are assuming that it is either a Sandy Bridge or a IVY bridge system
             // For others starting with X56, they are Westmere systems belonging to Thurley platform
@@ -346,11 +344,9 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             // There is one more attribute in the vCenter that actually provides the processor name directly unlike the open source hosts where we
             // need to do the mapping
             // Possible values include: "intel-westmere", "intel-sandybridge"
-             //String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
-             // Bug: 933 Since on some hosts we have seen this value to be unset, we will use the EAX register values to get the CPU ID and use
+            // Bug: 933 Since on some hosts we have seen this value to be unset, we will use the EAX register values to get the CPU ID and use
             // the mapping table to get the platform name.
-            /*String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
-
+             /*String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
              if (processorInfo.contains("intel")) {
                  processorInfo = processorInfo.substring( "intel".length()+1);
              }
