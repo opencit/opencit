@@ -17,7 +17,7 @@
       cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
       used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
       assess and provide an Assurance that the security components on the devices are 
-      protecting the assets executing or stored on the devices.   
+      protecting the assets executing or stored on the devices.      
   </description>
   
   <modules>
