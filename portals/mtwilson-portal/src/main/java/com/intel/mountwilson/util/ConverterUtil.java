@@ -15,15 +15,20 @@ import com.intel.mountwilson.datamodel.OEMDataVO;
 import com.intel.mountwilson.datamodel.OSDataVO;
 import com.intel.mountwilson.datamodel.TrustedHostVO;
 import com.intel.mtwilson.TrustAssertion;
+import com.intel.mtwilson.datatypes.Vendor;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ManifestData;
 import com.intel.mtwilson.datatypes.MleData;
 import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import static com.intel.mtwilson.datatypes.Vendor.INTEL;
+import static com.intel.mtwilson.datatypes.Vendor.VMWARE;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -204,12 +209,25 @@ public class ConverterUtil {
         return xmlOutput.getWriter().toString();
     }
     
-   public static HostDetailsEntityVO getHostVOObjectFromTxtHostRecord(TxtHostRecord txtHostDetail) {
-    	HostDetailsEntityVO entityVO = new HostDetailsEntityVO();
+   public static HostDetailsEntityVO getHostVOObjectFromTxtHostRecord(TxtHostRecord txtHostDetail) throws MalformedURLException {
+        HostDetailsEntityVO entityVO = new HostDetailsEntityVO();
+        ConnectionString connectionString = new ConnectionString(txtHostDetail.AddOn_Connection_String);
+        Vendor vendor = connectionString.getVendor();
+        switch(vendor) {
+           case VMWARE: 
+                entityVO.setHostPort("");
+                break;
+           case INTEL: 
+                entityVO.setHostPort(connectionString.getPort().toString());
+                break;
+           case CITRIX: 
+                entityVO.setHostPort(connectionString.getPort().toString());
+                break;  
+        }
 		entityVO.setHostId(getConvertedHostName(txtHostDetail.HostName));
 		entityVO.setHostName(txtHostDetail.HostName);
-		entityVO.setHostIPAddress(txtHostDetail.HostName);
-		entityVO.setHostPort(txtHostDetail.Port.toString());
+		//entityVO.setHostIPAddress(txtHostDetail.HostName);
+		//entityVO.setHostPort(txtHostDetail.Port.toString());
 		entityVO.setHostDescription(txtHostDetail.Description);
 		entityVO.setBiosName(txtHostDetail.BIOS_Name);
 		entityVO.setBiosBuildNo(txtHostDetail.BIOS_Version);
@@ -267,7 +285,7 @@ public class ConverterUtil {
 		return detailsEntityVOs;
 	}
 
-	public static List<HostDetailsEntityVO> getHostVOListFromTxtHostRecord(List<TxtHostRecord> txtHostDetails) {
+	public static List<HostDetailsEntityVO> getHostVOListFromTxtHostRecord(List<TxtHostRecord> txtHostDetails) throws MalformedURLException {
 		List<HostDetailsEntityVO> detailsEntityVOs = new ArrayList<HostDetailsEntityVO>();
 		for (TxtHostRecord tblHostDetail : txtHostDetails) {
 			detailsEntityVOs.add(getHostVOObjectFromTxtHostRecord(tblHostDetail));
