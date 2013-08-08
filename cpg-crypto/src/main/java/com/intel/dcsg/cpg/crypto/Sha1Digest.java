@@ -64,6 +64,14 @@ public class Sha1Digest extends AbstractDigest {
     }
 
     /**
+     * @param base64 value without any punctuation or spaces; can be null
+     * @return true if the value is a valid base64 representation of an SHA256 digest
+     */
+    public static boolean isValidBase64(String base64Value) {
+        return ALGORITHM.isValidBase64(base64Value);
+    }
+    
+    /**
      * Assumes the input represents an SHA1 digest and creates a new instance of Sha1Digest to wrap it.
      * This method does NOT compute a digest. If the input is not a valid SHA1 representation, a null
      * will be returned.
@@ -89,17 +97,53 @@ public class Sha1Digest extends AbstractDigest {
      * 
      * Callers must always check the return value for null. 
      * 
+     * Starting with version 0.1.2 this method also allows base64 input.
+     * 
      * @param hex
      * @return 
      */
-    public static Sha1Digest valueOf(String hex) {
-        if( isValidHex(hex) ) {
+    public static Sha1Digest valueOf(String text) {
+        if( isValidHex(text) ) {
             Sha1Digest digest = new Sha1Digest();
-            digest.value = HexUtil.toByteArray(hex); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            digest.value = HexUtil.toByteArray(text); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            return digest;
+        }
+        if( isValidBase64(text) ) {
+            Sha1Digest digest = new Sha1Digest();
+            digest.value = Base64Util.toByteArray(text); 
             return digest;
         }
         return null;
     }
+    
+    /**
+     * @since 0.1.2
+     * @param text
+     * @return 
+     */
+    public static Sha1Digest valueOfHex(String text) {
+        if( isValidHex(text) ) {
+            Sha1Digest digest = new Sha1Digest();
+            digest.value = HexUtil.toByteArray(text); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            return digest;
+        }
+        return null;
+    }
+
+    /**
+     * @since 0.1.2
+     * @param text
+     * @return 
+     */
+    public static Sha1Digest valueOfBase64(String text) {
+        if( isValidBase64(text) ) {
+            Sha1Digest digest = new Sha1Digest();
+            digest.value = Base64Util.toByteArray(text); 
+            return digest;
+        }
+        return null;
+    }
+    
     
     /**
      * Computes the SHA1 digest of the input and returns the result.
