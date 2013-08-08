@@ -235,7 +235,11 @@ public class TAHelper {
 
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException, 
             UnknownHostException, IOException, KeyManagementException, CertificateException  {
-        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT   
+        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        File q = null;
+        File n = null;
+        File c = null;
+        File r = null;
         String nonce = generateNonce();
 
         String sessionId = generateSessionId();
@@ -250,7 +254,7 @@ public class TAHelper {
         String quote = clientRequestType.getQuote();
         log.debug("extracted quote from response: " + quote);
 
-        saveQuote(quote, sessionId);
+        q = saveQuote(quote, sessionId);
         log.debug("saved quote with session id: " + sessionId);
 
         // we only need to save the certificate when registring the host ... when we are just getting a quote we need to verify it using the previously saved AIK.
@@ -258,18 +262,18 @@ public class TAHelper {
             String aikCertificate = clientRequestType.getAikcert();
             log.debug("extracted aik cert from response: " + aikCertificate);
 
-            saveCertificate(aikCertificate, sessionId);
+            c = saveCertificate(aikCertificate, sessionId);
             log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
-            saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
+            c = saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
-        saveNonce(nonce, sessionId);
+        n = saveNonce(nonce, sessionId);
 
         log.debug("saved nonce with session id: " + sessionId);
 
-        createRSAKeyFile(sessionId);
+        r = createRSAKeyFile(sessionId);
 
         log.debug("created RSA key file for session id: " + sessionId);
         
@@ -284,14 +288,20 @@ public class TAHelper {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             log.debug("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-
+            q.delete();
+            n.delete();
+            c.delete();
+            r.delete();
             return pcrManifest;
         }
         else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.debug("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-
+            q.delete();
+            n.delete();
+            c.delete();
+            r.delete();
             return pcrManifest;
         }
 
@@ -435,7 +445,7 @@ public class TAHelper {
         return "quote_" + sessionId + ".data";
     }
 
-    private void saveCertificate(String aikCertificate, String sessionId) throws IOException, CertificateException {
+    private File saveCertificate(String aikCertificate, String sessionId) throws IOException, CertificateException {
 
         /*
          // XXX this block of code where we fix the PEM format can be replaced with mtwilson-crypto X509Util.encodePemCertificate(X509Util.decodePemCertificate(...input...))
@@ -452,25 +462,28 @@ public class TAHelper {
 
          saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
          */
-
+        File file = null;
         X509Certificate aikcert = X509Util.decodePemCertificate(aikCertificate);
         String pem = X509Util.encodePemCertificate(aikcert);
-        FileOutputStream out = new FileOutputStream(new File(aikverifyhomeData + File.separator + getCertFileName(sessionId)));
+        file = new File(aikverifyhomeData + File.separator + getCertFileName(sessionId));
+        FileOutputStream out = new FileOutputStream(file);
         IOUtils.write(pem, out);
         IOUtils.closeQuietly(out);
+        return file;
     }
 
     private String getCertFileName(String sessionId) {
         return "aikcert_" + sessionId + ".cer";
     }
 
-    private void saveFile(String fileName, byte[] contents) throws IOException {
+    private File saveFile(String fileName, byte[] contents) throws IOException {
         FileOutputStream fileOutputStream = null;
-
+        File file = null;
         try {
             assert aikverifyhome != null;
             log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
-            fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator + fileName);
+            file = new File(aikverifyhomeData + File.separator + fileName);
+            fileOutputStream = new FileOutputStream(file);
             assert fileOutputStream != null;
             assert contents != null;
             fileOutputStream.write(contents);
@@ -486,24 +499,30 @@ public class TAHelper {
             } catch (IOException ex) {
                 log.error(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()), ex);
             }
+            
+            return file;
         }
 
 
     }
 
-    private void saveQuote(String quote, String sessionId) throws IOException {
+    private File saveQuote(String quote, String sessionId) throws IOException {
 //          byte[] quoteBytes = new BASE64Decoder().decodeBuffer(quote);
+        File file = null;
         byte[] quoteBytes = Base64.decodeBase64(quote);
-        saveFile(getQuoteFileName(sessionId), quoteBytes);
+        file = saveFile(getQuoteFileName(sessionId), quoteBytes);
+        return file;
     }
 
-    private void saveNonce(String nonce, String sessionId) throws IOException {
+    private File saveNonce(String nonce, String sessionId) throws IOException {
 //          byte[] nonceBytes = new BASE64Decoder().decodeBuffer(nonce);
         byte[] nonceBytes = Base64.decodeBase64(nonce);
-        saveFile(getNonceFileName(sessionId), nonceBytes);
+        File file = null;
+        file = saveFile(getNonceFileName(sessionId), nonceBytes);
+        return file;
     }
 
-    private void createRSAKeyFile(String sessionId) throws IOException, CertificateException {
+    private File createRSAKeyFile(String sessionId) throws IOException, CertificateException {
         // 20130409 replacing external openssl command with equivalent java code, see below
         /*
          String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
@@ -511,14 +530,17 @@ public class TAHelper {
          CommandUtil.runCommand(command, false, "CreateRsaKey" );
          //log.log(Level.INFO, "Result - {0} ", result);
          */
+        File file = null;
         FileInputStream in = new FileInputStream(new File(aikverifyhomeData + File.separator + getCertFileName(sessionId)));
         String x509cert = IOUtils.toString(in);
         IOUtils.closeQuietly(in);
         X509Certificate aikcert = X509Util.decodePemCertificate(x509cert);
         String aikpubkey = X509Util.encodePemPublicKey(aikcert.getPublicKey());
-        FileOutputStream out = new FileOutputStream(new File(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)));
+        file = new File(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId));
+        FileOutputStream out = new FileOutputStream(file);
         IOUtils.write(aikpubkey, out);
         IOUtils.closeQuietly(out);
+        return file;
     }
 
     private String getRSAPubkeyFileName(String sessionId) {
