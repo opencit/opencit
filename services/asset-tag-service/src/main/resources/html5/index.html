@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!--
+    HTML5 documentation:
+    http://www.w3.org/html/wg/drafts/html/master/
+    http://www.w3.org/TR/2010/WD-html5-20100624/
+    http://dev.w3.org/html5/html-author/
+    
+    Documentation on properties of HTA:APPLICATION: 
+    http://www.htmlgoodies.com/beyond/reference/article.php/3472841/HTML-Applications.htm
+    http://msdn.microsoft.com/library/default.asp?url=/workshop/author/hta/overview/htaoverview.asp
+    
+    It's possible to pack all the resources into a single executable with a custom icon using WinRAR:
+    http://stackoverflow.com/questions/4592410/is-it-possible-to-add-custom-icon-to-hta
+    http://www.rarlab.com/shop2rarlab-index.php?prod=winrar&x-source=winraronly
+    
+    <h1>Credits</h1>
+    <p>Javascript libraries <a href="http://prototypejs.org/" target="_blank">prototype.js</a> (<a href="http://prototypejs.org/license.html" target="_blank">MIT License</a>), <a href="http://script.aculo.us/" target="_blank">scriptaculous.js</a> (<a href="http://madrobby.github.io/scriptaculous/license/" target="_blank">MIT License</a>), <a href="http://livepipe.net/" target="_blank">livepipe.js</a> (<a href="http://livepipe.net/#MIT" target="_blank">MIT License</a>), and <a href="https://github.com/atetlaw/Really-Easy-Field-Validation" target="_blank">validation</a> (<a href="http://opensource.org/licenses/MIT" target="_blank">MIT License</a>).</p>
+    http://ajaxload.info/  for the ajax loading icon. license: "generated gifs are totally free for use"
+    
+    -->
+    <head>
+        <title>Asset Tag Provisioning Tool</title>
+        <meta name="Description" content="A web-based tool for defining tags and provisioning asset certificates" />
+        <meta name="Keywords" content="Mt Wilson, attestation, asset, inventory, management, security, cloud, data center" />
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+        <!--
+    <HTA:APPLICATION ID="oMyApp" 
+        APPLICATIONNAME="Mystery Hill Demo" 
+        BORDER="yes"
+        BORDERSTYLE="normal"
+        innerBorder="yes"
+        navigable="yes"
+        CAPTION="yes"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        maximizeButton="yes"
+        minimizeButton="yes"
+        SYSMENU="yes"
+        SCROLL="auto"
+        scrollFlat="no"
+        ICON="intel-logo-blue-transparent-160x121.ico"
+        WINDOWSTATE="maximize"/>
+        -->
+        <!--
+        <link rel="stylesheet" href="images/MarketPlace.css" type="text/css" />
+        <link rel="stylesheet" href="morestyle.css" type="text/css" />
+        -->
+        <link rel="stylesheet" href="images/at.css" type="text/css" />
+
+        <!--		<script src="ie-settimeout.js" type="text/javascript"><script> -->
+        <script src="watch.js" type="text/javascript"></script> <!-- required to use rivets -->
+        <script src="prototype-1.7.1.js" type="text/javascript"></script> <!-- required by log.js -->
+        <!-- ui tools -->
+        <script src="scriptaculous-1.9.0/scriptaculous.js" type="text/javascript"></script> 
+        <script src="livepipe/livepipe.js" type="text/javascript"></script>
+        <script src="livepipe/contextmenu.js" type="text/javascript"></script>
+        <script src="livepipe/cookie.js" type="text/javascript"></script>
+        <script src="livepipe/event_behavior.js" type="text/javascript"></script>
+        <script src="livepipe/hotkey.js" type="text/javascript"></script>
+        <script src="livepipe/progressbar.js" type="text/javascript"></script>
+        <script src="livepipe/rating.js" type="text/javascript"></script>
+        <script src="livepipe/resizable.js" type="text/javascript"></script>
+        <script src="livepipe/scrollbar.js" type="text/javascript"></script>
+        <script src="livepipe/selection.js" type="text/javascript"></script>
+        <script src="livepipe/selectmultiple.js" type="text/javascript"></script>
+        <script src="livepipe/tabs.js" type="text/javascript"></script>
+        <script src="livepipe/textarea.js" type="text/javascript"></script>
+        <script src="livepipe/window.js" type="text/javascript"></script>
+        <script src="validation.js" type="text/javascript"></script>
+        <!-- <script src="input.js" type="text/javascript"></script> -->
+        <script src="array.js" type="text/javascript"></script>
+        <script src="number.js" type="text/javascript"></script>
+        <script src="date.js" type="text/javascript"></script> <!-- required by log.js -->
+        <script src="log.js" type="text/javascript"></script> <!-- requires prototype.js, date.js -->
+        <script src="form.js" type="text/javascript"></script>
+        <script src="rivets.js" type="text/javascript"></script>
+        <script src="findx.js" type="text/javascript"></script>
+        <script src="rivets-adapter-watch-findx.js" type="text/javascript"></script> <!-- requires rivets, watch.js, and findx -->
+        <!-- mdv -->
+        <!-- this one uses template tags, but cannot get it to work in 5 minutes so switching to rivets
+        <script src="Template-instantiation-stable/mdv.js" type="text/javascript"></script> -->
+
+        <script src="atclient.js" type="text/javascript"></script>
+
+        <!-- sample data for testing -->
+        <script src="sampledata.js" type="text/javascript"></script>
+
+
+        <script type="text/javascript">
+            var ws = mtwilson.atag; // local name for the asset tag web service
+        </script>
+
+        <script type="text/javascript">
+            // watch adapter, from https://github.com/mikeric/rivets/wiki/Adapters
+            rivets.configure({
+                adapter: rivets_watch_findx_adapter
+            });
+        </script>
+
+    </head>
+    <body>
+        <!-- wrap starts here -->
+        <div id="wrap">
+
+            <!--header -->
+            <div id="header">			
+
+                <div id="header-links">
+                    <p>
+                        <a href="http://www.intel.com" target="_blank">Intel</a> | 
+                        <a href="http://http://cloudsecurityportal.intel.com/" target="_blank">Mt Wilson</a>
+                    </p>		
+                </div>		
+
+                <div id="header-caption">
+                    <h1>Mt Wilson - Asset Tag Provisioning Tool</h1>
+                </div>
+
+                <!--header ends-->					
+            </div>
+
+            <!-- navigation starts-->	
+            <div id="nav">
+                <ul id="navtabs"> <!-- put  id="current"  on the li tag that is currently displayed -->
+                    <li class="tab"><a href="#tags">Tags</a></li>  <!-- red color:  style="color: #c55" -->
+                    <li class="tab"><a href="#requests">Requests</a></li>
+                    <li class="tab"><a href="#certificates">Certificates</a></li>			
+                    <li class="tab"><a href="#rdf">RDF</a></li>			
+                    <li class="tab"><a href="#configure">Configure</a></li>
+                    <li class="tab"><a href="#log">Log</a></li>
+                </ul>
+                <!-- navigation ends-->	
+            </div>					
+            <div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+            </div>
+
+            <!-- content-wrap starts -->
+            <div id="content-wrap" class="one-col"  >	
+
+                <div id="main">
+
+                    <div id="tags">
+                        <h1>Manage Tags</h1>
+
+
+                        <h2>Create New Tag</h2>
+                        <script>
+                            var createTagObject = { 'name': '', 'oid':'', 'values':[] };
+                        </script>
+                        <form id="tag-create-form" action="#" onsubmit="ws.createTag(createTagObject); return false;">
+                            <ul>
+                                <li><label for="tag-create-name">Tag name</label><input type="text" id="tag-create-name" data-value="tag.name" name="name"/></li>
+                                <li><label for="tag-create-oid">Tag OID</label><input type="text" id="tag-create-oid" data-value="tag.oid" name="oid"/></li>
+                                <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
+                                <li><label for="tag-create-values">Tag values</label>
+                                    <input type="text"  id="tag-create-values"/>
+                                    <input type="button" value="Add" onclick="createTagObject.values.push($F('tag-create-values')); $('tag-create-values').focus(); $('tag-create-values').clear();"/>
+                                    <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
+                                        <li style="display: inline-block; border: 1px solid black; padding-left: 2px; padding-right: 2px; margin: 3px;" data-each-item="tag.values"><span data-text="item"></span> <a data-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:createTagObject.values.removeAll(this.getAttribute('tagValue')); /*createTagView.update({tag:createTagObject});*/ log.debug('create tag: '+Object.toJSON(createTagObject)); createTagView.update({tag:createTagObject}); /* XXX TODO the watch.js is not detecting the array element removal... */">X</a></li>
+                                    </ul>
+                                </li>
+                                <li><input type="submit" value="Save"/></li>
+                            </ul>
+                        </form>
+                        <script>
+                            var createTagView = rivets.bind(document.getElementById('tag-create-form'), {tag:createTagObject}); 
+                        </script>
+
+                        
+                        <h2>Search Tags</h2>
+
+                        <form id="tag-search-form" action="#" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="tag-search-name">Tag name</label>
+                                    <select id="tag-search-name-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="tag-search-name" name="name"/>
+                                </li>
+                                <li>
+                                    <label for="tag-search-oid">Tag OID</label>
+                                    <select id="tag-search-oid-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option value="startsWith">starts with</option>
+                                    </select>
+                                    <input type="text" id="tag-search-oid" name="oid"/>
+                                </li>
+                                <li>
+                                    <label for="tag-search-value">Tag value</label>
+                                    <select id="tag-search-value-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="tag-search-value" name="value"/>
+                                </li>
+                                <!--
+                                <li>
+                                    <label for="tag-search-description">Tag description</label>
+                                    <select id="tag-search-description-criteria">
+                                        <option>contains</option>
+                                        <option>is</option>
+                                    </select>
+                                    <input type="text" id="tag-create-description" name="oid"/>
+                                </li>
+                                -->
+                                <li><input type="button" value="Search..." onclick="searchTags();"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Browse Tags</h2>
+
+                        <table id="tag-browse-table">
+                            <caption>Tags</caption>
+                            <thead>
+                                <tr>
+                                    <th>Tag name</th>
+                                    <th>Tag OID</th>
+                                    <!-- <th>Description</th> -->
+                                    <th>Tag values</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-each-item="tags">
+                                    <td data-text="item.name"></td>
+                                    <td data-text="item.oid"></td>
+                                    <td style="max-width: 400px;">
+                                    <ul style="margin-left: 0px; padding-left: 0px; list-style: none;">
+                                        <li style="display: inline-block; list-style-type: inline; border: none; padding: 1px; margin: 3px;" data-each-item="item.values"><span style="text-decoration: underline;" data-text="item"></span></li>
+                                    </ul>
+                                    </td>
+                                    <td><a data-oid="item.oid" href="#" onclick="javascript:removeTag(this.getAttribute('oid'));">delete</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                        <!-- end tags tab  -->
+                    </div>
+
+                    <div id="requests">
+                        <h1>Manage Certificate Requests</h1>
+
+
+                        <h2>Create New Certificate Request</h2>
+
+                        <form id="certificate-request-create-form" action="#" onsubmit="ws.createCertificateRequest(/*this*/); return false;">
+                            <ul>
+                                <li><label for="certificate-request-create-subject">Subject (host uuid)</label><input type="text" id="certificate-request-create-subject" name="subject"/></li>
+                                <li><label for="certificate-request-create-tags-select">Tags</label>
+                                    <select id="certificate-request-create-tags-select" onchange="updateviews(withValuesOfSelectedTag);">
+                                        <option data-each-item="tags" data-text="item.name" data-value="item.oid"></option>
+                                    </select>
+                                    <select id="certificate-request-create-tags-values">
+                                        <option data-each-item="tagValues" data-text="item"></option>
+                                    </select>
+                                    <input type="button" value="Add" id="certificate-request-create-tags-select-add" onclick="log.debug('selected tag: '+$F('certificate-request-create-tags-select'))"/>
+                                    <table id="certificate-request-create-tags-table">
+                                        <caption>Selected Tags</caption>
+                                        <thead>
+                                            <tr>
+                                                <th>Tag name</th>
+                                                <th>Tag OID</th>
+                                                <th>Tag Value</th>
+                                                <!-- <th>Description</th> -->
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="4">
+                                                    <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                                    view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                                </td></tr>
+                                        </tfoot>
+                                        <tbody>
+                                            <tr data-each-item="tags">
+                                                <td data-text="item.name"></td>
+                                                <td data-text="item.oid"></td>
+                                                <td data-text="item.value"></td>
+                                                <td><a data-oid="item.oid" href="#" onclick="javascript:removeTag(this.getAttribute('oid'));">remove</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </li>
+                                <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
+                                <li><input type="submit" value="Save"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Search Certificate Requests</h2>
+
+                        <form id="certificate-request-search-form" action="#" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="certificate-request-search-subject">Subject (host uuid)</label>
+                                    <select id="certificate-request-search-subject-criteria">
+                                        <option value="equalTo">is</option>
+                                    </select>
+                                    <input type="text" id="certificate-request-search-subject" name="subject"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-request-search-tagName">Tag name</label>
+                                    <select id="certificate-request-search-tagName-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="certificate-request-search-tagName" name="tagName"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-request-search-tagOid">Tag OID</label>
+                                    <select id="certificate-request-search-tagOid-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option value="startsWith">starts with</option>
+                                    </select>
+                                    <input type="text" id="certificate-request-search-tagOid" name="tagOid"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-request-search-tagValue">Tag value</label>
+                                    <select id="certificate-request-search-tagValue-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="certificate-request-search-tagValue" name="tagValue"/>
+                                </li>
+                                <!--
+                                <li>
+                                    <label for="tag-search-description">Tag description</label>
+                                    <select id="tag-search-description-criteria">
+                                        <option>contains</option>
+                                        <option>is</option>
+                                    </select>
+                                    <input type="text" id="tag-create-description" name="oid"/>
+                                </li>
+                                -->
+                                <li><input type="button" value="Search..." onclick="searchCertificateRequests();"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Browse Certificate Requests</h2>
+
+                        <table id="certificate-request-browse-table">
+                            <caption>Certificate Requests</caption>
+                            <thead>
+                                <tr>
+                                    <th>Subject (host uuid)</th>
+                                    <th>Tag name</th>
+                                    <th>Tag OID</th>
+                                    <!-- <th>Description</th> -->
+                                    <th>Tag values</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-each-item="certificateRequests">
+                                    <td data-text="item.subject"></td>
+                                    <td data-text="item.name"></td>
+                                    <td data-text="item.oid"></td>
+                                    <td><a data-oid="item.oid" href="#" onclick="javascript:removeCertificateRequest(this.getAttribute('uuid'));">delete</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- end requests tab -->
+                    </div>
+
+                    <div id="certificates">
+
+                        <h1>Manage Certificates</h1>
+
+                        <table id="certificate-browse-table">
+                            <thead>
+                                <tr>
+                                    <th>Host ID</th>
+                                    <th>Certificate</th>
+                                    <th>Fingerprint (SHA-256)</th>
+                                    <th>PCR Event</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-each-item="certificates">
+                                    <td data-text="item.subject"></td>
+                                    <td data-text="item.certificate"></td>
+                                    <td data-text="item.sha256"></td>
+                                    <td data-text="item.pcrEvent"></td>
+                                    <td><a data-uuid="item.uuid" href="#" onclick="javascript:removeCertificate(this.getAttribute('uuid'));">revoke</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <div id="rdf">
+                        <h1>Manage RDF Triples</h1>
+
+
+                        <h2>Create New RDF Triple</h2>
+
+                        <script>
+                            var createRdfTripleObject = { 'subject': '', 'predicate':'', 'object':'' };
+                        </script>
+                        <form id="rdf-triple-create-form" action="#" onsubmit="ws.createRdfTriple(createRdfTripleObject); return false;">
+                            <ul>
+                                <li><label for="rdf-triple-create-subject">Subject (id)</label><input type="text" id="rdf-triple-create-subject" data-value="rdfTriple.subject" name="subject"/></li>
+                                <li><label for="rdf-triple-create-predicate">Predicate (attribute name)</label><input type="text" id="rdf-triple-create-predicate" data-value="rdfTriple.predicate" name="predicate"/></li>
+                                <li><label for="rdf-triple-create-object">Object (attribute value)</label><input type="text" id="rdf-triple-create-object" data-value="rdfTriple.object" name="object"/></li>
+                                <li><input type="submit" value="Save"/></li>
+                            </ul>
+                        </form>
+                        <script>
+                            var createRdfTripleView = rivets.bind(document.getElementById('rdf-triple-create-form'), {rdfTriple:createRdfTripleObject}); 
+                        </script>
+
+                        <h2>Search RDF Triples</h2>
+
+                        <form id="rdf-triple-search-form" action="#" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="rdf-triple-search-subject">Subject (id)</label>
+                                    <select id="rdf-triple-search-subject-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-search-subject" name="subject"/>
+                                </li>
+                                <li>
+                                    <label for="rdf-triple-search-predicate">Predicate (attribute name)</label>
+                                    <select id="rdf-triple-search-predicate-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-search-predicate" name="predicate"/>
+                                </li>
+                                <li>
+                                    <label for="rdf-triple-search-object">Object (attribute value)</label>
+                                    <select id="rdf-triple-search-object-criteria">
+                                        <option value="equalTo">is</option>
+                                        <option>contains</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-search-object" name="object"/>
+                                </li>
+                                <!--
+                                <li>
+                                    <label for="rdf-triple-search-description">Rdf Triple description</label>
+                                    <select id="rdf-triple-search-description-criteria">
+                                        <option>contains</option>
+                                        <option>is</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-create-description" name="predicate"/>
+                                </li>
+                                -->
+                                <li><input type="button" value="Search..." onclick="searchRdfTriples();"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Browse RDF Triples</h2>
+
+                        <table id="rdf-triple-browse-table">
+                            <caption>RDF Triples</caption>
+                            <thead>
+                                <tr>
+                                    <th>Subject (id)</th>
+                                    <th>Predicate (attribute name)</th>
+                                    <th>Object (attribute value)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr> <td colspan="4">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-each-item="rdfTriples">
+                                    <td data-text="item.subject"></td>
+                                    <td data-text="item.predicate"></td>
+                                    <td data-text="item.object"></td>
+                                    <td><a data-uuid="item.uuid" href="#" onclick="javascript:removeRdfTriple(this.getAttribute('uuid'));">delete</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- end rdf tab -->
+                    </div>
+
+
+                    <div id="configure">
+                        <h1>Configuration</h1>
+
+                        <form id="config-form" onsubmit="return false;">
+                            <input type="button" id="config-save-button" value="Save" onclick="saveConfig();"/>
+                            <input type="button" id="config-load-button" value="Load" onclick="loadConfig();"/>
+                            <br/>
+                            <!--
+                            <h2>Local Data</h2>
+                            <ul>
+                            <li><label for="mhclient-config-json">MHCLIENT_CONFIG</label> <input type="text" size="80" id="mhclient-config-json" value="C:\Users\jbuhacof\.mystery-hill\client\client-html5-config.json"/></li>
+                            <li><label for="mhclient-home-dir">MHCLIENT_HOME</label> <input type="text" size="80" id="mhclient-home-dir" value="C:\Users\jbuhacof\workspace\mystery-hill\client\target"/> location of mhclient.jar</li>
+                            <li><label for="mhclient-image-dir">MHCLIENT_IMAGES</label> <input type="text" size="80" id="mhclient-image-dir" value="C:\Users\jbuhacof\Downloads\VM Images"/></li>
+                            <li><label for="mhclient-encrypted-image-dir">MHCLIENT_ENC_IMAGES</label> <input type="text" size="80" id="mhclient-encrypted-image-dir" value="C:\Users\jbuhacof\Downloads\VM Encrypted Images"/></li>
+                            </ul>
+                            -->
+                            <h2>Web Services</h2>
+                            <ul>
+                                <li><label for="provsvc">MTWILSON_ATAG_PROVSVC_URL</label> <input type="text" size="80" id="provsvc" value="https://localhost:8080"/></li>
+                            </ul>
+
+
+                        </form>
+
+
+                        <!-- end configure tab -->
+                    </div>
+                </div>
+
+                <div id="log">
+                    <h1>Application Log</h1>
+                    <div id="logwindow" style="height: 250px; max-height: 250px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
+                    </div>
+                    <!-- end log tab -->
+                </div>
+                <!-- content-wrap ends-->	
+            </div>
+
+            <!-- footer starts -->			
+            <div id="footer-wrap"><div id="footer">				
+
+                    <p>
+                        &copy; 2013 Intel Corporation
+                    </p>
+
+                </div></div>
+            <!-- footer ends-->	
+
+            <!-- wrap ends here -->
+        </div>
+
+        <!-- configure javascript logging -->								
+        <script>
+            log.attach("logwindow");
+        </script>
+
+        <!-- script must be at the end of the markup so it can reference any element -->
+        <script>
+            // this section initializes the user interface   
+            var navTabs = new Control.Tabs('navtabs', {
+                activeClassName: 'current',
+                setClassOnContainer: true,
+                afterChange: function(new_container) {
+                    if(new_container.id == 'tags') {
+                        //                        onUpdateVoterIssues();
+                    }
+                    if(new_container.id == 'certificates') {
+                        //                        onDisplayTally();
+                    }
+                }
+            });
+            navTabs.setActiveTab('tags');
+            //navTabs.setActiveTab('requests'); // XXX for debugging only; normally start with 'tags''
+            //$('ajaxstatus').hide();
+        </script>
+
+
+        <script>
+            //log.debug("adapter: "+rivets_watch_findx_adapter);
+            //rivets-test
+            //var taglist = [ {name:"tag1",oid:"1.1"}, {name:"tag2",oid:"2.2" } ];
+            //var taglist = [ "hello", "world" ];
+            //var taglist = [ [{name:"hello"}, {name:"world"}] ];
+            //var myview = rivets.bind(document.getElementById('rivets-test'), { tags: [ {item:"hello"},{item:"world"}] }); // instead of sampledata.tags
+            var tagview = rivets.bind(document.getElementById('tag-browse-table'), {tags:sampledata.tags}); 
+            var rdfview = rivets.bind(document.getElementById('rdf-triple-browse-table'), {rdfTriples:sampledata.rdfTriples}); 
+            var tagviewCertificateRequests = rivets.bind(document.getElementById('certificate-request-create-tags-select'), {tags:sampledata.tags}); 
+            var certificateView = rivets.bind(document.getElementById('certificate-browse-table'), {certificates:sampledata.certificates}); 
+            //taglist.push("test");
+            //myview.build();
+            //mybindings.update({filter: mytags});
+            //sampledata.tags.push({"name":"new tag","oid":"1.2.3.4","values":["hello","world"]});
+            ws.initialize({
+                //views: { 'tags': tagview, 'rdf-triples': rdfview }
+                data: sampledata, // optional: if not provided will start empty and then we can load it from server
+                view: { 'update': function(data) {
+                        tagview.update(data);
+                        rdfview.update(data);
+                        tagviewCertificateRequests.update(data);
+                        certificateView.update(data);
+                    } }
+            });
+            ws.updateTags(sampledata.tags); // xxx initialize with sample data
+
+            function removeFirstTag(oid) {
+                for(var i=0; i<sampledata.tags.length; i--) {
+                    if( ('oid' in sampledata.tags[i]) && sampledata.tags[i].oid == oid ) {
+                        sampledata.tags.splice(i,1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
+                        tagview.update(sampledata);
+                        return;
+                    }				
+                }
+            }
+
+            // removes all tags with this oid
+            function removeTag(oid) {
+                for(var i=sampledata.tags.length-1; i>=0; i--) {
+                    if( ('oid' in sampledata.tags[i]) && sampledata.tags[i].oid == oid ) {
+                        sampledata.tags.splice(i,1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
+                        //					return;
+                    }				
+                    tagview.update(sampledata);
+                }
+            }
+            // removes all tags with this uuid
+            function removeRdfTriple(uuid) {
+                for(var i=sampledata.rdfTriples.length-1; i>=0; i--) {
+                    if( ('uuid' in sampledata.rdfTriples[i]) && sampledata.rdfTriples[i].uuid == uuid ) {
+                        sampledata.rdfTriples.splice(i,1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
+                        //					return;
+                    }				
+                    rdfview.update(sampledata);
+                }
+            }
+		
+        </script>
+
+    </body>
+</html>

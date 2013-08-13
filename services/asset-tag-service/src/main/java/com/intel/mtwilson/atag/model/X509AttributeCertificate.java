@@ -1,0 +1,139 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
+package com.intel.mtwilson.atag.model;
+
+import com.intel.mtwilson.atag.OID;
+import com.intel.dcsg.cpg.io.UUID;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Attribute;
+import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Convenience class that wraps the Bouncy Castle API to walk the ASN1 tree and extract the information that we are
+ * interested in.
+ *
+ * @author jbuhacoff
+ */
+public class X509AttributeCertificate {
+
+    private static Logger log = LoggerFactory.getLogger(X509AttributeCertificate.class);
+    private final byte[] encoded;
+    private String issuer;
+    private BigInteger serialNumber = null;
+    private String subject = null;
+//    private UUID subjectUuid = null;
+    private Date notBefore;
+    private Date notAfter;
+    private ArrayList<AttributeOidAndValue> tags = new ArrayList<AttributeOidAndValue>();
+    
+    private X509AttributeCertificate(byte[] encoded) {
+        this.encoded = encoded;
+    }
+    
+    public byte[] getEncoded() {
+        return encoded;
+    }
+    
+    public String getIssuer() {
+        return issuer;
+    }
+    
+    public BigInteger getSerialNumber() {
+        return serialNumber;
+    }
+    
+    public String getSubject() {
+        return subject;
+    }
+    
+    public Date getNotBefore() {
+        return notBefore;
+    }
+    
+    public Date getNotAfter() {
+        return notAfter;
+    }
+    
+    public ArrayList<AttributeOidAndValue> getTags() {
+        return tags;
+    }
+    
+    @Override
+    public String toString() {
+        return Base64.encodeBase64String(encoded);
+    }
+
+    /**
+     *
+     * @param encodedCertificate
+     * @return
+     */
+    public static X509AttributeCertificate valueOf(byte[] encodedCertificate) {
+        X509AttributeCertificate result = new X509AttributeCertificate(encodedCertificate);
+        X509AttributeCertificateHolder cert;
+        try {
+            cert = new X509AttributeCertificateHolder(encodedCertificate);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+        log.debug("issuer: {}", StringUtils.join(cert.getIssuer().getNames(), "; "));  // calls toString() on each X500Name so we get the default representation; we can do it ourselves for custom display;  output example: CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US
+        result.issuer = StringUtils.join(cert.getIssuer().getNames(), "; "); // but expected to be only one
+        log.debug("serial number: {}", cert.getSerialNumber().toString()); // output example:   1
+        result.serialNumber = cert.getSerialNumber();
+        log.debug("holder: {}", StringUtils.join(cert.getHolder().getEntityNames(), ", ")); // output example:  2.25=#041092a71a228c174522a18bfd3ed3d00b39
+        // now let's get the UUID specifically out of this
+        log.debug("holder has {} entity names", cert.getHolder().getEntityNames().length);
+        for (X500Name entityName : cert.getHolder().getEntityNames()) {
+            log.debug("holder entity name has {} rdns", entityName.getRDNs().length);
+            for (RDN rdn : entityName.getRDNs()) {
+                log.debug("entity rdn is multivalued? {}", rdn.isMultiValued());
+                AttributeTypeAndValue attr = rdn.getFirst();
+                if (attr.getType().toString().equals(OID.HOST_UUID)) {
+                    UUID uuid = UUID.valueOf(DEROctetString.getInstance(attr.getValue()).getOctets());
+                    log.debug("holder uuid: {}", uuid);
+                    result.subject = uuid.toString();// example: 33766a63-5c55-4461-8a84-5936577df450
+                }
+            }
+        }
+        // if we ddin't identify the UUID,  just display the subject same way we did the issuer... concat all the entity names. example: 2.25=#041033766a635c5544618a845936577df450  (notice that in the value, there's a #0410 prepended to the uuid 33766a635c5544618a845936577df450)
+        if (result.subject == null) {
+            result.subject = StringUtils.join(cert.getHolder().getEntityNames(), "; ");
+        }
+        log.debug("not before: {}", cert.getNotBefore()); // output example: Thu Aug 08 15:21:13 PDT 2013
+        log.debug("not after: {}", cert.getNotAfter()); // output example: Sun Sep 08 15:21:13 PDT 2013
+        result.notBefore = cert.getNotBefore();
+        result.notAfter = cert.getNotAfter();
+        Attribute[] attributes = cert.getAttributes();
+        
+        for (Attribute attr : attributes) {
+            for (ASN1Encodable value : attr.getAttributeValues()) {
+//                log.trace("encoded value: {}", Base64.encodeBase64String(value.getEncoded())); // throws IOException
+                log.debug("attribute: {} is {}", attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()); // our values are just UTF-8 strings  but if you use new String(value.getEncoded())  you will get two extra spaces at the beginning of the string
+                result.tags.add(new AttributeOidAndValue(attr.getAttrType().toString(), DERUTF8String.getInstance(value).getString()));
+                /*
+                 * output examples:
+                 * attribute: 1.3.6.1.4.1.99999.1.1.1.1 is US
+                 * attribute: 1.3.6.1.4.1.99999.2.2.2.2 is CA
+                 * attribute: 1.3.6.1.4.1.99999.3.3.3.3 is Folsom
+                 */
+            }
+        }
+        
+        return result;
+    }
+}
