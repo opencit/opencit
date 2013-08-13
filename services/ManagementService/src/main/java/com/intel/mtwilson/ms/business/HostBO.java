@@ -691,6 +691,9 @@ public class HostBO extends BaseBO {
             hostObj.VMM_OSVersion = tblHostObj.getVmmMleId().getOsId().getVersion();
             hostObj.Processor_Info = hostConfigObj.getTxtHostRecord().Processor_Info;
 
+            // Retrieve the platform name, which will be used later
+            String platformName = getPlatformName(hostObj.Processor_Info);
+            
             // Find out what is the current White List target that the host is configured. For
             // white list target of "Specified Good Known host", we will have the host name appended
             // to the VMM_Name. For "OEM specific ones" we will have the OEM name appended to it. This
@@ -779,7 +782,6 @@ public class HostBO extends BaseBO {
 
                     // Also we need to add back the OEM name to the VMM_Name. We do not need to add it for
                     // BIOS as BIOS_Name is always OEM specific.                    
-                    String platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty())
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
                     else
@@ -791,9 +793,15 @@ public class HostBO extends BaseBO {
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
 
                     // Now the user wants to change from SPECIFIC HOST option to Global option. So,
-                    // We need to change the name of VMM_Name to remove the Host Name                    
+                    // We need to change the name of VMM_Name to remove the Host Name and ensure that the platform name is added back.                   
                     hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_", hostObj.HostName).length());
 
+                    // We need to add back the platform name
+                    if (!platformName.isEmpty())
+                        hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
+                    else
+                        hostObj.VMM_Name = hostObj.VMM_Name;
+                    
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
                 } else {
@@ -829,10 +837,10 @@ public class HostBO extends BaseBO {
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
 
-                    // Now the user wants to change from VMM_OEM option to Global 
-                    // option. So,we need to change the names of VMM_Name 
-                    String platformName = getPlatformName(hostObj.Processor_Info);                    
-                    hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_%s_", hostObj.BIOS_Oem.split(" ")[0].toString(), platformName).length());
+                    // Now the user wants to change from VMM_OEM option to Global option. So,we need to change the names of VMM_Name 
+                    // Since it is currently using the OEM name, which is a combination of OEM_Platform_VMM name, we just remove the OEM part
+                    // and keep the remaining content as such.
+                    hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_", hostObj.BIOS_Oem.split(" ")[0].toString()).length());
 
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
@@ -862,12 +870,8 @@ public class HostBO extends BaseBO {
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_OEM) {
 
-                    // We need to add OEM name to the VMM_Name.     
-                    String platformName = getPlatformName(hostObj.Processor_Info);
-                    if (!platformName.isEmpty())
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    // We need to add OEM name to the VMM_Name.     Here the VMM_Name would already have the platform name.
+                    hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
                     
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
@@ -1482,7 +1486,14 @@ public class HostBO extends BaseBO {
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
                     else
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
-                }
+                } else if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_GLOBAL) {
+                    // Bug #951 where in we need to append the platform name to the global white lists also.
+                    String platformName = getPlatformName(hostObj.Processor_Info);
+                    if (!platformName.isEmpty())
+                        hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
+                    else
+                        hostObj.VMM_Name = hostObj.VMM_Name;
+            }
                 
                 // Create the VMM MLE
                 MleData mleVMMObj = new MleData();
