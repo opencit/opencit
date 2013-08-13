@@ -1729,7 +1729,7 @@ glassfish_detect() {
         fi
       fi
   done
-  echo_failure "Cannot find Glassfish"
+  #echo_failure "Cannot find Glassfish"
   glassfish_clear
   return 1
   # read the admin username and pasword, if present. format of both files is shell  VARIABLE=VALUE
