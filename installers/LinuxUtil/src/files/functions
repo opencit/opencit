@@ -345,7 +345,12 @@ prompt_with_default_password() {
     fi
   done
   echo
-  eval $resultvarname=${userinput:-$default_value}
+  if [ -z '$userinput' ]; then
+   eval $resultvarname='$userinput'
+  else
+   eval $resultvarname='$default_value'
+  fi
+  #eval $resultvarname="${userinput:-'$default_value'}"
 }
 
 ### FUNCTION LIBRARY: environment information functions
