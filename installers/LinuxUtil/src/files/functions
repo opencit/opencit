@@ -345,7 +345,7 @@ prompt_with_default_password() {
     fi
   done
   echo
-  if [ -z '$userinput' ]; then
+  if [ ! -z "$userinput" ]; then
    eval $resultvarname='$userinput'
   else
    eval $resultvarname='$default_value'
