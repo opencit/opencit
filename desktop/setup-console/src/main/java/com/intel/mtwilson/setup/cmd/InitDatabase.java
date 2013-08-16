@@ -156,15 +156,21 @@ public class InitDatabase implements Command {
         DataSource ds = getDataSource();
         
         log.debug("Connecting to {}", databaseVendor);
-        Connection c ;
+        Connection c = null;
         try {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
         catch(SQLException e) {
             log.error("Failed to connect to {} with schema: error =" + e.getMessage(), databaseVendor); 
-            throw e;
+                log.error("Cannot connect to database");
+                System.exit(2);
+//            throw e;
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
+        
+        // TODO: check for error condition "MW database does not exist" and if it happens then do System.exit(3);
+        
+        
 //        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
@@ -173,30 +179,34 @@ public class InitDatabase implements Command {
             presentChanges.put(Long.valueOf(entry.id), entry);
             if( entry != null ) { verbose("%s %s %s", entry.id, entry.applied_at, entry.description); }
         }
+
+        // Does it have any changes that we don't?  In other words, is the database schema newer than what we know in this installer?
+        if( options.getBoolean("check", false) ) {
+            HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
+            unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
+            if( unknownChanges.isEmpty() ) {
+                System.out.println("Database is compatible");
+//                System.exit(0); // not yet -- after this block we'll print out if there are any changes to apply
+            }
+            else { // if( !unknownChanges.isEmpty() ) {
+                // Database has new schema changes we dont' know about
+                System.out.println("WARNING: Database schema is newer than this version of Mt Wilson");
+                ArrayList<Long> unknownChangesInOrder = new ArrayList<Long>(unknownChanges);
+                Collections.sort(unknownChangesInOrder);
+                for(Long unknownChangeId : unknownChangesInOrder) {
+                    ChangelogEntry entry = presentChanges.get(unknownChangeId);
+                    System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                }
+                System.exit(8); // database not compatible
+            }
+        }
         
         HashSet<Long> changesToApply = new HashSet<Long>(sql.keySet());
         changesToApply.removeAll(presentChanges.keySet());
         
         if( changesToApply.isEmpty() ) {
             System.out.println("No database updates available");
-            
-            // At this point we know the database has every schema change that we have - but, does it have any that we don't?  In other words, is the database schema newer than what we know in this installer?
-            if( options.containsKey("check") && options.getBoolean("check") ) {
-                HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
-                unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
-                if( !unknownChanges.isEmpty() ) {
-                    // Database has new schema changes we dont' know about
-                    System.out.println("WARNING: Database schema is newer than this version of Mt Wilson");
-                    ArrayList<Long> unknownChangesInOrder = new ArrayList<Long>(unknownChanges);
-                    Collections.sort(unknownChangesInOrder);
-                    for(Long unknownChangeId : unknownChangesInOrder) {
-                        ChangelogEntry entry = presentChanges.get(unknownChangeId);
-                        System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
-                    }
-                }
-            }
-            
-            return;
+            System.exit(0); // database is compatible;   whether we are doing a dry run with --check or not, we exit here with success because there is nothing else to do
         }
         
         // At this point we know we have some updates to the databaseschema. 
@@ -205,8 +215,7 @@ public class InitDatabase implements Command {
         Collections.sort(changesToApplyInOrder);
         
         
-        if(options.containsKey("check") && options.getBoolean("check")) {
-            System.out.println("Database is compatible");
+        if(options.getBoolean("check", false)) {
             System.out.println("The following changes will be applied:");
                     for(Long changeId : changesToApplyInOrder) {
                         /*
@@ -215,7 +224,8 @@ public class InitDatabase implements Command {
                         */
                         System.out.println(changeId);
                     }
-            return;
+            System.exit(0); // database is compatible
+//            return;
         }
         
         ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
@@ -349,9 +359,15 @@ public class InitDatabase implements Command {
         try {
             Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(My.configuration());
             log.debug("JDBC URL with schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
+            if( jpaProperties.getProperty("javax.persistence.jdbc.url") == null ) {
+                log.error("Missing database connection settings");
+                System.exit(1);
+            }
             DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {
-                throw new SetupException("Cannot load persistence unit info");
+                log.error("Cannot load persistence unit info");
+                System.exit(2);
+//                throw new SetupException("Cannot load persistence unit info");
             }
             log.debug("Loaded persistence unit: ASDataPU");
             return ds;
