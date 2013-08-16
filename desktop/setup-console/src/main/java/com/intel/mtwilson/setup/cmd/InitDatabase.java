@@ -63,11 +63,11 @@ import org.slf4j.LoggerFactory;
  * 
  * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase mysql --check
  * 
+ * Test cases for the --check option:
+ * 1. install mt wilson, then run the tool.  Should report no changes are necessary 
+ * 2. delete some entries from the mw_changelog table, run the tool. Should report that there are database upgrades to apply.
+ * 3. create new bogus entries in the mw_changelog table, run the tool. Should report that it's not compatible with the database
  * 
- * 
- * TODO: List each .sql file that is supposed to be run (index them by changelog date), check for
- * current state of database before running scripts (via the mw_changelog table) so we know
- * which scripts to run based on what has already been noted in the mw_changelog.
  * 
  * TODO:  consolidate the persistence units into ASDataPU... the MSDataPU can't really be separate from
  * the ASDataPU because audit logs need to refer to users and to whitelist data...
