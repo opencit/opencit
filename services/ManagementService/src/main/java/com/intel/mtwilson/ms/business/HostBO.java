@@ -167,6 +167,12 @@ public class HostBO extends BaseBO {
             // Let us first search in the processorName field. If it cannot find, then we will search on the CPU ID field
             MwProcessorMapping procMap = jpaController.findByProcessorType(processorNameOrCPUID);
             if (procMap == null) {
+                // Since we did not find the platform by processor type, the search criteria is very likely to be CPU ID
+                // In some cases we have observed that the stepping can change within a processor generation and can be 
+                // ignored for mapping to the platform time.
+                // EX: C1 06 02. Here 1 is the stepping. To ignore this the below query has been modified to use the LIKE option. So,
+                // we need to set the second character to %
+                processorNameOrCPUID = processorNameOrCPUID.substring(0,1) + "%" + processorNameOrCPUID.substring(2);
                 procMap = jpaController.findByCPUID(processorNameOrCPUID);
             }
             
