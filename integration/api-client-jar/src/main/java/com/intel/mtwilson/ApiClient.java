@@ -968,6 +968,18 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return attReport;
     }*/
 
+    @Override
+    public boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPost(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
+
+    @Override
+    public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPut(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
+
     // Whitelist Management API
     @Override
     public boolean addMLE(MleData mle) throws IOException, ApiException, SignatureException {
