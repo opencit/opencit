@@ -24,13 +24,14 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
 -->
 
     <build>
-        <!--
+        
         <resources>
             <resource>
-                <directory>${project.build.outputDirectory}${file.separator}generated-sources${file.separator}jooq</directory>
+                <directory>${project.build.sourceDirectory}/main/resources/html5</directory>
             </resource>
         </resources>
-        -->
+        
+        
         <plugins>
             
            

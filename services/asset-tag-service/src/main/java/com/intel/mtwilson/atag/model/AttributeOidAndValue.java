@@ -5,7 +5,12 @@
 package com.intel.mtwilson.atag.model;
 
 /**
- * XXX maybe rename to TextAttribute since we are assuming a UTF-8 string value?
+ * XXX maybe rename from "AttributeOidAndValue" to "Tag" or "Attribute" since it represents one concrete (name,value) pair most
+ * analogous to a physical tag ex (price,5.99) or (location,Folsom)  ?
+ * 
+ * XXX if we support binary tags in the future that would be a subclass of this (text) tag and would automatically 
+ * decode the binary data from its text encoding
+ * 
  * @author jbuhacoff
  */
 public class AttributeOidAndValue {

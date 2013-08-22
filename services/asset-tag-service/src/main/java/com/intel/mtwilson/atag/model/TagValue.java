@@ -7,6 +7,9 @@ package com.intel.mtwilson.atag.model;
 import com.intel.dcsg.cpg.io.UUID;
 
 /**
+ * XXX  too similar to AttributeOidAndValue... both of these should simply be combined into "Tag" which is a pair
+ * of (oid,value). we do not need a class to model the relationship between tag definition and its list of values
+ * because that relationship is already modeled in the class (currently named "Tag" but maybe rename to "TagDefinition")
  * 
  * @author jbuhacoff
  */

@@ -125,9 +125,9 @@
             <div id="nav">
                 <ul id="navtabs"> <!-- put  id="current"  on the li tag that is currently displayed -->
                     <li class="tab"><a href="#tags">Tags</a></li>  <!-- red color:  style="color: #c55" -->
-                    <li class="tab"><a href="#requests">Requests</a></li>
-                    <li class="tab"><a href="#certificates">Certificates</a></li>			
                     <li class="tab"><a href="#rdf">RDF</a></li>			
+                    <li class="tab"><a href="#requests">Selection</a></li>
+                    <li class="tab"><a href="#certificates">Certificates</a></li>			
                     <li class="tab"><a href="#configure">Configure</a></li>
                     <li class="tab"><a href="#log">Log</a></li>
                 </ul>
@@ -142,7 +142,7 @@
                 <div id="main">
 
                     <div id="tags">
-                        <h1>Manage Tags</h1>
+                        <h1>Tag Management - Reference Implementation</h1>
 
 
                         <h2>Create New Tag</h2>
@@ -250,7 +250,7 @@
                     </div>
 
                     <div id="requests">
-                        <h1>Manage Certificate Requests</h1>
+                        <h1>Tag Selection - Reference Implementation</h1>
 
 
                         <h2>Create New Certificate Request</h2>
@@ -417,7 +417,7 @@
                     </div>
 
                     <div id="rdf">
-                        <h1>Manage RDF Triples</h1>
+                        <h1>Tag Policy Management - Reference Implementation</h1>
 
 
                         <h2>Create New RDF Triple</h2>
@@ -511,11 +511,12 @@
 
 
                     <div id="configure">
-                        <h1>Configuration</h1>
-
                         <form id="config-form" onsubmit="return false;">
                             <input type="button" id="config-save-button" value="Save" onclick="saveConfig();"/>
                             <input type="button" id="config-load-button" value="Load" onclick="loadConfig();"/>
+
+                            <fieldset><legend>Client Configuration</legend>
+
                             <br/>
                             <!--
                             <h2>Local Data</h2>
@@ -530,7 +531,28 @@
                             <ul>
                                 <li><label for="provsvc">MTWILSON_ATAG_PROVSVC_URL</label> <input type="text" size="80" id="provsvc" value="https://localhost:8080"/></li>
                             </ul>
-
+                            </fieldset>
+                            <fieldset><legend>Server Configuration</legend>
+                            <br/>
+                            <!--
+                            <h2>Local Data</h2>
+                            <ul>
+                            <li><label for="mhclient-config-json">MHCLIENT_CONFIG</label> <input type="text" size="80" id="mhclient-config-json" value="C:\Users\jbuhacof\.mystery-hill\client\client-html5-config.json"/></li>
+                            <li><label for="mhclient-home-dir">MHCLIENT_HOME</label> <input type="text" size="80" id="mhclient-home-dir" value="C:\Users\jbuhacof\workspace\mystery-hill\client\target"/> location of mhclient.jar</li>
+                            <li><label for="mhclient-image-dir">MHCLIENT_IMAGES</label> <input type="text" size="80" id="mhclient-image-dir" value="C:\Users\jbuhacof\Downloads\VM Images"/></li>
+                            <li><label for="mhclient-encrypted-image-dir">MHCLIENT_ENC_IMAGES</label> <input type="text" size="80" id="mhclient-encrypted-image-dir" value="C:\Users\jbuhacof\Downloads\VM Encrypted Images"/></li>
+                            </ul>
+                            -->
+                            <h2>Provisioning</h2>
+                            <ul>
+                                <li><label for="approval-method">Approval Method</label> 
+                                    <select id="approval-method">
+                                        <option>Automatic/internal</option>
+                                        <option>Manual/external</option>
+                                    </select>
+                                    </li>
+                            </ul>
+                            </fieldset>
 
                         </form>
 

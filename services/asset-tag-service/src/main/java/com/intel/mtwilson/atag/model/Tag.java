@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * XXX TODO:  rename from "Tag" to "TagDefinition"/"TagDescription" or "TagName" (works better if it didn't have a values list)?
+ * 
  * References:
  * http://www.cs.berkeley.edu/~jonah/bc/org/bouncycastle/asn1/x509/Attribute.html
  * http://www.cs.berkeley.edu/~jonah/bc/org/bouncycastle/x509/X509Attribute.html

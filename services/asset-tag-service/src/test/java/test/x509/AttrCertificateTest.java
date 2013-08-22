@@ -8,6 +8,7 @@ import com.intel.mtwilson.atag.OID;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.dcsg.cpg.x509.X509Util;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -80,6 +81,7 @@ public class AttrCertificateTest {
         // first, create the CA key pair and certificate
         KeyPair cakey = RsaUtil.generateRsaKeyPair(2048);
         X509Certificate cacert = X509Builder.factory().selfSigned("CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US", cakey).build();
+        log.debug("ca: {}", X509Util.encodePemCertificate(cacert));
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA"); // works with SHA1withRSA and  SHA256withRSA
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
         ContentSigner authority = new BcRSAContentSignerBuilder(sigAlgId, digAlgId).build(PrivateKeyFactory.createKey(cakey.getPrivate().getEncoded())); // create a bouncy castle content signer convert using our existing private key
