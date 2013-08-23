@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.controller;
 
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
+import com.intel.mtwilson.jpa.GenericJpaController;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -19,13 +20,16 @@ import javax.persistence.criteria.Root;
  *
  * @author ssbangal
  */
-public class MwAssetTagCertificateJpaController implements Serializable {
+public class MwAssetTagCertificateJpaController extends GenericJpaController<MwAssetTagCertificate> implements Serializable {
 
-    public MwAssetTagCertificateJpaController(EntityManagerFactory emf) {
-        this.emf = emf;
-    }
     private EntityManagerFactory emf = null;
 
+    public MwAssetTagCertificateJpaController(EntityManagerFactory emf) {
+        super(MwAssetTagCertificate.class);
+        this.emf = emf;
+    }
+    
+    @Override
     public EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
@@ -134,4 +138,16 @@ public class MwAssetTagCertificateJpaController implements Serializable {
         }
     }
     
+    public List<MwAssetTagCertificate> findAssetTagCertificateBySha256Hash(byte[] sha256Hash) {
+        return searchByNamedQuery("findBySha256Hash", "sHA256Hash", sha256Hash);
+    }
+    
+    public List<MwAssetTagCertificate> findAssetTagCertificatesByHostUUID(String uuid) {
+        return searchByNamedQuery("findByUuid", "uuid", uuid);
+    }
+
+    public List<MwAssetTagCertificate> findAssetTagCertificatesByHostID(int hostID) {
+        return searchByNamedQuery("findByHostID", "hostID", hostID);
+    }
+
 }

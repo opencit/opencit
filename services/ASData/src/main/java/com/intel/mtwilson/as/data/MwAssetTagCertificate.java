@@ -34,7 +34,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwAssetTagCertificate.findByUuid", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid = :uuid"),
     @NamedQuery(name = "MwAssetTagCertificate.findByRevoked", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.revoked = :revoked"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotBefore", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notBefore = :notBefore"),
-    @NamedQuery(name = "MwAssetTagCertificate.findByNotAfter", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notAfter = :notAfter")})
+    @NamedQuery(name = "MwAssetTagCertificate.findByNotAfter", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notAfter = :notAfter"),
+    @NamedQuery(name = "MwAssetTagCertificate.findBySha256Hash", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.sHA256Hash = :sHA256Hash")})
 public class MwAssetTagCertificate implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
