@@ -17,7 +17,8 @@ public enum Role {
     Attestation("Attestation"),
     Cache("Cache"),
     Report("Report"),
-    Audit("Audit");
+    Audit("Audit"),
+    AssetTagManagement("AssetTagManagement");
     
     private String name;
     

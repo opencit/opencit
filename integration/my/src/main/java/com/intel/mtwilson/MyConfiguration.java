@@ -374,7 +374,7 @@ public class MyConfiguration {
     }
 
     public String getMtWilsonRoleString() {
-        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
+        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit,AssetTagManagment");
     }
 
     public String[] getMtWilsonRoleArray() {
