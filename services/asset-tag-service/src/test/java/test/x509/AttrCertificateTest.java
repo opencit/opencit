@@ -7,17 +7,23 @@ package test.x509;
 import com.intel.mtwilson.atag.OID;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.atag.X509AttrBuilder;
+import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +82,8 @@ public class AttrCertificateTest {
         Security.addProvider(new BouncyCastleProvider());
     }
 
+    ////////////////////////// THE FIRST SET OF TESTS IS FOR THE BUONCY CASTLE LIBRARY, FOR SAMPLE CODE LOOK TO SECOND SET OF TESTS  ///////////////////////
+    
     /**
      * References: http://www.docjar.org/html/api/org/bouncycastle/x509/examples/AttrCertExample.java.html
      */
@@ -208,4 +216,43 @@ public class AttrCertificateTest {
         log.debug("Asset-tagging OID: {}", at1);
 
     }
+    
+    ////////////////////////// THE SECOND SET OF TESTS IS  SAMPLE CODE   ///////////////////////
+    
+    @Test
+    public void createAttributeCertificate() throws NoSuchAlgorithmException {
+        // first, create the CA key pair and certificate
+        KeyPair cakey = RsaUtil.generateRsaKeyPair(2048);
+        X509Certificate cacert = X509Builder.factory().selfSigned("CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US", cakey).build();
+        // second, create the attribute certificate
+        X509AttrBuilder builder = X509AttrBuilder.factory();
+        byte[] attrCertBytes = builder
+                .issuerName(cacert).issuerPrivateKey(cakey.getPrivate())
+                .expires(1, TimeUnit.HOURS)
+                .subjectUuid(new UUID())
+                .attribute(OID_CUSTOMER_ROOT+".1.2.3.4", "value1")
+                .attribute(OID_CUSTOMER_ROOT+".5.6.7.8", "value2")
+                .build();
+        if( attrCertBytes == null ) {
+            List<Fault> faults = builder.getFaults();
+            for(Fault fault : faults) {
+                log.debug("Error: {}", fault.toString());
+                if( fault.getCause() != null ) {
+                    log.debug("Caused by:", fault.getCause());
+                }
+            }
+        }
+        else {
+            X509AttributeCertificate attrCert = X509AttributeCertificate.valueOf(attrCertBytes);
+            if( attrCert.isValid(cacert) ) {
+                log.debug("Certificate is valid now");
+            }
+            Calendar future = Calendar.getInstance();
+            future.add(Calendar.MINUTE, 5);
+            if( attrCert.isValid(cacert, future.getTime()) ) {
+                log.debug("Certificate is valid in 5 minutes");
+            }        
+        }
+    }
+    
 }

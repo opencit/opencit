@@ -455,7 +455,7 @@ public class TagApiTest2 {
                 log.debug("Adding attribute: {} = {}", tag.getOid(), tag.getValue());
                 builder.attribute(tag.getOid(), tag.getValue());
             }
-            X509AttributeCertificateHolder certificateHolder = builder.build();
+            X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(builder.build());
             CertificateRequest approved = At.certificateRequestApproval(recentRequest.getUuid()).post(certificateHolder.getEncoded(), CertificateRequest.class);
             log.debug("approved request: {}", mapper.writeValueAsString(approved));
             // example output:  approved request: {"uuid":"75a7fabf-3a3c-4725-ab24-da3a5159529e","subject":"18148d3d-4078-49fa-a7c5-bfc73f1f15e8","tags":null,"status":"Done","certificateId":3}
