@@ -35,6 +35,7 @@ import org.bouncycastle.asn1.x509.DisplayText;
 import org.bouncycastle.cert.AttributeCertificateHolder;
 import org.bouncycastle.cert.AttributeCertificateIssuer;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider; // from bcprov
 import org.bouncycastle.cert.X509v2AttributeCertificateBuilder; // from bcmail, not bcprov!
 import org.bouncycastle.operator.ContentSigner;
@@ -42,6 +43,8 @@ import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
+import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -102,6 +105,16 @@ public class AttrCertificateTest {
         // third, sign the attribute certificate
         X509AttributeCertificateHolder cert = builder.build(authority);
         log.debug("cert: {}", Base64.encodeBase64String(cert.getEncoded())); // MIICGDCCAQACAQEwH6EdpBswGTEXMBUGAWkEEJKnGiKMF0UioYv9PtPQCzmgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjIyMTEzWhgPMjAxMzA5MDgyMjIxMTNaMEMwEwYLKwYBBAG9hDcBAQExBAwCVVMwEwYLKwYBBAG9hDgCAgIxBAwCQ0EwFwYLKwYBBAG9hDkDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQCcN8KjjmR2H3LT5aL1SCFS4joy/7vAd3/xdJtkqrb3UAQHMdUUJQHf3frJsMJs22m0So0xs/f1sB15frC1LsQGF5+RYVXsClv0glStWbPYiqEfdM7dc/RDMRtrXKEH3sBlxMT7YS/g5E6qwmKZX9shQ3BYmeZi5A3DTzgHCbA3Cm4/MQbgWGjoamfWZ9EDk4Bww2y0ueRi60PfoLg43rcijr8Wf+JEzCRw040vIaH3DtFdmzvvGRdqE3YlEkrUL3gEIZNY3Po1NL4cb238vT5CHZTt9NyD7xSv0XkwOY4RbSUdYBsxfH3mEcdQ6LtJdfF1BUXfMThKN3TctFcY/dLF
+        
+        // fourth verify the signature
+        ContentVerifierProvider verifierProvider = new BcRSAContentVerifierProviderBuilder(new DefaultDigestAlgorithmIdentifierFinder()).build(new X509CertificateHolder(cacert.getEncoded()));
+        assertTrue("certificate signature must be valid", cert.isSignatureValid(verifierProvider));
+        
+        // negative test case for verifying certificate: cannot verify signature using wrong certificate:
+        KeyPair cakeyOther = RsaUtil.generateRsaKeyPair(2048);
+        X509Certificate cacertOther = X509Builder.factory().selfSigned("CN=Other Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US", cakeyOther).build();
+        ContentVerifierProvider verifierProviderFail = new BcRSAContentVerifierProviderBuilder(new DefaultDigestAlgorithmIdentifierFinder()).build(new X509CertificateHolder(cacertOther.getEncoded()));
+        assertTrue("certificate signature must be valid", !cert.isSignatureValid(verifierProviderFail));
     }
 
     /**

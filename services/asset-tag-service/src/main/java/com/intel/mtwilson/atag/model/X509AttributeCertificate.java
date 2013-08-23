@@ -4,10 +4,12 @@
  */
 package com.intel.mtwilson.atag.model;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.atag.OID;
 import com.intel.dcsg.cpg.io.UUID;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
@@ -20,6 +22,10 @@ import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.Attribute;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.operator.ContentVerifierProvider;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.bc.BcRSAContentVerifierProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +94,8 @@ public class X509AttributeCertificate {
         X509AttributeCertificateHolder cert;
         try {
             cert = new X509AttributeCertificateHolder(encodedCertificate);
-        } catch (IOException e) {
+        }
+        catch(IOException e) {
             throw new IllegalArgumentException(e);
         }
         log.debug("issuer: {}", StringUtils.join(cert.getIssuer().getNames(), "; "));  // calls toString() on each X500Name so we get the default representation; we can do it ourselves for custom display;  output example: CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US
@@ -136,4 +143,37 @@ public class X509AttributeCertificate {
         
         return result;
     }
+    
+    /**
+     * This checks the certificate's notBefore and notAfter dates against the current time.
+     * This does NOT check the signature. Do that separately with isTrusted().
+     * @return true if the certificate is valid now
+     */
+    public boolean isValid(X509Certificate issuer) {
+        return isValid(issuer, new Date());
+    }
+    
+    /**
+     * This checks the certificate's notBefore and notAfter dates against the current time.
+     * This does NOT check the signature. Do that separately with isTrusted().
+     * 
+     * @param date to check against the certificate's validity period
+     * @return true if the certificate is valid on the given date
+     */
+    public boolean isValid(X509Certificate issuer, Date date) {
+        try {
+            X509AttributeCertificateHolder holder = new X509AttributeCertificateHolder(encoded);
+            ContentVerifierProvider verifierProvider = new BcRSAContentVerifierProviderBuilder(new DefaultDigestAlgorithmIdentifierFinder()).build(new X509CertificateHolder(issuer.getEncoded()));
+            if( !holder.isSignatureValid(verifierProvider) ) {
+                log.debug("Certificate signature cannot be validated with certificate: {}", issuer.getIssuerX500Principal().getName());
+                return false;
+            }
+            return date.compareTo(notBefore) > -1 && date.compareTo(notAfter) < 1;
+        }
+        catch(Exception e) {
+            log.error("Cannot initialize certificate verifier", e);
+            return false;
+        }
+    }
+    
 }
