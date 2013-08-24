@@ -98,6 +98,8 @@ public class Sha256Digest extends AbstractDigest {
      * @param text either hex or base64 encoded sha256 digest
      * @return 
      */
+    @org.codehaus.jackson.annotate.JsonCreator // jackson 1.x
+    @com.fasterxml.jackson.annotation.JsonCreator // jackson 2.x
     public static Sha256Digest valueOf(String text) {
         if( isValidHex(text) ) {
             Sha256Digest digest = new Sha256Digest();

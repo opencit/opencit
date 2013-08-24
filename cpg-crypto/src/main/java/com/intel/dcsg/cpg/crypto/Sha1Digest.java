@@ -1,5 +1,8 @@
 package com.intel.dcsg.cpg.crypto;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * Representation of a single SHA1 Digest. An SHA1 Digest is a 20-byte value.
  * 
@@ -11,6 +14,11 @@ package com.intel.dcsg.cpg.crypto;
  */
 public class Sha1Digest extends AbstractDigest {
     private static final DigestAlgorithm ALGORITHM = DigestAlgorithm.SHA1;
+    
+    /**
+     * @since 0.1.2
+     */
+    public final static Sha1Digest ZERO = new Sha1Digest(new byte[] {0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0});
     
     /**
      * This constructor exists so the valueOf methods can instantiate an SHA1 object
@@ -45,6 +53,37 @@ public class Sha1Digest extends AbstractDigest {
     public Sha1Digest(String hex) {
         super(ALGORITHM, hex);
     }
+    
+    /**
+     * Creates a NEW instance of Sha1Digest that contains the result of 
+     * extending this value with the specified data.
+     * @param data
+     * @return a new instance with the extended value, or null if there was an error
+     * @since 0.1.2
+     */
+    public Sha1Digest extend(Sha1Digest data) {
+        return extend(data.toByteArray());
+    }
+
+    /**
+     * Creates a NEW instance of Sha1Digest that contains the result of 
+     * extending this value with the specified data.
+     * @param data
+     * @return a new instance with the extended value, or null if there was an error
+     * @since 0.1.2
+     */
+    public Sha1Digest extend(byte[] data) {
+        try {
+            MessageDigest hash = MessageDigest.getInstance(algorithm());
+            hash.update(toByteArray());
+            hash.update(data);
+            return new Sha1Digest(hash.digest());
+        }
+        catch(NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException("No such algorithm: "+algorithm(), e);
+        }
+    }
+    
     
     /**
      * 
@@ -102,6 +141,8 @@ public class Sha1Digest extends AbstractDigest {
      * @param hex
      * @return 
      */
+    @org.codehaus.jackson.annotate.JsonCreator // jackson 1.x
+    @com.fasterxml.jackson.annotation.JsonCreator // jackson 2.x
     public static Sha1Digest valueOf(String text) {
         if( isValidHex(text) ) {
             Sha1Digest digest = new Sha1Digest();

@@ -57,4 +57,14 @@ public class TestUUID {
         assertEquals(uuid.toHexString(), uuid5.toHexString());
    }
 
+    @Test
+    public void testUUIDValues() {
+        log.debug(UUID.valueOf("a137a43e-03af-486a-ba05-3e0b4c159582").toHexString());
+        log.debug(UUID.valueOf("0137a43e-03af-486a-ba05-3e0b4c159582").toHexString());
+        log.debug(UUID.valueOf("0037a43e-03af-486a-ba05-3e0b4c159582").toHexString());
+        log.debug(UUID.valueOf("0007a43e-03af-486a-ba05-3e0b4c159582").toHexString());
+        log.debug(UUID.valueOf("0000a43e-03af-486a-ba05-3e0b4c159582").toHexString());
+        log.debug(UUID.valueOf("0000043e-03af-486a-ba05-3e0b4c159582").toHexString());
+        log.debug(UUID.valueOf("0000003e-03af-486a-ba05-3e0b4c159582").toHexString());
+    }
 }

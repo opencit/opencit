@@ -21,6 +21,9 @@ import org.slf4j.LoggerFactory;
  * the SimpleDateFormat class does not provide an output character for exactly this so
  * we use uppercase Z for hours and minutes without a separating colon.
  * 
+ * TODO:
+ * Accept dates like "2013-W33" and "2013-W33-4" 
+ * 
  * http://www.ietf.org/rfc/rfc3339.txt
  * http://en.wikipedia.org/wiki/ISO_8601
  * 

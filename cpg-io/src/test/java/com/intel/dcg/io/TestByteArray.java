@@ -36,6 +36,22 @@ public class TestByteArray {
     }
     
     @Test
+    public void testPreserveLeadingZero() {
+        assertEquals(1, ByteArray.fromHex("fa").length());
+        assertEquals("fa", ByteArray.fromHex("fa").toHexString());
+        assertEquals(1, ByteArray.fromHex("0a").length());
+        assertEquals("0a", ByteArray.fromHex("0a").toHexString());
+        assertEquals(2, ByteArray.fromHex("00aa").length());
+        assertEquals("00aa", ByteArray.fromHex("00aa").toHexString());
+        assertEquals(3, ByteArray.fromHex("0000aa").length());
+        assertEquals("0000aa", ByteArray.fromHex("0000aa").toHexString());
+        assertEquals(4, ByteArray.fromHex("000000aa").length());
+        assertEquals("000000aa", ByteArray.fromHex("000000aa").toHexString());
+        assertEquals(4, ByteArray.fromHex("00000faa").length());
+        assertEquals("00000faa", ByteArray.fromHex("00000faa").toHexString());
+    }
+    
+    @Test
     public void testByteArrayToUUID() {
         // start with a random UUID
         UUID uuid = UUID.randomUUID();

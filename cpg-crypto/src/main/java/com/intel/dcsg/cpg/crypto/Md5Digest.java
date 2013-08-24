@@ -64,6 +64,16 @@ public class Md5Digest extends AbstractDigest {
     }
 
     /**
+     * @since 0.1.2
+     * @param base64 value without any punctuation or spaces; can be null
+     * @return true if the value is a valid base64 representation of an SHA256 digest
+     */
+    public static boolean isValidBase64(String base64Value) {
+        return ALGORITHM.isValidBase64(base64Value);
+    }
+    
+    
+    /**
      * Assumes the input represents an MD5 digest and creates a new instance of Md5Digest to wrap it.
      * This method does NOT compute a digest. If the input is not a valid MD5 representation, a null
      * will be returned.
@@ -92,14 +102,50 @@ public class Md5Digest extends AbstractDigest {
      * @param hex
      * @return 
      */
-    public static Md5Digest valueOf(String hex) {
-        if( isValidHex(hex) ) {
+    @org.codehaus.jackson.annotate.JsonCreator // jackson 1.x
+    @com.fasterxml.jackson.annotation.JsonCreator // jackson 2.x
+    public static Md5Digest valueOf(String text) {
+        if( isValidHex(text) ) {
             Md5Digest digest = new Md5Digest();
-            digest.value = HexUtil.toByteArray(hex); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            digest.value = HexUtil.toByteArray(text); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            return digest;
+        }
+        if( isValidBase64(text) ) {
+            Md5Digest digest = new Md5Digest();
+            digest.value = Base64Util.toByteArray(text); 
             return digest;
         }
         return null;
     }
+    
+    /**
+     * @since 0.1.2
+     * @param text
+     * @return 
+     */
+    public static Md5Digest valueOfHex(String text) {
+        if( isValidHex(text) ) {
+            Md5Digest digest = new Md5Digest();
+            digest.value = HexUtil.toByteArray(text); // throws HexFormatException if invalid, but shouldn't happen since we check isValid() first
+            return digest;
+        }
+        return null;
+    }
+
+    /**
+     * @since 0.1.2
+     * @param text
+     * @return 
+     */
+    public static Md5Digest valueOfBase64(String text) {
+        if( isValidBase64(text) ) {
+            Md5Digest digest = new Md5Digest();
+            digest.value = Base64Util.toByteArray(text); 
+            return digest;
+        }
+        return null;
+    }
+    
     
     /**
      * Computes the MD5 digest of the input and returns the result.

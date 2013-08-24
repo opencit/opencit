@@ -58,6 +58,8 @@ public class AbstractDigest {
     }
     
     
+    @org.codehaus.jackson.annotate.JsonValue // jackson 1.x
+    @com.fasterxml.jackson.annotation.JsonValue // jackson 2.x
     @Override
     public String toString() {
         return Hex.encodeHexString(value);

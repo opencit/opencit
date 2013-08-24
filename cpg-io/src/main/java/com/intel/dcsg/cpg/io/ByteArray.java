@@ -144,6 +144,16 @@ public class ByteArray {
         Scanner scanner = new Scanner(text);
         ByteArray data = new ByteArray(scanner.nextBigInteger(16));
         scanner.close();
+        // preserve leading zeros; BigInteger preserves at most one byte of leading zeros that it uses to indicate the number is positive. we are only using biginteger as a shortcut to parsing so we need to ensure all leading zeros are preserved.
+        if( data.length() * 2 < text.length() && text.startsWith("00") ) {
+            int size = (text.length() / 2) - data.length();
+            byte[] zeros = new byte[size];
+            data = new ByteArray(ByteArray.concat(zeros, data.getBytes()));
+        }
+        // strip off leading zero that biginteger inserts to indicate sign
+        else if( data.length() * 2 > text.length() && data.getBytes()[0] == 0 ) {
+            data = data.subarray(1);
+        }
         return data;
     }
     

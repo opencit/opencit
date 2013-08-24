@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * but since there can only be one password per file, if it is shared with anyone then it is not possible
  * to know who entered the password.
  * 
- * This class does NOT provide denial of service protection: it is trivial to prevent someone from being
+ * This class does NOT provide availability protection (denial of service protection): it is trivial to prevent someone from being
  * able to open an encrypted file, by simply deleting the encryption key id header or by tampering with
  * the body so it fails the integrity check (change just one character...), or by deleting the file, or
  * by overwriting its content.
