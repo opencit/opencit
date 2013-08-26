@@ -241,7 +241,7 @@
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-io</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1.2-SNAPSHOT</version>
 </dependency>
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
