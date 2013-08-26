@@ -1,7 +1,12 @@
+* Version 0.1.2
+
+Fixed ByteArray.fromHex to preserve leading zeros.
 
 * Version 0.1.1
 
 Added toBigInteger() converter and new ByteArray(BigInteger) constructor to ByteArray.
+Added fromHex, equals, hashCode, toHexString, and concat(ByteArray...) to ByteArray.
+Added UUID class.
 
 * Version 0.1
 
