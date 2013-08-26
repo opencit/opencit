@@ -24,7 +24,7 @@
     </root>
 
     <!-- classes that are more or less known to be working -->
-    <logger name="com.intel.dcsg.cpg.atag" level="DEBUG"/>
+    <logger name="com.intel.mtwilson.atag" level="DEBUG"/>
     <logger name="org.restlet" level="TRACE"/>
     
 </configuration>

@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-
+License: MIT
 Version: 0.1
 Requires:  watch.js, findx.js
 
@@ -47,31 +47,58 @@ Optional dependency on log.js (used if present)
 var rivets_watch_findx_adapter =  {
     isLoggingEnabled: false,
     subscribe: function(obj, keypath, callback) {
-        if( this.isLoggingEnabled && log ) {
-            log.debug("rivets subscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)); // xxx jonathan
-        } 
+//        if( typeof keypath === 'function' ) { return; }
+        if( this.isLoggingEnabled && typeof log === 'object' ) {
+            log.debug("rivets subscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")"); // xxx jonathan
+        }
         watch(obj, keypath, callback);
     },
     unsubscribe: function(obj, keypath, callback) {
-        if( this.isLoggingEnabled && log ) {
-            log.debug("rivets unsubscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)); // xxx jonathan
+//        if( typeof keypath === 'function' ) { return; }
+        if( this.isLoggingEnabled  && typeof log === 'object' ) {
+            log.debug("rivets unsubscribe keypath: "+keypath+" callback: "+callback+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")"); // xxx jonathan
         } 
         if( typeof obj !== 'string' ) {
             unwatch(obj, keypath, callback);
         } // guard against "Cannot read property '' of undefined" since if the obj is a string and it's being removed, there won't be anything to unwatch
     },
+    /* read is called when the data model changes and we need to update the html element */
     read: function(obj, keypath) {
-        if( this.isLoggingEnabled &&  log ) {
-            log.debug("rivets read keypath: "+keypath+" on object: "+Object.toJSON(obj));
+        if( this.isLoggingEnabled  && typeof log === 'object' ) {
+            log.debug("rivets read keypath: "+keypath+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
         } // xxx jonathan
-        return obj.getx(keypath);
+        if( typeof obj === 'undefined') {
+//            log.debug("reading keypath "+keypath+" on undefined object");
+            return null;
+        }
+        else if( typeof obj === 'string' ) {
+            //log.debug("reading keypath "+keypath+" on string: "+obj);
+            return obj;
+        }
+        else if( typeof obj === 'object' ) {
+            return obj.getx(keypath);            
+        }
+        else {
+//            log.debug("reading keypath "+keypath+" on type: "+(typeof obj));
+            return obj.getx(keypath); //return null;
+        }
     //if( obj ) {	return obj.getx(keypath);   }
     //log.debug("tried to read undefined object with keypath: "+keypath);
     },
+    /* publish is called when the html element changes and we need to update the data model */
     publish: function(obj, keypath, value) {
-        if( this.isLoggingEnabled && log ) {
-            log.debug("rivets publish keypath: "+keypath+" value: "+value+" on object: "+Object.toJSON(obj));
+        if( this.isLoggingEnabled  && typeof log === 'object' ) {
+            //log.debug("rivets publish keypath: "+keypath+" value: "+value+" on object: "+Object.toJSON(obj)+" ("+(typeof obj)+")");
         } // xxx jonathan
-        obj.setx(keypath, value);
+        if( typeof obj === 'string'  ) {
+            //log.debug("writing keypath "+keypath+" on string: "+obj+" with value: "+value); // XXX TODO do we need to do anything here?
+        }
+        else if( typeof obj === 'object') {
+            obj.setx(keypath, value);            
+        }
+        else {        
+//            log.debug("writing keypath "+keypath+" on type: "+(typeof obj)+" for value: "+value);
+            obj.setx(keypath, value);            
+        }
     }
 };

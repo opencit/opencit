@@ -148,7 +148,7 @@ Object.extend(Validation, {
 					var advice = Validation.getAdvice(name, elm);
 					if(advice === null) {
 						var errorMsg = useTitle ? ((elm && elm.title) ? elm.title : v.error) : v.error;
-						advice = '<div class="validation-advice" id="advice-' + name + '-' + Validation.getElmID(elm) +'" style="display:none">' + errorMsg + '</div>';
+						advice = '<span class="validation-advice" id="advice-' + name + '-' + Validation.getElmID(elm) +'" style="display:none">' + errorMsg + '</span>'; // jonathan modified it to be a "span" instead of a "div" because div is not legal everywhere, for example inside a list or table cell -- and form inputs can be in a list or a table
 						switch (elm.type.toLowerCase()) {
 							case 'checkbox':
 							case 'radio':
@@ -237,6 +237,7 @@ Validation.add('IsEmpty', '', function(v,elm) {
 				return  ((v == null) || (v.length == 0) || (elm && elm.alt && v==elm.alt)); // || /^\s+$/.test(v));
 			});
 
+
 Validation.addAllThese([
 	['required', 'This is a required field.', function(v, el) {
 				return !Validation.get('IsEmpty').test(v, el);
@@ -297,3 +298,12 @@ Validation.addAllThese([
 				});
 			}]
 ]);
+
+// jonathan added a new validator type... use class="validate-data" and data-validator="name_of_function_to_validate_this_field"
+Validation.add('validate-data', 'error...', function(v,el) {
+    var dataValidator = el.getAttribute('data-validator');
+    if( dataValidator && window[dataValidator] /* TODO: add  && typeof window[dataValidator] === 'function' */ ) { // XXX TODO there is probably a better way to check if the function exists...
+        return window[dataValidator](el);
+    }
+    return false;
+});

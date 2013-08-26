@@ -5,25 +5,25 @@ sampledata.tags = [{
     "name":"country",
     "oid":"1.3.6.1.4.1.99999.1",
     "values":["US","MX","CA","FR","DE","TW","CN","IL"]
-    },{
+},{
     "id":2,
     "uuid":"5b786f7d-b477-4720-b976-faa0fce9ddc7",
     "name":"state",
     "oid":"1.3.6.1.4.1.99999.2",
     "values":["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WY","DC"]
-    },{
+},{
     "id":3,
     "uuid":"a373da29-72f6-49d6-a8d5-ec74488b0c25",
     "name":"city",
     "oid":"1.3.6.1.4.1.99999.3",
     "values":["Folsom","Santa Clara"]
-    },{
+},{
     "id":4,
     "uuid":"b17dd815-5621-49c7-c226-7a27fac2e211",
     "name":"customer",
     "oid":"1.3.6.1.4.1.99999.4",
     "values":["Coke","Pepsi"]
-    }];
+}];
 sampledata.certificateRequests = [{
     "uuid":"f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
     "subject":"375e566b-51dc-4c35-9a90-47c994e3653e",
@@ -112,3 +112,49 @@ sampledata.certificates = [
     "pcrEvent":"bbbbbbbbbbbbbbbbbbbb"
 },
 ];
+
+
+var fakeresource = fakeresource || {};
+fakeresource['/tags'] = [{
+    "id":1,
+    "uuid":"1d988b8e-c5b5-4c77-83c6-cabefb6c02bb",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+},{
+    "id":2,
+    "uuid":"0037a43e-03af-486a-ba05-3e0b4c159582",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+},{
+    "id":3,
+    "uuid":"ae88359b-18dc-48bc-ac71-dd587b398eac",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+},{
+    "id":4,
+    "uuid":"5dddcdee-e4c8-43a6-afda-7b3e1b34a5e5",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+},{
+    "id":5,
+    "uuid":"82d3ec0a-dba2-4630-b553-b4637fdb07ec",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+},{
+    "id":6,
+    "uuid":"5edf6746-b0f6-44e1-a9a1-399eee46816d",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+},{
+    "id":7,
+    "uuid":"d1d4ad01-557a-4e2b-b2da-4580a764d539",
+    "name":"state",
+    "oid":"1.1.1.1",
+    "values":[]
+}];

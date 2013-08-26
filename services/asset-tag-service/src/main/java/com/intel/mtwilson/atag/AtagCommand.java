@@ -10,7 +10,7 @@ import java.io.IOException;
 import org.apache.commons.configuration.Configuration;
 
 /**
- * XXX Copied from Mystery Hill where there is one of these in the client and the server package... probably
+ * XXX Copied from Mystery Hill where there is one of these in both the client and the server package... probably
  * merits a standard convenience base class in cpg.console
  * @author jbuhacoff
  */

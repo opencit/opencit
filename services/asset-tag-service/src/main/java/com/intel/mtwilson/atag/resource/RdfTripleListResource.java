@@ -106,7 +106,7 @@ public class RdfTripleListResource extends ServerResource {
     @Get("json")
     public RdfTriple[] search(/*RdfTripleSearchCriteria query*/) throws SQLException {
         RdfTripleSearchCriteria query = new RdfTripleSearchCriteria();
-        query.id = getQuery().getFirstValue("id") == null ? null : UUID.valueOf(getQuery().getFirstValue("id"));
+        query.id = getQuery().getFirstValue("id") == null || getQuery().getFirstValue("id").isEmpty() ? null : UUID.valueOf(getQuery().getFirstValue("id"));
         query.subjectEqualTo = getQuery().getFirstValue("subjectEqualTo");
         query.predicateEqualTo = getQuery().getFirstValue("predicateEqualTo");
         query.objectEqualTo = getQuery().getFirstValue("objectEqualTo");
@@ -116,22 +116,22 @@ public class RdfTripleListResource extends ServerResource {
 //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
             sql.addConditions(RDF_TRIPLE.UUID.equal(query.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
         }
-        if( query.subjectEqualTo != null ) {
+        if( query.subjectEqualTo != null && query.subjectEqualTo.length() > 0 ) {
             sql.addConditions(RDF_TRIPLE.SUBJECT.equal(query.subjectEqualTo));
         }
-        if( query.predicateEqualTo != null ) {
+        if( query.predicateEqualTo != null && query.predicateEqualTo.length() > 0 ) {
             sql.addConditions(RDF_TRIPLE.PREDICATE.equal(query.predicateEqualTo));
         }
-        if( query.objectEqualTo != null ) {
+        if( query.objectEqualTo != null && query.objectEqualTo.length() > 0 ) {
             sql.addConditions(RDF_TRIPLE.OBJECT.equal(query.objectEqualTo));
         }
-        if( query.subjectContains != null ) {
+        if( query.subjectContains != null && query.subjectContains.length() > 0 ) {
             sql.addConditions(RDF_TRIPLE.SUBJECT.contains(query.subjectContains));
         }
-        if( query.predicateContains != null ) {
+        if( query.predicateContains != null && query.predicateContains.length() > 0 ) {
             sql.addConditions(RDF_TRIPLE.PREDICATE.contains(query.predicateContains));
         }
-        if( query.objectContains != null ) {
+        if( query.objectContains != null && query.objectContains.length() > 0 ) {
             sql.addConditions(RDF_TRIPLE.OBJECT.contains(query.objectContains));
         }
         Result<Record> result = sql.fetch();

@@ -209,6 +209,22 @@ public class TagApiTest2 {
     }
 
     @Test
+    public void testGetExistingTagJson() throws IOException {
+        // create a tag so we have an existing tag
+        Tag[] newTags = new Tag[]{new Tag("state", "1.1.1.1")};
+        log.debug("Tags to insert: {}", mapper.writeValueAsString(newTags));
+        Tag[] results = At.tags().post(newTags, Tag[].class);
+        Tag insertedTag = results[0];
+        log.debug("Posted tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(insertedTag.getId()), insertedTag.getUuid(), insertedTag.getName(), insertedTag.getOid()));
+        // output: Posted tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1
+        String existingTag = At.tag(insertedTag.getUuid()).get(String.class); // shows up on server as empty string... try sending String[] instead
+        log.debug("Existing tag: {}", existingTag);
+        String existingTags = At.tags().get(String.class);
+        log.debug("Existing tags: {}", existingTags);
+        // output: Existing tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
+    }
+    
+    @Test
     public void testUpdateExistingTag() throws IOException {
         // create a tag so we have an existing tag
         Tag[] insertResults = At.tags().post(new Tag[]{new Tag("state", "1.1.1.1")}, Tag[].class);

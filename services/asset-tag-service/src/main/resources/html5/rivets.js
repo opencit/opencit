@@ -35,6 +35,7 @@
       this.set = __bind(this.set, this);
       this.eventHandler = __bind(this.eventHandler, this);
       this.formattedValue = __bind(this.formattedValue, this);
+      //log.debug("binding element: "+el+" type: "+type+" key: "+key+" keypath: "+keypath);
       if (!(this.binder = this.view.binders[type])) {
         _ref = this.view.binders;
         for (identifier in _ref) {
@@ -56,7 +57,34 @@
         };
       }
       this.formatters = this.options.formatters || [];
-      this.model = this.key ? this.view.models[this.key] : this.view.models;
+      /* jonathan fix for situation where the model is initialized as an empty object {} but is expected to
+      // bind to a form having inputs with attributes like data-bind-whatever; if we do nothing then in 
+      // that case this.key=whatever and this.view.models={}  so this.model gets assigned to this.view.models[whatever]
+      // which is undefined... and that is undesirable. it should automatically create properties in the model as needed
+      // to match the form!
+        
+        original javascript:      this.model = this.key ? this.view.models[this.key] : this.view.models;
+        replaced with below;  so it was already the first & last branches and i'm adding the middle branch else if (this.key) { ... }
+        */
+       if( this.key && this.key in this.view.models ) { // jonathan TODO maybe should also add a guard for typeof this.view.models[this.key]==='object' ... otherwise it could also be an issue
+           this.model = this.view.models[this.key];
+       }
+       else if( this.key ) {
+           var defaultValue = Rivets.Util.getInputValue(this.el);
+           var typeDefault='';
+           switch(this.type) {
+               case 'value': typeDefault=''; break;
+               case 'each-item': typeDefault=[]; break; // XXX TODO the '-item' part is specific to the tag... should be using regex for 'each-*' like in other parts of rivets
+           }
+           this.view.models[this.key] = defaultValue ? defaultValue : typeDefault; // jonathan if the form already comes with a default, then we initialize the model with it;  TODO:  if it's a select need to get the current option etc.
+           this.model = this.view.models; //this.view.models[this.key];
+           this.keypath = this.key;
+       }
+       else {
+           this.model = this.view.models;
+       }
+      //log.debug("setting binding model for "+el.id+"... this.key="+this.key+"  keypath="+this.keypath+"  this.view.models[this.key]="+this.view.models[this.key]+"  this.view.models="+this.view.models+" ... this.model="+this.model);
+//      this.model = this.key ? this.view.models[this.key] : this.view.models;
     }
 
     Binding.prototype.formattedValue = function(value) {
@@ -92,6 +120,7 @@
     };
 
     Binding.prototype.sync = function() {
+//        if( typeof this.model === 'undefined' && typeof log === 'object') { log.debug("Sync with undefined model: "+Object.toJSON(this.model)); } // jonathan debug
       return this.set(this.options.bypass ? this.model[this.keypath] : this.view.config.adapter.read(this.model, this.keypath));
     };
 
@@ -107,6 +136,8 @@
           value = (_ref2 = this.view.formatters[id]).publish.apply(_ref2, [value].concat(__slice.call(args)));
         }
       }
+      /* cannot use toJSON because 'this' often has circular references... so do just one level to peek at it: */ //for(var p in this) { log.debug("this["+p+"] = "+this[p]); }
+      //log.debug("calling publish for model: "+Object.toJSON(this.model)+" keypath: "+Object.toJSON(this.keypath)+" value: "+value);
       return this.view.config.adapter.publish(this.model, this.keypath, value);
     };
 
@@ -309,6 +340,7 @@
     function View(els, models, options) {
       var k, option, v, _base, _i, _len, _ref, _ref1, _ref2;
       this.els = els;
+      //log.debug("new Rivets.View with elements: "+els);
       this.models = models;
       this.options = options != null ? options : {};
       this.update = __bind(this.update, this);
@@ -638,6 +670,9 @@
         } else {
           return el.bind(event, handler);
         }
+      } else if( Prototype != null ) {  // jonathan added prototype.js support
+          //log.debug("observing "+el+" "+( 'id' in el ? el.id : 'no id'));
+          return Event.observe(el, event, handler);
       } else if (window.addEventListener != null) {
         return el.addEventListener(event, handler, false);
       } else {
@@ -653,6 +688,8 @@
         } else {
           return el.unbind(event, handler);
         }
+      } else if( Prototype != null ) {  // jonathan added prototype.js support
+          return Event.stopObserving(el, 'event', handler);
       } else if (window.removeEventListener != null) {
         return el.removeEventListener(event, handler, false);
       } else {
@@ -744,12 +781,15 @@
     value: {
       publishes: true,
       bind: function(el) {
+          //log.debug("binding element: "+el+" "+('id' in el ? el.id : 'no id'));
         return Rivets.Util.bindEvent(el, 'change', this.publish);
       },
       unbind: function(el) {
+          //log.debug("unbinding element: "+el+" "+('id' in el ? el.id : 'no id'));
         return Rivets.Util.unbindEvent(el, 'change', this.publish);
       },
       routine: function(el, value) {
+          //log.debug("routine value: "+el+" "+('id' in el ? el.id : 'no id')+" value: "+value);
         var o, _i, _len, _ref, _ref1, _ref2, _results;
         if (window.jQuery != null) {
           el = jQuery(el);
@@ -767,7 +807,10 @@
               return _results;
             }
           } else if ((value != null ? value.toString() : void 0) !== ((_ref2 = el.value) != null ? _ref2.toString() : void 0)) {
-            return el.value = value != null ? value : '';
+            //return el.value = value != null ? value : ''; // jonathan changing to also fire a change event so other interested parties will know the value was changed...
+            el.value = value != null ? value : ''; // original behvaior
+            if( Prototype && Event ) { el.focus(); el.blur(); /*Event.fire(el,'rivets:change',el.value);*/ } // jonathan added
+            return el.value; // original behavior
           }
         }
       }
@@ -1001,6 +1044,7 @@
       if (options == null) {
         options = {};
       }
+      //log.debug("rivets.bind("+el.id+", "+Object.toJSON(models)+", "+Object.toJSON(options)+")");
 	  if( !el ) { throw new Error("bind element does not exist"); } // added by jonathan 2013-08-10 to guard against trying to bind a non-existent element (which would fail later in a more obscure place -- here we can give the developer a better clue about what went wrong)
       view = new Rivets.View(el, models, options);
       view.bind();

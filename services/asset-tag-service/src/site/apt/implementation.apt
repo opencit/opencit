@@ -6,7 +6,7 @@
 
 	1. Determine the model of the resource. For RDF triples, the model should contain
 a subject, a predicate, and an object. Write class RdfTriple.java in the package
-com.intel.dcsg.cpg.atag.model, adding standard ID (long integer) and UUID fields.
+com.intel.mtwilson.atag.model, adding standard ID (long integer) and UUID fields.
 The ID field is used in the relational database, and the UUID field is used
 in the REST service interface. Ensure you use com.intel.dcsg.cpg.io.UUID for the UUID
 field, and not java.util.UUID. The UUID class in cpg-io is a wrapper for the standard
@@ -20,7 +20,7 @@ generate this automatically when creating responses.
 	2. Determine the the URI. The convention for resource URIs in this project is that
 they should be plural (but the table name is singular). So the URI is /rdf-triples.
 
-	3. Write class RdfTripleDAO.java in the package com.intel.dcsg.cpg.atag.dao.jdbi.
+	3. Write class RdfTripleDAO.java in the package com.intel.mtwilson.atag.dao.jdbi.
 The minimum requirements are to define the create method for the table, and
 insert/update/delete methods to modify records, and a findByUuid method for fetching
 specific triples. Other search/fetch methods can be added later. Write the class
@@ -40,14 +40,14 @@ maven build will automatically re-generate the JOOQ sources using the schema upd
 the previous step in your local Derby database.
 
 	5. Write classes RdfTripleResource.java and RdfTripleListResource.java in the 
-package com.intel.dcsg.cpg.atag.resource. The first class will handle requests for
+package com.intel.mtwilson.atag.resource. The first class will handle requests for
 specific resources for example GET /rdf-triples/{uuid}, while the second class with "List"
 in the name will handle requests for the collection such as POST /rdf-triples.
-Also add an Derby.rdfTripleDao() method in the com.intel.dcsg.cpg.atag package for
+Also add an Derby.rdfTripleDao() method in the com.intel.mtwilson.atag package for
 conveniently accessing the DAO from the resource classes.
 
 	6. Add routes to RdfTripleResource and RdfTripleListResource in the RestletApplication
-class in the com.intel.dcsg.cpg.atag package (used in production and in junit tests). For example:
+class in the com.intel.mtwilson.atag package (used in production and in junit tests). For example:
 
 +---
 router.attach("rdf-triples", RdfTripleListResource.class); 

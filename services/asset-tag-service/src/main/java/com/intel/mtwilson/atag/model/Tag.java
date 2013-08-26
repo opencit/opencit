@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.atag.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.intel.dcsg.cpg.io.UUID;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,8 @@ import java.util.List;
  * 
  * @author jbuhacoff
  */
+
+@JsonInclude(Include.NON_NULL)
 public class Tag {
     private long id;
     private UUID uuid;

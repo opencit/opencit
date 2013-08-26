@@ -165,7 +165,7 @@ public class CertificateRequestListResource extends ServerResource {
     @Get("json")
     public CertificateRequest[] search() throws SQLException {
         CertificateRequestSearchCriteria query = new CertificateRequestSearchCriteria();
-        query.id = getQuery().getFirstValue("id") == null ? null : UUID.valueOf(getQuery().getFirstValue("id"));
+        query.id = getQuery().getFirstValue("id") == null || getQuery().getFirstValue("id").isEmpty() ? null : UUID.valueOf(getQuery().getFirstValue("id"));
         query.subjectEqualTo = getQuery().getFirstValue("subjectEqualTo");
         query.subjectContains = getQuery().getFirstValue("subjectContains");
         query.tagNameEqualTo = getQuery().getFirstValue("tagNameEqualTo");
@@ -184,10 +184,10 @@ public class CertificateRequestListResource extends ServerResource {
             SelectQuery valueQuery = jooq.select(CERTIFICATE_REQUEST_TAG_VALUE.ID)
                     .from(CERTIFICATE_REQUEST_TAG_VALUE.join(TAG_VALUE).on(TAG_VALUE.ID.equal(CERTIFICATE_REQUEST_TAG_VALUE.TAGVALUEID)))
                     .getQuery();
-            if( query.tagValueEqualTo != null ) {
+            if( query.tagValueEqualTo != null && query.tagValueEqualTo.length() > 0 ) {
                 valueQuery.addConditions(TAG_VALUE.VALUE.equal(query.tagValueEqualTo));
             }
-            if( query.tagValueContains != null ) {
+            if( query.tagValueContains != null  && query.tagValueContains.length() > 0 ) {
                 valueQuery.addConditions(TAG_VALUE.VALUE.contains(query.tagValueContains));
             }
             sql.addConditions(CERTIFICATE_REQUEST_TAG_VALUE.ID.in(valueQuery));
@@ -197,16 +197,16 @@ public class CertificateRequestListResource extends ServerResource {
             SelectQuery tagQuery = jooq.select(CERTIFICATE_REQUEST_TAG_VALUE.ID)
                     .from(CERTIFICATE_REQUEST_TAG_VALUE.join(TAG).on(TAG.ID.equal(CERTIFICATE_REQUEST_TAG_VALUE.TAGID)))
                     .getQuery();
-            if( query.tagNameEqualTo != null ) {
+            if( query.tagNameEqualTo != null  && query.tagNameEqualTo.length() > 0 ) {
                 tagQuery.addConditions(TAG.NAME.equal(query.tagNameEqualTo));
             }
-            if( query.tagNameContains != null ) {
+            if( query.tagNameContains != null  && query.tagNameContains.length() > 0 ) {
                 tagQuery.addConditions(TAG.NAME.contains(query.tagNameContains));
             }
-            if( query.tagOidEqualTo != null ) {
+            if( query.tagOidEqualTo != null  && query.tagOidEqualTo.length() > 0 ) {
                 tagQuery.addConditions(TAG.OID.equal(query.tagOidEqualTo));
             }
-            if( query.tagOidContains != null ) {
+            if( query.tagOidContains != null  && query.tagOidContains.length() > 0 ) {
                 tagQuery.addConditions(TAG.OID.contains(query.tagOidContains));
             }
             sql.addConditions(CERTIFICATE_REQUEST_TAG_VALUE.ID.in(tagQuery));            
@@ -216,13 +216,13 @@ public class CertificateRequestListResource extends ServerResource {
 //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
             sql.addConditions(CERTIFICATE_REQUEST.UUID.equal(query.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
         }
-        if( query.subjectEqualTo != null ) {
+        if( query.subjectEqualTo != null  && query.subjectEqualTo.length() > 0 ) {
             sql.addConditions(CERTIFICATE_REQUEST.SUBJECT.equal(query.subjectEqualTo));
         }
-        if( query.subjectContains != null ) {
+        if( query.subjectContains != null  && query.subjectContains.length() > 0  ) {
             sql.addConditions(CERTIFICATE_REQUEST.SUBJECT.equal(query.subjectContains));
         }
-        if( query.statusEqualTo != null ) {
+        if( query.statusEqualTo != null  && query.statusEqualTo.length() > 0 ) {
 //            sql.addConditions(CERTIFICATE_REQUEST.STATUS.equal(query.statusEqualTo));
         }
         sql.addOrderBy(CERTIFICATE_REQUEST.ID);

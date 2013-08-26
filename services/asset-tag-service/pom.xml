@@ -24,13 +24,13 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
 -->
 
     <build>
-        
+        <!--
         <resources>
             <resource>
-                <directory>${project.build.sourceDirectory}/main/resources/html5</directory>
+                <directory>${basedir}/src/main/resources/html5</directory>
             </resource>
         </resources>
-        
+        -->
         
         <plugins>
             
@@ -194,7 +194,7 @@ our customers.
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>

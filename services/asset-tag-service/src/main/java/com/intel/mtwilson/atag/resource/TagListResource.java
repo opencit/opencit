@@ -123,7 +123,7 @@ public class TagListResource extends ServerResource {
     @Get("json")
     public Tag[] search(/*TagSearchCriteria query*/) throws SQLException {
         TagSearchCriteria query = new TagSearchCriteria();
-        query.id = getQuery().getFirstValue("id") == null ? null : UUID.valueOf(getQuery().getFirstValue("id"));
+        query.id = getQuery().getFirstValue("id") == null || getQuery().getFirstValue("id").isEmpty() ? null : UUID.valueOf(getQuery().getFirstValue("id"));
         query.nameContains = getQuery().getFirstValue("nameContains");
         query.nameEqualTo = getQuery().getFirstValue("nameEqualTo");
         query.oidEqualTo = getQuery().getFirstValue("oidEqualTo");
@@ -135,10 +135,10 @@ public class TagListResource extends ServerResource {
         if( query.valueEqualTo != null || query.valueContains != null ) {
             log.debug("Selecting from tag-value");
             SelectQuery valueQuery = jooq.select(TAG_VALUE.TAGID).from(TAG_VALUE).getQuery();
-            if( query.valueEqualTo != null ) {
+            if( query.valueEqualTo != null && query.valueEqualTo.length() > 0 ) {
                 valueQuery.addConditions(TAG_VALUE.VALUE.equal(query.valueEqualTo));
             }
-            if( query.valueContains != null ) {
+            if( query.valueContains != null  && query.valueContains.length() > 0 ) {
                 valueQuery.addConditions(TAG_VALUE.VALUE.contains(query.valueContains));
             }
             sql = jooq.select().from(TAG).getQuery();
@@ -154,16 +154,16 @@ public class TagListResource extends ServerResource {
 //            sql.addConditions(TAG.UUID.equal(query.id.toByteArray().getBytes())); // when uuid is stored in database as binary
             sql.addConditions(TAG.UUID.equal(query.id.toString())); // when uuid is stored in database as the standard UUID string format (36 chars)
         }
-        if( query.nameEqualTo != null ) {
+        if( query.nameEqualTo != null  && query.nameEqualTo.length() > 0 ) {
             sql.addConditions(TAG.NAME.equal(query.nameEqualTo));
         }
-        if( query.nameContains != null ) {
+        if( query.nameContains != null  && query.nameContains.length() > 0 ) {
             sql.addConditions(TAG.NAME.contains(query.nameContains));
         }
-        if( query.oidEqualTo != null ) {
+        if( query.oidEqualTo != null  && query.oidEqualTo.length() > 0 ) {
             sql.addConditions(TAG.OID.equal(query.oidEqualTo));
         }
-        if( query.oidStartsWith != null ) {
+        if( query.oidStartsWith != null  && query.oidStartsWith.length() > 0 ) {
             sql.addConditions(TAG.OID.like(query.oidStartsWith+"%"));
         }
         log.debug("Opening tag-value dao");
@@ -178,6 +178,7 @@ public class TagListResource extends ServerResource {
         for(Record r : result) {
             tags[i] = new Tag();
             tags[i].setId(r.getValue(TAG.ID));
+            log.debug("Got tag uuid: {}", r.getValue(TAG.UUID));
             tags[i].setUuid(UUID.valueOf(r.getValue(TAG.UUID)));
             tags[i].setName(r.getValue(TAG.NAME));
             tags[i].setOid(r.getValue(TAG.OID));

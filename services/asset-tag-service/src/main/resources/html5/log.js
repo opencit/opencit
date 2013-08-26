@@ -21,13 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-
+License: MIT
 Version: 0.1
 Requires: prototype.js 1.6.1 or later,  datejs
 */
 
 var log = log || {};
-(function() { // start log module definition
+(function(log) { // start log module definition
 
 // XXX TODO: there are emerging standards on defining classes... define a Log class and then instantiate it. then put the data in there.
 var _logdata = [];  // where each entry is {timestamp, level, message}

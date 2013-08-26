@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-
+License: MIT
 Version: 0.1
 Requires: no dependencies
 
@@ -60,7 +60,17 @@ var testobj = { "attr1":{ name:"joe",age:"bob",comments:["hello","world"] } };
 log.debug("testobj: "+testobj.getx(""));   // output:   testobj
 */
 
-Object.prototype.findx = function(keypath, value) {
+(function() { 
+    var defineFunction = function(obj, key, fn) {
+        Object.defineProperty(obj, key, {
+           enumerable: false,
+           configurable: false,
+           writable: false,
+           value: fn
+       });       
+    };
+
+var _findx = function(keypath, value) {
 	var obj = this;
 //	log.debug("assign obj: "+obj+"  keypath: "+keypath+"  value: "+value);
 	if( typeof keypath == 'string' && keypath == "" ) { return this; } // special case, if keypath is empty string, we return the root obj. we dont' support this when an array is passed.
@@ -77,5 +87,11 @@ Object.prototype.findx = function(keypath, value) {
    if( typeof value != 'undefined' ) { obj[keypath[lastKeyIndex]] = value; }
    return obj[keypath[lastKeyIndex]];
 };
-Object.prototype.getx = function(keypath) { return this.findx(keypath); }
-Object.prototype.setx = function(keypath, value) { return this.findx(keypath, value); }
+
+    defineFunction(Object.prototype, "findx", _findx);
+    
+    defineFunction(Object.prototype, "getx", function(keypath) { return this.findx(keypath); });
+    defineFunction(Object.prototype, "setx", function(keypath, value) { return this.findx(keypath, value); });
+    
+})();
+

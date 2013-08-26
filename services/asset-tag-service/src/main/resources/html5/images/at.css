@@ -102,6 +102,37 @@ label, input, select, textarea {
 	margin-left: 3px;
 	margin-right: 3px;
 }
+label {
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;    
+}
+form fieldset p {
+    color: #000;
+    border-bottom: 1px solid #aaa;
+    margin-bottom: 10px;
+/*    background-color: #f2f2f2; */
+}
+
+/* for use with input.js */
+input.empty {
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+    color: #aaa;
+}
+
+/* for use with validation.js */
+input.error {
+    border: 1px solid red;
+}
+input.required { }
+span.validation-advice {
+    color: red;
+    font-family: "Neo Sans Intel",  Geneva, Helvetica, "Calibri", Arial,  sans-serif;
+}
+/*  you can't use :after with input elements, you have to wrap with span like this:  <span class="required-input"><input.../></span>  */
+span.input-required:after {
+    content: "*";
+    color: red;
+    margin-left: 5px;
+}
 
 #content-wrap {
 	width: 850px;		
@@ -131,6 +162,7 @@ label, input, select, textarea {
 	padding: 2px;
 	background-color: #dddddd;
 }
+/* XXX temporary: hide the table footers since we haven't yet implemented paging */ #main tfoot { display: none; }
 #main tfoot td {
 	border: 1px solid black;
 	text-align: center;

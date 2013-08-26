@@ -50,8 +50,10 @@ public class RestletApplication extends Application {
 //        router.attach("certificate-requests/{id}/approval", CertificateRequestApprovalResource.class); 
         router.attach("/certificate-requests/{id}/certificate", CertificateRequestApprovalResource.class); 
         router.attach("/certificates/{id}", CertificateResource.class); 
-//        router.attach("/", new Directory(getContext(), "file:///c:/users/jbuhacof/workspace/asset-tag/client-html5/")); // C:\Users\jbuhacof\workspace\asset-tag\client-html5;
-        router.attach("/", new Directory(getContext(), "clap:///html5/"));
+        Directory directory = new Directory(getContext(), "file:///c:/users/jbuhacof/workspace/mtwilson-dev/services/asset-tag-service/src/main/resources/html5/");
+//        Directory directory = new Directory(getContext(), "clap:///html5/");
+        directory.setIndexName("index.html");
+        router.attach("/", directory);
         
         return router;
     }

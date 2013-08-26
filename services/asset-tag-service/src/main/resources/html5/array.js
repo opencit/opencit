@@ -21,23 +21,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-
-Version: 0.1
-Requires: no dependencies
+License: MIT (for the collection; sub-components licensed under CC-BY-SA)
+Version: 0.2
+Requires: html5, no dependencies
 
 */
 
-/**
- * Older browsers may not have Array.indexOf
- * 
- * Credits:
- * This portion adapted from
- * of https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf?redirectlocale=en-US&redirectslug=JavaScript%2FReference%2FGlobal_Objects%2FArray%2FindexOf
- * by Mozilla Contributors
- * licensed http://creativecommons.org/licenses/by-sa/3.0/
- */
-if (!Array.prototype.indexOf) {
-  Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+(function() { 
+    var defineFunction = function(obj, key, fn) {
+        Object.defineProperty(obj, key, {
+           enumerable: false,
+           configurable: false,
+           writable: false,
+           value: fn
+       });       
+    };
+    
+    var _indexOf = function (searchElement /*, fromIndex */ ) {
     'use strict';
     if (this == null) {
       throw new TypeError();
@@ -67,6 +67,18 @@ if (!Array.prototype.indexOf) {
     }
     return -1;
   };
+
+/**
+ * Older browsers may not have Array.indexOf
+ * 
+ * Credits:
+ * This portion adapted from
+ * of https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf?redirectlocale=en-US&redirectslug=JavaScript%2FReference%2FGlobal_Objects%2FArray%2FindexOf
+ * by Mozilla Contributors
+ * licensed http://creativecommons.org/licenses/by-sa/3.0/
+ */
+if (!Array.prototype.indexOf) {
+    defineFunction(Array.prototype, "indexOf", _indexOf);
 }
 
 /**
@@ -93,6 +105,19 @@ if(!Array.prototype.indexOf) {
 }
 */
 
+var _removeAll = function() {
+    var valueToRemove, argIndex = arguments.length, foundAtIndex; 
+    while( argIndex > 0 && this.length > -1 ) {
+        valueToRemove = arguments[--argIndex];
+        while( (foundAtIndex = this.indexOf(valueToRemove)) !== -1 ) {
+            this.splice(foundAtIndex,1);
+        }
+    }
+    return this;
+};
+
+    
+
 /**
  * Arguments:  one or more values to remove from the array
  * Post-condition: all elements in the array that have the same value as any one of the arguments are removed
@@ -104,14 +129,8 @@ if(!Array.prototype.indexOf) {
  * by http://stackoverflow.com/users/80860/kennebec
  * licensed http://creativecommons.org/licenses/by-sa/3.0/
  */
-Array.prototype.removeAll = function() {
-    var valueToRemove, argIndex = arguments.length, foundAtIndex; 
-    while( argIndex > 0 && this.length > -1 ) {
-        valueToRemove = arguments[--argIndex];
-        while( (foundAtIndex = this.indexOf(valueToRemove)) !== -1 ) {
-            this.splice(foundAtIndex,1);
-        }
-    }
-    return this;
-};
+if (!Array.prototype.removeAll) {
+    defineFunction(Array.prototype, "removeAll", _removeAll);
+}
 
+})();

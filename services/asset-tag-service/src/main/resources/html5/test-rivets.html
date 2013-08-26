@@ -14,60 +14,6 @@
 </head>
 <body>
 
-<!-- data-each-tag="tags" -->
-<!--
-								<ul id="rivets-test" >
-								<li data-text="tags.0.name"></li>
-								<li data-text="tags.1.name"></li>
-								</ul>
-var taglist = [ {name:"hello"}, {name:"world"} ];
-var myview = rivets.bind(document.getElementById('rivets-test'), {tags:taglist}); // instead of sampledata.tags
-result:
-* hello
-* world
--->
-
-<!--
-								<ul id="rivets-test" >
-								<li data-each-item="tags" data-text="item.name"></li>
-								</ul>
-var taglist = [ {name:"hello"}, {name:"world"} ];
-var myview = rivets.bind(document.getElementById('rivets-test'), {tags:taglist}); // instead of sampledata.tags
-result:
-* hello
-* world
--->
-
-<!--
-								<table id="rivets-test" >
-								<tr data-each-item="tags">
-									<td data-text="item.name"></td>
-									<td data-text="item.oid"></td>
-								</tr>
-								</table>
-var taglist = [ {name:"tag1",oid:"1.1"}, {name:"tag2",oid:"2.2" } ];
-var myview = rivets.bind(document.getElementById('rivets-test'), {tags:taglist}); // instead of sampledata.tags
-result:
-tag1	1.1
-tag2	2.2
-								-->
-
-							<table id="rivets-test" style="border: 1px solid black;">
-							<thead>
-								<tr>
-									<th>name</th><th>oid</th><th>actions</th>
-									</tr>
-							</thead>
-							<tbody>
-								<tr data-each-item="tags">
-									<td style="border: 1px solid black;" data-text="item.name"></td>
-									<td style="border: 1px solid black;" data-text="item.oid"></td>
-									<td style="border: 1px solid black;"><a data-oid="item.oid" href="#" onclick="javascript:removeTag(this.getAttribute('oid'));">delete</a></td>
-								</tr>
-							</tbody>
-								</table>
-
-
 								
 <p id="userinfo" data-text="user.name"></p>								 <!-- works -->
 <form><input type="text" id="user-name-input" data-value="user.name" name="username"/></form> <!-- works, links with paragraph above -->
@@ -81,105 +27,50 @@ log.attach("logwindow");
 </script>
 								
 <script>
-/*
-Array.prototype.observe = function(eventName, callbackFunction) {
-log.debug("observe "+eventName);
-};
-Array.prototype.stopObserving = function(eventName, callbackFunction) {
-log.debug("stop observing "+eventName);
-};*/
-/*
-Object.prototype.observe = function(eventName, callbackFunction) {
-log.debug("observe "+eventName);
-//	this.___callback = callbackFunction;
-//	$("datadiv").observe(eventName, callbackFunction);
-};
-Object.prototype.stopObserving = function(eventName, callbackFunction) {
-log.debug("stop observing "+eventName);
-//	$("datadiv").stopObserving(eventName, callbackFunction);
-};
-*/
-
-// rivets configuration with prototype adapter
-// http://rivetsjs.com/
-// http://prototypejs.org/doc/latest/dom/Event/observe/
-// http://prototypejs.org/doc/latest/dom/Event/stopObserving/
-/*
-// this adapter is the default from the example, probably works with jquery?
-rivets.configure({
-  adapter: {
-    subscribe: function(obj, keypath, callback) {
-      obj.on('change:' + keypath, callback)
-    },
-    unsubscribe: function(obj, keypath, callback) {
-      obj.off('change:' + keypath, callback)
-    },
-    read: function(obj, keypath) {
-      return obj.get(keypath)
-    },
-    publish: function(obj, keypath, value) {
-      obj.set(keypath, value)
+    function merge(newData, existingData, opt) {
+    if( typeof existingData !== typeof newData ) {
+        throw new TypeError("Merge data type '"+(typeof newData)+"' must match existing data type '"+(typeof existingData)+"'");
     }
-  }
-});
-*/
-/*
-// this adapter was meant to work with prototype, but since prototype doesn't add event handling to plain javascript objects/arrays (only to html elements) this doesn't work...
-rivets.configure({
-  adapter: {
-    subscribe: function(obj, keypath, callback) {
-	  $(obj).observe('change:'+keypath, callback);
-    },
-    unsubscribe: function(obj, keypath, callback) {
-	  $(obj).stopObserving('change:'+keypath, callback);
-    },
-    read: function(obj, keypath) {
-	  return $(obj).retrieve(keypath);
-    },
-    publish: function(obj, keypath, value) {
-	  return $(obj).store(keypath, value);
+    var result;
+    if( Object.isArray(existingData) ) {
+        if( !Object.isArray(newData) ) {
+            throw new TypeError("Merge data type is not array but existing data type is array");
+        }
+        result = [];
+        return result.concat(existingData, newData);        
     }
-  }
-});
-*/
+    if( typeof existingData === 'object') {
+        result = {};
+        var p;
+        for( p in existingData ) {
+            result[p] = existingData[p];
+        }
+        for( p in newData ) {
+            result[p] = newData[p];
+        }
+        return result;
+    }
+    // don't know what to do about other types so just return newData for now
+    return newData;
+}
 
-//log.debug("adapter: "+rivets_watch_findx_adapter);
-// watch adapter, from https://github.com/mikeric/rivets/wiki/Adapters
-rivets.configure({
-  adapter: rivets_watch_findx_adapter
-});
-//rivets-test
-var taglist = [ {name:"tag1",oid:"1.1"}, {name:"tag2",oid:"2.2" } ];
-//var taglist = [ "hello", "world" ];
-//var taglist = [ [{name:"hello"}, {name:"world"}] ];
-//var myview = rivets.bind(document.getElementById('rivets-test'), { tags: [ {item:"hello"},{item:"world"}] }); // instead of sampledata.tags
-var myview = rivets.bind(document.getElementById('rivets-test'), {tags:sampledata.tags}); // instead of sampledata.tags
-//taglist.push("test");
-//myview.build();
-//mybindings.update({filter: mytags});
-//sampledata.tags.push({"name":"new tag","oid":"1.2.3.4","values":["hello","world"]});
+var existingData, newData, mergeData;
 
-		function removeFirstTag(oid) {
-			for(var i=0; i<sampledata.tags.length; i--) {
-				if( ('oid' in sampledata.tags[i]) && sampledata.tags[i].oid == oid ) {
-					sampledata.tags.splice(i,1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
-					myview.update(sampledata);
-					return;
-				}				
-			}
-		}
+existingData = [ 'apples', 'oranges', 'bananas']		;
+newData = [ 'kiwis', 'mangos' ];
+mergeData = merge(newData, existingData);
+log.debug("Existing data: "+Object.toJSON(existingData));
+log.debug("New data: "+Object.toJSON(newData));
+log.debug("Merge data: "+Object.toJSON(mergeData));
 
-		// removes all tags with this oid
-		function removeTag(oid) {
-			for(var i=sampledata.tags.length-1; i>=0; i--) {
-				if( ('oid' in sampledata.tags[i]) && sampledata.tags[i].oid == oid ) {
-					sampledata.tags.splice(i,1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
-//					return;
-				}				
-					myview.update(sampledata);
-			}
-		}
-		
+existingData = { 'attr1': 'value1', 'attr2':'value2' };
+newData = { 'attr1':'newvalue1', 'attr3':'newvalue3' };
+mergeData = merge(newData, existingData);
+log.debug("Existing data: "+Object.toJSON(existingData));
+log.debug("New data: "+Object.toJSON(newData));
+log.debug("Merge data: "+Object.toJSON(mergeData));
+
+
 </script>
 
 </body>
