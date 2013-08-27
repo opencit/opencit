@@ -11,13 +11,18 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jpa.PersistenceManager;
-import java.util.Calendar;
+import com.intel.mtwilson.util.ResourceFinder;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.cert.X509Certificate;
 import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -252,17 +257,29 @@ public class AssetTagCertBO extends BaseBO{
             if (atagObj.getRevoked() == true)
                 return false;
             
-            // Next we need to check if the current datetime is greater than the notbefore value
-            Calendar cal = Calendar.getInstance();          
-            if ((cal.getTime().compareTo(atagObj.getNotBefore()))<0)
-                return false;
-            if ((cal.getTime().compareTo(atagObj.getNotAfter()))>=0)
-                return false;
+            // X509AttributeCertificate provides a helper function that validates both the dates and the signature.
+            // For that we need to first get the CA certificate that signed the Attribute Certificate. We need to
+            // extract this from the PEM file list and pass it to the helper function
+            X509AttributeCertificate atagAttrCertForHost = X509AttributeCertificate.valueOf(atagObj.getCertificate());
             
-            // Need to verify the signature now....
-            // TODO....
+            List<X509Certificate> atagCaCerts = null;
+            try {
+                InputStream atagCaIn = new FileInputStream(ResourceFinder.getFile("AssetTagCA.pem")); 
+                atagCaCerts = X509Util.decodePemCertificates(IOUtils.toString(atagCaIn));
+                IOUtils.closeQuietly(atagCaIn);
+                log.debug("Added {} certificates from AssetTagCA.pem", atagCaCerts.size());
+            }
+            catch(Exception ex) {
+                log.error("Error loading the Asset Tag pem file to extract the CA certificate(s).");
+            }
             
-            isValid = true;
+            for (X509Certificate atagCACert : atagCaCerts) {
+                if (atagCACert.getIssuerX500Principal().toString().equals(atagAttrCertForHost.getIssuer())){
+                    // Now that we have found the matching CA, let us verify the signature and the date
+                    if (atagAttrCertForHost.isValid(atagCACert))
+                        return true;
+                }
+            }
             
         } catch (Exception ex) {
             throw new ASException (ex);

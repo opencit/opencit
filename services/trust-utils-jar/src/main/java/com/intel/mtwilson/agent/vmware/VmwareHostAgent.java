@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -371,6 +372,20 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 
     @Override
     public Map<String, String> getHostAttributes() throws IOException {
-         return new HashMap<String,String>();
+        HashMap<String,String> hm = new HashMap<String, String>();
+        String hostUUID = "";
+        try {
+            // Retrieve the data from the host and add it into the hashmap
+            // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+            hostUUID = vmware.getMORProperty(hostMOR, "hardware.systemInfo.uuid").toString();
+        } catch (InvalidPropertyFaultMsg ex) {
+            // since we got an exception, let us make sure it is empty.
+            hostUUID = "";
+        } catch (RuntimeFaultFaultMsg ex) {
+            // since we got an exception, let us make sure it is empty.
+            hostUUID = "";
+        }
+        hm.put("Host_UUID", hostUUID);
+        return hm;
    }
 }
