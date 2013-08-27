@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
@@ -156,6 +157,17 @@ public class JpaPolicyReader {
 //        rules.add(rule);
 //        return rules;
         throw new UnsupportedOperationException("TODO: add support for checking pcr 22");
+    }
+
+    public Set<Rule> loadPcrMatchesConstantRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts tblHosts) {
+        HashSet<Rule> rules = new HashSet<Rule>();
+        log.debug("Adding the asset tag rule for host {0} with asset tag ID {1}", tblHosts.getName(), atagCert.getId());
+        log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", atagCert.getPCREvent().toString());
+        Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
+        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, pcrValue));
+        rule.setMarkers(TrustMarker.ASSET_TAG.name());
+        rules.add(rule);
+        return rules;
     }
 
     public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo, TblHosts host) {
