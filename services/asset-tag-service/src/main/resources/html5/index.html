@@ -263,7 +263,7 @@
                                             <li style="display: inline-block; list-style-type: inline; border: none; padding: 1px; margin: 3px;" data-bind-each-item="item.values"><span style="text-decoration: underline;" data-bind-text="item"></span></li>
                                         </ul>
                                     </td>
-                                    <td><a data-bind-oid="item.oid" href="#" onclick="javascript:ws.removeTag(this.getAttribute('oid'));">delete</a></td>
+                                    <td><a data-bind-oid="item.oid" data-bind-uuid="item.uuid"  href="#" onclick="javascript:ws.removeTag(this.getAttribute('uuid'));">delete</a></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -4,8 +4,9 @@
  */
 package com.intel.mtwilson.atag.client;
 
-import com.intel.mtwilson.atag.My;
+import com.intel.mtwilson.My;
 import com.intel.dcsg.cpg.io.UUID;
+import java.io.IOException;
 import org.restlet.resource.ClientResource;
 
 /**
@@ -17,7 +18,12 @@ import org.restlet.resource.ClientResource;
 public class At {
     
     private static String baseurl() {
-        return My.config().getServerURL();
+        try {
+            return My.configuration().getAssetTagServerURL().toExternalForm();
+        }
+        catch(IOException e) {
+            return "";
+        }
     }
     
     public static ClientResource tags() {

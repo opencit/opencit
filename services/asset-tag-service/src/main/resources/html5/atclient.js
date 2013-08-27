@@ -182,10 +182,10 @@ mtwilson.atag = mtwilson.atag || {};
     };
 
     // removes all tags with this oid
-    mtwilson.atag.removeTag = function (oid) {
+    mtwilson.atag.removeTag = function (uuid) {
         var i;
         for (i = data.tags.length - 1; i >= 0; i--) {
-            if (('oid' in data.tags[i]) && data.tags[i].oid == oid) {
+            if (('uuid' in data.tags[i]) && data.tags[i].uuid == uuid) {
                 ajax.json.delete('tags', data.tags[i]);
                 data.tags.splice(i, 1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
                 //					return;

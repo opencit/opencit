@@ -135,6 +135,9 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'get': function (resourceName, opt) {
+        if( ajax.resources[resourceName] === undefined ) {
+            ajax.resources[resourceName] = { uri:'/'+resourceName, datapath:resourceName, idkey:'id' };
+        }
         var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         _log.debug("get resource: "+my.uri+"  into: "+keyPath);
@@ -180,6 +183,9 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'put': function (resourceName, putObject, opt) {
+        if( ajax.resources[resourceName] === undefined ) {
+            ajax.resources[resourceName] = { uri:'/'+resourceName, datapath:resourceName, idkey:'id' };
+        }
         var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         var request = new Ajax.Request(my.uri+'/'+putObject[my.idkey], {
@@ -210,6 +216,9 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'delete': function (resourceName, deleteObject, opt) {
+        if( ajax.resources[resourceName] === undefined ) {
+            ajax.resources[resourceName] = { uri:'/'+resourceName, datapath:resourceName, idkey:'id' };
+        }
         var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
 //        var keyPath = my.datapath;
         var request = new Ajax.Request(my.uri+'/'+deleteObject[my.idkey], {

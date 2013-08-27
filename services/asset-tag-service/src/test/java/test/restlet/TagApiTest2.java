@@ -13,6 +13,7 @@ import example.restlet.ObjectBox;
 import example.restlet.Fruit;
 import com.intel.mtwilson.atag.client.At;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,11 +34,12 @@ import org.restlet.routing.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.intel.mtwilson.atag.My;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.atag.RestletApplication;
 import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import java.net.URL;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -60,12 +62,24 @@ public class TagApiTest2 {
     public final static String OID_CUSTOMER_ROOT = "1.3.6.1.4.1.99999"; // instead of OID_ASSET_TAG_SOLUTION + ".9"; // http://oid-info.com/get/1.3.6.1.4.1  is private organizations on internet, 999999 is INVENTED value that is not curently registered , for use in our demonstrations
 
 
+    private static int getPort(URL url) {
+        int port = url.getPort();
+        if( port == - 1 ) {
+            if( "http".equals(url.getProtocol()) ) {
+                port = 80;
+            }
+            else if( "https".equals(url.getProtocol())) {
+                port = 443;
+            }
+        }
+        return port;
+    }
     
     // if you make changes here,  probably need to review start() in the com.intel.dcsg.cpg.atag.cmd.StartHttpServer class
     @BeforeClass
     public static void startServer() throws Exception {
         component = new Component();
-        component.getServers().add(Protocol.HTTP, My.config().getServerPort());
+        component.getServers().add(Protocol.HTTP, getPort(My.configuration().getAssetTagServerURL()));
 //        component.getServers().add(Protocol.FILE);,  // apparently this one is not required for the Directory() resource
         component.getClients().add(Protocol.FILE); //  required to enable the Directory() resource defined in RestletApplication... dont' know why it has to be added to the clients, unless when we say "file://..." we are acting as a client of a file system resource  internally ???
         component.getClients().add(Protocol.CLAP); //  required to enable the Directory() resource defined in RestletApplication... dont' know why it has to be added to the clients, unless when we say "file://..." we are acting as a client of a file system resource  internally ???
@@ -575,7 +589,7 @@ public class TagApiTest2 {
     
     @Test
     public void testGetStaticFile() throws IOException {
-        ClientResource resource = new ClientResource(My.config().getServerURL() + "/index.html");
+        ClientResource resource = new ClientResource(My.configuration().getAssetTagServerURL() + "/index.html");
         Representation representation = resource.get(MediaType.TEXT_HTML);
         log.debug("static index.html: {}", representation.getText());
     }

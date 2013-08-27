@@ -469,4 +469,17 @@ public class MyConfiguration {
         return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
     }
     
+    
+    ///////////////////////// asset tag configuration //////////////////////////////////
+
+    // asset tagging html5 resources (used by the reference implementation)
+    public String getAssetTagHtml5Dir() {
+        return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
+    }
+    
+    // asset tag server url
+    public URL getAssetTagServerURL() throws MalformedURLException {
+        return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
+    }
+    
 }

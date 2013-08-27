@@ -7,9 +7,10 @@ package com.intel.mtwilson.atag.resource;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.atag.Derby;
-import com.intel.mtwilson.atag.My;
+import com.intel.mtwilson.My;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
+import java.io.IOException;
 import java.sql.SQLException;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
@@ -60,12 +61,12 @@ public class CertificateResource extends ServerResource {
     }
     
     @Get("txt")
-    public String existingCertificateContentPem() {
+    public String existingCertificateContentPem() throws IOException {
         String uuid = getAttribute("id");
         Certificate certificate = dao.findByUuid(UUID.valueOf(uuid)); 
         log.debug("resource url: {}", getRequest().getResourceRef().getIdentifier());
         Pem pem = new Pem("X509 ATTRIBUTE CERTIFICATE", certificate.getCertificate());
-        pem.getHeaders().put("URL", My.config().getServerURL()+"/certificates/"+uuid);
+        pem.getHeaders().put("URL", My.configuration().getAssetTagServerURL()+"/certificates/"+uuid);
         return pem.toString();
     }
 
