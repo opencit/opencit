@@ -131,6 +131,7 @@ Object.extend(Validation, {
 			onElementValidate : function(result, elm) {}
 		}, options || {});
 		elm = $(elm);
+        log.debug("validating element "+elm.id); // jonathan
 		var cn = elm.classNames();
 		var result = cn.all(function(value) {
 			var test = Validation.test(value,elm,options.useTitle);
@@ -201,6 +202,7 @@ Object.extend(Validation, {
 	},
 	reset : function(elm) {
 		elm = $(elm);
+log.debug("resetting validation for element: "+elm.id); // jonathan
 		var cn = elm.classNames();
 		cn.each(function(value) {
 			var prop = '__advice'+value.camelize();

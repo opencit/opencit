@@ -5,7 +5,10 @@
 package com.intel.mtwilson.atag.dao.jdbi;
 
 import com.intel.mtwilson.atag.model.Tag;
+import com.intel.mtwilson.atag.model.CertificateRequest;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.atag.model.Selection;
+import java.util.List;
 import org.skife.jdbi.v2.sqlobject.Bind;
 import org.skife.jdbi.v2.sqlobject.GetGeneratedKeys;
 import org.skife.jdbi.v2.sqlobject.SqlQuery;
@@ -32,42 +35,28 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  * @author jbuhacoff
  */
 @RegisterArgumentFactory(UUIDArgument.class)
-@RegisterMapper(TagResultMapper.class)
-public interface TagDAO {
+@RegisterMapper(SelectionResultMapper.class)
+public interface SelectionDAO {
     // Note:  if you change the table definition (for example uuid from binary to char) also check the TagResultMapper class that is used for jdbi queries
 //    @SqlUpdate("create table tag (id bigint primary key generated always as identity, uuid char(16) for bit data, name varchar(100), oid varchar(255))")   // jooq tries to cast char(16) for bit data  into a blob for comparisons... don't know why. and it's not possible to search on blob contents (usually not implemented by rdbms because blobs by definition can be gigabytes long), so using char(36) instead to get the standard uuid format
-    @SqlUpdate("create table tag (id bigint primary key generated always as identity, uuid char(36), name varchar(100), oid varchar(255))")
+    @SqlUpdate("create table selection (id bigint primary key generated always as identity, uuid char(36), name varchar(255))")
     void create();
-    
-    @SqlUpdate("insert into tag (uuid,name,oid) values (:uuid, :name, :oid)")
+
+    @SqlUpdate("insert into selection (uuid, name) values (:uuid, :name)")
     @GetGeneratedKeys
-    long insert(@Bind("uuid") UUID uuid, @Bind("name") String name, @Bind("oid") String oid);
+    long insert(@Bind("uuid") UUID uuid, @Bind("name") String name);
 
-    @SqlUpdate("update tag set name=:name, oid=:oid where id=:id")
-    void update(@Bind("id") long id, @Bind("name") String name, @Bind("oid") String oid);
-
-    @SqlUpdate("delete from tag where id=:id")
+    @SqlUpdate("delete from selection where id=:id")
     void delete(@Bind("id") long id);
 
-    @SqlQuery("select id, uuid, name, oid from tag where id=:id")
-    Tag findById(@Bind("id") long id);
+    @SqlQuery("select id, uuid, name from selection where id=:id")
+    Selection findById(@Bind("id") long id);
+    
+    @SqlQuery("select id, uuid, name from selection where uuid=:uuid")
+    Selection findByUuid(@Bind("uuid") UUID uuid);
 
-    
-    @SqlQuery("select id, uuid, name, oid from tag where uuid=:uuid")
-    Tag findByUuid(@Bind("uuid") UUID uuid);
-
-    @SqlQuery("select id, uuid, name, oid from tag where name=:name")
-    Tag findByName(@Bind("name") String name);
-    
-    @SqlQuery("select id, uuid, name, oid from tag where oid=:oid")
-    Tag findByOid(@Bind("oid") String oid);
-    
-    @SqlQuery("select id, uuid, name, oid from tag where oid=:oid or name=:name")
-    Tag findByOidOrName(@Bind("oid") String oid, @Bind("name") String name);
-    
-    // XXX this one is not really used externally, it's only referenced by a very early junit test  in RepositoryTest
-    @SqlQuery("select name from tag where id=:id")
-    String findNameById(@Bind("id") long id);
+    @SqlQuery("select id, uuid, name from selection where name=:name")
+    List<Selection> findByName(@Bind("name") String name);
     
     void close();
 }

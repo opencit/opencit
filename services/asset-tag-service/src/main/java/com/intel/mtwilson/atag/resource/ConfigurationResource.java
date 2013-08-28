@@ -4,9 +4,8 @@
  */
 package com.intel.mtwilson.atag.resource;
 
-import com.intel.mtwilson.atag.model.Tag;
-import com.intel.mtwilson.atag.dao.jdbi.TagDAO;
-import com.intel.mtwilson.atag.dao.jdbi.TagValueDAO;
+import com.intel.mtwilson.atag.model.Configuration;
+import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.atag.Derby;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;
@@ -24,17 +23,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
-public class TagResource extends ServerResource {
+public class ConfigurationResource extends ServerResource {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private TagDAO dao = null;
-    private TagValueDAO tagValueDao = null;
+    private ConfigurationDAO dao = null;
 
     @Override
     protected void doInit() throws ResourceException {
         super.doInit();
         try {
-            dao = Derby.tagDao();
-            tagValueDao = Derby.tagValueDao();
+            dao = Derby.configurationDao();
         } catch (SQLException e) {
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Cannot open database", e);
         }
@@ -44,56 +41,60 @@ public class TagResource extends ServerResource {
     @Override
     protected void doRelease() throws ResourceException {
         if( dao != null ) { dao.close(); }
-        if( tagValueDao != null ) { tagValueDao.close(); }
         super.doRelease();
     }
     
     @Get("json")
-    public Tag existingTag() {
+    public Configuration existingConfiguration() {
         String uuidOrName = getAttribute("id");
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
             return dao.findByUuid(uuid);
         }
         catch(Exception e) {
-            // not a valid UUID - maybe it's an oid or a name
-            return dao.findByOidOrName(uuidOrName, uuidOrName);
+            // not a valid UUID - maybe it's name
+            return dao.findByName(uuidOrName);
         }        
     }
 
     @Delete
-    public void deleteTag() {
+    public void deleteConfiguration() {
         String uuidOrName = getAttribute("id");
-        Tag tag;
+        Configuration configuration;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            tag = dao.findByUuid(uuid);
+            configuration = dao.findByUuid(uuid);
         }
         catch(Exception e) {
-            // not a valid UUID - maybe it's an oid or a name
-            tag = dao.findByOidOrName(uuidOrName, uuidOrName);
+            // not a valid UUID - maybe it's name
+            configuration = dao.findByName(uuidOrName);
         }        
-        dao.delete(tag.getId());
+        dao.delete(configuration.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
 
     @Put("json") // previously was: text/plain
-    public Tag updateTag(Tag updatedTag) throws SQLException {
+    public Configuration updateConfiguration(Configuration updatedConfiguration) throws SQLException {
         String uuidOrName = getAttribute("id");
-        Tag existingTag;
+        Configuration existingConfiguration;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            existingTag = dao.findByUuid(uuid);
+            existingConfiguration = dao.findByUuid(uuid);
         }
         catch(Exception e) {
-            // not a valid UUID - maybe it's an oid or a name
-            existingTag = dao.findByOidOrName(uuidOrName, uuidOrName);
-        }        
-        dao.update(existingTag.getId(), updatedTag.getName(), updatedTag.getOid());
-        if( updatedTag.getValues() != null ) {
-            tagValueDao.deleteAll(existingTag.getId());
-            tagValueDao.insert(existingTag.getId(), updatedTag.getValues());
+            // not a valid UUID - maybe it's name
+            existingConfiguration = dao.findByName(uuidOrName);
         }
-        return updatedTag;
+        if( existingConfiguration == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        log.debug("dao null? {}", dao == null ? "yes" : "no");
+        log.debug("id ? {}", existingConfiguration.getId());
+        log.debug("name null? {}", updatedConfiguration.getName() == null ? "yes" : "no");
+        log.debug("content type null? {}", updatedConfiguration.getContentType() == null ? "yes" : "no");
+        log.debug("content null? {}", updatedConfiguration.getContentText() == null ? "yes" : "no");
+        dao.update(existingConfiguration.getId(), updatedConfiguration.getName(), updatedConfiguration.getContentType(), updatedConfiguration.getContentText());
+        return updatedConfiguration;
     }
 }

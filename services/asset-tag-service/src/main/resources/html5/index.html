@@ -145,6 +145,13 @@
             </div>					
             <div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
             </div>
+            <!--
+            <div id="notifications" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+                <ul style="margin-left: 0px; padding-left: 0px; list-style: none;">
+                    <li style="border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="notices"><span data-bind-text="item.text"></span> <a href="#" style="color: black; font-weight: bold;" onclick="javascript:$(this).up('li').remove();">X</a></li>                    
+                </ul>
+            </div>
+            -->
 
             <!-- content-wrap starts -->
             <div id="content-wrap" class="one-col"  >	
@@ -230,7 +237,7 @@
                                     <input type="text" id="tag-create-description" name="oid"/>
                                 </li>
                                 -->
-                                <li><input type="button" value="Search..." onclick="ws.searchTags(this);"/></li>
+                                <li><input type="button" value="Search..." onclick="ws.searchTags(this); return false;"/></li>
                             </ul>
                         </form>
 
@@ -263,7 +270,7 @@
                                             <li style="display: inline-block; list-style-type: inline; border: none; padding: 1px; margin: 3px;" data-bind-each-item="item.values"><span style="text-decoration: underline;" data-bind-text="item"></span></li>
                                         </ul>
                                     </td>
-                                    <td><a data-bind-oid="item.oid" data-bind-uuid="item.uuid"  href="#" onclick="javascript:ws.removeTag(this.getAttribute('uuid'));">delete</a></td>
+                                    <td><a data-bind-oid="item.oid" data-bind-uuid="item.uuid"  href="#" onclick="javascript:ws.removeTag(this.getAttribute('uuid')); return false;">delete</a></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -275,10 +282,149 @@
                     <div id="requests">
                         <h1>Tag Selection</h1>
 
+                        <h2>Create New Tag Selection</h2>
+                        <form id="selection-create-form" action="#" onsubmit="ws.createSelection(this); return false;">
+                            <ul>
+                                <li><label for="selection-create-name">Name</label><input type="text" id="selection-create-name" name="name" placeholder="Name of this selection"/></li>
+                                <!-- XXX TODO future release should add a host selection here too:  so selection is list of selected tags and (optional) list of selected hosts to apply them to -->
+                                <li><label for="selection-create-tags-select">Tags</label>
+                                    <select id="selection-create-tags-select" onchange="updateviews(withValuesOfSelectedTag);">
+                                        <option data-bind-each-item="tags" data-bind-text="item.name" data-bind-value="item.oid"></option>
+                                    </select>
+                                    <select id="selection-create-tags-values">
+                                        <option data-bind-each-item="tagValues" data-bind-text="item"></option>
+                                    </select>
+                                    <input type="button" value="Add" id="selection-create-tags-select-add" onclick="log.debug('selected tag: '+$F('selection-create-tags-select'))"/>
+                                    <table id="selection-create-tags-table">
+                                        <caption>Selected Tags</caption>
+                                        <thead>
+                                            <tr>
+                                                <th>Tag name</th>
+                                                <th>Tag OID</th>
+                                                <th>Tag Value</th>
+                                                <!-- <th>Description</th> -->
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="4">
+                                                    <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                                    view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                                </td></tr>
+                                        </tfoot>
+                                        <tbody>
+                                            <tr data-bind-each-item="tags">
+                                                <td data-bind-text="item.name"></td>
+                                                <td data-bind-text="item.oid"></td>
+                                                <td data-bind-text="item.value"></td>
+                                                <td><a data-bind-oid="item.oid" href="#" onclick="javascript:ws.removeTagFromSelection(this.getAttribute('oid'));">remove</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
 
+                                </li>
+                                <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
+                                <li><input type="submit" value="Save"/></li>
+                            </ul>
+                        </form>
+
+                        
+                        <h2>Search Selections</h2>
+
+                        <form id="selection-search-form" action="#" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="selection-search-name">Name</label>
+                                    <select id="selection-search-name-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="selection-search-name" name="name" placeholder="Name"/>
+                                </li>
+                                <!--   subject selection, when implement,  must support selecting more than one subject
+                                <li>
+                                    <label for="selection-search-subject">Subject (host uuid)</label>
+                                    <select id="selection-search-subject-criteria">
+                                        <option value="equalTo">is</option>
+                                    </select>
+                                    <input type="text" id="selection-search-subject" name="subject" placeholder="Subject"/>
+                                </li>
+                                -->
+                                <li>
+                                    <label for="selection-search-tagName">Tag name</label>
+                                    <select id="selection-search-tagName-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="selection-search-tagName" name="tagName" placeholder="Tag name"/>
+                                </li>
+                                <li>
+                                    <label for="selection-search-tagOid">Tag OID</label>
+                                    <select id="selection-search-tagOid-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="StartsWith">starts with</option>
+                                    </select>
+                                    <input type="text" id="selection-search-tagOid" name="tagOid" placeholder="Tag OID"/>
+                                </li>
+                                <li>
+                                    <label for="selection-search-tagValue">Tag value</label>
+                                    <select id="selection-search-tagValue-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="selection-search-tagValue" name="tagValue" placeholder="Tag value"/>
+                                </li>
+                                <!--
+                                <li>
+                                    <label for="tag-search-description">Tag description</label>
+                                    <select id="tag-search-description-criteria">
+                                        <option>contains</option>
+                                        <option>is</option>
+                                    </select>
+                                    <input type="text" id="tag-create-description" name="oid"/>
+                                </li>
+                                -->
+                                <li><input type="button" value="Search..." onclick="ws.searchSelections(this); return false;"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Browse Selections</h2>
+
+                        <table id="selection-browse-table">
+                            <caption>Selections</caption>
+                            <thead>
+                                <tr>
+                                    <th>Selection Name</th>
+                                    <!-- <th>Subjects (host uuids)</th> -->
+                                    <th>Tag name</th>
+                                    <th>Tag OID</th>
+                                    <!-- <th>Description</th> -->
+                                    <th>Tag values</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-bind-each-item="selections">
+                                    <td data-bind-text="item.name"></td>
+                                    <td data-bind-text="item.tagName"></td>
+                                    <td data-bind-text="item.tagOid"></td>
+                                    <td><a data-bind-oid="item.tagOid" href="#" onclick="javascript:removeSelection(this.getAttribute('uuid'));">delete</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        
+                        
                         <h2>Create New Certificate Request</h2>
 
-                        <form id="certificate-request-create-form" action="#" onsubmit="ws.createCertificateRequest(/*this*/); return false;">
+                        <form id="certificate-request-create-form" action="#" onsubmit="ws.createCertificateRequest(this); return false;">
                             <ul>
                                 <li><label for="certificate-request-create-subject">Subject</label><input type="text" id="certificate-request-create-subject" name="subject" placeholder="Host UUID"/></li>
                                 <li><label for="certificate-request-create-tags-select">Tags</label>
@@ -461,24 +607,24 @@
                                 <li>
                                     <label for="rdf-triple-search-subject">Subject (id)</label>
                                     <select id="rdf-triple-search-subject-criteria">
-                                        <option value="equalTo">is</option>
-                                        <option>contains</option>
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
                                     </select>
                                     <input type="text" id="rdf-triple-search-subject" name="subject" placeholder="ID"/>
                                 </li>
                                 <li>
                                     <label for="rdf-triple-search-predicate">Predicate</label>
                                     <select id="rdf-triple-search-predicate-criteria">
-                                        <option value="equalTo">is</option>
-                                        <option>contains</option>
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
                                     </select>
                                     <input type="text" id="rdf-triple-search-predicate" name="predicate" placeholder="Attribute name"/>
                                 </li>
                                 <li>
                                     <label for="rdf-triple-search-object">Object</label>
                                     <select id="rdf-triple-search-object-criteria">
-                                        <option value="equalTo">is</option>
-                                        <option>contains</option>
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
                                     </select>
                                     <input type="text" id="rdf-triple-search-object" name="object" placeholder="Attribute value"/>
                                 </li>
@@ -492,7 +638,7 @@
                                     <input type="text" id="rdf-triple-create-description" name="predicate"/>
                                 </li>
                                 -->
-                                <li><input type="button" value="Search..." onclick="searchRdfTriples();"/></li>
+                                <li><input type="button" value="Search..." onclick="ws.searchRdfTriples(this); return false;"/></li>
                             </ul>
                         </form>
 
@@ -519,7 +665,7 @@
                                     <td data-bind-text="item.subject"></td>
                                     <td data-bind-text="item.predicate"></td>
                                     <td data-bind-text="item.object"></td>
-                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:removeRdfTriple(this.getAttribute('uuid'));">delete</a></td>
+                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeRdfTriple(this.getAttribute('uuid')); return false;">delete</a></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -528,13 +674,32 @@
 
 
                     <div id="configure">
+                        
+                        <form id="configuration-search-form" style="display: none;" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="configuration-search-name">Name</label>
+                                    <select id="configuration-search-name-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="configuration-search-name" name="name" placeholder="Configuration name, eg 'main'"/>
+                                </li>
+                                <li style="display: none;">
+                                    <label for="configuration-search-contentType">Content Type</label>
+                                    <input type="hidden" id="configuration-search-contentType-criteria" value="EqualTo"/>
+                                    <select id="configuration-search-contentType">
+                                        <option>JSON</option>
+                                    </select>
+                                </li>
+                                <li><input type="button" value="Search..." onclick="ws.searchConfigurations(this); return false;"/></li>
+                            </ul>
+                        </form>
+                        
                         <form id="config-form" onsubmit="return false;">
-                            <input type="button" id="config-save-button" value="Save" onclick="saveConfig();"/>
-                            <input type="button" id="config-load-button" value="Load" onclick="loadConfig();"/>
+                            <input type="button" id="config-save-button" value="Save" onclick="ws.storeMainConfiguration(this); return false;"/>
+                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration(); return false;"/>
 
-                            <fieldset><legend>Client Configuration</legend>
-
-                                <br/>
                                 <!--
                                 <h2>Local Data</h2>
                                 <ul>
@@ -544,11 +709,15 @@
                                 <li><label for="mhclient-encrypted-image-dir">MHCLIENT_ENC_IMAGES</label> <input type="text" size="80" id="mhclient-encrypted-image-dir" value="C:\Users\jbuhacof\Downloads\VM Encrypted Images"/></li>
                                 </ul>
                                 -->
+                                <!--
+                            <fieldset><legend>Client Configuration</legend>
+
+                                <br/>
                                 <h2>Web Services</h2>
                                 <ul>
                                     <li><label for="provsvc">MTWILSON_ATAG_PROVSVC_URL</label> <input type="text" size="80" id="provsvc" value="https://localhost:8080" placeholder="URL"/></li>
                                 </ul>
-                            </fieldset>
+                            </fieldset> -->
                             <fieldset><legend>Server Configuration</legend>
                                 <br/>
                                 <!--
@@ -562,10 +731,37 @@
                                 -->
                                 <h2>Provisioning</h2>
                                 <ul>
+                                    <li>
+                                        <label for="allow-tags-in-certificate-requests">Allow tag selections in certificate requests</label>
+                                        <select data-bind-value="allowTagsInCertificateRequests" id="allow-tags-in-certificate-requests" name="allowTagsInCertificateRequests">
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                        <p>Choosing 'Yes' here enables the "Manual" and "Automatic Host-Based" provisioning request models.
+                                        Note: for "Automatic Host-Based" provisioning you also need to configure a code signing certificate.</p>
+                                    </li>
+                                    <li>
+                                        <label for="allow-automatic-tag-selection">Allow server to automatically select tags for certificate requests</label>
+                                        <select data-bind-value="allowAutomaticTagSelection"  id="allow-automatic-tag-selection" name="allowAutomaticTagSelection">
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                        <p>Choosing 'Yes' here enables the "Automatic Server-Based" provisioning request models.
+                                        Note: for "Automatic Server-Based" provisioning you also need to set a tag selection policy.</p>
+                                    </li>
+                                    <li>
+                                        <label for="automatic-tag-selection-name">Choose a tag selection to use for all certificate requests</label>
+                                        <select data-bind-value="automaticTagSelectionName"  id="automatic-tag-selection-name" name="automaticTagSelectionName">
+                                            <option>default</option>
+                                            <option>other selection name... todo</option>
+                                        </select>
+                                        <p>If you use "Automatic Server-Based" provisioning, the server needs to know which tag selection
+                                        to use for incoming certificate requests. Currently only one tag selection is supported.</p>
+                                    </li>
                                     <li><label for="approval-method">Approval Method</label> 
-                                        <select id="approval-method">
-                                            <option>Automatic/internal</option>
-                                            <option>Manual/external</option>
+                                        <select  data-bind-value="approveAllCertificateRequests"  id="approval-method" name="approveAllCertificateRequests">
+                                            <option value="true">Automatic/internal</option>
+                                            <option value="false">Manual/external</option>
                                         </select>
                                     </li>
                                 </ul>
@@ -640,8 +836,9 @@
                     }
                 }
             });
-            navTabs.setActiveTab('tags');
-//            navTabs.setActiveTab('rdf'); // XXX for debugging only; normally start with 'tags''
+//            navTabs.setActiveTab('tags');
+            navTabs.setActiveTab('configure'); // XXX for debugging only; normally start with 'tags''
+//            navTabs.setActiveTab('requests'); // XXX for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
         </script>
 
@@ -654,7 +851,7 @@
             //var taglist = [ [{name:"hello"}, {name:"world"}] ];
             //var myview = rivets.bind(document.getElementById('rivets-test'), { tags: [ {item:"hello"},{item:"world"}] }); // instead of sampledata.tags
             // *** these were enabled ***
-            var tagview, rdfview, tagviewCertificateRequests, certificateView;
+            var alertView, tagview, rdfview, selectionview, tagviewCertificateRequests, certificateView /*, appview */, configurationView;
             //
             //taglist.push("test");
             //myview.build();
@@ -667,42 +864,42 @@
                 //views: { 'tags': tagview, 'rdf-triples': rdfview }
 //                data: sampledata, // optional: if not provided will start empty and then we can load it from server
                 view: { 'update': function(data) {
+//                        appview.update(data); 
                         tagview.update(data);
                         rdfview.update(data);
+                        selectionview.update(data);
                         tagviewCertificateRequests.update(data);
-                        certificateView.update(data);
+                        certificateView.update(data); 
+                        configurationView.update(data);
                     },
                     'sync': function() {
-                        log.debug("syncing tagview");
-                        log.debug("data... "+Object.toJSON(ws.data));
+//                        appview.sync(); 
                         tagview.sync();
-                        log.debug('tagview sync done');
                         rdfview.sync();
+                        selectionview.sync();
                         tagviewCertificateRequests.sync();
-                        certificateView.sync();
+                        certificateView.sync(); 
+                        configurationView.sync();
                     }
                 }
             });
             log.debug("after init, data: "+Object.toJSON(ws.data));
+            
+            //alertView = rivets.bind(document.getElementById('notifications'), ws.data);
+
+//            appview = rivets.bind(document.getElementById('main'), ws.data); 
             tagview = rivets.bind(document.getElementById('tag-browse-table'), ws.data); 
             rdfview = rivets.bind(document.getElementById('rdf-triple-browse-table'), ws.data); 
+            selectionview = rivets.bind(document.getElementById('selection-browse-table'), ws.data); 
             tagviewCertificateRequests = rivets.bind(document.getElementById('certificate-request-create-tags-select'), ws.data); 
             certificateView = rivets.bind(document.getElementById('certificate-browse-table'), ws.data); 
+            configurationView = rivets.bind(document.getElementById('config-form'), ws.data.currentConfiguration); 
 
-//ws.updateTags(sampledata.tags); // xxx initialize with sample data
+            // populate the UI with some data from the server
             ws.searchTags('tag-search-form');
-
-            // removes all tags with this uuid
-            function removeRdfTriple(uuid) {
-                for(var i=sampledata.rdfTriples.length-1; i>=0; i--) {
-                    if( ('uuid' in sampledata.rdfTriples[i]) && sampledata.rdfTriples[i].uuid == uuid ) {
-                        sampledata.rdfTriples.splice(i,1);  // removes just this element...  note it's the first one found, so if you search for something that appears many times, only the first one will be removed!
-                        //					return;
-                    }				
-                    rdfview.update(sampledata);
-                }
-            }
-		
+            ws.searchRdfTriples('rdf-triple-search-form');
+            ws.searchConfigurations('configuration-search-form');
+//            ws.retrieveMainConfiguration();
         </script>
 
     </body>

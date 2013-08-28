@@ -40,6 +40,27 @@ PUT /resources/{id}  to update an existing resource  (must send the entire resou
 DELETE /resources/{id}  to delete an existing resource
 
 
+Events are fired (using Prototype's Event class) after a successful request.
+
+ajax:httpPostSuccess - fired after successful HTTP POST. 
+ajax:httpGetSuccess - fired after successful HTTP GET.
+ajax:httpPutSuccess - fired after successful HTTP PUT.
+ajax:httpDeleteSuccess - fired after successful HTTP DELETE.
+
+For all events the memo looks like this: 
+{ 
+    resource: {name:'pets',uri:'/pets',datapath:'global.data.pets',idkey:'uuid', ... }, 
+    content:[ {name:'Sparky', age:2, color:'brown'} ],
+    params: { ... },    // any URL parameters
+}
+
+The HTTP GET event notification does not include the 'content' field, but typically might the only one
+to include the 'params' field for URL parameters (as an object).
+
+The '...' in the 'resource' field value in the example memo above represents any other options
+that you passed into the AJAX call. Options 'uri', 'datapath', and 'idkey' override the resource
+defaults and affect the http request. Any other options are kept for your use in the event handler.
+
  *   */
 
 /* globals: $, $$, Ajax, Object, TypeError, XMLHttpRequest, document, fakeresource, log, ajax */
@@ -79,6 +100,12 @@ ajax.options.baseurl = "";  // optional, prepends a url like "/api/v2" to all re
 
 ajax.requests = []; // active requests; new requests are pushed here, completed requests are removed
 
+
+// draft to encapsulate api styles... keys are style names, values are functions that return resource definition given some input (currently the resource name is the only input)
+ajax.apistyles = {
+    'resourceCollectionWithId': function(resourceName) { return { uri:'/'+resourceName, datapath:resourceName, idkey:'id' } }
+};
+
 // define   create(post), search(get), delete(delete),  update(put)
 
 // the usefulness of this module will come from automatically updating the data model with the server's response
@@ -90,6 +117,14 @@ ajax.requests = []; // active requests; new requests are pushed here, completed 
 /*
 ?foo=bar&baz=The%20first%20line.%0AThe%20second%20line. 
  */
+
+ajax.event = {
+    fire: function(eventName, eventInfo) {
+        if( Prototype && Event ) {
+            document.fire("ajax:"+eventName, eventInfo);
+        }
+    }
+};
 
 /*
 Content-Type: text/plain
@@ -105,7 +140,8 @@ ajax.text = {
 ajax.json = {
     'enctype': 'text/plain',
     'post': function (resourceName, postObject, opt) {
-        var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
+        // if( ajax.resources[resourceName] === undefined ) { use ajax.apistyles.resourceCollectionWithId(resourceName) to create a default }
+        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         var request = new Ajax.Request(my.uri, {
             method: 'post',
@@ -128,21 +164,20 @@ ajax.json = {
                 else {
                     existingData = ptr;
                 } 
-                ajax.data.setx(keyPath, existingData); 
+                ajax.data.setx(keyPath, existingData);
+                ajax.event.fire("httpPostSuccess", { resource:my, content:postObject });
                 ajax.view.sync();
             }    
         });
         ajax.requests.push(request);
     },
-    'get': function (resourceName, opt) {
-        if( ajax.resources[resourceName] === undefined ) {
-            ajax.resources[resourceName] = { uri:'/'+resourceName, datapath:resourceName, idkey:'id' };
-        }
-        var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
+    'get': function (resourceName, params, opt) {
+        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         _log.debug("get resource: "+my.uri+"  into: "+keyPath);
         var request = new Ajax.Request(my.uri, {
             method: 'get',
+            parameters: params || {},
             onSuccess: function (transport) {
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
@@ -167,6 +202,7 @@ ajax.json = {
                 } 
                 log.debug("calling setx data");
                 ajax.data.setx(keyPath, existingData);
+                ajax.event.fire("httpGetSuccess", { resource:my, params:params });
                 log.debug("calling view sync");
                 ajax.view.sync();
             } /*,
@@ -183,11 +219,11 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'put': function (resourceName, putObject, opt) {
-        if( ajax.resources[resourceName] === undefined ) {
-            ajax.resources[resourceName] = { uri:'/'+resourceName, datapath:resourceName, idkey:'id' };
-        }
-        var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
+        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
+        log.debug("AJAX PUT: "+Object.toJSON(my));
+        log.debug("AJAX PUT OBJECT: "+Object.toJSON(putObject));
+        log.debug("AJAX PUT URL: "+my.uri+'/'+putObject[my.idkey]);
         var request = new Ajax.Request(my.uri+'/'+putObject[my.idkey], {
             method: 'put',
             contentType: 'application/json',
@@ -210,16 +246,14 @@ ajax.json = {
                     existingData = ptr;
                 } 
                 ajax.data.setx(keyPath, existingData);
+                ajax.event.fire("httpPutSuccess", { resource:my, content:putObject });
                 ajax.view.sync();
             }    
         });
         ajax.requests.push(request);
     },
     'delete': function (resourceName, deleteObject, opt) {
-        if( ajax.resources[resourceName] === undefined ) {
-            ajax.resources[resourceName] = { uri:'/'+resourceName, datapath:resourceName, idkey:'id' };
-        }
-        var my = ajax.resources[resourceName].clone().merge(opt); // make a copy of the resource config and override it with passed-in options
+        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
 //        var keyPath = my.datapath;
         var request = new Ajax.Request(my.uri+'/'+deleteObject[my.idkey], {
             method: 'delete',
@@ -235,6 +269,7 @@ ajax.json = {
                 }
                 log.debug("Server response for delete: "+Object.toJSON(ptr));
                 // XXX TODO: should we call   data.setx(keypath, null); ? or setx {} or [] ? or deletex ??
+                ajax.event.fire("httpDeleteSuccess", { resource:my, content:deleteObject });
 //                ajax.view.sync();
             }    
         });

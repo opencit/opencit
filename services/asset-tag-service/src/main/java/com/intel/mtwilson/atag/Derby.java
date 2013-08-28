@@ -4,13 +4,7 @@
  */
 package com.intel.mtwilson.atag;
 
-import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
-import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestApprovalDAO;
-import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestDAO;
-import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestTagValueDAO;
-import com.intel.mtwilson.atag.dao.jdbi.RdfTripleDAO;
-import com.intel.mtwilson.atag.dao.jdbi.TagDAO;
-import com.intel.mtwilson.atag.dao.jdbi.TagValueDAO;
+import com.intel.mtwilson.atag.dao.jdbi.*;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -157,39 +151,54 @@ public class Derby {
     return null;
   }*/
  public static TagDAO tagDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(TagDAO.class);
   } 
  public static TagValueDAO tagValueDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(TagValueDAO.class);
   } 
  public static RdfTripleDAO rdfTripleDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(RdfTripleDAO.class);
   } 
  public static CertificateRequestDAO certificateRequestDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(CertificateRequestDAO.class);
   } 
  public static CertificateRequestTagValueDAO certificateRequestTagValueDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(CertificateRequestTagValueDAO.class);
   } 
  public static CertificateRequestApprovalDAO certificateRequestApprovalDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(CertificateRequestApprovalDAO.class);
   } 
  public static CertificateDAO certificateDao() throws SQLException {
-     createTables();
+//     createTables();
     DBI dbi = new DBI(getDataSource());
     return dbi.open(CertificateDAO.class);
+  } 
+ public static SelectionDAO selectionDao() throws SQLException {
+//     createTables();
+    DBI dbi = new DBI(getDataSource());
+    return dbi.open(SelectionDAO.class);
+  } 
+ public static SelectionTagValueDAO selectionTagValueDao() throws SQLException {
+//     createTables();
+    DBI dbi = new DBI(getDataSource());
+    return dbi.open(SelectionTagValueDAO.class);
+  } 
+ public static ConfigurationDAO configurationDao() throws SQLException {
+//     createTables();
+    DBI dbi = new DBI(getDataSource());
+    return dbi.open(ConfigurationDAO.class);
   } 
  
  

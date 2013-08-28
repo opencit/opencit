@@ -4,18 +4,12 @@
  */
 package test.jdbi;
 
-import com.intel.mtwilson.atag.model.Tag;
-import com.intel.mtwilson.atag.model.CertificateRequestTagValue;
-import com.intel.mtwilson.atag.model.CertificateRequest;
-import com.intel.mtwilson.atag.dao.jdbi.RdfTripleDAO;
-import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
-import com.intel.mtwilson.atag.dao.jdbi.TagDAO;
-import com.intel.mtwilson.atag.dao.jdbi.TagValueDAO;
-import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestDAO;
-import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestTagValueDAO;
+import com.intel.mtwilson.atag.model.*;
+import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.intel.mtwilson.atag.Derby;
 import com.intel.dcsg.cpg.io.UUID;
+//import com.intel.mtwilson.atag.cmd.CreateDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -48,7 +42,7 @@ public class RepositoryTest {
     public static DataSource ds = null;
     
     public static void main(String[] args) throws Exception {
-        startDatabase();
+        startDatabase(); // drops all tables and then recreates them
         new RepositoryTest().testDescribeDatabase();
         stopDatabase();
     }
@@ -66,7 +60,7 @@ public class RepositoryTest {
         
         testCreateInMemoryDbWithDriverManager(); // make sure database exists
         dropAllTablesInDb(); // start fresh... without any tables
-        testCreateInMemoryDb(); // create the tables
+//        testCreateInMemoryDb(); // create the tables
     }
     
     @AfterClass
@@ -126,43 +120,12 @@ public class RepositoryTest {
             s.close();
         }
     }
-    
-//    @Test
+    /*
+    @Test
     public static void testCreateInMemoryDb() throws SQLException {
-        ds = Derby.getDataSource();
-        DBI dbi = new DBI(ds);
-        
-        // tag
-        TagDAO tagDao = dbi.open(TagDAO.class);
-        if( !Derby.tableExists("tag") ) { tagDao.create(); }        
-        tagDao.close();
-        
-        // tag value
-        TagValueDAO tagValueDao = dbi.open(TagValueDAO.class);
-        if( !Derby.tableExists("tag_value") ) { tagValueDao.create(); }
-        tagValueDao.close();
-        
-        // rdf triple
-        RdfTripleDAO rdfTripleDao = dbi.open(RdfTripleDAO.class);
-        if( !Derby.tableExists("rdf_triple") ) { rdfTripleDao.create(); }
-        rdfTripleDao.close();
-        
-        // certificate request
-        CertificateRequestDAO certificateRequestDao = dbi.open(CertificateRequestDAO.class);
-        if( !Derby.tableExists("certificate_request") ) { certificateRequestDao.create(); }
-        certificateRequestDao.close();
-        
-        // certificate request tag value
-        CertificateRequestTagValueDAO certificateRequestTagValueDao = dbi.open(CertificateRequestTagValueDAO.class);
-        if( !Derby.tableExists("certificate_request_tag_value") ) { certificateRequestTagValueDao.create(); }
-        certificateRequestTagValueDao.close();
-
-        // certificate
-        CertificateDAO certificateDao = dbi.open(CertificateDAO.class);
-        if( !Derby.tableExists("certificate") ) { certificateDao.create(); }
-        certificateRequestTagValueDao.close();
-        
-    }
+        CreateDatabase cmd = new CreateDatabase();
+        cmd.createTables();
+    }*/
     
     @Test
     public void testDescribeDatabase() throws SQLException {

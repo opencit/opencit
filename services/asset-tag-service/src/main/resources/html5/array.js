@@ -105,6 +105,17 @@ if(!Array.prototype.indexOf) {
 }
 */
 
+/**
+ * Arguments:  one or more values to remove from the array
+ * Post-condition: all elements in the array that have the same value as any one of the arguments are removed
+ * Example:   ['e','b','b','c','z'].removeAll('b','c')  == ['e','z']
+ * 
+ * Credits:
+ * This portion adapted from
+ * of http://stackoverflow.com/questions/3954438/remove-item-from-array-by-value 
+ * by http://stackoverflow.com/users/80860/kennebec
+ * licensed http://creativecommons.org/licenses/by-sa/3.0/
+ */
 var _removeAll = function() {
     var valueToRemove, argIndex = arguments.length, foundAtIndex; 
     while( argIndex > 0 && this.length > -1 ) {
@@ -118,19 +129,17 @@ var _removeAll = function() {
 
     
 
-/**
- * Arguments:  one or more values to remove from the array
- * Post-condition: all elements in the array that have the same value as any one of the arguments are removed
- * Example:   ['e','b','b','c','z'].removeAll('b','c')  == ['e','z']
- * 
- * Credits:
- * This portion adapted from
- * of http://stackoverflow.com/questions/3954438/remove-item-from-array-by-value 
- * by http://stackoverflow.com/users/80860/kennebec
- * licensed http://creativecommons.org/licenses/by-sa/3.0/
- */
 if (!Array.prototype.removeAll) {
     defineFunction(Array.prototype, "removeAll", _removeAll);
+}
+
+
+if (!Array.prototype.clear) {
+    defineFunction(Array.prototype, "clear", function() {
+        while (this.length > 0) {
+          this.pop();
+        }        
+    });
 }
 
 })();

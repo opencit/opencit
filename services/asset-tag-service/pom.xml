@@ -491,6 +491,19 @@ our customers.
          classpath="${compile_classpath}"
          debug="on"
    includeantruntime="false"/>
+   <!-- build the CreateDatabase command separately ; it does not have any dependencies on jooq, so 
+   we can build it and then run it (later) to create the database so that jooq can generate sources.
+   in contrast to this, all commands are excluded above because starthttpserver for example imports
+   RestletApplication which in turn imports the *Resource classes which in turn import jooq generated
+   sources, so these classes must be excluded from the first phase of the build when those generated
+   sources do not yet exist -->
+   <javac 
+       srcdir="${basedir}/src/main/java"
+       includes="com/intel/mtwilson/atag/cmd/CreateDatabase*"
+       destdir="${project.build.outputDirectory}"
+         classpath="${compile_classpath}"
+         debug="on"
+   includeantruntime="false"/>
     <mkdir dir="${project.build.testOutputDirectory}"/>
    <javac srcdir="${basedir}/src/test/java"
             excludes="test/restlet/** test/jooq/**"
@@ -498,10 +511,20 @@ our customers.
          classpath="${test_classpath}"
          debug="on"
    includeantruntime="false"/>
-  <!-- run the program to create a local derby database -->                             
+  <!-- run the program to create a local derby database ; 
+fork=true is important so that Derby shuts down before it starts up again from the jooq plugin 
+(or else you'll get an error that Derby is already started and has the db locked) 
+TODO: find out why Derby.stopDatabase() doesn't complete release the db and fix it so that
+Derby will release its locks on the db so that we don't need to fork here.
+   -->                             
+  <java classname="com.intel.mtwilson.atag.cmd.CreateDatabase" classpath="${compile_classpath}" fork="true">
+        <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log"/>
+        <arg value="--drop=true"/>
+       </java>
+       <!--
   <java classname="test.jdbi.RepositoryTest" classpath="${test_classpath}">
         <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log"/>
-       </java>
+       </java> -->
                             </target>
                         </configuration>
                     </execution>

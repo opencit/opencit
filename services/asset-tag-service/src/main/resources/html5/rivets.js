@@ -804,12 +804,13 @@
                 o = el[_i];
                 _results.push(o.selected = (_ref1 = o.value, __indexOf.call(value, _ref1) >= 0));
               }
+//            if( Prototype && Event ) { el.focus(); el.blur(); }  // jonathan added to trigger any javascript which automatically validates fields as they blur 
               return _results;
             }
           } else if ((value != null ? value.toString() : void 0) !== ((_ref2 = el.value) != null ? _ref2.toString() : void 0)) {
             //return el.value = value != null ? value : ''; // jonathan changing to also fire a change event so other interested parties will know the value was changed...
             el.value = value != null ? value : ''; // original behvaior
-            if( Prototype && Event ) { el.focus(); el.blur(); /*Event.fire(el,'rivets:change',el.value);*/ } // jonathan added
+//            if( Prototype && Event ) { el.focus(); el.blur(); /*Event.fire(el,'rivets:change',el.value);*/ } // jonathan added to trigger any javascript which automatically validates fields as they blur 
             return el.value; // original behavior
           }
         }

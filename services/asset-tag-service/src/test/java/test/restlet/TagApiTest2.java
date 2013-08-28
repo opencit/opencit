@@ -39,6 +39,7 @@ import com.intel.mtwilson.atag.RestletApplication;
 import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.mtwilson.atag.model.Configuration;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -211,17 +212,41 @@ public class TagApiTest2 {
     }
 
     @Test
-    public void testGetExistingTag() throws IOException {
+    public void testGetExistingTagByUuid() throws IOException {
         // create a tag so we have an existing tag
         Tag[] results = At.tags().post(new Tag[]{new Tag("state", "1.1.1.1")}, Tag[].class);
         Tag insertedTag = results[0];
         log.debug("Posted tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(insertedTag.getId()), insertedTag.getUuid(), insertedTag.getName(), insertedTag.getOid()));
         // output: Posted tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1
         Tag existingTag = At.tag(insertedTag.getUuid()).get(Tag.class); // shows up on server as empty string... try sending String[] instead
-        log.debug("Existing tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(existingTag.getId()), existingTag.getUuid(), existingTag.getName(), existingTag.getOid()));
+        log.debug("Existing tag by uuid: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(existingTag.getId()), existingTag.getUuid(), existingTag.getName(), existingTag.getOid()));
         // output: Existing tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
     }
 
+    @Test
+    public void testGetExistingTagByOid() throws IOException {
+        // create a tag so we have an existing tag
+        Tag[] results = At.tags().post(new Tag[]{new Tag("state", "1.1.1.1")}, Tag[].class);
+        Tag insertedTag = results[0];
+        log.debug("Posted tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(insertedTag.getId()), insertedTag.getUuid(), insertedTag.getName(), insertedTag.getOid()));
+        // output: Posted tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1
+        Tag existingTag = At.tag(insertedTag.getOid()).get(Tag.class); // shows up on server as empty string... try sending String[] instead
+        log.debug("Existing tag by oid: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(existingTag.getId()), existingTag.getUuid(), existingTag.getName(), existingTag.getOid()));
+        // output: Existing tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
+    }
+
+    @Test
+    public void testGetExistingTagByName() throws IOException {
+        // create a tag so we have an existing tag
+        Tag[] results = At.tags().post(new Tag[]{new Tag("state", "1.1.1.1")}, Tag[].class);
+        Tag insertedTag = results[0];
+        log.debug("Posted tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(insertedTag.getId()), insertedTag.getUuid(), insertedTag.getName(), insertedTag.getOid()));
+        // output: Posted tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1
+        Tag existingTag = At.tag(insertedTag.getName()).get(Tag.class); // shows up on server as empty string... try sending String[] instead
+        log.debug("Existing tag by name: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s", String.valueOf(existingTag.getId()), existingTag.getUuid(), existingTag.getName(), existingTag.getOid()));
+        // output: Existing tag: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
+    }
+    
     @Test
     public void testGetExistingTagJson() throws IOException {
         // create a tag so we have an existing tag
@@ -548,6 +573,20 @@ public class TagApiTest2 {
             assertEquals("MX", certificateRequest.getTags().get(0).getValue()); // ALL of the results should have "country" in the subject
         }
     }
+    
+    @Test
+    public void testUpdateExistingConfiguration() throws IOException {
+        // create a rdfTriple so we have an existing rdfTriple
+        Configuration main = At.configuration("main").get(Configuration.class);
+        log.debug("Existing configuration: {}", String.format("id:%s uuid:%s name:%s contentType:%s content:%s", String.valueOf(main.getId()), main.getUuid(), main.getName(), main.getContentType().name(), main.getContentText()));
+        main.setContentText("{\"allowTagsInCertificateRequests\":\"true\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}");
+        log.debug("Updating: {}", mapper.writeValueAsString(main));
+        Configuration updatedMain = At.configuration("main").put(main, Configuration.class);
+        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s contentType:%s content:%s", updatedMain.getUuid(), updatedMain.getName(), updatedMain.getContentType().name(), updatedMain.getContentText()));
+        // output: Existing rdfTriple: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
+    }
+    
+    
 
     private void report(CertificateRequest[] certificateRequests) throws JsonProcessingException {
         log.debug("Report: {} certificate-requests", certificateRequests.length);
