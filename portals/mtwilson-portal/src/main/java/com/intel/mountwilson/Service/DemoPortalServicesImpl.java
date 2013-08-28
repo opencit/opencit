@@ -76,6 +76,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	                try {
 	                	log.debug("getTrustStatusForHost: Getting trust Information for Host "+hostTrustXmlResponse.getName());
 	                	if (hostTrustXmlResponse.getAssertion() != null) {
+                                        log.debug("There is an assertion from hostTrustXmlResponse");
 	                		TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, hostTrustXmlResponse.getAssertion());
 	                		if( trustAssertion.isValid() ) {
                                 log.debug("getTrustStatusForHost: Trust assertion is valid");
@@ -83,7 +84,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	                		}
 	                		else {
 	                			log.debug("getTrustStatusForHost: Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ trustAssertion.error().getMessage());
-	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,trustAssertion.error().getMessage()));
+	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, null,"Host unreachable, please verify connection to host."));
 	                		}
 	                	}else {
 	                		log.debug("getTrustStatusForHost: Trust Assertion is NOT valid "+hostTrustXmlResponse.getName()+". "+ hostTrustXmlResponse.getErrorCode()+". "+hostTrustXmlResponse.getErrorMessage());

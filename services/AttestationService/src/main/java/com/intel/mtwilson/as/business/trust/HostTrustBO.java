@@ -858,17 +858,25 @@ public class HostTrustBO extends BaseBO {
                 tblSamlAssertion.setExpiryTs(cal.getTime());
                 if(e instanceof ASException){
                     ASException ase = (ASException) e;
+                    log.debug("e is an instance of ASExpection: " +String.valueOf(ase.getErrorCode()));
                     tblSamlAssertion.setErrorCode(String.valueOf(ase.getErrorCode()));
                 }else{
+                    log.debug("e is NOT an instance of ASExpection: " +String.valueOf(ErrorCode.SYSTEM_ERROR.getErrorCode()));
                     tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.SYSTEM_ERROR.getErrorCode()));
                 }
                 tblSamlAssertion.setErrorMessage(e.getMessage());
                 new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
             }catch(Exception ex){
                 log.debug("getTrustwithSaml caugh exception while generating error saml assertion");
-                throw new ASException(new Exception("getTrustWithSaml " + ex.getMessage()));
+                String msg = ex.getMessage();
+                log.debug(msg);
+                throw new ASException(new Exception("getTrustWithSaml " + msg));
+                //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
             } 
+            //Daniel, change the messages into meaningful thiings here
+            log.debug("e.getMessage = "+e.getMessage());
             throw new ASException(new Exception(e.getMessage()));
+            //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
         }
     }
 

@@ -1294,18 +1294,30 @@ public class ManagementConsoleDataController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView getHostTrustStatus(HttpServletRequest req,HttpServletResponse res) {
-		log.debug("DemoPortalDataController.getHostTrustStatus >>");
+		//log.info("DemoPortalDataController.getHostTrustStatus >>");
+                log.debug("DemoPortalDataController.getHostTrustStatus >>");
 		ModelAndView responseView = new ModelAndView(new JSONView());
+                String block = "Success";
+                log.info(block);
 		try {
 			responseView.addObject("hostVo", demoPortalServices.getSingleHostTrust(req.getParameter("hostName"),getAttestationService(req,AttestationService.class),getTrustedCertificates(req)));
 		} catch (DemoPortalException e) {
-			log.error(e.toString());
-			e.printStackTrace();
+                        block = "Fail";
+			//log.error(e.toString());
+                        log.info("F-Error");
+			//e.printStackTrace();
+			String msg = StringEscapeUtils.escapeHtml(e.getMessage());
+                        if(msg.equals("Premature end of file.")) {
+                            msg = "Could not connect to host, please verify connection";
+                            e.printStackTrace();
+                        }
 			responseView.addObject("hostVo", "");
 			responseView.addObject("result", false);
-			responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+			//responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+                        responseView.addObject("message", msg);
 			return responseView;
 		}
+                log.info(block);
 		responseView.addObject("result", true);
 		responseView.addObject("message", "");
 		log.debug("DemoPortalDataController.getHostTrustStatus <<<");
