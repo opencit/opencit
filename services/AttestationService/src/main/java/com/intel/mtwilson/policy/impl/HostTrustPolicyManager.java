@@ -160,11 +160,11 @@ public class HostTrustPolicyManager {
                 rules.addAll(factory.loadTrustRulesForAssetTag(atagCertsForHost.get(0), host));
             }
             else {
-                log.info("Asset tag certificate not present for host {0}.", host.getName());
+                log.info("Asset tag certificate not present for host {}.", host.getName());
             }
         } catch (Exception ex) {
             // We cannot do anything ... just log the error and proceed
-            log.info("Error during look up of asset tag certificates for the host {0}", host.getName());
+            log.info("Error during look up of asset tag certificates for the host {}", host.getName());
         }
         
         Policy policy = new Policy(String.format("Host trust policy for host with AIK %s", hostId), rules);

@@ -280,7 +280,7 @@ BwIDAQAB
         try {
             hostInfo = client.getHostInfo();
         } catch (Exception ex) {
-            log.error("Unexpected error during retrieval of the host properties. Details : {0}", ex.getMessage());
+            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
         }
         // Currently we are just adding the UUID of th host. Going ahead we can add additional details
         hm.put("Host_UUID", hostInfo.getHostUUID());
