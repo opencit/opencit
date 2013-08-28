@@ -18,6 +18,7 @@ import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.util.ResourceFinder;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
@@ -223,10 +224,11 @@ public class AssetTagCertBO extends BaseBO{
                     // For each of the asset tag certs that are returned back, we need to validate the certificate first.
                     for (MwAssetTagCertificate atagTempCert : atagCerts){
                         if (validateAssetTagCert(atagTempCert)) {
-                            log.debug("Valid asset tag certificate found for host {0} with asset tag ID {1}.", uuid, atagTempCert.getId());
+                            log.debug("Valid asset tag certificate found for host with UUID {0}.", uuid);
                             return atagTempCert;
                         }
                     }
+                    log.info("No valid asset tag certificate found for host with UUID {0}.", uuid);
                 }
             } else {
                 log.error("UUID specified for the host is not valid.");
@@ -265,6 +267,7 @@ public class AssetTagCertBO extends BaseBO{
             List<X509Certificate> atagCaCerts = null;
             try {
                 InputStream atagCaIn = new FileInputStream(ResourceFinder.getFile("AssetTagCA.pem")); 
+                //InputStream atagCaIn = new FileInputStream(new File("c:/development/AssetTagCA.pem")); 
                 atagCaCerts = X509Util.decodePemCertificates(IOUtils.toString(atagCaIn));
                 IOUtils.closeQuietly(atagCaIn);
                 log.debug("Added {} certificates from AssetTagCA.pem", atagCaCerts.size());
@@ -273,12 +276,10 @@ public class AssetTagCertBO extends BaseBO{
                 log.error("Error loading the Asset Tag pem file to extract the CA certificate(s).");
             }
             
+            // The below isValid function verifies both the signature and the dates.
             for (X509Certificate atagCACert : atagCaCerts) {
-                if (atagCACert.getIssuerX500Principal().toString().equals(atagAttrCertForHost.getIssuer())){
-                    // Now that we have found the matching CA, let us verify the signature and the date
-                    if (atagAttrCertForHost.isValid(atagCACert))
-                        return true;
-                }
+                if (atagAttrCertForHost.isValid(atagCACert))
+                    return true;
             }
             
         } catch (Exception ex) {
