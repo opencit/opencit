@@ -245,6 +245,43 @@ public class AssetTagCertBO extends BaseBO{
         return atagCert;
     }
     
+    public MwAssetTagCertificate findValidAssetTagCertForHost(Integer hostID){
+        MwAssetTagCertificate atagCert = null;
+
+        try {
+            // Find the asset tag certificates for the specified UUID of the host. Not that this might return back multiple
+            // values. We need to evaluate each of the certificates to make sure that they are valid
+            if (hostID != 0) {
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(hostID);
+                if (atagCerts.isEmpty()) {
+                    log.info("Asset tag certificate has not been provisioned for the host with ID : {0}.", hostID);
+                    return null;
+                } else {
+                    // For each of the asset tag certs that are returned back, we need to validate the certificate first.
+                    // Ideally there should be only one that is valid.
+                    for (MwAssetTagCertificate atagTempCert : atagCerts){
+                        if (validateAssetTagCert(atagTempCert)) {
+                            log.debug("Valid asset tag certificate found for host with ID {0}.", hostID);
+                            return atagTempCert;
+                        }
+                    }
+                    log.info("No valid asset tag certificate found for host with ID {0}.", hostID);
+                }
+            } else {
+                log.error("ID specified for the host is not valid.");
+                throw new ASException(ErrorCode.AS_HOST_NOT_FOUND);
+            }            
+        } catch (ASException ase) {
+            log.error("Error during querying of valid asset tag certificate using host ID. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            throw ase;
+        } catch (Exception ex) {
+            log.error("Unexpected error during querying of valid asset tag certificate using host ID. Error Details - {0}.", ex.getMessage());
+            throw new ASException(ex);
+        }
+        
+        return atagCert;
+    }
+
     /**
      * Validates the asset tag certificate and returns back true/false accordingly.
      * 

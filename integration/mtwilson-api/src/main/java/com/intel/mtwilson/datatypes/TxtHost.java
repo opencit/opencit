@@ -182,5 +182,6 @@ public class TxtHost {
     final public boolean isBiosTrusted() { return trustStatus.bios; }
     final public boolean isVmmTrusted() { return trustStatus.vmm; }
     final public boolean isLocationTrusted() { return trustStatus.location; }
+    final public boolean isAssetTagTrusted() { return trustStatus.asset_tag; }
     
 }
