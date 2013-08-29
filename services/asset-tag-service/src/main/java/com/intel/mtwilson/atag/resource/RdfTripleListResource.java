@@ -147,6 +147,7 @@ public class RdfTripleListResource extends ServerResource {
             rdfTriples[i].setObject(r.getValue(RDF_TRIPLE.OBJECT));
             i++;
         }
+        sql.close();
         return rdfTriples;
     }
 }

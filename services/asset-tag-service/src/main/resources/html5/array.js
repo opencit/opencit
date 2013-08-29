@@ -138,8 +138,32 @@ if (!Array.prototype.clear) {
     defineFunction(Array.prototype, "clear", function() {
         while (this.length > 0) {
           this.pop();
-        }        
+        }
+        return this;
     });
 }
+
+if (!Object.prototype.keys) {
+    defineFunction(Object.prototype, "keys", function() {
+        var keynames = [], p;
+        for(p in this) {
+          if( this.hasOwnProperty(p) ) {
+              keynames.push(p);
+          }
+        }
+        return keynames;
+    });
+}
+
+if (!Object.prototype.clear) {
+    defineFunction(Object.prototype, "clear", function() {
+        var keynames = this.keys(), i = keynames.length;
+        while (i--) {
+          delete this[keynames[i]];
+        }
+        return this;
+    });
+}
+
 
 })();

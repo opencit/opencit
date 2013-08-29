@@ -1728,7 +1728,9 @@ Ajax.Request = Class.create(Ajax.Base, {
       this.transport.onreadystatechange = this.onStateChange.bind(this);
       this.setRequestHeaders();
 
-      this.body = this.method == 'post' ? (this.options.postBody || params) : null;
+      // jonathan adding support for put
+      //this.body = this.method == 'post' ? (this.options.postBody || params) : null;
+      this.body = (this.method == 'post' || this.method == 'put') ? (this.options.postBody || params) : null;
       this.transport.send(this.body);
 
       /* Force Firefox to handle ready state 4 for synchronous requests */
@@ -1754,7 +1756,7 @@ Ajax.Request = Class.create(Ajax.Base, {
       'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
     };
 
-    if (this.method == 'post') {
+    if (this.method == 'post' || this.method == 'put') { // jonathan added support for put
       headers['Content-type'] = this.options.contentType +
         (this.options.encoding ? '; charset=' + this.options.encoding : '');
 

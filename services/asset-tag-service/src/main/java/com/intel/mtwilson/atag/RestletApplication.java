@@ -48,8 +48,10 @@ public class RestletApplication extends Application {
 //        router.attach("certificate-requests/{id}/approval", CertificateRequestApprovalResource.class); 
         router.attach("/certificate-requests/{id}/certificate", CertificateRequestApprovalResource.class); 
         router.attach("/certificates/{id}", CertificateResource.class); 
-        router.attach("/configurations", ConfigurationListResource.class); // create tag, create multiple tags, search tags
-        router.attach("/configurations/{id}", ConfigurationResource.class); // update tag, delete tag, read tag
+        router.attach("/configurations", ConfigurationListResource.class); 
+        router.attach("/configurations/{id}", ConfigurationResource.class); 
+        router.attach("/files", FileListResource.class); 
+        router.attach("/files/{id}", FileResource.class); 
         // allows instant editing of html5 resources... set mtwilson.atag.html5.dir in ~/.mtwilson/mtwilson.properties to make this work on your development laptop
 //        Directory directory = new Directory(getContext(), "file:///c:/users/jbuhacof/workspace/mtwilson-dev/services/asset-tag-service/src/main/resources/html5/");
         // uses the resources on the classpath (packaged with the application) -- this is the default from MyConfiguration

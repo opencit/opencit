@@ -36,6 +36,7 @@ mtwilson.atag = mtwilson.atag || {};
             'certificates': [],
             'rdfTriples': [],
             'configurations': [],
+            'files':[],
             'currentConfiguration': {}
         };
         log.debug("init data to "+Object.toJSON(data));
@@ -49,6 +50,7 @@ mtwilson.atag = mtwilson.atag || {};
                 log.debug("No view to sync");
             }
         };
+        mtwilson.atag.view = view;
         ajax.view = view; // after every ajax call the view will be updated ???
         options = parameters.options || {
             'baseurl': (uri.scheme() == 'http' || uri.scheme() == 'https') ? '' : '#' // or http://localhost:8080
@@ -70,6 +72,7 @@ mtwilson.atag = mtwilson.atag || {};
     ajax.resources.certificateRequests = { uri:'/certificate-requests', datapath:'certificateRequests', idkey:'uuid' };
     ajax.resources.selections = { uri:'/selections', datapath:'selections', idkey:'uuid' }; // selections can also use idkey:'name'
     ajax.resources.configurations = { uri:'/configurations', datapath:'configurations', idkey:'uuid' }; // configurations can also use idkey:'name'
+    ajax.resources.files = { uri:'/files', datapath:'files', idkey:'uuid' }; // configurations can also use idkey:'name'
 
 //    mtwilson.atag.data = data; 
 //    log.debug("again, data = "+Object.toJSON(mtwilson.atag.data));
@@ -180,6 +183,9 @@ mtwilson.atag = mtwilson.atag || {};
             case 'configurations':
                     mtwilson.atag.notify({ text:'Created configuration: '+event.memo.resource.app.input.name, clear:'auto' });
                     break;
+            case 'files':
+                    mtwilson.atag.notify({ text:'Created file: '+event.memo.resource.app.input.name, clear:'auto' });
+                    break;
             default:
                 log.debug("No handler for successful HTTP POST of "+event.memo.resource.name);
         };
@@ -223,6 +229,10 @@ mtwilson.atag = mtwilson.atag || {};
                     mtwilson.atag.notify({ text:'Deleted configuration: '+event.memo.resource.app.input.name, clear:'auto' });
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                     break;
+            case 'files':
+                    mtwilson.atag.notify({ text:'Deleted file: '+event.memo.resource.app.input.name, clear:'auto' });
+//                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
+                    break;
             default:
                 log.debug("No handler for successful HTTP DELETE of "+event.memo.resource.name);
         };
@@ -250,6 +260,10 @@ mtwilson.atag = mtwilson.atag || {};
                     mtwilson.atag.notify({ text:'Updated configuration: '+event.memo.resource.app.input.name, clear:'auto' });
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                     break;
+            case 'files':
+                    mtwilson.atag.notify({ text:'Updated file: '+event.memo.resource.app.input.name, clear:'auto' });
+//                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
+                    break;
             default:
                 log.debug("No handler for successful HTTP PUT of "+event.memo.resource.name);
         };
@@ -258,14 +272,23 @@ mtwilson.atag = mtwilson.atag || {};
     document.observe("ajax:httpGetSuccess", function(event) {
         switch(event.memo.resource.name) {
             case 'tags':
+                    // update various controls that refer to the tags... 
+                    selection_create_form_init();  /// TODO:  this control should always have the full list of tags... nto just the search results from the other tab... so maybe instaed of updating it here, we need to make a distinction between a refresh of 'all tags' data and what the search screen asked for.
                     break;
             case 'rdfTriples':
                     break;
             case 'selections':
+                    //log.debug("got selections! "+Object.toJSON(event.memo));
+//                    automatic-tag-selection-name
                     break;
             case 'certificateRequests':
                     break;
             case 'configurations':
+                    if( event.memo.resource.callback ) {
+                        event.memo.resource.callback(event.memo);
+                    }
+                    break;
+            case 'files':
                     if( event.memo.resource.callback ) {
                         event.memo.resource.callback(event.memo);
                     }
@@ -278,16 +301,33 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.createTag = function (input) {
         var report = validate(input);
         if (report.isValid) {
-            var clone = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
-            ajax.json.post('tags', [clone], {app:report}); // pass {app:report} so it will be passed to the event handler after the request is complete
+            var tagObject = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
+            ajax.json.post('tags', [tagObject], {app:report}); // pass {app:report} so it will be passed to the event handler after the request is complete
         }
+    };
+    
+    mtwilson.atag.createSelection = function(input) {
+        log.debug("the form model is: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form']));
+        var report = validate(input);
+        if (report.isValid) {
+            log.debug("report input: "+Object.toJSON(report.input));
+            // sample post format: {"name":"default","tags":[{"tagName":"state","tagOid":"1.1.1.1","tagValue":"CA"},{"tagName":"city","tagOid":"2.2.2.2","tagValue":"sacramento"}]}
+            // when creating selections its the "selection" array of the form data that we submit to the server, together with the name of the selection:
+            var selectionObject = { name: $F('selection-create-name'), tags: [] }; // should use report.input.name but it's not being populated 
+            var i = report.input.selection.length; // but for tags we need to submit just the uuid & value... not the whole tag
+            while(i--) {
+                selectionObject.tags.push({tagName:report.input.selection[i].tag.name,tagValue:report.input.selection[i].value});
+            }
+            log.debug("Posting selection: {}", Object.toJSON(selectionObject));
+            ajax.json.post('selections', [selectionObject], {app:report}); // pass {app:report} so it will be passed to the event handler after the request is complete
+        }        
     };
     
     mtwilson.atag.createRdfTriple = function (input) {
         var report = validate(input);
         if (report.isValid) {
-            var clone = report.input.clone(); //Object.toJSON(report.input).evalJSON();
-            ajax.json.post('rdfTriples', [clone], {app:report});
+            var rdfTripleObject = report.input.clone(); //Object.toJSON(report.input).evalJSON();
+            ajax.json.post('rdfTriples', [rdfTripleObject], {app:report});
 //            view.sync(); //view.update(data);
         }
     };
@@ -340,6 +380,37 @@ mtwilson.atag = mtwilson.atag || {};
         }
         view.sync();
     };
+    
+    // removes all tags with this oid
+    mtwilson.atag.removeSelection = function (uuid) {
+        var i;
+        for (i = data.selections.length - 1; i >= 0; i--) {
+            if (('uuid' in data.selections[i]) && data.selections[i].uuid == uuid) {
+                ajax.json.delete('selections', data.selections[i]);
+                data.selections.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                //					return;
+            }
+        }
+        view.sync();
+    };
+    
+    
+    mtwilson.atag.findTagByUuid = function(uuid) {
+        var i;
+        for (i = data.tags.length - 1; i >= 0; i--) {
+            if (('uuid' in data.tags[i]) && data.tags[i].uuid == uuid) {
+                return data.tags[i];
+            }
+        }
+    };
+    mtwilson.atag.findTagByOid = function(oid) {
+        var i;
+        for (i = data.tags.length - 1; i >= 0; i--) {
+            if (('oid' in data.tags[i]) && data.tags[i].oid == oid) {
+                return data.tags[i];
+            }
+        }
+    };
 
 
     mtwilson.atag.updateTags = function (tags) {
@@ -359,8 +430,6 @@ mtwilson.atag = mtwilson.atag || {};
         
         // first clear search results (otherwise the results we get from server will be appended to them)
         data.tags.clear();
-        log.debug("cleared data tags: "+Object.toJSON(data.tags));
-        
 //        ajax.json.get('tags', {uri:'/tags?' + $(report.formId).serialize()}); // XXX TODO  serialize the search form controls into url parameters...
         ajax.json.get('tags', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
 //    apiwait("Searching tags...");
@@ -378,17 +447,32 @@ mtwilson.atag = mtwilson.atag || {};
         }
         
         // first clear search results (otherwise the results we get from server will be appended to them)
-        data.rdfTriples.clear();
-//        log.debug("cleared data tags: "+Object.toJSON(data.tags));
-        
+        data.rdfTriples.clear();       
 //        ajax.json.get('tags', {uri:'/tags?' + $(report.formId).serialize()}); // XXX TODO  serialize the search form controls into url parameters...
         ajax.json.get('rdfTriples', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
 //    apiwait("Searching tags...");
     };    
     
+    mtwilson.atag.searchSelections = function (input) {
+        var report = validate(input); // XXX TODO: add an OID validator function ; currently none of the inputs need to be validated
+//    if( report.isValid ) { ... }
+        // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
+        // we form parameters like nameEqualTo=argument  or nameContains=argument
+        var fields = ['name', 'tagName', 'tagOid', 'tagValue'];
+        var i;
+        for (i = 0; i < fields.length; i++) {
+            $('selection-search-' + fields[i]).name = fields[i] + $F('selection-search-' + fields[i] + '-criteria'); // this.options[this.selectedIndex].value;
+        }
+        
+        // first clear search results (otherwise the results we get from server will be appended to them)
+        data.selections.clear();
+//        ajax.json.get('tags', {uri:'/tags?' + $(report.formId).serialize()}); // XXX TODO  serialize the search form controls into url parameters...
+        ajax.json.get('selections', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
+//    apiwait("Searching tags...");
+    };
     
     mtwilson.atag.retrieveMainConfiguration = function (eventMemo_not_used) {
-        log.debug("retrieveMainConfiguration searching for main...");
+//        log.debug("retrieveMainConfiguration searching for main...");
         // we get called after all the configurations are retrieved from the server...
         // currently we really only support one "main" configuration 
         // so find it in the list -- should be the only one there
@@ -397,11 +481,12 @@ mtwilson.atag = mtwilson.atag || {};
         while(i-- && current === null) {
             if( data.configurations[i].name === 'main' ) {
                 current = data.configurations[i];
-                log.debug("found it!");
+//                log.debug("found it!");
             }
         }
-        data.currentConfiguration.merge(current.content);
-        log.debug("Current configuration: "+Object.toJSON(data.currentConfiguration));
+        data.currentConfiguration.merge(current.jsonContent);
+        data.currentConfiguration.selections = mtwilson.atag.data.selections; // need to have the selection choices for the form, but we don't submit all the seelction names, only the one that is chosen
+//        log.debug("Current configuration: "+Object.toJSON(data.currentConfiguration));
         view.sync();
 //        ajax.json.get('configurations', {nameEqualTo:'main'}, {datapath:'currentConfiguration'}); // pass parameters as object (serialize=true) and no other options (no third argument)
     };    
@@ -412,9 +497,11 @@ mtwilson.atag = mtwilson.atag || {};
 //        if (report.isValid) {
 //            log.debug("storeMainConfiguration input is valid");
 //            var clone = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
-        data.configurations[0].content.merge(data.currentConfiguration); // TODO: need to select the right configuration to update if we ever support more than one
+        data.configurations[0].jsonContent.merge(data.currentConfiguration); // TODO: need to select the right configuration to update if we ever support more than one
         var config = data.configurations[0];
-        log.debug("modified config: "+Object.toJSON(config));
+        delete config.content; // don't send the text content to the server... send only the jsonContent that we edited, and the server will serialize
+        delete config.selections; // don't send the selection data (merged into it in retrieveMainConfiguration)
+//        log.debug("modified config: "+Object.toJSON(config));
         ajax.json.put('configurations', config, {app:{input:{name:config.name}}}); // pass {app:report} so it will be passed to the event handler after the request is complete
 //        }
     };
@@ -440,6 +527,26 @@ mtwilson.atag = mtwilson.atag || {};
 //    apiwait("Searching tags...");
     };    
     
+    
+    mtwilson.atag.loadCaCerts = function(input) {
+        ajax.json.get('files', {nameEqualTo:'cacerts'}, {callback:function(eventMemo) {
+            var i = data.files.length;
+            var current = null;
+            while(i-- && current === null) {
+                if( data.files[i].name === 'cacerts' ) {
+                    current = data.files[i];
+//                    log.debug("found it! "+Object.toJSON(current));
+                }
+            }
+            if( current ) {
+                $('cacerts-text').update( Base64.decode(current.content) );
+            }
+//        data.currentConfiguration.merge(current.jsonContent);
+//        log.debug("Current configuration: "+Object.toJSON(data.currentConfiguration));
+//        view.sync();                
+        }}); // pass parameters as object (serialize=true) and no other options (no third argument)
+        
+    };
     
     /*
      function storeConfigForm() {
@@ -545,7 +652,7 @@ document.observe('dom:loaded', function () {
     for (i = 0; i < forms.length; i++) {
         formId = forms[i].id;
         // create a data object for the form
-        mtwilson.rivets.forms[ formId ] = {};
+        mtwilson.rivets.forms[ formId ] = { global: mtwilson.atag.data }; // give every form a link to global data (not included when the form is submitted)
         // use rivets to bind the object to the form
         mtwilson.rivets.views[ formId ] = rivets.bind(forms[i], mtwilson.rivets.forms[formId]);
     }

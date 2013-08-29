@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.atag.resource;
 
-import com.intel.mtwilson.atag.model.Configuration;
-import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
+import com.intel.mtwilson.atag.model.File;
+import com.intel.mtwilson.atag.dao.jdbi.FileDAO;
 import com.intel.mtwilson.atag.Derby;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;
@@ -23,15 +23,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
-public class ConfigurationResource extends ServerResource {
+public class FileResource extends ServerResource {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private ConfigurationDAO dao = null;
+    private FileDAO dao = null;
 
     @Override
     protected void doInit() throws ResourceException {
         super.doInit();
         try {
-            dao = Derby.configurationDao();
+            dao = Derby.fileDao();
         } catch (SQLException e) {
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Cannot open database", e);
         }
@@ -45,7 +45,7 @@ public class ConfigurationResource extends ServerResource {
     }
     
     @Get("json")
-    public Configuration existingConfiguration() {
+    public File existingFile() {
         String uuidOrName = getAttribute("id");
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
@@ -58,49 +58,42 @@ public class ConfigurationResource extends ServerResource {
     }
 
     @Delete
-    public void deleteConfiguration() {
+    public void deleteFile() {
         String uuidOrName = getAttribute("id");
-        Configuration configuration;
+        File file;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            configuration = dao.findByUuid(uuid);
+            file = dao.findByUuid(uuid);
         }
         catch(Exception e) {
             // not a valid UUID - maybe it's name
-            configuration = dao.findByName(uuidOrName);
+            file = dao.findByName(uuidOrName);
         }        
-        dao.delete(configuration.getId());
+        dao.delete(file.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
 
     @Put("json") // previously was: text/plain
-    public Configuration updateConfiguration(Configuration updatedConfiguration) throws SQLException {
+    public File updateFile(File updatedFile) throws SQLException {
         String uuidOrName = getAttribute("id");
-        Configuration existingConfiguration;
+        File existingFile;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            existingConfiguration = dao.findByUuid(uuid);
+            existingFile = dao.findByUuid(uuid);
         }
         catch(Exception e) {
             // not a valid UUID - maybe it's name
-            existingConfiguration = dao.findByName(uuidOrName);
+            existingFile = dao.findByName(uuidOrName);
         }
-        if( existingConfiguration == null ) {
+        if( existingFile == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        log.debug("dao null? {}", dao == null ? "yes" : "no");
-        log.debug("id ? {}", existingConfiguration.getId());
-        log.debug("updated configuration null? {}", updatedConfiguration == null ? "yes" : "no");
-        if( updatedConfiguration == null ) {
-            log.debug("Updated configuration is required");
+        if( updatedFile == null ) {
             setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
             return null;
         }
-        log.debug("name null? {}", updatedConfiguration.getName() == null ? "yes" : "no");
-        log.debug("content type null? {}", updatedConfiguration.getContentType() == null ? "yes" : "no");
-        log.debug("content null? {}", updatedConfiguration.getContent() == null ? "yes" : "no");
-        dao.update(existingConfiguration.getId(), updatedConfiguration.getName(), updatedConfiguration.getContentType(), updatedConfiguration.getContent());
-        return updatedConfiguration;
+        dao.update(existingFile.getId(), updatedFile.getName(), updatedFile.getContentType(), updatedFile.getContent());
+        return updatedFile;
     }
 }

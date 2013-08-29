@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.atag.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+//import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intel.dcsg.cpg.io.UUID;
 import java.util.List;
 
@@ -13,9 +13,7 @@ import java.util.List;
  * 
  * @author jbuhacoff
  */
-public class Selection {
-    private long id;
-    private UUID uuid;
+public class Selection extends Document {
     private String name;
     private List<SelectionTagValue> tags;
     private List<String> subjects; // hosts (optional)
@@ -24,24 +22,19 @@ public class Selection {
     }
 
     public Selection(long id, UUID uuid) {
-        this.id = id;
-        this.uuid = uuid;
+        setId(id);
+        setUuid(uuid);
     }
     
     public Selection(long id, UUID uuid, List<String> subjects, List<SelectionTagValue> tags) {
-        this.id = id;
-        this.uuid = uuid;
+        setId(id);
+        setUuid(uuid);
         this.subjects = subjects;
         this.tags = tags;
     }
-
-    @JsonIgnore
-    public long getId() {
-        return id;
-    }
-
-    public UUID getUuid() {
-        return uuid;
+    
+    public Selection(String name) {
+        this.name = name;
     }
 
     public String getName() {
@@ -56,17 +49,6 @@ public class Selection {
     
     public List<SelectionTagValue> getTags() {
         return tags;
-    }
-
-
-//    @JsonIgnore
-    public void setId(long id) {
-        this.id = id;
-    }
-
-//    @JsonIgnore
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
     }
 
     public void setName(String name) {

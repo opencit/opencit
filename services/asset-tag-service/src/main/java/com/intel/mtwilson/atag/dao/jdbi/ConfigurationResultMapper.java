@@ -25,7 +25,7 @@ public class ConfigurationResultMapper implements ResultSetMapper<Configuration>
         configuration.setId(rs.getLong("id"));
         configuration.setUuid(uuid);
         configuration.setName(rs.getString("name"));
-        configuration.setContentText(rs.getString("content"));
+        configuration.setContent(rs.getString("content"));
         try {
             configuration.setContentType(Configuration.ContentType.valueOf(rs.getString("contentType")));
         }

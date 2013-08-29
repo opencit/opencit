@@ -199,7 +199,8 @@ ajax.json = {
                 else {
                     log.debug("No existing data");
                     existingData = ptr;
-                } 
+                }
+                if( existingData instanceof Array ) { existingData.removeAll(null); } // automated data binding tends to break for null objects
                 log.debug("calling setx data");
                 ajax.data.setx(keyPath, existingData);
                 ajax.event.fire("httpGetSuccess", { resource:my, params:params });

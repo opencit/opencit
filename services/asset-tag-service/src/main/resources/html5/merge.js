@@ -70,7 +70,7 @@ The argument must match the type of the subject (can only merge arrays into arra
         }
         var i = other.length;
         while(i--) {
-            if (!this.contains(other[i])) {
+            if (other[i] !== null && !this.contains(other[i])) {
                 this.push(other[i]);
             }
         }
@@ -164,11 +164,12 @@ The argument must match the type of the subject (can only merge arrays into arra
     }
     
     function isAssignable(object) {
-        if( object === undefined ) { return true; }
-        if( object === null ) { return true; }
-        if( typeof object === 'string' ) { return true; } // or ""+object
-        if( typeof object === 'number' ) { return true; } // or 0+object
-        if( typeof object === 'function' ) { return true; } // xxx is reference ok here?
+        if( object === undefined ) { return true; } // or typeof object === 'undefined'
+        if( object === null ) { return true; } 
+        if( typeof object === 'boolean' ) { return true; } 
+        if( typeof object === 'string' ) { return true; } 
+        if( typeof object === 'number' ) { return true; } 
+        if( typeof object === 'function' ) { return true; } 
         return false;
     }
     
@@ -205,7 +206,7 @@ The argument must match the type of the subject (can only merge arrays into arra
                     return stack[s].ref;
                 }
                 else {
-                    return "#REF "+stackPath(stack, s);
+                    return "#"+stackPath(stack, s);
                 }
             }
             else {

@@ -101,6 +101,11 @@ public class CreateDatabase extends AtagCommand {
         ConfigurationDAO configurationDao = dbi.open(ConfigurationDAO.class);
         if( !Derby.tableExists("configuration") ) { configurationDao.create(); }
         configurationDao.close();
+
+        // file
+        FileDAO fileDao = dbi.open(FileDAO.class);
+        if( !Derby.tableExists("file") ) { fileDao.create(); }
+        fileDao.close();
         
         
     }    

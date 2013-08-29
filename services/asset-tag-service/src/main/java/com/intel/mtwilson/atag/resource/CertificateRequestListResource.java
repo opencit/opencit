@@ -209,7 +209,8 @@ public class CertificateRequestListResource extends ServerResource {
             if( query.tagOidContains != null  && query.tagOidContains.length() > 0 ) {
                 tagQuery.addConditions(TAG.OID.contains(query.tagOidContains));
             }
-            sql.addConditions(CERTIFICATE_REQUEST_TAG_VALUE.ID.in(tagQuery));            
+            sql.addConditions(CERTIFICATE_REQUEST_TAG_VALUE.ID.in(tagQuery));       
+            // XXX TODO when should we close tagQuery?  it's probably not automatically closed by the "sql" selectquery.  same applies to any other list resources that use a subquery.
         }
         
         if( query.id != null ) {
@@ -260,6 +261,7 @@ public class CertificateRequestListResource extends ServerResource {
                 log.debug("tag-value is null? {}", tagValue == null);
             }
         }
+        sql.close();
         return certificateRequests;
     }
 }

@@ -93,23 +93,30 @@ public class SelectionListResource extends ServerResource {
         ArrayList<Long> tagValues = new ArrayList<Long>();
         log.debug("insertSelection has {} tags", selection.getTags().size());
         for(SelectionTagValue crtv : selection.getTags()) {
-            // look up tagId and tagValueId for (name,value) or (oid,value) pairs
-            if( crtv.getName() != null ) { 
-                log.debug("tag name: {}", crtv.getName());
-                Tag byName = tagDao.findByName(crtv.getName()); 
+            // look up tagId and tagValueId for (uuid,value) or (name,value) or (oid,value) pairs
+            if( crtv.getUuid() != null ) { 
+                log.debug("tag uuid: {}", crtv.getUuid());
+                Tag byUuid = tagDao.findByUuid(crtv.getUuid()); 
+                if( byUuid != null ) {
+                    crtv.setTagId(byUuid.getId());
+                }
+            }
+            if( crtv.getTagName() != null ) { 
+                log.debug("tag name: {}", crtv.getTagName());
+                Tag byName = tagDao.findByName(crtv.getTagName()); 
                 if( byName != null ) {
                     crtv.setTagId(byName.getId());
                 }
             }
-            else if( crtv.getOid() != null ) { 
-                log.debug("tag oid: {}", crtv.getOid());
-                Tag byOid = tagDao.findByOid(crtv.getOid()); 
+            else if( crtv.getTagOid() != null ) { 
+                log.debug("tag oid: {}", crtv.getTagOid());
+                Tag byOid = tagDao.findByOid(crtv.getTagOid()); 
                 if( byOid != null ) {
                     crtv.setTagId(byOid.getId());
                 }
             }
-            log.debug("tag value (required): {}", crtv.getValue());
-            TagValue byValue = tagValueDao.findByTagIdAndValueEquals(crtv.getTagId(), crtv.getValue());
+            log.debug("tag value (required): {}", crtv.getTagValue());
+            TagValue byValue = tagValueDao.findByTagIdAndValueEquals(crtv.getTagId(), crtv.getTagValue());
             if( byValue != null ) {
                 crtv.setTagValueId(byValue.getId());
             }
@@ -221,7 +228,7 @@ public class SelectionListResource extends ServerResource {
             sql.addConditions(SELECTION.NAME.equal(query.nameEqualTo));
         }
         if( query.nameContains != null  && query.nameContains.length() > 0  ) {
-            sql.addConditions(SELECTION.NAME.equal(query.nameContains));
+            sql.addConditions(SELECTION.NAME.contains(query.nameContains));
         }
         sql.addOrderBy(SELECTION.ID);
         Result<Record> result = sql.fetch();
@@ -248,9 +255,11 @@ public class SelectionListResource extends ServerResource {
             Tag tag = tagDao.findById(crtv.getTagId());
             TagValue tagValue = tagValueDao.findById(crtv.getTagValueId());
             if( tag != null && tagValue != null ) {
-                crtv.setName(tag.getName());
-                crtv.setOid(tag.getOid());
-                crtv.setValue(tagValue.getValue());
+                crtv.setTagName(tag.getName());
+                crtv.setTagOid(tag.getOid());
+                crtv.setTagValue(tagValue.getValue());
+                crtv.setTagUuid(tag.getUuid());
+                // TODO:  crtv.setTagValueUuid(tagValue.getUuid());
                 selections[i].getTags().add(crtv);
             }
             else {
@@ -258,6 +267,7 @@ public class SelectionListResource extends ServerResource {
                 log.debug("tag-value is null? {}", tagValue == null);
             }
         }
+        sql.close();
         return selections;
     }
 }

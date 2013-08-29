@@ -40,6 +40,8 @@ import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.atag.model.Configuration;
+import com.intel.mtwilson.atag.model.Selection;
+import com.intel.mtwilson.atag.model.SelectionTagValue;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -445,6 +447,36 @@ public class TagApiTest2 {
     }
 
     @Test
+    public void testCreateSelection() throws IOException {
+        ArrayList<String> states = new ArrayList<String>(); // notice we do not post the id and uuid... those are generaetd by the server (would be ignored if we sent them)
+        states.add("CA");
+        states.add("TX");
+        ArrayList<String> cities = new ArrayList<String>(); // notice we do not post the id and uuid... those are generaetd by the server (would be ignored if we sent them)
+        cities.add("folsom");
+        cities.add("sacramento");
+        Tag[] tags = new Tag[]{new Tag("state", "1.1.1.1", states), new Tag("city", "2.2.2.2", cities)};
+        Tag[] results = At.tags().post(tags, Tag[].class);
+        log.debug("Posted {} tags", results.length);
+        for (int i = 0; i < results.length; i++) {
+            Tag tag = results[i];
+            log.debug("Posted tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s values:%s", String.valueOf(tag.getId()), tag.getUuid(), tag.getName(), tag.getOid(), StringUtils.join(tag.getValues(), ", ")));
+        }
+        // now create a selection with these tags
+        Selection selection = new Selection("default");
+        selection.setTags(new ArrayList<SelectionTagValue>());
+        selection.getTags().add(new SelectionTagValue(results[0].getName(), results[0].getOid(), results[0].getValues().get(0)));
+        selection.getTags().add(new SelectionTagValue(results[1].getName(), results[1].getOid(), results[1].getValues().get(1)));
+        log.debug("prepared selections: "+mapper.writeValueAsString(selection));
+        Selection[] createdSelections = At.selections().post(new Selection[] { selection }, Selection[].class);
+        log.debug("created {} new selections", createdSelections.length);
+        for(int i=0; i<createdSelections.length; i++) {
+            Selection s = createdSelections[i];
+            log.debug("Confirmed created selection: {}", String.format("id:%s  uuid:%s  name:%s", String.valueOf(s.getId()), s.getUuid(), s.getName()));
+        }
+    }
+    
+    
+    @Test
     public void testPostCertificateRequests() throws IOException {
         // before we can make a certificate request, we need to define tags and tag values!
         Tag[] tags = new Tag[]{
@@ -578,16 +610,24 @@ public class TagApiTest2 {
     public void testUpdateExistingConfiguration() throws IOException {
         // create a rdfTriple so we have an existing rdfTriple
         Configuration main = At.configuration("main").get(Configuration.class);
-        log.debug("Existing configuration: {}", String.format("id:%s uuid:%s name:%s contentType:%s content:%s", String.valueOf(main.getId()), main.getUuid(), main.getName(), main.getContentType().name(), main.getContentText()));
-        main.setContentText("{\"allowTagsInCertificateRequests\":\"true\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}");
+        log.debug("Existing configuration: {}", String.format("id:%s uuid:%s name:%s contentType:%s content:%s", String.valueOf(main.getId()), main.getUuid(), main.getName(), main.getContentType().name(), main.getContent()));
+        main.setContent("{\"allowTagsInCertificateRequests\":\"true\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}");
         log.debug("Updating: {}", mapper.writeValueAsString(main));
         Configuration updatedMain = At.configuration("main").put(main, Configuration.class);
-        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s contentType:%s content:%s", updatedMain.getUuid(), updatedMain.getName(), updatedMain.getContentType().name(), updatedMain.getContentText()));
+        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s contentType:%s content:%s", updatedMain.getUuid(), updatedMain.getName(), updatedMain.getContentType().name(), updatedMain.getContent()));
         // output: Existing rdfTriple: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
     }
     
+    @Test
+    public void testUpdateExistingConfigurationWithPut() throws IOException {
+        String input = "{\"uuid\":\"9e552d4f-097d-473b-a53e-0fe17ffec8a8\",\"links\":{},\"name\":\"main\",\"contentType\":\"JSON\",\"jsonContent\":{\"allowTagsInCertificateRequests\":\"false\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}}";
+        String updatedMain = At.configuration("main").put(input, String.class);
+        log.debug("Response: {}", updatedMain);
+        Configuration main = mapper.readValue(updatedMain, Configuration.class);
+        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s contentType:%s content:%s", main.getUuid(), main.getName(), main.getContentType().name(), main.getContent()));        
+    }
     
-
+ 
     private void report(CertificateRequest[] certificateRequests) throws JsonProcessingException {
         log.debug("Report: {} certificate-requests", certificateRequests.length);
         for (CertificateRequest certificateRequest : certificateRequests) {

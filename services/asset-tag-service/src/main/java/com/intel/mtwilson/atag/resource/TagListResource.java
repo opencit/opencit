@@ -111,6 +111,11 @@ public class TagListResource extends ServerResource {
      * http://blog.restlet.com/2006/11/15/reconsidering-content-negotiation/
      * http://www.jooq.org/doc/3.1/manual/sql-building/table-expressions/nested-selects/
      * 
+     * http://www.jooq.org/doc/2.4/manual/JOOQ/ResultQuery/
+     * http://comments.gmane.org/gmane.comp.java.jooq.user/1771
+     * http://www.jooq.org/javadoc/2.3.x/org/jooq/impl/Factory.html
+     * http://www.jooq.org/javadoc/latest/org/jooq/impl/DSL.html
+     * 
      * Because tag values are in a separate table, if the client wants to find tags that
      * have specific values, we need to search for those values first. 
      * 
@@ -189,6 +194,7 @@ public class TagListResource extends ServerResource {
             tags[i].setValues(values);
             i++;
         }
+        sql.close();
         log.debug("Closing tag-value dao");
         log.debug("Returning {} tags", tags.length);
         return tags;

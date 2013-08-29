@@ -45,52 +45,16 @@ public class Configuration extends Document {
         return name;
     }
 
-    /**
-     * Return value varies by content type.
-     * JSON: JsonNode (jackson)
-     * XML: JsonNode (jackson)
-     * YAML: String
-     * PROPERTIES: String
-     * @return 
-     */
-    public Object getContent() {
-        try {
-            if( ContentType.JSON.equals(contentType)) {
-                return json.readTree(content);
-            }
-            /* disabled because it currently doesn't serialize back to json well... see test.jackson.ConfigurationJsonTest for details
-            else if( ContentType.XML.equals(contentType)) {
-                return xml.readTree(content);
-            }
-            */
-            /**
-             * TODO: XML, YAML, and Java PROPERTIES formats
-             * Jackson has a plugin for YAML, so to quickly add support for YAML format, check out https://github.com/FasterXML/jackson-dataformat-yaml
-             */
-            else if( ContentType.PROPERTIES.equals(contentType) ) {
-                Properties p = new Properties();
-                p.load(new StringReader(content));
-                return p;
-            }
-            else {
-                return content;
-            }
-        }
-        catch(IOException e) {
-            log.warn("Cannot deserialize content of type: {}", contentType, e);
-            return null;
-        }
-    }
-    
-    @JsonIgnore
-    public String getContentText() {
+
+    public String getContent() {
+        log.debug("getContent");
         return content;
     }
     
-    @JsonIgnore
     public JsonNode getJsonContent() {
         try {
             if( ContentType.JSON.equals(contentType)) {
+                log.debug("getJsonContent");
                 return json.readTree(content);
             }
             else {
@@ -148,16 +112,21 @@ public class Configuration extends Document {
         this.name = name;
     }
 
-    public void setContent(Object content) throws JsonProcessingException {
-        this.content = json.writeValueAsString(content);
-    }
-    
-    @JsonIgnore
-    public void setContentText(String content) {
+    public void setContent(String content) {
         this.content = content;
+        log.debug("setContent: {}", this.content);
     }
 
+    public void setJsonContent(JsonNode content) throws JsonProcessingException {
+        if( content != null && content.isObject() ) {
+            log.debug("setJsonContent called with object");
+            this.content = json.writeValueAsString(content);        
+            log.debug("setJsonContent: {}", this.content);
+        }
+    }
+    
     public void setContentType(ContentType contentType) {
+        log.debug("setContentType: {}", contentType.name());
         this.contentType = contentType;
     }
     

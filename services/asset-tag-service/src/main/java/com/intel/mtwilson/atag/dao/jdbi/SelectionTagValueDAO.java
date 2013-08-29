@@ -45,7 +45,7 @@ public interface SelectionTagValueDAO {
     List<SelectionTagValue> findBySelectionId(@Bind("selectionId") long selectionId);
 
     // this one returns the records WITH associated information (so tag id, but also tag name and oid, and tag value id, but also tag value text)
-    @SqlQuery("select selection_tag_value.id,selection_tag_value.selectionId,selection_tag_value.tagId,selection_tag_value.tagValueId,tag.name,tag.oid,tag_value.value from selection_tag_value,tag,tag_value where selection_tag_value.selectionId=:selectionId and tag.id=selection_tag_value.tagId and tag_value.id=selection_tag_value.tagValueId")
+    @SqlQuery("select selection_tag_value.id,selection_tag_value.selectionId,selection_tag_value.tagId,selection_tag_value.tagValueId,tag.uuid,tag.name,tag.oid,tag_value.value from selection_tag_value,tag,tag_value where selection_tag_value.selectionId=:selectionId and tag.id=selection_tag_value.tagId and tag_value.id=selection_tag_value.tagValueId")
     List<SelectionTagValue> findBySelectionIdWithValues(@Bind("selectionId") long selectionId);
     
     @SqlQuery("select id,selectionId,tagId,tagValueId from selection_tag_value where tagId=:tagId")

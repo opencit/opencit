@@ -201,6 +201,11 @@ public class Derby {
     return dbi.open(ConfigurationDAO.class);
   } 
  
+ public static FileDAO fileDao() throws SQLException {
+//     createTables();
+    DBI dbi = new DBI(getDataSource());
+    return dbi.open(FileDAO.class);
+  } 
  
   // helper methods for JOOQ
  

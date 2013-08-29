@@ -60,7 +60,14 @@ Configuration: {"uuid":"702045f2-86d6-463a-902a-e36f4d80d723","links":{"author":
 
     @Test
     public void writeJsonConfiguration() throws IOException {
-        String input = "{\"uuid\":\"9e552d4f-097d-473b-a53e-0fe17ffec8a8\",\"links\":{},\"name\":\"main\",\"contentType\":\"JSON\",\"content\":{\"allowTagsInCertificateRequests\":\"true\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}}";
+        String input = "{\"uuid\":\"9e552d4f-097d-473b-a53e-0fe17ffec8a8\",\"links\":{},\"name\":\"main\",\"contentType\":\"JSON\",\"jsonContent\":{\"allowTagsInCertificateRequests\":true,\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}}";
+        Configuration configuration = mapper.readValue(input, Configuration.class);
+        log.debug("Configuration: {}", mapper.writeValueAsString(configuration));  
+    }
+    
+    @Test
+    public void writeJsonConfiguration2() throws IOException {
+        String input = "{\"uuid\":\"9e552d4f-097d-473b-a53e-0fe17ffec8a8\",\"links\":{},\"name\":\"main\",\"contentType\":\"JSON\",\"jsonContent\":{\"allowTagsInCertificateRequests\":\"false\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}}";
         Configuration configuration = mapper.readValue(input, Configuration.class);
         log.debug("Configuration: {}", mapper.writeValueAsString(configuration));  
     }

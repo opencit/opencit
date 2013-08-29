@@ -33,7 +33,7 @@ import java.util.HashMap;
 public class Document {
     @JsonIgnore private long id;
     private UUID uuid;
-    private HashMap<String,URL> links = new HashMap<String,URL>();
+    private HashMap<String,URL> links; // don't set it so it will be omitted when empty...   = new HashMap<String,URL>();
 
     public Document() {
     }
@@ -72,7 +72,10 @@ public class Document {
      * @param link 
      */
     public void addLink(String rel, URL link) {
-        this.links.put(rel, link);
+        if( links == null ) {
+            links = new HashMap<String,URL>();
+        }
+        links.put(rel, link);
     }
 
 }

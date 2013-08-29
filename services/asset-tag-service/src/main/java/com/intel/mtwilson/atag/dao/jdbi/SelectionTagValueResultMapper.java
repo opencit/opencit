@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.atag.dao.jdbi;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.atag.JdbcUtil;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
 import java.sql.ResultSet;
@@ -27,9 +28,10 @@ public class SelectionTagValueResultMapper implements ResultSetMapper<SelectionT
         JdbcUtil.describeResultSet(rs);
         SelectionTagValue crtv = new SelectionTagValue(rs.getLong("id"), rs.getLong("selectionId"), rs.getLong("tagId"), rs.getLong("tagValueId"));
         if( rs.getMetaData().getColumnCount() > 4 ) { // 4 is id, certificate request id, tag id, tag value id;  7 adds tag name, tag oid, and tag value
-            crtv.setName(rs.getString("name"));
-            crtv.setOid(rs.getString("oid"));
-            crtv.setValue(rs.getString("value"));
+            crtv.setTagName(rs.getString("name"));
+            crtv.setTagOid(rs.getString("oid"));
+            crtv.setTagValue(rs.getString("value"));
+            crtv.setTagUuid(UUID.valueOf(rs.getString("uuid")));
         }
         return crtv;
     }

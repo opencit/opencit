@@ -7,28 +7,29 @@ package com.intel.mtwilson.atag.model;
 //import com.intel.dcsg.cpg.io.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.intel.dcsg.cpg.io.UUID;
 
 
 /**
  * 
  * @author jbuhacoff
  */
-public class SelectionTagValue {
+public class SelectionTagValue extends Document {
     // this record links a tag instance (tag id and value id) to a certificate request
-    private long id;
     private long selectionId;
     private long tagId;
     private long tagValueId;
     // name, oid, and value are provided as inputs by API users; they are looked up in the database to populate the id fields above
-    private String name;
-    private String oid;
-    private String value;
+    private UUID tagUuid;
+    private String tagName;
+    private String tagOid;
+    private String tagValue;
 
     public SelectionTagValue() {
     }
 
     public SelectionTagValue(long id, long selectionId, long tagId, long tagValueId) {
-        this.id = id;
+        setId(id);
         this.selectionId = selectionId;
         this.tagId = tagId;
         this.tagValueId = tagValueId;
@@ -36,15 +37,11 @@ public class SelectionTagValue {
 
     public SelectionTagValue(String name, String oid, String value) {
 //        this.id = id;
-        this.name = name;
-        this.oid = oid;
-        this.value = value;
+        this.tagName = name;
+        this.tagOid = oid;
+        this.tagValue = value;
     }
     
-    @JsonIgnore
-    public long getId() {
-        return id;
-    }
 
     @JsonIgnore
     public long getSelectionId() {
@@ -61,25 +58,24 @@ public class SelectionTagValue {
         return tagValueId;
     }
 
-    public String getName() {
-        return name;
+    public UUID getTagUuid() {
+        return tagUuid;
     }
 
-    public String getOid() {
-        return oid;
+    
+    public String getTagName() {
+        return tagName;
     }
 
-    public String getValue() {
-        return value;
+    public String getTagOid() {
+        return tagOid;
+    }
+
+    public String getTagValue() {
+        return tagValue;
     }
     
     
-
-    @JsonIgnore
-    public void setId(long id) {
-        this.id = id;
-    }
-
     @JsonIgnore
     public void setSelectionId(long selectionId) {
         this.selectionId = selectionId;
@@ -95,17 +91,23 @@ public class SelectionTagValue {
         this.tagValueId = tagValueId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTagUuid(UUID tagUuid) {
+        this.tagUuid = tagUuid;
     }
 
-    public void setOid(String oid) {
-        this.oid = oid;
+    
+    public void setTagName(String name) {
+        this.tagName = name;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setTagOid(String oid) {
+        this.tagOid = oid;
     }
+
+    public void setTagValue(String value) {
+        this.tagValue = value;
+    }
+
 
 
     
