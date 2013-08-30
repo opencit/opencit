@@ -823,7 +823,7 @@ public class HostBO extends BaseBO {
         String hostUUID;
         
         try {
-            log.debug("Starting the procedure to map the asset tag certificate for host {0}.", host.getHostName().toString());
+            log.debug("Starting the procedure to map the asset tag certificate for host {}.", host.getHostName().toString());
             
             // First let us find if the asset tag is configured for this host or not. This information
             // would be available in the mw_asset_tag_certificate table, where the host's UUID would be
@@ -831,7 +831,7 @@ public class HostBO extends BaseBO {
             if (hostAttributes != null && hostAttributes.containsKey("Host_UUID")) {
                 hostUUID = hostAttributes.get("Host_UUID");
             } else {
-                log.info("Since UUID for the host {0} is not specified, asset tag would not be configured.", host.getHostName().toString());
+                log.info("Since UUID for the host {} is not specified, asset tag would not be configured.", host.getHostName().toString());
                 return;
             }
             
@@ -839,7 +839,7 @@ public class HostBO extends BaseBO {
             AssetTagCertBO atagCertBO = new AssetTagCertBO();
             MwAssetTagCertificate atagCert = atagCertBO.findValidAssetTagCertForHost(hostUUID);
             if (atagCert != null) {
-                log.debug("Found a valid asset tag certificate for the host {0} with UUID {1}.", host.getHostName().toString(), hostUUID);
+                log.debug("Found a valid asset tag certificate for the host {} with UUID {}.", host.getHostName().toString(), hostUUID);
                 // Now that there is a asset tag certificate for the host, let us retrieve the host ID and update
                 // the asset tag certificate with that ID
                 TblHosts tblHost = My.jpa().mwHosts().findByName(host.getHostName().toString());
@@ -850,17 +850,17 @@ public class HostBO extends BaseBO {
                     
                     boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHost(atagMapRequest);
                     if (mapAssetTagCertToHost)
-                        log.info("Successfully mapped the asset tag certificate with UUID {0} to host {1}", atagCert.getUuid(), tblHost.getName());
+                        log.info("Successfully mapped the asset tag certificate with UUID {} to host {}", atagCert.getUuid(), tblHost.getName());
                     else
-                        log.info("No valid asset tag certificate configured for the host {0}.", tblHost.getName());
+                        log.info("No valid asset tag certificate configured for the host {}.", tblHost.getName());
                 }
             } else {
-                log.info("No valid asset tag certificate configured for the host {0}.", host.getHostName().toString());
+                log.info("No valid asset tag certificate configured for the host {}.", host.getHostName().toString());
             }
             
         } catch (Exception ex) {
             // Log the error and return back.
-            log.info("Error during asset tag configuration for the host {0}. Details: {1}.", host.getHostName().toString(), ex.getMessage());
+            log.info("Error during asset tag configuration for the host {}. Details: {}.", host.getHostName().toString(), ex.getMessage());
         }
         
     }
@@ -872,7 +872,7 @@ public class HostBO extends BaseBO {
      */
     private void unmapAssetTagCertFromHost(Integer id, String name) {
         try {
-            log.debug("Starting the procedure to unmap the asset tag certificate from host {0}.", name);
+            log.debug("Starting the procedure to unmap the asset tag certificate from host {}.", name);
                         
             AssetTagCertBO atagCertBO = new AssetTagCertBO();
             AssetTagCertAssociateRequest atagUnmapRequest = new AssetTagCertAssociateRequest();
@@ -880,13 +880,13 @@ public class HostBO extends BaseBO {
                     
             boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHost(atagUnmapRequest);
             if (unmapAssetTagCertFromHost)
-                log.info("Successfully unmapped the asset tag certificate from host {0}", name);
+                log.info("Either the asset tag certificate was successfully unmapped from the host {} or there was not asset tag certificate associated.", name);
             else
-                log.info("Either there were errors or no asset tag certificate was configured for the host {0}.", name);
+                log.info("Either there were errors or no asset tag certificate was configured for the host {}.", name);
             
         } catch (Exception ex) {
             // Log the error and return back.
-            log.info("Error during asset tag unmapping for the host {0}. Details: {1}.", name, ex.getMessage());
+            log.info("Error during asset tag unmapping for the host {}. Details: {}.", name, ex.getMessage());
         }
     }
 }

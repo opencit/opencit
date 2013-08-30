@@ -57,7 +57,7 @@ public class AssetTagCertBO extends BaseBO{
             try {
                 x509AttrCert = X509AttributeCertificate.valueOf(atagObj.getCertificate());
             } catch (IllegalArgumentException ce) {
-                log.error("Error during retrieval of a new asset tag certificate. Error Details - {0}.", ce.getMessage());
+                log.error("Error during retrieval of a new asset tag certificate. Error Details - {}.", ce.getMessage());
                 throw new ASException(ce, ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE, ce.getMessage());
             }            
             
@@ -74,10 +74,10 @@ public class AssetTagCertBO extends BaseBO{
             result = true;
             
         } catch (ASException ase) {
-            log.error("Error during creation of a new asset tag certificate. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            log.error("Error during creation of a new asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during creation of a new asset tag certificate. Error Details - {0}.", ex.getMessage());
+            log.error("Unexpected error during creation of a new asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         return result;       
@@ -112,10 +112,10 @@ public class AssetTagCertBO extends BaseBO{
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
         } catch (ASException ase) {
-            log.error("Error during mapping of host to the asset tag certificate. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            log.error("Error during mapping of host to the asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during mapping of host to the asset tag certificate. Error Details - {0}.", ex.getMessage());
+            log.error("Unexpected error during mapping of host to the asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         return result;       
@@ -158,10 +158,10 @@ public class AssetTagCertBO extends BaseBO{
                 throw new ASException(ErrorCode.AS_HOST_SPECIFIED_IS_CURRENTLY_NOT_MAPPED_TO_ASSET_TAG_CERTIFICATE);
             }            
         } catch (ASException ase) {
-            log.error("Error during unmapping of the host from asset tag certificate. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            log.error("Error during unmapping of the host from asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during unmapping of the host from asset tag certificate. Error Details - {0}.", ex.getMessage());
+            log.error("Unexpected error during unmapping of the host from asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         return result;       
@@ -195,10 +195,10 @@ public class AssetTagCertBO extends BaseBO{
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
         } catch (ASException ase) {
-            log.error("Error during revocation of the asset tag certificate. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            log.error("Error during revocation of the asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during revocation of the new asset tag certificate. Error Details - {0}.", ex.getMessage());
+            log.error("Unexpected error during revocation of the new asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         return result;       
@@ -218,27 +218,27 @@ public class AssetTagCertBO extends BaseBO{
             if (uuid != null && !uuid.isEmpty()) {
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID(uuid);
                 if (atagCerts.isEmpty()) {
-                    log.info("Asset tag certificate has not been provisioned for the host with UUID : {0}.", uuid);
+                    log.info("Asset tag certificate has not been provisioned for the host with UUID : {}.", uuid);
                     return null;
                 } else {
                     // For each of the asset tag certs that are returned back, we need to validate the certificate first.
                     for (MwAssetTagCertificate atagTempCert : atagCerts){
                         if (validateAssetTagCert(atagTempCert)) {
-                            log.debug("Valid asset tag certificate found for host with UUID {0}.", uuid);
+                            log.debug("Valid asset tag certificate found for host with UUID {}.", uuid);
                             return atagTempCert;
                         }
                     }
-                    log.info("No valid asset tag certificate found for host with UUID {0}.", uuid);
+                    log.info("No valid asset tag certificate found for host with UUID {}.", uuid);
                 }
             } else {
                 log.error("UUID specified for the host is not valid.");
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND);
             }            
         } catch (ASException ase) {
-            log.error("Error during querying of valid asset tag certificate. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            log.error("Error during querying of valid asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during querying of valid asset tag certificate. Error Details - {0}.", ex.getMessage());
+            log.error("Unexpected error during querying of valid asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         
@@ -254,28 +254,28 @@ public class AssetTagCertBO extends BaseBO{
             if (hostID != 0) {
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(hostID);
                 if (atagCerts.isEmpty()) {
-                    log.info("Asset tag certificate has not been provisioned for the host with ID : {0}.", hostID);
+                    log.info("Asset tag certificate has not been provisioned for the host with ID : {}.", hostID);
                     return null;
                 } else {
                     // For each of the asset tag certs that are returned back, we need to validate the certificate first.
                     // Ideally there should be only one that is valid.
                     for (MwAssetTagCertificate atagTempCert : atagCerts){
                         if (validateAssetTagCert(atagTempCert)) {
-                            log.debug("Valid asset tag certificate found for host with ID {0}.", hostID);
+                            log.debug("Valid asset tag certificate found for host with ID {}.", hostID);
                             return atagTempCert;
                         }
                     }
-                    log.info("No valid asset tag certificate found for host with ID {0}.", hostID);
+                    log.info("No valid asset tag certificate found for host with ID {}.", hostID);
                 }
             } else {
                 log.error("ID specified for the host is not valid.");
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND);
             }            
         } catch (ASException ase) {
-            log.error("Error during querying of valid asset tag certificate using host ID. Error Details - {0}:{1}.", ase.getErrorCode(), ase.getErrorMessage());
+            log.error("Error during querying of valid asset tag certificate using host ID. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during querying of valid asset tag certificate using host ID. Error Details - {0}.", ex.getMessage());
+            log.error("Unexpected error during querying of valid asset tag certificate using host ID. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         

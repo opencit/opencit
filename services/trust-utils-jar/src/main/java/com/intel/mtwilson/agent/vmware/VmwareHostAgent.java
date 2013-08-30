@@ -380,9 +380,11 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             hostUUID = vmware.getMORProperty(hostMOR, "hardware.systemInfo.uuid").toString();
         } catch (InvalidPropertyFaultMsg ex) {
             // since we got an exception, let us make sure it is empty.
+            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
             hostUUID = "";
         } catch (RuntimeFaultFaultMsg ex) {
             // since we got an exception, let us make sure it is empty.
+            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
             hostUUID = "";
         }
         hm.put("Host_UUID", hostUUID);
