@@ -2,6 +2,7 @@
 
 Fixed ByteArray.fromHex to preserve leading zeros.
 Added HexInput and HexUtil and Base64Util
+Added Iso8601.valueOf(String) and Rfc822Date.valueOf(String)
 
 * Version 0.1.1
 

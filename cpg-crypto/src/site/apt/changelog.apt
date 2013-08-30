@@ -1,6 +1,10 @@
 * Version 0.1.3-SNAPSHOT
 
 Removed HexInput, HexUtil, and Base64Util; they can now be found in cpg-io-0.1.2
+Improved RsaUtil.decodePemPublicKey, RsaUtil.decodePemPrivateKey, and X509Util.decodePemCertificate to recognize the
+first block of valid data from a string containing possibly multiple blocks and surrounding text. This allows you
+to create a single file containing both a private key and public key or private key and certificate and parse each
+one out separately using the corresponding decode method.
 
 * Version 0.1.2-SNAPSHOT
 
