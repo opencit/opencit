@@ -6,31 +6,36 @@ package com.intel.dcsg.cpg.net;
  */
 
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  *
  * @author jbuhacoff
  */
 public class InetAddressTest {
+    private final Logger log = LoggerFactory.getLogger(getClass());
     @Test
     public void testInetAddress() throws UnknownHostException {
         InetAddress a = InetAddress.getByName("10.1.71.80");
-        System.out.println(a.toString()); // prints  "/ip"  because a reverse hostname lookup is not possible,  and optional
+        log.debug(a.toString()); // prints  "/ip"  because a reverse hostname lookup is not possible,  and optional
     }
 
     @Test
     public void testInvalidInetAddress() throws UnknownHostException {
         InetAddress a = InetAddress.getByName("10.1.x71.80"); // throws UnknownHostException because we don't have DNS... 
-        System.out.println(a.toString()); 
+        log.debug(a.toString()); 
     }
     
     @Test
     public void testInetAddressLookup() throws UnknownHostException {
         InetAddress b = InetAddress.getByName("mtwilsondev"); // throws UnknownHostException because we don't have DNS...
-        System.out.println(b.toString()); // would print  "mtwilsondev/10.1.71.80" if it could look it up
+        log.debug(b.toString()); // would print  "mtwilsondev/10.1.71.80" if it could look it up
     }
     
     @Test
@@ -67,4 +72,21 @@ public class InetAddressTest {
     
     
     }
+    
+    @Test
+    public void testJsonSerialize() throws IOException {
+        InternetAddress address = new InternetAddress("localhost");
+        ObjectMapper mapper = new ObjectMapper(); // or from  org.fasterxml.jackson.databind.ObjectMapper
+        log.debug("InternetAddress: {}", mapper.writeValueAsString(address));
+    }
+
+    @Test
+    public void testJsonDeserialize() throws IOException {
+        String input = "\"localhost\""; // json, so quotes are part of the input
+        ObjectMapper mapper = new ObjectMapper(); // or from  org.fasterxml.jackson.databind.ObjectMapper
+        InternetAddress address = mapper.readValue(input, InternetAddress.class);
+        log.debug("InternetAddress: {}", mapper.writeValueAsString(address));
+    }
+    
+    
 }

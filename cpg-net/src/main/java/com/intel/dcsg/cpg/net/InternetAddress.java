@@ -64,6 +64,8 @@ public class InternetAddress extends ObjectModel {
         fault("Unrecognized Internet Address format: %s", input);
     }
     
+    @org.codehaus.jackson.annotate.JsonValue
+    @com.fasterxml.jackson.annotation.JsonValue
     @Override
     public String toString() { return input; }
     
