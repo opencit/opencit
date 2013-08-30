@@ -50,13 +50,22 @@ public class CertificateResource extends ServerResource {
     @Get("json|xml")
     public Certificate existingCertificate() {
         String uuid = getAttribute("id");
-        return dao.findByUuid(UUID.valueOf(uuid));
+        Certificate certificate = dao.findByUuid(UUID.valueOf(uuid));
+        if( certificate == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return certificate;
     }
     
     @Get("bin")
     public byte[] existingCertificateContent() {
         String uuid = getAttribute("id");
         Certificate certificate = dao.findByUuid(UUID.valueOf(uuid)); 
+        if( certificate == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
         return certificate.getCertificate();
     }
     
@@ -64,6 +73,10 @@ public class CertificateResource extends ServerResource {
     public String existingCertificateContentPem() throws IOException {
         String uuid = getAttribute("id");
         Certificate certificate = dao.findByUuid(UUID.valueOf(uuid)); 
+        if( certificate == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
         log.debug("resource url: {}", getRequest().getResourceRef().getIdentifier());
         Pem pem = new Pem("X509 ATTRIBUTE CERTIFICATE", certificate.getCertificate());
         pem.getHeaders().put("URL", My.configuration().getAssetTagServerURL()+"/certificates/"+uuid);
@@ -73,8 +86,12 @@ public class CertificateResource extends ServerResource {
     @Delete
     public void deleteCertificate() {
         String uuid = getAttribute("id");
-        Certificate tag = dao.findByUuid(UUID.valueOf(uuid));
-        dao.delete(tag.getId());
+        Certificate certificate = dao.findByUuid(UUID.valueOf(uuid));
+        if( certificate == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
+        dao.delete(certificate.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
 

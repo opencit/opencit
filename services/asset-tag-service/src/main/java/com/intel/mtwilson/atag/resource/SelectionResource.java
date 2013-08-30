@@ -47,13 +47,22 @@ public class SelectionResource extends ServerResource {
     @Get("json")
     public Selection existingSelection() {
         String uuid = getAttribute("id");
-        return dao.findByUuid(UUID.valueOf(uuid));
+        Selection selection = dao.findByUuid(UUID.valueOf(uuid));
+        if( selection == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return selection;
     }
 
     @Delete
     public void deleteSelection() {
         String uuid = getAttribute("id");
         Selection selection = dao.findByUuid(UUID.valueOf(uuid));
+        if( selection == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
         dao.delete(selection.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
@@ -66,6 +75,10 @@ public class SelectionResource extends ServerResource {
     public Selection updateSelection(Selection updatedSelection) throws SQLException {
         String uuid = getAttribute("id");
         Selection existingSelection = dao.findByUuid(UUID.valueOf(uuid));
+        if( existingSelection == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
         dao.update(existingSelection.getId(), updatedSelection.getSubject(), updatedSelection.getPredicate(), updatedSelection.getObject());
         return updatedSelection;
     }

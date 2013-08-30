@@ -222,17 +222,8 @@ public class RepositoryTest {
         for(CertificateRequest certificateRequest : certificateRequests) {
             log.debug("uuid: {}", certificateRequest.getUuid());
             log.debug("subject: {}", certificateRequest.getSubject());
-            ArrayList<String> tagpairs = new ArrayList<String>();
-            List<CertificateRequestTagValue> tags = certificateRequest.getTags();
-            if( tags == null ) {
-                log.debug("tags property is null");
-            }
-            else {
-                for(CertificateRequestTagValue tag : tags) {
-                    tagpairs.add(String.format("(%s: %s)", tag.getName(), tag.getValue()));
-                }
-                log.debug("certificate-request: {}", String.format("uuid:%s  subject:%s  tags: %s", certificateRequest.getUuid(), certificateRequest.getSubject(), StringUtils.join(tagpairs, " ")));
-            }
+            log.debug("selection: {}", certificateRequest.getSelection());
+            log.debug("status: {}", certificateRequest.getStatus());
         }
     }
     private void report(CertificateRequestTagValue[] certificateRequestTagValues) throws JsonProcessingException {

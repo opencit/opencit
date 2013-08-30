@@ -47,14 +47,23 @@ public class RdfTripleResource extends ServerResource {
     @Get("json")
     public RdfTriple existingRdfTriple() {
         String uuid = getAttribute("id");
-        return dao.findByUuid(UUID.valueOf(uuid));
+        RdfTriple rdf = dao.findByUuid(UUID.valueOf(uuid));
+        if( rdf == null ) {            
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return rdf;
     }
 
     @Delete
     public void deleteRdfTriple() {
         String uuid = getAttribute("id");
-        RdfTriple tag = dao.findByUuid(UUID.valueOf(uuid));
-        dao.delete(tag.getId());
+        RdfTriple rdf = dao.findByUuid(UUID.valueOf(uuid));
+        if( rdf == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
+        dao.delete(rdf.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
 
@@ -62,6 +71,10 @@ public class RdfTripleResource extends ServerResource {
     public RdfTriple updateRdfTriple(RdfTriple updatedTriple) throws SQLException {
         String uuid = getAttribute("id");
         RdfTriple existingRdfTriple = dao.findByUuid(UUID.valueOf(uuid));
+        if( existingRdfTriple == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
         dao.update(existingRdfTriple.getId(), updatedTriple.getSubject(), updatedTriple.getPredicate(), updatedTriple.getObject());
         return updatedTriple;
     }

@@ -475,9 +475,43 @@ public class TagApiTest2 {
         }
     }
     
+    @Test
+    public void testPostCertificateRequestWithDefaultSelection() throws IOException {
+        // no need to insert tags or selections... this test assumes they are already defined in the database and configured for automatic certificate requests
+        // we just provide a subject (host uuid) .
+        // XXX TODO the certificate request subject is a String, but since we expect a UUID we should probably change that type... 
+        CertificateRequest req1 = new CertificateRequest(new UUID().toString()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
+
+        CertificateRequest[] certificateRequests = new CertificateRequest[]{ req1 };
+        log.debug("testPostCertificateRequests: {}", mapper.writeValueAsString(certificateRequests));
+        CertificateRequest[] results = At.certificateRequests().post(certificateRequests, CertificateRequest[].class);
+        log.debug("testPostCertificateRequests results: {}", mapper.writeValueAsString(results));
+        report(results);
+    }    
     
     @Test
-    public void testPostCertificateRequests() throws IOException {
+    public void testPostMultipleCertificateRequestsWithDefaultSelection() throws IOException {
+        // no need to insert tags or selections... this test assumes they are already defined in the database and configured for automatic certificate requests
+        // we just provide a subject (host uuid) .
+        // XXX TODO the certificate request subject is a String, but since we expect a UUID we should probably change that type... 
+        CertificateRequest req1 = new CertificateRequest(new UUID().toString()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
+        CertificateRequest req2 = new CertificateRequest(new UUID().toString()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
+        CertificateRequest req3 = new CertificateRequest(new UUID().toString()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "MX"), new CertificateRequestTagValue("city", null, "Mexico City")}));
+
+        CertificateRequest[] certificateRequests = new CertificateRequest[]{
+            req1,
+            req2,
+            req3
+        };
+        log.debug("testPostCertificateRequests: {}", mapper.writeValueAsString(certificateRequests));
+        CertificateRequest[] results = At.certificateRequests().post(certificateRequests, CertificateRequest[].class);
+        log.debug("testPostCertificateRequests results: {}", mapper.writeValueAsString(results));
+        report(results);
+    }    
+    
+    
+    @Test
+    public void testPostCertificateRequestsWithSelection() throws IOException {
         // before we can make a certificate request, we need to define tags and tag values!
         Tag[] tags = new Tag[]{
             new Tag("country", OID_CUSTOMER_ROOT + ".5.1.1.1", new String[]{"US", "MX"}),
@@ -487,10 +521,20 @@ public class TagApiTest2 {
         Tag[] insertedTags = At.tags().post(tags, Tag[].class);
         report(insertedTags);
 
+        Selection selection = new Selection("test selection");
+        selection.setTags(new ArrayList<SelectionTagValue>());
+        for(Tag insertedTag : insertedTags) {
+            for(String value : insertedTag.getValues()) {
+                selection.getTags().add(new SelectionTagValue(insertedTag.getName(), insertedTag.getOid(), value));
+            }
+        }
+        Selection[] insertedSelections = At.selections().post(new Selection[] { selection }, Selection[].class);
+        report(insertedSelections);
+        
         // XXX TODO the certificate request subject is a String, but since we expect a UUID we should probably change that type... 
-        CertificateRequest req1 = new CertificateRequest(new UUID().toString(), Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
-        CertificateRequest req2 = new CertificateRequest(new UUID().toString(), Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
-        CertificateRequest req3 = new CertificateRequest(new UUID().toString(), Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "MX"), new CertificateRequestTagValue("city", null, "Mexico City")}));
+        CertificateRequest req1 = new CertificateRequest(new UUID().toString(), insertedSelections[0].getName()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
+        CertificateRequest req2 = new CertificateRequest(new UUID().toString(), insertedSelections[0].getName()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
+        CertificateRequest req3 = new CertificateRequest(new UUID().toString(), insertedSelections[0].getName()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "MX"), new CertificateRequestTagValue("city", null, "Mexico City")}));
 
         CertificateRequest[] certificateRequests = new CertificateRequest[]{
             req1,
@@ -503,11 +547,11 @@ public class TagApiTest2 {
         report(results);
     }
 
+    // for this test to work you should disable automatic approval... XXX TODO or maybe we should rewrite it to insert the certicate request using a DAO directly and THEN poll for it and approve it
     @Test
     public void testApproveCertificateRequest() throws IOException, NoSuchAlgorithmException {
         // first delete all existing certificate requests
-        ClientResource resource = At.certificateRequests();
-        CertificateRequest[] existingRequests = resource.get(CertificateRequest[].class);
+        CertificateRequest[] existingRequests = At.certificateRequests().get(CertificateRequest[].class);
         log.debug("There are {} existing certificate-requests", existingRequests.length);
         for (CertificateRequest existingRequest : existingRequests) {
             log.debug("{}", mapper.writeValueAsString(existingRequest));
@@ -518,19 +562,21 @@ public class TagApiTest2 {
             log.debug("Deleting certificate-request: {}", (existingRequest.getUuid() == null ? "(no uuid, skipping)" : existingRequest.getUuid()));
             At.certificateRequest(existingRequest.getUuid()).delete();
         }
-        // first create a certificate request
-        testPostCertificateRequests();
+        // create a certificate request
+        testPostMultipleCertificateRequestsWithDefaultSelection(); // or testPostCertificateRequestsWithSelection
         // now find the latest pending certificate requests
-        CertificateRequest[] recentRequests = resource.get(CertificateRequest[].class);
+        CertificateRequest[] recentRequests = At.certificateRequests().get(CertificateRequest[].class);
         // create a certificate for each one with a new randomly generated issuer
         KeyPair cakey = RsaUtil.generateRsaKeyPair(2048); // throws NoSuchAlgorithmException
         X509Certificate cacert = X509Builder.factory().selfSigned("CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US", cakey).build();
 
         for (CertificateRequest recentRequest : recentRequests) {
             if( recentRequest == null ) {
-                log.debug("Null recent requests");
+                log.debug("Skipping null certificate request");
                 continue;
             }
+            // load the tags in the selection of this request
+            Selection selection = At.selections(recentRequest.getSelection()).get(Selection.class);
             log.debug("Building certificate for request: {}", recentRequest.getSubject());
             X509AttrBuilder builder = X509AttrBuilder.factory()
                     .issuerName(cacert)
@@ -538,9 +584,9 @@ public class TagApiTest2 {
                     .randomSerial()
                     .subjectUuid(UUID.valueOf(recentRequest.getSubject()))
                     .expires(7, TimeUnit.DAYS);
-            for (CertificateRequestTagValue tag : recentRequest.getTags()) {
-                log.debug("Adding attribute: {} = {}", tag.getOid(), tag.getValue());
-                builder.attribute(tag.getOid(), tag.getValue());
+            for (SelectionTagValue tag : selection.getTags()) {
+                log.debug("Adding attribute: {} = {}", tag.getTagOid(), tag.getTagValue());
+                builder.attribute(tag.getTagOid(), tag.getTagValue());
             }
             X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(builder.build());
             CertificateRequest approved = At.certificateRequestApproval(recentRequest.getUuid()).post(certificateHolder.getEncoded(), CertificateRequest.class);
@@ -571,6 +617,7 @@ public class TagApiTest2 {
     }
     */
 
+    /*
     @Test
     public void testSearchCertificateRequestsBySubjectAndTagName() throws Exception {
         testPostCertificateRequests();
@@ -589,7 +636,9 @@ public class TagApiTest2 {
             assertTrue(tagNames.contains("country"));
         }
     }
-
+    */
+    
+    /*
     @Test
     public void testSearchCertificateRequestsBySubjectAndTag() throws Exception {
         testPostCertificateRequests();
@@ -605,6 +654,7 @@ public class TagApiTest2 {
             assertEquals("MX", certificateRequest.getTags().get(0).getValue()); // ALL of the results should have "country" in the subject
         }
     }
+    */
     
     @Test
     public void testUpdateExistingConfiguration() throws IOException {
@@ -631,12 +681,15 @@ public class TagApiTest2 {
     private void report(CertificateRequest[] certificateRequests) throws JsonProcessingException {
         log.debug("Report: {} certificate-requests", certificateRequests.length);
         for (CertificateRequest certificateRequest : certificateRequests) {
+            /*
             ArrayList<String> tagpairs = new ArrayList<String>();
             List<CertificateRequestTagValue> tags = certificateRequest.getTags();
             for (CertificateRequestTagValue tag : tags) {
                 tagpairs.add(String.format("(%s: %s)", tag.getName(), tag.getValue()));
             }
             log.debug("certificate-request: {}", String.format("uuid:%s  subject:%s  tags: %s", certificateRequest.getUuid(), certificateRequest.getSubject(), StringUtils.join(tagpairs, " ")));
+            * */
+            log.debug("Certificate request: {}", String.format("uuid:%s  subject:%s  selection:%s status:%s", certificateRequest.getUuid(), certificateRequest.getSubject(), certificateRequest.getSelection(), certificateRequest.getStatus()));
         }
     }
 
@@ -663,6 +716,13 @@ public class TagApiTest2 {
 //            log.debug("values: {}", tag.getValues());
             log.debug("Tag: {}", String.format("uuid:%s  name:%s  oid:%s values:%s", tag.getUuid(), tag.getName(), tag.getOid(), (tag.getValues() == null ? "" : StringUtils.join(tag.getValues(), ", "))));
 //            log.debug("Tag: {}", String.format("id:%s  uuid:%s  name:%s  oid:%s values:%s", String.valueOf(tag.getId()), tag.getUuid(), tag.getName(), tag.getOid(), (tag.getValues() == null ? "" : StringUtils.join(tag.getValues(), ", "))));
+        }
+    }
+    
+    private void report(Selection[] selections) throws JsonProcessingException {
+        log.debug("Report: {} selections", selections.length);
+        for(Selection selection : selections) {
+            log.debug("Selection: {}", String.format("uuid: %s  name: %s  #tags: %s", selection.getUuid(), selection.getName(), (selection.getTags() == null ? "null" : String.valueOf(selection.getTags().size()))));
         }
     }
     

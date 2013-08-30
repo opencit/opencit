@@ -62,7 +62,16 @@ public class Derby {
     
     public static void stopDatabase() throws Exception {
 //        DriverManager.getConnection("jdbc:derby:MyDbTest;shutdown=true");  // shut down a specific database
-//        DriverManager.getConnection("jdbc:derby:;shutdown=true"); // shut down all databaes and the derby engine  ; throws SQLException "Derby system shutdown."
+        try {
+            // shut down all databaes and the derby engine  ; throws SQLException "Derby system shutdown."
+            DriverManager.getConnection("jdbc:derby:directory:target/derby/mytestdb;shutdown=true"); // same as the protocol above but with create=true replaced with shutdown=true
+        } 
+        catch(Exception e) {
+            log.info("{}", e.getMessage()); // expect:   Database 'directory:target/derby/mytestdb' shutdown.
+            // we don't print the full stack trace because we know Derby throws an exception on shutdown (part of its API documentation)
+            // if you print e.toString() it would be like: java.sql.SQLNonTransientConnectionException: Database 'directory:target/derby/mytestdb' shutdown.
+            // and the rest of the stack trace is not useful since we know the cause is we issued a shutdown command via the connection.
+        }
     }
     
     public static DataSource getDataSource() throws SQLException {

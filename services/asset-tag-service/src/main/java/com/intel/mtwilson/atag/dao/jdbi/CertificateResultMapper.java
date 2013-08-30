@@ -27,7 +27,17 @@ public class CertificateResultMapper implements ResultSetMapper<Certificate> {
         byte[] content = rs.getBytes("certificate");
         Sha256Digest sha256 = Sha256Digest.valueOfHex(rs.getString("sha256"));
         Sha1Digest pcrEvent = Sha1Digest.valueOfHex(rs.getString("pcrEvent"));
-        Certificate certificate = new Certificate(rs.getLong("id"), uuid, content, sha256, pcrEvent);
+        Certificate certificate = new Certificate();
+        certificate.setId(rs.getLong("id"));
+        certificate.setUuid( uuid);
+        certificate.setCertificate(content);
+        certificate.setSha256(sha256);
+        certificate.setPcrEvent(pcrEvent);
+        certificate.setSubject(rs.getString("subject"));
+        certificate.setIssuer(rs.getString("issuer"));
+        certificate.setNotBefore(rs.getDate("notBefore"));
+        certificate.setNotAfter(rs.getDate("notAfter"));
+        certificate.setRevoked(rs.getBoolean("revoked"));
         return certificate;
     }
     

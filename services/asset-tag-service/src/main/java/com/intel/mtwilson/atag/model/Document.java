@@ -78,4 +78,9 @@ public class Document {
         links.put(rel, link);
     }
 
+    public void removeLink(String rel) {
+        if( links != null ) {
+            links.remove(rel);
+        }
+    }
 }

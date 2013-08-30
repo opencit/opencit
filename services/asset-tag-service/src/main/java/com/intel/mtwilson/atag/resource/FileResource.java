@@ -47,14 +47,20 @@ public class FileResource extends ServerResource {
     @Get("json")
     public File existingFile() {
         String uuidOrName = getAttribute("id");
+        File file;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            return dao.findByUuid(uuid);
+            file = dao.findByUuid(uuid);
         }
         catch(Exception e) {
             // not a valid UUID - maybe it's name
-            return dao.findByName(uuidOrName);
+            file = dao.findByName(uuidOrName);
         }        
+        if( file == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return file;
     }
 
     @Delete
@@ -69,6 +75,10 @@ public class FileResource extends ServerResource {
             // not a valid UUID - maybe it's name
             file = dao.findByName(uuidOrName);
         }        
+        if( file == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
         dao.delete(file.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }

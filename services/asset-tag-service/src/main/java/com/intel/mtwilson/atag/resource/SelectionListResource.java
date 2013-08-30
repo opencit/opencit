@@ -232,7 +232,7 @@ public class SelectionListResource extends ServerResource {
         }
         sql.addOrderBy(SELECTION.ID);
         Result<Record> result = sql.fetch();
-        Selection[] selections = new Selection[result.size()];
+        Selection[] selections = new Selection[result.size()]; // XXX TODO because of row folding due to the join (below where we combine values from a bunch of rows into one Selection record) there will be nulls in this array... should chane to an ArrayList instead and only add the folded records as we go,  then convert to an array later for the return value
         log.debug("Got {} records", selections.length);
         int i = -1; //  index into the target array selections
         long c = -1; // id of the current certificate request object built, used to detect when it's time to build the next one

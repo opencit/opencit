@@ -16,9 +16,11 @@ public class CertificateRequest {
     private long id;
     private UUID uuid;
     private String subject;
-    private List<CertificateRequestTagValue> tags;
+    private String selection; // tags to include in the certificate
     private String status;
     private long certificateId;
+    private long selectionId; // set by DAO when loading
+    private UUID certificate;
 
     public CertificateRequest() {
     }
@@ -30,18 +32,22 @@ public class CertificateRequest {
 //        this.tags = tags;
     }
     
-    public CertificateRequest(String subject, List<CertificateRequestTagValue> tags) {
+    public CertificateRequest(String subject) {
+        this.subject = subject;
+    }
+    
+    public CertificateRequest(String subject, String selection) {
 //        this.id = id;
 //        this.uuid = uuid;
         this.subject = subject;
-        this.tags = tags;
+        this.selection = selection;
     }
     
-    public CertificateRequest(long id, UUID uuid, String subject, List<CertificateRequestTagValue> tags) {
+    public CertificateRequest(long id, UUID uuid, String subject, String selection) {
         this.id = id;
         this.uuid = uuid;
         this.subject = subject;
-        this.tags = tags;
+        this.selection = selection;
     }
 
     @JsonIgnore
@@ -57,18 +63,29 @@ public class CertificateRequest {
         return subject;
     }
 
+    @JsonIgnore
+    public long getSelectionId() {
+        return selectionId;
+    }
+
     
-    public List<CertificateRequestTagValue> getTags() {
-        return tags;
+    public String getSelection() {
+        return selection;
     }
 
     public String getStatus() {
         return status;
     }
 
+    @JsonIgnore
     public long getCertificateId() {
         return certificateId;
     }
+
+    public UUID getCertificate() {
+        return certificate;
+    }
+    
     
     
 
@@ -87,8 +104,8 @@ public class CertificateRequest {
     }
 
     
-    public void setTags(List<CertificateRequestTagValue> tags) {
-        this.tags = tags;
+    public void setSelection(String selection) {
+        this.selection = selection;
     }
 
     public void setStatus(String status) {
@@ -97,6 +114,16 @@ public class CertificateRequest {
 
     public void setCertificateId(long certificateId) {
         this.certificateId = certificateId;
+    }
+
+    public void setCertificate(UUID certificate) {
+        this.certificate = certificate;
+    }
+    
+    
+
+    public void setSelectionId(long selectionId) {
+        this.selectionId = selectionId;
     }
 
 

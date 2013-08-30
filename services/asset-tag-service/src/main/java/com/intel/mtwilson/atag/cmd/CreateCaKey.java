@@ -17,6 +17,8 @@ import java.io.FileNotFoundException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Properties;
+import org.apache.commons.configuration.MapConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +50,14 @@ public class CreateCaKey extends AtagCommand {
             return;
             
         }
-        byte[] privateKeyPemContent = RsaUtil.encodePemPrivateKey(cakey.getPrivate()).getBytes("UTF-8");
-        byte[] cacertPemContent = X509Util.encodePemCertificate(cacert).getBytes("UTF-8");
+        
+        String privateKeyPem = RsaUtil.encodePemPrivateKey(cakey.getPrivate());
+        String cacertPem = X509Util.encodePemCertificate(cacert);
+        
+        String combinedPrivateKeyAndCertPem = privateKeyPem + cacertPem;
+        
+        byte[] combinedPrivateKeyAndCertPemBytes = combinedPrivateKeyAndCertPem.getBytes("UTF-8");
+        byte[] cacertPemContent = cacertPem.getBytes("UTF-8");
 
         Derby.startDatabase();        
         
@@ -57,12 +65,12 @@ public class CreateCaKey extends AtagCommand {
         File cakeyFile = Derby.fileDao().findByName(PRIVATEKEY_FILE);
         if( cakeyFile == null ) {
             // create new private key file
-            Derby.fileDao().insert(new UUID(), PRIVATEKEY_FILE, "text/plain", privateKeyPemContent);
+            Derby.fileDao().insert(new UUID(), PRIVATEKEY_FILE, "text/plain", combinedPrivateKeyAndCertPemBytes);
         }
         else {
             // replace existing private key... 
             // XXX IMPORTANT TODO   before we replace it we need to revoke it so that nobody else with a copy can use it to sign any more certs
-            Derby.fileDao().update(cakeyFile.getId(), PRIVATEKEY_FILE, "text/plain", privateKeyPemContent);
+            Derby.fileDao().update(cakeyFile.getId(), PRIVATEKEY_FILE, "text/plain", combinedPrivateKeyAndCertPemBytes);
         }
         
         // add the ca cert to the list of approved certs
@@ -78,5 +86,13 @@ public class CreateCaKey extends AtagCommand {
         
         Derby.stopDatabase();
     }
+    
+    
+    public static void main(String args[]) throws Exception {
+        CreateCaKey cmd = new CreateCaKey();
+        cmd.setOptions(new MapConfiguration(new Properties()));
+        cmd.execute(new String[] { "CN=Asset CA,OU=Datacenter,C=US" });
+        
+    }    
     
 }

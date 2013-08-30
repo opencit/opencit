@@ -8,6 +8,7 @@ import com.intel.mtwilson.atag.model.Configuration;
 import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.atag.Derby;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.atag.Global;
 import java.sql.SQLException;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
@@ -47,14 +48,20 @@ public class ConfigurationResource extends ServerResource {
     @Get("json")
     public Configuration existingConfiguration() {
         String uuidOrName = getAttribute("id");
+        Configuration configuration;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            return dao.findByUuid(uuid);
+            configuration = dao.findByUuid(uuid);
         }
         catch(Exception e) {
             // not a valid UUID - maybe it's name
-            return dao.findByName(uuidOrName);
+            configuration = dao.findByName(uuidOrName);
         }        
+        if( configuration == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return configuration;
     }
 
     @Delete
@@ -69,6 +76,10 @@ public class ConfigurationResource extends ServerResource {
             // not a valid UUID - maybe it's name
             configuration = dao.findByName(uuidOrName);
         }        
+        if(configuration==null ){
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
         dao.delete(configuration.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
@@ -101,6 +112,7 @@ public class ConfigurationResource extends ServerResource {
         log.debug("content type null? {}", updatedConfiguration.getContentType() == null ? "yes" : "no");
         log.debug("content null? {}", updatedConfiguration.getContent() == null ? "yes" : "no");
         dao.update(existingConfiguration.getId(), updatedConfiguration.getName(), updatedConfiguration.getContentType(), updatedConfiguration.getContent());
+        Global.reset(); // new configuration will take effect next time it is needed (if it's the active one)
         return updatedConfiguration;
     }
 }

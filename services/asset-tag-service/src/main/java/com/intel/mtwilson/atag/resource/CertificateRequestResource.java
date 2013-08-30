@@ -47,13 +47,22 @@ public class CertificateRequestResource extends ServerResource {
     @Get("json")
     public CertificateRequest existingCertificateRequest() {
         String uuid = getAttribute("id");
-        return dao.findByUuid(UUID.valueOf(uuid));
+        CertificateRequest request = dao.findByUuid(UUID.valueOf(uuid));
+        if( request == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return request;
     }
 
     @Delete
     public void deleteCertificateRequest() {
         String uuid = getAttribute("id");
         CertificateRequest certificateRequest = dao.findByUuid(UUID.valueOf(uuid));
+        if( certificateRequest == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
         dao.delete(certificateRequest.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
@@ -63,6 +72,10 @@ public class CertificateRequestResource extends ServerResource {
     public CertificateRequest updateCertificateRequest(CertificateRequest updatedCertificateRequest) throws SQLException {
         String uuid = getAttribute("id");
         CertificateRequest existingCertificateRequest = dao.findByUuid(UUID.valueOf(uuid));
+        if( existingCertificateRequest == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
         dao.update(existingCertificateRequest.getId(), updatedCertificateRequest.getSubject(), updatedCertificateRequest.getPredicate(), updatedCertificateRequest.getObject());
         return updatedCertificateRequest;
     }

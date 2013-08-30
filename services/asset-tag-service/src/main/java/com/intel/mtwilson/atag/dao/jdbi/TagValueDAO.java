@@ -35,6 +35,7 @@ public interface TagValueDAO {
 
     @SqlBatch("insert into tag_value (tagId,value) values (:tagId, :value)")
     @BatchChunkSize(1000)
+    @GetGeneratedKeys
     int[] insert(@Bind("tagId") long tagId, @Bind("value") List<String> value); // return value is same size as input list;  each element in the int[] array is the number of rows modified by the corresponding insert.. which would either be 1 or 0.   so you can just tally up the 1s to see if all the rows were inserted or not.   unfortunately, the api does not have a mechanism for us to get the auto-generated id's for the batch-inserted rows. 
     
     @SqlQuery("select id,tagId,value from tag_value where id=:id")

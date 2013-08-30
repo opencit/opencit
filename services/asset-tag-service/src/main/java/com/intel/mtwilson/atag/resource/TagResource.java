@@ -51,14 +51,20 @@ public class TagResource extends ServerResource {
     @Get("json")
     public Tag existingTag() {
         String uuidOrName = getAttribute("id");
+        Tag tag;
         try {
             UUID uuid = UUID.valueOf(uuidOrName);
-            return dao.findByUuid(uuid);
+            tag = dao.findByUuid(uuid);
         }
         catch(Exception e) {
             // not a valid UUID - maybe it's an oid or a name
-            return dao.findByOidOrName(uuidOrName, uuidOrName);
+            tag = dao.findByOidOrName(uuidOrName, uuidOrName);
         }        
+        if( tag == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }        
+        return tag;
     }
 
     @Delete
@@ -72,7 +78,11 @@ public class TagResource extends ServerResource {
         catch(Exception e) {
             // not a valid UUID - maybe it's an oid or a name
             tag = dao.findByOidOrName(uuidOrName, uuidOrName);
-        }        
+        }
+        if( tag == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return;
+        }
         dao.delete(tag.getId());
         setStatus(Status.SUCCESS_NO_CONTENT);
     }
@@ -89,6 +99,10 @@ public class TagResource extends ServerResource {
             // not a valid UUID - maybe it's an oid or a name
             existingTag = dao.findByOidOrName(uuidOrName, uuidOrName);
         }        
+        if( existingTag == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
         dao.update(existingTag.getId(), updatedTag.getName(), updatedTag.getOid());
         if( updatedTag.getValues() != null ) {
             tagValueDao.deleteAll(existingTag.getId());

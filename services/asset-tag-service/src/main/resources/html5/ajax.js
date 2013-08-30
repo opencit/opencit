@@ -201,7 +201,7 @@ ajax.json = {
                     existingData = ptr;
                 }
                 if( existingData instanceof Array ) { existingData.removeAll(null); } // automated data binding tends to break for null objects
-                log.debug("calling setx data");
+                log.debug("calling setx with keypath: "+keyPath+" and data: "+Object.toJSON(existingData));
                 ajax.data.setx(keyPath, existingData);
                 ajax.event.fire("httpGetSuccess", { resource:my, params:params });
                 log.debug("calling view sync");
@@ -246,6 +246,7 @@ ajax.json = {
                 else {
                     existingData = ptr;
                 } 
+                log.debug("calling setx with keypath: "+keyPath+" and data: "+Object.toJSON(existingData));
                 ajax.data.setx(keyPath, existingData);
                 ajax.event.fire("httpPutSuccess", { resource:my, content:putObject });
                 ajax.view.sync();

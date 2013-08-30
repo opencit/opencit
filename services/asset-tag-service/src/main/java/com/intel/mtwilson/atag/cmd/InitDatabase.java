@@ -8,10 +8,11 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.atag.AtagCommand;
 import com.intel.mtwilson.atag.Derby;
 import com.intel.mtwilson.atag.dao.jdbi.*;
-import com.intel.mtwilson.atag.model.Configuration;
+import com.intel.mtwilson.atag.model.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Set;
 import javax.sql.DataSource;
@@ -26,6 +27,11 @@ import org.slf4j.LoggerFactory;
  */
 public class InitDatabase extends AtagCommand {
     private static Logger log = LoggerFactory.getLogger(InitDatabase.class);
+    public final static String OID_CUSTOMER_ROOT = "1.3.6.1.4.1.99999";
+    
+    private String oid(String relative) {
+        return OID_CUSTOMER_ROOT+"."+relative;
+    }
     
     @Override
     public void execute(String[] args) throws Exception {
@@ -39,8 +45,80 @@ public class InitDatabase extends AtagCommand {
     }
     
     public void insertMainConfiguration() throws SQLException {
-        String configuration = "{\"allowTagsInCertificateRequests\":false,\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}";
-        Derby.configurationDao().insert(new UUID(), "main", Configuration.ContentType.JSON, configuration);
+        // open daos
+        log.debug("get daos");
+        ConfigurationDAO configurationDao = Derby.configurationDao();
+        TagDAO tagDao = Derby.tagDao();
+        TagValueDAO tagValueDao = Derby.tagValueDao();
+        SelectionDAO selectionDao = Derby.selectionDao();
+        SelectionTagValueDAO selectionTagValueDao = Derby.selectionTagValueDao();
+        RdfTripleDAO rdfTripleDao = Derby.rdfTripleDao();
+        // example tags
+        log.debug("inserting tags");
+        long countryTagId = tagDao.insert(new UUID(), "country", oid("1"));
+        long stateTagId = tagDao.insert(new UUID(), "state", oid("2"));
+        long cityTagId = tagDao.insert(new UUID(), "city", oid("3"));
+        long customerTagId = tagDao.insert(new UUID(), "customer", oid("4"));
+        long buildingTagId = tagDao.insert(new UUID(), "building", oid("5"));
+        long[] countryTagValueIds = new long[3];
+        countryTagValueIds[0] = tagValueDao.insert(countryTagId, "US"); 
+        countryTagValueIds[1] = tagValueDao.insert(countryTagId, "CA"); 
+        countryTagValueIds[2] = tagValueDao.insert(countryTagId, "MX"); 
+        long[] stateTagValueIds = new long[5];
+        stateTagValueIds[0] = tagValueDao.insert(stateTagId, "CA"); 
+        stateTagValueIds[1] = tagValueDao.insert(stateTagId, "AZ"); 
+        stateTagValueIds[2] = tagValueDao.insert(stateTagId, "OR"); 
+        stateTagValueIds[3] = tagValueDao.insert(stateTagId, "TX"); 
+        stateTagValueIds[4] = tagValueDao.insert(stateTagId, "NY"); 
+        long[] cityTagValueIds = new long[5];
+        cityTagValueIds[0] = tagValueDao.insert(cityTagId, "Folsom"); 
+        cityTagValueIds[1] = tagValueDao.insert(cityTagId, "Santa Clara"); 
+        cityTagValueIds[2] = tagValueDao.insert(cityTagId, "Hillsboro"); 
+        cityTagValueIds[3] = tagValueDao.insert(cityTagId, "Austin"); 
+        cityTagValueIds[4] = tagValueDao.insert(cityTagId, "New York"); 
+        long[] customerTagValueIds = new long[3];
+        customerTagValueIds[0] = tagValueDao.insert(customerTagId, "Coke"); 
+        customerTagValueIds[1] = tagValueDao.insert(customerTagId, "Pepsi"); 
+        customerTagValueIds[2] = tagValueDao.insert(customerTagId, "US Govt"); 
+        long[] buildingTagValueIds = new long[3];
+        buildingTagValueIds[0] = tagValueDao.insert(buildingTagId, "Bldg 100"); 
+        buildingTagValueIds[1] = tagValueDao.insert(buildingTagId, "Bldg 200"); 
+        buildingTagValueIds[2] = tagValueDao.insert(buildingTagId, "Bldg 300"); 
+        // default tag selection
+        log.debug("insert selections");
+        UUID defaultSelectionUuid = new UUID(); // will be reused in the configuration below
+        long defaultSelectionId = selectionDao.insert(defaultSelectionUuid, "default");
+        long otherSelectionId = selectionDao.insert(new UUID(), "other");
+        selectionTagValueDao.insert(defaultSelectionId, countryTagId, countryTagValueIds[0]);
+        selectionTagValueDao.insert(defaultSelectionId, stateTagId, stateTagValueIds[0]);
+        selectionTagValueDao.insert(defaultSelectionId, cityTagId, cityTagValueIds[0]);
+        selectionTagValueDao.insert(defaultSelectionId, cityTagId, cityTagValueIds[1]);
+        selectionTagValueDao.insert(defaultSelectionId, customerTagId, customerTagValueIds[0]);
+        selectionTagValueDao.insert(defaultSelectionId, customerTagId, customerTagValueIds[1]);
+        selectionTagValueDao.insert(otherSelectionId, countryTagId, countryTagValueIds[1]);
+        selectionTagValueDao.insert(otherSelectionId, countryTagId, countryTagValueIds[2]);
+        selectionTagValueDao.insert(otherSelectionId, stateTagId, stateTagValueIds[1]);
+        selectionTagValueDao.insert(otherSelectionId, stateTagId, stateTagValueIds[2]);
+        selectionTagValueDao.insert(otherSelectionId, stateTagId, stateTagValueIds[3]);
+        selectionTagValueDao.insert(otherSelectionId, cityTagId, cityTagValueIds[2]);
+        selectionTagValueDao.insert(otherSelectionId, cityTagId, cityTagValueIds[3]);
+        selectionTagValueDao.insert(otherSelectionId, buildingTagId, buildingTagValueIds[0]);        
+        selectionTagValueDao.insert(otherSelectionId, buildingTagId, buildingTagValueIds[1]);
+        // XXX in production should probably  use the uuids, not the names ... just in case there are duplicate names 
+        rdfTripleDao.insert(new UUID(), "country", "contains", "state");
+        rdfTripleDao.insert(new UUID(), "state", "contains", "city");
+        
+        // configuration to allow automatic tag selection & approval
+        log.debug("inserting configuration");
+        String configuration = "{\"allowTagsInCertificateRequests\":false,\"allowAutomaticTagSelection\":true,\"automaticTagSelectionName\":\""+defaultSelectionUuid+"\",\"approveAllCertificateRequests\":true}";
+        configurationDao.insert(new UUID(), "main", Configuration.ContentType.JSON, configuration);
+        
+        // close daos'
+        configurationDao.close();
+        tagDao.close();
+        tagValueDao.close();
+        selectionDao.close();
+        selectionTagValueDao.close();
     }
     
 

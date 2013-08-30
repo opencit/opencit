@@ -98,6 +98,11 @@
         </script>
 
         <script type="text/javascript">
+// credit for isNumber (creative commons share alike 3.0) http://stackoverflow.com/questions/18082/validate-numbers-in-javascript-isnumeric/1830844#1830844
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}            
+            
             // watch adapter, from https://github.com/mikeric/rivets/wiki/Adapters
             rivets.configure({
                 adapter: rivets_watch_findx_adapter,
@@ -108,6 +113,46 @@
                 }
                  */
             });
+            
+            // input like timestamp 1377839054000 or text date format like yyyy-MM-dd, output like:  2013-08-30T05:04:14.000Z
+                rivets.formatters.isodate = function(value) {
+                        if( isNumber(value) ) {
+                            return new Date(value).toISOString();
+                        }
+                        else {
+                            return Date.parse(value).toISOString();
+                        }
+                    };
+                rivets.formatters.date = function(value) {
+                        if( isNumber(value) ) {
+                            return new Date(value).toString();
+                        }
+                        else {
+                            return Date.parse(value).toString();
+                        }
+                    };
+                    // input any value that evaluates to true/false, output either "yes" or "no" or replace those with your own "yes value" and "no value" for example "Active" and "Inactive" instead of "yes" and "no"
+               rivets.formatters.yesno = function(value,yestext,notext) {
+                   if( value ) {
+                       return yestext ? yestext : "yes";
+                   }
+                   else {
+                       return notext ? notext : "no";
+                   }
+               };
+               // input any hex or base64 value and this will return the value with newlines inserted
+               rivets.formatters.wrap = function(text,columns,sep) {
+                   var i=0, result="";
+                   columns = columns ? parseInt(columns) : 20;
+                   sep = sep || " ";
+                   log.debug("wrap text: "+text+"  length: "+text.length+"  columns: "+columns);
+                   while(i<text.length) { result += text.slice(i,i+columns) + sep; i += columns; }
+                   log.debug("wrap result: "+Object.toJSON(result));
+                   return result;
+               };
+               
+//                }
+            
         </script>
 
     </head>
@@ -166,33 +211,35 @@
                         <h2>Create New Tag</h2>
                         <script>
                             function tag_create_form_addValue() {
+                                mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({values:[]}); // sets the values to empty array if it's not already defined (applies first time this function is called)
                                 var value = (""+$F('tag-create-values')).strip();
                                 if( value.empty() ) { return; }
                                 //        alert("add value: "+value);
-                                mtwilson.rivets.forms['tag-create-form'].values.push($F('tag-create-values')); 
+                                log.debug("uh? "+Object.toJSON(mtwilson.rivets.forms['tag-create-form']));
+                                mtwilson.rivets.forms['tag-create-form'].input.values.push($F('tag-create-values')); 
                                 $('tag-create-values').focus(); 
                                 $('tag-create-values').clear();        
                             }
                             function tag_create_form_removeValue(tagValue) {
-                                mtwilson.rivets.forms['tag-create-form'].values.removeAll(tagValue); 
+                                mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
                                 mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
                             }
                             // called when submitting the form... checks that at least one value was added
                             function tag_create_form_validateValues() {
-                                return mtwilson.rivets.forms['tag-create-form'].values.length > 0;
+                                return mtwilson.rivets.forms['tag-create-form'].input.values.length > 0;
                             }
                         </script>
                         <form id="tag-create-form">
                             <ul>
-                                <li><label for="tag-create-name">Tag name</label><input type="text" id="tag-create-name" data-bind-value="name" name="name" placeholder="Tag name" class="required"/></li>
-                                <li><label for="tag-create-oid">Tag OID</label><input type="text" id="tag-create-oid" data-bind-value="oid" name="oid" placeholder="Tag OID" class="required"/></li>
+                                <li><label for="tag-create-name">Tag name</label><input type="text" id="tag-create-name" data-bind-value="input.name" name="name" placeholder="Tag name" class="required"/></li>
+                                <li><label for="tag-create-oid">Tag OID</label><input type="text" id="tag-create-oid" data-bind-value="input.oid" name="oid" placeholder="Tag OID" class="required"/></li>
                                 <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
                                 <li><label for="tag-create-values">Tag values</label>
                                     <input type="text"  id="tag-create-values" placeholder="Value" class="validate-data" data-validator="tag_create_form_validateValues"/>
                                     <input type="button" value="Add" onclick="tag_create_form_addValue();"/>
                                     <span style="display: none;" class="validation-advice" id="advice-tag-create-values">You must add at least one value.</span>
                                     <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
-                                        <li style="display: inline-block; border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="values"><span data-bind-text="item"></span> <a data-bind-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:tag_create_form_removeValue(this.getAttribute('tagValue'));">X</a></li>
+                                        <li style="display: inline-block; border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="input.values"><span data-bind-text="item"></span> <a data-bind-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:tag_create_form_removeValue(this.getAttribute('tagValue'));">X</a></li>
                                     </ul>
                                 </li>
                                 <li><input type="button" value="Save" onclick="ws.createTag(this); return false;"/></li>
@@ -244,7 +291,7 @@
 
                         <h2>Browse Tags</h2>
 
-                        <table id="tag-browse-table">
+                        <table id="tag-browse-table" class="dataview">
                             <caption>Tags</caption>
                             <thead>
                                 <tr>
@@ -286,56 +333,57 @@
                         <h2>Create New Tag Selection</h2>
                         <script>
                             function selection_create_form_init() {
-                                log.debug("selection_create_form_init: rivets forms: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form']));
-                                if( mtwilson.rivets.forms['selection-create-form'] ) {
+                                log.debug("selection_create_form_init: rivets forms: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input));
+//                                if( mtwilson.rivets.forms['selection-create-form'] ) {
                                     log.debug("selection_create_form_init: got selection-create-form");
                                     log.debug("selection_create_form_init: current tag data is: "+Object.toJSON(mtwilson.atag.data.tags));
-                                    mtwilson.rivets.forms['selection-create-form'].name = ''; // TODO should use automatic binding to form element... 
-                                    mtwilson.rivets.forms['selection-create-form'].tags = mtwilson.atag.data.tags;
-                                    mtwilson.rivets.forms['selection-create-form'].selection = [];
+                                    mtwilson.rivets.forms['selection-create-form'].input.name = ''; // TODO should use automatic binding to form element... don't know why that isn't working.
+                                    mtwilson.rivets.forms['selection-create-form'].tagValues = [];
+//                                    mtwilson.rivets.forms['selection-create-form'].tags = mtwilson.atag.data.tags; // already part of global binding
+                                    mtwilson.rivets.forms['selection-create-form'].input.selection = [];
                                     // and initialize the second select box with values of the first tag
                                     log.debug("current value: "+getSelectOptionValue('selection-create-tags-select')); // too early... ui update didn't happen yet
                                     selection_create_form_onSelectTag( getSelectOptionValue('selection-create-tags-select') );
-                                }                                
+//                                }                                
                             }
                             function selection_create_form_onSelectTag(tagId) {
                                 log.debug("selection_create_form_onSelectTag: selected tag id: "+tagId);
                                 var tag = ws.findTagByOid(tagId);
                                 log.debug("selection_create_form_onSelectTag: found tag: "+Object.toJSON(tag));
-                                log.debug("selection_create_form_onSelectTag: rivets forms: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form']));
-                                mtwilson.rivets.forms['selection-create-form'].tagValues.clear().merge(tag.values);
+//                                log.debug("selection_create_form_onSelectTag: rivets forms: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form']));
+                                mtwilson.rivets.forms['selection-create-form'].tagValues.clear().merge(tag.values); 
                             }
                             
                             function selection_create_form_addValue() {
                                 var tag = ws.findTagByOid(getSelectOptionValue('selection-create-tags-select'));
                                 var tagValue = $F('selection-create-tags-values');
-                                mtwilson.rivets.forms['selection-create-form'].selection.push({ tag:tag, value: tagValue});  // XXX tag should be uuid? oid? name? just need an id, not the whole object. maybe put the whole object here to make it easy and just pick out what we need to send to the server when it's time to submit the selection.
-                                log.debug("added tag ("+tag.oid+","+tagValue+") to selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].selection));
+                                mtwilson.rivets.forms['selection-create-form'].input.selection.push({ tag:tag, value: tagValue});  // XXX tag should be uuid? oid? name? just need an id, not the whole object. maybe put the whole object here to make it easy and just pick out what we need to send to the server when it's time to submit the selection.
+                                log.debug("added tag ("+tag.oid+","+tagValue+") to selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
                             }
                             function selection_create_form_removeValue(tagOid,tagValue) {
-                                var i = mtwilson.rivets.forms['selection-create-form'].selection.length;
+                                var i = mtwilson.rivets.forms['selection-create-form'].input.selection.length;
                                 log.debug("looking through "+i+" selections for value to remove: ("+tagOid+","+tagValue+")");
                                 while(i--) {
-                                    if( mtwilson.rivets.forms['selection-create-form'].selection[i].tag.oid == tagOid &&  mtwilson.rivets.forms['selection-create-form'].selection[i].value == tagValue ) {
-                                        mtwilson.rivets.forms['selection-create-form'].selection.splice(i,1);
+                                    if( mtwilson.rivets.forms['selection-create-form'].input.selection[i].tag.oid == tagOid &&  mtwilson.rivets.forms['selection-create-form'].input.selection[i].value == tagValue ) {
+                                        mtwilson.rivets.forms['selection-create-form'].input.selection.splice(i,1);
                                     }
                                 }
-                                log.debug("removed tag ("+tagOid+","+tagValue+") from selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].selection));
+                                log.debug("removed tag ("+tagOid+","+tagValue+") from selection: "+Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input.selection));
                                 mtwilson.rivets.views['selection-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
                             }
                             // called when submitting the form... checks that at least one value was added
                             function selection_create_form_validateValues() {
-                                return mtwilson.rivets.forms['selection-create-form'].selection.length > 0;
+                                return mtwilson.rivets.forms['selection-create-form'].input.selection.length > 0;
                             }
                             
                         </script>
                         <form id="selection-create-form" action="#" onsubmit="return false;">
                             <ul>
-                                <li><label for="selection-create-name">Name</label><input type="text" id="selection-create-name" name="name" placeholder="Name of this selection" class="required"/></li>
+                                <li><label for="selection-create-name">Name</label><input type="text" id="selection-create-name" name="name" data-bind-value="input.name" placeholder="Name of this selection" class="required"/></li>
                                 <!-- XXX TODO future release should add a host selection here too:  so selection is list of selected tags and (optional) list of selected hosts to apply them to -->
                                 <li><label for="selection-create-tags-select">Tags</label>
                                     <select id="selection-create-tags-select" onchange="selection_create_form_onSelectTag(getSelectOptionValue(this.id));">
-                                        <option data-bind-each-item="tags" data-bind-text="item.name" data-bind-value="item.oid"></option>
+                                        <option data-bind-each-item="global.tags" data-bind-text="item.name" data-bind-value="item.oid"></option>
                                     </select>
                                     <select id="selection-create-tags-values" class="validate-data" data-validator="selection_create_form_validateValues">
                                         <option data-bind-each-item="tagValues" data-bind-text="item"></option>
@@ -361,7 +409,7 @@
                                                 </td></tr>
                                         </tfoot>
                                         <tbody>
-                                            <tr data-bind-each-item="selection">
+                                            <tr data-bind-each-item="input.selection">
                                                 <td data-bind-text="item.tag.name"></td>
                                                 <td data-bind-text="item.tag.oid"></td>
                                                 <td data-bind-text="item.value"></td>
@@ -438,7 +486,7 @@
 
                         <h2>Browse Selections</h2>
 
-                        <table id="selection-browse-table">
+                        <table id="selection-browse-table" class="dataview">
                             <caption>Selections</caption>
                             <thead>
                                 <tr>
@@ -488,46 +536,18 @@
 
                         <h1>Manage Certificates</h1>
 
-                        <table id="certificate-browse-table">
-                            <thead>
-                                <tr>
-                                    <th>Host ID</th>
-                                    <th>Certificate</th>
-                                    <th>Fingerprint (SHA-256)</th>
-                                    <th>PCR Event</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="5">
-                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
-                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
-                                    </td></tr>
-                            </tfoot>
-                            <tbody>
-                                <tr data-bind-each-item="certificates">
-                                    <td data-bind-text="item.subject"></td>
-                                    <td data-bind-text="item.certificate"></td>
-                                    <td data-bind-text="item.sha256"></td>
-                                    <td data-bind-text="item.pcrEvent"></td>
-                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:removeCertificate(this.getAttribute('uuid'));">revoke</a></td>
-                                </tr>
-                            </tbody>
-                        </table>
 
-                        
 
                         <h2>Create New Certificate Request</h2>
 
                         <form id="certificate-request-create-form" action="#" onsubmit="return false;">
                             <ul>
                                 <li><label for="certificate-request-create-subject">Subject</label>
-                                    <input type="text" id="certificate-request-create-subject" name="subject" placeholder="Host UUID" data-bind-value="subject"/>
+                                    <input type="text" id="certificate-request-create-subject" name="subject" placeholder="Host UUID" data-bind-value="input.subject" class="required"/>
                                 </li>
                                 <li><label for="certificate-request-create-tag-selection">Tag Selection</label>
-                                    <select id="certificate-request-create-tag-selection" data-bind-value="selection">
-                                            <option data-bind-each-item="selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
+                                    <select id="certificate-request-create-tag-selection" data-bind-value="input.selection" class="required">
+                                            <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
                                     </select>
                                 </li>
                                 <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
@@ -540,61 +560,46 @@
                         <form id="certificate-request-search-form" action="#" onsubmit="return false;">
                             <ul>
                                 <li>
-                                    <label for="certificate-request-search-subject">Subject (host uuid)</label>
+                                    <label for="certificate-request-search-subject">Subject</label>
                                     <select id="certificate-request-search-subject-criteria">
-                                        <option value="equalTo">is</option>
+                                        <option value="EqualTo">is</option>
                                     </select>
-                                    <input type="text" id="certificate-request-search-subject" name="subject" placeholder="Subject"/>
+                                    <input type="text" id="certificate-request-search-subject" name="subject" placeholder="Host UUID"/>
                                 </li>
                                 <li>
-                                    <label for="certificate-request-search-tagName">Tag name</label>
-                                    <select id="certificate-request-search-tagName-criteria">
-                                        <option value="equalTo">is</option>
-                                        <option>contains</option>
+                                    <label for="certificate-request-search-selection">Selection</label>
+                                    <select id="certificate-request-search-selection-criteria">
+                                        <option value="EqualTo">is</option>
                                     </select>
-                                    <input type="text" id="certificate-request-search-tagName" name="tagName" placeholder="Tag name"/>
+                                    <input type="text" id="certificate-request-search-selection" name="selection" placeholder="Selection Name or UUID"/>
                                 </li>
                                 <li>
-                                    <label for="certificate-request-search-tagOid">Tag OID</label>
-                                    <select id="certificate-request-search-tagOid-criteria">
-                                        <option value="equalTo">is</option>
-                                        <option value="startsWith">starts with</option>
+                                    <label for="certificate-request-search-status">Status</label>
+                                    <select id="certificate-request-search-status-criteria">
+                                        <option value="EqualTo">is</option>
                                     </select>
-                                    <input type="text" id="certificate-request-search-tagOid" name="tagOid" placeholder="Tag OID"/>
-                                </li>
-                                <li>
-                                    <label for="certificate-request-search-tagValue">Tag value</label>
-                                    <select id="certificate-request-search-tagValue-criteria">
-                                        <option value="equalTo">is</option>
-                                        <option>contains</option>
+                                    <select id="certificate-request-search-status">
+                                        <option value=''>All</option>
+                                        <option>New</option>
+                                        <option>Pending</option>
+                                        <option>Done</option>
+                                        <option>Error</option>
                                     </select>
-                                    <input type="text" id="certificate-request-search-tagValue" name="tagValue" placeholder="Tag value"/>
                                 </li>
-                                <!--
-                                <li>
-                                    <label for="tag-search-description">Tag description</label>
-                                    <select id="tag-search-description-criteria">
-                                        <option>contains</option>
-                                        <option>is</option>
-                                    </select>
-                                    <input type="text" id="tag-create-description" name="oid"/>
-                                </li>
-                                -->
-                                <li><input type="button" value="Search..." onclick="searchCertificateRequests();"/></li>
+                                <li><input type="button" value="Search..." onclick="ws.searchCertificateRequests(this); return false;"/></li>
                             </ul>
                         </form>
 
                         <h2>Browse Certificate Requests</h2>
 
-                        <table id="certificate-request-browse-table">
+                        <table id="certificate-request-browse-table" class="dataview">
                             <caption>Certificate Requests</caption>
                             <thead>
                                 <tr>
                                     <th>Subject (host uuid)</th>
-                                    <th>Tag name</th>
-                                    <th>Tag OID</th>
-                                    <!-- <th>Description</th> -->
-                                    <th>Tag values</th>
+                                    <th>Selection</th>
+                                    <th>Status</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -607,9 +612,125 @@
                             <tbody>
                                 <tr data-bind-each-item="certificateRequests">
                                     <td data-bind-text="item.subject"></td>
-                                    <td data-bind-text="item.name"></td>
-                                    <td data-bind-text="item.oid"></td>
-                                    <td><a data-bind-oid="item.oid" href="#" onclick="javascript:removeCertificateRequest(this.getAttribute('uuid'));">delete</a></td>
+                                    <td data-bind-text="item.selection"></td>
+                                    <td data-bind-text="item.status"></td>
+                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeCertificateRequest(this.getAttribute('uuid')); return false;">delete</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <h2>Search Certificates</h2>
+
+                        <form id="certificate-search-form" action="#" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="certificate-search-subject">Subject</label>
+                                    <select id="certificate-search-subject-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="certificate-search-subject" name="subject" placeholder="Host UUID"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-issuer">Issuer</label>
+                                    <select id="certificate-search-issuer-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="certificate-search-issuer" name="issuer" placeholder="Issuer name"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-valid">Validity Date</label>
+                                    <select id="certificate-search-valid-criteria">
+                                        <option value="On">on</option>
+                                        <option value="Before">before</option>
+                                        <option value="After">after</option>
+                                    </select>
+                                    <input type="text" id="certificate-search-valid" name="valid" placeholder="Date" onblur='$(this).value = Date.parse($(this).value).toISOString();'/>
+                                    <span class="help">Try "today", "next tuesday", or most reasonable date formats</span>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-sha256">SHA-256</label>
+                                    <!-- <input type="hidden" id="certificate-search-sha256-criteria" value="Hex"/> -->
+                                    <input type="text" id="certificate-search-sha256" name="sha256" placeholder="Hex (64 characters)"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-pcrEvent">PCR Event</label>
+                                    <!-- <input type="hidden" id="certificate-search-pcrEvent-criteria" value="Hex"/> -->
+                                    <input type="text" id="certificate-search-pcrEvent" name="pcrEvent" placeholder="Hex (40 characters)"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-revoked">Status</label>
+                                    <input type="hidden" id="certificate-search-revoked-criteria" value=""/>
+                                    <select id="certificate-search-revoked">
+                                        <option value="">Any</option>
+                                        <option value="false">Active</option>
+                                        <option value="true">Revoked</option>
+                                    </select>
+                                </li>
+                                
+                                <!--
+                                <li>
+                                    <label for="certificate-search-selection">Selection</label>
+                                    <select id="certificate-search-selection-criteria">
+                                        <option value="EqualTo">is</option>
+                                    </select>
+                                    <input type="text" id="certificate-search-selection" name="selection" placeholder="Selection Name or UUID"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-status">Status</label>
+                                    <select id="certificate-search-status-criteria">
+                                        <option value="EqualTo">is</option>
+                                    </select>
+                                    <select id="certificate-search-status">
+                                        <option value=''>All</option>
+                                        <option>New</option>
+                                        <option>Pending</option>
+                                        <option>Done</option>
+                                        <option>Error</option>
+                                    </select>
+                                </li>
+                                -->
+                                <li><input type="button" value="Search..." onclick="ws.searchCertificates(this); return false;"/></li>
+                            </ul>
+                        </form>
+                                                
+
+                        
+                        <h2>Browse Certificates</h2>
+                        <table id="certificate-browse-table" class="dataview">
+                            <thead>
+                                <tr>
+                                    <th>Subject (Host ID)</th>
+                                    <th>Issuer</th>
+                                    <th style="width: 40px;">Not Before</th>
+                                    <th style="width: 40px;">Not After</th>
+                                    <th>Status</th>
+                                    <th>Fingerprint (SHA-256)</th>
+                                    <th>PCR Event</th>
+                                    <th>Certificate</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-bind-each-item="certificates">
+                                    <td data-bind-text="item.subject"></td>
+                                    <td data-bind-text="item.issuer"></td>
+                                    <td data-bind-text="item.notBefore | date"></td>
+                                    <td data-bind-text="item.notAfter | date"></td>
+                                    <td data-bind-text="item.revoked | yesno Revoked Active"></td>
+                                    <td data-bind-text="item.sha256 | wrap 16"></td>
+                                    <td data-bind-text="item.pcrEvent | wrap 20"></td>
+                                    <td>
+                                        <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">revoke</a>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -624,9 +745,9 @@
 
                         <form id="rdf-triple-create-form">
                             <ul>
-                                <li><label for="rdf-triple-create-subject">Subject</label><input type="text" id="rdf-triple-create-subject" data-bind-value="subject" name="subject" placeholder="ID"/></li>
-                                <li><label for="rdf-triple-create-predicate">Predicate</label><input type="text" id="rdf-triple-create-predicate" data-bind-value="predicate" name="predicate" placeholder="Attribute name"/></li>
-                                <li><label for="rdf-triple-create-object">Object</label><input type="text" id="rdf-triple-create-object" data-bind-value="object" name="object" placeholder="Attribute value"/></li>
+                                <li><label for="rdf-triple-create-subject">Subject</label><input type="text" id="rdf-triple-create-subject" data-bind-value="input.subject" name="subject" placeholder="ID"/></li>
+                                <li><label for="rdf-triple-create-predicate">Predicate</label><input type="text" id="rdf-triple-create-predicate" data-bind-value="input.predicate" name="predicate" placeholder="Attribute name"/></li>
+                                <li><label for="rdf-triple-create-object">Object</label><input type="text" id="rdf-triple-create-object" data-bind-value="input.object" name="object" placeholder="Attribute value"/></li>
                                 <li><input type="button" value="Save" onclick="ws.createRdfTriple(this); return false;"/></li>
                             </ul>
                         </form>
@@ -675,7 +796,7 @@
 
                         <h2>Browse RDF Triples</h2>
 
-                        <table id="rdf-triple-browse-table">
+                        <table id="rdf-triple-browse-table" class="dataview">
                             <caption>RDF Triples</caption>
                             <thead>
                                 <tr>
@@ -782,8 +903,9 @@
                                     </li>
                                     <li>
                                         <label for="automatic-tag-selection-name">Choose a tag selection to use for all certificate requests</label>
+                                        <!-- bind value below for the option used to be item.uuid but it's conveinnt to configure wiht human-readable name ... XXX solve this later by making the sample data use the uuid not the name when it configures -->
                                         <select data-bind-value="automaticTagSelectionName"  id="automatic-tag-selection-name" name="automaticTagSelectionName">
-                                            <option data-bind-each-item="selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
+                                            <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option> 
                                         </select>
                                         <p>If you use "Automatic Server-Based" provisioning, the server needs to know which tag selection
                                         to use for incoming certificate requests. Currently only one tag selection is supported.</p>
@@ -809,12 +931,12 @@
                                     created with the updated information.</p>
                                 <p>To create a new CA, use the "create-ca-key" command on the asset tag server.</p>
                                 <ul style="display: none;"> 
-                                    <li><label for="ca-cn">Common Name</label><input type="text" id="ca-cn" size="30" data-bind-value="cn" placeholder="First Name &amp; Last Name" class="required"/></li>
-                                    <li><label for="ca-ou">Organizational Unit</label><input type="text" id="ca-ou" size="30" data-bind-value="ou" placeholder="Department" value="Cloud Security" class="required"/></li>
-                                    <li><label for="ca-o">Organization</label><input type="text" id="ca-o" size="30" data-bind-value="o" placeholder="Organization or Company" value="Intel" class="required"/></li>
-                                    <li><label for="ca-l">Locality</label><input type="text" id="ca-l" size="30" data-bind-value="l" placeholder="City" value="Folsom" class="required"/></li>
-                                    <li><label for="ca-st">State</label><input type="text" id="ca-st" size="30" data-bind-value="st" placeholder="State or Province" value="CA" class="required"/></li>
-                                    <li><label for="ca-c">Country</label><input type="text" id="ca-c" size="30" data-bind-value="c" placeholder="Country" value="US" class="required"/></li>
+                                    <li><label for="ca-cn">Common Name</label><input type="text" id="ca-cn" size="30" data-bind-value="input.cn" placeholder="First Name &amp; Last Name" class="required"/></li>
+                                    <li><label for="ca-ou">Organizational Unit</label><input type="text" id="ca-ou" size="30" data-bind-value="input.ou" placeholder="Department" value="Cloud Security" class="required"/></li>
+                                    <li><label for="ca-o">Organization</label><input type="text" id="ca-o" size="30" data-bind-value="input.o" placeholder="Organization or Company" value="Intel" class="required"/></li>
+                                    <li><label for="ca-l">Locality</label><input type="text" id="ca-l" size="30" data-bind-value="input.l" placeholder="City" value="Folsom" class="required"/></li>
+                                    <li><label for="ca-st">State</label><input type="text" id="ca-st" size="30" data-bind-value="input.st" placeholder="State or Province" value="CA" class="required"/></li>
+                                    <li><label for="ca-c">Country</label><input type="text" id="ca-c" size="30" data-bind-value="input.c" placeholder="Country" value="US" class="required"/></li>
                                     <li><input type="button" value="Update" onclick="ws.updateCertificateAuthority(this);"/></li>
                                 </ul>
                                 <!-- not using data binding right now because we're not supporting updating the file... but we will later to allow user to import external ca certs by just appending them here -->
@@ -828,13 +950,13 @@
 
                 <div id="log">
                     <h1>Application Log</h1>
+                    <div id="logwindow" style="height: 250px; max-height: 250px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
+                    </div>
                     <!-- end log tab -->
                 </div>
                 <!-- content-wrap ends-->	
             </div>
 
-                    <div id="logwindow" style="height: 250px; max-height: 250px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
-                    </div>
             
             <!-- footer starts -->			
             <div id="footer-wrap"><div id="footer">				
@@ -869,8 +991,8 @@
                     }
                 }
             });
-//            navTabs.setActiveTab('tags');
-            navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
+            navTabs.setActiveTab('tags');
+//            navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
         </script>
 
@@ -889,55 +1011,71 @@
             //myview.build();
             //mybindings.update({filter: mytags});
             //sampledata.tags.push({"name":"new tag","oid":"1.2.3.4","values":["hello","world"]});
-            ws.initialize({
-                options: {
-                    baseurl: 'http://localhost:8080'
-                },
-                //views: { 'tags': tagview, 'rdf-triples': rdfview }
-//                data: sampledata, // optional: if not provided will start empty and then we can load it from server
-                view: { 'update': function(data) {
-//                        appview.update(data); 
-                        tagview.update(data);
-                        rdfview.update(data);
-                        selectionview.update(data);
-//                        tagviewCertificateRequests.update(data);
-                        certificateView.update(data); 
-                        configurationView.update(data);
-                    },
-                    'sync': function() {
-//                        appview.sync(); 
-                        tagview.sync();
-                        rdfview.sync();
-                        selectionview.sync();
-//                        tagviewCertificateRequests.sync();
-                        certificateView.sync(); 
-                        configurationView.sync();
+            // make sure all dom elements are loaded before initializing the web layer
+            document.observe('dom:loaded', function() {
+                ws.initialize({
+                    options: {
+                        baseurl: 'http://localhost:8080'
                     }
-                }
+                    //views: { 'tags': tagview, 'rdf-triples': rdfview }
+    //                data: sampledata, // optional: if not provided will start empty and then we can load it from server
+    /*
+                    view: { 'update': function(data) {
+                            var i = mtwilson.rivets.views.length; // until they respond we don't know what these tags are;  TODO if user changes here make sure yo uupdate config in database
+                            while(i--) {
+                                mtwilson.rivets.views[i].update(data);
+                            }
+    // //                     appview.update(data); 
+    //                        tagview.update(data);
+    //                        rdfview.update(data);
+    //                        selectionview.update(data);
+    //  //                      tagviewCertificateRequests.update(data);
+    //                        certificateView.update(data); 
+    //                        configurationView.update(data);
+                        },
+                        'sync': function() {
+                            var i = mtwilson.rivets.views.length; // until they respond we don't know what these tags are;  TODO if user changes here make sure yo uupdate config in database
+                            while(i--) {
+                                mtwilson.rivets.views[i].sync();
+                            }
+    ////                        appview.sync(); 
+    //                        tagview.sync();
+    //                        rdfview.sync();
+    //                        selectionview.sync();
+    // //                       tagviewCertificateRequests.sync();
+    //                        certificateView.sync(); 
+    //                        configurationView.sync();
+                        }
+                    }*/
+                });
+                log.debug("done initializing ws");
             });
-            log.debug("after init, data: "+Object.toJSON(ws.data));
             
             //alertView = rivets.bind(document.getElementById('notifications'), ws.data);
 
 //            appview = rivets.bind(document.getElementById('main'), ws.data); 
-            tagview = rivets.bind(document.getElementById('tag-browse-table'), ws.data); 
-            rdfview = rivets.bind(document.getElementById('rdf-triple-browse-table'), ws.data); 
-            selectionview = rivets.bind(document.getElementById('selection-browse-table'), ws.data); 
-//            tagviewCertificateRequests = rivets.bind(document.getElementById('certificate-request-create-form'), ws.data); 
-            certificateView = rivets.bind(document.getElementById('certificate-browse-table'), ws.data); 
-            configurationView = rivets.bind(document.getElementById('config-form'), ws.data.currentConfiguration); 
+//            tagview = rivets.bind(document.getElementById('tag-browse-table'), ws.data); 
+//            rdfview = rivets.bind(document.getElementById('rdf-triple-browse-table'), ws.data); 
+//            selectionview = rivets.bind(document.getElementById('selection-browse-table'), ws.data); 
+////            tagviewCertificateRequests = rivets.bind(document.getElementById('certificate-request-create-form'), ws.data); 
+//            certificateView = rivets.bind(document.getElementById('certificate-browse-table'), ws.data); 
+//            configurationView = rivets.bind(document.getElementById('config-form'), ws.data.currentConfiguration); 
 
-            // populate the UI with some data from the server. 
+            // wait for the webservice library to initialize, then populate the UI with some data from the server. 
             // XXX TODO create special 'views' resources on the  server that can provide all the info
             // we need in one response. so for example the default search for tags, triples, and selections, as well
             // as main configuration and cacerts... all would be defined in one 'view' that would be merged into
             // mtwilson.data. 
-            ws.searchTags('tag-search-form');
-            ws.searchRdfTriples('rdf-triple-search-form');
-            ws.searchSelections('selection-search-form');
-            ws.searchConfigurations('configuration-search-form');
-            ws.loadCaCerts();
-//            ws.retrieveMainConfiguration();
+            document.observe('mtwilson:ready', function() {
+                log.debug("after init (mtwilson:ready), data: "+Object.toJSON(ws.data));
+                ws.searchTags('tag-search-form');
+                ws.searchRdfTriples('rdf-triple-search-form');
+                ws.searchSelections('selection-search-form');
+                ws.searchConfigurations('configuration-search-form');
+                ws.loadCaCerts();
+    //            ws.retrieveMainConfiguration();
+            
+            });
         </script>
 
     </body>

@@ -25,6 +25,7 @@ public class Configuration extends Document {
     private String name;
     private ContentType contentType;
     private String content;
+    private JsonNode jsonContent;
     private static final ObjectMapper json = new ObjectMapper();
     private static final XmlMapper xml = new XmlMapper(); 
     
@@ -52,19 +53,21 @@ public class Configuration extends Document {
     }
     
     public JsonNode getJsonContent() {
-        try {
-            if( ContentType.JSON.equals(contentType)) {
-                log.debug("getJsonContent");
-                return json.readTree(content);
-            }
-            else {
-                return null;
+        log.debug("getJsonContent");
+        if( jsonContent == null ) {
+            if( content != null ) {
+                if( ContentType.JSON.equals(contentType)) {
+                    try {
+                        jsonContent = json.readTree(content);
+                    }
+                    catch(IOException e) {
+                        log.warn("Cannot deserialize JSON content", e);
+                        jsonContent = null;
+                    }
+                }
             }
         }
-        catch(IOException e) {
-            log.warn("Cannot deserialize JSON content", e);
-            return null;
-        }
+        return jsonContent;
     }
     
     @JsonIgnore
@@ -114,6 +117,7 @@ public class Configuration extends Document {
 
     public void setContent(String content) {
         this.content = content;
+        this.jsonContent = null; // will be populated next getJsonContent() is called
         log.debug("setContent: {}", this.content);
     }
 
@@ -157,6 +161,11 @@ public class Configuration extends Document {
         }
         return defaultValue;
     }
+    
+    // secure default values: 
+    // don't allow tags in certificate requests, don't allow automatic tag selection, 
+    // and disable automatic approval means nobody is getting an asset tag until the 
+    // system administrator configures the service
     
     @JsonIgnore
     public boolean isAllowTagsInCertificateRequests() {

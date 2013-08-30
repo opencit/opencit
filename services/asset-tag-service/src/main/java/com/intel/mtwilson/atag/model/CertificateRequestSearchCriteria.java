@@ -13,12 +13,8 @@ import com.intel.dcsg.cpg.io.UUID;
 public class CertificateRequestSearchCriteria {
     public UUID id; // setting this implies equalTo 
     public String subjectEqualTo;
-    public String subjectContains;
-    public String tagNameEqualTo;
-    public String tagNameContains;
-    public String tagOidEqualTo;
-    public String tagOidContains;
-    public String tagValueEqualTo;
-    public String tagValueContains;
+    public String subjectContains; // only makes sense if someone is using something other than UUIDs as the subject... 
+    public String selectionEqualTo;
+    public String selectionContains; // only makes sense if selections are being referenced by name nstead of uuid... uuid seems better.
     public String statusEqualTo;
 }
