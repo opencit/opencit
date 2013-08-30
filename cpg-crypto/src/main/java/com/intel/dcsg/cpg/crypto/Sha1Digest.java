@@ -1,5 +1,7 @@
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.Base64Util;
+import com.intel.dcsg.cpg.io.HexUtil;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 

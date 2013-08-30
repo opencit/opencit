@@ -1,5 +1,8 @@
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.Base64Util;
+import com.intel.dcsg.cpg.io.HexUtil;
+
 /**
  * Representation of a single SHA256 Digest. An SHA256 Digest is a 32-byte value.
  * 

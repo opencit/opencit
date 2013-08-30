@@ -95,7 +95,7 @@ public class UUID {
             log.debug("UUID.valueOf(bytes17)");
             return valueOf(array.subarray(1)); // skip leading zero; recursive call
         }*/
-        log.debug("UUID.valueOf(bytes {})", array.length());
+//        log.debug("UUID.valueOf(bytes {})", array.length());
         if( array.length() != 16 ) { throw new IllegalArgumentException("UUID must be 16 bytes"); }
         return new UUID(new java.util.UUID(array.subarray(0, 8).toBigInteger().longValue(), array.subarray(8, 8).toBigInteger().longValue()));
     }
@@ -105,16 +105,34 @@ public class UUID {
     public static UUID valueOf(String text) {
         if( text.length() != 32 && text.length() != 36 ) { throw new IllegalArgumentException("UUID must be 16 bytes; up to 4 hyphens allowed for standard UUID hex format"); }
         if( text.length() == 32 ) {
-            log.debug("UUID.valueOf(text32: {})", text);
+//            log.debug("UUID.valueOf(text32: {})", text);
             return valueOf(ByteArray.fromHex(text));
         }
         if( text.length() == 36 ) {
             String withoutHyphens = text.replaceAll("-", ""); // should be exactly 4 hyphens
             if( withoutHyphens.length() != 32 ) { throw new IllegalArgumentException("UUID must be 16 bytes; up to 4 hyphens allowed for standard UUID hex format"); }
-            log.debug("UUID.valueOf(text36: {})", withoutHyphens);
+//            log.debug("UUID.valueOf(text36: {})", withoutHyphens);
             return valueOf(ByteArray.fromHex(withoutHyphens));
         }
         throw new IllegalArgumentException("Unrecognized UUID format"); 
+    }
+    
+//    Pattern uuidPattern ...
+    /**
+     * TODO: make the regex pattern for valid UUIDs and use that instead of the looser "replace hyphens" approach below 
+     * @param text
+     * @return 
+     */
+    public static boolean isValid(String text) {
+        if( text.length() == 32 ) {
+            return HexUtil.isHex(text);
+        }
+        if( text.length() == 36 ) {
+            String withoutHyphens = text.replaceAll("-", ""); // should be exactly 4 hyphens
+            if( withoutHyphens.length() != 32 ) { return false; }
+            return HexUtil.isHex(withoutHyphens);
+        }
+        return false;
     }
     
     /**
@@ -124,19 +142,19 @@ public class UUID {
      */
     public static UUID valueOf(BigInteger number) {
         ByteArray array = new ByteArray(number);
-        log.debug("Array length 1: {}", array.length());
-        log.debug("Array: {}", array.toHexString());
+//        log.debug("Array length 1: {}", array.length());
+//        log.debug("Array: {}", array.toHexString());
         // BigInteger inserts a leading zero to preserve sign, but UUIDs do not have a sign bit so we need to strip it off
         if( array.length() == 17 && array.getBytes()[0] == 0 ) {
             return valueOf(array.subarray(1)); // skip leading zero
         }
         if( array.length() < 16 ) {
             int padding = 16 - array.length();
-            log.debug("Adding padding: {} bytes", padding);
+//            log.debug("Adding padding: {} bytes", padding);
             ByteArray zero = new ByteArray(new byte[padding]);
             return valueOf(ByteArray.concat(zero, array));
         }
-        log.debug("Array length 2: {}", array.length());
+//        log.debug("Array length 2: {}", array.length());
         if( array.length() != 16 ) { throw new IllegalArgumentException("UUID must be 128 bits"); }
         return valueOf(array);
     }

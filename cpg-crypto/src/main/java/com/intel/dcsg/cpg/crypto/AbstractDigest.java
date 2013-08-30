@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.HexUtil;
 import java.util.Arrays;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;

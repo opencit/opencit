@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.HexInput;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.List;
 

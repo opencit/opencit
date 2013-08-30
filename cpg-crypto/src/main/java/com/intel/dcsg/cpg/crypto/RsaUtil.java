@@ -5,7 +5,9 @@
 package com.intel.dcsg.cpg.crypto;
 
 import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.dcsg.cpg.io.pem.PemLikeParser;
 import com.intel.dcsg.cpg.x509.X509Builder;
+import static com.intel.dcsg.cpg.x509.X509Util.decodeDerCertificate;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
@@ -215,9 +217,27 @@ public class RsaUtil {
         return pem.toString();
     }
     
+    /**
+     * Behavior change from 0.1.2 to 0.1.3 -  instead of expecting exactly one PUBLIC KEY block in PEM-like format,
+     * this method now extracts the first PUBLIC KEY block from the given text. 
+     * This means you can have one file containing both PRIVATE KEY and PUBLIC KEY blocks and extract each
+     * key using the corresponding decode method.
+     * 
+     * @param text
+     * @return
+     * @throws CryptographyException 
+     */
     public static PublicKey decodePemPublicKey(String text) throws CryptographyException {
-        Pem pem = Pem.valueOf(text);
-        return decodeDerPublicKey(pem.getContent());
+        List<Pem> list = PemLikeParser.parse(text);
+        for(Pem pem : list) {
+            if( "PUBLIC KEY".equals(pem.getContentType()) ) {
+                byte[] der = Base64.decodeBase64(pem.getContent());
+                return decodeDerPublicKey(der);
+            }
+        }
+        return null;
+//        Pem pem = Pem.valueOf(text);
+//        return decodeDerPublicKey(pem.getContent());
     }
     
     public static PublicKey decodeDerPublicKey(byte[] publicKeyBytes) throws CryptographyException {
@@ -231,6 +251,45 @@ public class RsaUtil {
         }
     }
 
+    /**
+     * XXX TODO maybe this method should always require a password to use for encrypting the private key.
+     * 
+     * XXX TODO create other helper methods for p12 format, or creating a java keystore file for just one private key, etc. 
+     * 
+     * @param privateKey
+     * @return 
+     * @since 0.1.3
+     */
+    public static String encodePemPrivateKey(PrivateKey privateKey)  {
+        Pem pem = new Pem("PRIVATE KEY", privateKey.getEncoded());
+        return pem.toString();
+    }
+    
+    /**
+     * Given some text, this method extracts the first PRIVATE KEY block (PEM-like format) and deserializes the 
+     * private key, returning a PrivateKey object.
+     * This means you can have one file containing both PRIVATE KEY and PUBLIC KEY blocks and extract each
+     * key using the corresponding decode method.
+     * 
+     * XXX TODO maybe this method should allow providing a password for decrypting a password-encrypted private key
+     * @param text
+     * @return
+     * @throws CryptographyException 
+     * @since 0.1.3
+     */
+    public static PrivateKey decodePemPrivateKey(String text) throws CryptographyException {
+        List<Pem> list = PemLikeParser.parse(text);
+        for(Pem pem : list) {
+            if( "PRIVATE KEY".equals(pem.getContentType()) ) {
+                byte[] der = Base64.decodeBase64(pem.getContent());
+                return decodeDerPrivateKey(der);
+            }
+        }
+        return null;
+//        Pem pem = Pem.valueOf(text);
+//        return decodeDerPrivateKey(pem.getContent());
+    }
+    
     public static PrivateKey decodeDerPrivateKey(byte[] privateKeyBytes) throws CryptographyException {
         try {
             KeyFactory factory = KeyFactory.getInstance("RSA"); // throws NoSuchAlgorithmException

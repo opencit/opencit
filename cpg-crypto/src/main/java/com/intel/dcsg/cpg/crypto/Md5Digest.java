@@ -1,5 +1,8 @@
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.Base64Util;
+import com.intel.dcsg.cpg.io.HexUtil;
+
 /**
  * Representation of a single MD5 Digest. An MD5 Digest is a 16-byte value.
  * 

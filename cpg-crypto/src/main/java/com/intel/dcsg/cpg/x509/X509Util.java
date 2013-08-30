@@ -4,6 +4,8 @@
  */
 package com.intel.dcsg.cpg.x509;
 
+import com.intel.dcsg.cpg.io.pem.Pem;
+import com.intel.dcsg.cpg.io.pem.PemLikeParser;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -80,7 +82,11 @@ public class X509Util {
     
     /**
      * This function converts a PEM-format certificate to an X509Certificate
-     * object.
+     * object. 
+     * Behavior change from 0.1.2 to 0.1.3 -  instead of expecting exactly one CERTIFICATE block in PEM-like format,
+     * this method now extracts the first CERTIFICATE block from the given text. 
+     * This means you can have one file containing both PRIVATE KEY and CERTIFICATE blocks and extract each
+     * using the corresponding decode method.
      *
      * Example PEM format:
      *
@@ -94,9 +100,17 @@ public class X509Util {
      * @throws CertificateException 
      */
     public static X509Certificate decodePemCertificate(String text) throws CertificateException {
-        String content = text.replace(BEGIN_CERTIFICATE, "").replace(END_CERTIFICATE, "");
-        byte[] der = Base64.decodeBase64(content);
-        return decodeDerCertificate(der);
+        List<Pem> list = PemLikeParser.parse(text);
+        for(Pem pem : list) {
+            if( "CERTIFICATE".equals(pem.getContentType()) ) {
+                byte[] der = Base64.decodeBase64(pem.getContent());
+                return decodeDerCertificate(der);
+            }
+        }
+//        String content = text.replace(BEGIN_CERTIFICATE, "").replace(END_CERTIFICATE, "");
+//             byte[] der = Base64.decodeBase64(content);
+//                return decodeDerCertificate(der);
+        return null;        
     }
     
     public static List<X509Certificate> decodePemCertificates(String text) throws CertificateException {

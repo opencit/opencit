@@ -1,6 +1,7 @@
 * Version 0.1.2
 
 Fixed ByteArray.fromHex to preserve leading zeros.
+Added HexInput and HexUtil and Base64Util
 
 * Version 0.1.1
 

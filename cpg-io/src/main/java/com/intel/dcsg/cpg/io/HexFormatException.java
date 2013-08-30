@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.dcsg.cpg.crypto;
+package com.intel.dcsg.cpg.io;
 
 /**
  * This descendant of IllegalArgumentException is for classes that work with hex strings and

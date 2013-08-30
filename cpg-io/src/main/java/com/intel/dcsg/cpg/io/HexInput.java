@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.dcsg.cpg.crypto;
+package com.intel.dcsg.cpg.io;
 
 import com.intel.dcsg.cpg.validation.InputModel;
 import org.apache.commons.codec.DecoderException;
@@ -21,14 +21,14 @@ import org.apache.commons.codec.binary.Hex;
  *   }
  * }
  * 
- * @since 0.1
+ * @since 0.1.2
  * @author jbuhacoff
  */
 public class HexInput extends InputModel<byte[]> {
 
     @Override
     protected byte[] convert(String hexInput) {
-        String hex = hexInput.replaceAll("[ :]", "");
+        String hex = HexUtil.trim(hexInput);
         try {
             byte[] value = Hex.decodeHex(hex.toCharArray());
             return value;

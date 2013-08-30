@@ -2,16 +2,14 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.dcsg.cpg.crypto;
+package com.intel.dcsg.cpg.io;
 
 import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 /**
- *  * XXX TODO should move this into the io package
-
- * @since 0.1
+ * @since 0.1.2
  * @author jbuhacoff
  */
 public class HexUtil {
