@@ -64,6 +64,15 @@ public class Iso8601Date {
     private static final SimpleDateFormat iso8601DateOutput = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"); // capital Z produces output like -0800 which is ok for iso8601 but not for rfc3339
     private Date date;
     
+    private Iso8601Date() {
+        
+    }
+    
+    /**
+     * TODO remove this constructor in version 0.2
+     * @deprecated use Iso8601Date.valueOf(text) instead
+     * @param text 
+     */
     public Iso8601Date(String text) {
         date = parse(text);
     }
@@ -116,5 +125,17 @@ public class Iso8601Date {
             }
         }
         throw new IllegalArgumentException("Date is not in recognized ISO8601 format: "+text);        
+    }
+    
+    /**
+     * @since 0.1.2
+     * @param text
+     * @return a new instance of Iso8601Date
+     * @throws IllegalArgumentException if the text is not a recognized ISO8601 format; only a subset of ISO8601 is currently supported
+     */
+    public static Iso8601Date valueOf(String text) {
+        Date date = parse(text);
+        Iso8601Date isodate = new Iso8601Date(date);
+        return isodate;
     }
 }

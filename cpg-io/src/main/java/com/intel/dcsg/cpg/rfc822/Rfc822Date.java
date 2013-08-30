@@ -21,6 +21,11 @@ public class Rfc822Date {
     private static final SimpleDateFormat rfc822DateOutput = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
     private Date date;
     
+    /**
+     * TODO remove this constructor in version 0.2
+     * @deprecated use Rfc822Date.valueOf(text) instead
+     * @param text 
+     */
     public Rfc822Date(String text) {
         date = parse(text);
     }
@@ -54,5 +59,18 @@ public class Rfc822Date {
             }
         }
         throw new IllegalArgumentException("Date is not in RFC822 format: "+text);        
+    }
+    
+    /**
+     * 
+     * @param text
+     * @return a new instance of Rfc822Date
+     * @throws IllegalArgumentException if the text is not a recognized RFC 822 format
+     * @since 0.1.2
+     */
+    public static Rfc822Date valueOf(String text) {
+        Date date = parse(text);
+        Rfc822Date rfcdate = new Rfc822Date(date);
+        return rfcdate;
     }
 }
