@@ -473,7 +473,7 @@ mtwilson.atag = mtwilson.atag || {};
     
 
 // XXX currently we're only deleting it, but TODO need to instad of delete it, mark it as revoked ...
-    mtwilson.atag.revokeCertificate = function (uuid) {
+    mtwilson.atag.deleteCertificate = function (uuid) {
         var i;
         for (i = data.certificates.length - 1; i >= 0; i--) {
             if (('uuid' in data.certificates[i]) && data.certificates[i].uuid == uuid) {
