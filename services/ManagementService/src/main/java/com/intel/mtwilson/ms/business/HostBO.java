@@ -170,9 +170,9 @@ public class HostBO extends BaseBO {
                 procMap = jpaController.findByCPUID(processorNameOrCPUID);
             }
             
-            if (procMap != null)
+            if (procMap != null){
                 platformName = procMap.getPlatformName();
-            
+            }
         } catch (MSException me) {
             log.error("Error during retrieval of platform name details. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
@@ -780,10 +780,12 @@ public class HostBO extends BaseBO {
                     // Also we need to add back the OEM name to the VMM_Name. We do not need to add it for
                     // BIOS as BIOS_Name is always OEM specific.                    
                     String platformName = getPlatformName(hostObj.Processor_Info);
-                    if (!platformName.isEmpty())
+                    if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    }
+                    else {
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;    
+                    }
                     
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
@@ -864,10 +866,12 @@ public class HostBO extends BaseBO {
 
                     // We need to add OEM name to the VMM_Name.     
                     String platformName = getPlatformName(hostObj.Processor_Info);
-                    if (!platformName.isEmpty())
+                    if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    }
+                    else {
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;               
+                    }
                     
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
@@ -1248,10 +1252,12 @@ public class HostBO extends BaseBO {
             // Bug 799 & 791: Need to append the platform name too
             String platformName = getPlatformName(hostObj.Processor_Info);
             if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM) {
-                if (!platformName.isEmpty())
+                if (!platformName.isEmpty()){
                     hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                else
+                }
+                else {
                     hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;
+                }         
             }
 
             TblOem oemTblObj = oemJpa.findTblOemByName(hostObj.BIOS_Oem);
@@ -1478,10 +1484,12 @@ public class HostBO extends BaseBO {
                 } else if (hostConfigObj != null && value2) {
                     // Bug 799 & 791: Need to append the platform name too
                     String platformName = getPlatformName(hostObj.Processor_Info);
-                    if (!platformName.isEmpty())
+                    if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    }
+                    else {
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;    
+                    }
                 }
                 
                 // Create the VMM MLE
@@ -1880,10 +1888,12 @@ public class HostBO extends BaseBO {
                 Collection<TblHosts> vmmHostCollection = mleSearchObj.getTblHostsCollection();
                 if (vmmHostCollection != null && !vmmHostCollection.isEmpty()) {
                     log.debug("Retrieved {} hosts for updates.", vmmHostCollection.size());                    
-                    if (tblHostsCollection == null)
+                    if (tblHostsCollection == null){
                         tblHostsCollection = vmmHostCollection;
-                    else
+                    }
+                    else{
                         tblHostsCollection.addAll(vmmHostCollection);
+                    }
                 } else {
                         log.debug("No hosts to be updated because of VMM MLE update.");
                 }
