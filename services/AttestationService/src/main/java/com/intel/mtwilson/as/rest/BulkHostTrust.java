@@ -82,7 +82,7 @@ public class BulkHostTrust {
                 // bug #783  make sure that we only pass to the next layer hostnames that are likely to be valid 
                 for(String host : Arrays.asList(hosts.split(","))) {
                     log.debug("Host: '{}'", host);
-                    if( !host.trim().isEmpty() ) {
+                    if( !(host.trim().isEmpty() || host.trim() == null) ) {
                         hostSet.add(host.trim());
                     }
                 }
@@ -132,8 +132,16 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) {
+            TxtHostRecordList newHostRecords = new TxtHostRecordList();
+            for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
+            if(host.HostName.isEmpty() || host.HostName == null)
+                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
+                                "host");
+            else
+                newHostRecords.getHostRecords().add(host);
+            }
             BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
-            return bulkHostMgmtBO.addHosts(hostRecords);
+            return bulkHostMgmtBO.addHosts(newHostRecords);
         }
 
         /**
@@ -147,7 +155,15 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) {
+              TxtHostRecordList newHostRecords = new TxtHostRecordList();
+            for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
+            if(host.HostName.isEmpty() || host.HostName == null)
+                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
+                                "host");
+            else
+                newHostRecords.getHostRecords().add(host);
+            }
             BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
-            return bulkHostMgmtBO.updateHosts(hostRecords);
+            return bulkHostMgmtBO.updateHosts(newHostRecords);
         }
 }
