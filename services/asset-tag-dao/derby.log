@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Thu Sep 05 01:52:49 PDT 2013:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-0140-ed52-ebf5-000005a20000 
+on database directory C:\Users\jbuhacof\workspace\mtwilson-dev\services\asset-tag-dao\target\derby\mytestdb with class loader sun.misc.Launcher$AppClassLoader@66cf9bf0 
+Loaded from file:/C:/Users/jbuhacof/.m2/repository/org/apache/derby/derby/10.10.1.1/derby-10.10.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.7.0_13-b20
+user.dir=C:\Users\jbuhacof\workspace\mtwilson-dev\services\asset-tag-dao
+os.name=Windows 7
+os.arch=amd64
+os.version=6.1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

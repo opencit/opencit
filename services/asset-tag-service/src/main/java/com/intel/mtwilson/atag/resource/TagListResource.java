@@ -9,7 +9,7 @@ import com.intel.mtwilson.atag.model.TagSearchCriteria;
 import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.atag.dao.jdbi.TagDAO;
 import com.intel.mtwilson.atag.dao.jdbi.TagValueDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;

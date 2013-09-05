@@ -5,7 +5,7 @@
 package com.intel.mtwilson.atag.cmd;
 
 import com.intel.mtwilson.atag.AtagCommand;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -24,91 +24,15 @@ import org.slf4j.LoggerFactory;
  */
 public class CreateDatabase extends AtagCommand {
     private static Logger log = LoggerFactory.getLogger(CreateDatabase.class);
+    private com.intel.mtwilson.atag.dao.CreateDatabase creator = new com.intel.mtwilson.atag.dao.CreateDatabase();
     
     @Override
     public void execute(String[] args) throws Exception {
-        log.debug("Starting Derby...");
-        Derby.startDatabase();
-        log.debug("Derby started");
-        if( getOptions().getBoolean("drop", false) ) {
-            log.debug("Deleting database tables...");
-            dropTables();
-            log.info("Deleted database tables");
-        }
-        log.debug("Creating database tables...");
-        createTables();
-        log.info("Created database tables");
-        log.debug("Stopping Derby...");
-        Derby.stopDatabase();
-        log.debug("Derby stopped");
+        creator.setDropTablesEnabled(getOptions().getBoolean("drop", false));
+        creator.execute(args);
     }
     
-    public void dropTables() throws SQLException {
-        Connection c = Derby.getConnection();
-        Set<String> tables = Derby.listTablesAndViews(c);
-        for(String table : tables) {
-            Statement s = c.createStatement();
-            s.executeUpdate("DROP TABLE "+table);
-            s.close();
-        }
-    }
-    
-    public void createTables() throws SQLException {
-        DataSource ds = Derby.getDataSource();
-        DBI dbi = new DBI(ds);
-        
-        // tag
-        TagDAO tagDao = dbi.open(TagDAO.class);
-        if( !Derby.tableExists("tag") ) { tagDao.create(); }        
-        tagDao.close();
-        
-        // tag value
-        TagValueDAO tagValueDao = dbi.open(TagValueDAO.class);
-        if( !Derby.tableExists("tag_value") ) { tagValueDao.create(); }
-        tagValueDao.close();
-        
-        // rdf triple
-        RdfTripleDAO rdfTripleDao = dbi.open(RdfTripleDAO.class);
-        if( !Derby.tableExists("rdf_triple") ) { rdfTripleDao.create(); }
-        rdfTripleDao.close();
-        
-        // certificate request
-        CertificateRequestDAO certificateRequestDao = dbi.open(CertificateRequestDAO.class);
-        if( !Derby.tableExists("certificate_request") ) { certificateRequestDao.create(); }
-        certificateRequestDao.close();
-        
-        // certificate request tag value
-        CertificateRequestTagValueDAO certificateRequestTagValueDao = dbi.open(CertificateRequestTagValueDAO.class);
-        if( !Derby.tableExists("certificate_request_tag_value") ) { certificateRequestTagValueDao.create(); }
-        certificateRequestTagValueDao.close();
 
-        // certificate
-        CertificateDAO certificateDao = dbi.open(CertificateDAO.class);
-        if( !Derby.tableExists("certificate") ) { certificateDao.create(); }
-        certificateDao.close();
-
-        // certificate request
-        SelectionDAO selectionDao = dbi.open(SelectionDAO.class);
-        if( !Derby.tableExists("selection") ) { selectionDao.create(); }
-        selectionDao.close();
-        
-        // certificate request tag value
-        SelectionTagValueDAO selectionTagValueDao = dbi.open(SelectionTagValueDAO.class);
-        if( !Derby.tableExists("selection_tag_value") ) { selectionTagValueDao.create(); }
-        selectionTagValueDao.close();
-
-        // configuration
-        ConfigurationDAO configurationDao = dbi.open(ConfigurationDAO.class);
-        if( !Derby.tableExists("configuration") ) { configurationDao.create(); }
-        configurationDao.close();
-
-        // file
-        FileDAO fileDao = dbi.open(FileDAO.class);
-        if( !Derby.tableExists("file") ) { fileDao.create(); }
-        fileDao.close();
-        
-        
-    }    
  
     public static void main(String args[]) throws Exception {
         CreateDatabase cmd = new CreateDatabase();

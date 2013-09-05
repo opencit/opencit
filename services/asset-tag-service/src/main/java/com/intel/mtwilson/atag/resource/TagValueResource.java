@@ -8,7 +8,7 @@ import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.atag.dao.jdbi.TagDAO;
 import com.intel.mtwilson.atag.dao.jdbi.TagValueDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;
 import java.util.Arrays;

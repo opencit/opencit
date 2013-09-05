@@ -11,7 +11,7 @@ import com.intel.mtwilson.atag.model.CertificateRequest;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestDAO;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateRequestApprovalDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.dcsg.cpg.io.UUID;

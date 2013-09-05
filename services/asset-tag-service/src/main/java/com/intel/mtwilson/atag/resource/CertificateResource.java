@@ -10,13 +10,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
+import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.validation.ObjectModel;
+import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.api.MtWilson;
+import com.intel.mtwilson.atag.Global;
 import java.io.IOException;
+import java.security.SignatureException;
 import java.sql.SQLException;
 import java.util.Date;
 import org.restlet.data.Status;
@@ -186,7 +192,7 @@ public class CertificateResource extends ServerResource {
     }
     
     @Post("json:json")
-    public CertificateActionChoice[] actionCertificate(CertificateActionChoice[] actions) throws IOException {
+    public CertificateActionChoice[] actionCertificate(CertificateActionChoice[] actions) throws IOException, ApiException, SignatureException {
         UUID uuid = UUID.valueOf(getAttribute("id"));
         Certificate certificate = dao.findByUuid(uuid);
         if( certificate == null ) {
@@ -202,7 +208,13 @@ public class CertificateResource extends ServerResource {
                     }
                     action.provision.setUuid(uuid);
                     if( action.provision.isValid() ) {
+                        // first post the certificate to mt wilson
+                        AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
+                        request.setCertificate(certificate.getCertificate());
+//                        Global.mtwilson().importAssetTagCertificate(request); // XXX TODO compiles fine on command lien but in netbeans shows up as not being part of the MtWilson interface, even though when i go to declaration of interface MtWilson it is correct
+//                        My.client().importAssetTagCertificate(request);
                         // XXX TODO send it to the host...
+                        
                     }
                     break;
                 case REVOKE:
@@ -210,6 +222,12 @@ public class CertificateResource extends ServerResource {
                     if( action.revoke.isValid() ) {
                         // update the database...
                         dao.updateRevoked(certificate.getId(), true);
+                        // update mt wilson ...
+                        AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
+                        request.setSha256OfAssetCert(certificate.getSha256().toByteArray());
+//                        Global.mtwilson().revokeAssetTagCertificate(request); // XXX TODO compiles fine on command lien but in netbeans shows up as not being part of the MtWilson interface, even though when i go to declaration of interface MtWilson it is correct
+//                        My.client().revokeAssetTagCertificate(request);
+                        // XXX TODO revoke it from host (send zeros);
                     }
                     break;
                 default:

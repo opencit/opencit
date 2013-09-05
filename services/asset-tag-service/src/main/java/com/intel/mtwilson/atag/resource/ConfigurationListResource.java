@@ -7,7 +7,7 @@ package com.intel.mtwilson.atag.resource;
 import com.intel.mtwilson.atag.model.ConfigurationSearchCriteria;
 import com.intel.mtwilson.atag.model.Configuration;
 import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;

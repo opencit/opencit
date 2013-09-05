@@ -187,4 +187,18 @@ public class Configuration extends Document {
         return getBoolean("approveAllCertificateRequests", false);
     }
     
+    // mtwilson url and api client keystore username & password
+    @JsonIgnore
+    public String getMtWilsonURL() {
+        return getString("mtwilsonUrl", null);
+    }
+    @JsonIgnore
+    public String getMtWilsonClientKeystoreUsername() {
+        return getString("mtwilsonClientKeystoreUsername", null);
+    }
+    @JsonIgnore
+    public String getMtWilsonClientKeystorePassword() {
+        return getString("mtwilsonClientKeystorePassword", null);
+    }
+    
 }

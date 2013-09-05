@@ -6,7 +6,7 @@ package com.intel.mtwilson.atag.resource;
 
 import com.intel.mtwilson.atag.model.Configuration;
 import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.atag.Global;
 import java.sql.SQLException;

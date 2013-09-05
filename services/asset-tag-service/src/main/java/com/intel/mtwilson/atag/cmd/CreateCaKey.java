@@ -11,7 +11,7 @@ import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.atag.AtagCommand;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.model.File;
 import java.io.FileNotFoundException;
 import java.security.KeyPair;

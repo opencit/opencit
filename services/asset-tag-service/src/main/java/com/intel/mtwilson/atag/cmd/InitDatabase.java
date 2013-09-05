@@ -6,7 +6,7 @@ package com.intel.mtwilson.atag.cmd;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.atag.AtagCommand;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.model.*;
 import java.sql.Connection;
@@ -17,6 +17,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.lang.RandomStringUtils;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,9 +109,14 @@ public class InitDatabase extends AtagCommand {
         rdfTripleDao.insert(new UUID(), "country", "contains", "state");
         rdfTripleDao.insert(new UUID(), "state", "contains", "city");
         
+        
+    // mtwilsonUrl, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword (should generate automatically)
+//        String mtwilsonClientKeystoreUsername = "asset-tag-prov-svc";
+//        String mtwilsonClientKeystorePassword = RandomStringUtils.randomAlphanumeric(16);
+        
         // configuration to allow automatic tag selection & approval
         log.debug("inserting configuration");
-        String configuration = "{\"allowTagsInCertificateRequests\":false,\"allowAutomaticTagSelection\":true,\"automaticTagSelectionName\":\""+defaultSelectionUuid+"\",\"approveAllCertificateRequests\":true}";
+        String configuration = "{\"allowTagsInCertificateRequests\":false,\"allowAutomaticTagSelection\":true,\"automaticTagSelectionName\":\""+defaultSelectionUuid+"\",\"approveAllCertificateRequests\":true}"; // removed the following into mtwilson.properties: ,\"mtwilsonUrl\":\"https://mtwilson.com\",\"mtwilsonClientKeystoreUsername\":\""+mtwilsonClientKeystoreUsername+"\",\"mtwilsonClientKeystorePassword\":\""+mtwilsonClientKeystorePassword+"\"
         configurationDao.insert(new UUID(), "main", Configuration.ContentType.JSON, configuration);
         
         // close daos'

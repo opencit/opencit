@@ -16,6 +16,7 @@
   
   <modules>
 	<module>asset-tag-model</module>
+	<module>asset-tag-dao</module>
 	<module>asset-tag-service</module>
     <module>trust-policy</module>
     <module>webservice-util</module>

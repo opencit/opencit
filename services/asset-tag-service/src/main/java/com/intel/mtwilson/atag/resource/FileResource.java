@@ -6,7 +6,7 @@ package com.intel.mtwilson.atag.resource;
 
 import com.intel.mtwilson.atag.model.File;
 import com.intel.mtwilson.atag.dao.jdbi.FileDAO;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;
 import org.restlet.data.Status;

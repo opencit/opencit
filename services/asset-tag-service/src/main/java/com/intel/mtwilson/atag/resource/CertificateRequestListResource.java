@@ -9,7 +9,7 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.atag.model.CertificateRequestSearchCriteria;
 import com.intel.mtwilson.atag.model.CertificateRequest;
 import com.intel.mtwilson.atag.dao.jdbi.*;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;

@@ -6,7 +6,7 @@ package com.intel.mtwilson.atag.cmd;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.atag.AtagCommand;
-import com.intel.mtwilson.atag.Derby;
+import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.model.File;
 import java.io.FileNotFoundException;
 import org.apache.commons.io.IOUtils;
