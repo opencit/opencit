@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * Those two constructors provide the two extremes: with (File), all properties in a file,
  * developer specifies the path for easy integration into any system); with
  * (URL,Hmac/RsaCredential,SimpleKeystore) a developer is able to instantiate a secure
- * ApiClient completely in Java without requiring a  configuration file (it will enable
+ * ApiClient completely in Java without requiring a configuration file (it will enable
  * requireTrustedCertificate and verifyHostname).
  * @since 0.5.2
  * @author jbuhacoff

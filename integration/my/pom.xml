@@ -198,7 +198,7 @@
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-console</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>  
 </project>
