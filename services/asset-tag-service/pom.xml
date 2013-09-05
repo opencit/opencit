@@ -204,6 +204,12 @@ our customers.
     </dependency>
 
     <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>asset-tag-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
             <version>0.1.2-SNAPSHOT</version>

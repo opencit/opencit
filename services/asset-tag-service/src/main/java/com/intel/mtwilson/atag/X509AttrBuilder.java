@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.atag;
 
+import com.intel.mtwilson.atag.model.OID;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
@@ -49,11 +50,15 @@ import org.slf4j.LoggerFactory;
  * This convenience class implements the Builder pattern in order to simplify creation of X509 Attribute Certificates.
  * Certificates created by this builder do NOT have a public key. They only have attributes about the subject/holder.
  *
- * NOTE: this is different than X509 Public Key Certificates which can be built using cpg-crypto X509AttrBuilder.
+ * NOTE: this is different than X509 Public Key Certificates which can be built using cpg-crypto X509Builder.
  *
  * You should create a new instance of this class for every certificate.
  *
  * This class requires Bouncy Castle
+ * 
+ * XXX TODO this class may be moved to cpg-crypto if the OID and AttributeOidAndValue classes either also move or
+ * this is rewritten not to use them. OID may be easily moved to cpg-io.  AttributeOidAndValue may need revision and
+ * renaming before moving.
  *
  * @since 0.1
  * @author jbuhacoff

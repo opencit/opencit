@@ -636,6 +636,7 @@ mtwilson.atag = mtwilson.atag || {};
         var config = data.configurations[0];
         delete config.content; // don't send the text content to the server... send only the jsonContent that we edited, and the server will serialize
         delete config.selections; // don't send the selection data (merged into it in retrieveMainConfiguration)
+        delete config.tags; // don't send the selection data (merged into it in retrieveMainConfiguration)
 //        log.debug("modified config: "+Object.toJSON(config));
         ajax.json.put('configurations', config, {app:{input:{name:config.name}}}); // pass {app:report} so it will be passed to the event handler after the request is complete
 //        }

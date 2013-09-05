@@ -4,7 +4,7 @@
  */
 package test.x509;
 
-import com.intel.mtwilson.atag.OID;
+import com.intel.mtwilson.atag.model.OID;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
