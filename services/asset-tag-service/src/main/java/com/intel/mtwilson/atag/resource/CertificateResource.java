@@ -211,7 +211,7 @@ public class CertificateResource extends ServerResource {
                         // first post the certificate to mt wilson
                         AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
                         request.setCertificate(certificate.getCertificate());
-//                        Global.mtwilson().importAssetTagCertificate(request); // XXX TODO compiles fine on command lien but in netbeans shows up as not being part of the MtWilson interface, even though when i go to declaration of interface MtWilson it is correct
+                        Global.mtwilson().importAssetTagCertificate(request);
 //                        My.client().importAssetTagCertificate(request);
                         // XXX TODO send it to the host...
                         
@@ -225,7 +225,7 @@ public class CertificateResource extends ServerResource {
                         // update mt wilson ...
                         AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
                         request.setSha256OfAssetCert(certificate.getSha256().toByteArray());
-//                        Global.mtwilson().revokeAssetTagCertificate(request); // XXX TODO compiles fine on command lien but in netbeans shows up as not being part of the MtWilson interface, even though when i go to declaration of interface MtWilson it is correct
+                        Global.mtwilson().revokeAssetTagCertificate(request);
 //                        My.client().revokeAssetTagCertificate(request);
                         // XXX TODO revoke it from host (send zeros);
                     }
