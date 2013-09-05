@@ -12,6 +12,7 @@ import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.mtwilson.atag.dao.jdbi.*;
@@ -167,6 +168,11 @@ public class CertificateRequestListResource extends ServerResource {
         certificateRequest.setSelectionId(selection.getId()); // XXX of no use to the client, maybe remove this
         certificateRequest.setSelection(selection.getUuid().toString());
         List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
+        if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
+            log.error("No tags in selection");
+               setStatus(Status.CLIENT_ERROR_BAD_REQUEST);  // cannot make a certificate request without a valid selection;  we can't pick one automatically unless the administrator has configured a default selection and in that case we wouldn't even be searching here.
+               return null;            
+        }
         selection.setTags(selectionTagValues);
         
         // at this point we have a request for a subject (host uuid) and a specific selection of tags for that subject
@@ -196,7 +202,15 @@ public class CertificateRequestListResource extends ServerResource {
                         log.debug("Adding attribute: {} = {}", tag.getTagOid(), tag.getTagValue());
                         builder.attribute(tag.getTagOid(), tag.getTagValue());
                     }
-                    X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(builder.build());
+                    byte[] attributeCertificateBytes = builder.build();
+                    if( attributeCertificateBytes == null ) {
+                        log.error("Cannot build attribute certificate");
+                        for(Fault fault : builder.getFaults()) {
+                            log.error(String.format("%s%s", fault.toString(), fault.getCause() == null ? "" : ": "+fault.getCause().getMessage()));
+                        }
+                        throw new IllegalArgumentException("Cannot build attribute certificate");
+                    }
+                    X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(attributeCertificateBytes);
                     Certificate certificate = Certificate.valueOf(certificateHolder.getEncoded());
                     certificate.setUuid(new UUID());
                     long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha256().toHexString(), certificate.getPcrEvent().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
@@ -322,7 +336,9 @@ public class CertificateRequestListResource extends ServerResource {
                 certificateRequests[i].setSelection(selection.getUuid().toString());
                 if( certificateRequests[i].getCertificateId() > 0 ) {
                     Certificate certificate = certificateDao.findById(certificateRequests[i].getCertificateId());
-                    certificateRequests[i].setCertificate(certificate.getUuid());
+                    if( certificate != null ) {
+                        certificateRequests[i].setCertificate(certificate.getUuid());
+                    }
                 }
             }
         }

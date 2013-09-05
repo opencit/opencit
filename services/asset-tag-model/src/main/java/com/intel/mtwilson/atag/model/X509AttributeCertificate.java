@@ -5,7 +5,7 @@
 package com.intel.mtwilson.atag.model;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.atag.OID;
+import com.intel.mtwilson.atag.model.OID;
 import com.intel.dcsg.cpg.io.UUID;
 import java.io.IOException;
 import java.math.BigInteger;

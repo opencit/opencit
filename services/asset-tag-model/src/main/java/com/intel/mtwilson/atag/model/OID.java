@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.atag;
+package com.intel.mtwilson.atag.model;
 
 /**
  *
