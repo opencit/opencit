@@ -35,7 +35,7 @@ public class AssetTagCert {
      * @param atagObj
      * @return 
      */
-    @RolesAllowed({"AssetTagManagment"})
+    @RolesAllowed({"AssetTagManagement"})
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -49,7 +49,7 @@ public class AssetTagCert {
      * @param atagObj
      * @return 
      */
-    @RolesAllowed({"AssetTagManagment"})
+    @RolesAllowed({"AssetTagManagement"})
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
