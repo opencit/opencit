@@ -64,11 +64,6 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-console</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
