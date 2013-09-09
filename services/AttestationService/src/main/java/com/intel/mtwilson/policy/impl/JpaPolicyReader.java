@@ -109,7 +109,7 @@ public class JpaPolicyReader {
             return rule;
         }
         catch(IllegalArgumentException e) {
-            log.warn("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
+            log.error("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
             return null;
         }
     }
@@ -167,7 +167,7 @@ public class JpaPolicyReader {
         if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue() ) {
             TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
             if( hostSpecificModule == null ) {
-                log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
+                log.warn(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
                 Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
                 return m;
             }

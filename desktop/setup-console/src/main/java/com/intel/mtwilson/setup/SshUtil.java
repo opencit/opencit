@@ -185,7 +185,7 @@ public class SshUtil {
             
             // now restore the original trusted hosts whitelist
             remote(ssh, String.format("msctl edit mtwilson.api.trust \"%s\"", previousWhitelistString));        
-            log.debug("Restored previous trusted clients network address list");
+            log.info("Restored previous trusted clients network address list");
             remote(ssh, "msctl restart");
             
         }

@@ -168,7 +168,7 @@ public class MwProcessorMappingJpaController implements Serializable {
             MwProcessorMapping result = (MwProcessorMapping) query.getSingleResult();
             return result;
         } catch(NoResultException nre) {
-            log.info("No platform matched the CPUID {}.", cpuID);
+            log.error("No platform matched the CPUID {}.", cpuID);
             return null;
         } finally {
             em.close();

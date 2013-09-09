@@ -152,7 +152,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
         // first, if it's already registered we need to delete it
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         if( host != null ) {
-            log.debug("Host {} is already in database, deleting", host.getName());
+            log.warn("Host {} is already in database, deleting", host.getName());
             // must first delete any saml assertions that are recorded for this host
             List<TblSamlAssertion> samls = My.jpa().mwSamlAssertion().findByHostID(host);
             for(TblSamlAssertion saml : samls) {

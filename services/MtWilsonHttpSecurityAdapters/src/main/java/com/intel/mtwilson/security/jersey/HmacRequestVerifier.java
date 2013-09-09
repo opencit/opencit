@@ -81,7 +81,7 @@ public class HmacRequestVerifier {
 //        try {
             Authorization a = parseAuthorization(authorizationHeader);
             
-            log.debug("VerifyAuthorization: Request timestamp ok");
+            log.info("VerifyAuthorization: Request timestamp ok");
             HmacSignatureInput signatureBlock = new HmacSignatureInput();
             signatureBlock.httpMethod = a.httpMethod;
             signatureBlock.absoluteUrl = a.url;
@@ -113,7 +113,7 @@ public class HmacRequestVerifier {
             if( enforceSameHttpMethod ) {
             	if( a.httpMethod == null ) { return null; }
             	else if( !a.httpMethod.equals(httpMethod) ) {
-                    log.debug("Actual HTTP method did not match Signed HTTP method");
+                    log.info("Actual HTTP method did not match Signed HTTP method");
                     log.debug("  Actual method: "+httpMethod);
                     log.debug("  Signed method: "+a.httpMethod);
                     throw new CryptographyException("Request HTTP method did not match Signed HTTP method");
@@ -136,7 +136,7 @@ public class HmacRequestVerifier {
             }
             
             if( signature.equals(a.signature) ) {
-                log.debug("Request is authenticated");
+                log.info("Request is authenticated");
                 
                 try {
                     if( signatureBlock.timestamp == null || isRequestExpired(signatureBlock.timestamp) ) { // may throw ParseException
@@ -166,7 +166,7 @@ public class HmacRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.debug("Request is NOT AUTHENTICATED");
+        log.info("Request is NOT AUTHENTICATED");
         return null;
     }
     

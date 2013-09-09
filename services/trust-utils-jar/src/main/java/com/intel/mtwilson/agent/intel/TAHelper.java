@@ -97,7 +97,7 @@ public class TAHelper {
         for (String filename : required) {
             File file = new File(filename);
             if (!file.exists()) {
-                log.error(String.format("Invalid service configuration: Cannot find %s", filename));
+                log.warn(String.format("Invalid service configuration: Cannot find %s", filename));
                 foundAllRequiredFiles = false;
             }
         }
@@ -139,7 +139,7 @@ public class TAHelper {
             String sessionId = generateSessionId();
 
             // request AIK certificate and CA chain (the AIK Proof File)
-            log.debug("DAA requesting AIK proof");
+            log.info("DAA requesting AIK proof");
             String aikproof = client.getAIKCertificate(); // <identity_request></identity_request>
             FileOutputStream outAikProof = new FileOutputStream(new File(getDaaAikProofFileName(sessionId)));
             IOUtils.write(aikproof, outAikProof);
@@ -282,14 +282,14 @@ public class TAHelper {
 
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
-            log.debug("Got PCR map");
+            log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
 
             return pcrManifest;
         }
         else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
-            log.debug("Got PCR map");
+            log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
 
             return pcrManifest;

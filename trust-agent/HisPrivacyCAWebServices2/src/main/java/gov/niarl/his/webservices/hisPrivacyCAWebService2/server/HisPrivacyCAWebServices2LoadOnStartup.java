@@ -28,8 +28,7 @@ import gov.niarl.his.privacyca.TpmUtils;
 //import gov.niarl.sal.webservices.hisWebServices.clientWsImport.HisEnrollmentWebService;
 
 import java.io.FileNotFoundException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
@@ -40,6 +39,8 @@ import javax.servlet.http.HttpServlet;
  *
  */
 public class HisPrivacyCAWebServices2LoadOnStartup extends HttpServlet{
+    
+    private static org.slf4j.Logger log = LoggerFactory.getLogger(HisPrivacyCAWebServices2LoadOnStartup.class);
 
 	private static final long serialVersionUID = 1L;
         private static String homeFolder = "/etc/intel/cloudsecurity";
@@ -50,7 +51,7 @@ public class HisPrivacyCAWebServices2LoadOnStartup extends HttpServlet{
                 homeFolder = setUpFile.substring(0,setUpFile.indexOf("privacyca-client.properties"));
 
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(HisPrivacyCAWebService2Impl.class.getName()).log(Level.SEVERE, "Error while getting setup.properties.", ex);
+                log.error("Error while getting setup.properties.", ex);
             }
         }
 

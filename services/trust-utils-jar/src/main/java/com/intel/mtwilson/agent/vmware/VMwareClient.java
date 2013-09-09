@@ -177,7 +177,7 @@ public class VMwareClient implements TlsClient {
         if (session != null) {
             log.debug("Logged in Session key " + session.getKey());
         } else {
-            log.debug("session is null");
+            log.info("session is null");
         }
 
     }
@@ -189,10 +189,10 @@ public class VMwareClient implements TlsClient {
         try {
             return vimPort.sessionIsActive(serviceContent.getSessionManager(), session.getKey(), session.getUserName());
         } catch (Exception e) {
-            log.debug("session not active: {}", e.toString());
+            log.warn("session not active: {}", e.toString());
             return false;
         } catch (Error e) {
-            log.debug("session not active: {}", e.toString());
+            log.warn("session not active: {}", e.toString());
             return false;
         }
     }

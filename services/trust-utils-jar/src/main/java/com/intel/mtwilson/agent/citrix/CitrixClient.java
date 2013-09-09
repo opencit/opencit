@@ -106,7 +106,7 @@ public class CitrixClient {
         for(String filename : required) {
             File file = new File(filename);
             if( !file.exists() ) {
-                log.info( String.format("Invalid service configuration: Cannot find %s", filename ));
+                log.debug( String.format("Invalid service configuration: Cannot find %s", filename ));
                 foundAllRequiredFiles = false;
             }
         }
@@ -251,7 +251,7 @@ public class CitrixClient {
             
             HashMap<String, Pcr> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
             
-            log.debug( "Got PCR map");
+            log.info( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             
             return pcrMap;
@@ -277,7 +277,7 @@ public class CitrixClient {
 //            nonce = new BASE64Encoder().encode( bytes);
             String nonce = Base64.encodeBase64String(bytes);
 
-            log.info( "Nonce Generated " + nonce);
+            log.debug( "Nonce Generated " + nonce);
             return nonce;
         } catch (NoSuchAlgorithmException e) {
             throw new ASException(e);
@@ -301,7 +301,7 @@ public class CitrixClient {
             String sessionId = "" + ((nextInt < 0)?nextInt *-1 :nextInt); 
 
 
-            log.info( "Session Id Generated [" + sessionId + "]");
+            log.debug( "Session Id Generated [" + sessionId + "]");
 
         
 
@@ -424,7 +424,7 @@ public class CitrixClient {
                 }            	
             }
             else {
-            	log.debug( "Result PCR invalid");
+            	log.info( "Result PCR invalid");
             }
             /*
             if(pcrs.contains(parts[0].trim()))

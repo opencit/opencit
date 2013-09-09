@@ -73,7 +73,7 @@ public class TakeOwnershipCmd implements ICommand {
 		
 		String endorsementKey = (String) HisConfig.getConfiguration().getString("TpmEndorsmentP12");
 		
-		log.info(" File to check " + Config.getHomeFolder() + endorsementKey);
+		log.debug(" File to check " + Config.getHomeFolder() + endorsementKey);
 		
 		File file = new File(Config.getHomeFolder() + endorsementKey);
 		

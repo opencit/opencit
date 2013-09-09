@@ -353,7 +353,7 @@ public class InitDatabase implements Command {
             if( ds == null ) {
                 throw new SetupException("Cannot load persistence unit info");
             }
-            log.debug("Loaded persistence unit: ASDataPU");
+            log.info("Loaded persistence unit: ASDataPU");
             return ds;
         }
         catch(IOException e) {
@@ -411,7 +411,7 @@ public class InitDatabase implements Command {
     
     private List<ChangelogEntry> getChangelog(Connection c) throws SQLException {
         ArrayList<ChangelogEntry> list = new ArrayList<ChangelogEntry>();
-        log.debug("Listing tables...");
+        log.info("Listing tables...");
         // first determine if we have the new changelog table `mw_changelog`, or the old one `changelog`, or none at all
         List<String> tableNames = getTableNames(c);
         boolean hasMwChangelog = false;

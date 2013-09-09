@@ -141,7 +141,7 @@ public class TestVmwareEsxi51 {
         // first, if it's already registered we need to delete it
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         if( host != null ) {
-            log.debug("Host {} is already in database, deleting", host.getName());
+            log.warn("Host {} is already in database, deleting", host.getName());
             // before we delete a host we first need to delete all its saml assertions, otherwise the database throws a constraint violation...
             List<TblSamlAssertion> samlRecordList = My.jpa().mwSamlAssertion().findByHostID(host);
             for(TblSamlAssertion samlRecord : samlRecordList) {

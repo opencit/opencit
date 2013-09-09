@@ -100,7 +100,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      */
     public ApiClient(File configurationFile) throws ClientException, IOException {
         this(ConfigurationUtil.fromPropertiesFile(configurationFile));
-        log.info("Initialized with configuration file: "+configurationFile.getAbsolutePath());
+        log.debug("Initialized with configuration file: "+configurationFile.getAbsolutePath());
     }
     
     /**
@@ -281,7 +281,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             // no authentication
             setKeystore(config);
             httpClient = new ApacheHttpClient(baseURL, null, keystore, config);
-            log.debug("No identity configured");
+            log.info("No identity configured");
         }        
     }
     

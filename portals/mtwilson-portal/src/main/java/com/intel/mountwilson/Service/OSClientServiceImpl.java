@@ -35,14 +35,14 @@ public class OSClientServiceImpl implements IOSClientService {
 	 */
 	@Override
 	public List<OSDataVO> getAllOS(WhitelistService apiClientServices) throws WLMPortalException {
-                                log.debug("OSClientServiceImpl.getAllOS >>");
+                                log.info("OSClientServiceImpl.getAllOS >>");
                                 List<OSDataVO> list = null;
                                 try {
                                         list =ConverterUtil.getListToOSDataVO(apiClientServices.listAllOS());
                                 }catch (Exception e) {
                                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.debug("OSClientServiceImpl.getAllOS <<");
+                                log.info("OSClientServiceImpl.getAllOS <<");
                                 return list;
 	}
 
@@ -57,7 +57,7 @@ public class OSClientServiceImpl implements IOSClientService {
 	 */
 	@Override
 	public boolean addOSInfo(OSDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.debug("OSClientServiceImpl.addOSInfo >>");
+		log.info("OSClientServiceImpl.addOSInfo >>");
 		boolean result = false;
 		try {
 			result = apiClientServices.addOS(new OsData(dataVO.getOsName(), dataVO.getOsVersion(), dataVO.getOsDescription()));
@@ -65,7 +65,7 @@ public class OSClientServiceImpl implements IOSClientService {
 			log.error(e.getMessage());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-		log.debug("OSClientServiceImpl.addOSInfo <<");
+		log.info("OSClientServiceImpl.addOSInfo <<");
        	return result;
 	}
 
@@ -79,7 +79,7 @@ public class OSClientServiceImpl implements IOSClientService {
 	 */
 	@Override
 	public boolean updateOSInfo(OSDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.debug("OSClientServiceImpl.updateOSInfo >>");
+		log.info("OSClientServiceImpl.updateOSInfo >>");
 		
 		boolean result = false;
 		try {
@@ -88,7 +88,7 @@ public class OSClientServiceImpl implements IOSClientService {
 			log.error(e.getMessage());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-		log.debug("OSClientServiceImpl.updateOSInfo <<");
+		log.info("OSClientServiceImpl.updateOSInfo <<");
        	return result;
 	}
 
@@ -102,7 +102,7 @@ public class OSClientServiceImpl implements IOSClientService {
 	 */
 	@Override
 	public boolean deleteOS(OSDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.debug("OSClientServiceImpl.deleteOS >>");
+		log.info("OSClientServiceImpl.deleteOS >>");
 		boolean result = false;
 		try {
 			result = apiClientServices.deleteOS(new OsData(dataVO.getOsName(), dataVO.getOsVersion(), dataVO.getOsDescription()));
@@ -111,7 +111,7 @@ public class OSClientServiceImpl implements IOSClientService {
 			log.error(e.getMessage());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-		log.debug("OSClientServiceImpl.deleteOS <<");
+		log.info("OSClientServiceImpl.deleteOS <<");
        	return result;
 	}
 	

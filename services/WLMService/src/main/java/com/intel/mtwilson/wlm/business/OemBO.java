@@ -125,7 +125,7 @@ public class OemBO extends BaseBO {
             
             Collection<TblMle> tblMleCollection = tblOem.getTblMleCollection();
             if( tblMleCollection != null ) {
-                log.info("OEM is currently associated with # MLEs: " + tblMleCollection.size());
+                log.debug("OEM is currently associated with # MLEs: " + tblMleCollection.size());
             
                 if(!tblMleCollection.isEmpty()){
                     throw new ASException(ErrorCode.WS_OEM_ASSOCIATION_EXISTS, osName, tblMleCollection.size());

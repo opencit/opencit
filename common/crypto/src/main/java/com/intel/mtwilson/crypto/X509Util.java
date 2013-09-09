@@ -216,7 +216,7 @@ public class X509Util {
                 }
             }
         } catch (CertificateParsingException e) {
-            log.error("Cannot extract Subject Alternative Name IP Address from X509 Certificate", e);
+            log.warn("Cannot extract Subject Alternative Name IP Address from X509 Certificate", e);
         }
         return null;
     }
@@ -250,7 +250,7 @@ public class X509Util {
             }
             return ipNames;
         } catch (CertificateParsingException e) {
-            log.error("Cannot extract Subject Alternative Names from X509 Certificate", e);
+            log.warn("Cannot extract Subject Alternative Names from X509 Certificate", e);
             return Collections.EMPTY_SET;
         }
     }

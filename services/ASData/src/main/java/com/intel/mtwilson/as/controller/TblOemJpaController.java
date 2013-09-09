@@ -140,7 +140,7 @@ public class TblOemJpaController implements Serializable {
             return tblOem;
 
         } catch(NoResultException e){
-            log.info( "NoResultException : OEM [{}] not found", name);
+            log.error( "NoResultException : OEM [{}] not found", name);
             return null;
         }finally {
             em.close();

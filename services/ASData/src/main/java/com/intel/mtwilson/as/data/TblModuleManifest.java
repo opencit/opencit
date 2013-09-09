@@ -219,7 +219,7 @@ public class TblModuleManifest implements Serializable {
     public String getComponentName() {
         // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
         if( this.componentName != null ) {
-            log.debug("trimming componentName");
+            log.info("trimming componentName");
             this.componentName = this.componentName.trim(); 
         }
         return componentName;
@@ -230,7 +230,7 @@ public class TblModuleManifest implements Serializable {
         
         // fix for bug 2013-02-04 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
         if( this.componentName != null ) {
-            log.debug("trimming componentName");
+            log.info("trimming componentName");
             this.componentName = this.componentName.trim(); 
         }
     }

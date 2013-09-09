@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadx
  */
 public class AuditLogger {
-    private static Logger logger = LoggerFactory.getLogger(AuditLogger.class);
+    private static Logger log = LoggerFactory.getLogger(AuditLogger.class);
 //    private static boolean isAsyncEnabled = true; // AuditConfig.isAsyncEnabled();
     
     
@@ -71,13 +71,13 @@ public class AuditLogger {
     private void setSecurityCredentials(AuditLogEntry auditLogEntry) {
         AuditContext auditContext =  MtWilsonThreadLocal.get();
         
-        logger.debug("Object from thread local " + auditContext);
+        log.debug("Object from thread local " + auditContext);
         if(auditContext != null){
             //Need to handle the old auth scheme
             auditLogEntry.setFingerPrint(auditContext.getName());
             auditLogEntry.setTransactionId(auditContext.getTransactionUuid());
         }else{
-            logger.warn("No Audit context. Setting user as unknown.");
+            log.warn("No Audit context. Setting user as unknown.");
             auditLogEntry.setFingerPrint("Unknown");
             auditLogEntry.setTransactionId("Unknown");
         }
@@ -105,7 +105,7 @@ public class AuditLogger {
                 userName = "Unknown";
             } 
         } catch (Exception ex) {
-            logger.info("Error during retrieval of user name from the audit context. " + ex.getMessage());
+            log.error("Error during retrieval of user name from the audit context. " + ex.getMessage());
             userName = "Unknown";
         }
         return userName;
