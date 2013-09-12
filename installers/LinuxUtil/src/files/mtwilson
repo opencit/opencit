@@ -337,6 +337,13 @@ case "$1" in
           # application files
           echo "Removing Glassfish in /usr/share/glassfish3..."
           rm -rf /usr/share/glassfish3
+		elif using_tomcat; then
+		  tomcat_require
+		  echo "Stopping Tomcat..."
+          tomcat_shutdown
+          # application files
+          echo "Removing Tomcat in $TOMCAT_HOME..."
+          rm -rf "$TOMCAT_HOME"
         fi
         echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
         rm -rf /opt/intel/cloudsecurity
