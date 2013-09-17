@@ -38,7 +38,7 @@ public class My {
     private static MyJdbc jdbc = null;
     private static MyJpa jpa = null;
     private static MyEnvironment env = null;
-    private static MyLocale locale = null;
+//    private static MyLocale locale = null;
 
     public static void initDataEncryptionKey() throws IOException {
         initDataEncryptionKey(My.configuration().getDataEncryptionKeyBase64());
@@ -114,10 +114,12 @@ public class My {
         return env;
     }
     
+    /*
     public static MyLocale locale() throws IOException {
         if( locale == null ) {
             locale = new MyLocale(configuration().getLocale());
         }
         return locale;
     }
+    */
 }
