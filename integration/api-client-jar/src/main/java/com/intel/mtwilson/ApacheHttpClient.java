@@ -384,7 +384,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
-        request.setHeader("Accept-Language", locale.toLanguageTag());
+        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         // send the request and print the response
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
@@ -398,7 +398,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
-        request.setHeader("Accept-Language", locale.toLanguageTag());
+        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         // send the request and print the response
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
@@ -416,7 +416,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
-        request.setHeader("Accept-Language", locale.toLanguageTag());
+        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();
@@ -434,7 +434,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
-        request.setHeader("Accept-Language", locale.toLanguageTag());
+        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();

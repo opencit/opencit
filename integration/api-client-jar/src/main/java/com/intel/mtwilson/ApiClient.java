@@ -120,7 +120,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         httpClient = new JerseyHttpClient(baseURL.toExternalForm(), config.getString("mtwilson.api.clientId"), config.getString("mtwilson.api.secretKey"));
         */
         setKeystore(config);
-        setLocale(config.getString("mtwilson.locale", locale.toLanguageTag()));
+        setLocale(config.getString("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         setHttpClientWithConfig(config);
         httpClient.setLocale(locale);
         }
@@ -144,7 +144,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
-        setLocale(properties.getProperty("mtwilson.locale", locale.toLanguageTag()));
+        setLocale(properties.getProperty("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
         httpClient.setLocale(locale);
@@ -169,7 +169,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
-        setLocale(properties.getProperty("mtwilson.locale", locale.toLanguageTag()));
+        setLocale(properties.getProperty("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
         httpClient.setLocale(locale);
@@ -194,7 +194,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
-        setLocale(config.getString("mtwilson.locale", locale.toLanguageTag()));
+        setLocale(config.getString("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
         httpClient.setLocale(locale);
@@ -223,7 +223,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
-        setLocale(config.getString("mtwilson.locale", locale.toLanguageTag()));
+        setLocale(config.getString("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
         httpClient.setLocale(locale);
@@ -324,7 +324,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     final public void setLocale(String localeName) {
         try {
-            locale = Locale.forLanguageTag(localeName);
+            locale = LocaleUtil.forLanguageTag(localeName); // Locale.forLanguageTag is available in Java 7
         }
         catch(Exception e) {
             log.debug("Invalid locale: {}", localeName);
