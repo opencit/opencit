@@ -25,7 +25,8 @@ public class MyLocale {
             defaultLocale = Locale.getDefault();
         }
         try {
-            defaultLocale = Locale.forLanguageTag(configuredLocaleName);
+//            defaultLocale = Locale.forLanguageTag(configuredLocaleName); // only available in Java 7
+            throw new UnsupportedOperationException("This feature is not complete");
         }
         catch(Exception e) {
             log.error("Cannot load locale {}: {}", configuredLocaleName, e);
