@@ -10,8 +10,4 @@ package com.intel.mtwilson.datatypes;
  */
 public class RegisterHostResponse extends AuthResponse {
 
-    public RegisterHostResponse(AuthResponse response) {
-        super(response);
-    }
-    
 }

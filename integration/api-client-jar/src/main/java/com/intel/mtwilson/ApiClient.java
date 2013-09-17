@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import static javax.ws.rs.core.MediaType.*;
@@ -87,6 +88,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     private ClassLoader jaxbClassLoader = null;
     
     private SimpleKeystore keystore;
+    private Locale locale = Locale.getDefault();
         
     /**
      * Loads configuration from the specified file. 
@@ -118,7 +120,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         httpClient = new JerseyHttpClient(baseURL.toExternalForm(), config.getString("mtwilson.api.clientId"), config.getString("mtwilson.api.secretKey"));
         */
         setKeystore(config);
+        setLocale(config.getString("mtwilson.locale", locale.toLanguageTag()));
         setHttpClientWithConfig(config);
+        httpClient.setLocale(locale);
         }
         catch(Exception e) {
             throw new ClientException("Cannot initialize client", e);
@@ -140,8 +144,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
+        setLocale(properties.getProperty("mtwilson.locale", locale.toLanguageTag()));
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("HMAC-256 Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -163,8 +169,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
+        setLocale(properties.getProperty("mtwilson.locale", locale.toLanguageTag()));
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -186,8 +194,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
+        setLocale(config.getString("mtwilson.locale", locale.toLanguageTag()));
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("HMAC-256 Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -213,8 +223,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
+        setLocale(config.getString("mtwilson.locale", locale.toLanguageTag()));
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -228,6 +240,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setKeystore(keystore);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, tlsPolicy);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -307,6 +320,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      */
     public void setJaxbClassLoader(ClassLoader classLoader) {
         jaxbClassLoader = classLoader;
+    }
+    
+    final public void setLocale(String localeName) {
+        try {
+            locale = Locale.forLanguageTag(localeName);
+        }
+        catch(Exception e) {
+            log.debug("Invalid locale: {}", localeName);
+        }
     }
         
     /**
