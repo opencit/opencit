@@ -7,15 +7,19 @@ package com.intel.mtwilson.i18n;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Message class encapsulates localized strings. It's very generic so to maintain easy semantics in the
  * application it's recommended to subclass it.
  * @author jbuhacoff
  */
-public class Message {
+public class Message implements Localizable {
+    private static Logger log = LoggerFactory.getLogger(Message.class);
     private String name;
     private Object[] args;
+    private Locale locale = null;
     
     public Message(String name, Object... args) {
         this.name = name;
@@ -24,7 +28,9 @@ public class Message {
     
     public String toString(Locale locale) {
         // load the localized resource
-        ResourceBundle bundle = ResourceBundle.getBundle("mtwilson-strings", locale);
+        ResourceBundle bundle = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), locale);
+        log.debug("Message toString with locale: {}", locale.toString());
+        log.debug("Message toString loaded resource bundle: {}", bundle.getLocale().toString());
         String pattern = bundle.getString(name);
         // use this bundle!
         MessageFormat formatter = new MessageFormat("");
@@ -37,10 +43,16 @@ public class Message {
     
     @Override
     public String toString() {
-        return toString(Locale.getDefault());
+        if( locale == null ) {
+            return toString(Locale.getDefault());
+            
+        }
+        return toString(locale);
     }
     
     public String getName() { return name; }
     public Object[] getParameters() { return args; }
     
+    @Override
+    public void setLocale(Locale locale) { this.locale = locale; }
 }

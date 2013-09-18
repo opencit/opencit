@@ -5,6 +5,7 @@
 package test.i18n;
 
 import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.i18n.BundleName;
 import java.text.ChoiceFormat;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -36,7 +37,7 @@ public class I18nTest {
     @Test
     public void testLoadMtWilsonStrings() throws Exception {
         Locale currentLocale = new Locale("en", "US" /*, "UNIX"*/);
-        ResourceBundle labels = ResourceBundle.getBundle("mtwilson-strings", currentLocale);
+        ResourceBundle labels = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), currentLocale);
         String test = labels.getString("TLS_COMMMUNICATION_ERROR");
         log.debug("Got string: {}", test);
         Object[] args = new Object[] { "myhost123", "no route to host" };
@@ -60,7 +61,7 @@ After l10n: Asynchronous operation timed out after 2 seconds
     public void testPluralStrings() throws Exception {
         //AS_ASYNC_TIMEOUT=Asynchronous operation timed out after %d seconds        
         Locale currentLocale = new Locale("en", "US" /*, "UNIX"*/);
-        ResourceBundle labels = ResourceBundle.getBundle("mtwilson-strings", currentLocale);
+        ResourceBundle labels = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), currentLocale);
         String test = labels.getString("AS_ASYNC_TIMEOUT");
         log.debug("Got string: {}", test);
         for(int i=0; i<=2; i++) {

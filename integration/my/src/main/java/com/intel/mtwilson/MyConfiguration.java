@@ -470,8 +470,14 @@ public class MyConfiguration {
     }
     
     ///////////////////////// internationalization  //////////////////////////////////
+    
+    // this setting affects the localization of log messages
     public String getLocale() {
         return conf.getString("mtwilson.locale", ""); // we do not provide a default; the localization system has its own default handling
     }
     
+    // this setting specifies which locales have been translated and are available for localizing APIs and UIs
+    public String[] getAvailableLocales() {
+        return conf.getStringArray("mtwilson.locales");
+    }
 }

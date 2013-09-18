@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson;
+package com.intel.mtwilson.i18n;
 
 import java.util.Locale;
 import org.apache.commons.lang3.ArrayUtils;

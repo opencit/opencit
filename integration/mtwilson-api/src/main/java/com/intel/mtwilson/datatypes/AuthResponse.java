@@ -6,16 +6,20 @@ package com.intel.mtwilson.datatypes;
 
 
 import com.intel.mtwilson.i18n.ErrorMessage;
+import com.intel.mtwilson.i18n.Localizable;
 import java.util.Locale;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  *
  * @author dsmagadx
  */
-public class AuthResponse {
+public class AuthResponse implements Localizable {
+    private static Logger log = LoggerFactory.getLogger(AuthResponse.class);
+    
     private ErrorMessage errorMessage;
     private ErrorCode errorCode = ErrorCode.OK;
     private String jsonErrorMessage = null; // only set when deserializing a server response... 
@@ -80,12 +84,16 @@ public class AuthResponse {
     @JsonProperty("error_message")
     public String getErrorMessage() {
         if( jsonErrorMessage != null ) {
+            log.debug("AuthResponse already has JSON message: {}", jsonErrorMessage);
             return jsonErrorMessage; // already localized;  this is the case when the client deserializes json replies from the server (jackson calls setErrorMessage)
         }
         if( locale != null ) {
+            log.debug("AuthResponse locale has been set: {}", locale.toString());
+            log.debug("AuthResponse using custom locale: {}", errorMessage.toString());
             return errorMessage.toString(locale);
         }
         else {
+            log.debug("AuthResponse using default locale: {}", errorMessage.toString());
             return errorMessage.toString();
         }
 //        return errorMessage;
@@ -113,6 +121,7 @@ public class AuthResponse {
 //    }
     
     @JsonIgnore
+    @Override
     public void setLocale(Locale locale) {
         this.locale = locale;
     }
