@@ -48,11 +48,12 @@ public abstract class AbstractMessageDigest extends ObjectModel {
         if( hex.length() != digestLength*2 ) {  throw new IllegalArgumentException(algorithm+": Digest must be "+digestLength+" bytes ("+(digestLength*2)+" hex digits) long: "+hex); }
         try {
             this.value = Hex.decodeHex(hex.toCharArray());
+            this.hex = Hex.encodeHexString(value); // for consistency, so we don't have lowercase/uppercase issues; alternatively you can always toLower() or toUpper() if that is faster after doing a performance test
         }
         catch(DecoderException e) {
              throw new IllegalArgumentException(algorithm+": Invalid digest: "+value, e);
         }
-        this.hex = hex;
+//        this.hex = hex;
     }
     
     /**
