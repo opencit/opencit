@@ -50,7 +50,7 @@ public class TAConfig {
         defaults.setProperty("nonce.filename", "nonce");
         defaults.setProperty("aikquote.filename", "aikquote");
         defaults.setProperty("aikblob.filename", "aikblob.dat");
-        defaults.setProperty("aikcert.filename", "aikcert.cer");
+        defaults.setProperty("aikcert.filename", "aikcert.x");
         defaults.setProperty("ekcert.filename", "ekcert.cer");
         defaults.setProperty("daa.challenge.filename", "daa-challenge");
         defaults.setProperty("daa.response.filename.filename", "daa-response");        

@@ -34,8 +34,8 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.cert.CertificateException;
 
@@ -83,7 +83,7 @@ import javax.net.ssl.HttpsURLConnection;
  *
  */
 public class CreateIdentity  {
-	private static Logger log = Logger.getLogger(CreateIdentity.class.getName());
+	private static Logger log = LoggerFactory.getLogger(CreateIdentity.class);
 	/**
 	 * Entry point into the program. See class description for required properties file elements.
 	 * 
@@ -151,7 +151,7 @@ public class CreateIdentity  {
 				try {
 					PropertyFile.close();
 				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing the property file " , e);
+					log.error("Error while closing the property file " , e);
 				}
 		}
 		// Check to see if any of the values were not populated with acceptable values
@@ -267,7 +267,7 @@ public class CreateIdentity  {
             System.err.println("Create Identity... Calling into HisPriv second time, size of msg = " + encryptedChallenge.toByteArray().length);
 			byte[] encrypted2 = hisPrivacyCAWebService2.identityRequestSubmitResponse(encryptedChallenge.toByteArray());
 			if(encrypted2.length == 1){
-				log.warning("Identity request was rejected by Privacy CA in phase 2 of process");
+				log.warn("Identity request was rejected by Privacy CA in phase 2 of process");
 				throw new Exception("Identity request was rejected by Privacy CA in phase 2 of process");
 			}
 			byte[] asym2 = new byte[256];
@@ -280,18 +280,19 @@ public class CreateIdentity  {
 				HashMap<String, byte[]> results = TpmModule.activateIdentity2(ownerAuthRaw, keyAuthRaw,asym2, sym2, HisIdentityIndex);
 				System.out.println(results);
 
-				decrypted2 = results.get("aikcert");
-				aikblob = results.get("aikblob");
-				
-				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
-				writeFile(homeFolder + ClientPath, aikblob,"/aikblob.dat");
+				decrypted2 = results.get("aikcert2");
+				aikblob = results.get("aikblob3");
+				log.debug(homeFolder + ClientPath + "/aikcert.pem >>>");
+				writecert(homeFolder + ClientPath, decrypted2,"/aikcert4.pem");
+                                log.debug(homeFolder + ClientPath + "/aikcert.pem <<<");
+				writeFile(homeFolder + ClientPath, aikblob,"/aikblob5.dat");
 				
 				
 			}else{
 				//decrypted1 = TpmModuleJava.ActivateIdentity(asym1, sym1, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw); 
 				//decrypted2 = TpmModuleJava.ActivateIdentity(asym2, sym2, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw);//Comments  temporarily due to TSSCoreService.jar compiling issue 
 				decrypted2 = TpmModule.activateIdentity(ownerAuthRaw, keyAuthRaw,asym2, sym2, HisIdentityIndex);
-				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
+				writecert(homeFolder + ClientPath, decrypted2,"/aikcert6.pem");
 			}
 			
 			
@@ -303,7 +304,7 @@ public class CreateIdentity  {
 				try {
 					pcaFileOut.close();
 				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing pcaFileOut",e);
+					log.error("Error while closing pcaFileOut",e);
 				}
 		}
 	
@@ -346,7 +347,7 @@ public class CreateIdentity  {
 		File outFile = new File(ClientPath + fileName);
 		if(!outPath.isDirectory()){
 			if(!outPath.mkdirs()){
-				log.warning("Failed to create client installation path!");
+				log.warn("Failed to create client installation path!");
 				throw new PrivacyCAException("Failed to create client installation path!");
 			}
 		}
