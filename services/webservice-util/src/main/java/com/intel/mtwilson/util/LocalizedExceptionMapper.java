@@ -6,6 +6,7 @@ package com.intel.mtwilson.util;
 
 import com.intel.mtwilson.i18n.ErrorMessage;
 import com.intel.mtwilson.datatypes.AuthResponse;
+import com.intel.mtwilson.i18n.BundleName;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -52,7 +53,7 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
             int max = list.size() - 1; // no need to evaluate the last locale, it will be our default
             for(i=0; i<max && locale==null; i++) {
                 locale = list.get(i);
-                ResourceBundle bundle = ResourceBundle.getBundle("mtwilson-strings", locale);
+                ResourceBundle bundle = ResourceBundle.getBundle(BundleName.MTWILSON_STRINGS.bundle(), locale);
                 if( bundle.getLocale().equals(Locale.getDefault())) {
                     locale = null; // reset for next iteration
                 }
