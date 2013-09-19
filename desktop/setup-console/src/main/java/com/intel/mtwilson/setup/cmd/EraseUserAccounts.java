@@ -62,7 +62,7 @@ public class EraseUserAccounts implements Command {
         MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
         List<MwPortalUser> list = jpa.findMwPortalUserEntities();
         for(MwPortalUser record : list) {
-            if( deleteAll || (!deleteAll && !record.getUsername().equals("ManagementServiceAutomation") && !record.getUsername().equals("admin")) ) {
+            if( deleteAll || (!deleteAll && !record.getUsername().equals(ctx.automationKeyAlias) && !record.getUsername().equals("admin")) ) {
                 jpa.destroy(record.getId());
             }
         }
@@ -73,8 +73,9 @@ public class EraseUserAccounts implements Command {
         ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
         ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
         List<ApiClientX509> list = jpa.findApiClientX509Entities();
+        
         for(ApiClientX509 record : list) {
-            if( deleteAll || (!deleteAll && !record.getName().equals("CN=ManagementServiceAutomation") && !record.getName().equals("CN=admin")) ) {
+            if( deleteAll || (!deleteAll && !record.getName().contains("CN=" + ctx.automationKeyAlias + ",") && !record.getName().contains("CN=admin,")) ) {
                 Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
                 for(ApiRoleX509 role : roles) {
                     rolejpa.destroy(role.getApiRoleX509PK());
