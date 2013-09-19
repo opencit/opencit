@@ -74,7 +74,7 @@ public class EraseUserAccounts implements Command {
         ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
         List<ApiClientX509> list = jpa.findApiClientX509Entities();
         for(ApiClientX509 record : list) {
-            if( deleteAll || (!deleteAll && !record.getName().contains("CN=ManagementServiceAutomation") && !record.getName().contains("CN=admin")) ) {
+            if( deleteAll || (!deleteAll && !record.getName().equals("CN=ManagementServiceAutomation") && !record.getName().equals("CN=admin")) ) {
                 Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
                 for(ApiRoleX509 role : roles) {
                     rolejpa.destroy(role.getApiRoleX509PK());
