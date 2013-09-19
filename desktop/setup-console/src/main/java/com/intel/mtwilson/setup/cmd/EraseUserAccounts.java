@@ -61,8 +61,11 @@ public class EraseUserAccounts implements Command {
         boolean deleteAll = options.getBoolean("all", false);
         MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
         List<MwPortalUser> list = jpa.findMwPortalUserEntities();
+        Configuration serviceConf = MSConfig.getConfiguration();
+        String username = serviceConf.getString("mtwilson.api.key.alias");
+        
         for(MwPortalUser record : list) {
-            if( deleteAll || (!deleteAll && !record.getUsername().equals(ctx.automationKeyAlias) && !record.getUsername().equals("admin")) ) {
+            if( deleteAll || (!deleteAll && !record.getUsername().equals(username) && !record.getUsername().equals("admin")) ) {
                 jpa.destroy(record.getId());
             }
         }
@@ -73,9 +76,11 @@ public class EraseUserAccounts implements Command {
         ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
         ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
         List<ApiClientX509> list = jpa.findApiClientX509Entities();
+        Configuration serviceConf = MSConfig.getConfiguration();
+        String username = serviceConf.getString("mtwilson.api.key.alias");
         
         for(ApiClientX509 record : list) {
-            if( deleteAll || (!deleteAll && !record.getName().contains("CN=" + ctx.automationKeyAlias + ",") && !record.getName().contains("CN=admin,")) ) {
+            if( deleteAll || (!deleteAll && !record.getName().contains("CN=" + username + ",") && !record.getName().contains("CN=admin,")) ) {
                 Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
                 for(ApiRoleX509 role : roles) {
                     rolejpa.destroy(role.getApiRoleX509PK());
