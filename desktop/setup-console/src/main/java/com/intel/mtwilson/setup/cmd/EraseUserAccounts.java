@@ -65,11 +65,14 @@ public class EraseUserAccounts implements Command {
         String ms_user = serviceConf.getString("mtwilson.api.key.alias");
         String admin_user = System.getenv("MC_FIRST_USERNAME");
         
+        int count = 0;
         for(MwPortalUser record : list) {
             if( deleteAll || (!deleteAll && !record.getUsername().equals(ms_user) && !record.getUsername().equals(admin_user)) ) {
                 jpa.destroy(record.getId());
+                count++;
             }
         }
+        System.out.println(count + " portal users deleted.");
     }
     
     private void deleteApiClients() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
@@ -81,6 +84,7 @@ public class EraseUserAccounts implements Command {
         String ms_user = serviceConf.getString("mtwilson.api.key.alias");
         String admin_user = System.getenv("MC_FIRST_USERNAME");
         
+        int count = 0;
         for(ApiClientX509 record : list) {
             if( deleteAll || (!deleteAll && !record.getName().contains("CN=" + ms_user + ",") && !record.getName().contains("CN=" + admin_user + ",")) ) {
                 Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
@@ -88,8 +92,10 @@ public class EraseUserAccounts implements Command {
                     rolejpa.destroy(role.getApiRoleX509PK());
                 }
                 jpa.destroy(record.getId());
+                count++;
             }
         }
+        System.out.println(count + " API clients deleted.");
     }
     
 }
