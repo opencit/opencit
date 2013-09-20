@@ -59,17 +59,20 @@ public class EraseUserAccounts implements Command {
     
     private void deletePortalUsers() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException {
         boolean deleteAll = options.getBoolean("all", false);
+        boolean verbose = options.getBoolean("verbose",false);
         MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
         List<MwPortalUser> list = jpa.findMwPortalUserEntities();
         Configuration serviceConf = MSConfig.getConfiguration();
-        String ms_user = serviceConf.getString("mtwilson.api.key.alias");
-        String admin_user = System.getenv("MC_FIRST_USERNAME");
+        String msUser = serviceConf.getString("mtwilson.api.key.alias");
+        String adminUser = System.getenv("MC_FIRST_USERNAME");
         
         int count = 0;
         for(MwPortalUser record : list) {
-            if( deleteAll || (!deleteAll && !record.getUsername().equals(ms_user) && !record.getUsername().equals(admin_user)) ) {
+            if( deleteAll || (!deleteAll && !record.getUsername().equals(msUser) && !record.getUsername().equals(adminUser)) ) {
                 jpa.destroy(record.getId());
                 count++;
+                if (verbose)
+                    System.out.println("Deleting portal user " + record.getUsername() + "..... Done");
             }
         }
         System.out.println(count + " portal users deleted.");
@@ -77,22 +80,26 @@ public class EraseUserAccounts implements Command {
     
     private void deleteApiClients() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
         boolean deleteAll = options.getBoolean("all", false);
+        boolean verbose = options.getBoolean("verbose",false);
         ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
         ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
         List<ApiClientX509> list = jpa.findApiClientX509Entities();
         Configuration serviceConf = MSConfig.getConfiguration();
-        String ms_user = serviceConf.getString("mtwilson.api.key.alias");
-        String admin_user = System.getenv("MC_FIRST_USERNAME");
+        String msUser = serviceConf.getString("mtwilson.api.key.alias");
+        String adminUser = System.getenv("MC_FIRST_USERNAME");
         
         int count = 0;
         for(ApiClientX509 record : list) {
-            if( deleteAll || (!deleteAll && !record.getName().contains("CN=" + ms_user + ",") && !record.getName().contains("CN=" + admin_user + ",")) ) {
+            if( deleteAll || (!deleteAll && !record.getName().contains("CN=" + msUser + ",") && !record.getName().contains("CN=" + adminUser + ",")) ) {
                 Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
                 for(ApiRoleX509 role : roles) {
                     rolejpa.destroy(role.getApiRoleX509PK());
                 }
                 jpa.destroy(record.getId());
                 count++;
+                String apiName = record.getName().substring(3,record.getName().indexOf(","));
+                if (verbose)
+                    System.out.println("Deleting API client " + apiName + "..... Done");
             }
         }
         System.out.println(count + " API clients deleted.");
