@@ -326,6 +326,10 @@ case "$1" in
         call_setupcommand EraseLogs
         ;;
   erase-users)
+		if [ -z $MC_FIRST_USERNAME ]; then
+			prompt_with_default MC_FIRST_USERNAME "Management Console Username:" "admin"
+		fi
+		export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
   uninstall)
