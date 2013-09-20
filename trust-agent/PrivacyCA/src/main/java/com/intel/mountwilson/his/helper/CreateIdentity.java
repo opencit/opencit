@@ -331,6 +331,8 @@ public class CreateIdentity  {
 			pcaFileOut = new FileOutputStream(outFile);
 			pcaFileOut.write("-----BEGIN CERTIFICATE-----\n".getBytes());
                         String code = Base64.encode(cert.getEncoded()).toString();
+                        log.debug(Base64.encode(cert.getEncoded()).toString());
+                        log.debug(code);
                         int line = 0;
                         int remaining = code.length();
                         while(remaining > 76){
