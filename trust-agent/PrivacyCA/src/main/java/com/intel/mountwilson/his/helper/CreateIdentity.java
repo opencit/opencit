@@ -328,11 +328,12 @@ public class CreateIdentity  {
 					System.exit(5);
 				}
 			}
+                        // stdale start here when you resume
 			pcaFileOut = new FileOutputStream(outFile);
 			pcaFileOut.write("-----BEGIN CERTIFICATE-----\n".getBytes());
-                        String code = Base64.encode(cert.getEncoded()).toString();
-                        log.debug(Base64.encode(cert.getEncoded()).toString());
-                        log.debug(code);
+                        String code = new String(Base64.encode(cert.getEncoded()));
+                        //log.debug(Base64.encode(cert.getEncoded()).toString());
+                        //log.debug(code);
                         int line = 0;
                         int remaining = code.length();
                         while(remaining > 76){
