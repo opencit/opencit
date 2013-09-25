@@ -23,6 +23,9 @@ shell_include_files ${env_dir}/*
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
+# load default environment variables if not defined by mtwilson.env
+#load_default_env
+
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
@@ -162,7 +165,6 @@ all_status() {
   if [ -n "$mpctl" ]; then $mpctl status; fi
 }
 
-
 setup_env() {
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
@@ -199,6 +201,34 @@ setup_env() {
   echo "DEFAULT_API_PORT=$DEFAULT_API_PORT"
 }
 
+decrypt_file() {
+  local filename="${1}"
+  export PASSWORD="${2}"
+  if [ -f "$filename" ]; then
+    echo -n "Decrypting file [$filename]....."
+    call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
+    if file_encrypted $filename; then
+      echo_failure "Incorrect encryption password."; exit -1; fi
+    echo_success " Done"
+  else
+    echo_warning "File NOT found: $filename"
+  fi
+}
+
+encrypt_file() {
+  local filename="${1}"
+  export PASSWORD="${2}"
+  if [ -f "$filename" ]; then
+    echo -n "Encrypting file [$filename]....."
+    call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"
+    if ! file_encrypted $filename; then
+      echo_failure "Password failure. Please check password for illegal characters."; exit -1; fi
+    echo_success " Done"
+  else
+    echo_warning "File NOT found: $filename"
+  fi
+}
+
 RETVAL=0
 
 # See how we were called.
@@ -210,6 +240,36 @@ case "$1" in
         ;;
   setup-env)
         setup_env
+        ;;
+  start)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+		  glassfish_require
+          glassfish_start_report
+        elif using_tomcat; then
+		  tomcat_require
+          tomcat_start_report
+        fi
+        ;;
+  stop)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+		  glassfish_require
+          glassfish_shutdown
+        elif using_tomcat; then
+		  tomcat_require
+          tomcat_shutdown
+        fi
+        ;;
+  restart)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+		  glassfish_require
+          glassfish_restart
+        elif using_tomcat; then
+		  tomcat_require
+          tomcat_restart
+        fi
         ;;
   glassfish-detect)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
@@ -328,6 +388,11 @@ case "$1" in
   erase-users)
         call_setupcommand EraseUserAccounts $@
         ;;
+  change-db-pass)
+        if [[ $# -ne 2 && $# -ne 3 ]]; then
+          echo_failure "Usage: $0 $1 'newpassword' 'encryption_password'"; exit -1; fi
+        change_db_pass $@
+        ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
         if using_glassfish; then
@@ -365,12 +430,13 @@ case "$1" in
         echo_success "Done"
         ;;
   help)
-        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
-        ;;
+        ;&
   *)
-        echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+        echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|help|\n" \
+             "|glassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
+			 "|java-detect|mysql-detect|mysql-sslcert|\n" \
+             "|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+			 "|restart|setup|start|status|stop|uninstall|version}"
         exit 1
 esac
 
