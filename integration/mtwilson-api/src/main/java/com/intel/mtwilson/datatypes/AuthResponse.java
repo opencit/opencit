@@ -6,7 +6,7 @@ package com.intel.mtwilson.datatypes;
 
 
 import com.intel.mtwilson.i18n.ErrorMessage;
-import com.intel.mtwilson.i18n.Localizable;
+import com.intel.dcsg.cpg.i18n.Localizable;
 import java.util.Locale;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;

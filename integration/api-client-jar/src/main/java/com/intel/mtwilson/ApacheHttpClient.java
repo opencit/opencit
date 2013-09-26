@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
-import com.intel.mtwilson.i18n.LocaleUtil;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;

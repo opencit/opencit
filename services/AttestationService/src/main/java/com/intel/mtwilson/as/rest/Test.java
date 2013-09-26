@@ -14,7 +14,7 @@ import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.AuthResponse;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.i18n.Localizable;
+import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import java.util.ArrayList;

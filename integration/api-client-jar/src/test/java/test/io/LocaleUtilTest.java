@@ -4,7 +4,7 @@
  */
 package test.io;
 
-import com.intel.mtwilson.i18n.LocaleUtil;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import java.util.Locale;
 import org.junit.Test;
 import static org.junit.Assert.*;

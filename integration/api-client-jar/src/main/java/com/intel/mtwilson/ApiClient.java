@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
-import com.intel.mtwilson.i18n.LocaleUtil;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.api.MtWilson;

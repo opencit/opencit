@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.i18n;
 
+import com.intel.dcsg.cpg.i18n.Localizable;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;

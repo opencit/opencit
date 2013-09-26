@@ -6,7 +6,7 @@ package test.i18n;
 
 import com.intel.mtwilson.datatypes.AuthResponse;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.i18n.Localizable;
+import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.i18n.Message;
 import java.util.Locale;
 import org.junit.Test;
@@ -43,5 +43,11 @@ public class TestLocalizationFilter {
         log.debug("Message with default locale: {}", m.toString());
         m.setLocale(new Locale("es","MX"));
         log.debug("Message with default locale: {}", m.toString());
+    }
+    
+    @Test
+    public void testMyMessage() {
+        Message m = new Message("myprpoertyname");
+//        m.toString(m.toString(new Locale("fr"));
     }
 }

@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.util;
 
-import com.intel.mtwilson.i18n.Localizable;
+import com.intel.dcsg.cpg.i18n.Localizable;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
