@@ -52,9 +52,16 @@ public class CreateIdentityCmd implements ICommand {
 
             log.info("AIK Certificate Read to memory - {}", context.getAikCertFileName());
 
-        } catch (Exception e) {
-
-            throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", e);
+        } 
+        
+        //catch (IOException ex) {
+        //    throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
+        //}
+        //catch (PrivacyCAExption ex) {
+        //    throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
+        //}
+        catch (Exception ex) {
+            throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
         }
     }
 }

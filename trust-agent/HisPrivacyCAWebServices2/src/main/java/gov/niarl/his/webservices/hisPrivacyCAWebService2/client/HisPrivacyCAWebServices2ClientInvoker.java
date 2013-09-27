@@ -29,6 +29,7 @@ public class HisPrivacyCAWebServices2ClientInvoker {
 
 	public static IHisPrivacyCAWebService2 getHisPrivacyCAWebService2(String url) {
 		try {
+                    System.err.println("Savy002");
             System.err.println("getHisPrivacyCAWebService2 trying to create service factory!");
             HisPrivacyCAWebService2FactoryServiceService hisPrivacyCAWebService2FactoryServiceService = null;
             try {
@@ -36,7 +37,7 @@ public class HisPrivacyCAWebServices2ClientInvoker {
             }catch(Exception e){
                 System.err.println("getHisPrivacyCAWebService2 exception was " + e.getMessage());
                 e.printStackTrace();
-                throw new RuntimeException(e);
+                throw new RuntimeException("Savy003: " + e);
             }
             System.err.println("getHisPrivacyCAWebService2 created it!");
 			HisPrivacyCAWebService2FactoryService hisPrivacyCAWebService2FactoryService = hisPrivacyCAWebService2FactoryServiceService.getHisPrivacyCAWebService2FactoryServicePort();

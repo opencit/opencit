@@ -239,7 +239,9 @@ public class CreateIdentity  {
                         
 //                        HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
             System.err.println("Create Identity... Calling into HisPriv first time. using url = " + PrivacyCaUrl);
-			IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);
+			System.err.println("Savy001");
+                        IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);
+                        System.err.println("Savy010");
             System.err.println("Create Identity... Got HisPrivCA ref, making request ize of msg = " + encryptedEkCert.toByteArray().length);
 			byte[] encrypted1 = hisPrivacyCAWebService2.identityRequestGetChallenge(newId.getIdentityRequest(), encryptedEkCert.toByteArray());
 			if(encrypted1.length == 1){
