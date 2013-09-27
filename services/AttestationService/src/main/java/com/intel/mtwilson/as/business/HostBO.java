@@ -297,6 +297,7 @@ public class HostBO extends BaseBO {
                         
                         // Using the connection string we will find out the type of the host. This information would be used later
                         ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
+                        tblHosts.setAddOnConnectionInfo(hostConnString.getConnectionStringWithPrefix());
                         hostType = hostConnString.getVendor();
                         
                         if (host.getHostName() != null) {
@@ -311,9 +312,10 @@ public class HostBO extends BaseBO {
 
                         HostAgentFactory factory = new HostAgentFactory();
                         HostAgent agent = factory.getHostAgent(tblHosts);
+                        if( agent.isAikAvailable() ) {
                             log.debug("Getting identity.");
                                 setAikForHost(tblHosts, host);
-                        
+                        }
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
                                 log.debug("VMM is updated. Update the host specific manifest");
@@ -330,7 +332,10 @@ public class HostBO extends BaseBO {
 //                                hostReport.tpmQuote = null;
 //                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 //                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
-
+                                
+                                // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
+                                // already be updated and the query would not find any values to delete.
+                                deleteHostSpecificManifest(tblHosts);
                                 tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                             }
 
@@ -351,7 +356,8 @@ public class HostBO extends BaseBO {
                         
                         if(tblHostSpecificManifests != null){
                             log.debug("Updating Host Specific Manifest in database");
-                            deleteHostSpecificManifest(tblHosts);
+                            // Bug 962: Making this call earlier in the function before updating the host with the new MLEs.
+                            //deleteHostSpecificManifest(tblHosts);
                             createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
                         }
 
