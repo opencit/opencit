@@ -476,6 +476,12 @@ public class TagApiTest2 {
     }
     
     @Test
+    public void testGetSelections() throws IOException {
+        String existingSelections = At.selections().get(String.class);
+        log.debug("Selections: {}", existingSelections);
+    }
+    
+    @Test
     public void testPostCertificateRequestWithDefaultSelection() throws IOException {
         // no need to insert tags or selections... this test assumes they are already defined in the database and configured for automatic certificate requests
         // we just provide a subject (host uuid) .

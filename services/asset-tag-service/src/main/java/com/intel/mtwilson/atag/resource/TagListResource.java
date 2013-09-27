@@ -178,7 +178,7 @@ public class TagListResource extends ServerResource {
         log.debug("Fetching records using JOOQ");
         Result<Record> result = sql.fetch();
         Tag[] tags = new Tag[result.size()];
-        log.debug("Got {} records", tags.length);
+        log.debug("Got {} tag records", tags.length);
         int i = 0;
         for(Record r : result) {
             tags[i] = new Tag();

@@ -18,6 +18,7 @@ import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -70,6 +71,8 @@ public class SelectionListResource extends ServerResource {
             selectionDao.close();
         }
         if( selectionTagValueDao != null ) { selectionTagValueDao.close(); }
+        if( tagDao != null ) { tagDao.close(); }
+        if( tagValueDao != null ) { tagValueDao.close(); }
         super.doRelease();
     }
 
@@ -171,6 +174,7 @@ public class SelectionListResource extends ServerResource {
     
     @Get("json")
     public Selection[] search() throws SQLException {
+        log.debug("Search selections");
         SelectionSearchCriteria query = new SelectionSearchCriteria();
         query.id = getQuery().getFirstValue("id") == null || getQuery().getFirstValue("id").isEmpty() ? null : UUID.valueOf(getQuery().getFirstValue("id"));
         query.nameEqualTo = getQuery().getFirstValue("nameEqualTo");
@@ -232,19 +236,24 @@ public class SelectionListResource extends ServerResource {
         }
         sql.addOrderBy(SELECTION.ID);
         Result<Record> result = sql.fetch();
-        Selection[] selections = new Selection[result.size()]; // XXX TODO because of row folding due to the join (below where we combine values from a bunch of rows into one Selection record) there will be nulls in this array... should chane to an ArrayList instead and only add the folded records as we go,  then convert to an array later for the return value
-        log.debug("Got {} records", selections.length);
-        int i = -1; //  index into the target array selections
-        long c = -1; // id of the current certificate request object built, used to detect when it's time to build the next one
+//        ArrayList<Selection> selections = new ArrayList<Selection>(); // will be the return value
+//        Selection selection = null; // current selection record being built
+//        Selection[] selections = new Selection[result.size()]; // XXX TODO because of row folding due to the join (below where we combine values from a bunch of rows into one Selection record) there will be nulls in this array... should chane to an ArrayList instead and only add the folded records as we go,  then convert to an array later for the return value
+        HashMap<Long,Selection> selections = new HashMap<Long,Selection>();
+        log.debug("Got {} selection records", result.size());
+//        long c = -1; // id of the current certificate request object built, used to detect when it's time to build the next one
         for(Record r : result) {
-            if( r.getValue(SELECTION.ID) != c ) {
-                i++;
-                c = r.getValue(SELECTION.ID);
-                selections[i] = new Selection();
-                selections[i].setId(r.getValue(SELECTION.ID));
-                selections[i].setUuid(UUID.valueOf(r.getValue(SELECTION.UUID)));
-                selections[i].setName(r.getValue(SELECTION.NAME));
-                selections[i].setTags(new ArrayList<SelectionTagValue>());
+//            if( r.getValue(SELECTION.ID) != c ) {
+            if( selections.get(r.getValue(SELECTION.ID)) == null ) {
+//                c = r.getValue(SELECTION.ID);
+                Selection selection = new Selection();
+                selection.setId(r.getValue(SELECTION.ID));
+                selection.setUuid(UUID.valueOf(r.getValue(SELECTION.UUID)));
+                selection.setName(r.getValue(SELECTION.NAME));
+                selection.setTags(new ArrayList<SelectionTagValue>());
+//                selections.add(selection); // set(i, selection);
+                selections.put(r.getValue(SELECTION.ID), selection);
+                log.debug("Created new selection object: {}", selection.getId());
             }
             SelectionTagValue crtv = new SelectionTagValue(
                     r.getValue(SELECTION_TAG_VALUE.ID), 
@@ -260,14 +269,21 @@ public class SelectionListResource extends ServerResource {
                 crtv.setTagValue(tagValue.getValue());
                 crtv.setTagUuid(tag.getUuid());
                 // TODO:  crtv.setTagValueUuid(tagValue.getUuid());
-                selections[i].getTags().add(crtv);
+//                selection.getTags().add(crtv); // safety note:  selection tags initialized when record id changes above, so it should never be null
+                Selection selection = selections.get(r.getValue(SELECTION.ID));
+                selection.getTags().add(crtv); // XXX inefficient to look up the selection each time in the map but we want to avoid relying on the order of fields in the resultset... we're not assuming that all related records would be grouped together
+                log.debug("Added tag to selection object: {}", selection.getId());
             }
             else {
                 log.debug("tag is null? {}", tag == null);
                 log.debug("tag-value is null? {}", tagValue == null);
             }
         }
+//        result.
+        log.debug("Closing jooq sql statement");
         sql.close();
-        return selections;
+        log.debug("Closed jooq sql statement");
+//        return selections.values().toArray(new Selection[0]);
+        return new Selection[0];
     }
 }
