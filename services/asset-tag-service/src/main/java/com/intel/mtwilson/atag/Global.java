@@ -19,6 +19,7 @@ import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
+import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -38,7 +39,7 @@ public class Global {
     private static List<X509Certificate> cacerts = null; // the list of all approved certificates (including cakeyCert)
     private static MtWilson mtwilson = null;
     
-    public static Configuration configuration() {
+    public static Configuration configuration() throws IOException {
         if( currentConfiguration == null ) {
             log.debug("Loading global configuration...");
             ConfigurationDAO configurationDao = null;
@@ -58,7 +59,7 @@ public class Global {
                 if( configurationDao != null ) { configurationDao.close(); }
             }
         }
-        log.debug("Loaded configuration: {}", currentConfiguration.getContent());
+        log.debug("Loaded configuration: {}", currentConfiguration.getXmlContent());
         return currentConfiguration;
     }
     

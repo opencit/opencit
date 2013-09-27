@@ -98,7 +98,7 @@ public class CertificateRequestListResource extends ServerResource {
      * object. Then we can insert it to the database.
      */
 //    @Post("json:json")
-    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException {
+    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
         // IMPORTANT: provisioning policy choices:
@@ -251,7 +251,7 @@ public class CertificateRequestListResource extends ServerResource {
      * @throws SQLException
      */
     @Post("json:json")
-    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException {
+    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
             results[i] = insertCertificateRequest(certificateRequests[i]);
