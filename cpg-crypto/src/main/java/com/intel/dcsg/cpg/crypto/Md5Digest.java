@@ -52,7 +52,7 @@ public class Md5Digest extends AbstractDigest {
     /**
      * 
      * @param value can be null
-     * @return true if value is a valid MD5 digest
+     * @return true if value is a valid MD5 digest (length is checked)
      */
     public static boolean isValid(byte[] value) {
         return ALGORITHM.isValid(value);
@@ -60,7 +60,7 @@ public class Md5Digest extends AbstractDigest {
     
     /**
      * @param hex without any punctuation or spaces; can be null
-     * @return true if the value is a valid hex representation of an MD5 digest
+     * @return true if the value is a valid hex representation of an MD5 digest (length is checked)
      */
     public static boolean isValidHex(String hexValue) {
         return ALGORITHM.isValidHex(hexValue);
@@ -69,7 +69,7 @@ public class Md5Digest extends AbstractDigest {
     /**
      * @since 0.1.2
      * @param base64 value without any punctuation or spaces; can be null
-     * @return true if the value is a valid base64 representation of an SHA256 digest
+     * @return true if the value is a valid base64 representation of an SHA256 digest (length is checked)
      */
     public static boolean isValidBase64(String base64Value) {
         return ALGORITHM.isValidBase64(base64Value);
@@ -79,7 +79,7 @@ public class Md5Digest extends AbstractDigest {
     /**
      * Assumes the input represents an MD5 digest and creates a new instance of Md5Digest to wrap it.
      * This method does NOT compute a digest. If the input is not a valid MD5 representation, a null
-     * will be returned.
+     * will be returned. The length of the input is checked to make sure it's the correct number of bytes.
      * 
      * Callers must always check the return value for null. 
      * 
@@ -98,11 +98,11 @@ public class Md5Digest extends AbstractDigest {
     /**
      * Assumes the input represents an MD5 digest and creates a new instance of Md5Digest to wrap it.
      * This method does NOT compute a digest. If the input is not a valid MD5 representation, a null
-     * will be returned.
+     * will be returned. 
      * 
      * Callers must always check the return value for null. 
      * 
-     * @param hex
+     * @param text may be either hex or base64 representation of an MD5 digest
      * @return 
      */
     @org.codehaus.jackson.annotate.JsonCreator // jackson 1.x
@@ -123,7 +123,7 @@ public class Md5Digest extends AbstractDigest {
     
     /**
      * @since 0.1.2
-     * @param text
+     * @param text must be a valid hex representation of an MD5 digest
      * @return 
      */
     public static Md5Digest valueOfHex(String text) {
@@ -137,7 +137,7 @@ public class Md5Digest extends AbstractDigest {
 
     /**
      * @since 0.1.2
-     * @param text
+     * @param text must be a valid base64 representation of an MD5 digest
      * @return 
      */
     public static Md5Digest valueOfBase64(String text) {

@@ -50,7 +50,7 @@ public class Sha1Digest extends AbstractDigest {
      * 
      * If you need to create a Sha1Digest where the input may be invalid, use valueOf.
      * 
-     * @param hex 
+     * @param hex must be 40 hex characters representing 20 bytes
      */
     public Sha1Digest(String hex) {
         super(ALGORITHM, hex);

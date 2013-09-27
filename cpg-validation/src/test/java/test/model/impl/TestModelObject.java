@@ -4,19 +4,24 @@
  */
 package test.model.impl;
 
+import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.dcsg.cpg.validation.InvalidModelException;
 import com.intel.dcsg.cpg.validation.Model;
 import com.intel.dcsg.cpg.validation.Unchecked;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import org.junit.Test;
 import test.model.Color;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test features of the aspect oriented model validation
  * @author jbuhacoff
  */
 public class TestModelObject {
+    private static Logger log = LoggerFactory.getLogger(TestModelObject.class);
     
     @Test
     public void testUseNoArgConstructorValid() {
@@ -26,7 +31,7 @@ public class TestModelObject {
         color.setGreen(2);
         color.setBlue(3);
         boolean valid = color.isValid();
-        System.out.println(String.format("testUseNoArgConstructorValid: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testUseNoArgConstructorValid: Valid? %s", String.valueOf(valid)));
     }
 
     @Test
@@ -37,21 +42,21 @@ public class TestModelObject {
         color.setGreen(2);
         color.setBlue(3);
         boolean valid = color.isValid();
-        System.out.println(String.format("testUseNoArgConstructorInvalid: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testUseNoArgConstructorInvalid: Valid? %s", String.valueOf(valid)));
     }
 
     @Test
     public void testConstructorValid() {
         Color color = new Color("test", 1, 2, 3);
         boolean valid = color.isValid();
-        System.out.println(String.format("testConstructorValid: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testConstructorValid: Valid? %s", String.valueOf(valid)));
     }
     
     @Test(expected=IllegalArgumentException.class)
     public void testConstructorInvalid() {
         Color color = new Color(null, 1, 2, 3); // IllegalArgumentException because of null name
         boolean valid = color.isValid();
-        System.out.println(String.format("testConstructorInvalid: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testConstructorInvalid: Valid? %s", String.valueOf(valid)));
     }
     
     @Test
@@ -93,10 +98,10 @@ public class TestModelObject {
 
     
     private void printModel(Model model) {
-        System.out.println(String.format("printModel: %s", String.valueOf(model.isValid())));
+        log.debug(String.format("printModel: %s", String.valueOf(model.isValid())));
     }
     private void printUncheckedModel(@Unchecked Model model) {
-        System.out.println(String.format("printUncheckedModel: %s", String.valueOf(model.isValid())));
+        log.debug(String.format("printUncheckedModel: %s", String.valueOf(model.isValid())));
     }
     
     /**
@@ -104,7 +109,7 @@ public class TestModelObject {
      * @param color 
      */
     private void printColor(Color color) {
-        System.out.println(String.format("printColor: %s", color.getName()));
+        log.debug(String.format("printColor: %s", color.getName()));
     }
 
     /**
@@ -112,29 +117,33 @@ public class TestModelObject {
      * @param color 
      */
     private void printUncheckedColor(@Unchecked Color color) {
-        System.out.println(String.format("printUncheckedColor: %s", color.getName()));
+        log.debug(String.format("printUncheckedColor: %s", color.getName()));
     }
     
     @Test
     public void testUseHashCode() {
         Color color = new Color();
         boolean valid = color.isValid();
-        System.out.println(String.format("testUseHashCode: Valid? %s", String.valueOf(valid)));
-        System.out.println(String.format("testUseHashCode: Hashcode for this object is %d", hashCode()));
+        log.debug(String.format("testUseHashCode: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testUseHashCode: Hashcode for this object is %d", hashCode()));
     }
 
     @Test
     public void testModelInterface() {
         Color color = new Color("blue", 0, 0, 255);
         boolean valid = color.isValid();
-        System.out.println(String.format("testModelInterface: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testModelInterface: Valid? %s", String.valueOf(valid)));
     }
     
     @Test
     public void testModelInterfaceWithErrors() {
         Color color = new Color();
         boolean valid = color.isValid();
-        System.out.println(String.format("testModelInterfaceWithErrors: Valid? %s", String.valueOf(valid)));
+        log.debug(String.format("testModelInterfaceWithErrors: Valid? %s", String.valueOf(valid)));
+        List<Fault> faults = color.getFaults();
+        for(Fault fault : faults) {
+            log.debug("Fault: {}", fault);
+        }
     }
     
     @Test
@@ -144,17 +153,17 @@ public class TestModelObject {
             Color color = new Color("blue", 0, 0, 255);
             Method isValid = color.getClass().getMethod("isValid");
             Boolean isValidResult = (Boolean)isValid.invoke(color);
-            System.out.println("testReflection: color isValid? "+isValidResult);
+            log.debug("testReflection: color isValid? "+isValidResult);
         } catch (IllegalAccessException ex) {
-            System.out.println("Illegal access exception while invoking isValid on color");
+            log.debug("Illegal access exception while invoking isValid on color");
         } catch (IllegalArgumentException ex) {
-            System.out.println("Illegal argument exception while invoking isValid on color");
+            log.debug("Illegal argument exception while invoking isValid on color");
         } catch (InvocationTargetException ex) {
-            System.out.println("Invocation target  exception while invoking isValid on color");
+            log.debug("Invocation target  exception while invoking isValid on color");
         } catch (NoSuchMethodException ex) {
-            System.out.println("Color object does not have an isValid method");
+            log.debug("Color object does not have an isValid method");
         } catch (SecurityException ex) {
-            System.out.println("Security exception while checking for isValid method in Color object");
+            log.debug("Security exception while checking for isValid method in Color object");
         }
     }
     

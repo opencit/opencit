@@ -4,6 +4,9 @@
  */
 package com.intel.dcsg.cpg.validation;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.apache.commons.lang3.StringUtils;
+
 /**
  * This class strongly resembles an Exception object but it is used differently.
  * 
@@ -16,7 +19,10 @@ package com.intel.dcsg.cpg.validation;
  * interrupt the flow of execution, forcing the user to correct and resubmit
  * one error at a time until the input is completely validated.
  * 
- * First, 
+ * XXX TODO make the Fault class implement Localizable, allow a Message object in a
+ * constructor like Fault(Message) and Fault(Throwable,, Message) and then pass the locale to the 
+ * Message object when toString() or toString(Locale) is called.
+ * 
  * @since 1.1
  * @author jbuhacoff
  */
@@ -26,24 +32,28 @@ public class Fault {
     private final Fault[] more;
     
     public Fault(String description) {
+        if( description == null ) { throw new IllegalArgumentException("Cannot create a fault with null description"); }
         this.cause = null;
         this.description = description;
         this.more = new Fault[0];
     }
     
     public Fault(String format, Object... args) {
+        if( format == null ) { throw new IllegalArgumentException("Cannot create a fault with null format"); }
         this.cause = null;
         this.description = String.format(format, args);
         this.more = new Fault[0];
     }
     
     public Fault(Throwable e, String description) {
+        if( description == null ) { throw new IllegalArgumentException("Cannot create a fault with null description"); }
         this.cause = e;
         this.description = description;
         this.more = new Fault[0];
     }
     
     public Fault(Throwable e, String format, Object... args) {
+        if( format == null ) { throw new IllegalArgumentException("Cannot create a fault with null format"); }
         this.cause = e;
         this.description = String.format(format, args);
         this.more = new Fault[0];
@@ -57,6 +67,7 @@ public class Fault {
      * @param args 
      */
     public Fault(Model m, String format, Object... args) {
+        if( format == null ) { throw new IllegalArgumentException("Cannot create a fault with null format"); }
         this.cause = null;
         this.description = String.format(format, args);
         int size = m.getFaults().size();
@@ -66,9 +77,21 @@ public class Fault {
         }
     }
     
+    /**
+     * 
+     * @return 
+     */
+    @JsonValue
     @Override
     public String toString() {
-        return description;
+        return description; // should never be null because we set it in every constructor
+        /*
+        return StringUtils.join(new String[] {
+            (description == null ? "" : description), // XXX TODO if we have a localizable Message object use that instead
+            (cause == null ? "" : (cause.getMessage() == null ? "" : "["+cause.getMessage()+"]")),
+            (more == null ? "" : (more.length == 0 ? "" : String.format("(%d more)", more.length)))
+        }, " "); 
+        */
     }
     
     /**
@@ -90,4 +113,5 @@ public class Fault {
     public Fault[] getMore() {
         return more;
     }
+    
 }

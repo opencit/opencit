@@ -12,7 +12,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Random;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -94,4 +97,33 @@ Output: hello world (str length: 11)
         log.info("Plaintext length {} content: {}", plaintext2.length, Base64.encodeBase64String(plaintext2));        
         assertTrue(Arrays.equals(plaintext, plaintext2));
     }
+    
+    
+    @Test
+    public void testAes128KeyEncoding() throws Exception {
+        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+        kgen.init(128);
+        SecretKey secretKey = kgen.generateKey();
+        byte[] encoded = secretKey.getEncoded();
+        log.debug("Encoded AES-128 key is {} bytes", encoded.length); // 16 ... so there are no other bits inserted for algorighm id etc.
+    }
+
+    @Test
+    public void testAes192KeyEncoding() throws Exception {
+        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+        kgen.init(192);
+        SecretKey secretKey = kgen.generateKey();
+        byte[] encoded = secretKey.getEncoded();
+        log.debug("Encoded AES-192 key is {} bytes", encoded.length); // 24
+    }
+
+    @Test
+    public void testAes256KeyEncoding() throws Exception {
+        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+        kgen.init(256);
+        SecretKey secretKey = kgen.generateKey();
+        byte[] encoded = secretKey.getEncoded();
+        log.debug("Encoded AES-256 key is {} bytes", encoded.length); // 32
+    }
+    
 }

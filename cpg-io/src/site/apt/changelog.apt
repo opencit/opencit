@@ -1,35 +1,37 @@
+Changelog
+
 * Version 0.1.2
 
-Fixed ByteArray.fromHex to preserve leading zeros.
-Added HexInput and HexUtil and Base64Util
-Added Iso8601.valueOf(String) and Rfc822Date.valueOf(String)
+  Fixed ByteArray.fromHex to preserve leading zeros.
+  Added HexInput and HexUtil and Base64Util
+  Added Iso8601.valueOf(String) and Rfc822Date.valueOf(String)
 
 * Version 0.1.1
 
-Added toBigInteger() converter and new ByteArray(BigInteger) constructor to ByteArray.
-Added fromHex, equals, hashCode, toHexString, and concat(ByteArray...) to ByteArray.
-Added UUID class.
+  Added toBigInteger() converter and new ByteArray(BigInteger) constructor to ByteArray.
+  Added fromHex, equals, hashCode, toHexString, and concat(ByteArray...) to ByteArray.
+  Added UUID class.
 
 * Version 0.1
 
 List of classes present in the first version of this module:
 
-AllCapsEnvironmentConfiguration
-ByteArrayResource
-Classpath
-ConfigurationUtil
-CopyResource
-ExistingFileResource
-ExistingFolder
-FileResource
-Filename
-Folder
-Platform
-Resource
-FileRepository
-InternetMessage
-Pem
-PemLikeParser
-Iso8601Date
-Rfc822Date
-DN (x500)
+  AllCapsEnvironmentConfiguration
+  ByteArrayResource
+  Classpath
+  ConfigurationUtil
+  CopyResource
+  ExistingFileResource
+  ExistingFolder
+  FileResource
+  Filename
+  Folder
+  Platform
+  Resource
+  FileRepository
+  InternetMessage
+  Pem
+  PemLikeParser
+  Iso8601Date
+  Rfc822Date
+  DN (x500)

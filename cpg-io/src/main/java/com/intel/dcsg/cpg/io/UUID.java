@@ -13,13 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Represents a UUID.
+ * 
+ * 
  * Convenience class that adds conversion to/from ByteArray.
  * 
  * Automatically serializes/deserializes to UUID format string with Jackson (both 1.x and 2.x)
  * 
- * References:
- * http://www.ietf.org/rfc/rfc4122.txt   UUID 
- * 
+ * @see http://www.ietf.org/rfc/rfc4122.txt
  * @author jbuhacoff
  */
 public class UUID {
