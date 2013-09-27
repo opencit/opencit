@@ -11,6 +11,7 @@ import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.his.helper.CreateIdentity;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.File;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,14 +55,9 @@ public class CreateIdentityCmd implements ICommand {
 
         } 
         
-        //catch (IOException ex) {
-        //    throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
-        //}
-        //catch (PrivacyCAExption ex) {
-        //    throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
-        //}
-        catch (Exception ex) {
-            throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
+        catch (Exception e) {
+            throw new TAException(ErrorCode.COMMAND_ERROR, e.toString(), e);
+            //throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
         }
     }
 }

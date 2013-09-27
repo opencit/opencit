@@ -43,8 +43,10 @@ import org.bouncycastle.util.encoders.Base64;
 
 //import com.intel.mountwilson.as.common.ResourceFinder;
 import com.intel.mtwilson.util.ResourceFinder;
+import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -240,7 +242,6 @@ public class CreateIdentity  {
                         
 //                        HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
             System.err.println("Create Identity... Calling into HisPriv first time. using url = " + PrivacyCaUrl);
-                        testURL(PrivacyCaUrl);
                         IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);
             System.err.println("Create Identity... Got HisPrivCA ref, making request ize of msg = " + encryptedEkCert.toByteArray().length);
 			byte[] encrypted1 = hisPrivacyCAWebService2.identityRequestGetChallenge(newId.getIdentityRequest(), encryptedEkCert.toByteArray());
@@ -296,18 +297,28 @@ public class CreateIdentity  {
 				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
 			}
 			
-			
-		}catch(Exception e){
-			throw new PrivacyCAException("FAILED: " + e.getMessage(),e);
-		}
-		finally{
-			if (pcaFileOut != null)
-				try {
-					pcaFileOut.close();
-				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing pcaFileOut",e);
-				}
-		}
+	 
+                }catch(Exception e){
+                    e.printStackTrace();
+                    Throwable t = ErrorUtil.rootCause(e);
+                    if (t instanceof UnknownHostException){
+                        throw new PrivacyCAException("Unknown host. Error connecting to: " + t.getMessage());
+                    }
+                    else if (t instanceof TpmModuleException){
+                        throw new PrivacyCAException("TPM error. Please verify TPM ownership");
+                    }
+                    else {
+                        throw new PrivacyCAException("Error while creating identity.");
+                    }
+                }
+                finally{
+                    if (pcaFileOut != null)
+                        try {
+                            pcaFileOut.close();
+                        } catch (IOException e) {
+                            log.log(Level.SEVERE,"Error while closing pcaFileOut",e);
+                        }
+                }
 	
 		log.info("DONE");
 		
@@ -357,25 +368,6 @@ public class CreateIdentity  {
 		pcaFileOut.flush();
 		pcaFileOut.close();
 	}
-        
-        private static void testURL(String strUrl) throws Exception {
-            String host_nm = strUrl;
-            try {
-                
-                URL url = new URL(strUrl);
-                HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-                urlConn.connect();
-
-                urlConn.getResponseCode();
-                
-                //assertEquals(HttpURLConnection.HTTP_OK, urlConn.getResponseCode());
-            } catch (IOException e) {
-                String errmsg = "Error connecting to \"" + host_nm + "\". Please verify hostname.";
-                System.err.println(errmsg);
-                e.printStackTrace();
-                throw new IOException(errmsg);
-            }
-}
 }
 
 
