@@ -283,7 +283,7 @@ public class SelectionListResource extends ServerResource {
         log.debug("Closing jooq sql statement");
         sql.close();
         log.debug("Closed jooq sql statement");
-//        return selections.values().toArray(new Selection[0]);
-        return new Selection[0];
+        return selections.values().toArray(new Selection[0]);
+//        return new Selection[0];
     }
 }
