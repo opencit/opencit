@@ -69,6 +69,7 @@ public enum ErrorCode {
     AS_INVALID_AIK_CERTIFICATE(1027, "Cannot validate AIK for '%s' against known Privacy CAs"),
     AS_TPM_NOT_SUPPORTED(1028,"Host '%s' does not support TXT."),
     AS_CITRIX_ERROR(1029, "Citrix error"),
+    AS_MLE_DOES_NOT_EXIST(1030, "MLE '%s' of version '%s' is not configured in the system."),
 
 
     // Error codes for White List Service
@@ -124,6 +125,7 @@ public enum ErrorCode {
     MS_API_EXCEPTION(3208, "API Call failed with error '%s'."),
     MS_INVALID_ATTESTATION_REPORT(3209, "Unable to retrieve the TPM values from the host. Verify the host TXT configuration."),
     MS_HOST_CONFIGURATION_ERROR(3210, "Unable to retrieve the host configuration details. Please verify the host information."),
+    MS_MLE_CONFIGURATION_NOT_FOUND(3211, "BIOS or Hypervisor MLE is not configured correctly."),
     
     TLS_COMMMUNICATION_ERROR(4001, "Cannot establish secure connection to '%s': %s");
    

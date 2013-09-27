@@ -267,4 +267,14 @@ public class Host {
         public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria) {
                 return hostBO.queryForHosts(searchCriteria);
         }
+
+        @RolesAllowed({"Attestation"})
+        @POST
+        @Consumes({MediaType.APPLICATION_JSON})
+        @Produces({MediaType.APPLICATION_JSON})
+        @Path("/mle")
+        public String findMLEForHost(TxtHostRecord hostRecord) {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDB(hostRecord);
+        }
+        
 }
