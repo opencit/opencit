@@ -7,11 +7,13 @@ import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
+import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestLogJpaController;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblLocationPcr;
+import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifestLog;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
@@ -139,6 +141,150 @@ public class HostTrustBO extends BaseBO {
             log.error("Cannot get trust status for {}", aik.toString(), e); // log the error for sysadmin to troubleshoot, since we are not allowing the original exception to propagate
             throw new IOException("Cannot get trust status for "+aik.toString()); // rethrowing to make sure that the hostname is not leaked from an exception message; we only provide the AIK in the message
         }
+    }
+    
+    /**
+     * This function verifies the host's PCR measurements against the possible MLE whitelists that it could be mapped to
+     * and accordingly returns backs the caller the correct MLE name (both BIOS and VMM) using which the host can be 
+     * registered.
+     * @param hostObj
+     * @return
+     * @throws IOException 
+     */
+    public String getTrustStatusOfHostNotInDB(TxtHostRecord hostObj) {
+        String biosMLEName = "", vmmMLEName = "";
+        
+        try {
+            
+            TblMleJpaController mleJpa = My.jpa().mwMle();
+
+            TblHosts tblHosts = new TblHosts();
+            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+            tblHosts.setTlsKeystore(null);
+            tblHosts.setName(hostObj.HostName);
+            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setIPAddress(hostObj.HostName);
+            if (hostObj.Port != null) {
+                tblHosts.setPort(hostObj.Port);
+            }
+            
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
+                throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
+            }
+
+            PcrManifest pcrManifest = agent.getPcrManifest();
+            if( pcrManifest == null ) {
+                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+            }
+
+            HostReport hostReport = new HostReport();
+            hostReport.pcrManifest = pcrManifest;
+            hostReport.tpmQuote = null; // TODO
+            hostReport.variables = new HashMap<String,String>(); // TODO
+
+            log.debug("Successfully retrieved the TPM meausrements from host '{}' for identifying the MLE to be mapped to.", hostObj.HostName);
+            HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+            
+            // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
+            // numeric extensions if any.
+            List<TblMle> biosMLEList = mleJpa.findBIOSMLEByNameSearchCriteria((hostObj.BIOS_Name));
+            if (biosMLEList != null && !biosMLEList.isEmpty()) {
+                for (TblMle biosMLE : biosMLEList) {
+                    // Now that we have a matching BIOS MLE, we need to verify the version againist the host BIOS version as well 
+                    // since the BIOS name would be same for different versions also.
+                    if (biosMLE.getVersion().equals(hostObj.BIOS_Version)) {
+                        tblHosts.setBiosMleId(biosMLE);
+
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        PolicyEngine policyEngine = new PolicyEngine();
+                        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+
+                        if (trustReport != null && trustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
+                            // We found the MLE to map to. So, we can continue to process the VMM MLE mapping
+                            log.debug("Found the matching BIOS MLE '{}' for host '{}'.", biosMLE.getName(), hostObj.HostName);
+                            biosMLEName = biosMLE.getName();
+                            break;
+                        } else {
+                            // Since there was a mismatch we need to continue looking for additonal MLEs. We still need to track
+                            // the BIOS MLE name so that if nothing matches, we assign the host to the last MLE found.
+                            log.debug("BIOS attestation failed for host '{}' against MLE '{}'.", hostObj.HostName, biosMLE.getName());
+                            biosMLEName = biosMLE.getName();
+                        }
+                    }
+                }
+            } else {
+                String [] params = {hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.HostName};
+                log.info("BIOS MLE {} with version {} is not configured for host {}.", params);
+                throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.BIOS_Name, hostObj.BIOS_Version);
+            }
+
+            // If at the end of the above loop, we do not find any BIOS MLE matching for the host we need to throw an appropriate exception
+            if (biosMLEName.isEmpty()) {
+                String [] params = {hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.HostName};
+                log.info("BIOS MLE {} with version {} is not configured for host {}.", params);
+                throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.BIOS_Name, hostObj.BIOS_Version);
+            }
+            
+            // Reset the BIOS MLE ID so that we don't verify that again along with VMM MLE
+            tblHosts.setBiosMleId(null);
+            
+            // First let us find the matching VMM MLEs for the host that is configured in the system.
+            List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(hostObj.VMM_Name);
+            if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
+                for (TblMle vmmMLE : vmmMLEList) {
+                    // Now that we have a matching VMM MLE, we need to verify the version againist the version the host is running 
+                    // since the VMM name would be same for different versions.
+                    if (vmmMLE.getVersion().equals(hostObj.VMM_Version)) {
+                        tblHosts.setVmmMleId(vmmMLE);
+
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        PolicyEngine policyEngine = new PolicyEngine();
+                        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+
+                        if (trustReport != null && trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
+                            // We found the MLE to map to. 
+                            log.debug("Found the matching VMM MLE '{}' for host '{}'.", vmmMLE.getName(), hostObj.HostName);
+                            vmmMLEName = vmmMLE.getName();
+                            break;
+                        } else {
+                            // Since there was a mismatch we need to continue looking for additonal MLEs. We still need to track
+                            // the BIOS MLE name so that if nothing matches, we assign the host to the last MLE found.
+                            log.debug("VMM attestation failed for host '{}' against MLE '{}'.", hostObj.HostName, vmmMLE.getName());
+                            vmmMLEName = vmmMLE.getName();
+                        }
+                    }
+                }
+            } else {
+                String [] params = {hostObj.VMM_Name, hostObj.VMM_Version, hostObj.HostName};
+                log.info("VMM MLE {} with version {} is not configured for host {}.", params);
+                throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.VMM_Name, hostObj.VMM_Version);
+            }
+            
+            // If at the end of the above loop, we do not find any VMM MLE matching for the host we need to throw an appropriate exception
+            if (vmmMLEName.isEmpty()) {
+                String [] params = {hostObj.VMM_Name, hostObj.VMM_Version, hostObj.HostName};
+                log.info("VMM MLE {} with version {} is not configured for host {}.", params);
+                throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.VMM_Name, hostObj.VMM_Version);
+            }
+
+            // Let us return back the MLE names that should be used to map the host to
+            return biosMLEName + "||" + vmmMLEName;
+            
+        } catch (ASException ae) {
+            throw ae;
+            
+        } catch (IOException ioex) {
+            // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
+            log.error("IO Exception during verifying the host trust status before registration. {}.", ioex.getMessage());
+            return hostObj.BIOS_Name + "||" + hostObj.VMM_Name;
+            
+        } catch (Exception ex) {
+            // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
+            log.error("Error during verifying the host trust status before registration. {}.", ex.getMessage());
+            return hostObj.BIOS_Name + "||" + hostObj.VMM_Name;
+        }        
     }
     
     /**

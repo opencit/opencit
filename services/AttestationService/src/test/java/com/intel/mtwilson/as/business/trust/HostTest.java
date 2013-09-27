@@ -47,6 +47,22 @@ public class HostTest {
         hostTrustBO = null;
     }
 
+    @Test
+    public void testGetTrustStatusOfHostNotInDB () throws IOException {
+        TxtHostRecord hostObj = new TxtHostRecord();
+        hostObj.HostName = "10.1.71.154";
+        hostObj.AddOn_Connection_String = new ConnectionString("https://10.1.71.87:443/sdk;Administrator;P@ssw0rd").getConnectionStringWithPrefix();
+        hostObj.BIOS_Name = "Intel_Corporation";
+        hostObj.BIOS_Version = "01.00.0060";
+        hostObj.BIOS_Oem = "Intel Corporation";
+        hostObj.VMM_Name = "Thurley_VMware_ESXi";
+        hostObj.VMM_Version = "5.0.0-469512";
+        hostObj.VMM_OSName = "VMware_ESXi";
+        hostObj.VMM_OSVersion = "5.0.0";
+        
+        String result = hostTrustBO.getTrustStatusOfHostNotInDB(hostObj);
+        System.out.println(result);
+    }
     
     @Test
     public void testCreateTxtHostFromTblHostsRecord() throws CryptographyException, IOException, MalformedURLException {
