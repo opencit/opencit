@@ -149,6 +149,7 @@ mtwilson.atag = mtwilson.atag || {};
         }
         log.debug("getting model for form id "+formId+"  area: "+Object.toJSON(mtwilson.rivets.forms[formId]));
         model = mtwilson.rivets.forms[ formId ].input; // only validate the input area (not the global data area)
+        log.debug("so the model is... "+Object.toJSON(model));
         validator = new Validation(formId, {
             useTitles: true,
             immediate: true,
@@ -163,6 +164,7 @@ mtwilson.atag = mtwilson.atag || {};
         if (validator) {
             isValid = validator.validate();
         }
+        log.debug("returning with input/model = "+Object.toJSON(model));
         return {'validator': validator, 'input': model, 'isValid': isValid, 'formId': formId};
     }
 
@@ -257,6 +259,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
 
     document.observe("ajax:httpDeleteSuccess", function(event) {
+        log.debug("httpDeleteSuccess: "+Object.toJSON(event.memo));
         switch(event.memo.resource.name) {
             case 'tags':
                     mtwilson.atag.notify({ text:'Deleted tag: '+event.memo.resource.app.input.name, clear:'auto' });
@@ -267,7 +270,9 @@ mtwilson.atag = mtwilson.atag || {};
                     event.memo.resource.app.input.merge({subject:'', predicate:'', object:''});
                     break;
             case 'selections':
+                    log.debug("deleted selection notification...");
                     mtwilson.atag.notify({ text:'Deleted selection: '+event.memo.resource.app.input.name, clear:'auto' });
+                    log.debug("deleted selection input merge...");
                     event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                     break;
             case 'certificateRequests':
@@ -445,14 +450,23 @@ mtwilson.atag = mtwilson.atag || {};
     
     // removes all tags with this oid
     mtwilson.atag.removeSelection = function (uuid) {
+        log.debug("removeSelection: "+uuid);
         var i;
         for (i = data.selections.length - 1; i >= 0; i--) {
-            if (('uuid' in data.selections[i]) && data.selections[i].uuid == uuid) {
+            log.debug("removeSelection from model; looking at index "+i);
+            log.debug("index i is: "+Object.toJSON(data.selections[i]));
+            log.debug("index i uuid is: "+data.selections[i].uuid);
+            log.debug("typeof data.selections[i].uuid = "+(typeof data.selections[i].uuid));
+            if (data.selections[i].uuid == uuid) {
+                log.debug("found selection with uuid "+data.selections[i].uuid);
                 ajax.json.delete('selections', data.selections[i]);
+                log.debug("ajax request ok");
                 data.selections.splice(i, 1);  // maybe this should move to the httpDeleteSuccess event listener? 
+                log.debug("model splice ok");
                 //					return;
             }
         }
+        log.debug("removeSelection synchrnoizing view...");
 //        view.sync();
         mtwilson.rivets.views['selection-browse-table'].sync();
 
@@ -607,7 +621,7 @@ mtwilson.atag = mtwilson.atag || {};
     
     
     mtwilson.atag.retrieveMainConfiguration = function (eventMemo_not_used) {
-//        log.debug("retrieveMainConfiguration searching for main...");
+        log.debug("retrieveMainConfiguration searching for main...");
         // we get called after all the configurations are retrieved from the server...
         // currently we really only support one "main" configuration 
         // so find it in the list -- should be the only one there
@@ -619,26 +633,42 @@ mtwilson.atag = mtwilson.atag || {};
 //                log.debug("found it!");
             }
         }
-        data.currentConfiguration.merge(current.jsonContent);
-        data.currentConfiguration.selections = mtwilson.atag.data.selections; // need to have the selection choices for the form, but we don't submit all the seelction names, only the one that is chosen
+        log.debug("Found current configuration: "+Object.toJSON(current));
+//        data.currentConfiguration.merge(current.jsonContent);
+        data.currentConfiguration.merge(current.content);
+        
+        // for the configuration form
+        mtwilson.rivets.forms['config-form'].input.merge(current.content);
+        
+//        data.currentConfiguration.selections = mtwilson.atag.data.selections; // need to have the selection choices for the form, but we don't submit all the seelction names, only the one that is chosen
 //        log.debug("Current configuration: "+Object.toJSON(data.currentConfiguration));
         view.sync();
 //        ajax.json.get('configurations', {nameEqualTo:'main'}, {datapath:'currentConfiguration'}); // pass parameters as object (serialize=true) and no other options (no third argument)
     };    
     
     mtwilson.atag.storeMainConfiguration = function (input) {
-//        var report = validate(input);
+        var report = validate(input);
 //        log.debug("storeMainConfiguration validated input (no-op)");
-//        if (report.isValid) {
-//            log.debug("storeMainConfiguration input is valid");
+        if (report.isValid) {
+            log.debug("storeMainConfiguration input is valid");
+            log.debug("the report.input is: "+Object.toJSON(report.input)); // report = {'validator': validator, 'input': model, 'isValid': isValid, 'formId': formId};
+        }
 //            var clone = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
-        data.configurations[0].jsonContent.merge(data.currentConfiguration); // TODO: need to select the right configuration to update if we ever support more than one
-        var config = data.configurations[0];
-        delete config.content; // don't send the text content to the server... send only the jsonContent that we edited, and the server will serialize
-        delete config.selections; // don't send the selection data (merged into it in retrieveMainConfiguration)
-        delete config.tags; // don't send the selection data (merged into it in retrieveMainConfiguration)
-//        log.debug("modified config: "+Object.toJSON(config));
-        ajax.json.put('configurations', config, {app:{input:{name:config.name}}}); // pass {app:report} so it will be passed to the event handler after the request is complete
+        log.debug("current configuration: "+Object.toJSON(data.currentConfiguration));
+//        data.configurations[0].content.merge(data.currentConfiguration); // TODO: need to select the right configuration to update if we ever support more than one
+  //      var config = data.configurations[0];
+//        delete config.content; // don't send the text content to the server... send only the jsonContent that we edited, and the server will serialize
+        var config = {};
+//        config.merge(data.currentConfiguration);  // for name, uuid
+        config.merge(data.configurations[0]); // for name, uuid   XXX hardcoded index , this will break if there is more than one config.  
+        config.content.merge(report.input);  // for the updated settings
+//        delete config.content.selections; // don't send the selection data (merged into it in retrieveMainConfiguration)
+//        delete config.content.tags; // don't send the selection data (merged into it in retrieveMainConfiguration)
+        log.debug("modified config: "+Object.toJSON(config));
+        log.debug("calling ajax... "+report);
+//        ajax.json.put('configurations', config, {'app':report});
+        ajax.json.put('configurations', config, {app:{'input':{'name':config.name}}}); // pass {app:report} so it will be passed to the event handler after the request is complete
+//        log.debug("returned from ajax...");
 //        }
     };
     

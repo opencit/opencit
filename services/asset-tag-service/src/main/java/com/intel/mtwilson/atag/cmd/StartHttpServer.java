@@ -19,7 +19,7 @@ import org.restlet.data.Protocol;
  */
 public class StartHttpServer extends AtagCommand {
     private Component component;
-    private int port = 8080;
+    private int port = 1700;
     
     @Override
     public void execute(String[] args) throws Exception {

@@ -10,6 +10,7 @@ import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,9 +62,9 @@ public class ConfigurationListResource extends ServerResource {
     }
 
 //    @Post("json:json")
-    public Configuration insertConfiguration(Configuration configuration) throws SQLException {
+    public Configuration insertConfiguration(Configuration configuration) throws SQLException, IOException {
         configuration.setUuid(new UUID());
-        long configurationId = dao.insert(configuration.getUuid(), configuration.getName(), configuration.getContentType(), configuration.getContent());
+        long configurationId = dao.insert(configuration.getUuid(), configuration.getName(), configuration.getXmlContent());
         configuration.setId(configurationId);
         return configuration;
     }
@@ -80,7 +81,7 @@ public class ConfigurationListResource extends ServerResource {
      * @throws SQLException
      */
     @Post("json:json")
-    public Configuration[] insertConfigurations(Configuration[] configurations) throws SQLException {
+    public Configuration[] insertConfigurations(Configuration[] configurations) throws SQLException, IOException {
         for (int i = 0; i < configurations.length; i++) {
             configurations[i] = insertConfiguration(configurations[i]);
         }
@@ -109,7 +110,7 @@ public class ConfigurationListResource extends ServerResource {
         query.id = getQuery().getFirstValue("id") == null || getQuery().getFirstValue("id").isEmpty() ? null : UUID.valueOf(getQuery().getFirstValue("id"));
         query.nameEqualTo = getQuery().getFirstValue("nameEqualTo");
         query.nameContains = getQuery().getFirstValue("nameContains");
-        query.contentTypeEqualTo = getQuery().getFirstValue("contentTypeEqualTo");
+//        query.contentTypeEqualTo = getQuery().getFirstValue("contentTypeEqualTo");
         log.debug("Search: {}", getQuery().getQueryString());
         SelectQuery sql = jooq.select().from(CONFIGURATION).getQuery();
         if( query.id != null ) {
@@ -121,10 +122,10 @@ public class ConfigurationListResource extends ServerResource {
         }
         if( query.nameContains != null && query.nameContains.length() > 0 ) {
             sql.addConditions(CONFIGURATION.NAME.contains(query.nameContains));
-        }
+        }/*
         if( query.contentTypeEqualTo != null && query.contentTypeEqualTo.length() > 0 ) {
             sql.addConditions(CONFIGURATION.CONTENTTYPE.equal(query.contentTypeEqualTo));
-        }
+        }*/
         Result<Record> result = sql.fetch();
         Configuration[] configurations = new Configuration[result.size()];
         log.debug("Got {} records", configurations.length);
@@ -134,8 +135,13 @@ public class ConfigurationListResource extends ServerResource {
             configurations[i].setId(r.getValue(CONFIGURATION.ID));
             configurations[i].setUuid(UUID.valueOf(r.getValue(CONFIGURATION.UUID)));
             configurations[i].setName(r.getValue(CONFIGURATION.NAME));
-            configurations[i].setContent(r.getValue(CONFIGURATION.CONTENT));
-            configurations[i].setContentType(Configuration.ContentType.valueOf(r.getValue(CONFIGURATION.CONTENTTYPE)));
+            try {
+                configurations[i].setXmlContent(r.getValue(CONFIGURATION.CONTENT));
+            }
+            catch(IOException e) {
+                log.error("Failed to load configuration content for {}", configurations[i].getUuid());
+            }
+//            configurations[i].setContentType(Configuration.ContentType.valueOf(r.getValue(CONFIGURATION.CONTENTTYPE)));
             i++;
         }
         sql.close();

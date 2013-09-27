@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
 import com.intel.mtwilson.atag.dao.Derby;
@@ -61,10 +62,20 @@ public class CertificateResource extends ServerResource {
         super.doRelease();
     }
     
+    private Certificate find(String id) {
+        if( UUID.isValid(id) ) {
+            return dao.findByUuid(UUID.valueOf(id));
+        }
+        if( Sha256Digest.isValidHex(id)) {
+            return dao.findBySha256(id);
+        }
+        return null;
+    }
+    
     @Get("json|xml")
     public Certificate existingCertificate() {
-        String uuid = getAttribute("id");
-        Certificate certificate = dao.findByUuid(UUID.valueOf(uuid));
+        String id = getAttribute("id");
+        Certificate certificate = find(id);
         if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
@@ -74,8 +85,8 @@ public class CertificateResource extends ServerResource {
     
     @Get("bin")
     public byte[] existingCertificateContent() {
-        String uuid = getAttribute("id");
-        Certificate certificate = dao.findByUuid(UUID.valueOf(uuid)); 
+        String id = getAttribute("id");
+        Certificate certificate = find(id);
         if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
@@ -85,22 +96,22 @@ public class CertificateResource extends ServerResource {
     
     @Get("txt")
     public String existingCertificateContentPem() throws IOException {
-        String uuid = getAttribute("id");
-        Certificate certificate = dao.findByUuid(UUID.valueOf(uuid)); 
+        String id = getAttribute("id");
+        Certificate certificate = find(id);
         if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
         log.debug("resource url: {}", getRequest().getResourceRef().getIdentifier());
         Pem pem = new Pem("X509 ATTRIBUTE CERTIFICATE", certificate.getCertificate());
-        pem.getHeaders().put("URL", My.configuration().getAssetTagServerURL()+"/certificates/"+uuid);
+        pem.getHeaders().put("URL", My.configuration().getAssetTagServerURL()+"/certificates/"+id);
         return pem.toString();
     }
 
     @Delete
     public void deleteCertificate() {
-        String uuid = getAttribute("id");
-        Certificate certificate = dao.findByUuid(UUID.valueOf(uuid));
+        String id = getAttribute("id");
+        Certificate certificate = find(id);
         if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return;

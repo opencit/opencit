@@ -31,27 +31,27 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
  * BIGINT is 8 bytes and maps to java's long (java.lang.Long.MAX_VALUE = 9,223,372,036,854,775,807 = 9.2x10^18 = 9 quintillion) (so be sure to return the appropriate type from the insert method)
  * @author jbuhacoff
  */
-@RegisterArgumentFactory({UUIDArgument.class, ContentTypeArgument.class})
+@RegisterArgumentFactory({UUIDArgument.class})
 @RegisterMapper(ConfigurationResultMapper.class)
 public interface ConfigurationDAO {
-    @SqlUpdate("create table configuration (id bigint primary key generated always as identity, uuid char(36), name varchar(255), contentType varchar(15), content clob)")
+    @SqlUpdate("create table configuration (id bigint primary key generated always as identity, uuid char(36), name varchar(255), content clob)")
     void create();
     
-    @SqlUpdate("insert into configuration (uuid,name,contentType,content) values (:uuid, :name, :contentType, :content)")
+    @SqlUpdate("insert into configuration (uuid,name,content) values (:uuid, :name, :content)")
     @GetGeneratedKeys
-    long insert(@Bind("uuid") UUID uuid, @Bind("name") String name, @Bind("contentType") Configuration.ContentType contentType, @Bind("content") String content);
+    long insert(@Bind("uuid") UUID uuid, @Bind("name") String name, @Bind("content") String content);
 
-    @SqlUpdate("update configuration set name=:name, contentType=:contentType, content=:content where id=:id")
-    void update(@Bind("id") long id, @Bind("name") String name, @Bind("contentType") Configuration.ContentType contentType, @Bind("content") String content);
+    @SqlUpdate("update configuration set name=:name, content=:content where id=:id")
+    void update(@Bind("id") long id, @Bind("name") String name, @Bind("content") String content);
 
     @SqlUpdate("delete from configuration where id=:id")
     void delete(@Bind("id") long id);
 
     
-    @SqlQuery("select id, uuid, name, contentType, content from configuration where uuid=:uuid")
+    @SqlQuery("select id, uuid, name, content from configuration where uuid=:uuid")
     Configuration findByUuid(@Bind("uuid") UUID uuid);
     
-    @SqlQuery("select id, uuid, name, contentType, content from configuration where name=:name")
+    @SqlQuery("select id, uuid, name, content from configuration where name=:name")
     Configuration findByName(@Bind("name") String name);
 
     void close();

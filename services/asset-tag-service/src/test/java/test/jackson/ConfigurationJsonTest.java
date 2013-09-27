@@ -4,26 +4,19 @@
  */
 package test.jackson;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import test.restlet.*;
 import com.intel.dcsg.cpg.io.UUID;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.mtwilson.atag.model.Configuration;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.Properties;
-import java.util.Stack;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import java.util.Set;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +45,8 @@ Configuration: {"uuid":"702045f2-86d6-463a-902a-e36f4d80d723","links":{"author":
         doc.setId(1);
         doc.setUuid(new UUID());
         doc.setName("main");
-        doc.setContentType(Configuration.ContentType.JSON);
-        doc.setContent("{\"color\":\"red\",\"enabled\":true,\"numbers\":[1,2,3]}");
+//        doc.setContentType(Configuration.ContentType.JSON);
+        doc.setJsonContent("{\"color\":\"red\",\"enabled\":true,\"numbers\":[1,2,3]}");
         doc.getLinks().put("author", new URL("http://localhost/authors/123"));
         log.debug("Configuration: {}", mapper.writeValueAsString(doc));  
     }
@@ -99,32 +92,12 @@ Configuration: {"uuid":"844bce8f-9711-48b9-943b-68f9a80492bc","links":{"author":
         doc.setId(1);
         doc.setUuid(new UUID());
         doc.setName("main");
-        doc.setContentType(Configuration.ContentType.XML);
-        doc.setContent("<configuration><color>red</color><enabled>true</enabled><numbers><numbers>1</numbers><numbers>2</numbers><numbers>3</numbers></numbers></configuration>"); 
+//        doc.setContentType(Configuration.ContentType.XML);
+//        doc.setContent("<configuration><color>red</color><enabled>true</enabled><numbers><numbers>1</numbers><numbers>2</numbers><numbers>3</numbers></numbers></configuration>"); 
         doc.getLinks().put("author", new URL("http://localhost/authors/123"));
         log.debug("Configuration: {}", mapper.writeValueAsString(doc));  
     }
    
-    /**
-     * Example output:
-     * 
-Configuration: {"uuid":"2e1ced50-e7fa-4f63-a407-7e2591ad3342","links":{"author":"http://localhost/authors/123"},"name":"main","contentType":"PROPERTIES","content":{"numbers":"1,2,3","color":"red","enabled":"true"}}
-     * 
-     * 
-     * @throws IOException 
-     */
-    @Test
-    public void readPropertiesConfiguration() throws IOException {
-        Configuration doc = new Configuration();
-        doc.setId(1);
-        doc.setUuid(new UUID());
-        doc.setName("main");
-        doc.setContentType(Configuration.ContentType.PROPERTIES);
-        doc.setContent("#Tue Aug 27 22:47:06 PDT 2013\n" +"numbers=1,2,3\n" +"color=red\n" +"enabled=true\n"); 
-        doc.getLinks().put("author", new URL("http://localhost/authors/123"));
-        log.debug("Configuration: {}", mapper.writeValueAsString(doc));  
-    }
-
     /**
      * 
      * Example output for properties format:
@@ -145,7 +118,7 @@ enabled=true
      * 
      */
     @Test
-    public void writePropertiesConfiguration() throws IOException {
+    public void writePropertiesXmlConfiguration() throws IOException {
         Properties p = new Properties();
         p.setProperty("color", "red");
         p.setProperty("enabled","true");
@@ -157,6 +130,87 @@ enabled=true
         p.storeToXML(out, null);
         log.debug("Configuration xml: {}", out.toString());
     }
+    
+    @Test
+    public void readPropertiesXmlConfiguration() throws IOException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+"<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
+"<properties>\n" +
+"<entry key=\"numbers\">1,2,3</entry>\n" +
+"<entry key=\"color\">red</entry>\n" +
+"<entry key=\"enabled\">true</entry>\n" +
+"</properties>";
+        Properties p = new Properties();
+        p.loadFromXML(new ByteArrayInputStream(xml.getBytes()));
+        Set<Object> keys = p.keySet();
+        for(Object key : keys) {
+            log.debug("Property: {} = {}", (String)key, p.getProperty((String)key));
+        }
+    }
+    
+    /**
+     * Output:
+     * 
+Configuration: {"numbers":"1,2,3","color":"red","enabled":"true"}
+     * 
+     */
+    @Test
+    public void convertXmlPropertiesToJson() throws IOException {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+"<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">\n" +
+"<properties>\n" +
+"<entry key=\"numbers\">1,2,3</entry>\n" +
+"<entry key=\"color\">red</entry>\n" +
+"<entry key=\"enabled\">true</entry>\n" +
+"</properties>";
+        Properties p = new Properties();
+        p.loadFromXML(new ByteArrayInputStream(xml.getBytes()));
+        log.debug("Configuration: {}", mapper.writeValueAsString(p));          
+    }
+    
+    /**
+     * Output:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="numbers">1,2,3</entry>
+<entry key="color">red</entry>
+<entry key="enabled">true</entry>
+</properties>
+     * 
+     * 
+     * @throws IOException 
+     */
+    @Test
+    public void convertJsonToXmlProperties() throws IOException {
+        String json = "{\"numbers\":\"1,2,3\",\"color\":\"red\",\"enabled\":\"true\"}";
+        Properties p = mapper.readValue(json, Properties.class);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        p.storeToXML(out, null);
+        log.debug("Configuration xml: {}", out.toString());        
+    }
+    
+    /**
+     * Output... notice that the nonscalar values for "numbers" and "foo" are ignored:
+     * 
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="color">red</entry>
+<entry key="enabled">true</entry>
+</properties>
+     * 
+     * @throws IOException 
+     */
+    @Test
+    public void convertJsonWithNonscalarValuesToXmlProperties() throws IOException {
+        String json = "{\"numbers\":[1,2,3],\"color\":\"red\",\"enabled\":\"true\",\"foo\":{\"bar\":\"baz\"}}";
+        Properties p = mapper.readValue(json, Properties.class);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        p.storeToXML(out, null, "UTF-8");
+        log.debug("Configuration xml: {}", out.toString());        
+    }
+    
     
     public static class SampleRootConfiguration {
         public String color = "red";

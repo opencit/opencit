@@ -7,6 +7,7 @@ package com.intel.mtwilson.atag.client;
 import com.intel.mtwilson.My;
 import com.intel.dcsg.cpg.io.UUID;
 import java.io.IOException;
+import org.restlet.data.MediaType;
 import org.restlet.resource.ClientResource;
 
 /**
@@ -87,7 +88,9 @@ public class At {
     }
 
     public static ClientResource configuration(String anyUuidName) {
-        return new ClientResource(baseurl() + "/configurations/" + anyUuidName);
+        ClientResource client = new ClientResource(baseurl() + "/configurations/" + anyUuidName);
+//        client.accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
+        return client;
     }
     
 }

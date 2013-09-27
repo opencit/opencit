@@ -46,6 +46,9 @@ public interface CertificateDAO {
 
     @SqlQuery("select id,uuid,certificate,sha256,pcrEvent,subject,issuer,notBefore,notAfter,revoked from certificate where uuid=:uuid")
     Certificate findByUuid(@Bind("uuid") UUID uuid);
+
+    @SqlQuery("select id,uuid,certificate,sha256,pcrEvent,subject,issuer,notBefore,notAfter,revoked from certificate where sha256=:sha256")
+    Certificate findBySha256(@Bind("sha256") String sha256);
     
     @SqlUpdate("delete from certificate where id=:id")
     void delete(@Bind("id") long id);

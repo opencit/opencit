@@ -886,7 +886,7 @@ function isNumber(n) {
                                 <ul>
                                     <li>
                                         <label for="allow-tags-in-certificate-requests">Allow tag selections in certificate requests</label>
-                                        <select data-bind-value="allowTagsInCertificateRequests" id="allow-tags-in-certificate-requests" name="allowTagsInCertificateRequests">
+                                        <select data-bind-value="input.allowTagsInCertificateRequests" id="allow-tags-in-certificate-requests" name="allowTagsInCertificateRequests">
                                             <option value="true">Yes</option>
                                             <option value="false">No</option>
                                         </select>
@@ -895,7 +895,7 @@ function isNumber(n) {
                                     </li>
                                     <li>
                                         <label for="allow-automatic-tag-selection">Allow server to automatically select tags for certificate requests</label>
-                                        <select data-bind-value="allowAutomaticTagSelection"  id="allow-automatic-tag-selection" name="allowAutomaticTagSelection">
+                                        <select data-bind-value="input.allowAutomaticTagSelection"  id="allow-automatic-tag-selection" name="allowAutomaticTagSelection">
                                             <option value="true">Yes</option>
                                             <option value="false">No</option>
                                         </select>
@@ -905,14 +905,14 @@ function isNumber(n) {
                                     <li>
                                         <label for="automatic-tag-selection-name">Choose a tag selection to use for all certificate requests</label>
                                         <!-- bind value below for the option used to be item.uuid but it's conveinnt to configure wiht human-readable name ... XXX solve this later by making the sample data use the uuid not the name when it configures -->
-                                        <select data-bind-value="automaticTagSelectionName"  id="automatic-tag-selection-name" name="automaticTagSelectionName">
+                                        <select data-bind-value="input.automaticTagSelectionName"  id="automatic-tag-selection-name" name="automaticTagSelectionName">
                                             <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option> 
                                         </select>
                                         <p>If you use "Automatic Server-Based" provisioning, the server needs to know which tag selection
                                         to use for incoming certificate requests. Currently only one tag selection is supported.</p>
                                     </li>
                                     <li><label for="approval-method">Approval Method</label> 
-                                        <select  data-bind-value="approveAllCertificateRequests"  id="approval-method" name="approveAllCertificateRequests">
+                                        <select  data-bind-value="input.approveAllCertificateRequests"  id="approval-method" name="approveAllCertificateRequests">
                                             <option value="true">Automatic/internal</option>
                                             <option value="false">Manual/external</option>
                                         </select>
@@ -1092,7 +1092,7 @@ function isNumber(n) {
                 ws.searchSelections('selection-search-form');
                 ws.searchConfigurations('configuration-search-form');
                 ws.loadCaCerts();
-    //            ws.retrieveMainConfiguration();
+//                ws.retrieveMainConfiguration();
             
             });
         </script>

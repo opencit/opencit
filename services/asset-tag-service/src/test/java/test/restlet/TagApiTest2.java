@@ -47,7 +47,9 @@ import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cert.X509AttributeCertificateHolder;
 import org.restlet.representation.Representation;
 
@@ -662,25 +664,86 @@ public class TagApiTest2 {
     }
     */
     
+    /**
+     * Output:
+     * 
+     * 
+     * 
+JSON Response: {"uuid":"549f8135-9d10-4167-b9cc-4b342a5c611b","name":"main","content":{"allowTagsInCertificateRequests":"false","approveAllCertificateRequests":"true","allowAutomaticTagSelection":"true","automaticTagSelectionName":"9f1377de-4a76-4ada-8b77-4c1d3ef9bd3a"}}
+
+XML Response: <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>main</comment>
+<entry key="allowTagsInCertificateRequests">false</entry>
+<entry key="allowAutomaticTagSelection">true</entry>
+<entry key="approveAllCertificateRequests">true</entry>
+<entry key="automaticTagSelectionName">9f1377de-4a76-4ada-8b77-4c1d3ef9bd3a</entry>
+</properties>
+     * 
+     */
+    @Test
+    public void testReadExistingConfiguration() throws IOException {
+        Representation jsonRepresentation = At.configuration("main").get(MediaType.APPLICATION_JSON);
+        String json = IOUtils.toString(jsonRepresentation.getStream());
+        jsonRepresentation.exhaust();
+        jsonRepresentation.release();
+        log.debug("JSON Response: {}", json);
+        
+        Representation xmlRepresentation = At.configuration("main").get(MediaType.APPLICATION_XML);
+        String xml = IOUtils.toString(xmlRepresentation.getStream());
+        xmlRepresentation.exhaust();
+        xmlRepresentation.release();
+        log.debug("XML Response: {}", xml);
+        
+        
+//       Configuration main = At.configuration("main").get(Configuration.class);
+//        log.debug("Existing configuration: {}", String.format("id:%s uuid:%s name:%s content:%s", String.valueOf(main.getId()), main.getUuid(), main.getName(), main.getContent()));
+    }
+    
+    
     @Test
     public void testUpdateExistingConfiguration() throws IOException {
-        // create a rdfTriple so we have an existing rdfTriple
         Configuration main = At.configuration("main").get(Configuration.class);
-        log.debug("Existing configuration: {}", String.format("id:%s uuid:%s name:%s contentType:%s content:%s", String.valueOf(main.getId()), main.getUuid(), main.getName(), main.getContentType().name(), main.getContent()));
-        main.setContent("{\"allowTagsInCertificateRequests\":\"true\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}");
+        log.debug("Existing configuration: {}", String.format("id:%s uuid:%s name:%s content:%s", String.valueOf(main.getId()), main.getUuid(), main.getName(), main.getContent()));
+        main.setJsonContent("{\"allowTagsInCertificateRequests\":\"true\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}");
         log.debug("Updating: {}", mapper.writeValueAsString(main));
         Configuration updatedMain = At.configuration("main").put(main, Configuration.class);
-        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s contentType:%s content:%s", updatedMain.getUuid(), updatedMain.getName(), updatedMain.getContentType().name(), updatedMain.getContent()));
+        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s content:%s", updatedMain.getUuid(), updatedMain.getName(), updatedMain.getContent()));
         // output: Existing rdfTriple: id:24  uuid:d42fa1a3-54c3-4774-aa95-dc3e61e5ece5  name:state  oid:1.1.1.1 
     }
     
     @Test
-    public void testUpdateExistingConfigurationWithPut() throws IOException {
-        String input = "{\"uuid\":\"9e552d4f-097d-473b-a53e-0fe17ffec8a8\",\"links\":{},\"name\":\"main\",\"contentType\":\"JSON\",\"jsonContent\":{\"allowTagsInCertificateRequests\":\"false\",\"allowAutomaticTagSelection\":false,\"automaticTagSelectionName\":\"default\",\"approveAllCertificateRequests\":false}}";
-        String updatedMain = At.configuration("main").put(input, String.class);
-        log.debug("Response: {}", updatedMain);
-        Configuration main = mapper.readValue(updatedMain, Configuration.class);
-        log.debug("Updated configuration: {}", String.format("uuid:%s name:%s contentType:%s content:%s", main.getUuid(), main.getName(), main.getContentType().name(), main.getContent()));        
+    public void testUpdateExistingConfigurationXml() throws IOException {
+        // load the existing "main" configuration
+        Representation mainRepresentation = At.configuration("main").get(MediaType.APPLICATION_XML);
+        String main = IOUtils.toString(mainRepresentation.getStream());
+        mainRepresentation.exhaust();
+        mainRepresentation.release();
+        Configuration mainConfiguration = new Configuration();
+        mainConfiguration.setName("main");
+        mainConfiguration.setXmlContent(main);
+        // add a property to it
+        mainConfiguration.getContent().setProperty("testUpdateExistingConfigurationXml", "it works");
+        // store the updated configuration
+//        Representation updatedMainRepresentation = At.configuration("main").put(mainConfiguration.getXmlContent(), MediaType.APPLICATION_XML);
+        At.configuration("main").put(mainConfiguration.getXmlContent(), MediaType.APPLICATION_XML);
+//        String updatedMain = IOUtils.toString(updatedMainRepresentation.getStream());
+//        updatedMainRepresentation.exhaust();
+//        updatedMainRepresentation.release();
+//        log.debug("Response: {}", updatedMain);
+    }
+    
+    @Test
+    public void testUpdateExistingConfigurationXmlWithCustom() throws IOException {
+        ClientResource client = At.configuration("main");
+        client.accept(MediaType.APPLICATION_XML);
+        Properties p = new Properties();
+        p.setProperty("color", "green");
+        Configuration c = new Configuration("test", p);
+        client.put(c.getXmlContent(), MediaType.TEXT_XML);
+//        client.put(c.getXmlContent(), MediaType.APPLICATION_XML);
+        
     }
     
  

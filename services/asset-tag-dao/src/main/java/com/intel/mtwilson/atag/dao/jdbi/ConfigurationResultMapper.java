@@ -8,6 +8,7 @@ import com.intel.mtwilson.atag.model.Configuration;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.intel.dcsg.cpg.io.UUID;
+import java.io.IOException;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.tweak.ResultSetMapper;
 
@@ -25,12 +26,13 @@ public class ConfigurationResultMapper implements ResultSetMapper<Configuration>
         configuration.setId(rs.getLong("id"));
         configuration.setUuid(uuid);
         configuration.setName(rs.getString("name"));
-        configuration.setContent(rs.getString("content"));
-        try {
-            configuration.setContentType(Configuration.ContentType.valueOf(rs.getString("contentType")));
-        }
-        catch(Exception e) {
-            configuration.setContentType(Configuration.ContentType.TEXT);
+        if( rs.getString("content") != null ) {
+            try {
+                configuration.setXmlContent(rs.getString("content"));
+            }
+            catch(IOException e) {
+                throw new SQLException("Cannot parse configuration content", e);
+            }
         }
         return configuration;
     }

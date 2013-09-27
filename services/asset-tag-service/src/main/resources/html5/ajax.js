@@ -220,6 +220,13 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'put': function (resourceName, putObject, opt) {
+        log.debug("AJAX PUT resourceName: "+resourceName);
+        log.debug("AJAX PUT object: "+Object.toJSON(putObject));
+        log.debug("AJAX PUT opt1: "+(typeof opt));
+        log.debug("AJAX PUT opt2: "+opt);
+        log.debug("AJAX PUT opt3: "+Object.toJSON(opt));
+//        log.debug("AJAX PUT "+resourceName+": "+Object.toJSON(putObject)+" WITH OPTIONS: "+Object.toJSON(opt));
+        log.debug("AJAX PUT config: "+Object.toJSON(ajax.resources[resourceName]));
         var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         log.debug("AJAX PUT: "+Object.toJSON(my));
@@ -262,6 +269,7 @@ ajax.json = {
             onSuccess: function (transport) {
                 var response = transport.responseText || "no response text";
                 _log.debug("Success! \n\n" + response);
+                if( transport.responseText ) {
                 var json = transport.responseJSON;
                 var ptr = json;
                 // some apis return metadata in an outer object and the content inside a 'data' field
@@ -271,6 +279,7 @@ ajax.json = {
                 }
                 log.debug("Server response for delete: "+Object.toJSON(ptr));
                 // XXX TODO: should we call   data.setx(keypath, null); ? or setx {} or [] ? or deletex ??
+                }
                 ajax.event.fire("httpDeleteSuccess", { resource:my, content:deleteObject });
 //                ajax.view.sync();
             }    

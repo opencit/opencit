@@ -9,6 +9,7 @@ import com.intel.mtwilson.atag.AtagCommand;
 import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.model.*;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -45,7 +46,7 @@ public class InitDatabase extends AtagCommand {
         log.debug("Derby stopped");
     }
     
-    public void insertMainConfiguration() throws SQLException {
+    public void insertMainConfiguration() throws SQLException, IOException {
         // open daos
         log.debug("get daos");
         ConfigurationDAO configurationDao = Derby.configurationDao();
@@ -116,8 +117,14 @@ public class InitDatabase extends AtagCommand {
         
         // configuration to allow automatic tag selection & approval
         log.debug("inserting configuration");
-        String configuration = "{\"allowTagsInCertificateRequests\":false,\"allowAutomaticTagSelection\":true,\"automaticTagSelectionName\":\""+defaultSelectionUuid+"\",\"approveAllCertificateRequests\":true}"; // removed the following into mtwilson.properties: ,\"mtwilsonUrl\":\"https://mtwilson.com\",\"mtwilsonClientKeystoreUsername\":\""+mtwilsonClientKeystoreUsername+"\",\"mtwilsonClientKeystorePassword\":\""+mtwilsonClientKeystorePassword+"\"
-        configurationDao.insert(new UUID(), "main", Configuration.ContentType.JSON, configuration);
+        Properties p = new Properties();
+        p.setProperty("allowTagsInCertificateRequests", "false");
+        p.setProperty("allowAutomaticTagSelection", "true");
+        p.setProperty("automaticTagSelectionName", defaultSelectionUuid.toString());
+        p.setProperty("approveAllCertificateRequests", "true");
+        // removed the following into mtwilson.properties: ,\"mtwilsonUrl\":\"https://mtwilson.com\",\"mtwilsonClientKeystoreUsername\":\""+mtwilsonClientKeystoreUsername+"\",\"mtwilsonClientKeystorePassword\":\""+mtwilsonClientKeystorePassword+"\"
+        Configuration configuration = new Configuration("main", p);
+        configurationDao.insert(new UUID(), configuration.getName(), configuration.getXmlContent());
         
         // close daos'
         configurationDao.close();

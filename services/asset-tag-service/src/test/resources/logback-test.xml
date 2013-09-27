@@ -26,5 +26,7 @@
     <!-- classes that are more or less known to be working -->
     <logger name="com.intel.mtwilson.atag" level="DEBUG"/>
     <logger name="org.restlet" level="TRACE"/>
+    <logger name="org.eclipse.jetty" level="ERROR"/>
+    <logger name="ch.qos.logback" level="WARN"/>
     
 </configuration>
