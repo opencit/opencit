@@ -138,6 +138,10 @@ public class MwAssetTagCertificateJpaController extends GenericJpaController<MwA
         }
     }
     
+    public List<MwAssetTagCertificate> findAssetTagCertificateBySha1Hash(byte[] sha1Hash) {
+        return searchByNamedQuery("findBySha1Hash", "sHA1Hash", sha1Hash);
+    }
+    
     public List<MwAssetTagCertificate> findAssetTagCertificateBySha256Hash(byte[] sha256Hash) {
         return searchByNamedQuery("findBySha256Hash", "sHA256Hash", sha256Hash);
     }

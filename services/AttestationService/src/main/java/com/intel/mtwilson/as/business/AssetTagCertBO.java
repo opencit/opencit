@@ -67,8 +67,9 @@ public class AssetTagCertBO extends BaseBO{
             atagCert.setNotAfter(x509AttrCert.getNotAfter());
             atagCert.setNotBefore(x509AttrCert.getNotBefore());
             atagCert.setRevoked(false);
-            atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray());
-            atagCert.setPCREvent(Sha1Digest.digestOf(atagCert.getSHA256Hash()).toByteArray());
+            atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
+            atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
+            atagCert.setPCREvent(Sha1Digest.digestOf(atagCert.getSHA1Hash()).toByteArray());
             
             My.jpa().mwAssetTagCertificate().create(atagCert);
             result = true;

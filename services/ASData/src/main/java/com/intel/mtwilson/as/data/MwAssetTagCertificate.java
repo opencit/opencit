@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwAssetTagCertificate.findByRevoked", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.revoked = :revoked"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotBefore", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notBefore = :notBefore"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotAfter", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notAfter = :notAfter"),
+    @NamedQuery(name = "MwAssetTagCertificate.findBySha1Hash", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.sHA1Hash = :sHA1Hash"),
     @NamedQuery(name = "MwAssetTagCertificate.findBySha256Hash", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.sHA256Hash = :sHA256Hash")})
 public class MwAssetTagCertificate implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -51,6 +52,9 @@ public class MwAssetTagCertificate implements Serializable {
     @Lob
     @Column(name = "Certificate")
     private byte[] certificate;
+    @Lob
+    @Column(name = "SHA1_Hash")
+    private byte[] sHA1Hash;
     @Lob
     @Column(name = "SHA256_Hash")
     private byte[] sHA256Hash;
@@ -108,6 +112,14 @@ public class MwAssetTagCertificate implements Serializable {
 
     public void setCertificate(byte[] certificate) {
         this.certificate = certificate;
+    }
+
+    public byte[] getSHA1Hash() {
+        return sHA1Hash;
+    }
+
+    public void setSHA1Hash(byte[] sHA1Hash) {
+        this.sHA1Hash = sHA1Hash;
     }
 
     public byte[] getSHA256Hash() {
