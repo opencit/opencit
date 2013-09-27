@@ -18,9 +18,11 @@ import org.apache.commons.codec.binary.Base64;
  */
 public class Certificate extends Document {
     private byte[] certificate; // variable size
+    private Sha1Digest sha1; // 20 bytes      SHA1(CERTIFICATE)  the certificate fingerprint
     private Sha256Digest sha256; // 32 bytes      SHA256(CERTIFICATE)  the certificate fingerprint
 //    private byte[] sha1; // 20 bytes   SHA1(CERTIFICATE)  the certificate fingerprint
-    private Sha1Digest pcrEvent; // 20 bytes   SHA1(SHA256(CERTIFICATE))   the hash of certificate fingerprint that gets extended to the TPM PCR
+//    private Sha1Digest pcrEventSha1; // 20 bytes   SHA1(SHA1(CERTIFICATE))   the hash of certificate fingerprint that gets extended to the TPM PCR  because tboot always hashes it even if it's already the right size 
+//    private Sha256Digest pcrEventSha256; // 32 bytes   SHA256(SHA256(CERTIFICATE))   the hash of certificate fingerprint that gets extended to the TPM PCR because tboot always hashes it even if it's already the right size 
     private String subject;
     private String issuer;
     private Date notBefore;
@@ -35,15 +37,15 @@ public class Certificate extends Document {
         return certificate;
     }
 
+    public Sha1Digest getSha1() {
+        return sha1;
+    }
+
+    
     public Sha256Digest getSha256() {
         return sha256;
     }
 
-    
-
-    public Sha1Digest getPcrEvent() {
-        return pcrEvent;
-    }
 
     public String getSubject() {
         return subject;
@@ -72,15 +74,15 @@ public class Certificate extends Document {
         this.certificate = certificate;
     }
 
+    public void setSha1(Sha1Digest sha1) {
+        this.sha1 = sha1;
+    }
+
+    
     public void setSha256(Sha256Digest sha256) {
         this.sha256 = sha256;
     }
 
-    
-
-    public void setPcrEvent(Sha1Digest pcrEvent) {
-        this.pcrEvent = pcrEvent;
-    }
 
     public void setSubject(String subject) {
         this.subject = subject;
@@ -115,8 +117,10 @@ public class Certificate extends Document {
     public static Certificate valueOf(byte[] data) throws UnsupportedEncodingException {
         Certificate certificate = new Certificate();
         certificate.setCertificate(data);
+        certificate.setSha1(Sha1Digest.digestOf(data)); // throws UnsupportedEncodingException
         certificate.setSha256(Sha256Digest.digestOf(data)); // throws UnsupportedEncodingException
-        certificate.setPcrEvent(Sha1Digest.digestOf(certificate.getSha256().toByteArray()));
+//        certificate.setPcrEventSha256(Sha256Digest.digestOf(certificate.getSha256().toByteArray()));
+//        certificate.setPcrEventSha1(Sha1Digest.digestOf(certificate.getSha1().toByteArray()));
         X509AttributeCertificate attrcert = X509AttributeCertificate.valueOf(data);
         certificate.setIssuer(attrcert.getIssuer());
         certificate.setSubject(attrcert.getSubject());

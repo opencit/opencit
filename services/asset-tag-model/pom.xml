@@ -53,7 +53,57 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </plugins>
     </build>
 
-
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<version>2.9.1</version>
+			<configuration>
+                <show>public</show>
+				<stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+                <includeDependencySources>true</includeDependencySources>
+                <dependencySourceIncludes>
+                    <dependencySourceInclude>com.intel.dcsg.cpg:*</dependencySourceInclude>
+                    <dependencySourceInclude>com.intel.mtwilson.*:*</dependencySourceInclude>
+                </dependencySourceIncludes>
+			</configuration>
+			<executions>
+            <execution>
+                <id>attach-javadocs</id>
+                <phase>site</phase>
+                <goals>
+                    <goal>jar</goal>
+                </goals>
+            </execution>
+        </executions>			
+		</plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
+    
     <dependencies>
 
 
@@ -64,13 +114,25 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
+            <version>0.1.2-SNAPSHOT</version>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.1.3-SNAPSHOT</version>
+            <version>0.1.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1.4-SNAPSHOT</version>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
