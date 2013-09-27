@@ -12,7 +12,15 @@
     </parent>
 
 <!--
+
+To generate javadocs:  mvn -DskipTests=true -Drelease site:site
+They will be created in target/site/apidocs
+
 IMPORTANT NOTE ON BUILDING THIS PROJECT:
+The asset-tag-model and asset-tag-dao projects must be built first. 
+If the database schema has changed, be sure to do a clean build on asset-tag-dao and then a 
+clean build on this project. Then run "CreateDatabase", "InitDatabase", and "CreateCaKey" before
+you run "StartHttpServer" if you do any local testing.
 ** most of below has been automated in this pom, project build should "just work" even the first time **
 When you build it the first time, the JOOQ plugin will generate sources but they will be
 incomplete because it automatically generates them from an existing database. So after
@@ -162,10 +170,55 @@ our customers.
         </executions>
 </plugin>-->
 <!-- end jetty plugin  for junit testing -->
+                           
                                                                    
+                                                                                                                                                   
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<version>2.9</version>
+			<configuration>
+				<stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+			</configuration>
+			<executions>
+            <execution>
+                <id>attach-javadocs</id>
+                <phase>site</phase>
+                <goals>
+                    <goal>aggregate</goal>
+                </goals>
+            </execution>
+        </executions>			
+		</plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
     <dependencies>
 

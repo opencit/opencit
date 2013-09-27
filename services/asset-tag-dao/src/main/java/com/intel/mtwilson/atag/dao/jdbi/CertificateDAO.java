@@ -31,23 +31,26 @@ import org.skife.jdbi.v2.sqlobject.customizers.RegisterMapper;
 @RegisterArgumentFactory(UUIDArgument.class)
 @RegisterMapper(CertificateResultMapper.class)
 public interface CertificateDAO {
-    @SqlUpdate("create table certificate (id bigint primary key generated always as identity, uuid char(36), certificate blob, sha256 char(64), pcrEvent char(40), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
+    @SqlUpdate("create table certificate (id bigint primary key generated always as identity, uuid char(36), certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
     void create();
     
-    @SqlUpdate("insert into certificate (uuid, certificate, sha256, pcrEvent, subject, issuer, notBefore, notAfter, revoked) values (:uuid, :certificate, :sha256, :pcrEvent, :subject, :issuer, :notBefore, :notAfter, false)")
+    @SqlUpdate("insert into certificate (uuid, certificate, sha1, sha256, subject, issuer, notBefore, notAfter, revoked) values (:uuid, :certificate, :sha1, :sha256, :subject, :issuer, :notBefore, :notAfter, false)")
     @GetGeneratedKeys
-    long insert(@Bind("uuid") UUID uuid, @Bind("certificate") byte[] certificate, @Bind("sha256") String sha256, @Bind("pcrEvent") String pcrEvent, @Bind("subject") String subject, @Bind("issuer") String issuer, @Bind("notBefore") Date notBefore, @Bind("notAfter") Date notAfter);
+    long insert(@Bind("uuid") UUID uuid, @Bind("certificate") byte[] certificate, @Bind("sha1") String sha1, @Bind("sha256") String sha256, @Bind("subject") String subject, @Bind("issuer") String issuer, @Bind("notBefore") Date notBefore, @Bind("notAfter") Date notAfter);
 
     @SqlUpdate("update certificate set revoked=:revoked where id=:id")
     long updateRevoked(@Bind("id") long id, @Bind("revoked") boolean revoked);
     
-    @SqlQuery("select id,uuid,certificate,sha256,pcrEvent,subject,issuer,notBefore,notAfter,revoked from certificate where id=:id")
+    @SqlQuery("select id,uuid,certificate,sha1,sha256,subject,issuer,notBefore,notAfter,revoked from certificate where id=:id")
     Certificate findById(@Bind("id") long id);
 
-    @SqlQuery("select id,uuid,certificate,sha256,pcrEvent,subject,issuer,notBefore,notAfter,revoked from certificate where uuid=:uuid")
+    @SqlQuery("select id,uuid,certificate,sha1,sha256,subject,issuer,notBefore,notAfter,revoked from certificate where uuid=:uuid")
     Certificate findByUuid(@Bind("uuid") UUID uuid);
 
-    @SqlQuery("select id,uuid,certificate,sha256,pcrEvent,subject,issuer,notBefore,notAfter,revoked from certificate where sha256=:sha256")
+    @SqlQuery("select id,uuid,certificate,sha1,sha256,subject,issuer,notBefore,notAfter,revoked from certificate where sha1=:sha1")
+    Certificate findBySha1(@Bind("sha1") String sha1);
+
+    @SqlQuery("select id,uuid,certificate,sha1,sha256,subject,issuer,notBefore,notAfter,revoked from certificate where sha256=:sha256")
     Certificate findBySha256(@Bind("sha256") String sha256);
     
     @SqlUpdate("delete from certificate where id=:id")

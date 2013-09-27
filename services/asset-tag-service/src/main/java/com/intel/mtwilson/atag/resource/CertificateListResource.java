@@ -72,29 +72,35 @@ public class CertificateListResource extends ServerResource {
     }
 
     /**
-     * Use this to import certificates (for example if an external CA is downloading requests and uploading certificates)
+     * Imports a single certificate.
+     * 
+     * For example, an external CA might download requests and upload certificates.
+     * 
+     * @param certificate to import
      */
 //    @Post("json:json")
     public Certificate insertCertificate(Certificate certificate) throws SQLException {
 //        log.debug("insertCertificate for subject: {}", certificate.getSubject());
         certificate.setUuid(new UUID());
         // at this point we have a request for a subject (host uuid) and a specific selection of tags for that subject
-        long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha256().toHexString(), certificate.getPcrEvent().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
+        long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha1().toHexString(), certificate.getSha256().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
         certificate.setId(certificateId); // XXX of no use to the client, maybe remove this
 
         return certificate;
     }
 
     /**
+     * Imports a list of certificates.
+     * 
      * Note: must use the list wrapper class. If you try to accept Certificate[] certificates as a parameter, you will get this
      * exception: com.fasterxml.jackson.databind.JsonMappingException: Can not deserialize instance of
      * com.intel.dcsg.cpg.acertificate.model.Certificate out of START_ARRAY token
      *
      * java.lang.ClassCastException: java.util.LinkedHashMap cannot be cast to com.intel.dcsg.cpg.acertificate.model.Certificate
      *
-     * @param certificates
-     * @return
-     * @throws SQLException
+     * @param certificates to import
+     * @return an array of certificates corresponding to the import list; some certificates may have the "error" field set if they could not be imported
+     * @throws SQLException on any database-related error
      */
     @Post("json:json")
     public Certificate[] insertCertificates(Certificate[] certificates) throws SQLException {
@@ -108,18 +114,27 @@ public class CertificateListResource extends ServerResource {
     }
 
     /**
-     * References:
-     * http://www.jooq.org/doc/2.6/manual/sql-building/sql-statements/dsl-and-non-dsl/
-     * http://comments.gmane.org/gmane.comp.java.restlet.devel/1115
-     * http://blog.restlet.com/2006/11/15/reconsidering-content-negotiation/
-     * http://www.jooq.org/doc/3.1/manual/sql-building/table-expressions/nested-selects/
+     * Searches the certificates using provided criteria.
+     * 
      * 
      * Because certificate values are in a separate table, if the client wants to find certificates that
      * have specific values, we need to search for those values first. 
      * 
      * find certificate where certificate.id = certificate_value.certificateId and certificate_value
      * 
-     * @param query
+     * Query parameters are defined in {@link CertificateSearchCriteria}. All are optional and when used
+     * together each further restricts the query results ("AND" conjunction). All dates are in ISO8601 format.
+     * Booleans are "true" or "false". SHA-1 and SHA256 digests can be hex or base64-encoded. UUID can be
+     * in UUID format with hyphens or in hex format without hyphens.
+     * <p>
+     * References:
+     * <ul>
+     * <li>http://www.jooq.org/doc/2.6/manual/sql-building/sql-statements/dsl-and-non-dsl/</li>
+     * <li>http://comments.gmane.org/gmane.comp.java.restlet.devel/1115</li>
+     * <li>http://blog.restlet.com/2006/11/15/reconsidering-content-negotiation/</li>
+     * <li>http://www.jooq.org/doc/3.1/manual/sql-building/table-expressions/nested-selects/</li>
+     * </ul>
+     * 
      * @return
      * @throws SQLException 
      */
@@ -133,8 +148,8 @@ public class CertificateListResource extends ServerResource {
         query.issuerEqualTo = getQuery().getFirstValue("issuerEqualTo");
         query.issuerContains = getQuery().getFirstValue("issuerContains");
         query.statusEqualTo = getQuery().getFirstValue("statusEqualTo");
+        query.sha1 = Sha1Digest.valueOf(getQuery().getFirstValue("sha1")); // will return null if not a valid digest
         query.sha256 = Sha256Digest.valueOf(getQuery().getFirstValue("sha256")); // will return null if not a valid digest
-        query.pcrEvent = Sha1Digest.valueOf(getQuery().getFirstValue("pcrEvent")); // will return null if not a valid digest
         if( getQuery().getFirstValue("validBefore") != null && !getQuery().getFirstValue("validBefore").isEmpty() ) {
             query.validBefore = Iso8601Date.valueOf(getQuery().getFirstValue("validBefore")).toDate();
         }
@@ -169,11 +184,11 @@ public class CertificateListResource extends ServerResource {
         if( query.issuerContains != null  && query.issuerContains.length() > 0  ) {
             sql.addConditions(CERTIFICATE.ISSUER.equal(query.issuerContains));
         }
+        if( query.sha1 != null  ) {
+            sql.addConditions(CERTIFICATE.SHA1.equal(query.sha1.toHexString()));
+        }
         if( query.sha256 != null  ) {
             sql.addConditions(CERTIFICATE.SHA256.equal(query.sha256.toHexString()));
-        }
-        if( query.pcrEvent != null  ) {
-            sql.addConditions(CERTIFICATE.PCREVENT.equal(query.pcrEvent.toHexString()));
         }
         if( query.validOn != null ) {
             sql.addConditions(CERTIFICATE.NOTBEFORE.lessOrEqual(new Timestamp(query.validOn.getTime())));

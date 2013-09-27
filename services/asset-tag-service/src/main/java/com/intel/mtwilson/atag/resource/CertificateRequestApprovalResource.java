@@ -75,9 +75,10 @@ public class CertificateRequestApprovalResource extends ServerResource {
         String uuid = getAttribute("id");
         CertificateRequest certificateRequest =  certificateRequestDao.findByUuid(UUID.valueOf(uuid));
         certificate.setUuid(new UUID());
+        certificate.setSha1(Sha1Digest.digestOf(certificate.getCertificate()));
         certificate.setSha256(Sha256Digest.digestOf(certificate.getCertificate()));
-        certificate.setPcrEvent(Sha1Digest.digestOf(certificate.getSha256().toByteArray()));  // pcrEvent = sha1(sha256(certificate))
-        long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha256().toHexString(), certificate.getPcrEvent().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
+//        certificate.setPcrEvent(Sha1Digest.digestOf(certificate.getSha256().toByteArray()));  // pcrEvent = sha1(sha256(certificate))
+        long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha1().toHexString(), certificate.getSha256().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
         certificateRequest.setCertificateId(certificateId);
         certificateRequest.setStatus("Done");
         // XXX TODO need to validate tags in the input certificate... that we have those tags defined & that values are known, or maybe automatically add new values to our list o fpre-defined values if they are not alraedy there (which means we need to maybe mark values with their source so we can tell if they are still in use ...)

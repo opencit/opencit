@@ -25,14 +25,16 @@ public class CertificateResultMapper implements ResultSetMapper<Certificate> {
 //        UUID uuid = UUID.valueOf(rs.getBytes("uuid")); // use this when uuid is a binary type in database
         UUID uuid = UUID.valueOf(rs.getString("uuid")); // use this when uuid is a char type in database
         byte[] content = rs.getBytes("certificate");
+        Sha1Digest sha1 = Sha1Digest.valueOfHex(rs.getString("sha1"));
         Sha256Digest sha256 = Sha256Digest.valueOfHex(rs.getString("sha256"));
-        Sha1Digest pcrEvent = Sha1Digest.valueOfHex(rs.getString("pcrEvent"));
+//        Sha1Digest pcrEvent = Sha1Digest.valueOfHex(rs.getString("pcrEvent"));
         Certificate certificate = new Certificate();
         certificate.setId(rs.getLong("id"));
         certificate.setUuid( uuid);
         certificate.setCertificate(content);
+        certificate.setSha1(sha1);
         certificate.setSha256(sha256);
-        certificate.setPcrEvent(pcrEvent);
+//        certificate.setPcrEvent(pcrEvent);
         certificate.setSubject(rs.getString("subject"));
         certificate.setIssuer(rs.getString("issuer"));
         certificate.setNotBefore(rs.getDate("notBefore"));

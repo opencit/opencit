@@ -213,7 +213,7 @@ public class CertificateRequestListResource extends ServerResource {
                     X509AttributeCertificateHolder certificateHolder = new X509AttributeCertificateHolder(attributeCertificateBytes);
                     Certificate certificate = Certificate.valueOf(certificateHolder.getEncoded());
                     certificate.setUuid(new UUID());
-                    long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha256().toHexString(), certificate.getPcrEvent().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
+                    long certificateId = certificateDao.insert(certificate.getUuid(), certificate.getCertificate(), certificate.getSha1().toHexString(), certificate.getSha256().toHexString(), certificate.getSubject(), certificate.getIssuer(), certificate.getNotBefore(), certificate.getNotAfter());
                     // now the certificate has been created so update the certificate request record
                     certificateRequestDao.updateApproved(certificateRequestId, certificateId);
                     certificateRequest.setCertificateId(certificateId); // XXX of no use to client, maybe remove this
