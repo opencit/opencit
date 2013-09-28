@@ -114,12 +114,6 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
-            <version>0.1.2-SNAPSHOT</version>
-            <classifier>sources</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
@@ -127,12 +121,6 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
             <version>0.1.4-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
-            <version>0.1.4-SNAPSHOT</version>
-            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
