@@ -353,7 +353,7 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
       <profile>
           <activation>
               <file>
-                  <missing>target/generated-sources/jooq</missing>
+                  <missing>${project.build.directory}/generated-sources/jooq</missing>
               </file>
           </activation>
   <build>
@@ -418,6 +418,7 @@ Derby will release its locks on the db so that we don't need to fork here.
    -->                             
   <java classname="com.intel.mtwilson.atag.dao.CreateDatabase" classpath="${compile_classpath}" fork="true">
         <sysproperty key="derby.stream.error.file" value="${project.build.directory}/derby/derby.log"/>
+        <sysproperty key="derby.system.home" value="${project.build.directory}/derby"/>
         <arg value="--drop=true"/>
        </java>
        <!--
@@ -496,7 +497,7 @@ Derby will release its locks on the db so that we don't need to fork here.
     <!-- JDBC connection parameters -->
     <jdbc>
       <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
-      <url>jdbc:derby:directory:target/derby/mytestdb;create=true</url>
+      <url>jdbc:derby:directory:${project.build.directory}/derby/mytestdb;create=true</url>
       <user></user>
       <password></password>
     </jdbc>

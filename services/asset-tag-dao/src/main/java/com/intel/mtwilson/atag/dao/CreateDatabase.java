@@ -34,8 +34,14 @@ public class CreateDatabase {
         dropTables = enabled;
     }
     
-    
+    /**
+     * Uses the system property "derby.system.home" when configuring derby.  see also http://db.apache.org/derby/docs/10.4/tuning/rtunproper32066.html
+     * 
+     * @param args
+     * @throws Exception 
+     */
     public void execute(String[] args) throws Exception {
+        Derby.protocol = "jdbc:derby:directory:mytestdb;create=true"; // was:   jdbc:derby:directory:target/derby/mytestdb;create=true
         log.debug("Starting Derby...");
         Derby.startDatabase();
         log.debug("Derby started");
