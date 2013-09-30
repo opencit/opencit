@@ -70,6 +70,11 @@ public class HostBO extends BaseBO {
 
     private static int MAX_BIOS_PCR = 6;
     private static int LOCATION_PCR = 22;
+    private static String BIOS_PCRs = "0,17";
+    private static String VMWARE_PCRs = "18,19,20";
+    private static String OPENSOURCE_PCRs = "18";
+    private static String CITRIX_PCRs = "17,18";
+    
     //private static String propertiesFile = "management-service.properties";
     //Configuration config = ConfigurationFactory.loadConfiguration(propertiesFile);
     Logger log = LoggerFactory.getLogger(getClass().getName());
@@ -417,9 +422,10 @@ public class HostBO extends BaseBO {
                 //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
                 // option to separately configure BIOS and VMM PCRs
                 
+                // Bug 957: Since PCR configuration is not needed during host registration, commenting them out.
                 // The below changes are to address the bug in which if the REST API is directly called the default
                 // PCRs were being read from the property file which does not match the UI defaults.
-                if (connString.getVendor().equals(Vendor.VMWARE)) {
+                /*if (connString.getVendor().equals(Vendor.VMWARE)) {
                     biosPCRs = "0";
                     vmmPCRs = "17,18,19,20";
                 } else if (connString.getVendor().equals(Vendor.CITRIX)) {
@@ -432,7 +438,7 @@ public class HostBO extends BaseBO {
                 }
                 
                 hostConfigObj.setBiosPCRs(biosPCRs);
-                hostConfigObj.setVmmPCRs(vmmPCRs);
+                hostConfigObj.setVmmPCRs(vmmPCRs);*/
 
                 hostConfigObj.setTxtHostRecord(hostObj);
                                 
@@ -486,8 +492,10 @@ public class HostBO extends BaseBO {
                                         //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
                                         // option to separately configure BIOS and VMM PCRs
 
+                                        // Bug 957: Since PCR configuration is not needed during host registration, commenting them out.
                                         // The below changes are to address the bug in which if the REST API is directly called the default
                                         // PCRs were being read from the property file which does not match the UI defaults.
+                                        /*
                                         if (connString.getVendor().equals(Vendor.VMWARE)) {
                                             biosPCRs = "0";
                                             vmmPCRs = "17,18,19,20";
@@ -498,7 +506,7 @@ public class HostBO extends BaseBO {
                                             // Assuming INTEL
                                             biosPCRs = "0";
                                             vmmPCRs = "17,18";                    
-                                        }
+                                        }*/
 
                                         hostConfigObj.setBiosPCRs(biosPCRs);
                                         hostConfigObj.setVmmPCRs(vmmPCRs);
@@ -1068,7 +1076,7 @@ public class HostBO extends BaseBO {
                 hostConfigObj.setVmmWhiteList(true);
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
-                
+                hostConfigObj.setOverWriteWhiteList(true);
                 // By default we should not be registering the host since the user wants to just configure the white list.
                 hostConfigObj.setRegisterHost(false);
 
@@ -1419,7 +1427,10 @@ public class HostBO extends BaseBO {
                 hostConfigObj = calibrateMLENames(hostConfigObj, true);
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();  
                 
-                hostObj.BIOS_Name = getNextAvailableBIOSMLEName(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
+                // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
+                // white list of the existing MLE
+                if (!hostConfigObj.getOverWriteWhiteList())
+                    hostObj.BIOS_Name = getNextAvailableBIOSMLEName(hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.BIOS_Oem);
                 
                 /*
                 // Need to do some data massaging. Firstly we need to change the White Spaces
@@ -1541,7 +1552,10 @@ public class HostBO extends BaseBO {
                 hostConfigObj = calibrateMLENames(hostConfigObj, false);
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
                 
-                hostObj.VMM_Name = getNextAvailableVMMMLEName(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
+                // white list of the existing MLE
+                if (!hostConfigObj.getOverWriteWhiteList())
+                    hostObj.VMM_Name = getNextAvailableVMMMLEName(hostObj.VMM_Name, hostObj.VMM_Version, hostObj.VMM_OSName, hostObj.VMM_OSVersion);
                 
                 /*
                 // Need to do some data massaging. Firstly we need to change the White Spaces in the OS name to underscores. This is to ensure that it works correctly with

@@ -14,6 +14,7 @@ public class HostConfigData {
     private boolean registerHost; 
     private HostVMMType hostVmmType;
     private TxtHostRecord txtHostRecord;
+    private boolean overWriteWhiteList;
 
     // By default we will use the OEM as the white list target for both BIOS and VMM.
     public HostConfigData() {
@@ -27,6 +28,7 @@ public class HostConfigData {
         this.registerHost = false;
         this.hostVmmType = null;
         this.txtHostRecord = null;
+        this.overWriteWhiteList = true;
     }
     
     @JsonProperty("Host_VMM_Type")
@@ -129,6 +131,16 @@ public class HostConfigData {
         this.registerHost = registerHost;
     }
     
+    @JsonProperty("Overwrite_Whitelist")
+    public boolean getOverWriteWhiteList() {
+        return overWriteWhiteList;
+    }
+
+    @JsonProperty("Overwrite_Whitelist")
+    public void setOverWriteWhiteList(boolean overWriteWhiteList) {
+        this.overWriteWhiteList = overWriteWhiteList;
+    }
+
     @Override
     public String toString() {
         return "WhiteListConfig [biosWhiteList=" + biosWhiteList
