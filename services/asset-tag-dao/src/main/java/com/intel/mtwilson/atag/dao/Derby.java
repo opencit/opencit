@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.skife.jdbi.v2.DBI;
 import org.slf4j.Logger;
@@ -219,7 +220,10 @@ public class Derby {
   // helper methods for JOOQ
  
  public static DSLContext jooq() throws SQLException {
-        DSLContext jooq = DSL.using(Derby.getConnection(), SQLDialect.DERBY); // throws SQLException; Note that the DSLContext doesn't close the connection. We'll have to do that ourselves.
+        Settings settings = new Settings()
+            .withRenderSchema(false); // omits the schema name from generated sql ; when we connect to the database we already specify a schema so this settings avoid redundancy in the sql and allows the administrator to change the database name without breaking the application
+
+        DSLContext jooq = DSL.using(Derby.getConnection(), SQLDialect.DERBY, settings); // throws SQLException; Note that the DSLContext doesn't close the connection. We'll have to do that ourselves.
         return jooq;
  }
 }

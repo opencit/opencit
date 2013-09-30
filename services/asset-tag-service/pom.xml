@@ -311,6 +311,12 @@ our customers.
             <artifactId>cpg-tls-policy</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-performance</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
 
         <!-- mtwilson integration -->
 		<!--
@@ -500,6 +506,14 @@ our customers.
 	<artifactId>derby</artifactId>
 	<version>10.10.1.1</version>
 </dependency>
+
+                    <!-- gplv2 license mysql database connector for testing only (cannot include in production build) -->
+        <dependency>
+    	<groupId>mysql</groupId>
+    	<artifactId>mysql-connector-java</artifactId>
+        <scope>test</scope>
+    </dependency>
+    
                     
         <!--
     <dependency>
