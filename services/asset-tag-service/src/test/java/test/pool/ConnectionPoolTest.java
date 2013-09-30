@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 import javax.sql.DataSource;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DataSourceConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
@@ -35,8 +36,7 @@ public class ConnectionPoolTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ConnectionPoolTest.class);
 
     private static DataSource createDataSource(Properties jpaProperties) {
-        BasicManagedDataSource ds = new BasicManagedDataSource();
-        Current tm = new Current();
+        BasicDataSource ds = new BasicDataSource();
         ds.setAccessToUnderlyingConnectionAllowed(true);
         ds.setConnectionInitSqls(Collections.EMPTY_LIST);
         ds.setDefaultAutoCommit(true);
@@ -68,10 +68,6 @@ public class ConnectionPoolTest {
         ds.setUsername(jpaProperties.getProperty("javax.persistence.jdbc.user"));
         ds.setValidationQuery("SELECT 1");
         ds.setValidationQueryTimeout(2); // (seconds) how long to wait on a result for the validation query before giving up
-//        DataSourceConnectionFactory connectionFactory = new DataSourceConnectionFactory(dataSource, dbUsername, dbPassowrd);
-//        PoolableConnectionFactory dbcpFactory = new PoolableConnectionFactory(connectionFactory, pool, validationQuery, validationQueryTimeoutSeconds, false, false);
-//        poolingDataSource = new PoolingDataSource(pool);
-        ds.setTransactionManager(tm);
         return ds;
     }
     
