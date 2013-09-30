@@ -516,4 +516,44 @@ public class TblMleJpaController implements Serializable {
         
 
     }    
+      
+    public List<TblMle> findBIOSMLEByNameSearchCriteria(String searchCriteria) {
+        List<TblMle> mleList = new ArrayList<TblMle>();
+        EntityManager em = getEntityManager();
+        try {           
+            Query query = em.createNamedQuery("TblMle.findBiosMleByNameSearchCriteria");
+            query.setParameter("search", searchCriteria+"%");
+            
+            List<TblMle> biosList = query.getResultList();
+            if(biosList != null && biosList.size() > 0 )
+                mleList.addAll(biosList);         
+
+        } finally {
+            em.close();
+        }
+        
+        return mleList;
+        
+    }
+
+    public List<TblMle> findVMMMLEByNameSearchCriteria(String searchCriteria) {
+        List<TblMle> mleList = new ArrayList<TblMle>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findVmmMleByNameSearchCriteria");
+            query.setParameter("search", searchCriteria+"%");
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+            mleList.addAll(vmmList);
+        } finally {
+            em.close();
+        }
+        
+        return mleList;
+        
+    }
+    
 }

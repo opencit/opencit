@@ -127,7 +127,7 @@
                                                 <div class="valueDiv">&nbsp; </div>
 				<div class="labelDivgkv" >&nbsp;</div>
 				<div class="valueDiv">
-					<table style="padding-top:800px;padding-bottom: 10px;padding-right:50px;padding-left:50px;">
+					<table style="padding-top:80px;padding-bottom: 10px;padding-right:50px;padding-left:50px;">
 						<tr>
 							<td><input type="button" class="button" value="Add Host" id="addHostButton" onclick="addNewHost()"/></td>
                                                                                                                                                                          <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()"/></td>
