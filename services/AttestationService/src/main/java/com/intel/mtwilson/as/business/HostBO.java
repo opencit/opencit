@@ -336,7 +336,16 @@ public class HostBO extends BaseBO {
                                 // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
                                 // already be updated and the query would not find any values to delete.
                                 deleteHostSpecificManifest(tblHosts);
-                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                                
+                                // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
+                                // the host specific modules.
+                                if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                                    log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                                    // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
+                                    tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                                } else {
+                                    log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                                }
                             }
 
                         log.debug("Saving Host in database");
@@ -633,8 +642,8 @@ public class HostBO extends BaseBO {
         List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
         // Using the connection string, let us first find out the host type
-        
-        if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
+        // Bug 963: Ensure that we even check if PCR 19 is required as per the MLE setup
+        if (vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString()) && pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
 
             for (Measurement m : pcrEventLog.getEventLog()) {
