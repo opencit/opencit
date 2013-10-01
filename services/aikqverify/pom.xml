@@ -32,7 +32,7 @@
             <configuration>
 		<target>
 	    		<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-				<fileset dir="${basedir}/src/main/resources" prefix="${project.artifactId}-${project.version}"/>
+				<zipfileset dir="${basedir}/src/main/resources" prefix="${project.artifactId}-${project.version}"/>
 			</zip>
 		</target>
             </configuration>
