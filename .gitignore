@@ -5,5 +5,5 @@ target
 .project
 .classpath
 /trust-agent/HisPrivacyCAWebServices2/WEB-INF/classes
-pom.xml.releaseBackup
 pom.xml.versionsBackup
+pom.xml.releaseBackup
