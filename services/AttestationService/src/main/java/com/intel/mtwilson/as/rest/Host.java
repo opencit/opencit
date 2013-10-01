@@ -30,8 +30,10 @@ import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ws.rs.DefaultValue;
 
 /**
  * REST Web Service *
@@ -90,6 +92,31 @@ public class Host {
             throw new ASException(e);
         }
     }
+    
+    @RolesAllowed({"Attestation","Report"})
+    @GET
+    @Produces({"application/samlassertion+xml"})
+    @Path("/aik-{aik}/trust.saml")
+    public String getSamlByAik(
+            @PathParam("aik")String aikFingerprint,
+            @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify
+            ) throws IOException {
+        
+        try {
+            // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
+            Sha1Digest aikId = new Sha1Digest(aikFingerprint);
+            if( aikId.isValid() ) {
+                return new ASComponentFactory().getHostTrustBO().getTrustWithSamlByAik(aikId, forceVerify);
+            }
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+        }
+        catch(ASException e) {
+            throw e;
+        }catch(Exception e) {
+            throw new ASException(e);
+        }
+    }
+    
     
     /**
      * Implements SAFE AR "closing the loop" aka "tls-enforced attestation" and "host bind-data public key".

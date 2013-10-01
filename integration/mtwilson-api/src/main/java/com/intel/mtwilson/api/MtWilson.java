@@ -578,6 +578,9 @@ public interface MtWilson {
      */
     HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException;
 
+
+    String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException;
+    
     /**
      * Retrieves the trust status of the host specified as a SAML assertion, which can be verified by caller. The 
      * SAML assertion containing the trust status of the host is signed by Mt.Wilson using its private key.
