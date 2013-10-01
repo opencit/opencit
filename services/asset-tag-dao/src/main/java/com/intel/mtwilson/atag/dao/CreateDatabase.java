@@ -36,12 +36,12 @@ public class CreateDatabase {
     
     /**
      * Uses the system property "derby.system.home" when configuring derby.  see also http://db.apache.org/derby/docs/10.4/tuning/rtunproper32066.html
-     * 
+     * You can set derby.system.home=${project.build.directory}/derby in your maven config, or -Dderby.system.home=target\derby on command line.
      * @param args
      * @throws Exception 
      */
     public void execute(String[] args) throws Exception {
-        Derby.protocol = "jdbc:derby:directory:mytestdb;create=true"; // was:   jdbc:derby:directory:target/derby/mytestdb;create=true
+//        Derby.protocol = "jdbc:derby:directory:mytestdb;create=true"; // was:   jdbc:derby:directory:target/derby/mytestdb;create=true
         log.debug("Starting Derby...");
         Derby.startDatabase();
         log.debug("Derby started");

@@ -39,13 +39,19 @@ public class Derby {
      * NOTE: this url is repeated in the pom.xml where jooq needs it to connect
      * to the database to grab the schema and automatically generate sources
      */
-    public static String protocol = "jdbc:derby:directory:target/derby/mytestdb;create=true"; // places it in directory "target/derby" under current directory (good for junit testing)
+    public static String protocol = "jdbc:derby:directory:mytestdb"; // places it in directory "target/derby" under current directory (good for junit testing)
     public static Connection c = null;
     public static DataSource ds = null;
     private static boolean isLoaded = false;
     private static boolean isSchemaCreated = false;
     
     public static void startDatabase() throws SQLException {
+        // assume derby database is in a "derby" folder in current directory unless the user has set the system property to override this.
+        if( System.getProperty("derby.system.home") == null ) {
+            log.debug("System property derby.system.home is not set; using default ./derby");
+            System.setProperty("derby.system.home", "derby");
+        }
+        
         if( !isLoaded ) {
             try {
             // find the temporary directory
@@ -65,7 +71,7 @@ public class Derby {
 //        DriverManager.getConnection("jdbc:derby:MyDbTest;shutdown=true");  // shut down a specific database
         try {
             // shut down all databaes and the derby engine  ; throws SQLException "Derby system shutdown."
-            DriverManager.getConnection("jdbc:derby:directory:target/derby/mytestdb;shutdown=true"); // same as the protocol above but with create=true replaced with shutdown=true
+            DriverManager.getConnection(protocol+";shutdown=true"); // same as the protocol above but with create=true replaced with shutdown=true
         } 
         catch(Exception e) {
             log.info("{}", e.getMessage()); // expect:   Database 'directory:target/derby/mytestdb' shutdown.
@@ -84,7 +90,7 @@ public class Derby {
 //        dataSource.setUsername("username");
 //        dataSource.setPassword("password");
         //dataSource.setUrl("jdbc:derby:mytestdb;create=true"); // automatically creates derby in-memory db,   or use "jdbc:mysql://<host>:<port>/<database>"  for a mysql db
-        dataSource.setUrl(protocol); // creates it in the "target/derby" folder which is for temporary files, good for junit tests
+        dataSource.setUrl(protocol+";create=true"); // creates it in the "target/derby" folder which is for temporary files, good for junit tests
         dataSource.setMaxActive(10);
         dataSource.setMaxIdle(5);
         dataSource.setInitialSize(5);
