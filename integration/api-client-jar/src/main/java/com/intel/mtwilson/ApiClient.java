@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * Those two constructors provide the two extremes: with (File), all properties in a file,
  * developer specifies the path for easy integration into any system); with
  * (URL,Hmac/RsaCredential,SimpleKeystore) a developer is able to instantiate a secure
- * ApiClient completely in Java without requiring a  configuration file (it will enable
+ * ApiClient completely in Java without requiring a configuration file (it will enable
  * requireTrustedCertificate and verifyHostname).
  * @since 0.5.2
  * @author jbuhacoff
@@ -976,6 +976,18 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         String attReport = text(httpGet(asurl("/hosts/reports/attestation", query)));
         return attReport;
     }*/
+
+    @Override
+    public boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPost(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
+
+    @Override
+    public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPut(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
 
     // Whitelist Management API
     @Override

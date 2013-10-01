@@ -93,7 +93,7 @@ public class APIClient {
     @GET
     @Produces("application/json")
     public Role[] listAvailableRoles() {
-        return new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit }; // XXX intentionally omitting the cache role, because we are removing AH from the design, and anyway the cache needs a "real" permission to read whatever it is caching.
+        return new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement }; // XXX intentionally omitting the cache role, because we are removing AH from the design, and anyway the cache needs a "real" permission to read whatever it is caching.
     }
     
     

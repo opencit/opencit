@@ -17,6 +17,7 @@ import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
@@ -44,6 +45,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,6 +191,10 @@ public class HostBO extends BaseBO {
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
+                        
+                        // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
+                        // to which the host has to be associated
+                        associateAssetTagCertForHost(host, agent.getHostAttributes());
 
 		} catch (ASException ase) {
             //System.err.println("JIM DEBUG"); 
@@ -383,6 +389,10 @@ public class HostBO extends BaseBO {
 
                         My.jpa().mwHosts().destroy(tblHosts.getId());
                         log.info("Deleted host: {}", hostName.toString());
+                        
+                        // Now that the host is deleted, we need to remove any asset tag certificate mapped to this host
+                        unmapAssetTagCertFromHost(tblHosts.getId(), tblHosts.getName());
+                        
                 } catch (ASException ase) {
                         //System.err.println("JIM DEBUG"); 
                         //ase.printStackTrace(System.err);
@@ -804,4 +814,79 @@ public class HostBO extends BaseBO {
 
                 return hostObj;
         }
+
+    /**
+     * 
+     * @param host 
+     */
+    private void associateAssetTagCertForHost(TxtHost host, Map<String, String> hostAttributes) {
+        String hostUUID;
+        
+        try {
+            log.debug("Starting the procedure to map the asset tag certificate for host {}.", host.getHostName().toString());
+            
+            // First let us find if the asset tag is configured for this host or not. This information
+            // would be available in the mw_asset_tag_certificate table, where the host's UUID would be
+            // present.
+            if (hostAttributes != null && hostAttributes.containsKey("Host_UUID")) {
+                hostUUID = hostAttributes.get("Host_UUID");
+            } else {
+                log.info("Since UUID for the host {} is not specified, asset tag would not be configured.", host.getHostName().toString());
+                return;
+            }
+            
+            // Now that we have a valid host UUID, let us search for an entry in the db.
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            MwAssetTagCertificate atagCert = atagCertBO.findValidAssetTagCertForHost(hostUUID);
+            if (atagCert != null) {
+                log.debug("Found a valid asset tag certificate for the host {} with UUID {}.", host.getHostName().toString(), hostUUID);
+                // Now that there is a asset tag certificate for the host, let us retrieve the host ID and update
+                // the asset tag certificate with that ID
+                TblHosts tblHost = My.jpa().mwHosts().findByName(host.getHostName().toString());
+                if (tblHost != null) {
+                    AssetTagCertAssociateRequest atagMapRequest = new AssetTagCertAssociateRequest();
+                    atagMapRequest.setSha256OfAssetCert(atagCert.getSHA256Hash());
+                    atagMapRequest.setHostID(tblHost.getId());
+                    
+                    boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHost(atagMapRequest);
+                    if (mapAssetTagCertToHost)
+                        log.info("Successfully mapped the asset tag certificate with UUID {} to host {}", atagCert.getUuid(), tblHost.getName());
+                    else
+                        log.info("No valid asset tag certificate configured for the host {}.", tblHost.getName());
+                }
+            } else {
+                log.info("No valid asset tag certificate configured for the host {}.", host.getHostName().toString());
+            }
+            
+        } catch (Exception ex) {
+            // Log the error and return back.
+            log.info("Error during asset tag configuration for the host {}. Details: {}.", host.getHostName().toString(), ex.getMessage());
+        }
+        
+    }
+
+    /**
+     * 
+     * @param id
+     * @param name 
+     */
+    private void unmapAssetTagCertFromHost(Integer id, String name) {
+        try {
+            log.debug("Starting the procedure to unmap the asset tag certificate from host {}.", name);
+                        
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            AssetTagCertAssociateRequest atagUnmapRequest = new AssetTagCertAssociateRequest();
+            atagUnmapRequest.setHostID(id);
+                    
+            boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHost(atagUnmapRequest);
+            if (unmapAssetTagCertFromHost)
+                log.info("Either the asset tag certificate was successfully unmapped from the host {} or there was not asset tag certificate associated.", name);
+            else
+                log.info("Either there were errors or no asset tag certificate was configured for the host {}.", name);
+            
+        } catch (Exception ex) {
+            // Log the error and return back.
+            log.info("Error during asset tag unmapping for the host {}. Details: {}.", name, ex.getMessage());
+        }
+    }
 }
