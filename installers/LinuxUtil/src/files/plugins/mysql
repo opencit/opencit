@@ -10,6 +10,9 @@ DEFAULT_MYSQL_USERNAME="root"
 DEFAULT_MYSQL_PASSWORD=""
 DEFAULT_MYSQL_DATABASE="mw_as"
 
+DEFAULT_MYSQL_REQUIRED_VERSION="5.0"
+
+# DEPRECATED
 mysql_required_version=5.0
 
 ### FUNCTION LIBRARY: MYSQL FUNCTIONS
@@ -28,6 +31,7 @@ mysql_read_connection_properties() {
     MYSQL_USERNAME=`read_property_from_file ${prefix}.user "${config_file}"`
     MYSQL_PASSWORD=`read_property_from_file ${prefix}.password "${config_file}"`
     MYSQL_DATABASE=`read_property_from_file ${prefix}.schema "${config_file}"`
+    MYSQL_JDBC_DRIVER=`read_property_from_file ${prefix}.driver "${config_file}"`
 }
 mysql_write_connection_properties() {
     local config_file="$1"
@@ -37,6 +41,8 @@ mysql_write_connection_properties() {
     update_property_in_file ${prefix}.user "${config_file}" "${MYSQL_USERNAME}"
     update_property_in_file ${prefix}.password "${config_file}" "${MYSQL_PASSWORD}"
     update_property_in_file ${prefix}.schema "${config_file}" "${MYSQL_DATABASE}"
+    update_property_in_file ${prefix}.driver "${config_file}" "com.mysql.jdbc.Driver"
+    # if you create a .url property then it takes precedence over the .host, .port, and .schema - so let user do that
 }
 
 # parameters:
@@ -59,7 +65,7 @@ mysql_clear() {
 # Environment:
 # - mysql_required_version (or provide it as a parameter)
 mysql_version() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION:-${DEFAULT_MYSQL_REQUIRED_VERSION}}}"
   MYSQL_CLIENT_VERSION=""
   MYSQL_CLIENT_VERSION_OK=""
   if [ -n "$mysql" ]; then
@@ -79,14 +85,14 @@ mysql_version_report() {
   if [ "$MYSQL_CLIENT_VERSION_OK" == "yes" ]; then
     echo_success "Mysql client version $MYSQL_CLIENT_VERSION is ok"
   else
-    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${mysql_required_version}"
+    echo_warning "Mysql client version $MYSQL_CLIENT_VERSION is not supported, minimum is ${MYSQL_REQUIRED_VERSION:-${DEFAULT_MYSQL_REQUIRED_VERSION}}"
   fi
 }
 
 # Environment:
 # - mysql_required_version
 mysql_detect() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION:-${DEFAULT_MYSQL_REQUIRED_VERSION}}}"
   if [[ -n "$MYSQL_HOME" && -n "$mysql" && -f "$mysql" ]]; then
     return
   fi
@@ -134,7 +140,7 @@ mysql_env_report() {
 # Environment:
 # - mysql_required_version
 mysql_require() {
-  local min_version="${1:-${mysql_required_version}}"
+  local min_version="${1:-${MYSQL_REQUIRED_VERSION:-${DEFAULT_MYSQL_REQUIRED_VERSION}}}"
   if [[ -z "$MYSQL_HOME" || -z "$mysql" || ! -f "$mysql" ]]; then
     mysql_detect ${min_version} > /dev/null
   fi
@@ -168,6 +174,7 @@ mysql_test_connection() {
   rm -f /tmp/intel.mysql.err
 }
 
+# XXX TODO maybe replace with test_function_with_var
 # Environment:
 # - mysql_required_version
 mysql_test_connection_report() {
@@ -234,9 +241,19 @@ mysql_server_install() {
     echo_failure "Unable to auto-install MySQL server" | tee -a $INSTALL_LOG_FILE
     echo "MySQL download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.mysql.com/downloads/" >> $INSTALL_LOG_FILE
+  else #create the monitrc script
+    mkdir -p /etc/monit/conf.d
+    if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+      echo "# mysql monitor
+      check process mysql matching \"mysql\"
+      group database
+      start program = \"/usr/sbin/service mysql start\"
+      stop program = \"/usr/sbin/service mysql stop\"
+      if failed host 127.0.0.1 port 3306 then restart
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.mtwilson
+    fi
   fi
 }
-
 # responsible for ensuring that the connection properties in the config file
 # Call this from the control script such as "asctl" before calling the other mysql_* functions
 # Parameters:
@@ -454,7 +471,7 @@ mysql_create_ssl() {
 
 # Usage: mtwilson mysql-detect
 mw_mysql_detect() {
-        mysql_detect ${2:-$mysql_required_version}
+        mysql_detect ${2:-${MYSQL_REQUIRED_VERSION:-${DEFAULT_MYSQL_REQUIRED_VERSION}}}
         mysql_env_report
 }
 

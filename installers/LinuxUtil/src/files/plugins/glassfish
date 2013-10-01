@@ -2,6 +2,9 @@
 
 DEFAULT_GLASSFISH_REQUIRED_VERSION="3.0"
 
+# XXX was originally called DEFAULT_GLASSFISH_API_PORT
+DEFAULT_GLASSFISH_HTTPS_PORT="8181"
+DEFAULT_GLASSFISH_HTTP_PORT="8080"
 
 #mw_glassfish() {
 #addopt "s" "start"
@@ -38,6 +41,10 @@ glassfish_ready() {
 # If you pass a parameter, it is the path to a glassfish "asadmin" binary 
 # If you do not pass a parameter, the "glassfish" variable is used as the path to the binary
 glassfish_version() {
+
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+
   if [[ -n "$glassfish" ]]; then
     # extract the version number from a string like: glassfish version "3.0"
     local current_glassfish_version=`$glassfish version 2>&1 | grep -i glassfish | grep -i version | awk '{ print $8 }'`
@@ -64,6 +71,7 @@ glassfish_version_report() {
   fi
 }
 
+
 # detects possible glassfish installations
 # does nothing if GLASSFISH_HOME is already set; unset with glassfish_clear before calling to force detection
 # Environment:
@@ -72,6 +80,9 @@ glassfish_version_report() {
 # - minimum required version
 glassfish_detect() {
   local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
+
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
+  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
 
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
@@ -321,8 +332,8 @@ glassfish_admin_user() {
   $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd.old change-admin-password
   # XXX it asks for the password twice ...  can we script with our known value?
   $glassfish --user=admin --passwordfile=/etc/glassfish/admin.passwd enable-secure-admin
-
 }
+
 
 # pre-conditions:   GLASSFISH_HOME  must be set  (find it with glassfish_detect)
 # returns success (0) if glassfish is running, error (1) if it is not running
@@ -443,7 +454,7 @@ glassfish_create_ssl_cert_prompt() {
     prompt_yes_no GLASSFISH_CREATE_SSL_CERT "Do you want to set up an SSL certificate for Glassfish?"
     echo
     if [ "${GLASSFISH_CREATE_SSL_CERT}" == "yes" ]; then
-      if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+      if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; return 1; fi
       glassfish_require
       prompt_with_default GLASSFISH_SSL_CERT_CN "Domain name for SSL Certificate:" ${MTWILSON_SERVER:-127.0.0.1}
       glassfish_create_ssl_cert "${GLASSFISH_SSL_CERT_CN}"
@@ -457,7 +468,7 @@ glassfish_create_ssl_cert_prompt() {
 glassfish_create_ssl_cert() {
 #  echo_warning "This feature has been disabled: glassfish_create_ssl_cert"
 #  return
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+  if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; return 1; fi
   glassfish_require
   local serverName="${1}"
   local keystorePassword=changeit
@@ -481,8 +492,17 @@ glassfish_create_ssl_cert() {
     # Java 7 supports -ext san=ip:1.2.3.4    to add the extension.  Java 6 does not.  So we use the mtwilson command to generate it. 
     #$keytool -genkey -alias s1as -keysize 2048 -keyalg RSA -dname "CN=${serverName}, OU=Mt Wilson, C=US" -keystore $keystore -storepass $keystorePassword -keypass $keystorePassword -validity 3650
     #$mtwilson api CreateSSLCertificate "CN=${serverName}, OU=Mt Wilson, C=US" "ip:${serverName}" $keystore s1as "$keystorePassword"
-    $mtwilson api CreateSSLCertificate "${serverName}" "ip:${serverName}" $keystore s1as "$keystorePassword"
-    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword 
+    local tmpCN
+    if valid_ip "${serverName}"; then 
+     tmpCN="ip:${serverName}"
+    else
+     tmpCN="dns:${serverName}"
+    fi
+    $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
+    #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -out /tmp/mycert.der -outform DER
+    #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
@@ -492,35 +512,35 @@ glassfish_create_ssl_cert() {
 
 # Usage: mtwilson glassfish-detect
 mw_glassfish_detect() {
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
         glassfish_detect ${2:-$GLASSFISH_REQUIRED_VERSION}
         glassfish_env_report
 }
 
 # Usage: mtwilson glassfish-start
 mw_glassfish_start() {
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
         glassfish_require
         glassfish_start_report
 }
 
 # Usage: mtwilson glassfish-stop
 mw_glassfish_stop() {
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
         glassfish_require
         glassfish_shutdown
 }
 
 # Usage: mtwilson glassfish-restart
 mw_glassfish_restart() {
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
         glassfish_require
         glassfish_restart
 }
 
 # Usage: mtwilson glassfish-status
 mw_glassfish_status() {
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
         glassfish_require
         glassfish_running_report
         glassfish_sslcert_report

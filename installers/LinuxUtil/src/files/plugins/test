@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#For example, the following function can be replaced:
+#mysql_test_connection_report() {
+#  echo -n "Testing database connection... "
+#  mysql_test_connection
+#  if [ -n "$is_mysql_available" ]; then
+#    echo "OK"
+#  else
+#    echo "FAILED"
+#    echo_failure "${mysql_connection_error}"
+#  fi
+#}
+#with this:
+#test_function_with_var "database connection" "mysql_test_connection" "is_mysql_available" "mysql_connection_error"
+#
+# Returns 0 on success, 1 on failure
+test_function_with_var() {
+  local label_text="$1"
+  local function_name="$2"
+  local testvar_name="$3"
+  local errorvar_name="$4"
+  echo -n "Testing ${label_text:-something}..."
+  local ret=$(eval "$function_name")
+  local testvar_text=$(eval "echo \$${testvar_name}")
+  local errorvar_text=$(eval "echo \$${errorvar_name}")
+  if [ -n "$testvar_text" ]; then
+    echo_success "OK"
+    return 0
+  else
+    echo_failure "FAILED"
+    echo_failure "$testvar_text"
+    return 1
+  fi
+}

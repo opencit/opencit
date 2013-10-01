@@ -2,7 +2,8 @@
 
 DEFAULT_JAVA_REQUIRED_VERSION="1.6"
 
-# XXX TODO should move to /etc/mtwilson/java   (whereas JAVA_HOME, java_bin, and java would be in /var/mtwilson/env/java)
+# caller can define JAVA_REQUIRED_VERSION ; if they don't we fall back on DEFAULT_JAVA_REQUIRED_VERSION
+# XXX TODO the variable JAVA_REQUIRED_VERSION should move to /etc/mtwilson/java   (whereas JAVA_HOME, java_bin, and java would be in /var/mtwilson/env/java)
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
@@ -104,10 +105,10 @@ java_detect() {
     do
         local java_bindir=`dirname $c`
         if [ -f "$java_bindir/java" ]; then
-          JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME"
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
           if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
             return 0
           fi
@@ -121,10 +122,10 @@ java_detect() {
     do
         java_bindir=`dirname $c`
         if [ -f "$java_bindir/java" ]; then
-          JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
-          echo "Found Java: $JAVA_HOME"
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
           if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
             return 0
           fi
@@ -139,10 +140,10 @@ java_detect() {
         java_bindir=`dirname $c`
         # in non-JDK and non-JRE folders the "java" command may be a symlink:
         if [ -f "$java_bindir/java" ]; then
-          JAVA_HOME=`dirname $java_bindir`
+          export JAVA_HOME=`dirname $java_bindir`
           java=$c
           JAVA_VERSION=`java_version`
-          echo "Found Java: $c"
+          echo "Found Java: $c" >> $INSTALL_LOG_FILE
           if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
             return 0
           fi
@@ -150,10 +151,10 @@ java_detect() {
           local javatarget=`readlink $c`
           if [ -f "$javatarget" ]; then
             java_bindir=`dirname $javatarget`
-            JAVA_HOME=`dirname $java_bindir`
+            export JAVA_HOME=`dirname $java_bindir`
             java=$javatarget
             JAVA_VERSION=`java_version`
-            echo "Found Java: $java"
+            echo "Found Java: $java" >> $INSTALL_LOG_FILE
             if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
               return 0
             fi
@@ -182,7 +183,7 @@ java_env_report() {
 # if they are not configured it initiates java detect to find them
 # if
 # Environment:
-# - java_required_version in the format "1.6.0_29" (or pass it as a parameter)
+# - JAVA_REQUIRED_VERSION in the format "1.6.0_29" (or pass it as a parameter)
 java_require() {
   local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
   if [[ -z "$JAVA_HOME" || -z "$java" || ! -f "$java" ]]; then
@@ -203,7 +204,7 @@ no_java() {
 }
 
 # Environment:
-# - java_required_version in the format "1.6.0_29"
+# - JAVA_REQUIRED_VERSION in the format "1.6.0_29"
 java_install_openjdk() {
   JAVA_YUM_PACKAGES="java-1.6.0-openjdk java-1.6.0-openjdk-devel"
   JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
@@ -227,7 +228,7 @@ java_install() {
 #  JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
 #  auto_install "Java" "JAVA"
   java_clear; java_detect >> $INSTALL_LOG_FILE
-  if no_java ${java_required_version:-1.6} >> $INSTALL_LOG_FILE; then
+  if no_java ${JAVA_REQUIRED_VERSION:-1.6} >> $INSTALL_LOG_FILE; then
     if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
       echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
       return 1

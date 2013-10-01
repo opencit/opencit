@@ -65,6 +65,8 @@ is_version_at_least() {
 
 # like is_version_at_least but works on entire java version string 1.6.0_29
 # instead of just a major.minor number
+# This function is here and not in the java plugin because it's a generic version check
+# function for version numbers that are in the same (Java) format. 
 # Parameters:
 # - version to test (of installed software)
 # - minimum required version

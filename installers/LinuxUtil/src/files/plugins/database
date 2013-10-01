@@ -1,0 +1,41 @@
+#!/bin/sh
+
+### FUNCTION LIBRARY: DATABASE FUNCTIONS
+
+database_restart(){
+  if using_glassfish; then
+    glassfish_restart
+  elif using_tomcat; then
+    tomcat_restart
+  fi
+}
+
+database_shutdown(){
+  if using_glassfish; then
+    glassfish_shutdown
+  elif using_tomcat; then
+    tomcat_shutdown
+  fi
+}
+# determine database
+which_dbms(){
+  echo "Please identify the database which will be used for the Mt Wilson server.
+The supported databases are m=MySQL | p=Postrges"
+  while true; do
+    prompt_with_default DATABASE_CHOICE "Choose Database:" "p";
+
+    if [ "$DATABASE_CHOICE" != 'm' ] && [ "$DATABASE_CHOICE" != 'p' ]; then
+      echo "Be serious.  Common, try again: "
+      DATABASE_CHOICE=
+    else
+      if [ "$DATABASE_CHOICE" = 'm' ]; then 
+        export DATABASE_VENDOR="mysql"
+      else
+        export DATABASE_VENDOR="postgres"
+      fi
+      break
+    fi
+  done
+  echo "Database Choice: $DATABASE_VENDOR" >> $INSTALL_LOG_FILE
+}
+

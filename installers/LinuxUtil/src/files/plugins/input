@@ -46,7 +46,9 @@ prompt_with_default() {
   local resultvarname="${1}"
   local userprompt="${2}"
   local default_value
-  eval default_value="${3:-\$$resultvarname}"
+  # here $$
+  eval current_value="\$$resultvarname"
+  eval default_value="${3:-$current_value}"
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
@@ -69,9 +71,18 @@ prompt_with_default() {
 prompt_with_default_password() {
   local resultvarname="${1}"
   local userprompt="${2:-Password:}"
-  local default_value
-  eval default_value="${3:-\$$resultvarname}"
+  # here $$
+  #eval current_value="\$$resultvarname"
+  #eval default_value="${3:-$current_value}"
+  eval variable_name="$resultvarname"
+  #echo_warning "variable name is $variable_name"
+  eval current_value="\$$variable_name"
+  #echo_warning "current value = $current_value"
+  eval default_value="${3:-'$current_value'}"
+  #echo_warning "default value = $default_value"
+
   local default_value_display="********"
+  if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
   if [ -n "${!resultvarname}" ]; then
     if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
@@ -106,5 +117,20 @@ prompt_with_default_password() {
     fi
   done
   echo
-  eval $resultvarname=${userinput:-$default_value}
+  if [ ! -z "$userinput" ]; then
+   eval $resultvarname='$userinput'
+  else
+   eval $resultvarname='$default_value'
+  fi
+  #eval $resultvarname="${userinput:-'$default_value'}"
 }
+
+### FUNCTION LIBRARY: escape out input strings for passing to sed
+# you pass it the string you are about to pass to sed that might 
+# contain the following characters ()&#%$+
+# usage examples:
+# new_string=$(sed_escape $string)
+sed_escape() {
+ echo $(echo $1 | sed -e 's/[()&#%$+]/\\&/g' -e 's/[/]/\\&/g')
+}
+
