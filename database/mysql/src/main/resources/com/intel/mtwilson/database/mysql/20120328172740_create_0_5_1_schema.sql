@@ -83,8 +83,6 @@ CREATE TABLE `tbl_hosts` (
   `AddOn_Connection_Info` varchar(80) DEFAULT NULL,
   `AIK_Certificate` text,
   `Email` varchar(45) DEFAULT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_On` datetime NOT NULL,
   `Error_Code` int(11) DEFAULT NULL,
   `Error_Description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`),
@@ -140,17 +138,12 @@ CREATE TABLE `tbl_pcr_manifest` (
   `MLE_ID` int(11) NOT NULL,
   `Name` varchar(20) NOT NULL,
   `Value` varchar(100) NOT NULL,
-  `Created_By` int(11) NOT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_By` int(11) NOT NULL,
-  `Updated_On` datetime NOT NULL,
+ 
   `PCR_Description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`),
   KEY `PCR_MLE_ID` (`MLE_ID`),
-  KEY `PCR_Created_By` (`Created_By`),
-  KEY `PCR_Last_Updated_By` (`Updated_By`),
-  CONSTRAINT `PCR_Created_By` FOREIGN KEY (`Created_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `PCR_Last_Updated_By` FOREIGN KEY (`Updated_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+ 
+ 
   CONSTRAINT `PCR_MLE_ID` FOREIGN KEY (`MLE_ID`) REFERENCES `tbl_mle` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -196,19 +189,13 @@ CREATE TABLE `tbl_module_manifest` (
   `PackageVersion` varchar(45) DEFAULT NULL,
   `UseHostSpecificDigestValue` tinyint(1) DEFAULT NULL,
   `Description` varchar(100) DEFAULT NULL,
-  `Created_By` int(11) NOT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_By` int(11) DEFAULT NULL,
-  `Updated_On` datetime DEFAULT NULL,
+
   PRIMARY KEY (`ID`),
   KEY `Module_MLE_ID` (`MLE_ID`),
-  KEY `Module_Created_By` (`Created_By`),
-  KEY `Module_Last_Updated_By` (`Updated_By`),
+
   KEY `Module_NameSpace_ID` (`NameSpace_ID`),
   KEY `Module_Event_ID` (`Event_ID`),
   CONSTRAINT `Module_MLE_ID` FOREIGN KEY (`MLE_ID`) REFERENCES `tbl_mle` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Module_Created_By` FOREIGN KEY (`Created_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Module_Last_Updated_By` FOREIGN KEY (`Updated_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `Module_NameSpace_ID` FOREIGN KEY (`NameSpace_ID`) REFERENCES `tbl_package_namespace` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `Module_Event_ID` FOREIGN KEY (`Event_ID`) REFERENCES `tbl_event_type` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=latin1;

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
@@ -66,9 +67,9 @@ public class HostAgentFactory {
         try {
             InternetAddress hostAddress = new InternetAddress(host.getName());
             String connectionString = getConnectionString(host);
-            String tlsPolicyName = host.getTlsPolicyName() == null ? "TRUST_FIRST_CERTIFICATE" : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
+            String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
 //            ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO it's the responsibility of the caller to save the TblHosts record after calling this method if the policy is trust first certificate ; we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
-            String password = "password"; // XXX TODO uh oh... opening a keystore requires a password, so we can verify its signed contents, which is important. putting the password in the txthost record won't be secure.  password needs to  come from attestation service configuration - or from the user.  this isn't an issue for the factory because the factory is supposed to get the keystore AFTER it has been opened with the password.  but when this code moves to the JPA/DAO/Repository layer, we'll need to have a password from somewhere.         
+            String password = My.configuration().getTlsKeystorePassword(); 
             SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); // XXX TODO see above commment about password;  the per-host trusted certificates keystore has to either be protected by a password known to all mt wilson instances (stored in database or sync'd across each server's configuration files) or it has to be protected by a group secret known to all authorized clients (and then we need a mechanism for the api client to send us the secret in the request, and a way get secrets in and out of api client's keystore so it can be sync'd across the authorized group of clients) or we can just not store it encrypted and use a pem-format keystore instead of a java KeyStore 
             TlsPolicy tlsPolicy = getTlsPolicy(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
             HostAgent hostAgent = getHostAgent(hostAddress, connectionString, tlsPolicy);
@@ -94,9 +95,9 @@ public class HostAgentFactory {
             InternetAddress hostAddress = new InternetAddress(host.getName()); // switching from Hostname to InternetAddress (better support for both hostname and ip address)
             // here we figure out if it's vmware or intel  and ensure we have a valid connection string starting with the vendor scheme.  XXX TODO should not be here, everyone should have valid connection strings like vmware:*, intel:*, citrix:*, etc. 
             // no special case for citrix, since that support was added recently they should always come with citrix: prepended.
-            System.out.println("host cs = " + host.getAddOnConnectionInfo());
+//            System.out.println("host cs = " + host.getAddOnConnectionInfo());
             String connectionString = getConnectionString(host);
-            System.out.println("stdalex getHostAgent cs =" + connectionString);
+            //System.out.println("stdalex getHostAgent cs =" + connectionString);
             TlsPolicy tlsPolicy = getTlsPolicy(host);
             return getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
         }
@@ -105,25 +106,30 @@ public class HostAgentFactory {
         }
     }
     
-    // given a host, it returns the complete connection string starting with vendor scheme
+    /*
+     * XXX TODO this functionality moved to ConnectionString.from() , need to change all references & delete this one
+     * given a host, it returns the complete connection string starting with vendor scheme
+     * 
+     * @deprecated
+     */
     public String getConnectionString(TblHosts host) {
         String connectionString = host.getAddOnConnectionInfo();
         if( connectionString == null || connectionString.isEmpty() ) {
-            if( host.getIPAddress() != null  ) {
-                connectionString = String.format("intel:https://%s:%d", host.getIPAddress(), host.getPort());
-                System.out.println("Assuming Intel connection string " + connectionString + " for host " + host.getName());
+            if( host.getName() != null  ) {
+                connectionString = String.format("intel:https://%s:%d", host.getName(), host.getPort());
+                log.debug("Assuming Intel connection string for host " + host.getName());// removed connection string to prevent leaking secrets
             }
         }
         else if( connectionString.startsWith("http") && connectionString.contains("/sdk;") ) {
             connectionString = String.format("vmware:%s", connectionString);
-           System.out.println("Assuming Vmware connection string " + connectionString + " for host " + host.getName());
+           log.debug("Assuming Vmware connection string for host " + host.getName()); // removed connection string to prevent leaking secrets
         }        
         return connectionString;
     }
     
-    public TlsPolicy getTlsPolicy(TblHosts host) throws KeyManagementException {
+    public TlsPolicy getTlsPolicy(TblHosts host) throws KeyManagementException, IOException {
         if( host.getTlsPolicyName() == null ) {
-            host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+            host.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
         }
 //        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
 //        KeyStore tlsKeystore = txtHost.getTlsKeystore(); // XXX TODO TxtHost doesn't have this field yet
@@ -131,16 +137,16 @@ public class HostAgentFactory {
         return tlsPolicy;
     }
 
-    public TlsPolicy getTlsPolicy(String tlsPolicyName, Resource resource) throws KeyManagementException {
-        String password = "password"; // XXX TODO uh oh... opening a keystore requires a password, so we can verify its signed contents, which is important. putting the password in the txthost record won't be secure.  password needs to  come from attestation service configuration - or from the user.  this isn't an issue for the factory because the factory is supposed to get the keystore AFTER it has been opened with the password.  but when this code moves to the JPA/DAO/Repository layer, we'll need to have a password from somewhere.         
+    public TlsPolicy getTlsPolicy(String tlsPolicyName, Resource resource) throws KeyManagementException, IOException {
+        String password = My.configuration().getTlsKeystorePassword();
         SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); // XXX TODO only because txthost doesn't have the field yet... we should get the keystore from the txthost object
         TlsPolicy tlsPolicy = getTlsPolicy(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
         return tlsPolicy;
     }
     
     
-    private TlsPolicy getTlsPolicy(String tlsPolicyName, SimpleKeystore tlsKeystore) {
-        if( tlsPolicyName == null ) { tlsPolicyName = "TRUST_FIRST_CERTIFICATE"; } // XXX for backwards compatibility with records that don't have a policy set, but maybe this isn't the place to put it - maybe it should be in the DAO that provides us the txthost object.
+    private TlsPolicy getTlsPolicy(String tlsPolicyName, SimpleKeystore tlsKeystore) throws IOException {
+        if( tlsPolicyName == null ) { tlsPolicyName = My.configuration().getDefaultTlsPolicyName(); } // XXX for backwards compatibility with records that don't have a policy set, but maybe this isn't the place to put it - maybe it should be in the DAO that provides us the txthost object.
         String ucName = tlsPolicyName.toUpperCase();
         if( ucName.equals("TRUST_CA_VERIFY_HOSTNAME") ) {
             return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
@@ -167,7 +173,10 @@ public class HostAgentFactory {
         if( connectionString == null ) {
             throw new IllegalArgumentException("Connection info missing"); // XXX it is missing for intel trust agents configured in 1.0-RC2 or earlier -- should we attempt to guess intel:https://hostaddress:9999 for backwards compatibility?  also we don't have a vendor host agent factory for intel trust agent yet!!
         }
+        ConnectionString cs = new ConnectionString(connectionString);
+        String vendorName = cs.getVendor().name(); // INTEL, CITRIX, VMWARE
         for(Vendor vendor : vendors) {
+            /*
             String prefix = vendor.name().toLowerCase()+":"; // "INTEL" becomes "intel:"
             if( connectionString.startsWith(prefix) ) {
                 String urlpart = connectionString.substring(prefix.length());
@@ -175,9 +184,16 @@ public class HostAgentFactory {
                 if( factory != null ) {
                     return factory.getHostAgent(hostAddress, urlpart, tlsPolicy);
                 }
+            }*/
+            if( vendor.name().equals(vendorName) ) {
+                VendorHostAgentFactory factory = vendorFactoryMap.get(vendor);
+                if( factory != null ) {
+                    return factory.getHostAgent(hostAddress, cs.getConnectionString(), tlsPolicy);
+                }
             }
         }
-        throw new UnsupportedOperationException("No agent factory registered for this host");
+        log.error("HostAgentFactory: Unsupported host type: "+vendorName);
+        throw new UnsupportedOperationException("Unsupported host type: "+vendorName);
     }
     
     

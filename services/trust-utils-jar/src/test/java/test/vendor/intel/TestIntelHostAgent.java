@@ -4,13 +4,31 @@
  */
 package test.vendor.intel;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
+import com.intel.mtwilson.crypto.Aes128;
+import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.SslUtil;
+import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
+import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.cert.X509Certificate;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -40,24 +58,45 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  * @author jbuhacoff
  */
 public class TestIntelHostAgent {
-    private transient Logger log = LoggerFactory.getLogger(getClass());
-    private static String hostname = "10.1.71.169";
-    private static String connection = "intel:https://10.1.71.169:9999";
+    private static transient Logger log = LoggerFactory.getLogger(TestIntelHostAgent.class);
+    private static String hostname = "10.1.71.167";
+    private static String connection = "intel:https://10.1.71.167:9999";
     private static HostAgent agent;
     
     @BeforeClass
-    public static void createHostAgent() {
+    public static void createHostAgent() throws Exception {
         agent = getAgent();
     }
     
-    public static HostAgent getAgent() {
-        TblHosts host = new TblHosts();
-        host.setName(hostname);
-        host.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
-        host.setTlsKeystore(null);
-        host.setAddOnConnectionInfo(connection);
+    public static HostAgent getAgent() throws Exception {
+        SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
+		TlsPolicy tlsPolicy =  new InsecureTlsPolicy(); //new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+        SslUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
+        keystore.save();
+        /*
+        // make sure that the current certificate for this host, from the database, is in our keystore...
+        TblHosts tblHost = My.jpa().mwHosts().findByName(hostname);
+        SimpleKeystore dbKeystore = new SimpleKeystore(tblHost.getTlsKeystoreResource(), My.configuration().getKeystorePassword());
+        for(String alias : dbKeystore.aliases()) {
+            log.debug("Database-keystore has certificate: {}", alias);
+            X509Certificate cert = dbKeystore.getX509Certificate(alias);
+            log.debug("with subject: {}", cert.getSubjectX500Principal().getName());
+            log.debug("and fingerprint: {}", X509Util.sha1fingerprint(cert));
+            keystore.addTrustedSslCertificate(cert, alias+"-0557");
+            keystore.save();
+        }
+
+        for(String alias : keystore.aliases()) {
+            log.debug("File-keystore has certificate: {}", alias);
+            X509Certificate cert = keystore.getX509Certificate(alias);
+            log.debug("with subject: {}", cert.getSubjectX500Principal().getName());
+            log.debug("and fingerprint: {}", X509Util.sha1fingerprint(cert));
+        }*/
+        
+        
+        //TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
         HostAgentFactory factory = new HostAgentFactory();
-        HostAgent hostAgent = factory.getHostAgent(host);
+        HostAgent hostAgent = factory.getHostAgent(ConnectionString.forIntel(hostname), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;
     }
     
@@ -118,8 +157,18 @@ Pcr 23 = 0000000000000000000000000000000000000000
      */
     @Test
     public void getPcrManifestFromXen() throws IOException {
+        X509Certificate aikCertificate = agent.getAikCertificate();
         PcrManifest pcrManifest = agent.getPcrManifest();
         assertNotNull(pcrManifest);
+        
+        if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
+                   PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
+                   for (Measurement m : pcrEventLog.getEventLog()) {
+                       log.debug("Host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                               "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                   }
+        }
+        
         for(int i=0; i<24; i++) {
             Pcr pcr = pcrManifest.getPcr(i);
             log.debug("Pcr {} = {}", i, pcr.getValue().toString());
@@ -151,5 +200,6 @@ AIK Certificate: null
         log.debug("OS Name: {}", hostDetails.VMM_OSName);
         log.debug("OS Version: {}", hostDetails.VMM_OSVersion);
         log.debug("AIK Certificate: {}", hostDetails.AIK_Certificate);
+        log.debug("Processor Info:{}", hostDetails.Processor_Info);
     }
 }

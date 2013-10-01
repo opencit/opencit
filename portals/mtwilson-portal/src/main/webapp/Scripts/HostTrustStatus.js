@@ -22,11 +22,25 @@ function populateHostTrustDetails(responsJSON) {
 	}else {
                 if(responsJSON.noHosts) {
                     $('#hostTrustPaginationDiv').html('<span>'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
+                }else if(responsJSON.ResetPeer){  // CERT FIX
+                    //fnOpenDialogWithYesNOButton("Do you want to update this hosts cert?", "Confirm", 280, 150, updatePeerCert, updatePeerCertNo);
+                    /*var name = prompt("Enter your password", "*******");
+                     *get the users pw to be able to open his keystore
+                     */
+                    $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
+                }else if(responseJSON.parseError){
+                    $('#errorMessage').html('<span class="errorMessage">There was a error reading the servers response.  Pleaes refresh this page.</span>');
                 }else{
                     $('#errorMessage').html('<span class="errorMessage">'+getHTMLEscapedMessage(responsJSON.message)+'</span>');
                 }
 	}
 }
+
+function updatePeerCert(responsJSON) {
+    alert("updating cert now");
+}
+
+function updatePeerCertNo(responsJSON){}
 
 /*This Function will create a trust status table based on the host list provided.*/
 function populateHostTrustDataIntoTable(hostDetails) {
@@ -37,7 +51,8 @@ function populateHostTrustDataIntoTable(hostDetails) {
 			var classValue = null;
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
 			str+='<tr class="'+classValue+'" hostID="'+hostDetails[item].hostID+'" id="host_div_id_'+hostDetails[item].hostName.replace(/\./g,'_')+'">'+
-				'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+                                                //'<td align="center" class="row1"><a onclick="fnColapse(this)" isColpase="true"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+				'<td align="center" class="row1">&nbsp;&nbsp;&nbsp;</td>'+
 				'<td class="row2">'+hostDetails[item].hostName+'</td>'+
 				'<td align="center" class="row3"><img border="0" src="'+hostDetails[item].osName+'"></td>';
 				var value = hostDetails[item].hypervisorName != "" ? '<img border="0" src="'+hostDetails[item].hypervisorName+'">' : '';
@@ -134,7 +149,7 @@ function fnColapse(element){
 function populateVMwareSubgridDetails(responseJSON,div,hostName,hostID) {
 	if(responseJSON.result){
 		var list = responseJSON.VMsForHost;
-		var str = '<tr style="color:White;background-color:#5D7B9D;font-weight:bold;">'+
+		var str = '<tr style="color:White;background-color:#3A4F63;font-weight:bold;">'+
 					'<th class="showVMHostrow1">VM Name</th>'+
 					'<th class="showVMHostrow2">Trusted Host Policy</th>'+
 					'<th class="showVMHostrow3">Location Compliance Policy</th>'+
@@ -343,7 +358,7 @@ function checkTrustConstrains(element){
         if(($(div).attr('overall') == 'true' && targethostTrust == 'true')){
             trustPL = true;
         }else {
-            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Cannot migrate the VM since the target host does not satisfy the Trust policy.');
+            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Cannot migrate the VM since the target host does not satisfy the trust policy.');
             trustPL = false;
         }
     return trustPL;
@@ -360,7 +375,7 @@ function checkTrustOnlyCurrentHost(element){
         if($(div).attr('overall') == 'true'){
             trustPL = true;
         }else {
-            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Trust policy cannot be applied as the VM is placed on a trusted host.');
+            $(element).parent().parent().find('td:eq(5)').find('textarea').val('Trust policy cannot be applied as the VM is placed on a non-trusted host.');
             trustPL = false;
         }
     return trustPL;
@@ -431,7 +446,7 @@ function getFailureReportSuccess(responseJSON) {
 			if(item % 2 === 0){classValue='evenRow';}else{classValue='oddRow';}
 			var styleUntrusted = reportdata[item].trustStatus == 0 ? "color:red;" : "";
             str+='<tr class="'+classValue+'">'+
-            	'<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+
+                        '<td align="center" class="failureReportRow1"><a isColpase="true" onclick="fnColapseFailReport(this)"><img class="imageClass" border="0" alt="-" src="images/plus.jpg"></a></td>'+            	
             	'<td class="failureReportRow2">'+reportdata[item].name+'</td>'+
                 '<td class="failureReportRow3" style="'+styleUntrusted+'" >'+reportdata[item].value+'</td>'+
                 '<td class="failureReportRow4" >'+reportdata[item].whiteListValue+'</td>'+

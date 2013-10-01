@@ -16,17 +16,18 @@ import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
-import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import java.io.StringWriter;
 import java.util.*;
-
+import java.io.IOException;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 //import org.apache.commons.lang3.StringUtils;
@@ -40,47 +41,7 @@ import org.slf4j.LoggerFactory;
 public class ReportsBO extends BaseBO {
     Logger logger = LoggerFactory.getLogger(getClass().getName());
     
-    private byte[] dataEncryptionKey = null;
 
-    private static class Aes128DataCipher implements DataCipher {
-            private Logger log = LoggerFactory.getLogger(getClass());
-            private Aes128 cipher;
-            public Aes128DataCipher(Aes128 cipher) { this.cipher = cipher; }
-            
-            @Override
-            public String encryptString(String plaintext) {
-                try {
-                    return cipher.encryptString(plaintext);
-                }
-                catch(CryptographyException e) {
-                    log.error("Failed to encrypt data", e);
-                    return null;
-                }
-            }
-
-            @Override
-            public String decryptString(String ciphertext) {
-                try {
-                    return cipher.decryptString(ciphertext);
-                }
-                catch(CryptographyException e) {
-                    log.error("Failed to decrypt data", e);
-                    return null;
-                }
-            }
-            
-    }
-        
-    public void setDataEncryptionKey(byte[] key) {
-                    try {
-                        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
-                    }
-                    catch(CryptographyException e) {
-                        logger.error("Cannot initialize data encryption cipher", e);
-                    }      
-    }
-    
-    
     public ReportsBO() {
         super();
     }
@@ -98,14 +59,14 @@ public class ReportsBO extends BaseBO {
         try {
             HostsTrustReportType hostsTrustReportType = new HostsTrustReportType();
             for (Hostname host : hostNames) {
-                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(host.toString()); // datatype.Hostname
+                TblHosts tblHosts = My.jpa().mwHosts().findByName(host.toString()); // datatype.Hostname
 
 
                 if (tblHosts == null) {
                     throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, host);
                 }
 
-                List<TblTaLog> logs = new TblTaLogJpaController(getEntityManagerFactory()).findTrustStatusByHostId(tblHosts.getId(), 5);
+                List<TblTaLog> logs = My.jpa().mwTaLog().findTrustStatusByHostId(tblHosts.getId(), 5);
 
                 if (logs != null) {
 
@@ -124,8 +85,6 @@ public class ReportsBO extends BaseBO {
 
             }
             return hostsTrustReportType;
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
         } catch (Exception e) {
             throw new ASException(e);
         }
@@ -142,21 +101,19 @@ public class ReportsBO extends BaseBO {
          *
          */
         TblHosts tblHosts = null;
+        
         try {
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-        }
+        tblHosts = My.jpa().mwHosts().findByName(hostName.toString()); // datatype.Hostname
 
         if (tblHosts == null) {
             throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
         }
 
-        Date lastStatusTs = new TblTaLogJpaController(getEntityManagerFactory()).findLastStatusTs(tblHosts.getId());
+        Date lastStatusTs = My.jpa().mwTaLog().findLastStatusTs(tblHosts.getId());
 
 
         if (lastStatusTs != null) {
-            List<TblTaLog> logs = new TblTaLogJpaController(getEntityManagerFactory()).findLogsByHostId(tblHosts.getId(), lastStatusTs);
+            List<TblTaLog> logs = My.jpa().mwTaLog().findLogsByHostId(tblHosts.getId(), lastStatusTs);
             com.intel.mountwilson.as.hostmanifestreport.data.HostType hostType = new com.intel.mountwilson.as.hostmanifestreport.data.HostType();
             hostType.setName(hostName.toString()); // datatype.Hostname
             if (logs != null) {
@@ -173,6 +130,10 @@ public class ReportsBO extends BaseBO {
             hostManifestReportType.setHost(hostType);
         }
         return hostManifestReportType;
+        }
+        catch(Exception e) {
+            throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
+        }
     }
 
     private String getMleInfo(TblHosts tblHosts) {
@@ -214,7 +175,7 @@ public class ReportsBO extends BaseBO {
 
         try {
 
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString());
+            tblHosts = My.jpa().mwHosts().findByName(hostName.toString());
 
             if (tblHosts == null) {
                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
@@ -236,16 +197,15 @@ public class ReportsBO extends BaseBO {
             throw aex;
 
 
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-        } catch (Exception ex) {
+        }  catch (Exception ex) {
 
             throw new ASException(ex);
         }
     }
 
-    public AttestationReport getAttestationReport(Hostname hostName, Boolean failureOnly) {
+    public AttestationReport getAttestationReport(Hostname hostName, Boolean failureOnly)  {
 
+        try {
         AttestationReport attestationReport = new AttestationReport();
 
         /*
@@ -256,12 +216,8 @@ public class ReportsBO extends BaseBO {
          */
 
         TblHosts tblHosts = null;
-        try {
-            tblHosts = new TblHostsJpaController(getEntityManagerFactory()).findByName(hostName.toString()); // datatype.Hostname
-        } catch (CryptographyException e) {
-            throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-        }
-
+                    tblHosts = My.jpa().mwHosts().findByName(hostName.toString()); // datatype.Hostname
+        
         if (tblHosts == null) {
             throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName.toString());
         }
@@ -284,9 +240,13 @@ public class ReportsBO extends BaseBO {
         }
 
         return attestationReport;
+        }
+        catch(Exception e) {
+            throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
+        }
     }
     
-    public PcrLogReport getPcrManifestLog(TblHosts tblHosts, TblTaLog log, Boolean failureOnly) throws NumberFormatException {
+    public PcrLogReport getPcrManifestLog(TblHosts tblHosts, TblTaLog log, Boolean failureOnly) throws NumberFormatException, IOException {
         TblPcrManifest tblPcrManifest = getPcrModuleManifest(tblHosts,log.getMleId(),log.getManifestName());
         PcrLogReport manifest = new PcrLogReport();
         manifest.setName(Integer.parseInt(log.getManifestName()));
@@ -322,7 +282,7 @@ public class ReportsBO extends BaseBO {
     
     
     // XXX the mw_ta_log and  mw_module_manifest_log tables are not adequate to express the results of policy evaluation... better to just store a serialized copy of the trust report and then read it in once using json mapper, or maybe yaml,  and then have all the info. 
-    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) {
+    private void addManifestLogs(Integer hostId, PcrLogReport manifest, TblTaLog log, Boolean failureOnly,TblPcrManifest tblPcrManifest) throws IOException {
         HashMap<String,ModuleLogReport> moduleReports = new HashMap<String, ModuleLogReport>();
         
         if(log.getTblModuleManifestLogCollection() != null){
@@ -333,13 +293,15 @@ public class ReportsBO extends BaseBO {
         }
         
         if(!failureOnly){
-            logger.info("FailureOnly flag is false. Adding all manifests.");
+            logger.debug("FailureOnly flag is false. Adding all manifests.");
             for(TblModuleManifest moduleManifest : tblPcrManifest.getMleId().getTblModuleManifestCollection()){
                 if(moduleManifest.getExtendedToPCR().equalsIgnoreCase(tblPcrManifest.getName()) && 
                         !moduleReports.containsKey(moduleManifest.getComponentName())){
                     
                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
-                        String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
+                        //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        String hostSpecificDigestValue = My.jpa().mwHostSpecificManifest().findByModuleAndHostID(hostId, moduleManifest.getId()).getDigestValue();
                         moduleReports.put(moduleManifest.getComponentName(), new ModuleLogReport(moduleManifest.getComponentName(),
                                 hostSpecificDigestValue, hostSpecificDigestValue, 1));
                     }

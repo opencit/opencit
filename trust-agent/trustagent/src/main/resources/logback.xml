@@ -1,6 +1,6 @@
 <configuration>
 
-  <property name="USER_HOME" value="/usr/share/glassfish3/glassfish/domains/domain1/logs" />
+  <property name="USER_HOME" value="/var/log" />
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
     <file>/var/log/trustAgent.log</file>

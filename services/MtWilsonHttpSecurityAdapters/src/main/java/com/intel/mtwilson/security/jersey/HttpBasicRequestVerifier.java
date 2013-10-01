@@ -30,13 +30,13 @@ public class HttpBasicRequestVerifier {
 
     public User getUserForRequest(String httpMethod, String requestUrl, MultivaluedMap<String, String> headers, String requestBody) throws CryptographyException {
 
-        String userName = "";
-        String userSpecifiedPassword = "";
+        String userName;
+        String userSpecifiedPassword;
         String authorizationHeader = headers.getFirst("Authorization");
         HttpBasicRequestVerifier.Authorization auth = parseAuthorization(authorizationHeader);
 
         String realm = new String(Base64.decodeBase64(auth.realm));
-        log.debug("VerifyAuthorization Header: Signed content (" + realm.length() + ") follows:\n" + realm);
+        //log.debug("VerifyAuthorization Header: Signed content (" + realm.length() + ") follows:\n" + realm);
 
         // In HttpBasic, the user name and password would be separated by :
         String[] loginInfo = realm.split(":");
@@ -64,7 +64,7 @@ public class HttpBasicRequestVerifier {
         log.debug("VerifyAuthorization:   Retrieved the user credentials from DB");
 
         if (!userPasswordInSystem.equals(userSpecifiedPassword)) {
-            log.info("Request is NOT Authenticated");
+            log.debug("Request is NOT Authenticated");
             throw new CryptographyException("Either the user name or password specified is not correct.");
         }
 
@@ -74,7 +74,7 @@ public class HttpBasicRequestVerifier {
         // Because of security reasons, the users using HttpBasic would be able to just retrieve the attestation status and will 
         // not have previleges for any any other operations.
         try {
-            log.info("Request is authenticated");
+            log.debug("Request is authenticated");
             User userInfo = new User(userName, new Role[]{Role.Report}, userName, Md5Digest.valueOf(insecureRequestSummary.getBytes("UTF-8"))); 
             return userInfo;
         }

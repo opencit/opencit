@@ -44,6 +44,7 @@ public class ASComponentFactory {
         else {
             bean = new HostBO();
         }
+        /*
         String dataEncryptionKeyString = ASConfig.getConfiguration().getString("mtwilson.as.dek");
         if( dataEncryptionKeyString != null ) {
             try {
@@ -53,6 +54,7 @@ public class ASComponentFactory {
                 throw new ASException(e);
             }
         }
+        */
         return bean;
     }
 
@@ -79,10 +81,12 @@ public class ASComponentFactory {
         else {
             bean = new ReportsBO();
         }
+        /*
         String dataEncryptionKeyString = ASConfig.getConfiguration().getString("mtwilson.as.dek");
         if( dataEncryptionKeyString != null ) {
             bean.setDataEncryptionKey(Base64.decodeBase64(dataEncryptionKeyString));
         }
+        */
         return bean;
     }
 

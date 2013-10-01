@@ -183,7 +183,7 @@ public class RsaAuthorization {
         signatureBlock.headerNames = new String[] { "X-Nonce", "Date" };
 
         String content = signatureBlock.toString();        
-        log.debug("signed content follows... ("+content.length()+") \n"+content);
+        //log.debug("signed content follows... ("+content.length()+") \n"+content);
         
         byte[] signature = credential.signature(content.getBytes("UTF-8"));
         String signatureBase64 = new String(Base64.encodeBase64(signature));
@@ -193,7 +193,7 @@ public class RsaAuthorization {
         // includes the SHA256withRSA algorithm OID, which is an X509 thing,
         // and pure public key signatures don't have that.
         String authorization = String.format("X509 %s", headerParams( realm, username, signatureBlock.headerNames, signatureBlock.signatureAlgorithm,  signatureBase64));
-        log.debug("authorization: "+authorization);
+        //log.debug("authorization: "+authorization);
         return authorization;
     }
     

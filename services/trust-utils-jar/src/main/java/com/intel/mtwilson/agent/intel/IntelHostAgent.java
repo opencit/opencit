@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.crypto.X509Util;
@@ -140,6 +139,9 @@ public class IntelHostAgent implements HostAgent {
         host.VMM_Version = hostInfo.getVmmVersion().trim();
         host.VMM_OSName = hostInfo.getOsName().trim();
         host.VMM_OSVersion = hostInfo.getOsVersion().trim();
+        //  The actual processor information includes the below 8 byte data out of which only the first 3 bytes are needed to match the processor generation
+        // C2 06 02 00 FF FB EB BF
+        host.Processor_Info = hostInfo.getProcessorInfo().trim().substring(0, 8).toUpperCase();
         // now set some state we need for getHostAttestationReport
         vmmName = host.VMM_Name; // XXX maybe we should maintain the entire TxtHostRecord or something similar
         return host;

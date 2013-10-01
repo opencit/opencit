@@ -12,10 +12,10 @@
         for complete details.
     </description>
   
-    <parent>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>mtwilson-integration</artifactId>
-		<version>1.2-SNAPSHOT</version>
+    <parent> 
+        <groupId>com.intel.mtwilson.integration</groupId> 
+        <artifactId>mtwilson-integration</artifactId> 
+        <version>1.2-SNAPSHOT</version> 
     </parent>
 
 
@@ -39,7 +39,23 @@
           </execution>
         </executions>
       </plugin>
- 
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-javadoc-plugin</artifactId>
+			<version>2.9</version>
+			<configuration>
+				<stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+			</configuration>
+			<executions>
+            <execution>
+                <id>attach-javadocs</id>
+                <phase>site</phase>
+                <goals>
+                    <goal>aggregate</goal>
+                </goals>
+            </execution>
+        </executions>			
+		</plugin>
             
         </plugins>
     </build>
@@ -53,13 +69,25 @@
         <artifactId>mtwilson-io</artifactId>
         <version>${project.version}</version>
       </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
       
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-crypto</artifactId>
         <version>${project.version}</version>
       </dependency>
-      
+
+        <!-- for tls-policy -->
+      <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>http-authorization</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+            
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-validation</artifactId>
@@ -87,12 +115,26 @@
 		<artifactId>slf4j-api</artifactId>
 		<version>1.6.4</version>
     </dependency>
+    <!--
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-simple</artifactId>
 		<version>1.6.4</version>
 		<scope>provided</scope>
     </dependency>
+    -->
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.12</version>
+                <scope>test</scope>
+        </dependency>
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.0.12</version>
+                <scope>test</scope>
+        </dependency>
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
@@ -141,4 +183,5 @@
         </dependency>        
     -->
   </dependencies>  
+
 </project>

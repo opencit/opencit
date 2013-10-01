@@ -36,8 +36,8 @@ public class RegisterUserController extends AbstractController {
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
         
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
-		logger.info("RegisterUserController >>");
+	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res)  {
+		logger.debug("RegisterUserController >>");
 		ModelAndView view = new ModelAndView(new JSONView());
 		
 		String username;
@@ -59,7 +59,7 @@ public class RegisterUserController extends AbstractController {
                 //Checking for duplicate user registration by seeing if there is already a cert in table for user
                 MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
                 if(keyTest != null) {
-                  logger.info("An user already exists with the specified User Name. Please select different User Name.");
+                  logger.info("An user already exists with the specified User Name: {}", username);
 		  view.addObject("result",false);
 		  view.addObject("message","An user already exists with the specified User Name. Please select different User Name.");
 		  return view;      
@@ -87,13 +87,13 @@ public class RegisterUserController extends AbstractController {
                 //SimpleKeystore response = KeystoreUtil.createUserInDirectory(new File(dirName), username, password, new URL(baseURL), new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
                 
                 ByteArrayResource certResource = new ByteArrayResource();
-                logger.info("registerusercontroller calling createUserInResource");
+                logger.debug("registerusercontroller calling createUserInResource");
         	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL),new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
                 MwPortalUser keyTable = new MwPortalUser();
                 keyTable.setUsername(username);
                 keyTable.setStatus("PENDING");
                 keyTable.setKeystore(certResource.toByteArray());
-                logger.info("registerusercontroller calling create");
+                logger.debug("registerusercontroller calling create");
                 keystoreJpa.create(keyTable);
         	
             if (response == null) {

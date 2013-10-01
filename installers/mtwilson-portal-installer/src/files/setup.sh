@@ -9,11 +9,9 @@ package_name=mtwilson-portal
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_var_dir=/var/opt/intel/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
-#package_env_filename=${package_dir}/${package_name}.env
-#package_install_filename=${package_dir}/${package_name}.install
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
@@ -24,10 +22,10 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
-mcctl=`which mcctl 2>/dev/null`
-if [ -f "$mcctl" ]; then
+mtwilson_portal=`which mtwilson-portal 2>/dev/null`
+if [ -f "$mtwilson_portal" ]; then
   echo "Uninstalling previous version..."
-  $mcctl uninstall
+  $mtwilson_portal uninstall
 fi
 
 # detect the packages we have to install
@@ -72,12 +70,18 @@ chmod 700 "${package_var_dir}"
 
 
 # copy control script to /usr/local/bin and finish setup
-chmod +x mcctl
+chmod +x mtwilson-portal
 mkdir -p /usr/local/bin
-cp mcctl /usr/local/bin
-/usr/local/bin/mcctl setup
-register_startup_script /usr/local/bin/mcctl mcctl >> $INSTALL_LOG_FILE
+cp mtwilson-portal /usr/local/bin
+/usr/local/bin/mtwilson-portal setup
+register_startup_script /usr/local/bin/mtwilson-portal mtwilson-portal >> $INSTALL_LOG_FILE
 
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
-glassfish_permissions "${package_var_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+  glassfish_permissions "${package_var_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
+  tomcat_permissions "${package_var_dir}"
+fi

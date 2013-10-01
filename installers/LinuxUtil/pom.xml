@@ -35,6 +35,27 @@
           </activation>
   <build>
     <plugins>
+        
+<!-- also defined in top level pom.xml but appears to not take effect if someoen runs just this pom -->      
+        <plugin>
+            <groupId>pl.project13.maven</groupId>
+            <artifactId>git-commit-id-plugin</artifactId>
+            <version>2.1.4</version>
+            <executions>
+                <execution>
+                    <phase>initialize</phase>
+                    <goals>
+                        <goal>revision</goal>
+                    </goals>
+                    <inherited>true</inherited>
+                    <configuration>
+                        <prefix>git</prefix>
+                        <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        
       <!-- begin copy other resources plugin -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
@@ -133,7 +154,14 @@
   
   
   </build>
-      </profile>
+  <dependencies>
+    <dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+  </dependencies>
+  </profile>
   </profiles>
 
 </project>

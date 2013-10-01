@@ -104,7 +104,7 @@ public class PublicKeyRequestVerifier {
             signatureBlock.body = requestBody;
             String content = signatureBlock.toString(); // may throw IllegalArgumentException if any required field is null or invalid
 
-            log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
+            //log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             
             // locate the public key or x509 certificate that can verify the signature
             // XXX TODO: need to also load the roles from the database (in case we're successful, so we don't do 2 queries) and also in future versions the roles may be in the x509 certificate so we need to get it directly and save it so we can examine after verifying
@@ -149,7 +149,7 @@ public class PublicKeyRequestVerifier {
             
 
             if( isValid ) {
-                log.info("Request is authenticated");
+                log.debug("Request is authenticated");
                 
                 // check if the request has expired by looking at the HTTP Date header, but only if it was signed.
                 if( signatureBlock.headers.containsKey("Date") ) {
@@ -184,7 +184,7 @@ public class PublicKeyRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.info("Request is NOT AUTHENTICATED");
+        log.debug("Request is NOT AUTHENTICATED");
         return null;
     }
     
@@ -270,14 +270,15 @@ Authorization: MtWilson
         rsa.update(document);
         return rsa.verify(signature);
     }
-
+    // commenting out unused function (6/11 1.2)
+    /*
     private boolean verifySignature(byte[] document, Certificate certificate, String signatureAlgorithm, byte[] signature) throws NoSuchAlgorithmException,InvalidKeyException, SignatureException {
         Signature rsa = Signature.getInstance(signatureAlgorithm); 
         rsa.initVerify(certificate);
         rsa.update(document);
         return rsa.verify(signature);
     }
-    
+    */
     /**
      * Standardizes signature algorithm names to the Java name.
      * "SHA256withRSA".equals(signatureAlgorithm("RSA-SHA256a")); // true

@@ -4,14 +4,13 @@
  */
 package test.policy;
 
-import com.intel.mtwilson.as.helper.Aes128DataCipher;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.MwMleSource;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -19,6 +18,7 @@ import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
@@ -30,7 +30,6 @@ import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.policy.*;
-import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -41,12 +40,14 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.junit.BeforeClass;
 import com.intel.mtwilson.tls.TlsPolicy;
 import org.apache.commons.codec.binary.Base64;
+import com.intel.mtwilson.util.ASDataCipher;
+import java.io.IOException;
+import org.junit.BeforeClass;
+
 /**
  *
  * @author jbuhacoff
@@ -59,6 +60,11 @@ public class TestVmwareEsxi51 {
     private transient String connection = "vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.175";
 //    private transient String hostname = "10.1.71.155";
 //    private transient String connection = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+    
+    @BeforeClass
+    public static void setMwHostsDek() throws CryptographyException, IOException {
+        ASDataCipher.cipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
+    }
     
     private TblHosts initNewHost() {
         TblHosts host = new TblHosts();
@@ -337,7 +343,6 @@ public class TestVmwareEsxi51 {
     
     @Test
     public void testApplyPolicyForHost() throws Exception {
-        TblHosts.dataCipher = new Aes128DataCipher(new Aes128(Base64.decodeBase64(My.configuration().getDataEncryptionKeyBase64())));
         TblHosts host = My.jpa().mwHosts().findByName(hostname);
         assertNotNull(host); 
         HostAgentFactory agentFactory = new HostAgentFactory();

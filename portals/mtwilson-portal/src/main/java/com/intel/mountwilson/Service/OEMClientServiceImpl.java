@@ -30,7 +30,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public List<OEMDataVO> getAllOEM(WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("OEMClientServiceImpl.getAllOEM >>");
+                                log.debug("OEMClientServiceImpl.getAllOEM >>");
                                 List<OEMDataVO> list = null;
                                 try {
                                         list =ConverterUtil.getListToOEMDataVO(apiClientServices.listAllOEM());
@@ -38,7 +38,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
                                         log.error(e.getMessage());
                                         throw ConnectionUtil.handleWLMPortalException(e);
                                         }
-                                log.info("OEMClientServiceImpl.getAllOEM <<");
+                                log.debug("OEMClientServiceImpl.getAllOEM <<");
                                 return list;
 	}
 
@@ -52,7 +52,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public boolean addOEMInfo(OEMDataVO dataVO, WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("OEMClientServiceImpl.addOEMInfo >>");
+                                log.debug("OEMClientServiceImpl.addOEMInfo >>");
                                 boolean result = false;
                                 try {
                                         apiClientServices.addOEM(new OemData(dataVO.getOemName(), dataVO.getOemDescription()));
@@ -61,7 +61,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
                                         log.error(e.getMessage());
                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.info("OEMClientServiceImpl.addOEMInfo <<");       	
+                                log.debug("OEMClientServiceImpl.addOEMInfo <<");       	
                                 return result;
 	}
 
@@ -76,7 +76,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public boolean updateOEMInfo(OEMDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-                                log.info("OEMClientServiceImpl.updateOEMInfo >>");
+                                log.debug("OEMClientServiceImpl.updateOEMInfo >>");
                                 boolean result = false;
                                 try {
                                         apiClientServices.updateOEM(new OemData(dataVO.getOemName(), dataVO.getOemDescription()));
@@ -85,7 +85,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
                                         log.error(e.getMessage());
                                         throw ConnectionUtil.handleWLMPortalException(e);
                                 }
-                                log.info("OEMClientServiceImpl.updateOEMInfo <<");
+                                log.debug("OEMClientServiceImpl.updateOEMInfo <<");
                                 return result;
 	}
 
@@ -99,7 +99,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
 	 */
 	@Override
 	public boolean deleteOEM(OEMDataVO dataVO,WhitelistService apiClientServices) throws WLMPortalException {
-		log.info("OEMClientServiceImpl.deleteOEM >>");
+		log.debug("OEMClientServiceImpl.deleteOEM >>");
 		boolean result = false;
 		try {
 			System.out.println(apiClientServices+"----"+dataVO.getOemName());
@@ -108,7 +108,7 @@ public class OEMClientServiceImpl implements IOEMClientService {
 			log.error(e.getMessage());
 			throw ConnectionUtil.handleWLMPortalException(e);
 		}
-                               log.info("OEMClientServiceImpl.deleteOEM <<");
+                               log.debug("OEMClientServiceImpl.deleteOEM <<");
                                 return result;
 	}
 }

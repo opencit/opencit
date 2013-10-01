@@ -31,6 +31,7 @@ public class TADataContext {
     private String vmmName;
     private String vmmVersion;
     private String modulesStr;
+    private String processorInfo;
     
 
     public String getBiosOem() {
@@ -204,5 +205,14 @@ public class TADataContext {
 
     public String getModules() {
         return modulesStr;
-    }    
+    } 
+
+    public String getProcessorInfo() {
+        return processorInfo;
+    }
+
+    public void setProcessorInfo(String processorInfo) {
+        this.processorInfo = processorInfo;
+    }
+        
 }

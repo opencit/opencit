@@ -370,7 +370,7 @@ public class X509Builder extends BuilderModel {
     public X509Builder algorithm(AlgorithmId algorithmId) {
         try {
             this.algorithm = algorithmId; // new AlgorithmId(AlgorithmId.sha256WithRSAEncryption_oid); // md5WithRSAEncryption_oid
-            info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algorithm));
+            info.set(X509CertInfo.ALGORITHM_ID, new CertificateAlgorithmId(algorithmId));
 //                info.set(CertificateAlgorithmId.NAME + "." + CertificateAlgorithmId.ALGORITHM, algorithm); // was present in older monolith version of the certificate factory, but it seems we don't really need it
         }
         catch(Exception e) {

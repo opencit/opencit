@@ -8,7 +8,7 @@
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">OS \> Add OS</div>
+		<div class="nagPanel">Whitelist &gt; Edit OS &gt; Add OS</div>
 		<div id="nameOfPage" class="NameHeader">New OS/Hypervisor Combination</div>
 		<div class="tableDiv" style="margin-left: 61px;">
 		

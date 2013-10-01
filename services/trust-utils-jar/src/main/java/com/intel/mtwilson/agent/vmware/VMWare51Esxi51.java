@@ -140,7 +140,7 @@ public class VMWare51Esxi51   {
                 }
                 if( digest.replace("0", "").trim().isEmpty() ) {
                     log.warn("Event Digest is zero longer than 20 bytes: {}  -- replacing with 20 bytes of zero", digest);
-                    return new Measurement(/*new Sha1Digest(digest)*/new Sha1Digest("0000000000000000000000000000000000000000"), label, info );
+                    return new Measurement(Sha1Digest.ZERO, label, info );
                 }
                 /**
                  * XXX the following lines may cause a problem.  If you are reading this, it's probably because
@@ -150,7 +150,7 @@ public class VMWare51Esxi51   {
                  * So the TSS automatically does a SHA1 hash on the data --  haven't read the source code so I don't know
                  * if it only hashes if it's longer than 20 bytes, or if it always hashes.  Probably always hashes for consistency.
                  */
-                log.error("Event Digest is non-zero longer than 20 bytes: {}  -- replacing with SHA1 of value zero", digest);
+                log.error("Event Digest is non-zero longer than 20 bytes: {}  -- trying to decode it", digest);
                 return new Measurement(Sha1Digest.valueOf(Hex.decode(digest)), label, info ); // XXX need some thought on how to handle this.  maybe change the Measurement class to accept ANY SIZE byte[]  instead of a Sha1Digest ??
                 
     }

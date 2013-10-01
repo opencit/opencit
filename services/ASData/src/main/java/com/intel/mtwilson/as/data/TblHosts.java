@@ -4,13 +4,16 @@
  */
 package com.intel.mtwilson.as.data;
 
-import com.intel.mtwilson.as.data.helper.DataCipher;
+import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
+import com.intel.mtwilson.util.ASDataCipher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import javax.crypto.BadPaddingException;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -45,9 +48,6 @@ import org.slf4j.LoggerFactory;
 public class TblHosts implements Serializable {
     @Transient
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    
-    @Transient
-    public static transient DataCipher dataCipher = null;
     
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
@@ -197,7 +197,23 @@ public class TblHosts implements Serializable {
 
     public String getAddOnConnectionInfo() {
         if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
-            addOnConnectionInfo_plainText = dataCipher.decryptString(addOnConnectionInfo_cipherText);
+            try {
+                //log.info("XXX TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
+                addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
+                //log.info("XXX TblHosts ASDataCipher plainText = {}", addOnConnectionInfo_plainText);
+                //log.info("XXX TblHosts ASDataCipher cipherText = {}", addOnConnectionInfo_cipherText);
+            }
+            catch(Exception e) {
+                log.error("Cannot decrypt host connection credentials", e);
+                // this will happen if the data is being decrypted with the wrong key (which will happen if someone reinstalled mt wilson and kept the data but didn't save the data encryption key)
+                // it may also happen if the data wasn't encrypted in the first place
+                if( addOnConnectionInfo_cipherText.startsWith("http") ) {
+                    return addOnConnectionInfo_plainText; // data was not encrypted
+                }
+                else {
+                    throw new IllegalArgumentException("Cannot decrypt host connection credentials; check the key or delete and re-register the host");
+                }
+            }
         }
         return addOnConnectionInfo_plainText;
     }
@@ -207,7 +223,7 @@ public class TblHosts implements Serializable {
         // TODO  encrypt it and set addOnConnectionInfo_cipherText
         if( addOnConnectionInfo == null ) { addOnConnectionInfo_cipherText = null; }
         else {
-             addOnConnectionInfo_cipherText = dataCipher.encryptString(addOnConnectionInfo_plainText);
+             addOnConnectionInfo_cipherText = ASDataCipher.cipher.encryptString(addOnConnectionInfo_plainText);
         }
     }
 

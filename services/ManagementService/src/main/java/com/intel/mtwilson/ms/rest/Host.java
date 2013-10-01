@@ -151,31 +151,31 @@ public class Host {
      * @return : List of HostConfigResponse objects each one having the status of the registration or update of the host passed in.
      * @throws ApiException 
     */
-    //@RolesAllowed({"Attestation", "Security"})
-    //@POST
-    //@Path("/bulk")
-    //@Consumes(MediaType.APPLICATION_JSON)
-    //@Produces(MediaType.APPLICATION_JSON)
-    //public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws ApiException {
-    //    log.error("About to execute the registerhosts function");
-    //      HostConfigResponseList results = new MSComponentFactory().getHostBO().registerHosts(hostRecords);
-    //      return results;        
-    //   /*HostConfigResponseList hostResponses = new HostConfigResponseList();
-    //    List <HostConfigResponse> hostResList = new ArrayList<HostConfigResponse>();       
-    //   if (hostRecords != null && !hostRecords.getHostRecords().isEmpty()) {
-    //         for (TxtHostRecord hostRecord: hostRecords.getHostRecords()) {
-    //            HostConfigResponse hostResponse = new HostConfigResponse();
-    //            hostResponse.setHostName(hostRecord.HostName);
-    //            hostResponse.setStatus(Boolean.toString(false));
-    //             hostResponse.setErrorMessage("Test");
-    //            log.error("Processed host {} successfully",hostRecord.HostName );
-    //            hostResList.add(hostResponse);
-    //        }           
-    //   }
-    //   // boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
-    //   hostResponses.setHostRecords(hostResList);
-    //    return hostResponses;*/
-    //}
+    @RolesAllowed({"Attestation", "Security"})
+    @POST
+    @Path("/bulk")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws ApiException {
+        log.error("About to execute the registerhosts function");
+          HostConfigResponseList results = new MSComponentFactory().getHostBO().registerHosts(hostRecords);
+          return results;        
+       /*HostConfigResponseList hostResponses = new HostConfigResponseList();
+        List <HostConfigResponse> hostResList = new ArrayList<HostConfigResponse>();       
+       if (hostRecords != null && !hostRecords.getHostRecords().isEmpty()) {
+             for (TxtHostRecord hostRecord: hostRecords.getHostRecords()) {
+                HostConfigResponse hostResponse = new HostConfigResponse();
+                hostResponse.setHostName(hostRecord.HostName);
+                hostResponse.setStatus(Boolean.toString(false));
+                 hostResponse.setErrorMessage("Test");
+                log.error("Processed host {} successfully",hostRecord.HostName );
+                hostResList.add(hostResponse);
+            }           
+       }
+       // boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
+       hostResponses.setHostRecords(hostResList);
+        return hostResponses;*/
+    }
     
    
 

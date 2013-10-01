@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-        		<div class="mainHeader"><span class="labelPageTitle" id="MainContent_lblPageTitle">Trust Status Dash Board</span></div>
+        		<div class="mainHeader"><span class="labelPageTitle" id="MainContent_lblPageTitle">Trust Dashboard</span></div> <!-- was: "Trust Status Dash Board" -->
         		<div class="mainTableDiv" id="mainTrustDetailsDiv">
         		<div id="mainTrustDetailsDivHidden" style="display: none;" class="mainTableDisplayDiv">
         			<div class="tableDisplay">

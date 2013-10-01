@@ -1,16 +1,22 @@
 var uploadFileHelp = [];
-uploadFileHelp[0]="Please provide file in following format :";
-uploadFileHelp[1]="Host_Name|Host_Port_no";
-uploadFileHelp[2]="e.g.   myTrustAgent|9999";
-uploadFileHelp[3]="or for VMWare Type";
-uploadFileHelp[4]="Host_Name|Vmware_Connection_String";
-uploadFileHelp[5]="e.g.   myVmwareHost|https://192.168.1.0/sdk;Administrator;Password";
-
+uploadFileHelp[0]="Provide a plain text file (.txt format) containing a list of hosts to be registered in the following format(S):";
+uploadFileHelp[1]="Agent | Host_Name | connection string";
+uploadFileHelp[2]="For Open Source Based Hosts:";
+uploadFileHelp[3]="intel|Host_Name|Host_Port_no";
+uploadFileHelp[4]="e.g.   intel|myTrustAgent|9999";
+uploadFileHelp[5]="For VMWare Based Hosts:";
+uploadFileHelp[6]="vmware|Host_Name|Vmware_Connection_String*";
+uploadFileHelp[7]="e.g. vmware|myVmwareHost|https://192.168.1.0:443/sdk;Administrator;Password";
+uploadFileHelp[8]="For Citrix Type";
+uploadFileHelp[9]="citrix|Host_Name|Citrix_Connection_String*";
+uploadFileHelp[10]="e.g.   citrix|myCitrixHost|https://192.168.1.0:443/;Administrator;Password";
+uploadFileHelp[11]="* connection strings must be valid urls.  Please notice the / after the port number.  That is required"
 
 var vCenterStringHelp = [];
-vCenterStringHelp[0]="Please provide only the IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.";
-vCenterStringHelp[1]="Ex: 192.168.1.1";
-vCenterStringHelp[2]="Ex: 192.168.1.0:444";
+vCenterStringHelp[0]="Please provide the hostname or IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.";
+vCenterStringHelp[1]="Ex: hostname.com";
+vCenterStringHelp[2]="Ex: 192.168.1.1";
+vCenterStringHelp[3]="Ex: 192.168.1.0:444";
 
 var addLocationHelp = [];
 addLocationHelp[0]="Please provide Location for server.";
@@ -26,8 +32,8 @@ requiredPCRValuesHelp[6] = "PCR[3]- Option ROM Configuration and Data - measures
 requiredPCRValuesHelp[7] = "PCR[4]- IPL code that performs the initial boot, usually the Master Boot Record (MBR).";
 requiredPCRValuesHelp[8] = "PCR[5]- IPL Configuration and Data (i.e., the configuration and data used by the IPL Code).";
 requiredPCRValuesHelp[9] = "PCR[17]- Code and data associated with the secure launch process.";
-requiredPCRValuesHelp[10] = "PCR[18]- Measurement of the tBoot package.";
-requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the key packages of the of the MLE.";
+requiredPCRValuesHelp[10] = "PCR[18]- Measurement of the MLE [Tboot+ hypervisor]";
+requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the Trusted OS (kernel code, settings, other)";
 
 var applicableWhiteListTargetHelp = [];
 applicableWhiteListTargetHelp[0]="This option allows users to choose how the white list is configured.";

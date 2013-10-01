@@ -8,7 +8,7 @@
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">OS \> View OS</div>
+		<div class="nagPanel">Whitelist &gt; View OS</div>
 		<div id="nameOfPage" class="NameHeader">View OS/Hypervisor Combination</div>
 		<div id="ViewOSDisplayDiv">
 			<div class="tableDiv" style="margin-left: 61px; display: none;" id="viewOSMainDataDisplay">

@@ -95,9 +95,24 @@
             <version>2.6</version>
     </dependency>
     <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>my</artifactId>
+            <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
     </dependency>
     <dependency>
             <groupId>${project.groupId}</groupId>
@@ -105,9 +120,34 @@
             <version>${project.version}</version>
     </dependency>
     <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>MSData</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-data</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-handler</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+    </dependency>
+    <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>api-client</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <!-- must exclude this artifact to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->
+                <exclusion>
+                    <artifactId>jaxb-impl</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                </exclusion>                
+            </exclusions>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>

@@ -4,61 +4,46 @@
  */
 package com.intel.mtwilson.agent.citrix;
 
-import java.net.MalformedURLException; 
-import java.net.URL; 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;  
-import java.util.Set;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap; 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
-import javax.net.ssl.HostnameVerifier;  
-import javax.net.ssl.HttpsURLConnection;  
-import javax.net.ssl.SSLContext;  
-import javax.net.ssl.SSLSession;  
-import javax.net.ssl.TrustManager;  
-import javax.net.ssl.X509TrustManager; 
-import javax.persistence.EntityManagerFactory;
-import java.sql.Timestamp;
-import java.util.Date;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.io.IOUtils;
-
+import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mountwilson.as.helper.CommandUtil;
+import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
+import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrIndex;
+import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.mtwilson.tls.TlsConnection;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;
 import com.xensource.xenapi.Session;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
-
-
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mountwilson.as.helper.CommandUtil;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
-import com.intel.mtwilson.model.Pcr;
-import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
-import com.intel.mtwilson.tls.TlsConnection;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.logging.Level;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.configuration.Configuration;
 import org.apache.xmlrpc.XmlRpcException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,28 +71,25 @@ public class CitrixClient {
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
-    private EntityManagerFactory entityManagerFactory;
     
-    protected static Connection connection;
+    protected Connection connection;
 	
     public CitrixClient(TlsConnection tlsConnection){
         this.tlsConnection = tlsConnection;
-        this.connectionString = tlsConnection.getConnectionString();
-        log.info("CitrixClient connectionString == " + connectionString);
-        // connectionString == citrix:https://xenserver:port;username;password
-        String cs = connectionString.substring(8);
-        log.info("ConnectionString cs == " + cs);
-        String[] parts = cs.split(";");
-        // 10.1.70.126:443;root;P@ssw0rd
-                                   
-        String   ipParts = parts[0];
-        String[] ip = ipParts.split(":");
-            
-        this.hostIpAddress = ip[0];
-        this.port = Integer.parseInt(ip[1]);
-        this.userName = parts[1];
-        this.password = parts[2];
-        log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+        this.connectionString = tlsConnection.getURL().toExternalForm();
+//        log.info("CitrixClient connectionString == " + connectionString);
+        // connectionString == citrix:https://xenserver:port;username;password  or citrix:https://xenserver:port;u=username;p=password  or the same w/o the citrix prefix
+        try {
+            ConnectionString.CitrixConnectionString citrixConnection = ConnectionString.CitrixConnectionString.forURL(connectionString);
+            hostIpAddress = citrixConnection.getHost().toString();
+            port = citrixConnection.getPort();
+            userName = citrixConnection.getUsername();
+            password = citrixConnection.getPassword();
+        }
+        catch(MalformedURLException e) {
+            throw new IllegalArgumentException("Invalid Citrix Host URL", e); // NOTE: we are NOT providing the connection string in the error message because, since we can't parse it, we dn't know if there's a password in there. 
+        }
+        //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
                
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
@@ -116,6 +98,9 @@ public class CitrixClient {
         opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
         aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
         
+    }
+    
+    public void init() {
         boolean foundAllRequiredFiles = true;
         String required[] = new String[] { aikverifyhome, opensslCmd, aikverifyCmd, aikverifyhomeData };
         for(String filename : required) {
@@ -130,21 +115,17 @@ public class CitrixClient {
         }
         
         // we must be able to write to the data folder in order to save certificates, nones, public keys, etc.
-        log.info("stdalex-error checking to see if we can write to " + aikverifyhomeData);
+        //log.info("stdalex-error checking to see if we can write to " + aikverifyhomeData);
         File datafolder = new File(aikverifyhomeData);
         if( !datafolder.canWrite() ) {
             throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));            
         }    
+        
     }
 	
-    public CitrixClient(EntityManagerFactory entityManagerFactory,TlsConnection tlsConnection) {
-        this(tlsConnection);
-        this.setEntityManagerFactory(entityManagerFactory);
-    }
-    
 	
-    
-    private String removeTags(String xml) {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning    
+    /*private String removeTags(String xml) {
 	
       String resp = "";  
       int i = 0;
@@ -161,7 +142,7 @@ public class CitrixClient {
        resp += xml.charAt(i);
       }
       return resp;
-    }
+    }*/
     
     public class keys {
      public String tpmEndCert;
@@ -171,14 +152,8 @@ public class CitrixClient {
      
      public keys() {}
     }
-	
-    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
-          System.err.println("stdalex-error getQuoteInformationForHost pcrList == " + pcrList);
-          try {
-            
-            String nonce = generateNonce();
-            String sessionId = generateSessionId();
-
+    
+    public void connect() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XmlRpcException, XmlRpcException {
             URL url = null; 
             try { 
                url = new URL("https://" + hostIpAddress + ":" + port); 
@@ -198,15 +173,43 @@ public class CitrixClient {
             HttpsURLConnection.setDefaultHostnameVerifier(hv); 
 			
             connection = new Connection(url);
-            System.err.println("stdalex-error connecting with " + userName + " " + password);
-            Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+        
+         Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+            
+    }
+	
+    public boolean isConnected() { return connection != null; }
+    
+    public void disconnect() throws BadServerResponse, XenAPIException, XmlRpcException {
+        Session.logout(connection);
+//        connection.dispose();
+    }
+    
+    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
+          log.debug("getQuoteInformationForHost pcrList == " + pcrList);
+          try {
+            
+              // We cannot reuse the connections across different calls since they are tied to a particular host.
+              if( !isConnected()) { connect(); } 
+              
+            String nonce = generateNonce();
+            String sessionId = generateSessionId();
+
+			// We do not need to connect again. So, commenting it out.
+            // System.err.println("stdalex-error connecting with " + userName + " " + password);
+            // Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
 			
-            System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
+            // System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
 			 
             Map<String, String> myMap = new HashMap<String, String>();
             Set<Host> hostList = Host.getAll(connection);
             Iterator iter = hostList.iterator();
-            Host h = (Host)iter.next();
+            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+            // to throw an exception if the hasNext is false.
+            Host h = null;
+            if (iter.hasNext()) {
+                h = (Host)iter.next();
+            } 
 			
             String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
            
@@ -214,7 +217,7 @@ public class CitrixClient {
             int endP   = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
             // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
             String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(),endP);
-            System.err.println("aikCert == " + cert);
+            log.debug("aikCert == " + cert);
             
             keys key = new keys();
             
@@ -223,43 +226,43 @@ public class CitrixClient {
 			
             String aikCertificate = key.tpmAttKeyPEM;
             
-            System.err.println( "extracted aik cert from response: " + aikCertificate);
+            log.debug( "extracted aik cert from response: " + aikCertificate);
             
             myMap = new HashMap<String, String>();
             myMap.put("nonce",nonce);
             String quote = h.callPlugin(connection, "tpm", "tpm_get_quote", myMap);
 
-            System.err.println("extracted quote from response: "+ quote);
+            log.debug("extracted quote from response: "+ quote);
             //saveFile(getCertFileName(sessionId), Base64.decodeBase64(aikCertificate));
             saveFile(getCertFileName(sessionId),aikCertificate.getBytes());
-            System.err.println( "saved certificate with session id: "+sessionId);
+            log.debug( "saved certificate with session id: "+sessionId);
             
             saveQuote(quote, sessionId);
 
-            System.err.println( "saved quote with session id: "+sessionId);
+            log.debug( "saved quote with session id: "+sessionId);
             
             saveNonce(nonce,sessionId);
             
-            System.err.println( "saved nonce with session id: "+sessionId);
+            log.debug( "saved nonce with session id: "+sessionId);
             
             //createRSAKeyFile(sessionId);
 
-           System.err.println( "created RSA key file for session id: "+sessionId);
+           log.debug( "created RSA key file for session id: "+sessionId);
             
             HashMap<String, Pcr> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
             
-            System.err.println( "Got PCR map");
+            log.debug( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
             
             return pcrMap;
             
         } catch (ASException e) {
             throw e;
-        } catch(UnknownHostException e) {
-            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
+//        } catch(UnknownHostException e) {
+//            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
         }  catch (Exception e) {
-            System.err.println("stdalex-error caught exception during login: " + e.toString() + " class: " + e.getClass());
-            throw new ASException(e);
+            log.debug("caught exception during login: " + e.toString() + " class: " + e.getClass());
+            throw new ASException(e, ErrorCode.AS_CITRIX_ERROR, e.toString());
         }
     }
 
@@ -314,18 +317,19 @@ public class CitrixClient {
         return "quote_" + sessionId +".data";
     }
 
-    private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning
+    /*private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
         if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
-            log.info( "adding newlines to certificate BEGIN tag");            
+            log.debug( "adding newlines to certificate BEGIN tag");            
             aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
         }
         if( aikCertificate.indexOf("\n-----END CERTIFICATE-----") < 0 && aikCertificate.indexOf("-----END CERTIFICATE-----") >= 0 ) {
-            log.info( "adding newlines to certificate END tag");            
+            log.debug( "adding newlines to certificate END tag");            
             aikCertificate = aikCertificate.replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----");
         }
 
         saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
-    }
+    }*/
 
     private String getCertFileName(String sessionId) {
         return "aikcert_" + sessionId + ".cer";
@@ -336,7 +340,7 @@ public class CitrixClient {
 
         try {
             assert aikverifyhome != null;
-            log.info( String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
+            log.debug( String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
             fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator +fileName);
             assert fileOutputStream != null;
             assert contents != null;
@@ -344,14 +348,14 @@ public class CitrixClient {
             fileOutputStream.flush();
         }
         catch(FileNotFoundException e) {
-            log.info( String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
+            log.warn( String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
             throw e;
         } finally {
             if (fileOutputStream != null) {
                 try {
                     fileOutputStream.close();
                 } catch (IOException ex) {
-                    log.info(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()));
+                    log.warn(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()));
                 }
             }
         }
@@ -371,26 +375,27 @@ public class CitrixClient {
           saveFile(getNonceFileName(sessionId), nonceBytes);
     }
 
-    private void createRSAKeyFile(String sessionId)  {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning
+    /*private void createRSAKeyFile(String sessionId)  {
         
         String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
-        log.info( "RSA Key Command " + command);
+        log.debug( "RSA Key Command " + command);
         CommandUtil.runCommand(command, false, "CreateRsaKey" );
         //log.log(Level.INFO, "Result - {0} ", result);
-    }
+    } */
 
-    private String getRSAPubkeyFileName(String sessionId) {
+    /*private String getRSAPubkeyFileName(String sessionId) {
         return "rsapubkey_" + sessionId + ".key";
-    }
+    }*/ 
 
     private HashMap<String,Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
         HashMap<String,Pcr> pcrMp = new HashMap<String,Pcr>();
-        System.err.println( "verifyQuoteAndGetPcr for session " + sessionId);
+        log.debug( "verifyQuoteAndGetPcr for session " + sessionId);
         String command = String.format("%s -c %s %s %s",aikverifyCmd, aikverifyhomeData + File.separator+getNonceFileName( sessionId),
                 aikverifyhomeData + File.separator+getCertFileName(sessionId),
                 aikverifyhomeData + File.separator+getQuoteFileName(sessionId)); 
         
-        System.err.println( "Command: " + command);
+        log.debug( "Command: " + command);
         List<String> result = CommandUtil.runCommand(command,true,"VerifyQuote");
         
         // Sample output from command:
@@ -412,14 +417,14 @@ public class CitrixClient {
                 boolean validPcrNumber = pcrNumberPattern.matcher(pcrNumber).matches();
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
                 if( validPcrNumber && validPcrValue ) {
-                	System.err.println("Result PCR "+pcrNumber+": "+pcrValue);
+                	log.debug("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
                             pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
                                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }
             else {
-            	System.err.println( "Result PCR invalid");
+            	log.debug( "Result PCR invalid");
             }
             /*
             if(pcrs.contains(parts[0].trim()))
@@ -430,75 +435,29 @@ public class CitrixClient {
         return pcrMp;
         
     }
-       
-    public EntityManagerFactory getEntityManagerFactory() {
-		return entityManagerFactory;
-	}
     
     
-	
-    public void setEntityManagerFactory(EntityManagerFactory entityManagerFactory) {
-		this.entityManagerFactory = entityManagerFactory;
-	}    
-    
-    public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception  {
-        log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+    public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException,  XmlRpcException  {
+        //log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
          HostInfo response = new HostInfo();
-       
-         URL url = null; 
-         try { 
-                 url = new URL("https://" + hostIpAddress + ":" + port); 
-                 log.info("stdalex-error url generated:" + url.toString());
-          }catch (Exception e) { 
-               log.info("stdalex-error exception while generating URL:" + e.toString());
-               throw e;
-          } 
-       
-	 		
-       // TODO-stdalex:  Do this so we actually check trust
-       
-       // Create a trust manager that does not validate certificate chains  
-       TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-         @Override 
-         public X509Certificate[] getAcceptedIssuers() {
-          return null;  
-         }  
-         // Trust always  
-         @Override 
-         public void checkClientTrusted(X509Certificate[] certs,  String authType) {}
-	 // Trust always  
-         @Override 
-         public void checkServerTrusted(X509Certificate[] certs, String authType) {}  
-        } 
-       };  
-       
-       // Install the all-trusting trust manager  
-       SSLContext sc = SSLContext.getInstance("SSL");  
-       // Create empty HostnameVerifier  
-       HostnameVerifier hv = new HostnameVerifier() {  
-        public boolean verify(String arg0, SSLSession arg1) {  
-         return true;  
-        }  
-       };  
- 
-       sc.init(null, trustAllCerts, new java.security.SecureRandom());  
-       HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
-       HttpsURLConnection.setDefaultHostnameVerifier(hv); 
-       log.info( "stdalex-error CitrixClient: attempting connection to "+hostIpAddress + " with values of " +
-                  url.toString() + "/" + userName + "/" + password);
-       connection = new Connection(url);
-       Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
-			
-       log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
+         
+         if( !isConnected()) { connect(); } 
+             
+       log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
-       Map<String, String> myMap = new HashMap<String, String>();
+      // Map<String, String> myMap = new HashMap<String, String>();
        Set<Host> hostList = Host.getAll(connection);
        Iterator iter = hostList.iterator();
-       Host h = (Host)iter.next();
+        // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+        // to throw an exception if the hasNext is false.
+       Host h = null;
+        if (iter.hasNext()) {       
+            h = (Host)iter.next();
+        }
        
        response.setClientIp(hostIpAddress);
-       
+
        Map<String, String> map = h.getSoftwareVersion(connection);
        response.setOsName(map.get("product_brand"));
        response.setOsVersion(map.get("product_version"));
@@ -509,75 +468,65 @@ public class CitrixClient {
        response.setBiosOem(map.get("bios-vendor"));
        response.setBiosVersion(map.get("bios-version"));
        
+       map = h.getCpuInfo(connection);
+       int stepping = Integer.parseInt(map.get("stepping"));
+       int model = Integer.parseInt(map.get("model"));
+       int family = Integer.parseInt(map.get("family"));
+       // EAX register contents is used for defining CPU ID and as well as family/model/stepping
+       // 0-3 bits : Stepping
+       // 4-7 bits: Model #
+       // 8-11 bits: Family code
+       // 12 & 13: Processor type, which will always be zero
+       // 14 & 15: Reserved
+       // 16 to 19: Extended model
+       // Below is the sample of the data got from the Citrix API
+       // Model: 45, Stepping:7 and Family: 6
+       // Mapping it to the EAX register we would get
+       // 0-3 bits: 7
+       // 4-7 bits: D (Actually 45 would be 2D. So, we would put D in 4-7 bits and 2 in 16-19 bits
+       // 8-11 bits: 6
+       //12-15 bits: 0
+       // 16-19 bits: 2
+       // 20-31 bits: Extended family and reserved, which will be 0
+       // So, the final content would be : 000206D7
+       // On reversing individual bytes, we would get D7 06 02 00
+       String modelInfo = Integer.toHexString(model);
+       String processorInfo = modelInfo.charAt(1) + Integer.toHexString(stepping) + " " + "0" + Integer.toHexString(family) + " " + "0" + modelInfo.charAt(0);
+       processorInfo = processorInfo.trim().toUpperCase();
+       response.setProcessorInfo(processorInfo);
        java.util.Date date= new java.util.Date();
        response.setTimeStamp( new Timestamp(date.getTime()).toString());
-       log.info("stdalex-error leaving getHostInfo");
+//       log.trace("stdalex-error leaving getHostInfo");
+              
        return response;
     }
 
-    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception {
-        String resp = new String();
-        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
+    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException,  XmlRpcException {
+        String resp = "";
+//        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
                
-         URL url = null; 
-         try { 
-                 url = new URL("https://" + hostIpAddress + ":" + port); 
-                 log.info("stdalex-error url generated:" + url.toString());
-          }catch (Exception e) { 
-               log.info("stdalex-error exception while generating URL:" + e.toString());
-               throw e;
-          } 
-       
-	 		
-       // TODO-stdalex:  Do this so we actually check trust
-       
-       // Create a trust manager that does not validate certificate chains  
-       TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-         @Override 
-         public X509Certificate[] getAcceptedIssuers() {
-          return null;  
-         }  
-         // Trust always  
-         @Override 
-         public void checkClientTrusted(X509Certificate[] certs,  String authType) {}
-	 // Trust always  
-         @Override 
-         public void checkServerTrusted(X509Certificate[] certs, String authType) {}  
-        } 
-       };  
-       
-       // Install the all-trusting trust manager  
-       SSLContext sc = SSLContext.getInstance("SSL");  
-       // Create empty HostnameVerifier  
-       HostnameVerifier hv = new HostnameVerifier() {  
-        public boolean verify(String arg0, SSLSession arg1) {  
-         return true;  
-        }  
-       };  
- 
-       sc.init(null, trustAllCerts, new java.security.SecureRandom());  
-       HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
-       HttpsURLConnection.setDefaultHostnameVerifier(hv); 
-       log.info( "stdalex-error CitrixClient: attempting connection to "+hostIpAddress + " with values of " +
-                  url.toString() + "/" + userName + "/" + password);
-       connection = new Connection(url);
-       Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
-			
-       log.info( "stdalex-error CitrixClient: connected to server ["+hostIpAddress+"]");
+        if( !isConnected()) { connect(); } 
+
+       log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
        Map<String, String> myMap = new HashMap<String, String>();
        Set<Host> hostList = Host.getAll(connection);
        Iterator iter = hostList.iterator();
-       Host h = (Host)iter.next();
-       
+        // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+        // to throw an exception if the hasNext is false.
+       Host h = null;
+        if (iter.hasNext()) {       
+          h = (Host)iter.next();
+        }
+        
        String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
        
        int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
        int endP   = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
        // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
        String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(),endP);
-       System.err.println("aikCert == " + cert);
+       log.debug("aikCert == " + cert);
       
             
        keys key = new keys();
@@ -586,9 +535,9 @@ public class CitrixClient {
 
        
        //resp = new String( Base64.decodeBase64(key.tpmAttKeyPEM));
-       resp = new String(key.tpmAttKeyPEM);
+       resp = key.tpmAttKeyPEM;//new String(key.tpmAttKeyPEM);
        
-       log.info("stdalex-error getAIKCert: returning back: " + resp);
+//       log.trace("stdalex-error getAIKCert: returning back: " + resp);
        return resp;
     }
 }

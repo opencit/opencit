@@ -40,7 +40,7 @@ public enum ErrorCode {
     HTTP_NOT_FOUND(404, "HTTP 404 NOT FOUND"),
     HTTP_INTERNAL_SERVER_ERROR(500, "HTTP 500 INTERNAL SERVER ERROR"),
 
-    AS_ASYNC_TIMEOUT(1002,"Asynchronous operation timed out.Time out set to %d seconds"),
+    AS_ASYNC_TIMEOUT(1002,"Asynchronous operation timed out after %d seconds"),
     AS_HOST_NOT_FOUND(1003,"Host '%s' not found."),
     AS_BIOS_INCORRECT(1004,"Bios '%s' or version '%s' is incorrect."),
     AS_VMM_INCORRECT(1004,"VMM '%s' or version '%s' is incorrect."),
@@ -51,22 +51,25 @@ public enum ErrorCode {
     AS_OPERATION_NOT_SUPPORTED(1009,"Operation not supported.%s" ),
     AS_QUOTE_VERIFY_COMMAND_FAILED(1010,"TPM quote verification failed.Command error code %d"),
     AS_HOST_COMMUNICATION_ERROR(1011,"Unable to communicate with host: %s"), // error message
-    AS_TRUST_AGENT_ERROR(1012,"Trust Agent failed with code '%d' and message '%s'. See the Trust Agent log located at /var/logs/tagent.log for more details."),
+    AS_TRUST_AGENT_ERROR(1012,"Trust Agent failed with code '%d' and message '%s'. See the Trust Agent log located at /var/log/tagent.log for more details."),
     AS_ENCRYPTION_ERROR(1013,"Encryption of data failed due to error %s"),
     AS_VMW_TPM_NOT_SUPPORTED(1014,"VMWare - Host '%s' does not support TXT"),
     AS_PCR_NOT_FOUND(1015,"PCR '%s' no found in host manifest."),
     AS_MISSING_PCR_MANIFEST(1016,"Missing Manifest data for PCR '%d'" ),
     AS_CONFIGURATION_ERROR(1017,"Configuration Error: %s "),
-    AS_TRUST_AGENT_DAA_ERROR(1018,"DAA Error: %s . See the Trust Agent log located at /var/logs/tagent.log for more details."),
+    AS_TRUST_AGENT_DAA_ERROR(1018,"DAA Error: %s . See the Trust Agent log located at /var/log/tagent.log for more details."),
     AS_MISSING_MLE_REQD_MANIFEST_LIST(1019,"Missing reqired manifest list for MLE '%s' Version '%s'"),
     AS_HOST_MANIFEST_MISSING_PCRS (1020,"Host Manifest is missing required PCRs."),
     AS_VMWARE_INVALID_CONNECT_STRING(1021,"Input VMWare connect string '%s' is invalid."),
     AS_HOST_NOT_FOUND_IN_VCENTER(1022,"Host '%s' is not found in VCenter."),
     AS_PCR_MANIFEST_MISSING(1023,"Pcr Manifest for PCR '%s' is missing in MLE Id '%d' associated to host '%s"),
-    AS_TRUST_AGENT_CONNNECT_TIMED_OUT(1024,"Unable to connect to Trust Agent on '%s:%d'. Timed out after %d seconds. See the Trust Agent log located at /var/logs/tagent.log for more details."),
-    AS_TRUST_AGENT_INVALID_RESPONSE(1025, "Invalid response from host: %s. See the Trust Agent log located at /var/logs/tagent.log for more details."),
+    AS_TRUST_AGENT_CONNNECT_TIMED_OUT(1024,"Unable to connect to Trust Agent on '%s:%d'. Timed out after %d seconds. See the Trust Agent log located at /var/log/tagent.log for more details."),
+    AS_TRUST_AGENT_INVALID_RESPONSE(1025, "Invalid response from host: %s. See the Trust Agent log located at /var/log/tagent.log for more details."),
     AS_INTEL_TXT_NOT_ENABLED(1026, "Host does not have Intel TXT enabled: %s"),
     AS_INVALID_AIK_CERTIFICATE(1027, "Cannot validate AIK for '%s' against known Privacy CAs"),
+    AS_TPM_NOT_SUPPORTED(1028,"Host '%s' does not support TXT."),
+    AS_CITRIX_ERROR(1029, "Citrix error"),
+
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),
@@ -89,7 +92,7 @@ public enum ErrorCode {
     WS_NAME_SPACE_DOES_NOT_EXIST(2018, "Name space table is not configured in the system. Please contact administrator."),
     WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS(2019, "White list host mapping already exists for the MLE '%s'."),
     WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST(2020, "White list host mapping does not exist for the MLE '%s'."),
-    WS_INVALID_WHITE_LIST_VALUE(2021, "White list '%s' specified for '%s' has invalid characters. Only hexadecimal values are allowed."),
+    WS_INVALID_WHITE_LIST_VALUE(2021, "White list value '%s' specified for '%s' is invalid. Only hexadecimal SHA1 values are allowed."),
     
     
     // Below are error codes for the Management service

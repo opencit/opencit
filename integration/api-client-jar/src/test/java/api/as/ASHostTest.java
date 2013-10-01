@@ -27,7 +27,7 @@ public class ASHostTest {
     
     private static ApiClient c;
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setup() throws IOException, ClientException  {
         c = new ApiClient(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
     }
     

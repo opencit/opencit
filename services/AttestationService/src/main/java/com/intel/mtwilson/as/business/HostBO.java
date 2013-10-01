@@ -1,10 +1,12 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
 package com.intel.mtwilson.as.business;
 
-import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -20,9 +22,9 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
+import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
-import com.intel.mtwilson.as.data.helper.DataCipher;
-import com.intel.mtwilson.as.helper.Aes128DataCipher;
+import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -30,29 +32,16 @@ import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.policy.HostReport;
-import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.impl.HostTrustPolicyManager;
 import com.intel.mtwilson.util.ResourceFinder;
-import com.vmware.vim25.HostTpmAttestationReport;
-import com.vmware.vim25.HostTpmCommandEventDetails;
-import com.vmware.vim25.HostTpmDigestInfo;
-import com.vmware.vim25.HostTpmEventLogEntry;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.PublicKey;
-import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
@@ -72,16 +61,16 @@ public class HostBO extends BaseBO {
         private Logger log = LoggerFactory.getLogger(getClass());
         private TblMle biosMleId = null;
         private TblMle vmmMleId = null;
-        private byte[] dataEncryptionKey = null;
-        private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
-        private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
-        private TblHostsJpaController hostController;
-        private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
-        private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
-        private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
+//        private byte[] dataEncryptionKey = null;
+//        private TblLocationPcrJpaController locationPcrJpaController = new TblLocationPcrJpaController(getEntityManagerFactory());
+//        private TblMleJpaController mleController = new TblMleJpaController(getEntityManagerFactory());
+//        private TblHostsJpaController hostController = new TblHostsJpaController(getEntityManagerFactory());
+//        private HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+//        private TblHostSpecificManifestJpaController hostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
+//        private TblModuleManifestJpaController moduleManifestJpaController = new TblModuleManifestJpaController(getEntityManagerFactory());
 
 
-        
+        /*
         public void setDataEncryptionKey(byte[] key) {
                     try {
                         TblHosts.dataCipher = new Aes128DataCipher(new Aes128(key));
@@ -89,43 +78,55 @@ public class HostBO extends BaseBO {
                     catch(CryptographyException e) {
                         log.error("Cannot initialize data encryption cipher", e);
                     }      
-        }
+        }*/
         
-    public HostBO() {
+    public HostBO()  {
+        
         super();
+       
+   
     }
     
     public HostBO(PersistenceManager pm) {
         super(pm);
+       
     }
         
 	public HostResponse addHost(TxtHost host) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
-          TblMle  biosMleId = findBiosMleForHost(host); 
-          TblMle  vmmMleId = findVmmMleForHost(host); 
-
-                log.error("HOST BO ADD HOST STARTING");
 
                 try {
+                    
+          TblMle  biosMleId = findBiosMleForHost(host); 
+          TblMle  vmmMleId = findVmmMleForHost(host); 
+          Vendor hostType;
+
+                log.trace("HOST BO ADD HOST STARTING");
+                    
                         checkForDuplicate(host);
 
                         getBiosAndVMM(host);
 
-                        log.info("Getting Server Identity.");
+                        log.debug("Getting Server Identity.");
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
-                        tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE");
+                        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
                         tblHosts.setTlsKeystore(null);
-                        System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
+                        //System.err.println("stdalex addHost " + host.getHostName() + " with cs == " + host.getAddOn_Connection_String());
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        
+                        // Using the connection string we will find out the type of the host. This information would be used later
+                        ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
+                        hostType = hostConnString.getVendor();
+                        
                         if (host.getHostName() != null) {
                                 tblHosts.setName(host.getHostName().toString());
                         }
-                        if (host.getIPAddress() != null) {
-                                tblHosts.setIPAddress(host.getIPAddress().toString());
+                        if (host.getHostName() != null) {
+                                tblHosts.setIPAddress(host.getHostName().toString());
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
@@ -142,7 +143,7 @@ public class HostBO extends BaseBO {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
                                     X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                     hostAikCert.checkValidity(); // AIK certificate must be valid today
-                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
                                     if( !validCaSignature ) {
                                         throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
                                     }
@@ -163,7 +164,17 @@ public class HostBO extends BaseBO {
 //                        hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 
 //                        TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
-                        List<TblHostSpecificManifest>   tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest);
+                        
+                        // Bug: 749: We need to handle the host specific modules only if the PCR 19 is selected for attestation
+                        List<TblHostSpecificManifest>   tblHostSpecificManifests = null;
+                        if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                            log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                            // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
+                            tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                        } else {
+                            log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                        }
+                        
                         // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
 //                            pcrMap = getHostPcrManifest(tblHosts, host); // BUG #497 sending both the new TblHosts record and the TxtHost object just to get the TlsPolicy into the initial call so that with the trust_first_certificate policy we will obtain the host certificate now while adding it
                         
@@ -174,18 +185,23 @@ public class HostBO extends BaseBO {
                         
                         //Bug: 597, 594 & 583. Here we were trying to get the length of the TlsKeystore without checking if it is NULL or not. 
                         // If in case it is NULL, it would throw NullPointerException                        
-                        log.info("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+                        log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
-                        log.error("HOST BO CALLING SAVEHOSTINDATABASE");
+                        log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
 		} catch (ASException ase) {
+            //System.err.println("JIM DEBUG"); 
+            //ase.printStackTrace(System.err);
+
 			throw ase;
 		} 
 //                catch(CryptographyException e) {
 //                    throw new ASException(e,ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
 //                } 
         catch (Exception e) {
+            //System.err.println("JIM DEBUG");
+            //e.printStackTrace(System.err);
 			throw new ASException(e);
 		}
 		return new HostResponse(ErrorCode.OK);
@@ -239,26 +255,28 @@ public class HostBO extends BaseBO {
         return validCaSignature;
     }
 
-	private String getLocation(PcrManifest pcrManifest) {
+	private String getLocation(PcrManifest pcrManifest) throws IOException {
         if( pcrManifest == null ) { return null; }
         if( pcrManifest.containsPcr(LOCATION_PCR) ) {
             String value = pcrManifest.getPcr(LOCATION_PCR).getValue().toString();
-            return locationPcrJpaController.findTblLocationPcrByPcrValue(value);
+            return My.jpa().mwLocationPcr().findTblLocationPcrByPcrValue(value);
         }
 		return null;
     }
     
-    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) {
-        
-        for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
-                tblHostSpecificManifest.setHostID(tblHosts.getId());
-                hostSpecificManifestJpaController.create(tblHostSpecificManifest);
+    private void createHostSpecificManifest(List<TblHostSpecificManifest> tblHostSpecificManifests, TblHosts tblHosts) throws IOException {
+        if (tblHostSpecificManifests != null && !tblHostSpecificManifests.isEmpty()) {
+            for(TblHostSpecificManifest tblHostSpecificManifest : tblHostSpecificManifests){
+                    tblHostSpecificManifest.setHostID(tblHosts.getId());
+                    My.jpa().mwHostSpecificManifest().create(tblHostSpecificManifest);
+            }
         }
     }
 
 
         public HostResponse updateHost(TxtHost host) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
+                Vendor hostType;
                 try {
 
                         TblHosts tblHosts = getHostByName(host.getHostName()); // datatype.Hostname
@@ -272,15 +290,20 @@ public class HostBO extends BaseBO {
 
                         // need to update with the new connection string before we attempt to connect to get any updated info from host (aik cert, manifest, etc)
                         if (tblHosts.getTlsPolicyName() == null && tblHosts.getTlsPolicyName().isEmpty()) { // XXX new code to test
-                                tblHosts.setTlsPolicyName("TRUST_FIRST_CERTIFICATE"); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
+                                tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName()); // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy
                         }
 //                        tblHosts.setTlsKeystore(null);  // XXX new code to test: it's either null or it's already set so don't change it // XXX  bug #497  the TxtHost object doesn't have the ssl certificate and policy 
                         tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+                        
+                        // Using the connection string we will find out the type of the host. This information would be used later
+                        ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
+                        hostType = hostConnString.getVendor();
+                        
                         if (host.getHostName() != null) {
                                 tblHosts.setName(host.getHostName().toString());
                         }
-                        if (host.getIPAddress() != null) {
-                                tblHosts.setIPAddress(host.getIPAddress().toString());
+                        if (host.getHostName() != null) {
+                                tblHosts.setIPAddress(host.getHostName().toString());
                         }
                         if (host.getPort() != null) {
                                 tblHosts.setPort(host.getPort());
@@ -288,12 +311,12 @@ public class HostBO extends BaseBO {
 
                         HostAgentFactory factory = new HostAgentFactory();
                         HostAgent agent = factory.getHostAgent(tblHosts);
-                            log.info("Getting identity.");
+                            log.debug("Getting identity.");
                                 setAikForHost(tblHosts, host);
                         
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
-                                log.info("VMM is updated. Update the host specific manifest");
+                                log.debug("VMM is updated. Update the host specific manifest");
                                 // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
                                 PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
@@ -308,27 +331,27 @@ public class HostBO extends BaseBO {
 //                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 //                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
 
-                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest);
+                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                             }
 
-                        log.info("Saving Host in database");
+                        log.debug("Saving Host in database");
                         tblHosts.setBiosMleId(biosMleId);
                         // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                         // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
                         tblHosts.setDescription(host.getDescription());
                         tblHosts.setEmail(host.getEmail());
-                        if (host.getIPAddress() != null) {
-                                tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                        if (host.getHostName() != null) {
+                                tblHosts.setIPAddress(host.getHostName().toString()); // datatype.IPAddress
                         }
                         if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }                        
                         tblHosts.setVmmMleId(vmmMleId);
 
-			log.info("Updating Host in database");
-			hostController.edit(tblHosts);
+			My.jpa().mwHosts().edit(tblHosts);
+			log.info("Updated host: {}", tblHosts.getName());
                         
                         if(tblHostSpecificManifests != null){
-                            log.info("Updating Host Specific Manifest in database");
-                            deleteHostSpecificManifest(tblHosts.getId());
+                            log.debug("Updating Host Specific Manifest in database");
+                            deleteHostSpecificManifest(tblHosts);
                             createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
                         }
 
@@ -350,43 +373,53 @@ public class HostBO extends BaseBO {
                         if (tblHosts == null) {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
                         }
-                        log.info("Deleting Host from database");
+                        log.debug("Deleting Host from database");
 
-                        deleteHostSpecificManifest(tblHosts.getId());
+                        deleteHostSpecificManifest(tblHosts);
 
                         deleteTALogs(tblHosts.getId());
 
                         deleteSAMLAssertions(tblHosts);
 
-                        new TblHostsJpaController(getEntityManagerFactory()).destroy(tblHosts.getId());
+                        My.jpa().mwHosts().destroy(tblHosts.getId());
+                        log.info("Deleted host: {}", hostName.toString());
                 } catch (ASException ase) {
+                        //System.err.println("JIM DEBUG"); 
+                        //ase.printStackTrace(System.err);
                         throw ase;
                 } catch (CryptographyException e) {
+                        //System.err.println("JIM DEBUG"); 
+                        //e.printStackTrace(System.err);
                         throw new ASException(ErrorCode.SYSTEM_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage(), e);
                 } catch (Exception e) {
+                        //System.err.println("JIM DEBUG"); 
+                        //e.printStackTrace(System.err);
                         throw new ASException(e);
                 }
                 return new HostResponse(ErrorCode.OK);
         }
 
         // PREMIUM FEATURE ? 
-        private void deleteHostSpecificManifest(Integer hostId)
-                throws NonexistentEntityException {
-                TblHostSpecificManifestJpaController tblHostSpecificManifestJpaController;
-
-                tblHostSpecificManifestJpaController = new TblHostSpecificManifestJpaController(getEntityManagerFactory());
-                TblHostSpecificManifest hostSpecificManifest =
-                        tblHostSpecificManifestJpaController.findByHostID(hostId);
-
-                if (hostSpecificManifest != null) {
-                        log.info("Deleting Host specific manifest.");
-                        tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());
-                }
+        private void deleteHostSpecificManifest(TblHosts tblHosts)
+                throws NonexistentEntityException, IOException {
+                TblHostSpecificManifestJpaController tblHostSpecificManifestJpaController = My.jpa().mwHostSpecificManifest();
+                
+                for(TblModuleManifest moduleManifest : tblHosts.getVmmMleId().getTblModuleManifestCollection()) {
+                     if( moduleManifest.getUseHostSpecificDigestValue() != null && moduleManifest.getUseHostSpecificDigestValue().booleanValue() ) {
+                        // For open source we used to have multiple module manifests for the same hosts. So, the below query by hostID was returning multiple results.
+                        //String hostSpecificDigestValue = new TblHostSpecificManifestJpaController(getEntityManagerFactory()).findByHostID(hostId).getDigestValue();
+                        TblHostSpecificManifest hostSpecificManifest = tblHostSpecificManifestJpaController.findByModuleAndHostID(tblHosts.getId(), moduleManifest.getId());
+                        if (hostSpecificManifest != null) {
+                                log.debug("Deleting Host specific manifest." + moduleManifest.getComponentName() + ":" + hostSpecificManifest.getDigestValue());
+                                tblHostSpecificManifestJpaController.destroy(hostSpecificManifest.getId());
+                        }                        
+                    }
+                }                
         }
 
-        private void deleteTALogs(Integer hostId) throws IllegalOrphanException {
+        private void deleteTALogs(Integer hostId) throws IllegalOrphanException, IOException {
 
-                TblTaLogJpaController tblTaLogJpaController = new TblTaLogJpaController(getEntityManagerFactory());
+                TblTaLogJpaController tblTaLogJpaController = My.jpa().mwTaLog(); // new TblTaLogJpaController(getEntityManagerFactory());
 
                 List<TblTaLog> taLogs = tblTaLogJpaController.findLogsByHostId(hostId, new Date());
 
@@ -410,8 +443,8 @@ public class HostBO extends BaseBO {
          *
          * @param hostId
          */
-        private void deleteSAMLAssertions(TblHosts hostId) {
-                TblSamlAssertionJpaController samlJpaController = new TblSamlAssertionJpaController(getEntityManagerFactory());
+        private void deleteSAMLAssertions(TblHosts hostId) throws IOException {
+                TblSamlAssertionJpaController samlJpaController = My.jpa().mwSamlAssertion(); //new TblSamlAssertionJpaController(getEntityManagerFactory());
 
                 List<TblSamlAssertion> hostSAMLAssertions = samlJpaController.findByHostID(hostId);
 
@@ -444,7 +477,6 @@ public class HostBO extends BaseBO {
                     }
                 }
                 else {
-                    // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
                     PublicKey publicKey = agent.getAik();
                     String pem = X509Util.encodePemPublicKey(publicKey); 
                     tblHosts.setAIKCertificate(null);
@@ -496,9 +528,8 @@ public class HostBO extends BaseBO {
          * private boolean requiresConnectionString(String vmmName) { if(
          * hostname.contains("ESX") ) { return true; } return false; }
          */
-        private void getBiosAndVMM(TxtHost host) {
-                TblMleJpaController mleController = new TblMleJpaController(
-                        getEntityManagerFactory());
+        private void getBiosAndVMM(TxtHost host) throws IOException {
+                TblMleJpaController mleController = My.jpa().mwMle(); //new TblMleJpaController(getEntityManagerFactory());
                 this.biosMleId = mleController.findBiosMle(host.getBios().getName(),
                         host.getBios().getVersion(), host.getBios().getOem());
                 if (biosMleId == null) {
@@ -512,17 +543,17 @@ public class HostBO extends BaseBO {
                 }
         }
 
-	private TblMle findBiosMleForHost(TxtHost host) {
+	private TblMle findBiosMleForHost(TxtHost host) throws IOException {
 		
-		TblMle biosMleId = mleController.findBiosMle(host.getBios().getName(),
+		TblMle biosMleId = My.jpa().mwMle().findBiosMle(host.getBios().getName(),
 				host.getBios().getVersion(), host.getBios().getOem());
 		if (biosMleId == null) {
 			throw new ASException(ErrorCode.AS_BIOS_INCORRECT, host.getBios().getName(),host.getBios().getVersion());
 		}
         return biosMleId;
 	}
-	private TblMle findVmmMleForHost(TxtHost host) {
-		TblMle vmmMleId = mleController.findVmmMle(host.getVmm().getName(), host
+	private TblMle findVmmMleForHost(TxtHost host) throws IOException {
+		TblMle vmmMleId = My.jpa().mwMle().findVmmMle(host.getVmm().getName(), host
 				.getVmm().getVersion(), host.getVmm().getOsName(), host
 				.getVmm().getOsVersion());
 		if (vmmMleId == null) {
@@ -532,31 +563,31 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
 		
+		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
+		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		
-		
-		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();
-		log.info("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-		log.error("saveHostInDatabase with tls policy {} and keystore size {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
-
-		
-		tblHosts.setAddOnConnectionInfo(host.getAddOn_Connection_String());
+		String cs = host.getAddOn_Connection_String();
+        //log.info("saveHostInDatabase cs = " + cs);
+		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                 // tblHosts.setCreatedOn(new Date(System.currentTimeMillis()));
                 // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
                 tblHosts.setDescription(host.getDescription());
                 tblHosts.setEmail(host.getEmail());
-                if (host.getIPAddress() != null) {
-                        tblHosts.setIPAddress(host.getIPAddress().toString()); // datatype.IPAddress
+                if (host.getHostName() != null) {
+                        tblHosts.setIPAddress(host.getHostName().toString()); // datatype.IPAddress
+                }else{
+                        tblHosts.setIPAddress(host.getHostName().toString());
                 }
                 tblHosts.setName(host.getHostName().toString()); // datatype.Hostname
 
                 if (host.getPort() != null) {
                         tblHosts.setPort(host.getPort());
                 }
-		tblHosts.setVmmMleId(vmmMleId);
+                tblHosts.setVmmMleId(vmmMleId);
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.
@@ -565,10 +596,19 @@ public class HostBO extends BaseBO {
 //                }
 
                 // create the host
-                log.error("COMMITING NEW HOST DO DATABASE");
-                hostController.create(tblHosts);
-
-                log.info("Save host specific manifest if any.");
+                log.trace("COMMITING NEW HOST DO DATABASE");
+                //log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
+                //          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
+                //          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName() + ", port=" + tblHosts.getPort());
+                try {
+                    My.jpa().mwHosts().create(tblHosts);
+                }catch (Exception e){
+                    log.debug("SaveHostInDatabase caught ex!");
+                    e.printStackTrace();
+                    log.trace("end print stack trace");
+                    throw new ASException(e);
+                }
+                log.debug("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
 
         }
@@ -583,47 +623,64 @@ public class HostBO extends BaseBO {
      * and instaed of returning a "host-specific manifest" it should return a list of policies with module-included
      * or module-equals type rules.    XXX for now converting to PcrManifest but this probably still needs to be moved.
     */
-	private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest) {
-		List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
+    private List<TblHostSpecificManifest> createHostSpecificManifestRecords(TblMle vmmMleId, PcrManifest pcrManifest, Vendor hostType) throws IOException {
+        List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
-		if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19) ) {
+        // Using the connection string, let us first find out the host type
+        
+        if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
-			
-				for (Measurement m : pcrEventLog.getEventLog()) {
-				
-					log.info("getHostSpecificManifest creating host specific manifest for event '"
-							+ m.getInfo().get("EventName") +"' field '"+m.getLabel()+"' component '"+m.getInfo().get("ComponentName") +"'");
 
-					
-                    // we are looking for the "commandline" event specifically  (vmware)
-                    if(  m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails") ) { 
+            for (Measurement m : pcrEventLog.getEventLog()) {
+
+                log.debug("Checking host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                        "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                
+                // we are looking for the "commandline" event specifically  (vmware)
+                if (hostType.equals(Vendor.VMWARE) && m.getInfo().get("EventName") != null && m.getInfo().get("EventName").equals("Vim25Api.HostTpmCommandEventDetails")) {
+
+                    log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                    log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
                     
-                        TblModuleManifest tblModuleManifest = moduleManifestJpaController.findByMleNameEventName(vmmMleId.getId(),
-                                m.getInfo().get("ComponentName"),
-                                m.getInfo().get("EventName"));
+                    TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
+                            m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
-                        TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
-                        tblHostSpecificManifest.setDigestValue(m.getValue().toString());
-    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
-                        tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
-                        tblHostSpecificManifests.add(tblHostSpecificManifest);
-                    }
-					
-				}				
-				
-				return tblHostSpecificManifests;
-			
-		} else {
-			log.warn("No PCR 19 found.SO not saving host specific manifest.");
-			return tblHostSpecificManifests;
-		}
+                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                    //					tblHostSpecificManifest.setHostID(tblHosts.getId());
+                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                    tblHostSpecificManifests.add(tblHostSpecificManifest);
+                } else if (hostType.equals(Vendor.INTEL) && m.getInfo().get("EventName") != null) {
+                    
+                    log.debug("Adding host specific manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' field '" + m.getLabel() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                    log.debug("Querying manifest for event '"   + m.getInfo().get("EventName") + 
+                            "' MLE_ID '" + vmmMleId.getId() + "' component '" + m.getInfo().get("ComponentName") + "'");
+                    
+                    // For open source XEN and KVM both the modules that get extended to PCR 19 should be added into the host specific table
+                    TblModuleManifest tblModuleManifest = My.jpa().mwModuleManifest().findByMleNameEventName(vmmMleId.getId(),
+                            m.getInfo().get("ComponentName"),  m.getInfo().get("EventName"));
 
+                    TblHostSpecificManifest tblHostSpecificManifest = new TblHostSpecificManifest();
+                    tblHostSpecificManifest.setDigestValue(m.getValue().toString());
+                    tblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                    tblHostSpecificManifests.add(tblHostSpecificManifest);                    
+                }
+            }
 
+            return tblHostSpecificManifests;
+            
+        } else {
+            log.warn("No PCR 19 found.SO not saving host specific manifest.");
+            return tblHostSpecificManifests;
         }
+    }
 
         public HostResponse isHostRegistered(String hostnameOrAddress) {
                 try {
-                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory());
+                        TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         TblHosts tblHosts = tblHostsJpaController.findByName(hostnameOrAddress);
                         if (tblHosts != null) {
                                 return new HostResponse(ErrorCode.OK); // host name exists in
@@ -637,16 +694,13 @@ public class HostBO extends BaseBO {
                         return new HostResponse(ErrorCode.AS_HOST_NOT_FOUND);
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }
         }
 
-        private void checkForDuplicate(TxtHost host) throws CryptographyException {
-                TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(
-                        getEntityManagerFactory());
+        private void checkForDuplicate(TxtHost host) throws CryptographyException, IOException {
+                TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                 TblHosts tblHosts = tblHostsJpaController.findByName(host.getHostName()
                         .toString()); // datatype.Hostname
                 if (tblHosts != null) {
@@ -678,14 +732,12 @@ public class HostBO extends BaseBO {
          * @return
          * @throws CryptographyException
          */
-        public TblHosts getHostByName(Hostname hostName) throws CryptographyException { // datatype.Hostname
-                TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory())
-                        .findByName(hostName.toString());
+        public TblHosts getHostByName(Hostname hostName) throws CryptographyException, IOException { // datatype.Hostname
+                TblHosts tblHosts = My.jpa().mwHosts().findByName(hostName.toString());
                 return tblHosts;
         }
-	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException { // datatype.Hostname
-		TblHosts tblHosts = new TblHostsJpaController(getEntityManagerFactory())
-				.findByAikSha1(aik.toString());
+	public TblHosts getHostByAik(Sha1Digest aik) throws CryptographyException, IOException { // datatype.Hostname
+		TblHosts tblHosts = My.jpa().mwHosts().findByAikSha1(aik.toString());
 		return tblHosts;
 	}
 
@@ -701,7 +753,7 @@ public class HostBO extends BaseBO {
          */
         public List<TxtHostRecord> queryForHosts(String searchCriteria) {
                 try {
-                        TblHostsJpaController tblHostsJpaController = new TblHostsJpaController(getEntityManagerFactory());
+                        TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
                         List<TblHosts> tblHostList;
 
@@ -727,8 +779,6 @@ public class HostBO extends BaseBO {
                         return txtHostList;
                 } catch (ASException e) {
                         throw e;
-                } catch (CryptographyException e) {
-                        throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
                         throw new ASException(e);
                 }
@@ -738,7 +788,7 @@ public class HostBO extends BaseBO {
         public TxtHostRecord createTxtHostFromDatabaseRecord(TblHosts tblHost) {
                 TxtHostRecord hostObj = new TxtHostRecord();
                 hostObj.HostName = tblHost.getName();
-                hostObj.IPAddress = tblHost.getIPAddress();
+                hostObj.IPAddress = tblHost.getName();
                 hostObj.Port = tblHost.getPort();
                 hostObj.AddOn_Connection_String = tblHost.getAddOnConnectionInfo();
                 hostObj.Description = tblHost.getDescription();

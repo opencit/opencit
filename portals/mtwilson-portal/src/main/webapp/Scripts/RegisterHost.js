@@ -1,13 +1,28 @@
 $(function() {
-	$('#vmwareHostType').find('input:text').each(function() {
+	/*$('#vmwareHostType').find('input:text').each(function() {
 		$(this).blur(function() {
 			fnValidateEmptyValue($(this).attr('id'));
 		});
+	});*/
+    
+//	$('#mainRegisterHost_ClusterName').blur(function() {
+//                        // Since Cluster name can have any special characters, we are not going to validate it. We will just check for empty value
+//		fnMWValidateField('mainRegisterHost_ClusterName',true);
+//	});
+    
+	$('#mainRegisterHost_vCenterServer').blur(function() {
+		fnMWValidateIpAddressOrHostName('mainRegisterHost_vCenterServer',true);
+	});    
+
+        	$('#mainRegisterHost_loginID').blur(function() {
+		fnMWValidateField('mainRegisterHost_loginID', true);
 	});
-	$('#mainRegisterHost_password').blur(function() {
-		fnValidateEmptyValue($(this).attr('id'));
+
+    	$('#mainRegisterHost_password').blur(function() {
+		fnMWValidateField('mainRegisterHost_password', true);
 	});
-	fnChangehostType($('#MainContent_ddlHOSTProvider'),false);
+
+            fnChangehostType($('#MainContent_ddlHOSTProvider'),false);
 });
 
 function fnUploadFlatFile() {
@@ -163,35 +178,124 @@ function showDialogUpFlatFileHelp() {
 	fnOpenDialog(str, "Upload Flat File Help", 500,275,false);
 }
 
-function fnRetriveHostFromCluster() {
-	cleanUpAllDivs();
-	var valid = true;
-        if(fnValidateIpAddress($('#mainRegisterHost_vCenterServer').val())) {
-            $('#vmwareHostType').find('input:text').each(function() {
-		if (!fnValidateEmptyValue($(this).attr('id'))) {
-			valid = false;
-		}
-            });
-            if (!fnValidateEmptyValue('mainRegisterHost_password')) {
-		valid = false;
+function fnRetrieveDatacenters() {
+    cleanUpAllDivs();
+    $('#MainContent_ddlDatacenterName').empty();
+    $('#MainContent_ddlDatacenterName').prop('disabled',true);
+    $('#MainContent_ddlClusterName').empty();
+    $('#MainContent_ddlClusterName').prop('disabled',true);
+    $('#retriveHostButton').prop('disabled',true);
+    
+    var valid = true;
+    if (fnValidateIpAddress($('#mainRegisterHost_vCenterServer').val())) {
+        $('#vmwareHostType').find('input:text').each(function() {
+            if (!fnValidateEmptyValue($(this).attr('id'))) {
+                valid = false;
             }
-            if (valid) {
-		var data = "clusterName="+$('#mainRegisterHost_ClusterName').val()+"&vCentertConnection="+getVCenterServerAddress('mainRegisterHost_vCenterServer')+";"+$('#mainRegisterHost_loginID').val()+";"+$('#mainRegisterHost_password').val();
-		$('#mainLoadingDiv').prepend(disabledDiv);
-		sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
-            }
-        }else{
-             alert("Please enter a valid ip address and try again.");
+        });
+        if (!fnValidateEmptyValue('mainRegisterHost_password')) {
+            valid = false;
         }
+        if (valid) {
+            var data = "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            $('#mainLoadingDiv').prepend(disabledDiv);
+            sendJSONAjaxRequest(false, 'getData/retrieveDatacenters.html', data, fnRetrieveDatacentersSuccess, null);
+        }
+    } else {
+        alert("Please enter a valid ip address and try again.");
+    }
+}
+
+function fnRetrieveDatacentersSuccess(responseJSON) {
+    $('#disabledDiv').remove();
+    var dcList = [];
+    
+    if (responseJSON.result) {
+        dcList = responseJSON.datacenters.split(",");
+        for (var i=0; i<dcList.length; i++){
+            $('#MainContent_ddlDatacenterName').append($('<option>',{value: 1, text: dcList[i]}));
+        }
+        $('#MainContent_ddlDatacenterName').prop('disabled',false);
+        fnRetrieveClusters();
+    } else {
+        $('#successMessage').html('<span class="errorMessage">Server Error : ' + responseJSON.message + '</span>');
+    }
+}
+
+function fnRetrieveClusters() {
+    cleanUpAllDivs();
+    $('#MainContent_ddlClusterName').empty();
+    $('#MainContent_ddlClusterName').prop('disabled',true);
+    $('#retriveHostButton').prop('disabled',true);
+    
+    var valid = true;
+    if (fnValidateIpAddress($('#mainRegisterHost_vCenterServer').val())) {
+        $('#vmwareHostType').find('input:text').each(function() {
+            if (!fnValidateEmptyValue($(this).attr('id'))) {
+                valid = false;
+            }
+        });
+        if (!fnValidateEmptyValue('mainRegisterHost_password')) {
+            valid = false;
+        }
+        if (valid) {
+            var data = "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            $('#mainLoadingDiv').prepend(disabledDiv);
+            sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
+        }
+    } else {
+        alert("Please enter a valid ip address and try again.");
+    }
+}
+
+function fnRetrieveClustersSuccess(responseJSON) {
+    $('#disabledDiv').remove();
+    var clusterList = [];
+    
+    if (responseJSON.result) {
+        clusterList = responseJSON.clusters.split(",");
+        for (var i=0; i<clusterList.length; i++){
+            $('#MainContent_ddlClusterName').append($('<option>',{value: 1, text: clusterList[i]}));
+        }
+        $('#MainContent_ddlClusterName').prop('disabled',false);
+        $('#retriveHostButton').prop('disabled',false);
+    } else {
+        $('#successMessage').html('<span class="errorMessage">Server Error : ' + responseJSON.message + '</span>');
+    }
+}
+
+function fnRetriveHostFromCluster() {
+    cleanUpAllDivs();
+    var valid = true;
+    if (fnValidateIpAddress($('#mainRegisterHost_vCenterServer').val())) {
+        $('#vmwareHostType').find('input:text').each(function() {
+            if (!fnValidateEmptyValue($(this).attr('id'))) {
+                valid = false;
+            }
+        });
+        if (!fnValidateEmptyValue('mainRegisterHost_password')) {
+            valid = false;
+        }
+        if (valid) {
+            var data = "clusterName=" + $('#MainContent_ddlClusterName option:selected').text() + "&vCentertConnection=" + getVCenterServerAddress('mainRegisterHost_vCenterServer') + ";" + $('#mainRegisterHost_loginID').val() + ";" + $('#mainRegisterHost_password').val();
+            $('#mainLoadingDiv').prepend(disabledDiv);
+            sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
+        }
+    } else {
+        alert("Please enter a valid ip address and try again.");
+    }
 }
 
 function fnRetriveHostSuccess(responsJSON) {
-	$('#disabledDiv').remove();
-	if(responsJSON.result){
-		updateListHostToBeRegister(responsJSON);
-	}else {
-		$('#successMessage').html('<span class="errorMessage">Server Error : '+responsJSON.message+'</span>');
-	}
+    $('#disabledDiv').remove();
+    if (responsJSON.result) {
+        updateListHostToBeRegister(responsJSON);
+    } else {
+        $('#MainContent_ddlClusterName').empty();
+        $('#MainContent_ddlClusterName').prop('disabled', true);
+        $('#retriveHostButton').prop('disabled', true);
+        $('#successMessage').html('<span class="errorMessage">Server Error : ' + responsJSON.message + '</span>');
+    }
 }
 
 function fnRegisterMultipleHost() {
@@ -264,4 +368,11 @@ function showHelpForVCenterServer() {
 		str+='<div class="helpDiv">'+vCenterStringHelp[iteam]+'</div>';
 	}
 	fnOpenDialog(str, "Help", 500, 285,false);
+}
+
+//Function to check all checkbox in table.
+function fnSelectAllCheckBox(status) {
+	$('.registerHostTableContent table tr td').each(function() {
+		$(this).find(':checkbox').attr('checked',status);
+	});
 }

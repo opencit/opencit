@@ -9,8 +9,8 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Automation ></div>
-		<div id="nameOfPage" class="NameHeader">White List Configuration</div>
+		<div class="nagPanel">Whitelist &gt;</div> <!-- was: "Automation" -->
+		<div id="nameOfPage" class="NameHeader">Import Whitelist from Trusted Host</div> <!-- was: "White List Configuration" -->
 		<c:set var="Data" value="${result}"></c:set>
 		<c:choose>
 			<c:when test="${Data == true}">
@@ -101,10 +101,40 @@
 							</div>
 						</div>
 					</div>
+                    <div id="citrixHostType" style="display: none;">
+						<div class="singleDiv">
+							<div class="labelDiv">WhiteList Host : </div>
+							<div class="valueDiv">
+								<input type="text" class="textBox_Border" id="whiteListCitrix_Host">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+						<div class="singleDiv">
+							<div class="labelDiv">Port #: </div>
+							<div class="valueDiv">
+								<input type="text" class="textBox_Border" id="whiteListCitrix_portNO">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+                        <div class="singleDiv">
+							<div class="labelDiv">UserName: </div>
+							<div class="valueDiv">
+								<input type="text" class="textBox_Border" id="whiteListCitrix_userName">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+                        <div class="singleDiv">
+							<div class="labelDiv">Password: </div>
+							<div class="valueDiv">
+								<input type="password" class="textBox_Border" id="whiteListCitrix_password">
+								<span class="requiredField">*</span>
+							</div>
+						</div>
+					</div>
 					<div id="vmwareHostType" style="display: none;" >
 						<div id="defineVMWareHostType">
 							<div class="singleDiv">
-								<div class="labelDiv">Good Known Host : </div>
+								<div class="labelDiv">WhiteList Host : </div>
 								<div class="valueDiv">
 									<input type="text" class="textBox_Border" id="whiteListVMware_Host">
 									<span class="requiredField">*</span>
@@ -134,10 +164,16 @@
 							<br>
 						</div>
 					</div>
-					<div class="singleDiv" id="uploadButtonID">
+                    <div class="singleDiv">
+							<div class="labelDiv"><span>Register Host: </span></div>
+							<div class="valueDivConfig">
+								<input type="checkbox" id="RegisterWhiteListHost" checked="yes">
+                            </div>
+                    </div> 
+                    <div class="singleDiv" id="uploadButtonID">
 						<div class="labelDiv">&nbsp;</div>
 						<div class="valueDiv">
-							<input type="button" class="" value="Upload White List" onclick="fnUploadWhiteListConfigurationData()">
+							<input type="button" class="" value="Import White List" onclick="fnUploadWhiteListConfigurationData()"> <!-- was: "Upload White List" -->
 							<input type="button" value="Clear" onclick="fnClearAllFiled()">
 						</div>
 					</div>

@@ -533,7 +533,8 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     public void addTlsAndRootCaToAdminPortalUserKeystore() throws IOException {
         
     }
-
+    //commenting out unused function (6/11 1.2)
+    /*
     private List<String> listRemoteFiles(String remotePath) throws IOException {
         String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); // XXX using this only internally (no for arbitrary user input) so this should be ok, but it is a good idea to shell-escape it anyway
         if( result == null || result.isEmpty() ) { return Collections.EMPTY_LIST; }
@@ -545,7 +546,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         return list;
     }
-    
+    */
     
     public void downloadPrivacyCaKeystoreFromServer() throws IOException {
         if( ctx.privacyCA.ekSigningKeyFilename == null ) {
@@ -789,7 +790,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     private void importManagementConsoleProperties(Properties asprops, Properties mwprops) {
         ctx.portalUserKeystoreDir = asprops.getProperty("mtwilson.mc.keystore.dir");
         ctx.portalHostTypeList = asprops.getProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
-        ctx.portalSessionTimeout = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.mc.sessionTimeOut", "1800")), TimeUnit.SECONDS);
+        ctx.portalSessionTimeout = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.portal.sessionTimeOut", "1800")), TimeUnit.SECONDS);
         ctx.portalApiKeyExpirationNotice = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3"))*30, TimeUnit.DAYS); // for example 3 months is stored as 90 days, since the TimeUnit type does not have MONTHS
     }
     

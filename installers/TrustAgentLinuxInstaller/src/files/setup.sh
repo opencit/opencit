@@ -48,7 +48,7 @@ JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 
-
+saveD=`pwd`
 # copy application files to /opt
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
@@ -160,7 +160,7 @@ fix_redhat_libcrypto
   echo "TRUST_AGENT_HOME=${package_dir}" >> ${myinstall}
   echo "TRUST_AGENT_NAME=${ARTIFACT}" >> ${myinstall}
   echo "TRUST_AGENT_VERSION=${VERSION}" >> ${myinstall}
-  echo "TRUST_AGENT_RELEASE=${BUILD}" >> ${myinstall}
+  echo "TRUST_AGENT_RELEASE=\"${BUILD}\"" >> ${myinstall}
 #  echo "TRUST_AGENT_ID=${WAR_NAME}" >> ${myinstall}
 
 
@@ -254,22 +254,25 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
+cd $saveD
+if [ ! -d /etc/monit ]; then
+ mkdir /etc/monit
+fi
+
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
+else
+    cp monitrc /etc/monit/monitrc
 fi
-cat >> /etc/monit/monitrc << EOF
-## Monit Process Monitor Config File
-## Configuration options and examples can be found here:
-## http://mmonit.com/monit/documentation/monit.html
-set daemon 60
-# Set path to log file
-set logfile /var/log/monit.log
-# TA monitoring
-check process tagent with pidfile /var/run/tagent.pid
-        start program = "/etc/init.d/tagent start" with timeout 30 seconds
-        stop program  = "/etc/init.d/tagent stop
-EOF
+
+if [ ! -d /etc/monit/conf.d ]; then
+ mkdir -p /etc/monit/conf.d
+fi
+
+if [ ! -f /etc/monit/conf.d/ta.monit ]; then
+ cp ta.monit /etc/monit/conf.d/ta.monit
+fi
 
 chmod 700 /etc/monit/monitrc
 service monit restart

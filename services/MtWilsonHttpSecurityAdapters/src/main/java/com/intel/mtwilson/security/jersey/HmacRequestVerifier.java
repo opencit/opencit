@@ -92,10 +92,10 @@ public class HmacRequestVerifier {
             signatureBlock.timestamp = a.timestamp;
             String content = signatureBlock.toString(); // may throw IllegalArgumentException if any required field is null or invalid
 
-            log.debug("VerifyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
+            //log.debug("VerifyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             String username = new String(Base64.decodeBase64(a.username));
             String secretKey = finder.getSecretKeyForUserId(username);
-            String signature = null;
+            String signature;
             try {
                 signature = sign(content, secretKey); // may throw NoSuchAlgorithmException, InvalidKeyException
             } catch (NoSuchAlgorithmException ex) {
@@ -136,7 +136,7 @@ public class HmacRequestVerifier {
             }
             
             if( signature.equals(a.signature) ) {
-                log.info("Request is authenticated");
+                log.debug("Request is authenticated");
                 
                 try {
                     if( signatureBlock.timestamp == null || isRequestExpired(signatureBlock.timestamp) ) { // may throw ParseException
@@ -166,7 +166,7 @@ public class HmacRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.info("Request is NOT AUTHENTICATED");
+        log.debug("Request is NOT AUTHENTICATED");
         return null;
     }
     

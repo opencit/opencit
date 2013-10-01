@@ -1,9 +1,12 @@
 
 package com.intel.mtwilson.as.rest;
 
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.security.annotations.*;
+import java.io.IOException;
 import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -46,10 +49,14 @@ public class SAML {
     @Produces({"application/samlassertion+xml"})
     @Path("/assertions/host")
     public String getHostAssertions(
-            @QueryParam("ID")String hostName,
+            @QueryParam("hostName")String hostName,
             @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify
-            ) {
-        return hostTrustBO.getTrustWithSaml(hostName);
+            ) throws IOException {
+        // bug #783, "missing hostname" we were not validating the input from the dashboard
+        if( hostName == null || hostName.isEmpty() ) {
+            throw new ASException(ErrorCode.AS_MISSING_INPUT, "Hostname or IP address is required");
+        }
+        return hostTrustBO.getTrustWithSaml(hostName, forceVerify);
     }
 
 

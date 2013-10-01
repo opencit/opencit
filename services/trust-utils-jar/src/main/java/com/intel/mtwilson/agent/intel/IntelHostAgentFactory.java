@@ -4,12 +4,12 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.mtwilson.tls.TlsPolicyManager;
 import java.io.IOException;
 import java.net.URL;
 import org.slf4j.Logger;
@@ -26,8 +26,10 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
-            log.debug("Creating IntelHostAgent for host {} with connection string {}", hostAddress, vendorConnectionString);
+            URL url = new URL(vendorConnectionString);
+            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+            log.debug("Creating IntelHostAgent for host {}", hostAddress); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             return new IntelHostAgent(client, hostAddress);
         }
         catch(Exception e) {
@@ -38,9 +40,10 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     @Override
     public HostAgent getHostAgent(String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
-            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(vendorConnectionString, tlsPolicy));
-            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString);
             URL url = new URL(vendorConnectionString);
+            TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+            TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(url, TlsPolicyManager.getInstance()));
+//            log.debug("Creating IntelHostAgent for connection string {}", vendorConnectionString); // removed  vendorConnectionString to prevent leaking secrets  with connection string {}
             InternetAddress hostAddress = new InternetAddress(url.getHost());
             return new IntelHostAgent(client, hostAddress);
         }

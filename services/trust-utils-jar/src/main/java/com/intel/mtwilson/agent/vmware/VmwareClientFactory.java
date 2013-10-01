@@ -4,7 +4,15 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;
+import com.vmware.vim25.InvalidLocaleFaultMsg;
+import com.vmware.vim25.InvalidLoginFaultMsg;
+import com.vmware.vim25.RuntimeFaultFaultMsg;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
 /**
@@ -20,10 +28,11 @@ import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,VMwareClient> {
     
     @Override
-    public VMwareClient makeObject(TlsConnection tlsConnection) throws Exception {
+    public VMwareClient makeObject(TlsConnection tlsConnection) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, 
+    KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException  {
         VMwareClient client = new VMwareClient();
         client.setTlsPolicy(tlsConnection.getTlsPolicy());
-        client.connect(tlsConnection.getConnectionString());        
+        client.connect(tlsConnection.getURL().toExternalForm());        
         return client;
     }
     
@@ -37,7 +46,7 @@ public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConne
      * @throws Exception 
      */
     @Override
-    public void activateObject(TlsConnection tlsConnection, VMwareClient client) throws Exception {
+    public void activateObject(TlsConnection tlsConnection, VMwareClient client)  {
     }
     
     /**
@@ -64,7 +73,7 @@ public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConne
      * @throws Exception 
      */
     @Override
-    public void destroyObject(TlsConnection tlsConnection, VMwareClient client) throws Exception {
+    public void destroyObject(TlsConnection tlsConnection, VMwareClient client)  {
         client.disconnect();
     }
 }

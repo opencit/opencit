@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">MLE \> View MLE</div>
+		<div class="nagPanel">Whitelist &gt; View MLE</div>
 		<div id="nameOfPage" class="NameHeader">View MLE Configuration</div>
 		<div id="mainLoadingDiv">
 			<div class="tableDivMLE" style="margin-left: 61px; display: none;" id="viewMleMainDataDisplay">

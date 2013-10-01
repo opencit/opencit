@@ -1,6 +1,6 @@
 $(function(){ 
     var hostname ="hostName="+$('#hostName').text();
-    sendJSONAjaxRequest(false, "/TrustDashBoard/getData/trustVerificationDetailsXML.html", hostname, showXMLData, null);    
+    sendJSONAjaxRequest(false, "/mtwilson-portal/getData/trustVerificationDetailsXML.html", hostname, showXMLData, null);    
 });
 
 function showXMLData(response){
@@ -102,6 +102,6 @@ function formatXml(xml) {
         formatted += padding + node + '\r\n';
         pad += indent;
     });
-    alert(formatted);
+   // alert(formatted);
     return formatted;
 }

@@ -66,10 +66,11 @@ public class BulkHostTrust {
                 Integer myTimeOut = timeout;
                 // if no timeout value is passed to function, check config for default, 
                 // if not in config, go with default value
+                // Modified the default time out back to 600 seconds as we are seeing time out issues. 30 seconds short for VMware hosts.
                 if (timeout == 600) {
-                        log.info("getTrustSaml called with default timeout, checking config");
-                        myTimeOut = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.attestation.hostTimeout", 30);
-                        log.info("getTrustSaml config returned back" + myTimeOut);
+                        log.debug("getTrustSaml called with default timeout, checking config");
+                        myTimeOut = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.attestation.hostTimeout", 600);
+                        log.debug("getTrustSaml config returned back" + myTimeOut);
                 }
                 if (hosts == null || hosts.length() == 0) {
 
@@ -78,7 +79,13 @@ public class BulkHostTrust {
                 }
 
                 Set<String> hostSet = new HashSet<String>();
-                hostSet.addAll(Arrays.asList(hosts.split(",")));
+                // bug #783  make sure that we only pass to the next layer hostnames that are likely to be valid 
+                for(String host : Arrays.asList(hosts.split(","))) {
+                    log.debug("Host: '{}'", host);
+                    if( !host.trim().isEmpty() ) {
+                        hostSet.add(host.trim());
+                    }
+                }
                 BulkHostTrustBO bulkHostTrustBO = new BulkHostTrustBO(/*threads, */myTimeOut);
                 return bulkHostTrustBO.getBulkTrustSaml(hostSet, forceVerify);
 

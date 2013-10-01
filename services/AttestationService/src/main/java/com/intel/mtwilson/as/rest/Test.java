@@ -14,6 +14,7 @@ import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -143,7 +144,7 @@ public class Test {
             this.hostname = hostname;
         }
         
-        public void loadConnectionString() throws CryptographyException {
+        public void loadConnectionString() throws IOException, CryptographyException {
             hostRecord = dao.getHostByName(new Hostname(hostname));
 //            this.connectionString = host.getAddOnConnectionInfo();
         }
@@ -159,7 +160,7 @@ public class Test {
                 hostAgent = hostAgentFactory.getHostAgent(hostRecord);
 //                VMwareClient client = hostAgent.getgetClient(host);
 	                result = hostAgent.getVendorHostReport(); //getHostAttestationReport(host, "0,17,18,20");
-	                log.info("Got response for "+hostname);
+	                log.debug("Got response for "+hostname);
             } catch (Exception ex) {
                 error = ex.toString();
             }

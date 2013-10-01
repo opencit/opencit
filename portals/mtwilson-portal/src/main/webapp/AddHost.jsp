@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel" id="mainHeader">New host configuration</div>
+		<div class="nagPanel" id="mainHeader">Host Management &gt; New host configuration</div>
 		<div class="dataTableMle" id="mainAddHostContainer">
 			<div class="singleDiv">
 				<div class="labelDiv">Host Name :</div>
@@ -16,28 +16,7 @@
 					<input type="text" id="MainContent_tbHostName" class="textBoxClass">
 				</div>
 			</div>
-					
-			<div class="singleDiv">
-				<div class="labelDiv">Host IP Address : </div>
-				<div class="valueDiv">
-					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
-				</div>
-			</div>
-					
-			<div class="singleDiv" id="hostPortDisplayDiv">
-				<div class="labelDiv">Host Port :</div>
-				<div class="valueDiv" >
-					<input type="text" class="textBoxClass" id="MainContent_tbHostPort" value="9999" >
-				</div>
-			</div>
-			
-			<div class="singleDiv">
-				<div class="labelDiv">Description :</div>
-				<div class="valueDiv">
-					<textarea class="textAreaBoxClass" id="MainContent_tbDesc" cols="20" rows="2"></textarea>
-				</div>
-			</div>
-			
+            
 			<div class="singleDiv">
 				<div class="labelDiv">OEM Vendor :</div>
 				<div class="valueDiv">
@@ -59,6 +38,46 @@
 				<div class="valueDiv">
 					<select onchange="javascript:SetRequired(this);" id="MainContent_LstVmm" size="4" class="textBoxClass" style="height: auto;">
 					</select>
+				</div>
+			</div>
+                                    
+                                    <div class="singleDiv">
+				<div class="labelDivgkv" >&nbsp;</div>
+				<div class="labelDivgkv" >&nbsp;</div>
+			</div>
+            <!--
+			<div class="singleDiv">
+				<div class="labelDiv">Host IP Address : </div>
+				<div class="valueDiv">
+					<input type="text" class="textBoxClass" id="MainContent_tbHostIP">
+				</div>
+			</div>
+		    -->
+			<div class="singleDiv" id="hostPortDisplayDiv">
+				<div class="labelDiv">Host Port :</div>
+				<div class="valueDiv" >
+                                    <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="9999"-->
+				</div>
+			</div>
+						            
+                                    <div id="citrixStringElement">
+				<div class="singleDiv">
+					<div class="labelDiv">XenServer Details :</div>
+					<div class="valueDiv">&nbsp;
+						<!-- <textarea class="textAreaBoxClass" id="MainContent_tbVCenterDetails" cols="20" rows="2"></textarea> -->
+					</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv">Login ID :</div>
+						<div class="valueDiv">
+							<input type="text" maxlength="200" id="MainContent_tbVcitrixLoginId" class="textBoxClass">
+						</div>
+				</div>
+				<div class="subSingleDiv">
+						<div class="subLabelDivgkv labelDiv">Password :</div>
+						<div class="valueDiv">
+							<input type="password" maxlength="200" id="MainContent_tbVcitrixPass" class="textBoxClass">
+						</div>
 				</div>
 			</div>
 			<div id="vcenterStringElement">
@@ -88,7 +107,16 @@
 						</div>
 				</div>
 			</div>
+            
+                                    <div class="singleDiv">
+				<div class="labelDiv">Description :</div>
+				<div class="valueDiv">
+					<textarea class="textAreaBoxClass" id="MainContent_tbDesc" cols="20" rows="2"></textarea>
+				</div>
+			</div>
+            
 			<div class="singleDiv">
+                                                <div class="valueDiv">&nbsp; </div>
 				<div class="labelDiv">E-mail Address :</div>
 				<div class="valueDiv">
 					<input type="text" maxlength="200" id="MainContent_tbEmailAddress" class="textBoxClass">
@@ -96,9 +124,10 @@
 			</div>
 			
 			<div class="singleDiv">
+                                                <div class="valueDiv">&nbsp; </div>
 				<div class="labelDivgkv" >&nbsp;</div>
 				<div class="valueDiv">
-					<table style="padding-top:20px;padding-bottom: 10px;">
+					<table style="padding-top:80px;padding-bottom: 10px;padding-right:50px;padding-left:50px;">
 						<tr>
 							<td><input type="button" class="button" value="Add Host" id="addHostButton" onclick="addNewHost()"/></td>
                                                                                                                                                                          <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()"/></td>
@@ -110,6 +139,7 @@
 			</div>
 			
 		</div>
+                        <div class="singleDiv" >&nbsp;</div>
 		<div id="mleMessage" class="errorDiv"></div>
 	</div>
 <script type="text/javascript" src="Scripts/addHost.js"></script>

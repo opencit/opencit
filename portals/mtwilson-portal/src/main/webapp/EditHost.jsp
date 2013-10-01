@@ -5,7 +5,7 @@
 <html>
 <body>
 <div class="container">
-		<div class="nagPanel">Update/Delete an existing host </div>
+		<div class="nagPanel">Host Management &gt; Edit Hosts </div> <!-- was: "Update/Delete an existing host" -->
 		<div id="mainAddHostContainer">
 		<div id="mainEditHostDivHidden" style="display: none;" class="mainTableDisplayDiv">
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
@@ -13,7 +13,7 @@
 					<tr>
 						<th class="editRow0"></th>
 						<th class="editRow1">Host Name</th>
-						<th class="editRow2">Host IP Address</th>
+						<!-- <th class="editRow2">Host IP Address</th> -->
 						<th class="editRow3">Host Port</th>
 						<th class="editRow10">Host Description</th>
 						<th class="editRow4">BIOS Name</th>
@@ -21,7 +21,7 @@
 						<th class="editRow6">VMM Name</th>
 						<th class="editRow7">VMM Build</th>
 						<th class="editRow8">Email Address</th>
-						<th class="editRow9">VCenter Details</th>
+						<th class="editRow9">Connection Details</th>
 					</tr>
 				</thead>
 				</table>

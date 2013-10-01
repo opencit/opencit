@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mountwilson.as.helper.TrustAgentSecureClient;
 import com.intel.mtwilson.tls.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
@@ -21,7 +20,7 @@ import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,TrustAgentSecureClient> {
     
     @Override
-    public TrustAgentSecureClient makeObject(TlsConnection tlsConnection) throws Exception {
+    public TrustAgentSecureClient makeObject(TlsConnection tlsConnection)  {
         TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection); // client has to parse the string to get ip address and port for trust agent. 
         return client;
     }
@@ -36,7 +35,7 @@ public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnec
      * @throws Exception 
      */
     @Override
-    public void activateObject(TlsConnection tlsConnection, TrustAgentSecureClient client) throws Exception {
+    public void activateObject(TlsConnection tlsConnection, TrustAgentSecureClient client)  {
     }
     
     /**
@@ -64,7 +63,7 @@ public class IntelClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnec
      * @throws Exception 
      */
     @Override
-    public void destroyObject(TlsConnection tlsConnection, TrustAgentSecureClient client) throws Exception {
+    public void destroyObject(TlsConnection tlsConnection, TrustAgentSecureClient client)  {
 //        client.disconnect();
     }
 }

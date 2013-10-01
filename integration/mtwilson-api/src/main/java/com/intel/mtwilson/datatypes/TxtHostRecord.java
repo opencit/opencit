@@ -50,6 +50,8 @@ public class TxtHostRecord {
     public String AIK_PublicKey;
     @JsonProperty
     public String AIK_SHA1;
+    @JsonProperty
+    public String Processor_Info;    
     
     public TxtHostRecord() {
         
@@ -57,8 +59,8 @@ public class TxtHostRecord {
     
     public TxtHostRecord(TxtHost input) throws MalformedURLException {
         HostName = input.getHostName().toString();
-        if (input.getIPAddress() != null)
-            IPAddress = input.getIPAddress().toString();
+        if (input.getHostName() != null)
+            IPAddress = input.getHostName().toString();
         else
             IPAddress = "";
         Port = input.getPort();

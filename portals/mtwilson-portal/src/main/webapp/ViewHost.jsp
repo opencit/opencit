@@ -4,22 +4,22 @@
 <html>
 <body>
 <div class="container">
-		<div class="nagPanel">View an existing host </div>
+		<div class="nagPanel">Host Management &gt; View an existing host </div>
 		<div id="mainViewHostDetailsDiv">
 		<div id="mainViewHostDivHidden" style="display: none;" class="mainTableDisplayDiv">
-			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
+			<table class="tableDisplay" id="viewHostTable" width="100%" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
-						<th class="viewRow1">Host Name</th>
-						<th class="viewRow2">Host IP Address</th>
-						<th class="viewRow3">Host Port</th>
-						<th class="viewRow4">BIOS Name</th>
-						<th class="viewRow5">BIOS Build</th>
-						<th class="viewRow6">VMM Name</th>
-						<th class="viewRow7">VMM Build</th>
-						<th class="viewRow8">Email Address</th>
-						<th class="viewRow9">VCenter Details</th>
-						<th class="viewRow10">Host Description</th>
+						<th class="vh_viewRow1">Host Name</th>
+						<!-- <th class="vh_viewRow2">Host IP Address</th> -->
+						<th class="vh_viewRow3">Host Port</th>
+						<th class="vh_viewRow4">BIOS Name</th>
+						<th class="vh_viewRow5">BIOS Build</th>
+						<th class="vh_viewRow6">VMM Name</th>
+						<th class="vh_viewRow7">VMM Build</th>
+						<th class="vh_viewRow8">Email Address</th>
+						<th class="vh_viewRow9">Connection Details</th>
+						<th class="vh_viewRow10">Host Description</th>
 					</tr>
 				</thead>
 				</table>

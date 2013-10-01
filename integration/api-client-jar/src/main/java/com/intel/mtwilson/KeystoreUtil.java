@@ -24,6 +24,8 @@ import java.util.Properties;
 import java.util.Set;
 import javax.net.ssl.TrustManager;
 import com.intel.mtwilson.api.*;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.mtwilson.tls.TlsPolicy;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -323,7 +325,7 @@ public class KeystoreUtil {
      * The underlying Resource implementation determines the location where the
      * keystore will be saved.
      * 
-     * Implies Tls Policy TRUST_FIRST_CERTIFICATE
+     * Implies Tls Policy INSECURE to allow automatic download & saving of the server SSL certificate.
      * 
      * @param resource like FileResource or ByteArrayResource to which the keystore will be saved
      * @param username arbitrary, needs to be unique only within the resource container, and any restrictions on allowed characters are determined by the resource implmenetation
@@ -335,19 +337,36 @@ public class KeystoreUtil {
      * @since 0.5.4
      */
     public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
+        return createUserInResource(resource, username, password, server, new InsecureTlsPolicy(), roles);
+    }
+    
+    public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
+        log.trace("URL Protocol: {}", server.getProtocol());
         if( "https".equals(server.getProtocol()) ) {
             SslUtil.addSslCertificatesToKeystore(keystore, server); //CryptographyException, IOException            
+        }
+        if(log.isTraceEnabled()) {
+            try {
+                String[] aliases = keystore.aliases();
+                for(String alias : aliases) {
+                    log.trace("Certificate: "+keystore.getX509Certificate(alias).getSubjectX500Principal().getName());
+                }
+            }
+            catch(Exception e) {
+                log.trace("cannot display keystore: "+e.toString());
+            }
         }
         ApiClient c = null;
         try {
             // download server's ssl certificates and add them to the keystore
-            Properties p = new Properties();
-            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE");
-            Configuration config = new MapConfiguration(p);
+//            Properties p = new Properties();
+//            p.setProperty("mtwilson.api.ssl.policy", "TRUST_FIRST_CERTIFICATE"); // XXX TODO it is currently the user's responsibility to verify the ssl certificate after they register;  need to move this out of here and make it controllable via the api;  we should not be embedding a hard-coded policy in a utility function
+//            Configuration config = new MapConfiguration(p);
             // register the user with the server
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password); // CryptographyException, FileNotFoundException
-            c = new ApiClient(server, rsaCredential, keystore, config); //ClientException
+//            c = new ApiClient(server, rsaCredential, keystore, config); //ClientException
+            c = new ApiClient(server, rsaCredential, keystore, tlsPolicy); //ClientException
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded()); //CertificateEncodingException
             user.setRoles(roles);
@@ -438,7 +457,7 @@ public class KeystoreUtil {
      * @return an ApiClient object configured with the credentials in the keystore
      * @throws Exception 
      */
-    public static ApiClient clientForUserInDirectory(File directory, String username, String password, URL server) throws Exception {
+    public static ApiClient clientForUserInDirectory(File directory, String username, String password, URL server) throws ClientException, ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException   {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
@@ -458,13 +477,16 @@ public class KeystoreUtil {
      * @throws Exception 
      * @since 0.5.4
      */
-    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server) throws Exception {
-        SimpleKeystore keystore = new SimpleKeystore(resource, password);
-        RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
-        ApiClient c = new ApiClient(server, rsaCredential, keystore, null);
-        return c;        
+    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException {
+        return clientForUserInResource(resource, username, password, server, new InsecureTlsPolicy());
     }
     
+    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException  {
+        SimpleKeystore keystore = new SimpleKeystore(resource, password);
+        RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
+        ApiClient c = new ApiClient(server, rsaCredential, keystore, tlsPolicy);
+        return c;        
+    }
     
     
 }

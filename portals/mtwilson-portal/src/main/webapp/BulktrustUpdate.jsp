@@ -4,7 +4,7 @@
 <html>
 <body>
 <div class="container">
-		<div class="nagPanel">Group/Bulk Trust Status Update</div>
+		<div class="nagPanel">Trust &gt; Bulk Trust Status Update</div> <!-- was: "Group/Bulk Trust Status Update" -->
 		<div id="mainConatinerForBulkPage">
 			<div class="mainTableDisplayDiv" style="display: none;" id="mainTableForReports">
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">

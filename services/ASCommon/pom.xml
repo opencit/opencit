@@ -126,6 +126,12 @@
   	</dependency>
 	<dependency>
 	    <groupId>${project.groupId}</groupId>
+	    <artifactId>ASData</artifactId>
+	    <version>${project.version}</version>
+	    <scope>compile</scope>
+  	</dependency>
+	<dependency>
+	    <groupId>${project.groupId}</groupId>
 	    <artifactId>MSCommon</artifactId>
 	    <version>${project.version}</version>
 	    <scope>compile</scope>
@@ -135,6 +141,12 @@
 		<artifactId>commons-math3</artifactId>
 		<version>3.0</version>
 	</dependency>
-  	
+    <dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>my</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+
+      	
   </dependencies>  
 </project>

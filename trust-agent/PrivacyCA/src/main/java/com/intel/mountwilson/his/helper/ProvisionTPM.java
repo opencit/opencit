@@ -58,7 +58,7 @@ public class ProvisionTPM {
 	 * Entry point into the program
 	 * @throws Exception 
 	 */
-	public static void takeOwnership() throws Exception{// throws InvalidKeyException, CertificateEncodingException, UnrecoverableKeyException, NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, NoSuchProviderException, KeyStoreException, CertificateException, IOException, javax.security.cert.CertificateException {
+	public static void takeOwnership() throws FileNotFoundException, PrivacyCAException {// throws InvalidKeyException, CertificateEncodingException, UnrecoverableKeyException, NoSuchAlgorithmException, InvalidKeySpecException, SignatureException, NoSuchProviderException, KeyStoreException, CertificateException, IOException, javax.security.cert.CertificateException {
 		//get properties file info
 		final String EC_P12_FILE = "TpmEndorsmentP12";
 		final String EC_P12_PASSWORD = "EndorsementP12Pass";

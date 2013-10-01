@@ -61,21 +61,21 @@ public class ConverterUtil {
 		hostRecord.Description=dataVO.getHostDescription();
 		hostRecord.Email=dataVO.getEmailAddress();
 		hostRecord.HostName=dataVO.getHostName();
-		hostRecord.IPAddress=dataVO.getHostIPAddress();
+		hostRecord.IPAddress=dataVO.getHostName();
 		hostRecord.Port=Integer.parseInt(dataVO.getHostPort());
 		
 		String[] osVMMInfo = dataVO.getVmmName().split(Pattern.quote(HelperConstant.OS_VMM_INFORMATION_SEPERATOR));
 		String osNameWithVer = osVMMInfo[0];
-		String osName = null;
+		String osName;
 		String osVer = "";
-		
+		StringBuffer res = new StringBuffer();
 		String[] s = osNameWithVer.split(" ");
 			osName = s[0];
 			if (s.length == 2) {
 				osVer = s[1];
 			}else {
 				for (int i = 1; i < s.length; i++) {
-					osVer+=s[i]+" ";
+					res.append(s[i]+" ");
 				}
 			}
 		
@@ -156,7 +156,7 @@ public class ConverterUtil {
 			for (hostOS hostOSType : hostOSTypes) {
 				if (biosName.toLowerCase().contains(hostOSType.getValue().toLowerCase())) {
 					hostVO.setOsName(TDPConfig.getConfiguration().getString(HelperConstant.IMAGES_ROOT_PATH)+hostOSType.getImageName());
-                                        if (hostOSType.getVmmImageNeeded().toString() == "false")
+                                        if (hostOSType.getVmmImageNeeded().contains("false"))
                                             skipAddingVMMImage = true;
                                         break;
 				}
@@ -208,7 +208,7 @@ public class ConverterUtil {
     	HostDetailsEntityVO entityVO = new HostDetailsEntityVO();
 		entityVO.setHostId(getConvertedHostName(txtHostDetail.HostName));
 		entityVO.setHostName(txtHostDetail.HostName);
-		entityVO.setHostIPAddress(txtHostDetail.IPAddress);
+		entityVO.setHostIPAddress(txtHostDetail.HostName);
 		entityVO.setHostPort(txtHostDetail.Port.toString());
 		entityVO.setHostDescription(txtHostDetail.Description);
 		entityVO.setBiosName(txtHostDetail.BIOS_Name);

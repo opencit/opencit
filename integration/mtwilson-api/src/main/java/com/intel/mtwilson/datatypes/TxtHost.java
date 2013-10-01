@@ -16,7 +16,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 public class TxtHost {
     private Hostname hostname;
 //    private ServicePort servicePort;
-    private IPAddress ipAddress;
+    private String ipAddress;
     private Integer port;
     private String connectionString;
     private Bios bios;
@@ -54,7 +54,8 @@ public class TxtHost {
         hostname = new Hostname(host.HostName);
         bios = new Bios(host.BIOS_Name, host.BIOS_Version, host.BIOS_Oem);
         vmm = new Vmm(host.VMM_Name, host.VMM_Version, host.VMM_OSName, host.VMM_OSVersion);
-        ipAddress = (host.IPAddress == null || host.IPAddress.isEmpty()) ? null : new IPAddress(host.IPAddress);
+        //ipAddress = (host.HostName == null || host.IPAddress.isEmpty()) ? null : host.IPAddress;
+        ipAddress = hostname.toString();
         port = host.Port;
         connectionString = host.AddOn_Connection_String;
         description = host.Description;
@@ -101,7 +102,7 @@ public class TxtHost {
         return vmm;
     }
 
-    public IPAddress getIPAddress() {
+    public String getIPAddress() {
         return ipAddress;
     }
 
@@ -109,12 +110,17 @@ public class TxtHost {
         return port;
     }
 
+    /**
+     * XXX TODO  the guessing of connection string has now moved to ConnectionString.from()
+     * @return
+     * @throws MalformedURLException 
+     */
     public String getAddOn_Connection_String() throws MalformedURLException {
         ConnectionString connStr = null;
         if( connectionString == null) {
             if (ipAddress != null && port != null) {
                 // for backwards compatibility with cilents that don't submit a connection string for intel hosts
-                connStr = new ConnectionString(Vendor.INTEL, ipAddress.toString(), port);
+                connStr = ConnectionString.forIntel(ipAddress.toString(), port);
                 // return "intel:https://"+ipAddress.toString()+":"+port.toString(); // XXX or mabye just throw an IllegalArgumentException , this may not be the right place to kludge this.
             }            
         } else {

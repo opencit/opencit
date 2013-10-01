@@ -1,12 +1,95 @@
 var disabledDiv = '<div id="disabledDiv" class="disabledDiv"><img class="loadingImageClass" src="images/loading.gif" /></div>';
-var validationDiv = '<div class="errorMessage validationErrorDiv"> Value Can\'t be Empty.</div>';
-var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special Characters are not allowed.</div>';
+var validationDiv = '<div class="errorMessage validationErrorDiv"> Value cannot be empty.</div>';
+var validationSpecialDiv = '<div class="errorMessage validationErrorDiv"> Special characters are not allowed.</div>';
+var validationSpan = '<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>';
+var validationSpecialSpan = '<span class="errorMessage validationErrorDiv" style="float:none">Special characters are not allowed.</span>';
 var normalReg = new RegExp(/^[a-zA-Z0-9_. -]+$/);
 var manifestReg = new RegExp(/^[a-fA-F0-9]+$/);
 var selectedPageNo = 1;
 var moduleAttestationDisplayString = 'PCR + Module';
+var regIPAddress = new RegExp(/^[0-9_.]+$/);
+var regPortNo = new RegExp(/^[0-9]+$/);
+// 0 = TA,  1 == vmware, 2 == citrix
+var isVMWare = 0;
 
-var isVMWare = false;
+
+// Validation functions
+// TODO  this function is being used everywhere but we really need ip address OR hostname validation.
+//       adding hostname validation here sinc
+// stdalex_ validate ip address function
+
+function fnMWValidateIpAddressOrHostName(elementID, isMandatory) {
+    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+    var checkHostname = /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/;
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } else {
+        // Since the user has specified a value, irrespective of whether it is mandatory or not, let us validate it.
+        if(checkIp.test($('#'+elementID).val()) || checkHostname.test($('#'+elementID).val())) {
+            return true;
+        } else {
+            $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value specified is not valid.</span>');
+            return false;
+        }
+    }
+}
+
+function fnMWValidateIpAddress(elementID, isMandatory) {
+    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } else {
+        // Since the user has specified a value, irrespective of whether it is mandatory or not, let us validate it.
+        if(checkIp.test($('#'+elementID).val())) {
+            return true;
+        } else {
+            $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value specified is not valid.</span>');
+            return false;
+        }
+    }
+}
+
+function fnMWValidatePort(elementID, isMandatory) {
+    var checkPort = /^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/;
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } else {
+        // Since the user has specified a value, irrespective of whether it is mandatory or not, let us validate it.
+        if(checkPort.test($('#'+elementID).val())) {
+            return true;
+        } else {
+            $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value specified is not valid. Please specify a value between 0 and 65535.</span>');
+            return false;
+        }
+    }
+}
+
+// This function is basically for validating null or empty fields. There are no restrictions on the contents.
+function fnMWValidateField(elementID, isMandatory) {
+    $('#'+elementID).parent().find('.errorMessage').remove();
+    if ((isMandatory == true) && ($('#'+elementID).val() == '')) {
+        $('#'+elementID).parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Value cannot be empty.</span>');
+        return false;
+    } else if ((isMandatory == false) && ($('#'+elementID).val() == '')) {
+        // Since the value is not mandatory and the user has not specified anything, then lets return back zero
+        return true;
+    } 
+}
 
 var JSON = JSON || {};
 JSON.stringify = JSON.stringify || function (obj) {
@@ -85,7 +168,7 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -139,7 +222,7 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 			}
 		},
 		error: function(errorMessage){
-                        alert(JSON.stringify(errorMessage));
+                        //alert(JSON.stringify(errorMessage));
 			if(callbackErrorFunction != null){
 				var args = []; 
 				args.push(responseJSON);
@@ -242,23 +325,41 @@ function fnSessionExpireLoginAgain() {
 	fnOpenDialog(str, "Error", 300, 150,true);
 }
 
-/*Method to change display div while selection of drop down for VMWare or Opensources*/
 function fnChangehostType(element,isWhiteListConfigPage) {
-	var type = "false";
+    //alert($('#MainContent_ddlHOSTType').attr('value') );
+	var type = "";
+    // This code loops through all the options in the host type
+    // drop down box and finds the one thats selected and saves
+    // its name in type variable
+    // choices are VMware, Citrix, KVM|Xen
+    cleanUpAllDivs();
 	$(element).find('option').each(function() {
 		if ($(this).attr('selected') == 'selected') {
-			type = $(this).attr('type');
+			type = $(this).attr('value');
 		}
 	});
-	if (type == 'false') {
-		isVMWare= false;
-		$('#openSourcesHostType').show();
-		$('#vmwareHostType').hide();
-	}else {
-		isVMWare = true;
+
+	if (type.indexOf("VMware") != -1) {       
+		isVMWare = 1;
+        
 		$('#openSourcesHostType').hide();
+        $('#citrixHostType').hide();
 		$('#vmwareHostType').show();
-	}
+	}else if(type.indexOf("Citrix") != -1) {
+        isVMWare = 2;
+       
+        $('#openSourcesHostType').hide();
+        $('#vmwareHostType').hide();
+		$('#citrixHostType').show();
+        
+	}else{
+        isVMWare= 0;
+        
+        $('#vmwareHostType').hide();
+        $('#citrixHostType').hide();
+		$('#openSourcesHostType').show();
+		
+    }
 	
 	if (isWhiteListConfigPage == true) {
 		$('#whiteListMessage').html('');
@@ -266,7 +367,6 @@ function fnChangehostType(element,isWhiteListConfigPage) {
 		changeRequiredPCR();
 		fnDisableOrEnableUploadButton(false);
 	}
-	
 }
 
 //function to test Validation for given input ID for empty values.
@@ -319,13 +419,6 @@ function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,b
 	this.vmmPCRs = vmmPCRs;
 	this.hostLocation = hostLocation;
 	this.registerHost = registerHost;
-}
-
-//Function to check all checkbox in table.
-function fnSelectAllCheckBox(status) {
-	$('.registerHostTableContent table tr td').each(function() {
-		$(this).find(':checkbox').attr('checked',status);
-	});
 }
 
 
@@ -469,10 +562,13 @@ return true;
 	
 }
 
+// TODO  this function is being used everywhere but we really need ip address OR hostname validation.
+//       adding hostname validation here sinc
 // stdalex_ validate ip address function
 function fnValidateIpAddress(ipAddress) {
     var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
-    if(checkIp.test(ipAddress)) {
+    var checkHostname = /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/;
+    if(checkIp.test(ipAddress) || checkHostname.test(ipAddress)) {
         return true;
     }else{
         return false;
@@ -573,6 +669,11 @@ function clearAllFiled(divID) {
 			$(this).val('');
 		}
 	});
+    	$('#'+divID).find('input:password').each(function() {
+		if ($(this).attr('disabled') != 'disabled') {
+			$(this).val('');
+		}
+	});
 }
 
 function fnGetMleData(isNewMle) {
@@ -664,12 +765,13 @@ function fnGetMleData(isNewMle) {
                         }
 		mleObj.mleDescription = $('#MainContent_tbDesc').val();
 		var mani = [];
-		if ($('#MainContent_ddlAttestationType').val() == "Module" || $('#MainContent_ddlAttestationType').val() == "MODULE") {
+		if (mleObj.attestation_Type == "Module" || mleObj.attestation_Type == "MODULE") {
 			$('#gkvs_register_checkbox input').each(function() {
 				var manifestObj = new manifestList();
 				if($(this).attr('checked') == 'checked'){
 					manifestObj.name = $(this).attr('name');
 					manifestObj.value= $(this).attr('value');
+                                                            // alert("Manifest Name is: " +  manifestObj.name + " Value is: " + manifestObj.value );
 					mani.push(manifestObj);
 				}
 			});
@@ -692,13 +794,14 @@ function fnGetMleData(isNewMle) {
 
 
 function fnTestValidation(inputID,regExpresion) {
+           // alert($('#'+inputID).val());
 	$('#'+inputID).parent().find('.errorMessage').remove();
 	if ($('#'+inputID).val() == '') {
-		$('#'+inputID).parent().append(validationDiv);
+		$('#'+inputID).parent().append(validationSpan);
 		return false;
 	}else {
 		if (!regExpresion.test($('#'+inputID).val())) {
-			$('#'+inputID).parent().append(validationSpecialDiv);
+			$('#'+inputID).parent().append(validationSpecialSpan);
 			return false;
 		}
 	}
@@ -898,17 +1001,13 @@ function getVCenterServerAddress(inputID) {
 
 function getVCeterHostIpAddress(address){
 	var string = address;
-	string = string.substring(8);
-	return string.split("/")[0];
+	string = string.substring(15);
+            // remove the sdk part
+	string = string.split("/")[0]; 
+            // remove the port # if using default
+            if (string.split(":")[1] == "443")
+                return string.split(":")[0];
+            else
+                return string;
 }
 
-// stdalex_ validate ip address function
-function fnValidateIpAddress(ipAddress) {
-    var checkIp = /\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/;
-    if(checkIp.test(ipAddress)) {
-        return true;
-    }else{
-        return false;
-    }
-    
-}

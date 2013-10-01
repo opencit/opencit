@@ -1,5 +1,7 @@
 var oemInfo = [];
-var isVmware = false;
+
+// 0 = TA,  1 == vmware, 2 == citrix
+var isVmware = 0;
 
 $(function() {
 	$('#mainAddHostContainer').prepend(disabledDiv);
@@ -10,41 +12,50 @@ $(function() {
 	 */
 
 	$('#MainContent_tbHostName').blur(function() {
-		fnTestValidation('MainContent_tbHostName',normalReg);
+		fnMWValidateIpAddressOrHostName('MainContent_tbHostName',false);
 	});
 	$('#MainContent_tbHostPort').blur(function() {
-		if (isVmware == 'false') {
-			$('.portNoError').each(function() {
+                        // Port has to be validated for both Open Source and Citrix
+		if ((isVmware == 0)  || (isVmware ==2)){
+			/*$('.portNoError').each(function() {
 				$(this).remove();
 			});
 			if (!regPortNo.test($('#MainContent_tbHostPort').val())) {
-				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv portNoError" style="float:none">only Numeric values are allowed.</span>');
+				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv portNoError" style="float:none">Only numeric values are allowed.</span>');
 				return false;
 			}
 			if ($('#MainContent_tbHostPort').val().length > 4 ) {
 				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv portNoError" style="float:none">Port NO length should not be greater 4.</span>');
 				return false;
-			}
+			}*/
+                                    fnMWValidatePort('MainContent_tbHostPort', true);
 		}
 	});
-	$('#MainContent_tbHostIP').blur(function() {
-		if (isVmware == 'false') {
-			fnTestValidation('MainContent_tbHostIP',regIPAddress);
-		}
-	});
+    
+	//$('#MainContent_tbHostIP').blur(function() {
+                        // For both open source and citrix we have to validate IP address since it is mandatory. For VMware we validate only if the user has entered value
+	//	if ((isVmware == 0) || (isVmware == 2)){
+			//fnTestValidation('MainContent_tbHostIP',regIPAddress);
+    //                                fnMWValidateIpAddress('MainContent_tbHostIP', true);
+	//	} else if ((isVmware == 1)) {
+    //                               // fnTestValidation('MainContent_tbHostIP',regIPAddress);
+    //                                fnMWValidateIpAddress('MainContent_tbHostIP', false);                                   
+    //       }
+	//});
+    
 	$('#MainContent_tbVCenterAddress').blur(function() {
-		if (isVmware != 'false') {
-			fnTestValidation('MainContent_tbVCenterAddress',regVcenterAddress);
+		if (isVmware == 1) {
+			fnMWValidateIpAddressOrHostName('MainContent_tbVCenterAddress',true);
 		}
 	});
 	$('#MainContent_tbVCenterLoginId').blur(function() {
-		if (isVmware != 'false') {
-			fnTestValidation('MainContent_tbVCenterLoginId',new RegExp());
+		if (isVmware == 1) {
+			fnMWValidateField('MainContent_tbVCenterLoginId',true);
 		}
 	});
 	$('#MainContent_tbVCenterPass').blur(function() {
-		if (isVmware != 'false') {
-			fnTestValidation('MainContent_tbVCenterPass',new RegExp());
+		if (isVmware == 1) {
+			fnMWValidateField('MainContent_tbVCenterPass',true);
 		}
 	});
 });
@@ -110,25 +121,38 @@ function fnChangeOEMVender() {
 
 function SetRequired(element) {
 	var selected = $(element).val();
-	
+    
 	$(element).find('option').each(function() {
 		if ($(this).text() == selected) {
-			isVmware = $(this).attr('isvmware'); 
+			type = $(this).attr('value');  // 'isvmware'
 		}
 	});
+    
+    if (type.indexOf("VMware") != -1) {  
+		isVmware = 1;
+	}else if(type.indexOf("XenServer") != -1) {
+       isVmware = 2;
+	}else{
+        isVmware= 0;
+    }
+    
 	$('.requiredOne').each(function() {
 		$(this).remove();
 	});
 	var reqStr = '<span id="requiredFiled" class="requiredOne" style="color:red;">*  </span>';
-	if (isVmware == 'false') {
+	if (isVmware == 0) { // TA
+        
 		$('#hostPortDisplayDiv').show();
-		$('#MainContent_tbHostIP').parent().append(reqStr);
+		//$('#MainContent_tbHostIP').parent().append(reqStr);
 		$('#MainContent_tbHostPort').parent().append(reqStr);
 		$('#vcenterStringElement').find('input').each(function() {
 			$(this).parent().find('.validationErrorDiv').remove();
 		});
 		$('#vcenterStringElement').hide();
-	}else {
+		$('#citrixStringElement').hide();
+                $('#MainContent_tbHostPort').val("9999");
+	}else if(isVmware == 1){  // VMWARE
+        
 		$('#vcenterStringElement').find('input').each(function() {
 			$(this).parent().append(reqStr);
 		});
@@ -136,10 +160,26 @@ function SetRequired(element) {
 		/*$('#MainContent_tbVCenterAddress').parent().append(reqStr);
 		$('#MainContent_tbVCenterLoginId').parent().append(reqStr);
 		$('#MainContent_tbVCenterPass').parent().append(reqStr);*/
-		$('#MainContent_tbHostIP').parent().find('.validationErrorDiv').remove();
+		//$('#MainContent_tbHostIP').parent().find('.validationErrorDiv').remove();
 		$('#MainContent_tbHostPort').parent().find('.validationErrorDiv').remove();
 		$('#hostPortDisplayDiv').hide();
-	}
+      
+		$('#citrixStringElement').hide();
+	}else { //CITRIX
+                $('#hostPortDisplayDiv').show();
+                //$('#MainContent_tbHostIP').parent().append(reqStr);
+		$('#MainContent_tbHostPort').parent().append(reqStr);
+                $('#vcenterStringElement').find('input').each(function() {
+                    $(this).parent().find('.validationErrorDiv').remove();
+                });
+                $('#vcenterStringElement').hide();
+                
+                $('#citrixStringElement').find('input').each(function() {
+                    $(this).parent().append(reqStr);
+                });
+                $('#citrixStringElement').show();
+                $('#MainContent_tbHostPort').val("443");
+    }
 }
 
 function hostDataVoObbject(hostId,hostName,hostIPAddress,hostPort,hostDescription,biosName,biosBuildNo,vmmName,vmmBuildNo,updatedOn,emailAddress,location,oemName,vCenterDetails) {
@@ -178,9 +218,9 @@ function chechAddHostValidation() {
 	var valid5 = true;
 	var valid6 = true;
 	var valid4 = true;
-	if (isVmware == 'false') {
+	if (isVmware == 0) { // TA
 		valid2 = fnTestValidation('MainContent_tbHostPort',normalReg);
-		valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
+		//valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
 		/* Soni_Begin_27/09/2012_for_validating IP address */
 		//valid4 = isValidIPAddress('MainContent_tbHostIP');
 		//if (!valid4){
@@ -190,11 +230,16 @@ function chechAddHostValidation() {
                 //}
 		/* Soni_End_27/09/2012_for_validating IP address */		
 		
-	}else {
-		//valid3 =  fnTestValidation('MainContent_tbVCenterAddress',new RegExp());
+	}else if(isVmware == 1){ //vmware
+		valid3 =  fnTestValidation('MainContent_tbVCenterAddress',new RegExp());
 		valid3 =  fnTestValidation('MainContent_tbVCenterLoginId',new RegExp());
 		valid3 =  fnTestValidation('MainContent_tbVCenterPass',new RegExp());
-	}
+	}else { // citrix
+        valid2 = fnTestValidation('MainContent_tbHostPort',normalReg);
+        //valid3 = fnTestValidation('MainContent_tbHostIP',normalReg);
+        valid3 =  fnTestValidation('MainContent_tbVcitrixLoginId',new RegExp());
+        valid3 =  fnTestValidation('MainContent_tbVcitrixPass',new RegExp());
+    }
 	
         // Description and email field were not getting validated for VMware hosts. So, moved it outside the if/else statement
         /* Soni Begin_1/10/2012_for_validating descriptionnot allowing & and % Bug 436*/
@@ -218,7 +263,7 @@ function chechAddHostValidation() {
         
 	if (valid1 && valid2 && valid3) {
 		
-		if(isVmware == 'false'){
+		if(isVmware == 0){
 			if (!regPortNo.test($('#MainContent_tbHostPort').val())) {
 				$('#MainContent_tbHostPort').parent().append('<span class="errorMessage validationErrorDiv" style="float:none">Only numeric values are allowed.</span>');
 				return false;
@@ -256,15 +301,20 @@ function fnGetNewHostData() {
 		}
 	});*/
 	
-	hostVo.hostIPAddress = $.trim($('#MainContent_tbHostIP').val());
-	if (isVmware == 'false') {
+	hostVo.hostIPAddress = hostVo.hostName; //$.trim($('#MainContent_tbHostIP').val());
+	if (isVmware == 0) { // TA
 		hostVo.hostPort =$.trim($('#MainContent_tbHostPort').val());
 		hostVo.vCenterDetails = "";
-	}else {
+	}else if(isVmware == 1) { // VMWARE
 	//	hostVo.hostIPAddress = "";
 		hostVo.hostPort =0;
 		hostVo.vCenterDetails = getVCenterServerAddress('MainContent_tbVCenterAddress')+";"+$('#MainContent_tbVCenterLoginId').val()+";"+$('#MainContent_tbVCenterPass').val();
-	}
+	}else { // CITRIX
+        hostVo.hostPort =$.trim($('#MainContent_tbHostPort').val());
+        hostVo.vCenterDetails = "citrix:https://"+$('#MainContent_tbHostName').val()+":"+$('#MainContent_tbHostPort').val()+
+                                             "/;"+$('#MainContent_tbVcitrixLoginId').val()+";"+$('#MainContent_tbVcitrixPass').val();
+        
+    }
 	
 	//setting unwanted values to null or default
 	hostVo.location = null;
@@ -274,26 +324,29 @@ function fnGetNewHostData() {
 
 function addNewHost() {
         var ipValid = true;
-        if (isVmware == 'false') {
-         if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
-             ipValid=false;
-         }   
+        
+        if (isVmware == 0 || isVmware == 2) {
+         //if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
+       
+         //    ipValid=false;
+         //}   
         }else{
           if(!fnValidateIpAddress($('#MainContent_tbVCenterAddress').val())) {
+
              ipValid=false;
          }    
         }
 
         if(ipValid == true) {
             if (chechAddHostValidation()) {
-		if (confirm("Are you Sure you want to Add this Host ?")) {
-			var dataToSend = fnGetNewHostData();
-			dataToSend.hostId = null;
-			dataToSend = $.toJSON(dataToSend);
-			$('#mainAddHostContainer').prepend(disabledDiv);
-			$('#mleMessage').html('');
-			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+(dataToSend)+"&newhost=true", fnSaveNewHostInfoSuccess, null,"New Host has been successfully Added.");
-		}
+                if (confirm("Are you Sure you want to Add this Host ?")) {
+                    var dataToSend = fnGetNewHostData();
+                    dataToSend.hostId = null;
+                    dataToSend = $.toJSON(dataToSend);
+                    $('#mainAddHostContainer').prepend(disabledDiv);
+                    $('#mleMessage').html('');
+                    sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+(dataToSend)+"&newhost=true", fnSaveNewHostInfoSuccess, null,"New Host has been successfully Added.");
+                }
             }
         }else{
             alert("Please enter a valid IP address and try again.")

@@ -54,7 +54,7 @@ public class Main {
      * @param args 
      */
     public static void main(String[] args) {
-
+       
         if( args.length == 0 ) {
             System.err.println("Usage: <command> [args]");
             System.exit(1);
@@ -81,9 +81,19 @@ public class Main {
         catch(ClassNotFoundException e) {
             System.err.println("Unrecognized command: "+commandName);
         }
+        /*
+        catch(IOException e){
+            System.err.println("No console.");
+            e.printStackTrace();   
+        }
+        * */
+        catch(java.lang.SecurityException e){
+            System.err.println("Securty Exception: "+ e.getMessage());
+        }
         catch(Exception e) {
             e.printStackTrace(System.err);
         }
+        
         
     }
     

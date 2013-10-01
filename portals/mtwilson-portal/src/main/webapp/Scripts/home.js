@@ -429,7 +429,7 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
 		$('#MainContent_tbHostName').val(responseJSON.hostData.hostName);
         $('#MainContent_tbHostName').attr('disabled','disabled');
         var value = responseJSON.hostData.hostIPAddress == 'null' || responseJSON.hostData.hostIPAddress == undefined ? "" : responseJSON.hostData.hostIPAddress;
-		$('#MainContent_tbHostIP').val(value);
+		//$('#MainContent_tbHostIP').val(value);
 		value = responseJSON.hostData.hostPort == 'null' || responseJSON.hostData.hostPort == undefined ? "" : responseJSON.hostData.hostPort;
 		$('#MainContent_tbHostPort').val(value);
 		value = responseJSON.hostData.hostDescription == 'null' || responseJSON.hostData.hostDescription == undefined ? "" : responseJSON.hostData.hostDescription;
@@ -467,11 +467,11 @@ function fnFillAddHostPageDataForEdit(responseJSON) {
  
 function updateHostInfo() {
     var ipValid = true;
-        if (isVmware == 'false') {
-         if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
-             ipValid=false;
-         }   
-        }else{
+        if (isVmware == 0 || isVmware == 2) { // intel and citrix hosts
+         //if(!fnValidateIpAddress($('#MainContent_tbHostIP').val())) {
+         //    ipValid=false;
+         //}   
+        }else{ // vmware host
           if(!fnValidateIpAddress($('#MainContent_tbVCenterAddress').val())) {
              ipValid=false;
          }    
@@ -479,14 +479,15 @@ function updateHostInfo() {
 
         if(ipValid == true) {
             if (chechAddHostValidation()) {
-		if (confirm("Are you sure you want to update this Host ?")) {
+                        // Bug: 727
+		//if (confirm("Are you sure you want to update this Host ?")) {
 			var dataToSend = fnGetNewHostData();
 			dataToSend.hostId = selectedHostID;
 			dataToSend = $.toJSON(dataToSend);
 			$('#mainAddHostContainer').prepend(disabledDiv);
 			$('#mleMessage').html('');
 			sendJSONAjaxRequest(false, 'getData/saveNewHostInfo.html', "hostObject="+dataToSend+"&newhost=false", fnSaveNewHostInfoSuccess, null,"Host has been successfully updated.");
-		}
+		//}
             }
         }else{
             alert("Please enter a valid IP address and try again.")

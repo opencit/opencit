@@ -75,7 +75,7 @@ public class SearchApiClient implements Command {
         System.out.println(String.format("Found record for %s in database [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
     }
     
-    private boolean findApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException {
+    private boolean findApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException, IOException {
         boolean found = false;
         SetupWizard wizard = new SetupWizard(conf);
         try {
@@ -114,20 +114,24 @@ public class SearchApiClient implements Command {
     //}
     
     private String readInputStringWithPrompt(String prompt) throws IOException {
+        
         if (console == null) {
             throw new IOException("no console.");
         }
+		//BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s: ", prompt));
         String input = console.readLine();
 //        in.close(); // don't close System.in !!
         return input;
     }
-
+    // comment out unused function (6/11 1.2)
+    /*
     private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
+        
         if (console == null) {
             throw new IOException("no console.");
         }
-        
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s [%s]: ", prompt, defaultValue));
         String input = console.readLine();
 //        in.close(); // don't close System.in !!
@@ -136,7 +140,9 @@ public class SearchApiClient implements Command {
         }
         return input;
     }
-    
+    */
+    // commenting out unused function (6/11 1.2)
+    /*
     private String firstNonEmpty(String[] values) {
         for(String value : values) {
             if( value != null && !value.isEmpty() ) {
@@ -145,4 +151,5 @@ public class SearchApiClient implements Command {
         }
         return null;
     }
+    */
 }

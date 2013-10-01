@@ -4,10 +4,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<link rel="stylesheet" type="text/css" href="/TrustDashBoard/CSS/JQueryHelperCSS/prettify.css" />
+	<link rel="stylesheet" type="text/css" href="/mtwilson-portal/CSS/JQueryHelperCSS/prettify.css" />
 
-    <script type="text/javascript" src="/TrustDashBoard/Scripts/JQuery/jquery-1.7.2.js"></script>
-    <script type="text/javascript" src="/TrustDashBoard/Scripts/JQuery/prettify.js"></script>
+    <script type="text/javascript" src="/mtwilson-portal/Scripts/JQuery/jquery-1.7.2.js"></script>
+    <script type="text/javascript" src="/mtwilson-portal/Scripts/JQuery/prettify.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <c:set var="hostName" scope="session" value="${hostName}"/>
 <title>Trust Details <c:out value="${hostName}"></c:out></title>
@@ -38,6 +38,6 @@
 			</div>
 		</c:otherwise>
 	</c:choose>-->
-       <script type="text/javascript" src="/TrustDashBoard/Scripts/showXmlDetailsForHost.js"></script>
+       <script type="text/javascript" src="/mtwilson-portal/Scripts/showXmlDetailsForHost.js"></script>
 </body>
 </html>

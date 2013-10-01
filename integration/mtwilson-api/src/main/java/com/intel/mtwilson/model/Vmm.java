@@ -48,12 +48,12 @@ public final class Vmm extends ObjectModel {
     }
 
     public final void setName(String value) {
-        Validate.notNull(value);
+        //Validate.notNull(value);
         name = value;
     }
 
     public final void setVersion(String value) {
-        Validate.notNull(value);
+        //Validate.notNull(value);
         version = value;
     }
 

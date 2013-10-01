@@ -250,19 +250,24 @@ h5, h6
 }
 
 .tableDisplay{
-	color: #333333;
+	color: #3A4F63;
 	text-align: center;
 	width: 100%;
-	height: 45px;
+            /* Removed the column height so as to allow the resize automatically */
+	/* height: 40px; */
+        table-layout: fixed;
 	}
+    
 .tableDisplay thead{
-	background-color: #5D7B9D;
+	background-color: #3A4F63;
     color: White;
     font-weight: bold;
 }
 .tableDisplay tr td{
-    border: 1px solid #6E3F4A;
+    border: 1px solid #3A4F63;
     empty-cells: show;
+     overflow: hidden;
+     word-wrap: break-word;
 }
 
 .tableBorderClass tr td{
@@ -275,27 +280,32 @@ h5, h6
     empty-cells: show;
     word-wrap: break-word;
 }
+
+/* Commented out the MLE specific table settings since it was causing scroll bars.
 .tableDivMLE{
 	width: 1000px;
    max-height: 350px;
 }
 .tableDivMLE table{
-	border: 1px solid #6E3F4A;
+	border: 1px solid #3A4F63;
 }
 .tableDivMLE table tr{
 	height: 25px;
 }
+
+.tableDivEditMle{
+    max-height: 330px;
+    width: 870px; *
+} */
+
+
 .tableDiv{
    max-height: 330px;
     width: 650px;
 }
-.tableDivEditMle{
-    max-height: 330px;
-   /*  width: 870px; */
-}
 
 .tableDiv table{
-	border: 1px solid #6E3F4A;
+	border: 1px solid #3A4F63;
 }
 
 .tableDiv table tr{
@@ -342,7 +352,7 @@ h5, h6
 .tableDivMLE .rowr6{width: 65px;}
 .tableDivMLE .rowr7{width: 90px;}
 
-.row1{width: 20px;}
+/*.row1{width: 20px;}
 .row2{width: 80px;}
 .row3{width: 175px;}
 .row4{width: 80px;}
@@ -353,7 +363,21 @@ h5, h6
 .row9{width: 170px;}
 .row10{width: 110px;}
 .row11{width: 50px;}
-.row5Sub{width: 150px;}
+.row5Sub{width: 150px;}*/
+
+.row1{width: 20px;}
+.row2{width: 80px;}
+.row3{width: 50px;}
+.row4{width: 55px;}
+.row5{width: 60px;}
+.row6{width: 75px;}
+.row7{width: 75px;}
+.row8{width: 80px;}
+.row9{width: 100px;}
+.row10{width: 90px;}
+.row11{width: 65px;}
+.row12{width: 210px;}
+.rowHelp{width:50px; }
 
 /*.row12{width: 50px;}*/
 
@@ -364,7 +388,31 @@ h5, h6
 .manifestModuleTypeRow5{width: 65px;}
 .manifestModuleTypeRow6{width: 75px;}
 
+.manifestModuleTypeTableHeader{
+    table-layout: fixed;
+    text-align: center;
+    width: 98%;
+}
 
+.manifestModuleTypeTableHeader thead{
+/*    background-color: #6E3F4A;*/
+    color: White;
+    font-weight: bold;
+}
+
+.manifestModuleTypeTableContent{
+    text-align: center;
+    overflow: auto;
+    max-height: 461px;
+}
+.manifestModuleTypeTableContent table{
+    table-layout: fixed;
+}
+.manifestModuleTypeTableContent tr td{
+    border: 1px solid #3A4F63;
+    empty-cells: show;
+    word-wrap: break-word;
+}
 
 /* Class for View Pending Registration page */
 .viewRequestRow1{width: 412px;}
@@ -379,6 +427,18 @@ h5, h6
 .deleteRequestRow4{width: 169px;}
 .deleteRequestRow4Header{width: 189px;}
 
+
+/* Class for View Host page */
+.vh_viewRow1{width: 100px;}
+.vh_viewRow2{width: 100px;}
+.vh_viewRow3{width: 50px;}
+.vh_viewRow4{width: 70px;}
+.vh_viewRow5{width: 50px;}
+.vh_viewRow6{width: 150px;}
+.vh_viewRow7{width: 60px;}
+.vh_viewRow8{width: 70px;}
+.vh_viewRow9{width: 100px;}
+.vh_viewRow10{width: 70px;}
 
 /* Class for View Request page */
 .viewRow1{width: 260px;}
@@ -494,6 +554,13 @@ h5, h6
 	height: 20px;
 }
 
+.ddlBox_Border{
+    border: 1px solid #7A5660;
+    width: 503px;
+    height: 24px;
+    float: left;
+}
+
 .uploadButton{
 	float: left;
 	margin-right: 5px;
@@ -517,12 +584,36 @@ text-align: center;
 
 
 /* --------------- class specific  for Demo Portal --------*/
-.mainTableDiv{
+/*.mainTableDiv{
 	color: black;
     height: 500px;
     padding-left: 35px;
     text-align: center;
     width: 93%;
+}*/
+
+.mainTableDiv{
+	color: black;
+    height: 500px;
+   /*  padding-left: 35px; */
+    /* text-align: center; */
+    /* width: 985px; */
+    /* Soni_Begin_02/10/2012_issue_table aligned at the left  */
+    /*float: left;*/
+    float: center;
+      /* Soni_End_02/10/2012_issue_table aligned at the left  */
+}
+
+.mainTableDisplayDiv{
+    min-width: 1030px;
+}
+
+.mainTableDisplayDiv table{
+	 table-layout: fixed; 
+}
+
+.mainTableDisplayDiv table tr td{
+	word-wrap: break-word;
 }
 
 .subTableDiv{
@@ -542,7 +633,7 @@ text-align: center;
 	border:1px solid #3A4F63;
 }
 .textAreaBoxClass{
-	width:240px; 
+	width:300px; 
 	border: 1px solid #3A4F63;
         height: 35px;;
 }
@@ -592,6 +683,8 @@ text-align: center;
 	float: left;
 	font-size: small;
 	margin-left: 4px;
+        display:inline-block;
+	width:10px;
 }
 
 #moduleTypeAttestationMez{
@@ -652,7 +745,8 @@ text-align: center;
 	margin-top: 10px;
 }
 .registerHostTableContent{
-	max-height: 150px;
+            /* Bug 770: Do not want to restrict the height of the table*/
+	/*max-height: 150px;*/
 	overflow: auto;
 }
 
@@ -666,7 +760,12 @@ text-align: center;
 
 #retriveHostButton{
 	float: left;
-	margin-left: 30px;
+	margin-left: 10px;
+}
+
+#retrieveDatacentersButton{
+	float: left;
+	margin-left: 10px;
 }
 
 .requestedRolesDispaly{ 
@@ -693,3 +792,30 @@ text-align: center;
 .whiteListConfigDropDown{
 	width: 150px;
 }
+
+.failureReportdiv{
+	margin:20px 5px;
+	text-align: center;
+}
+
+.failureReportRow1{width: 20px;}
+.failureReportRow2{width: 100px;}
+.failureReportRow3{width: 390px;}
+.failureReportRow4{}
+
+.subTableDivFailureReport{
+	padding: 10px 15px;
+	widows: 92%;
+}
+
+.subTableDivFailureReport table{
+	border: 1px solid #4B6C9E;
+}
+.subTableDivFailureReport table thead{
+	background-color: #708EAE;
+	color: white;
+}
+.failureReportSubRow1{width: 390px;}
+.failureReportSubRow2{width: 100px;}
+.failureReportSubRow3{width: 390px;}
+

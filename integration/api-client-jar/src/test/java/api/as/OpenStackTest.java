@@ -9,6 +9,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,7 +39,7 @@ public class OpenStackTest {
 
     @Test
     public void pollHostsSingleElementArray() throws MalformedURLException, ClientException, IOException, ApiException, SignatureException, NoSuchAlgorithmException, KeyManagementException {
-        ApacheHttpClient client = new ApacheHttpClient(new URL("http://10.1.71.95:8080"), null, null, null);
+        ApacheHttpClient client = new ApacheHttpClient(new URL("http://10.1.71.95:8080"), null, null, new InsecureTlsPolicy());
         ApiRequest request = new ApiRequest(MediaType.APPLICATION_JSON_TYPE, "{\"count\":0,\"hosts\":[\"127.0.0.1\"],\"pcrmask\":null}");
         ApiResponse response = client.post("http://10.1.71.95:8080/AttestationService/resources/PollHosts", request);
         System.out.println("Response: "+new String(response.content));
@@ -51,7 +52,7 @@ FINE: POST content: {"count":0,"hosts":["127.0.0.1"],"pcrmask":null}         *
     
     @Test
     public void pollHostsSingleElementNonArray() throws MalformedURLException, ClientException, IOException, ApiException, SignatureException, NoSuchAlgorithmException, KeyManagementException {
-        ApacheHttpClient client = new ApacheHttpClient(new URL("http://10.1.71.95:8080"), null, null, null);
+        ApacheHttpClient client = new ApacheHttpClient(new URL("http://10.1.71.95:8080"), null, null, new InsecureTlsPolicy());
         ApiRequest request = new ApiRequest(MediaType.APPLICATION_JSON_TYPE, "{\"count\":0,\"hosts\":\"127.0.0.1\",\"pcrmask\":null}");
         ApiResponse response = client.post("http://10.1.71.95:8080/AttestationService/resources/PollHosts", request);
         System.out.println("Response: "+new String(response.content));

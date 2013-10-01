@@ -13,6 +13,8 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -25,13 +27,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.AbstractController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author yuvrajsx
  *
  */
 public class CheckLoginController extends AbstractController {
-
+    private Logger log = LoggerFactory.getLogger(getClass());
 	
 	// variable declaration used during Processing data. 
         private static final Logger logger = LoggerFactory.getLogger(CheckLoginController.class.getName());       
@@ -40,10 +44,10 @@ public class CheckLoginController extends AbstractController {
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
-            logger.info("CheckLoginController >>");
+	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws MalformedURLException, IOException {
+            logger.debug("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
-            String keystoreFilename = "";
+            
             
             String keyAliasName = req.getParameter("userNameTXT");
             String keyPassword = req.getParameter("passwordTXT");
@@ -104,6 +108,7 @@ public class CheckLoginController extends AbstractController {
                 try {
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                 } catch (ClientException e) {
+                    log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
                 }
                 
@@ -111,7 +116,7 @@ public class CheckLoginController extends AbstractController {
                 HttpSession session = req.getSession();
                 session.setAttribute("logged-in", true);
                 	session.setAttribute("username", keyAliasName);
-                session.setMaxInactiveInterval(MCPConfig.getConfiguration().getInt("mtwilson.mc.sessionTimeOut"));
+                session.setMaxInactiveInterval(MCPConfig.getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800));
                 
 
                         X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);

@@ -1,10 +1,11 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mountwilson.mscu.common;
 
-import com.intel.mtwilson.util.ConfigBase;
+import com.intel.mtwilson.My;
+import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -14,19 +15,19 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class MSCUConfig extends ConfigBase {
+public class MSCUConfig  {
 
     private static final Logger log = LoggerFactory.getLogger(MSCUConfig.class);
     private static final MSCUConfig global = new MSCUConfig();
     
-    public static Configuration getConfiguration() { return global.getConfigurationInstance(); }
+    public static Configuration getConfiguration() { try {
+        return My.configuration().getConfiguration();
+    } catch(IOException e) {
+        log.error("Cannot load configuration: "+e.toString(), e);
+        return null;
+    }}
         
-    private MSCUConfig() {
-        
-        super("management-cmdutil.properties");
-    }
 
-    @Override
     public Properties getDefaults() {
         Properties defaults = new Properties();
         

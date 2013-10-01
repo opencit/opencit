@@ -8,6 +8,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import org.junit.Test;
 import com.intel.mtwilson.agent.*;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
@@ -19,6 +20,7 @@ import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.FileResource;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.model.Sha1Digest;
@@ -28,19 +30,23 @@ import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringUtils;
 
@@ -92,7 +98,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
         SimpleKeystore keystore = new SimpleKeystore(resource, password);
         X509Certificate[] certificates = keystore.getTrustedCertificates("ssl");
         for(X509Certificate certificate : certificates) {
-            log.info(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.debug(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
         }
     }
     
@@ -116,7 +122,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
      */
     @Test
     public void testAddCurrentTlsCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
-        String username = "admin2";
+        String username = "admin"; // "ManagementServiceAutomation"; 
         String password = "password";
         MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
         MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
@@ -131,7 +137,49 @@ public class UpdateTlsKeystoreInDatabaseTest {
         portalUser.setKeystore(newkeystore);
         keystoreJpa.edit(portalUser);
     }
+
+    @Test
+    public void testAddCurrentTlsCertificateToMyUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
+        FileResource keystoreFile = new FileResource(My.configuration().getKeystoreFile());
+        SimpleKeystore keystore = new SimpleKeystore(keystoreFile, My.configuration().getKeystorePassword());
+        SslUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
+        keystore.save();
+    }
     
+    @Test
+    public void testAddCurrentSamlCertificateToExistingUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, MalformedURLException, ApiException, SignatureException, Exception {
+        String username = "admin"; // "ManagementServiceAutomation"; 
+        String password = "password";
+        // get the new saml certificate
+        X509Certificate samlCert = My.client().getSamlCertificate();
+        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
+        MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
+        byte[] oldkeystore = portalUser.getKeystore();
+        log.debug("old keystore: {}", Md5Digest.valueOf(oldkeystore));
+        ByteArrayResource resource = new ByteArrayResource(oldkeystore);
+        SimpleKeystore keystore = new SimpleKeystore(resource, password);
+        keystore.addTrustedSamlCertificate(samlCert, samlCert.getSubjectX500Principal().getName());
+        keystore.save();
+        byte[] newkeystore = resource.toByteArray();
+        log.debug("new keystore: {}", Md5Digest.valueOf(newkeystore));
+        portalUser.setKeystore(newkeystore);
+        keystoreJpa.edit(portalUser);
+    }
+    
+    @Test
+    public void testPrintCurrentUserKeystoreContents() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, UnrecoverableEntryException {
+        String username = "admin";
+        String password = "password";
+        MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(My.persistenceManager().getEntityManagerFactory("MSDataPU"));
+        MwPortalUser portalUser = keystoreJpa.findMwPortalUserByUserName(username);
+        byte[] keystorebytes = portalUser.getKeystore();
+        ByteArrayResource resource = new ByteArrayResource(keystorebytes);
+        SimpleKeystore keystore = new SimpleKeystore(resource, password);
+        for(String alias : keystore.aliases()) {
+            X509Certificate cert = keystore.getX509Certificate(alias);
+            System.out.println(alias+": "+cert.getSubjectX500Principal().getName());
+        }
+    }
     
     @Test
     public void testUpdateAikSha1() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException, IllegalOrphanException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException, CertificateEncodingException, ASDataException {
@@ -187,11 +235,17 @@ public class UpdateTlsKeystoreInDatabaseTest {
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"), My.persistenceManager().getDek());
         */
         TblHostsJpaController hostsJpa = new TblHostsJpaController(My.persistenceManager().getEntityManagerFactory("ASDataPU"));
-        TblHosts host = hostsJpa.findByIPAddress("10.1.71.169");
+        TblHosts host = hostsJpa.findByIPAddress("10.1.70.126");
         SimpleKeystore keystore = new SimpleKeystore(host.getTlsKeystoreResource(),"password");
-        X509Certificate[] certificates = keystore.getTrustedCertificates("dek-recipient");
+        ArrayList<X509Certificate> certificates = new ArrayList<X509Certificate>();
+        for(String alias : keystore.aliases()) {
+            log.debug("certificate alias {}", alias);
+            certificates.add(keystore.getX509Certificate(alias));
+        }
         for(X509Certificate certificate : certificates) {
-            log.info(String.format("%s (%s)", certificate.getSubjectX500Principal().getName(), StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.debug(String.format("Subject: %s", certificate.getSubjectX500Principal().getName()));
+            log.debug(String.format("Alternative names: %s", X509Util.alternativeNames(certificate).isEmpty() ? "none" : StringUtils.join(X509Util.alternativeNames(certificate),", ")));
+            log.debug(String.format("Fingerprint: %s", Hex.encodeHexString(X509Util.sha1fingerprint(certificate))));
         }
     }
     
