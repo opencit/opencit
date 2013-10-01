@@ -941,8 +941,7 @@ public class HostTrustBO extends BaseBO {
             log.error("Error while getting trust for host " + host,e );
             //System.err.println("JIM DEBUG"); 
             //e.printStackTrace(System.err);
-            return new HostTrust(ErrorCode.SYSTEM_ERROR,
-                    new AuthResponse(ErrorCode.SYSTEM_ERROR,e.getMessage()).getErrorMessage(),host,null,null);
+            return new HostTrust(ErrorCode.SYSTEM_ERROR,e.getMessage(),host,null,null);
         }
 
     }

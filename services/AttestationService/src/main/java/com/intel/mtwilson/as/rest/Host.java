@@ -33,6 +33,8 @@ import com.intel.mtwilson.security.annotations.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.DefaultValue;
 
 /**
@@ -84,7 +86,7 @@ public class Host {
                 HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatusByAik(aikId);
                 return new HostTrustResponse(new Hostname(aikId.toString()), trust);                
             }
-            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
+            throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest"); // XXX TODO issue-956 move to mtwilson i18n 
         }
         catch(ASException e) {
             throw e;

@@ -13,12 +13,15 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dsmagadx
  */
 public class OsBOTest {
+    private static Logger log = LoggerFactory.getLogger(OsBOTest.class);
     private SecureRandom rnd = new SecureRandom();
 
     public OsBOTest() {
@@ -93,7 +96,8 @@ public class OsBOTest {
             fail("Duplicate create test failed.");
         } catch (ASException e) {
             // success, trying to add a duplicate raised an exception
-            System.out.println("... success: "+e.getErrorCode().getMessage()+": "+e.getErrorMessage()+": "+e.getMessage());
+//            System.out.println("... success: "+String.valueOf(e.getErrorCode())+": "+e.getErrorMessage()+": "+e.getMessage());
+            log.debug("... success: {}: {}", e.getErrorCode(), e);
         }
 
 

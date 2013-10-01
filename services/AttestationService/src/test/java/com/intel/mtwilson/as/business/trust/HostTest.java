@@ -81,7 +81,7 @@ public class HostTest {
         try {
             saml = htbo.getTrustWithSaml(knownHost, true);
         } catch (ASException ae) {
-            System.out.println(ae.getErrorMessage());
+            System.out.println(ae.getLocalizedMessage());
         }
         System.out.println("saml: "+saml);
     }

@@ -150,7 +150,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Error while creating the Api Client object. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ErrorCode.SYSTEM_ERROR, "Error while creating the Api Client object. " + ex.getMessage(), ex);
+            throw new MSException(ex, ErrorCode.MS_API_CLIENT_CREATE_ERROR);
 
         }
 
@@ -184,7 +184,7 @@ public class HostBO extends BaseBO {
             throw me;
         } catch (Exception ex) {
             log.error("Unexpected errror during retrieval of platform name details. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of platform name details." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_GET_HOST_PLATFORM_NAME);
         }
         
         return platformName;
@@ -261,7 +261,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_GET_HOST_MLE_INFO);
         }
     }
 
@@ -299,7 +299,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_BULK_REGISTER_HOST);
         }
     }
 
@@ -362,7 +362,7 @@ public class HostBO extends BaseBO {
 
             log.error("Unexpected errror during host registration. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_REGISTER_HOST);
         }
         return registerStatus;
     }
@@ -436,7 +436,7 @@ public class HostBO extends BaseBO {
 
                         log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
                         ex.printStackTrace(System.err);
-                        throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+                        throw new MSException(ex, ErrorCode.MS_FAILED_BULK_REGISTER_HOST);
                 }
         }
 
@@ -540,7 +540,7 @@ public class HostBO extends BaseBO {
 
             log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_BULK_REGISTER_HOST);
         }
     }
 
@@ -656,7 +656,7 @@ public class HostBO extends BaseBO {
 
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during host registration. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_REGISTER_HOST);
         }
         return registerStatus;
     }
@@ -929,7 +929,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during host update. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host update." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_UPDATE_HOST);
         }
 
         return updateStatus;
@@ -997,7 +997,7 @@ public class HostBO extends BaseBO {
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during white list configuration. " + ex.toString());
             ex.printStackTrace();
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_CONFIGURE_WHITELIST);
         }
 
         return configStatus;
@@ -1204,7 +1204,7 @@ public class HostBO extends BaseBO {
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during white list configuration. " + ex.toString());
             ex.printStackTrace();
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_CONFIGURE_WHITELIST);
         }
 
         return configStatus;

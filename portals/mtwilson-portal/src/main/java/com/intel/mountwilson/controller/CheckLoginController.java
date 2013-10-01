@@ -101,7 +101,10 @@ public class CheckLoginController extends AbstractController {
                 p.setProperty("mtwilson.api.ssl.policy", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
                 p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
                 p.setProperty("mtwilson.api.ssl.verifyHostname", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
-
+                if( tblKeystore.getLocale() != null && !tblKeystore.getLocale().isEmpty() ) { 
+                    p.setProperty("mtwilson.locale", tblKeystore.getLocale());
+                }
+                
                 ApiClient rsaApiClient = null;
                 // Instantiate the API Client object and store it in the session. Otherwise either we need
                 // to store the password in the session or the decrypted RSA key
