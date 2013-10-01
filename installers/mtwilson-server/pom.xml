@@ -122,12 +122,6 @@
 	<version>${project.version}</version>
 	<type>bin</type>
     </dependency>    
-    <dependency>
-	<groupId>com.intel.mtwilson.linux</groupId>
-	<artifactId>MtWilsonLinuxUtil</artifactId>
-	<version>${project.version}</version>
-	<type>sh</type>
-    </dependency>    
   </dependencies>
            
   <build>
@@ -179,8 +173,8 @@
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
-                  <type>sh</type>
-                  <destFileName>functions</destFileName>
+                  <type>bin</type>
+                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
@@ -282,8 +276,8 @@
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
-                  <type>sh</type>
-                  <destFileName>functions</destFileName>
+                  <type>bin</type>
+                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>

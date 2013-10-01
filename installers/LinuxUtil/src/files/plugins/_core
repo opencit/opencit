@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# This file defines some functions that can be considered
+# extension points, or abstract, or basic implementations
+# of common features.
+# The filename starts with an underscore so that it will
+# be loaded before other plugins and give other plugins
+# a chance to override these methods.
+
+# Functions in optional modules may override these with
+# improved or customized implementations.
+# For example, the echo_warning and echo_failure functions
+# defined here simply do a regular echo, but there is a
+# colorful version defined by the color plugin.
+
+TERM_DISPLAY_MODE=plain
+
+echo_success() {
+  echo "$@"
+  return 0
+}
+
+echo_warning() {
+  echo "$@"
+  return 1
+}
+
+echo_failure() {
+  echo "$@"
+  return 1
+}
+
+
+# Parameters:
+# - character like 'a' for which to echo the character code
+# echos the character code of the specified character
+# For example:   ord a     will echo 97
+ord() { printf '%d' "'$1"; }
+
+
+
+
+
+### FUNCTION LIBRARY: environment information functions
+
+# Usage example:   if using_glassfish; then echo "Using glassfish"; fi
+using_glassfish() { if [[ "${WEBSERVER_VENDOR}" == "glassfish" ]]; then return 0; else return 1; fi }
+using_tomcat() { if [[ "${WEBSERVER_VENDOR}" == "tomcat" ]]; then return 0; else return 1; fi }
+using_mysql() { if [[ "${DATABASE_VENDOR}" == "mysql" ]]; then return 0; else return 1; fi }
+using_postgres() { if [[ "${DATABASE_VENDOR}" == "postgres" ]]; then return 0; else return 1; fi }
+
+
+
+# XXX this is from 1.2 but is not used by plugins. maybe used by the ctl scripts.
+# Set config file db properties
+set_config_db_properties() {
+  local scriptname="$1"
+  local packagename="$2"
+  intel_conf_dir=/etc/intel/cloudsecurity
+  package_dir=/opt/intel/cloudsecurity/${packagename}
+  package_config_filename=${intel_conf_dir}/${packagename}.properties
+  package_env_filename=${package_dir}/${packagename}.env
+  package_install_filename=${package_dir}/${packagename}.install
+}
