@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>my</artifactId>
+  <artifactId>mtwilson-my</artifactId>
   <packaging>jar</packaging>
   <name>My Config</name>
   <description>Utility to allow developers to maintain their own local configuration so that JUnit tests do not have any environment-specific configuration embedded in them.</description>
@@ -107,7 +107,7 @@
     -->
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>api-client</artifactId>
+		<artifactId>mtwilson-client-java6</artifactId>
 		<version>${project.version}</version>
         <scope>test</scope>
     </dependency>

@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>TrustAgent</artifactId>
+  <artifactId>mtwilson-trustagent-installer</artifactId>
 
   <packaging>pom</packaging>
   <name>Trust Agent Linux Installer</name>
@@ -52,14 +52,14 @@
         </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.trustagent</groupId>
-      <artifactId>TrustAgent</artifactId>
+      <artifactId>mtwilson-trustagent</artifactId>
       <version>${project.version}</version>
       <classifier>jar-with-dependencies</classifier>
       <type>jar</type>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>MtWilsonLinuxUtil</artifactId>
+      <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
       <type>bin</type>
     </dependency>	
@@ -90,7 +90,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.trustagent</groupId>
-                  <artifactId>TrustAgent</artifactId>
+                  <artifactId>mtwilson-trustagent</artifactId>
                   <version>${project.version}</version>
                   <classifier>jar-with-dependencies</classifier>
                   <type>jar</type>
@@ -99,7 +99,7 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <artifactId>mtwilson-linux-util</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>

@@ -143,7 +143,7 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
 		<!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>api-client</artifactId>
+            <artifactId>mtwilson-client-java6</artifactId>
             <version>1.2-SNAPSHOT</version>
         </dependency>
 		-->

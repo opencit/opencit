@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>mtwilson-java-client</artifactId>
+  <artifactId>mtwilson-client-java6-installer</artifactId>
 
   <packaging>pom</packaging>
   <name>Mt Wilson Client for Java</name>
@@ -11,7 +11,7 @@
     <parent>
         <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>mtwilson-linux</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
   
   <properties>
@@ -22,7 +22,7 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>api-client</artifactId>
+      <artifactId>mtwilson-client-java6</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
@@ -48,7 +48,7 @@
 		  <!-- Java and glassfish -->
                 <artifactItem>
                   <groupId>com.intel.mtwilson.integration</groupId>
-                  <artifactId>api-client</artifactId>
+                  <artifactId>mtwilson-client-java6</artifactId>
                   <version>${project.version}</version>
                   <type>jar</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
