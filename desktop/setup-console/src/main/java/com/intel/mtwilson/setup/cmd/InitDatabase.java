@@ -156,7 +156,7 @@ public class InitDatabase implements Command {
         DataSource ds = getDataSource();
         
         log.debug("Connecting to {}", databaseVendor);
-        Connection c = null;
+        Connection c ;
         try {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
@@ -234,7 +234,8 @@ public class InitDatabase implements Command {
         
         c.close();
     }
-    
+    // commenting out unused function (6/11 1.2)
+    /*
     private String getDatabaseHostname(Connection c) throws SQLException {
         String hostname = null;
         Statement s = c.createStatement();
@@ -252,7 +253,7 @@ public class InitDatabase implements Command {
         s.close();
          return hostname;
     }
-    
+    */
     /**
      * Locates the SQL files for the specified vendor, and reads them to
      * create a mapping of changelog-date to SQL content. This mapping can
@@ -327,7 +328,8 @@ public class InitDatabase implements Command {
         }
         return null;
     }
-    
+    // commenting out unused function (6/11 1.2)
+    /*
     private void printSqlMap(Map<Long,String> sqlmap) {
         Set<Long> timestampSet = sqlmap.keySet();
         ArrayList<Long> timestampList = new ArrayList<Long>();
@@ -337,7 +339,7 @@ public class InitDatabase implements Command {
             System.out.println("File timestamp: "+timestamp);
         }
     }
-    
+    */
     /**
      * 
      * @return datasource object for mt wilson database, guaranteed non-null
@@ -401,6 +403,8 @@ public class InitDatabase implements Command {
         while(rs.next()) {
             list.add(rs.getString(1));
         }
+        s.close();
+        rs.close();
         return list;
 
     }

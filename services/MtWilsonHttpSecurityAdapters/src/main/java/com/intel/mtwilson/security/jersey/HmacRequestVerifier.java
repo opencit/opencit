@@ -95,7 +95,7 @@ public class HmacRequestVerifier {
             //log.debug("VerifyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             String username = new String(Base64.decodeBase64(a.username));
             String secretKey = finder.getSecretKeyForUserId(username);
-            String signature = null;
+            String signature;
             try {
                 signature = sign(content, secretKey); // may throw NoSuchAlgorithmException, InvalidKeyException
             } catch (NoSuchAlgorithmException ex) {

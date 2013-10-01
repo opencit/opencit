@@ -56,7 +56,9 @@ else
   cp "${package_name}.properties" "${package_config_filename}"
 fi
 
-
+# Create a random password and update the property file of the management service
+mypassword16=`generate_password 16`
+update_property_in_file mtwilson.api.key.password "${package_config_filename}" "$mypassword16"
 
 # SCRIPT EXECUTION
 #if using_mysql; then

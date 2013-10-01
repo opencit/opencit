@@ -231,7 +231,8 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 					}
 					Map<String, String> oemInfo = new HashMap<String, String>();
 					oemInfo.put(mleDetailsEntityVO.getMleName(), mleDetailsEntityVO.getMleVersion());
-					list.add(oemInfo);
+                    if(list != null)
+                        list.add(oemInfo);
 				}
 			}else {
 				// throw new DemoPortalException("No OEM & OS Information is present in Database. Please check Database Configuration.");
@@ -621,7 +622,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	}
 
    	//Method to add/update VM Mapping map after getting all VM info for a Host.
-    private void addVMDetailsToHostVmMapping(String hostID, List<String> listVMDetails, Map<String, HostVmMappingVO> vmMappingData) throws Exception {
+    private void addVMDetailsToHostVmMapping(String hostID, List<String> listVMDetails, Map<String, HostVmMappingVO> vmMappingData) {
         for (String vmDetails : listVMDetails) {
         	HostVmMappingVO hostVmMappingVO = new HostVmMappingVO();
                 hostVmMappingVO.setHostId(hostID);
@@ -730,7 +731,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 * @throws Exception
 	 */
 	@Override
-	public List<PcrLogReport> getFailureReportData(String hostName,ApiClient attestationService) throws Exception {
+	public List<PcrLogReport> getFailureReportData(String hostName,ApiClient attestationService) throws DemoPortalException {
 		log.debug("DemoPortalServicesImpl.getFailureReportData >>");
 		
 			AttestationReport report;

@@ -11,6 +11,7 @@ import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.io.Filename;
 import com.intel.mtwilson.api.*;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.rfc822.Rfc822Date;
 import java.io.*;
 import java.net.InetAddress;
@@ -55,7 +56,7 @@ public class ApiCommand {
      * 
      * @param args 
      */
-    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, Exception {
+    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, CryptographyException, ClientException {
         
             for(int i=0;  i<args.length ;i++) {
                 System.out.println("ApiCommand ARG "+i+" = "+args[i]);
@@ -111,10 +112,16 @@ public class ApiCommand {
                 password = in.readLine();
                 System.out.print("Password again: ");
                 String passwordAgain = in.readLine();
-                if( !password.equals(passwordAgain) ) {
-                    System.err.println("The two passwords don't match");
+                if(password != null && passwordAgain != null) {
+                    if( !password.equals(passwordAgain) ) {
+                        System.err.println("The two passwords don't match");
+                        System.exit(1);
+                    }
+                }else{
+                    System.err.println("Error reading passwords.  Please run command again");
                     System.exit(1);
                 }
+                    
             }
             else if( password.startsWith("env:") && password.length() > 4 ) {
                 String varName = password.substring(4);

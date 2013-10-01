@@ -54,6 +54,15 @@ generate_password() {
 }
 
 
+### FUNCTION LIBRARY: escape out input strings for passing to sed
+# you pass it the string you are about to pass to sed that might 
+# contain the following characters ()&#%$+
+# usage examples:
+# new_string=$(sed_escape $string)
+sed_escape() {
+ echo $(echo $1 | sed -e 's/[()&#%$+]/\\&/g' -e 's/[/]/\\&/g')
+}
+
 ### FUNCTION LIBRARY: terminal display functions
 
 # move to column 60:    term_cursor_movex $TERM_STATUS_COLUMN
@@ -292,8 +301,15 @@ prompt_with_default_password() {
   local userprompt="${2:-Password:}"
   local default_value
   # here $$
-  eval current_value="\$$resultvarname"
-  eval default_value="${3:-$current_value}"
+  #eval current_value="\$$resultvarname"
+  #eval default_value="${3:-$current_value}"
+  eval variable_name="$resultvarname"
+  #echo_warning "variable name is $variable_name"
+  eval current_value="\$$variable_name"
+  #echo_warning "current value = $current_value"
+  eval default_value="${3:-'$current_value'}"
+  #echo_warning "default value = $default_value"
+
   local default_value_display="********"
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
@@ -329,7 +345,12 @@ prompt_with_default_password() {
     fi
   done
   echo
-  eval $resultvarname=${userinput:-$default_value}
+  if [ ! -z "$userinput" ]; then
+   eval $resultvarname='$userinput'
+  else
+   eval $resultvarname='$default_value'
+  fi
+  #eval $resultvarname="${userinput:-'$default_value'}"
 }
 
 ### FUNCTION LIBRARY: environment information functions
@@ -464,8 +485,9 @@ update_property_in_file() {
   if [ -n "$ispresent" ]; then
       # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
       local escaped_value=`echo "${value}" | sed 's/|/\\|/g'`
+      local sed_escaped_value=$(sed_escape $escaped_value)
       # replace just that line in the file and save the file
-      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${escaped_value}|" "${filename}"`
+      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${sed_escaped_value}|" "${filename}"`
       # protect against an error
       if [ -n "$updatedcontent" ]; then
         echo "$updatedcontent" > "${filename}"

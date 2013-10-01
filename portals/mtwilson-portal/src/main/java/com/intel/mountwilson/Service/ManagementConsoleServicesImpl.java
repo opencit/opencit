@@ -89,6 +89,66 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                 return result;
         }
 
+    /**
+     *
+     * @param vCenterConnection
+     * @return
+     * @throws ManagementConsolePortalException
+     */
+    @Override
+    public List<String> getDatacenters(String vCenterConnection) throws ManagementConsolePortalException {
+        logger.debug("ManagementConsoleServicesImpl.getDatacenters >>");
+        //logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
+        List<String> datacenters = null;
+
+        try {
+            datacenters = new ArrayList<String>();
+            VMwareClient vmHelperObj = new VMwareClient();
+
+            try {
+                datacenters = vmHelperObj.getDatacenterNames(vCenterConnection);
+            } catch (Exception e) {
+                logger.error("Failed to get datacenter information from vmware: {}", e.getMessage());
+                throw ConnectionUtil.handleManagementConsoleException(e);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get datacenter information from vmware: {}", e.getMessage());
+            throw ConnectionUtil.handleManagementConsoleException(e);
+        }
+        return datacenters;
+    }
+    
+    /**
+     *
+     * @param datacenter
+     * @param vCenterConnection
+     * @return
+     * @throws ManagementConsolePortalException
+     */
+    @Override
+    public List<String> getClusters(String vCenterConnection, String datacenter) throws ManagementConsolePortalException {
+        logger.debug("ManagementConsoleServicesImpl.getClusters >>");
+        //logger.info("ClusterName : "+clusterName +", vCenter Connection String : "+vCenterConnection);
+        List<String> clusters = null;
+
+        try {
+            clusters = new ArrayList<String>();
+            VMwareClient vmHelperObj = new VMwareClient();
+
+            try {
+                clusters = vmHelperObj.getClusterNames(vCenterConnection, datacenter);
+            } catch (Exception e) {
+                logger.error("Failed to get cluster information from vmware: {}", e.getMessage());
+                throw ConnectionUtil.handleManagementConsoleException(e);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get cluster information from vmware: {}", e.getMessage());
+            throw ConnectionUtil.handleManagementConsoleException(e);
+        }
+        return clusters;
+    }
+        
+        
         /**
         * 
         * @param clusterName
@@ -347,6 +407,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
                         throw ConnectionUtil.handleManagementConsoleException(e);
                 }
                 try {
+                    if(apiListFromDB != null) {
                         for (ApiClientInfo apiClientObj : apiListFromDB) {
                                 ApiClientDetails apiClientDetailObj = new ApiClientDetails();
                                 apiClientDetailObj.setName(apiClientObj.name);
@@ -359,6 +420,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
 
                                 apiClientList.add(apiClientDetailObj);
                         }
+                    }
                 } catch (Exception e) {
                         logger.error("Failed to compile list of API clients: {}", e.getMessage());
                         throw ConnectionUtil.handleManagementConsoleException(e);
