@@ -1,5 +1,6 @@
 package com.intel.mtwilson.as.helper;
 
+import com.intel.mtwilson.jpa.PersistenceManager;
 import javax.persistence.EntityManagerFactory;
 
 /**
@@ -12,9 +13,13 @@ import javax.persistence.EntityManagerFactory;
  */
 public class BaseBO {
     
-    private ASPersistenceManager persistenceManager = new ASPersistenceManager();
+    private PersistenceManager persistenceManager = new ASPersistenceManager();
     
     public BaseBO(){
+        this(new ASPersistenceManager());
+    }
+    public BaseBO(PersistenceManager pm) {
+        this.persistenceManager = pm;
     }
 
     public EntityManagerFactory getEntityManagerFactory() {

@@ -1,17 +1,16 @@
 package com.intel.mtwilson.as.business;
 
-import com.intel.mtwilson.as.business.ReportsBO;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.datatypes.AttestationReport;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
+import java.util.*;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import java.util.*;
 
 /**
  *
@@ -88,7 +87,7 @@ PCR Manifest. PCR: 18  value: 9c65082230f792824eba1c43e3c0fa6255186577   trust: 
         System.out.println("setDataEncryptionKey");
         byte[] key = null;
         ReportsBO instance = new ReportsBO();
-        instance.setDataEncryptionKey(key);
+//        instance.setDataEncryptionKey(key);
         fail("The test case is a prototype.");
     }
 

@@ -42,11 +42,11 @@
 
         <!-- XXX the following dependencies are declared so the java code will compile in the IDE - but they are included separately by the ant build for now; when we fully mavenize, we can use them directly -->
 		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.servlet</artifactId>
-			<version>3.1.1</version>
-                        <scope>provided</scope>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-crypto</artifactId>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.servlet.jsp</artifactId>
@@ -79,8 +79,12 @@
             <version>1.0.1-SNAPSHOT</version>
 	    <classifier>HisPrivacyCAWebServices2-client</classifier>
         </dependency>
-
-
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>my</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
  
  
@@ -190,7 +194,9 @@
                                 <artifact>*:*</artifact>
                                 <includes>
                                     <include>gov/niarl/his/privacyca/**</include>
-                                    <include>com/intel/mtwilson/util/**</include>
+                                    <include>com/intel/mtwilson/**</include>
+                                    <include>com/intel/dcsg/cpg/**</include>
+                                    <include>org/apache/commons/**</include>
                                     <include>org/slf4j/**</include>
                                     <include>ch/qos/logback/**</include>
                                     <include>org/bouncycastle/**</include>

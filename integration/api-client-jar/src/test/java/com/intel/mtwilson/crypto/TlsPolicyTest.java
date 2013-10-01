@@ -5,9 +5,8 @@
 package com.intel.mtwilson.crypto;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.api.*;
+import com.intel.mtwilson.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.SignatureException;

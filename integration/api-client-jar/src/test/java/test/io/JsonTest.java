@@ -4,9 +4,9 @@
  */
 package test.io;
 
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
+import com.intel.mtwilson.model.Hostname;
 import java.io.IOException;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;

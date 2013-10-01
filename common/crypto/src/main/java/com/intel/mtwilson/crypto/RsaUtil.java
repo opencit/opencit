@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.net.InternetAddress;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
@@ -151,10 +152,31 @@ public class RsaUtil {
             info.set(X509CertInfo.KEY, new CertificateX509Key(subjectPublicKey)); // CertificateException, IOException
             info.set(X509CertInfo.VERSION, new CertificateVersion(CertificateVersion.V3)); // CertificateException, IOException
             if (alternativeName != null) {
-                if(alternativeName.startsWith("ip:")) {
+                boolean isIpAddress = alternativeName.startsWith("ip:");
+                boolean isDnsName = alternativeName.startsWith("dns:");
+                if( isIpAddress ) {
+                    alternativeName = alternativeName.substring(3); // remove ip: prefix
+                }
+                if( isDnsName ) {
+                    alternativeName = alternativeName.substring(4); // remove dns: prefix
+                }
+                if( !isIpAddress && !isDnsName ) {
+                    // currently we only support ip or dns, and user didn't specify either one so let's try to automatically
+                    // detect
+                    InternetAddress address = new InternetAddress(alternativeName);
+                    if( address.isValid() ) {
+                        if( address.isHostname() ) {
+                            isDnsName = true;
+                        }
+                        else if( address.isIPv4() || address.isIPv6() ) {
+                            isIpAddress = true;
+                        }
+                    }
+                }
+                if(isIpAddress) {
                     //                InetAddress ipAddress = new InetAddress.getByName(alternativeName.substring(3));
                     //                IPAddressName ipAddressName = new IPAddressName(ipAddress.getAddress());
-                    IPAddressName ipAddressName = new IPAddressName(alternativeName.substring(3));
+                    IPAddressName ipAddressName = new IPAddressName(alternativeName);
                     GeneralNames generalNames = new GeneralNames();
                     generalNames.add(new GeneralName(ipAddressName));
                     SubjectAlternativeNameExtension san = new SubjectAlternativeNameExtension(generalNames);
@@ -163,8 +185,8 @@ public class RsaUtil {
                     info.set(X509CertInfo.EXTENSIONS, ext);
                     //   ObjectIdentifier("2.5.29.17") , false, "ipaddress".getBytes()                            
                 }
-                if(alternativeName.startsWith("dns:")) {
-                    DNSName dnsName = new DNSName(alternativeName.substring(4));
+                if(isDnsName) {
+                    DNSName dnsName = new DNSName(alternativeName);
                     GeneralNames generalNames = new GeneralNames();
                     generalNames.add(new GeneralName(dnsName));
                     SubjectAlternativeNameExtension san = new SubjectAlternativeNameExtension(generalNames);

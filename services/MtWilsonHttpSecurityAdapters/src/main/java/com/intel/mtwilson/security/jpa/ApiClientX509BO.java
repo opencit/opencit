@@ -70,7 +70,8 @@ public class ApiClientX509BO implements X509UserFinder, PublicKeyUserFinder {
         }
         return null;
     }
-    
+    // commenting out unused function (6/11 1.2)
+    /*
     private PublicKey getPublicKey(byte[] publicKeyBytes) {
         if( publicKeyBytes != null ) {
             try {
@@ -89,6 +90,7 @@ public class ApiClientX509BO implements X509UserFinder, PublicKeyUserFinder {
         }
         return null;
     }
+    */
     
     @Override
     public X509UserInfo getUserForX509Identity(byte[] fingerprint) {

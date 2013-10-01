@@ -38,7 +38,7 @@ public class TblHostsJpaController implements Serializable {
     private EntityManagerFactory emf = null;
     
 
-    public TblHostsJpaController(EntityManagerFactory emf) throws CryptographyException {
+    public TblHostsJpaController(EntityManagerFactory emf)  {
         this.emf = emf;
     }
     
@@ -47,7 +47,8 @@ public class TblHostsJpaController implements Serializable {
     }
 
     public void create(TblHosts tblHosts) throws CryptographyException {
-        log.debug("create tblHosts with policy {} and keystore length {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+        //System.err.println("create tblHosts with policy " +  tblHosts.getTlsPolicyName() + " and keystore length " + tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
+       
         if (tblHosts.getTblSamlAssertionCollection() == null) {
             tblHosts.setTblSamlAssertionCollection(new ArrayList<TblSamlAssertion>());
         }
@@ -71,9 +72,9 @@ public class TblHostsJpaController implements Serializable {
             }
             tblHosts.setTblSamlAssertionCollection(attachedTblSamlAssertionCollection);
             
-           
+            System.err.println("tblHosts create before persist");
             em.persist(tblHosts);
-          
+            System.err.println("tblHosts create after persist");
             
             if (vmmMleId != null) {
                 vmmMleId.getTblHostsCollection().add(tblHosts);
@@ -295,6 +296,30 @@ public class TblHostsJpaController implements Serializable {
         return host;
 
     }
+    
+    public TblHosts findByAikSha1(String fingerprint) {
+
+        TblHosts host = null;
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("TblHosts.findByAikSha1");
+
+            query.setParameter("aikSha1", fingerprint);
+          
+
+            List<TblHosts> list = query.getResultList();
+
+            if (list != null && list.size() > 0) {
+                host = list.get(0);
+            }
+        } finally {
+                em.close();
+        }
+
+        return host;
+
+    }    
 
       public TblHosts findByIPAddress(String ipAddress) {
 

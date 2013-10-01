@@ -4,7 +4,10 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.setup.PropertyHidingConfiguration;
 import com.intel.mountwilson.as.common.ASConfig;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.io.Classpath;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.setup.Command;
@@ -13,6 +16,8 @@ import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.sql.Connection;
@@ -25,8 +30,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,9 +44,26 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Bug #509 create java program to handle database updates and ensure that 
  * old updates (already executed) are not executed again
+ * 
+ * Added -n (dry run) option on request from the SAM team: provide a way to determine if the
+ * installer is compatible with the database; in other words, can the installer use the existing
+ * database or does it know how to upgrade it as necessary. This is only true if the changelog
+ * in the database is a subset of what is in the installer - in this case return a dry run success. 
+ * If the database has any entries that are not in the installer, return a dry run failure.
+ * 
+ * Examples:
+ * 
+ * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase postgres --check
+ * 
+ * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase mysql --check
+ * 
+ * 
  * 
  * TODO: List each .sql file that is supposed to be run (index them by changelog date), check for
  * current state of database before running scripts (via the mw_changelog table) so we know
@@ -54,8 +78,11 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * @author jbuhacoff
  */
 public class InitDatabase implements Command {
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
     private SetupContext ctx = null;
-
+    private String databaseVendor = null;
+    
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
@@ -68,14 +95,17 @@ public class InitDatabase implements Command {
     }
 
     @Override
-    public void execute(String[] args) throws SetupException {
+    public void execute(String[] args) throws Exception {
         // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
         if( args.length < 1 ) {
-            throw new SetupException("Usage: InitializeMysqlDatabase mysql|postgres");
+            
+            throw new SetupException("Usage: InitDatabase mysql|postgres [--check]");
         }
         
+        databaseVendor = args[0];
+        vendor = databaseVendor;
         try {
-            initDatabase(args[0]);
+            initDatabase();
         }
         catch(Exception e) {
             throw new SetupException("Cannot setup database: "+e.toString(), e);
@@ -94,18 +124,54 @@ public class InitDatabase implements Command {
             this.description = description;
         }
     }
-    
-    private void initDatabase(String databaseVendor) throws SetupException, IOException, SQLException {
+    private String vendor = null;
+    /*
+    private boolean checkDatabaseConnection() throws SetupException, IOException, SQLException {
         
+            DataSource ds = getDataSourceNoSchema();
+            try {
+                Connection c = ds.getConnection();
+                log.debug("Connected to database");
+                return true;
+            }
+            catch(SQLException e) {
+                log.debug("Database connection failed: {}",e.toString(), e);
+                log.error("Failed to connect to {} without schema", databaseVendor);
+                return false;
+            }
+    }
+    */
+    
+    private void verbose(String format, Object... args) {
+        if( options.getBoolean("verbose", false) ) {
+            System.out.println(String.format(format, args));
+        }
+    }
+    
+    private void initDatabase() throws SetupException, IOException, SQLException {
+        log.debug("Loading SQL for {}", databaseVendor);
         Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
         DataSource ds = getDataSource();
-        Connection c = ds.getConnection();  // username and password should already be set in the datasource
+        
+        log.debug("Connecting to {}", databaseVendor);
+        Connection c ;
+        try {
+            c = ds.getConnection();  // username and password should already be set in the datasource
+        }
+        catch(SQLException e) {
+            log.error("Failed to connect to {} with schema: error =" + e.getMessage(), databaseVendor); 
+            throw e;
+            // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
+        }
+//        log.debug("Connected to schema: {}", c.getSchema());
         List<ChangelogEntry> changelog = getChangelog(c);
-        HashMap<Long,String> presentChanges = new HashMap<Long,String>(); // what is already in the database according to the changelog
+        HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
+        verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
-            presentChanges.put(Long.valueOf(entry.id), entry.applied_at);
+            presentChanges.put(Long.valueOf(entry.id), entry);
+            if( entry != null ) { verbose("%s %s %s", entry.id, entry.applied_at, entry.description); }
         }
         
         HashSet<Long> changesToApply = new HashSet<Long>(sql.keySet());
@@ -113,11 +179,44 @@ public class InitDatabase implements Command {
         
         if( changesToApply.isEmpty() ) {
             System.out.println("No database updates available");
+            
+            // At this point we know the database has every schema change that we have - but, does it have any that we don't?  In other words, is the database schema newer than what we know in this installer?
+            if( options.containsKey("check") && options.getBoolean("check") ) {
+                HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
+                unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
+                if( !unknownChanges.isEmpty() ) {
+                    // Database has new schema changes we dont' know about
+                    System.out.println("WARNING: Database schema is newer than this version of Mt Wilson");
+                    ArrayList<Long> unknownChangesInOrder = new ArrayList<Long>(unknownChanges);
+                    Collections.sort(unknownChangesInOrder);
+                    for(Long unknownChangeId : unknownChangesInOrder) {
+                        ChangelogEntry entry = presentChanges.get(unknownChangeId);
+                        System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                    }
+                }
+            }
+            
             return;
         }
         
+        // At this point we know we have some updates to the databaseschema. 
+        
         ArrayList<Long> changesToApplyInOrder = new ArrayList<Long>(changesToApply);
         Collections.sort(changesToApplyInOrder);
+        
+        
+        if(options.containsKey("check") && options.getBoolean("check")) {
+            System.out.println("Database is compatible");
+            System.out.println("The following changes will be applied:");
+                    for(Long changeId : changesToApplyInOrder) {
+                        /*
+                        ChangelogEntry entry = presentChanges.get(changeId);
+                        System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                        */
+                        System.out.println(changeId);
+                    }
+            return;
+        }
         
         ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
         // removing unneeded output as user can't choice what updates to apply
@@ -135,7 +234,8 @@ public class InitDatabase implements Command {
         
         c.close();
     }
-    
+    // commenting out unused function (6/11 1.2)
+    /*
     private String getDatabaseHostname(Connection c) throws SQLException {
         String hostname = null;
         Statement s = c.createStatement();
@@ -153,7 +253,7 @@ public class InitDatabase implements Command {
         s.close();
          return hostname;
     }
-    
+    */
     /**
      * Locates the SQL files for the specified vendor, and reads them to
      * create a mapping of changelog-date to SQL content. This mapping can
@@ -185,6 +285,7 @@ public class InitDatabase implements Command {
         catch(IOException e) {
             throw new SetupException("Error while scanning for SQL files: "+e.getLocalizedMessage(), e);
         }
+        //System.err.println("Number of SQL files: "+sqlmap.size());
         return sqlmap;        
     }
     
@@ -227,7 +328,8 @@ public class InitDatabase implements Command {
         }
         return null;
     }
-    
+    // commenting out unused function (6/11 1.2)
+    /*
     private void printSqlMap(Map<Long,String> sqlmap) {
         Set<Long> timestampSet = sqlmap.keySet();
         ArrayList<Long> timestampList = new ArrayList<Long>();
@@ -237,20 +339,43 @@ public class InitDatabase implements Command {
             System.out.println("File timestamp: "+timestamp);
         }
     }
-    
+    */
     /**
      * 
      * @return datasource object for mt wilson database, guaranteed non-null
      * @throws SetupException if the datasource cannot be obtained
      */
     private DataSource getDataSource() throws SetupException {
-        // load the sql files and run them
-        //InputStream in = getClass().getResourceAsStream("/bootstrap.sql");
         try {
-            DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", ASConfig.getJpaProperties()).getNonJtaDataSource();
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(My.configuration());
+            log.debug("JDBC URL with schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
+            DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
             if( ds == null ) {
                 throw new SetupException("Cannot load persistence unit info");
             }
+            log.debug("Loaded persistence unit: ASDataPU");
+            return ds;
+        }
+        catch(IOException e) {
+            throw new SetupException("Cannot load persistence unit info", e);
+        }   
+    }
+    
+
+    /*
+    private DataSource getDataSourceNoSchema() throws SetupException {
+        try {
+            PropertyHidingConfiguration confNoSchema = new PropertyHidingConfiguration(ASConfig.getConfiguration());
+            confNoSchema.replaceProperty("mtwilson.db.schema","");
+            confNoSchema.replaceProperty("mountwilson.as.db.schema","");
+            confNoSchema.replaceProperty("mountwilson.ms.db.schema","");
+            Properties jpaProperties = MyPersistenceManager.getASDataJpaProperties(confNoSchema);
+            log.debug("JDBC URL without schema: {}", jpaProperties.getProperty("javax.persistence.jdbc.url"));
+            DataSource ds = PersistenceManager.getPersistenceUnitInfo("ASDataPU", jpaProperties).getNonJtaDataSource();
+            if( ds == null ) {
+                throw new SetupException("Cannot load persistence unit info");
+            }
+            log.debug("Loaded persistence unit: ASDataPU");
             return ds;
         }
         catch(IOException e) {
@@ -258,20 +383,35 @@ public class InitDatabase implements Command {
         }
         
     }
+    */
+    
     
     private List<String> getTableNames(Connection c) throws SQLException {
-        ArrayList<String> list = new ArrayList<String>();
+        
+       ArrayList<String> list = new ArrayList<String>();
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery("SHOW TABLES");
+        
+        String sql = "";
+        if (vendor.equals("mysql")){
+            sql = "SHOW TABLES";
+        }
+        else if (vendor.equals("postgres")){
+            sql = "SELECT table_name FROM information_schema.tables;";          
+        }
+       
+        ResultSet rs = s.executeQuery(sql);
         while(rs.next()) {
             list.add(rs.getString(1));
         }
+        s.close();
+        rs.close();
         return list;
+
     }
     
     private List<ChangelogEntry> getChangelog(Connection c) throws SQLException {
         ArrayList<ChangelogEntry> list = new ArrayList<ChangelogEntry>();
-        
+        log.debug("Listing tables...");
         // first determine if we have the new changelog table `mw_changelog`, or the old one `changelog`, or none at all
         List<String> tableNames = getTableNames(c);
         boolean hasMwChangelog = false;
@@ -290,10 +430,10 @@ public class InitDatabase implements Command {
         String changelogTableName = null;
         // if we have both changelog tables, copy all records from old changelog to new changelog and then use that
         if( hasChangelog && hasMwChangelog ) {
-            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM `mw_changelog` WHERE ID=?");
-            PreparedStatement insert = c.prepareStatement("INSERT INTO `mw_changelog` SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
+            PreparedStatement check = c.prepareStatement("SELECT APPLIED_AT FROM mw_changelog WHERE ID=?");
+            PreparedStatement insert = c.prepareStatement("INSERT INTO mw_changelog SET ID=?, APPLIED_AT=?, DESCRIPTION=?");
             Statement select = c.createStatement();
-            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM `changelog`");
+            ResultSet rs = select.executeQuery("SELECT ID,APPLIED_AT,DESCRIPTION FROM changelog");
             while(rs.next()) {
                 check.setLong(1, rs.getLong("ID"));
                 ResultSet rsCheck = check.executeQuery();
@@ -322,7 +462,7 @@ public class InitDatabase implements Command {
         }
         
         Statement s = c.createStatement();
-        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM `%s`", changelogTableName));
+        ResultSet rs = s.executeQuery(String.format("SELECT ID,APPLIED_AT,DESCRIPTION FROM %s", changelogTableName));
         while(rs.next()) {
             ChangelogEntry entry = new ChangelogEntry();
             entry.id = rs.getString("ID");

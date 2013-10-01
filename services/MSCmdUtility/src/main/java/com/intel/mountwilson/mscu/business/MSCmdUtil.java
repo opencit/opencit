@@ -1,18 +1,19 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mountwilson.mscu.business;
 
 import com.intel.mountwilson.mscu.common.MSCUConfig;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ManagementService;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
+import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.api.ManagementService;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.io.Filename;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -241,6 +242,7 @@ public class MSCmdUtil {
                                                 newHostObj.HostName + ". Details: " + ex.getMessage());
                                     }                               
                                 }
+                                hfr.close();
                             } catch (Exception ex) {
 
                                 // We get here if there is some kind of IOException or the file format is not right
@@ -265,6 +267,8 @@ public class MSCmdUtil {
                             try {
                                 // retrieve the details of the hosts configured in the cluster on the specified vCenter server
                                 VMwareClient vmHelperObj = new VMwareClient();
+//                                vmHelperObj.setTlsPolicy(new InsecureTlsPolicy()); //  if you need an insecure policy use InsecureTlsPolicy() instead of making  a separate connect() method in the client;  XXX TODO need to 1) rewrite client methods that reconnect with custom insecure trust manager to use the tls policy provided by setTlsPolicy(), and 2) need to create a separate table in the database to track vcenter tls certificates so they can be used and managed independently of host records.
+//                                vmHelperObj.connect(prodVCenter);
                                 hostList = vmHelperObj.getHostDetailsForCluster(clusterName, prodVCenter);
 
                             } catch (Exception ex) {
@@ -335,10 +339,15 @@ public class MSCmdUtil {
         if (MSCUConfig.getConfiguration().getString("mtwilson.mscu.userApprovalRequired").equalsIgnoreCase("true")) {
                 System.out.print(printMessage);
                 userInput = br.readLine();
-                if (userInput.isEmpty())
+                if(userInput !=  null) {
+                    if (userInput.isEmpty())
+                        userInput = defaultValue;
+                }else{
                     userInput = defaultValue;
-            } else
+                }
+            } else{
                 userInput = defaultValue;
+            }
         } catch (Exception ex) {
             userInput = defaultValue;
         }

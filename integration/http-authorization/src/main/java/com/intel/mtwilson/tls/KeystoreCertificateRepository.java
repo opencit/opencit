@@ -6,7 +6,7 @@ package com.intel.mtwilson.tls;
 
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.InternetAddress;
+//import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.x500.DN;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -55,6 +55,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
      */
     // XXX not being used;  was part of previous draft interface of CertificateRepository
 //    @Override
+    /*
     public X509Certificate getCertificateForAddress(InternetAddress dnsHostnameOrIpAddress) {
         try {
             String[] sslCertAliases = keystore.listTrustedSslCertificates();
@@ -88,6 +89,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
             return null;
         }
     }
+    */
     
     @Override
     public void addCertificate(X509Certificate certificate) throws KeyManagementException {

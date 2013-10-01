@@ -6,35 +6,40 @@ package test.io;
 
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ApiResponse;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.HtmlErrorParser;
 import com.intel.mtwilson.MultivaluedMapImpl;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.RsaCredential;
+import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.rfc822.Rfc822Date;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.security.http.HttpRequestURL;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
-import com.intel.mtwilson.rfc822.Rfc822Date;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
 import java.security.KeyPair;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,7 +68,7 @@ public class SecurityTest {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     @Test
-    public void testSaveSslCertificate() throws Exception {
+    public void testSaveSslCertificate() throws IOException, KeyManagementException, CryptographyException  {
         Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
 //        ApiClient api = new ApiClient(config);
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
@@ -87,7 +92,7 @@ public class SecurityTest {
     */
     
     @Test
-    public void testUnregisteredClient() throws Exception {
+    public void testUnregisteredClient() throws IOException, NoSuchAlgorithmException, CryptographyException, CertificateEncodingException, KeyManagementException, ClientException, ApiException, SignatureException  {
         Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         // create a new keypair to ensure it's not registered
         KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
@@ -101,7 +106,7 @@ public class SecurityTest {
     }
     
     @Test
-    public void testInvalidAuthorizationHeader() throws Exception {
+    public void testInvalidAuthorizationHeader() throws IOException, KeyManagementException, FileNotFoundException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ApiException, SignatureException {
         Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         // use the keystore just because it already has the server ssl cert
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
@@ -128,7 +133,7 @@ public class SecurityTest {
         public CustomizedApiClient(URL baseURL, ApacheHttpClient client) {
             this.baseURL = baseURL;
             this.httpClient = client;
-            log.info("CUSTOMIZED API CLIENT CONSTRUCTOR");
+            log.debug("CUSTOMIZED API CLIENT CONSTRUCTOR");
         }
         private String querystring(MultivaluedMap<String,String> query) {
             URLCodec urlsafe = new URLCodec("UTF-8");
@@ -151,9 +156,10 @@ public class SecurityTest {
             }
             return queryString;
         }
-        private String asurl(String apiPath) {
-            return baseURL.toExternalForm().concat("/AttestationService/resources").concat(apiPath);
-        }
+        //comment out unused function for removal (6/10 1.2)
+        //private String asurl(String apiPath) {
+        //    return baseURL.toExternalForm().concat("/AttestationService/resources").concat(apiPath);
+        //}
         private String asurl(String apiPath, MultivaluedMap<String,String> query) {
             return baseURL.toExternalForm().concat("/AttestationService/resources").concat(apiPath).concat("?").concat(querystring(query));
         }
@@ -272,7 +278,7 @@ public class SecurityTest {
         private CustomizedRsaAuthorization authority;
     
         public CustomizedApacheRsaHttpAuthorization(RsaCredential credential) {
-            log.info("CUSTOMIZED APACHE RSA HTTP AUTHORIZATION CONSTRUCTOR");
+            log.debug("CUSTOMIZED APACHE RSA HTTP AUTHORIZATION CONSTRUCTOR");
             authority = new CustomizedRsaAuthorization(credential);
         }
     
@@ -303,7 +309,7 @@ public class SecurityTest {
             // CUSTOMIZE:  try null, empty, or arbitrary attestation. if missing should get "Unauthorized: Authorization is missing realm"
             this.realm = "Attestation";
             
-            log.info("CUSTOMIZED RSA AUTHORIZATION CONSTRUCTOR");
+            log.debug("CUSTOMIZED RSA AUTHORIZATION CONSTRUCTOR");
         }
         public String getAuthorizationQuietly(String httpMethod, String requestUrl, Map<String,String> headers) throws SignatureException {
             return getAuthorizationQuietly(httpMethod, requestUrl, null, headers, null);
@@ -368,7 +374,7 @@ public class SecurityTest {
             signatureBlock.headerNames = new String[] { "X-Nonce", "Date" };
 
             String content = signatureBlock.toString();        
-            log.debug("CUSTOMIZED signed content follows... ("+content.length()+") \n"+content);
+            //log.debug("CUSTOMIZED signed content follows... ("+content.length()+") \n"+content);
 
             byte[] signature = credential.signature(content.getBytes("UTF-8"));
             

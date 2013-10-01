@@ -154,26 +154,6 @@
                 <version>2.1</version>
             </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.8.1</version>
-        <executions>
-            <execution>
-                <phase>prepare-package</phase>
-                <goals>
-<!--                    <goal>jar</goal> -->
-                    <goal>javadoc</goal>
-                </goals>        
-            </execution>
-        </executions>
-        <configuration>
-            <show>public</show>
-            <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
-            <encoding>utf-8</encoding>
-        </configuration>
-      </plugin>
-        
 	
 <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
@@ -240,38 +220,7 @@
             </executions>
         </plugin>
 			
-        <!-- Enunciate generates API documentation -->
-      <plugin>
-        <groupId>org.codehaus.enunciate</groupId>
-        <artifactId>maven-enunciate-plugin</artifactId>
-        <version>1.26</version>
-        <executions>
-          <execution>
-              <phase>package</phase>
-            <goals>
-<!--              <goal>assemble</goal> -->
-              <goal>docs</goal>
-            </goals>
-            <configuration>
-                <configFile>enunciate.xml</configFile>
-              <!-- the directory where to put the docs -->
-              <docsDir>${project.build.directory}/docs</docsDir>
-              <docsSubdir>webservice</docsSubdir>
-              <!-- the site directory in which to put the html docs -->
-              <!--
-              <sources>
-                  <source>
-                      <groupId>com.intel.mtwilson.integration</groupId>
-                      <artifactId>api-datatypes</artifactId>
-                      <version>${project.version}</version>
-                  </source>
-              </sources>
-              -->
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-                        
+
         </plugins>
 <!--
 	<extensions>
@@ -293,7 +242,7 @@
         <!--
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>api-datatypes</artifactId>
+      <artifactId>mtwilson-api</artifactId>
       <version>${project.version}</version>
       <classifier>sources</classifier>
       <scope>compile</scope>
@@ -303,7 +252,13 @@
 
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>my</artifactId>
+	    <version>${project.version}</version>
+	    <type>jar</type>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
 	<dependency>
@@ -341,6 +296,18 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <!--
+		<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency> 
+        -->
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ASData</artifactId>
@@ -374,7 +341,7 @@
 		</dependency>
         <dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>vmware-util-jar</artifactId>
+			<artifactId>trust-util-jar</artifactId>
 			<version>${project.version}</version>
         </dependency>
 		<dependency>
@@ -416,7 +383,7 @@
 	<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.6</version>
+			<version>1.8</version>
 		</dependency>
 	<dependency>
 			<groupId>commons-lang</groupId>
@@ -444,6 +411,21 @@
 	<artifactId>jackson-xc</artifactId>
 	<version>1.9.11</version>
 </dependency>
+
+<!-- for testing policy generation, sometimes xml is easier to read than json -->
+<dependency>
+  <groupId>com.fasterxml.jackson.dataformat</groupId>
+  <artifactId>jackson-dataformat-xml</artifactId>
+  <version>2.1.4</version>
+  <scope>test</scope>
+</dependency>
+<dependency>
+  <groupId>org.codehaus.woodstox</groupId>
+  <artifactId>woodstox-core-asl</artifactId>
+  <version>4.2.0</version>
+  <scope>test</scope>
+</dependency>
+<!-- end for testing -->
                 
         <dependency>
             <groupId>com.sun.jersey</groupId>
@@ -519,6 +501,21 @@
 			<scope>test</scope>
 		</dependency>
 
+        <!-- 
+        XXX TODO plugin jars should eventually be installed on filesystem somewhere and added to the application's
+        classpath using a custom class loader... not packaged in the war :)  
+        but as a first step all the plugins are included in attestation service premium 
+        -->
+		<!--
+        <dependency>
+            <groupId>com.intel.mtwilson.plugins</groupId>
+            <artifactId>auto-refresh-trust</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		-->
+        <!-- end plugins -->
+        
+
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
@@ -542,19 +539,31 @@
             <artifactId>audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+        <!--
         <dependency>
             <groupId>org.codehaus.enunciate</groupId>
             <artifactId>enunciate-rt</artifactId>
             <version>1.26</version>            
         </dependency>        
-
         <dependency>
             <groupId>com.intel.mtwilson.database</groupId>
             <artifactId>mtwilson-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
-                        
+-->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <scope>provided</scope>
+        <optional>true</optional>
+	</dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.2</version>
+        </dependency>                        
+		
 <!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
 <!--
         <dependency>
@@ -563,7 +572,78 @@
             <version>1.16</version>
         </dependency>
 -->
-                        
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>trust-policy</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties />
+    
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-javadoc-plugin</artifactId>
+                      <version>2.8.1</version>
+                      <executions>
+                          <execution>
+                              <phase>prepare-package</phase>
+                              <goals>
+              <!--                    <goal>jar</goal> -->
+                                  <goal>javadoc</goal>
+                              </goals>        
+                          </execution>
+                      </executions>
+                      <configuration>
+                          <show>public</show>
+                          <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
+                          <encoding>utf-8</encoding>
+                      </configuration>
+                    </plugin>
+                        <!-- Enunciate generates API documentation -->
+                      <plugin>
+                        <groupId>org.codehaus.enunciate</groupId>
+                        <artifactId>maven-enunciate-plugin</artifactId>
+                        <version>1.26</version>
+                        <executions>
+                          <execution>
+                              <phase>package</phase>
+                            <goals>
+                <!--              <goal>assemble</goal> -->
+                              <goal>docs</goal>
+                            </goals>
+                            <configuration>
+                                <configFile>enunciate.xml</configFile>
+                              <!-- the directory where to put the docs -->
+                              <docsDir>${project.build.directory}/docs</docsDir>
+                              <docsSubdir>webservice</docsSubdir>
+                              <!-- the site directory in which to put the html docs -->
+                              <!--
+                              <sources>
+                                  <source>
+                                      <groupId>com.intel.mtwilson.integration</groupId>
+                                      <artifactId>mtwilson-api</artifactId>
+                                      <version>${project.version}</version>
+                                  </source>
+                              </sources>
+                              -->
+                            </configuration>
+                          </execution>
+                        </executions>
+                      </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
 </project>

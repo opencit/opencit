@@ -5,8 +5,7 @@
 package com.intel.mountwilson.wlm.client;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.crypto.HmacCredential;
 import java.io.FileNotFoundException;
@@ -83,7 +82,7 @@ public class GetAllOSClientTest {
     
     @Test
     public void makeOsTest() throws ClientException, IOException, ApiException, SignatureException {
-        log.info("Connecting to {}", baseurl.toExternalForm());
+        log.debug("Connecting to {}", baseurl.toExternalForm());
         Properties p = new Properties();
         p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "false");
         p.setProperty("mtwilson.api.ssl.verifyHostname", "false");

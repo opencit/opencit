@@ -27,16 +27,13 @@ import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.*;
 import org.apache.commons.dbcp.managed.BasicManagedDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.jotm.Current;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -73,14 +70,14 @@ public abstract class PersistenceManager implements ServletContextListener {
     private static final ConcurrentHashMap<String,EntityManagerFactory> factories = new ConcurrentHashMap<String,EntityManagerFactory>();
 
     public EntityManagerFactory getEntityManagerFactory(String persistenceUnitName) {
-        log.info("PersistenceManager is configured with {} factories in getEntityManagerFactory", factories.keySet().size());
+        log.debug("PersistenceManager is configured with {} factories in getEntityManagerFactory", factories.keySet().size());
         if( factories.keySet().isEmpty() ) {
-            log.info("PersistenceManager factories is empty, calling configure()");
+            log.debug("PersistenceManager factories is empty, calling configure()");
             configure();
             for(String factoryName : factories.keySet()) {
                 EntityManagerFactory factory = factories.get(factoryName);
                 if( factory != null && factory.isOpen() ) {
-                    log.info("PersistenceManager is configured with factory {} in getEntityManagerFactory", factoryName);
+                    log.debug("PersistenceManager is configured with factory {} in getEntityManagerFactory", factoryName);
                 }
             }
         }
@@ -104,7 +101,7 @@ public abstract class PersistenceManager implements ServletContextListener {
     public abstract void configure();
     
     public void addPersistenceUnit(String persistenceUnitName, Properties jpaProperties) {
-        log.info("PersistenceManager adding PersistenceUnit {}", persistenceUnitName);
+        log.debug("PersistenceManager adding PersistenceUnit {}", persistenceUnitName);
         if( factories.containsKey(persistenceUnitName) ) {
             EntityManagerFactory factory = factories.get(persistenceUnitName);
             if( factory != null && factory.isOpen() ) {
@@ -113,27 +110,27 @@ public abstract class PersistenceManager implements ServletContextListener {
             }
         }
         EntityManagerFactory factory = createFactory(persistenceUnitName, jpaProperties);
-        log.warn("Created EntityManagerFactory for persistence unit {}", persistenceUnitName);
+        log.debug("Created EntityManagerFactory for persistence unit {}", persistenceUnitName);
         factories.put(persistenceUnitName, factory);
     }
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        log.info("PersistenceManager initialized");
+        log.debug("PersistenceManager initialized");
         
         // XXX can we get persistence unit names from web.xml to simplify configuration?
         Enumeration<String> attrs = sce.getServletContext().getAttributeNames();
-        log.info("Servlet Context path {}",sce.getServletContext().getContextPath()); // like /WLMService
+        log.debug("Servlet Context path {}",sce.getServletContext().getContextPath()); // like /WLMService
         while(attrs.hasMoreElements()) {
             String attr = attrs.nextElement();
-//            log.info("Servlet Context attribute: {} = {}", new String[] { attr, sce.getServletContext().getAttribute(attr).toString() }); // attributes are not necessarily strings... some may be boolean or something else
-            log.info("Servlet Context attribute: {}", attr);             
+//            log.debug("Servlet Context attribute: {} = {}", new String[] { attr, sce.getServletContext().getAttribute(attr).toString() }); // attributes are not necessarily strings... some may be boolean or something else
+            log.debug("Servlet Context attribute: {}", attr);             
         }
         Enumeration<String> initparams = sce.getServletContext().getInitParameterNames();
         while(initparams.hasMoreElements()) {
             String param = initparams.nextElement();
-//            log.info("Servlet Context init param: {} = {}", new String[] { param, sce.getServletContext().getInitParameter(param).toString() });
-            log.info("Servlet Context init param: {}",  param);
+//            log.debug("Servlet Context init param: {} = {}", new String[] { param, sce.getServletContext().getInitParameter(param).toString() });
+            log.debug("Servlet Context init param: {}",  param);
         }
         
         /*
@@ -141,7 +138,7 @@ public abstract class PersistenceManager implements ServletContextListener {
         for(String factoryName : factories.keySet()) {
             EntityManagerFactory factory = factories.get(factoryName);
             if( factory != null && factory.isOpen() ) {
-                log.info("PersistenceManager closing factory {} in contextInitialized", factoryName);
+                log.debug("PersistenceManager closing factory {} in contextInitialized", factoryName);
                 factory.close();
             }
             factories.remove(factoryName);
@@ -157,7 +154,7 @@ public abstract class PersistenceManager implements ServletContextListener {
         for(String factoryName : factories.keySet()) {
             EntityManagerFactory factory = factories.get(factoryName);
             if( factory != null && factory.isOpen() ) {
-                log.info("PersistenceManager closing factory {} in contextDestroyed", factoryName);
+                log.debug("PersistenceManager closing factory {} in contextDestroyed", factoryName);
                 factory.close();
             }
             factories.remove(factoryName);
@@ -204,7 +201,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             log.error("Cannot load JDBC Driver for persistence unit", ex);
         }
         
-        PersistenceUnitInfo persistenceUnitInfo = null;
+        PersistenceUnitInfo persistenceUnitInfo;
         try {
             persistenceUnitInfo = getPersistenceUnitInfo(persistenceUnitName, jpaProperties);
         }
@@ -215,32 +212,32 @@ public abstract class PersistenceManager implements ServletContextListener {
             throw new PersistenceException("Cannot find PersistenceUnit named "+persistenceUnitName);
         }
 
-        EntityManagerFactory emf = null;
+        EntityManagerFactory emf;
         PersistenceProviderResolver resolver = PersistenceProviderResolverHolder.getPersistenceProviderResolver();
 
         List<PersistenceProvider> providers = resolver.getPersistenceProviders();
         
         // check if we have the requested provider
         if( persistenceUnitInfo.getPersistenceProviderClassName() != null ) {
-            log.info("Looking for specific JPA provider: {}", persistenceUnitInfo.getPersistenceProviderClassName());
+            log.debug("Looking for specific JPA provider: {}", persistenceUnitInfo.getPersistenceProviderClassName());
             for(PersistenceProvider provider : providers) {
-                log.info("Looking at provider: {}", provider.getClass().getName());
+                log.debug("Looking at provider: {}", provider.getClass().getName());
                 if( provider.getClass().getName().equals(persistenceUnitInfo.getPersistenceProviderClassName()) ) {
                     emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
                     if( emf != null ) {
-                        log.info("Found requested persistence provider");
+                        log.debug("Found requested persistence provider");
                         return emf;
                     }
                 }
             }
         }
         // check if any other provider can accomodate the persistence unit
-        log.info("Looking for any compatible JPA provider");
+        log.debug("Looking for any compatible JPA provider");
         for (PersistenceProvider provider : providers) {
-            log.info("Looking at provider: {}", provider.getClass().getName());
+            log.debug("Looking at provider: {}", provider.getClass().getName());
             emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
             if (emf != null) {
-                log.info("Found compatible persistence provider");
+                log.debug("Found compatible persistence provider");
                 return emf;
             }
         }
@@ -277,7 +274,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             CustomPersistenceUnitInfoImpl unitInfo = persistenceInfoMap.get(persistenceUnitName);
             if( unitInfo != null ) {
                 if( unitInfo.ds == null ) {
-                    log.info("Found PersistenceUnit {}, creating DataSource", persistenceUnitName);
+                    log.debug("Found PersistenceUnit {}, creating DataSource", persistenceUnitName);
                     Properties copy = new Properties();
                     copy.putAll(jpaProperties);
                     unitInfo.jpaProperties = copy;
@@ -294,7 +291,7 @@ public abstract class PersistenceManager implements ServletContextListener {
     /*
     private static void loadAllPersistenceUnits() throws IOException {
         ClassLoader cl = PersistenceManager.class.getClassLoader();
-        log.info("Loading all persistence.xml files in classpath using classloader: {}", cl.getClass().getName());
+        log.debug("Loading all persistence.xml files in classpath using classloader: {}", cl.getClass().getName());
         ArrayList<URL> list = new ArrayList<URL>();
         list.addAll(getResources(cl, "META-INF/persistence.xml"));
         for(URL url : list) {
@@ -304,7 +301,7 @@ public abstract class PersistenceManager implements ServletContextListener {
     }*/
     private static void loadPersistenceUnit(String persistenceUnitName) throws IOException {
         ClassLoader cl = PersistenceManager.class.getClassLoader();
-        log.info("Loading persistence.xml for {} using classloader: {}", new String[] { persistenceUnitName,  cl.getClass().getName() });
+        log.debug("Loading persistence.xml for {} using classloader: {}", new String[] { persistenceUnitName,  cl.getClass().getName() });
         ArrayList<URL> list = new ArrayList<URL>();
         list.addAll(listResources(cl, String.format("META-INF/persistence-%s.xml", persistenceUnitName)));
         list.addAll(listResources(cl, String.format("META-INF/%s/persistence.xml", persistenceUnitName)));
@@ -333,7 +330,7 @@ public abstract class PersistenceManager implements ServletContextListener {
     }
 
     private static CustomPersistenceUnitInfoImpl readPersistenceXml(URL url) throws IOException {
-        log.info("Loading {}", url.toExternalForm());
+        log.debug("Loading {}", url.toExternalForm());
         InputStream in = null;
         try {
             in = url.openStream();
@@ -353,7 +350,7 @@ public abstract class PersistenceManager implements ServletContextListener {
             documentBuilderFactory.setNamespaceAware(true);
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.parse(in);
-            log.info("document element tag name: "+document.getDocumentElement().getTagName());
+            log.debug("document element tag name: "+document.getDocumentElement().getTagName());
 
             // create a persistence unit info object and fill it in with information we find in persistence.xml
             CustomPersistenceUnitInfoImpl p = new CustomPersistenceUnitInfoImpl();
@@ -389,10 +386,10 @@ public abstract class PersistenceManager implements ServletContextListener {
                 classList.add(classNodes.item(i).getTextContent());
             }
 
-            log.info("Persistence Unit Name: "+unitName);
-            log.info("Transaction Type: "+transactionType);
-            log.info("Provider: "+provider);
-            log.info("Class List: "+StringUtils.join(classList, ", "));
+            log.debug("Persistence Unit Name: "+unitName);
+            log.debug("Transaction Type: "+transactionType);
+            log.debug("Provider: "+provider);
+            log.debug("Class List: "+StringUtils.join(classList, ", "));
             
             
             p.persistenceUnitName = unitName;
@@ -433,21 +430,21 @@ public abstract class PersistenceManager implements ServletContextListener {
 //        ds.setDefaultTransactionIsolation(0);
         ds.setDriverClassLoader(ClassLoader.getSystemClassLoader());
         ds.setDriverClassName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));
-        ds.setInitialSize(10);
+        ds.setInitialSize(20);
         ds.setLogAbandoned(true);
 //        ds.setLogWriter(null); // null disables logging; TODO: see if we can get a PrintWriter from slf4j... and for some reason calls createDataSource() whic hdoesn't make sense
 //        ds.setLoginTimeout(30); // in seconds ;   not supported by basicdatasource... and for some reason calls createDataSource() whic hdoesn't make sense
-        ds.setMaxActive(50); // max 50 active connections to database
+        ds.setMaxActive(250); // max 50 active connections to database
         ds.setMaxIdle(10); // max 10 idle connections in the pool
-        ds.setMaxOpenPreparedStatements(-1); // no limit
+        ds.setMaxOpenPreparedStatements(50); // no limit
         ds.setMaxWait(-1); // wait indefinitely for a new connection from the pool
-        ds.setMinEvictableIdleTimeMillis(1000*60*30); // (milliseconds) connection may be idle up to 30 minutes before being evicted
+        ds.setMinEvictableIdleTimeMillis(1000*60*5); // (milliseconds) connection may be idle up to 5 minutes before being evicted
         ds.setMinIdle(5); // min 5 idle connections in the pool
-        ds.setNumTestsPerEvictionRun(10); // how many connections to test each time
+        ds.setNumTestsPerEvictionRun(25); // how many connections to test each time
         ds.setPassword(jpaProperties.getProperty("javax.persistence.jdbc.password"));
         ds.setPoolPreparedStatements(true);
         ds.setRemoveAbandoned(true);
-        ds.setRemoveAbandonedTimeout(60*60); // (seconds) connection may be abandoned for up to an hour before being removed
+        ds.setRemoveAbandonedTimeout(60*5); // (seconds) connection may be abandoned for up to 5 minutes before being removed
         ds.setTestOnBorrow(true);
         ds.setTestOnReturn(false);
         ds.setTestWhileIdle(true);

@@ -37,7 +37,11 @@ public class MultivaluedMapImpl<K,V> extends HashMap<K,List<V>> implements Multi
     @Override
     public V getFirst(K k) {
         List<V> list = get(k);
-        if( list.isEmpty() ) {
+        if(list != null) {
+            if( list.isEmpty() ) {
+                return null;
+            }
+        }else{
             return null;
         }
         return list.get(0);

@@ -10,10 +10,9 @@ import com.intel.mountwilson.client.AttestationService;
 */
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.TrustAssertion;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Properties;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.BeforeClass;
@@ -66,11 +65,11 @@ public class ASClientTest {
         api = new ApiClient(new MapConfiguration(config));
     }
     
-    
+    /*
     @Test
     public void testSamlAssertion() throws Exception {
         String saml = api.getSamlForHost(new Hostname("1.2.3.4"));
         TrustAssertion assertion = api.verifyTrustAssertion(saml);
         assertion.getAssertion().getIssueInstant().toDate();
-    }
+    }*/
 }

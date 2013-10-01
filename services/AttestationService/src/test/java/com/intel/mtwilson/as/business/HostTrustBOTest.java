@@ -1,17 +1,18 @@
 package com.intel.mtwilson.as.business;
 
-import static org.junit.Assert.assertTrue;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.HostLocation;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.datatypes.Hostname;
+import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.util.ASDataCipher;
+import java.io.IOException;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *
@@ -61,13 +62,21 @@ public class HostTrustBOTest {
      * This is not a good test for AS, should be moved to integration test project
      */
     @Test
-    public void testGetTrustStatusForKnownHost() {
+    public void testGetTrustStatusForKnownHost() throws IOException {
         HostTrustBO htbo = new HostTrustBO();
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response = "+response.vmm);
         
         
         //assertTrue("true".equals(response));
+    }
+    
+    @Test
+    public void testCipher() {
+        My.initDataEncryptionKey("NCJcq+T0FSanxY54rUhoGw==");
+        String url = ASDataCipher.cipher.decryptString("4l7d1+kkFz5degCzNFQPaXjGihmKE/0PaIHMCdMCwx20gfwj/SD+wHeJRPUpkWEIEIbtVQBG6QYwmPrx3uhejtUjpAwH1qs62G9YWCOLflg=");
+        System.out.print("url = " + url);
+        
     }
 
 //    @Test

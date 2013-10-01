@@ -6,39 +6,24 @@ package com.intel.mtwilson.setup;
 
 import com.intel.mtwilson.crypto.Pkcs12;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.InternetAddress;
-import com.intel.mtwilson.datatypes.Md5Digest;
-import com.intel.mtwilson.datatypes.Sha1Digest;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.Database;
 import com.intel.mtwilson.setup.model.DatabaseType;
 import com.intel.mtwilson.setup.model.PrivacyCA;
 import com.intel.mtwilson.setup.model.WebContainerType;
 import com.intel.mtwilson.setup.model.WebServiceSecurityPolicy;
 import com.intel.mtwilson.validation.BuilderModel;
-import com.intel.mtwilson.validation.Fault;
-import com.intel.mtwilson.validation.ObjectModel;
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.security.PublicKey;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Properties;
-import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.transport.verification.HostKeyVerifier;
-import net.schmizz.sshj.userauth.UserAuthException;
-import sun.security.rsa.RSAPublicKeyImpl;
-import sun.security.x509.X509Key;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.Console;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -47,12 +32,17 @@ import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 import net.schmizz.sshj.xfer.InMemoryDestFile;
 import net.schmizz.sshj.xfer.InMemorySourceFile;
 import net.schmizz.sshj.xfer.scp.SCPException;
@@ -543,7 +533,8 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     public void addTlsAndRootCaToAdminPortalUserKeystore() throws IOException {
         
     }
-
+    //commenting out unused function (6/11 1.2)
+    /*
     private List<String> listRemoteFiles(String remotePath) throws IOException {
         String result = SshUtil.remote(ssh, "ls -1 "+remotePath+" 2>/dev/null", remoteTimeout); // XXX using this only internally (no for arbitrary user input) so this should be ok, but it is a good idea to shell-escape it anyway
         if( result == null || result.isEmpty() ) { return Collections.EMPTY_LIST; }
@@ -555,7 +546,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         }
         return list;
     }
-    
+    */
     
     public void downloadPrivacyCaKeystoreFromServer() throws IOException {
         if( ctx.privacyCA.ekSigningKeyFilename == null ) {
@@ -799,7 +790,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
     private void importManagementConsoleProperties(Properties asprops, Properties mwprops) {
         ctx.portalUserKeystoreDir = asprops.getProperty("mtwilson.mc.keystore.dir");
         ctx.portalHostTypeList = asprops.getProperty("mtwilson.mc.hostTypes", "Xen;KVM;VMWare");
-        ctx.portalSessionTimeout = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.mc.sessionTimeOut", "1800")), TimeUnit.SECONDS);
+        ctx.portalSessionTimeout = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.portal.sessionTimeOut", "1800")), TimeUnit.SECONDS);
         ctx.portalApiKeyExpirationNotice = new Timeout(Integer.valueOf(asprops.getProperty("mtwilson.mc.apiKeyExpirationNoticeInMonths", "3"))*30, TimeUnit.DAYS); // for example 3 months is stored as 90 days, since the TimeUnit type does not have MONTHS
     }
     

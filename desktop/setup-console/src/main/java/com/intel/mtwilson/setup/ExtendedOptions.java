@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Parses extended command line arguments in the form --option=value and 
@@ -20,6 +22,7 @@ import org.apache.commons.configuration.MapConfiguration;
  * @author jbuhacoff
  */
 public class ExtendedOptions {
+    private Logger log = LoggerFactory.getLogger(getClass());
     private final String[] args;
     private String[] argsWithoutOptions = null;
     private MapConfiguration options = null;
@@ -32,6 +35,7 @@ public class ExtendedOptions {
         ArrayList<String> rest = new ArrayList<String>(args.length);
         int appendAll = -1;
         Properties opts = new Properties();
+        log.trace("Parsing {} args", args.length);
         for(int i=0; i<args.length; i++) {
             if( args[i].equals("--") ) {
                 // end parsing, pass all susequent arguments verbatim

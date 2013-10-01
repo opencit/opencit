@@ -9,8 +9,9 @@ import com.intel.mtwilson.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
-import com.intel.mtwilson.datatypes.InternetAddress;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.RemoteSetup;
 import com.intel.mtwilson.setup.SetupContext;
@@ -292,10 +293,10 @@ public class ConfigureRemote implements Command {
         return getRequiredInputWithPrompt(STRING_INPUT, prompt, "String:");
     }
 
-    
-    private Integer getRequiredIntegerWithPrompt(String prompt) throws IOException {
-        return getRequiredInputWithPrompt(INTEGER_INPUT, prompt, "Integer:");
-    }
+    // commenting out unused function (6/11 1.2)
+    //private Integer getRequiredIntegerWithPrompt(String prompt) throws IOException {
+    //    return getRequiredInputWithPrompt(INTEGER_INPUT, prompt, "Integer:");
+    //}
     
 
     private Integer getRequiredIntegerInRangeWithPrompt(int min, int max, String prompt) throws IOException {
@@ -506,7 +507,7 @@ public class ConfigureRemote implements Command {
     private void generateSelfSignedTlsKey() throws NoSuchAlgorithmException, CryptographyException, IOException {
         System.out.println("Going to generate a TLS/SSL key and certificate");
         KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
-        String alternativeName = null;
+        String alternativeName ;
         if( ctx.serverAddress.isHostname() ) {
             alternativeName = "dns:"+ctx.serverAddress.toString();
         }
@@ -527,7 +528,7 @@ public class ConfigureRemote implements Command {
     private void generateSelfSignedSamlSigningKey() throws NoSuchAlgorithmException, CryptographyException, IOException {
         System.out.println("Going to generate a SAML key and certificate");
         KeyPair keypair = RsaUtil.generateRsaKeyPair(RsaUtil.MINIMUM_RSA_KEY_SIZE);
-        String alternativeName = null;
+        String alternativeName;
         if( ctx.serverAddress.isHostname() ) {
             alternativeName = "dns:"+ctx.serverAddress.toString();
         }

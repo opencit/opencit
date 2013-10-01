@@ -9,7 +9,7 @@ import com.intel.mtwilson.audit.helper.AuditHandlerException;
 import com.intel.mtwilson.audit.data.AuditContext;
 import com.intel.mtwilson.audit.data.AuditLog;
 import com.intel.mtwilson.audit.data.AuditLogEntry;
-import com.intel.mtwilson.audit.helper.AuditConfig;
+//import com.intel.mtwilson.audit.helper.AuditConfig;
 import com.intel.mtwilson.audit.helper.MtWilsonThreadLocal;
 
 import java.util.Date;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AuditLogger {
     private static Logger logger = LoggerFactory.getLogger(AuditLogger.class);
-    private static boolean isAsyncEnabled = AuditConfig.isAsyncEnabled();
+//    private static boolean isAsyncEnabled = true; // AuditConfig.isAsyncEnabled();
     
     
 //    private static String AUDIT_LOGGER_JNDI= "";

@@ -5,10 +5,8 @@
 package com.intel.mtwilson.tls;
 
 import com.intel.mtwilson.crypto.NopX509TrustManager;
-import com.intel.mtwilson.datatypes.InternetAddress;
+//import com.intel.mtwilson.model.InternetAddress;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.List;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -31,10 +29,11 @@ public class InsecureTlsPolicy implements TlsPolicy, ApacheTlsPolicy {
     private final static NopX509TrustManager nop = new NopX509TrustManager();
     private final static ArrayCertificateRepository emptyRepository = new ArrayCertificateRepository(new X509Certificate[0]);
     public InsecureTlsPolicy() { }
-    
+    /*
     public InsecureTlsPolicy(InternetAddress server) {
 //        this.server = server;
     }
+    */
     
     @Override
     public X509TrustManager getTrustManager() { return nop; }

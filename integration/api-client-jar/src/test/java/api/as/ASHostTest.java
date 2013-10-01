@@ -5,9 +5,10 @@
 package api.as;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.mtwilson.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.SignatureException;
@@ -26,7 +27,7 @@ public class ASHostTest {
     
     private static ApiClient c;
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setup() throws IOException, ClientException  {
         c = new ApiClient(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
     }
     

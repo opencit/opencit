@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwMleSource;
 import java.io.Serializable;
@@ -56,7 +57,7 @@ public class MwMleSourceJpaController implements Serializable {
         }
     }
 
-    public void edit(MwMleSource mwMleSource) throws NonexistentEntityException, Exception {
+    public void edit(MwMleSource mwMleSource) throws NonexistentEntityException, ASDataException {
         EntityManager em = getEntityManager();
         try {
             
@@ -86,7 +87,7 @@ public class MwMleSourceJpaController implements Serializable {
                     throw new NonexistentEntityException("The mwMleSource with id " + id + " no longer exists.");
                 }
             }
-            throw ex;
+            throw new ASDataException(ex);
         } finally {
             em.close();
         }

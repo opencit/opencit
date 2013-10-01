@@ -1,10 +1,9 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
@@ -49,7 +48,7 @@ public class ApiClientBO extends BaseBO {
 
 
         try {
-            X509Certificate x509Certificate = null;
+            X509Certificate x509Certificate;
             try {
                 x509Certificate = X509Util.decodeDerCertificate(apiClientRequest.getCertificate());
             } catch (CertificateException e) {
@@ -307,7 +306,7 @@ public class ApiClientBO extends BaseBO {
         
         try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
-            List<ApiClientX509> list = null;
+            List<ApiClientX509> list;
             if( criteria.enabledEqualTo != null && criteria.statusEqualTo != null ) {
                 list = apiClientX509JpaController.findApiClientX509ByEnabledStatus(criteria.enabledEqualTo, criteria.statusEqualTo); // findByEnabledStatus
             }

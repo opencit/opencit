@@ -63,6 +63,7 @@
 <dependency>
 	<groupId>mysql</groupId>
 	<artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
 </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -113,6 +114,17 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency>
+            <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+        </dependency>
+
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>MSData</artifactId>
 			<version>${project.version}</version>
@@ -149,7 +161,12 @@
 		</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>my</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
         <dependency>

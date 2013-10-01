@@ -16,8 +16,9 @@ public enum ErrorCode {
     BAD_PCR_VALUES(1003,"TrustAgent: Bad PCR Values"), 
     TPM_OWNERSHIP_ERROR(1005,"TrustAgent: Error with TPM ownership"), 
     FATAL_ERROR(1006,"TrustAgent: Fatal unknown error"), 
-    COMMAND_ERROR(1007,"Trust Agent: "), 
-    ERROR(1, "Trust Agent:");
+    COMMAND_ERROR(1007,"TrustAgent: "), 
+    UNSUPPORTED_OPERATION(1008, "TrustAgent: Unsupported operation"),
+    ERROR(1, "TrustAgent:");
 
     public int getErrorCode() {
         return errorCode;

@@ -24,6 +24,14 @@
           </resource>
       </resources>      
   </build>
+
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.portals</groupId>
@@ -39,14 +47,7 @@
     </dependency>	
   </dependencies>
 
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
-  <build>
+          <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
      <plugin>

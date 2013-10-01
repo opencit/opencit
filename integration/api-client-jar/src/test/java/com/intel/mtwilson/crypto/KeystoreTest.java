@@ -6,8 +6,7 @@ package com.intel.mtwilson.crypto;
 
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
@@ -54,7 +53,7 @@ public class KeystoreTest {
      * Fails if the keystore does not have the server's SSL certificate
      */
     @Test
-    public void executeApiCall() throws Exception {
+    public void executeApiCall() throws MalformedURLException, ClientException, IOException, IOException, ApiException, ApiException, SignatureException {
         // test API client against a server and require valid certs
         URL url = new URL(config.getProperty("mtwilson.api.baseurl"));
         Properties p = new Properties();
@@ -68,7 +67,7 @@ public class KeystoreTest {
     }
 
     @Test
-    public void createNewKeystore() throws Exception {
+    public void createNewKeystore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
         File keystoreFile = new File(config.getProperty("mtwilson.api.keystore"));
         KeyStore keystore = KeyStore.getInstance("JKS");
         keystore.load(null, null);
@@ -78,7 +77,7 @@ public class KeystoreTest {
     
     
     @Test
-    public void showCertificatesInKeystore() throws Exception {
+    public void showCertificatesInKeystore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, UnrecoverableEntryException  {
         KeyStore keystore = KeystoreUtil.open(new MapConfiguration(config));
         Enumeration<String> aliases = keystore.aliases();
         System.out.println("Certificates in keystore:");
@@ -106,7 +105,7 @@ public class KeystoreTest {
      * @throws IOException 
      */
     @Test
-    public void addServerSslCertificateToKeystore() throws Exception {
+    public void addServerSslCertificateToKeystore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException  {
         KeyStore keystore = KeystoreUtil.open(new MapConfiguration(config));
         URL url = new URL(config.getProperty("mtwilson.api.baseurl"));        
         X509Certificate[] certs = SslUtil.getServerCertificates(url);
@@ -122,7 +121,7 @@ public class KeystoreTest {
     }
 
     @Test
-    public void createNewKeystoreWithServerSslCert() throws Exception {
+    public void createNewKeystoreWithServerSslCert() throws KeyStoreException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException  {
         createNewKeystore();
         showCertificatesInKeystore();
         addServerSslCertificateToKeystore();
@@ -133,7 +132,7 @@ public class KeystoreTest {
      * Same as createNewKeystoreWithServerSslCert but uses the SimpleKeystore class. 
      */
     @Test
-    public void createNewKeystoreWithServerSslCertUsingSimpleKeystore() throws Exception {
+    public void createNewKeystoreWithServerSslCertUsingSimpleKeystore() throws KeyManagementException, KeyStoreException, MalformedURLException, NoSuchAlgorithmException, IOException, CertificateException {
         // create new keystore (if file does not exist and is writable it will be created when we save)
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getProperty("mtwilson.api.keystore")), config.getProperty("mtwilson.api.keystore.password"));
         // list certificates

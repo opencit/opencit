@@ -7,13 +7,17 @@ package com.intel.mtwilson.crypto;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +40,10 @@ public class X509Util {
     private static Logger log = LoggerFactory.getLogger(X509Util.class);
     public static final String BEGIN_CERTIFICATE = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERTIFICATE = "-----END CERTIFICATE-----";
+    public static final String BEGIN_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----";
+    public static final String END_PUBLIC_KEY = "-----END PUBLIC KEY-----";
+    public static final String BEGIN_RSA_PUBLIC_KEY = "-----BEGIN RSA PUBLIC KEY-----";
+    public static final String END_RSA_PUBLIC_KEY = "-----END RSA PUBLIC KEY-----";
     public static final String PEM_NEWLINE = "\r\n";
 
     /**
@@ -76,6 +84,13 @@ public class X509Util {
         String encoded = new String(Base64.encodeBase64(certificate.getEncoded(), true));
         return BEGIN_CERTIFICATE+PEM_NEWLINE+encoded.trim()+PEM_NEWLINE+END_CERTIFICATE+PEM_NEWLINE;
     }
+
+    public static String encodePemPublicKey(PublicKey publicKey)  {
+        // the function Base64.encodeBase64String does not chunk to 76 characters per line
+        String encoded = new String(Base64.encodeBase64(publicKey.getEncoded(), true));
+        return BEGIN_PUBLIC_KEY+PEM_NEWLINE+encoded.trim()+PEM_NEWLINE+END_PUBLIC_KEY+PEM_NEWLINE;
+    }
+    
     
     /**
      * This function converts a PEM-format certificate to an X509Certificate
@@ -97,6 +112,19 @@ public class X509Util {
         byte[] der = Base64.decodeBase64(content);
         return decodeDerCertificate(der);
     }
+
+    public static PublicKey decodePemPublicKey(String text) throws CryptographyException {
+        String content = text;
+        if( text.contains(BEGIN_PUBLIC_KEY) ) {
+            content = text.replace(BEGIN_PUBLIC_KEY, "").replace(END_PUBLIC_KEY, "");
+        }
+        if( text.contains(BEGIN_RSA_PUBLIC_KEY) ) {
+            content = text.replace(BEGIN_RSA_PUBLIC_KEY, "").replace(END_RSA_PUBLIC_KEY, "");
+        }
+        byte[] der = Base64.decodeBase64(content);
+        return decodeDerPublicKey(der);
+    }
+    
     
     public static List<X509Certificate> decodePemCertificates(String text) throws CertificateException {
         String[] pems = StringUtils.splitByWholeSeparator(text, END_CERTIFICATE);
@@ -120,6 +148,19 @@ public class X509Util {
         X509Certificate cert = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(certificateBytes));
         return cert;
     }
+
+    public static PublicKey decodeDerPublicKey(byte[] publicKeyBytes) throws CryptographyException {
+        try {
+            KeyFactory factory = KeyFactory.getInstance("RSA"); // throws NoSuchAlgorithmException
+            
+            PublicKey publicKey  = factory.generatePublic(new X509EncodedKeySpec(publicKeyBytes)); // throws InvalidKeySpecException
+            return publicKey;
+        }
+        catch(Exception e) {
+             
+            throw new CryptographyException(e);
+        }
+    }
     
     /**
      * For completeness.  The X509Certificate.getEncoded() method returns the DER
@@ -130,6 +171,10 @@ public class X509Util {
      */
     public static byte[] encodeDerCertificate(X509Certificate certificate) throws CertificateEncodingException {
         return certificate.getEncoded();
+    }
+    
+    public static byte[] encodeDerPublicKey(PublicKey publicKey)  {
+        return publicKey.getEncoded();
     }
 
     /**

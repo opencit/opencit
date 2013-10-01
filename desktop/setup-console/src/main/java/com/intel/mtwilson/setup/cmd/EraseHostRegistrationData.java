@@ -5,7 +5,6 @@
 package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
@@ -14,17 +13,10 @@ import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASPersistenceManager;
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.setup.SetupWizard;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 
 /**
@@ -58,6 +50,11 @@ public class EraseHostRegistrationData implements Command {
     
     private void deleteHostRegistrationRecords(Configuration conf) throws SetupException, CryptographyException, IllegalOrphanException, NonexistentEntityException {
         ASPersistenceManager pm = new ASPersistenceManager();
+        TblHostSpecificManifestJpaController hsmJpa = new TblHostSpecificManifestJpaController(pm.getEntityManagerFactory("ASDataPU"));
+        List<TblHostSpecificManifest> hsmList = hsmJpa.findTblHostSpecificManifestEntities();
+        for(TblHostSpecificManifest hsm : hsmList) {
+            hsmJpa.destroy(hsm.getId());
+        }
 //        byte[] dek = Base64.decodeBase64(ASConfig.getConfiguration().getString("mtwilson.as.dek"));
         TblHostsJpaController jpa = new TblHostsJpaController(pm.getEntityManagerFactory("ASDataPU"));
         List<TblHosts> list = jpa.findTblHostsEntities();
@@ -66,11 +63,6 @@ public class EraseHostRegistrationData implements Command {
             jpa.destroy(host.getId());
         }
         
-        TblHostSpecificManifestJpaController hsmJpa = new TblHostSpecificManifestJpaController(pm.getEntityManagerFactory("ASDataPU"));
-        List<TblHostSpecificManifest> hsmList = hsmJpa.findTblHostSpecificManifestEntities();
-        for(TblHostSpecificManifest hsm : hsmList) {
-            hsmJpa.destroy(hsm.getId());
-        }
     }
 
 }
