@@ -87,8 +87,8 @@ public class BootstrapUser implements Command {
             baseurl = readInputStringWithPromptAndDefault("Mt Wilson URL", baseurl);
         }
         
-        String username = null;
-        String password = null;
+        String username ;
+        String password ;
         if( args.length > 0 ) { username = args[0]; } else { username = readInputStringWithPrompt("Username"); }
         if( args.length > 1 ) { password = args[1]; } else { password = readInputStringWithPrompt("Password"); }
         if( password != null && password.startsWith("env:") && password.length() > 4 ) {
@@ -100,7 +100,12 @@ public class BootstrapUser implements Command {
         }
         
         MwPortalUser keyTest = portalUserJpa.findMwPortalUserByUserName(username);
-        if(keyTest != null) {
+        // Bug # 883: We should be checking the status since the user could be deleted, in which case the status would be "cancelled".
+        // The possible values for the status include approved, cancelled, rejected, expired and pending. We should allow the
+        // creation of the user if the status is not "approved" or "pending" in which cases the user already is in active state or someone has
+        // not yet approved the user creation request.
+        // if(keyTest != null) {
+        if ((keyTest != null) && (keyTest.getStatus().equalsIgnoreCase("approved") || keyTest.getStatus().equalsIgnoreCase("pending"))) {        
           logger.info("A user already exists with the specified User Name: {}", username);
           throw new SetupException("User account with that name already exists. Please select different User Name.");
         }
@@ -143,7 +148,7 @@ public class BootstrapUser implements Command {
     }
     
     private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
-        SetupWizard wizard = new SetupWizard(conf);
+        //SetupWizard wizard = new SetupWizard(conf);
         try {
             // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
             /*

@@ -41,10 +41,16 @@ public class CreateUser extends AbstractCommand {
                 password = in.readLine();
                 System.out.print("Password again: ");
                 String passwordAgain = in.readLine();
-                if( !password.equals(passwordAgain) ) {
-                    System.err.println("The two passwords don't match");
-                    System.exit(1);
+                if(password != null && passwordAgain != null) {
+                    if( !password.equals(passwordAgain) ) {
+                        System.err.println("The two passwords don't match");
+                        System.exit(1);
+                    }
+                }else{
+                     System.err.println("Unable to read password.  Please run command again");
+                     System.exit(1);
                 }
+                    
             }
             else if( password.startsWith("env:") && password.length() > 4 ) {
                 String varName = password.substring(4);

@@ -56,7 +56,7 @@
 			<div class="singleDiv" id="hostPortDisplayDiv">
 				<div class="labelDiv">Host Port :</div>
 				<div class="valueDiv" >
-					<input type="text" class="textBoxClass" id="MainContent_tbHostPort" value="9999" >
+                                    <input type="text" class="textBoxClass" id="MainContent_tbHostPort" ><!--value="9999"-->
 				</div>
 			</div>
 						            
@@ -124,9 +124,10 @@
 			</div>
 			
 			<div class="singleDiv">
+                                                <div class="valueDiv">&nbsp; </div>
 				<div class="labelDivgkv" >&nbsp;</div>
 				<div class="valueDiv">
-					<table style="padding-top:20px;padding-bottom: 10px;">
+					<table style="padding-top:80px;padding-bottom: 10px;padding-right:50px;padding-left:50px;">
 						<tr>
 							<td><input type="button" class="button" value="Add Host" id="addHostButton" onclick="addNewHost()"/></td>
                                                                                                                                                                          <td><input type="button" class="button" value="Update Host" id="updateHostButton" onclick="updateHostInfo()"/></td>

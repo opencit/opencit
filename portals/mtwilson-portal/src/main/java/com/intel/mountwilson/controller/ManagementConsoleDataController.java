@@ -44,6 +44,7 @@ import java.lang.reflect.Type;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,6 +58,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -132,7 +134,7 @@ public class ManagementConsoleDataController extends MultiActionController{
                                         String lines[] = item.getString().split("\\r?\\n");
                                         for (String values : lines) {
                                                 //Split host name and host value with Separator e.g. |
-                                                if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) > 0) {
+                                                if (values.indexOf(HelperConstant.SEPARATOR_REGISTER_HOST) >= 0) {
                                                         String val[] = values.split(Pattern.quote(HelperConstant.SEPARATOR_REGISTER_HOST));
                                                         if (val.length == 3) {
                                                                 HostDetails host = new HostDetails();
@@ -300,7 +302,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	}*/
 	
-	private HostWhiteListTarget getBiosWhiteListTarget(String target) throws Exception{
+	private HostWhiteListTarget getBiosWhiteListTarget(String target) {
 		List<HostWhiteListTarget> biosTargetList = new ArrayList<HostWhiteListTarget>();
 		biosTargetList.add(HostWhiteListTarget.BIOS_HOST);
 		biosTargetList.add(HostWhiteListTarget.BIOS_OEM);
@@ -312,7 +314,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		return null;
 	}
 	
-	private HostWhiteListTarget getVmmWhiteListTarget(String target) throws Exception{
+	private HostWhiteListTarget getVmmWhiteListTarget(String target) {
 		List<HostWhiteListTarget> vmmTargetList = new ArrayList<HostWhiteListTarget>();
 		vmmTargetList.add(HostWhiteListTarget.VMM_OEM);
 		vmmTargetList.add(HostWhiteListTarget.VMM_HOST);
@@ -325,7 +327,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 		return null;
 	}
 	
-	private HostVMMType getHostVmmTypeTarget(String target) throws Exception{
+	private HostVMMType getHostVmmTypeTarget(String target) {
 		for (HostVMMType hostVmmType : HostVMMType.values()){
 			if (hostVmmType.getValue().equals(target)){	
 				return hostVmmType; 
@@ -369,8 +371,111 @@ public class ManagementConsoleDataController extends MultiActionController{
 		
 	}
 	
-        /**
-         * This Method is use to get Retrive Host data from VMWare Cluster.
+       
+
+    /**
+     * This Method is used to retrieve the datacenter names of a vSphere Server.
+     *
+     * @param req
+     * @param res
+     * @return
+     */
+    public ModelAndView retrieveDatacenters(HttpServletRequest req, HttpServletResponse res) {
+        log.debug("ManagementConsoleDataController.retrieveDatacenters >>");
+        ModelAndView responseView = new ModelAndView(new JSONView());
+        String vCenterConnection;
+        String dcCombined = "";
+
+        try {
+            vCenterConnection = req.getParameter("vCentertConnection");
+        } catch (Exception e) {
+            log.error("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
+            responseView.addObject("message", "Input Parameters are NUll.");
+            responseView.addObject("result", false);
+            return responseView;
+        }
+
+        try {
+            List<String> listOfDatacenters = services.getDatacenters(vCenterConnection);
+            for (String dcDetail : listOfDatacenters) {
+                dcCombined += dcDetail + ",";
+            }
+            dcCombined = dcCombined.substring(0, dcCombined.length()-1);
+        } catch (Exception e) {
+            log.error("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
+            responseView.addObject("message", e.getMessage());
+            responseView.addObject("result", false);
+            return responseView;
+        }
+
+        responseView.addObject("datacenters",dcCombined);
+        responseView.addObject("result", true);
+        log.debug("ManagementConsoleDataController.retrieveDatacenters <<<");
+        return responseView;
+    }
+
+    /**
+     * This Method is used to retrieve all cluster names within the vSphere Server.
+     *
+     * @param req
+     * @param res
+     * @return
+     */
+    public ModelAndView retrieveAllClusters(HttpServletRequest req, HttpServletResponse res) {
+        log.debug("ManagementConsoleDataController.retrieveAllClusters >>");
+        ModelAndView responseView = new ModelAndView(new JSONView());
+        String vCenterConnection;
+        List<String> dcList = new ArrayList<String>();
+        List<String> clustList = new ArrayList<String>();
+        String clusterCombined = "";
+
+        try {
+            vCenterConnection = req.getParameter("vCentertConnection");
+        } catch (Exception e) {
+            log.error("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
+            responseView.addObject("message", "Input Parameters are NUll.");
+            responseView.addObject("result", false);
+            return responseView;
+        }
+
+        try {
+            dcList = services.getDatacenters(vCenterConnection);
+        } catch (Exception e) {
+            log.error("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
+            responseView.addObject("message", e.getMessage());
+            responseView.addObject("result", false);
+            return responseView;
+        }
+
+        try {
+            for (String dc : dcList){
+                List<String> clustList_temp = services.getClusters(vCenterConnection, dc);
+                
+                // tag dc name
+                for (String clust : clustList_temp){
+                    clustList.add("[" + dc + "] " + clust);
+                }
+            }
+            Collections.sort(clustList);
+            for (String clusterDetail : clustList) {
+                clusterCombined += clusterDetail + ",";
+            }
+            clusterCombined = clusterCombined.substring(0, clusterCombined.length()-1);
+        } catch (Exception e) {
+            log.error("Error while getting data from VMware vCeneter. " + StringEscapeUtils.escapeHtml(e.getMessage()));
+            responseView.addObject("message", e.getMessage());
+            responseView.addObject("result", false);
+            return responseView;
+        }
+
+        responseView.addObject("clusters",clusterCombined);
+        responseView.addObject("result", true);
+        log.debug("ManagementConsoleDataController.retrieveAllClusters <<<");
+        return responseView;
+    }
+        
+         /**
+         * This Method is use to get Retrieve Host data from VMWare Cluster.
          * using Cluster name and vCenterConnection String.
          *
          * @param req
@@ -385,6 +490,7 @@ public class ManagementConsoleDataController extends MultiActionController{
 
                 try {
                         clusterName = req.getParameter("clusterName");
+                        clusterName = clusterName.substring(clusterName.indexOf("] ") + 2);
                         vCenterConnection = req.getParameter("vCentertConnection");
                 } catch (Exception e) {
                         log.error("Error while getting Input parameter from request." + StringEscapeUtils.escapeHtml(e.getMessage()));
@@ -415,7 +521,8 @@ public class ManagementConsoleDataController extends MultiActionController{
                 return responseView;
 
         }
-	
+        
+        
 	/**
 	 * This Method is use to register multiple host on server..
 	 * 
@@ -827,6 +934,7 @@ public class ManagementConsoleDataController extends MultiActionController{
             stringBuilder.append( line );
             stringBuilder.append( ls );
         }
+        reader.close();
         return stringBuilder.toString();
     }
     
@@ -1395,7 +1503,6 @@ public class ManagementConsoleDataController extends MultiActionController{
                         
 			Map<String, HostVmMappingVO> vmMappingData = getHostVmMappingdata();
 			HostVmMappingVO hostVmMappingVO = vmMappingData.get(hostID+HelperConstant.VM_HOST_MAPPING_SEPERATOR+vmName);
-	        
 	        hostVmMappingVO.setTrustedHostPolicy(trustPolicy);
 	        hostVmMappingVO.setLocationPolicy(locationPloicy);
 	        if (isPowerOnCommand) {

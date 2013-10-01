@@ -48,7 +48,7 @@ public class ImportConfig implements Command {
         FileResource resource = new FileResource(new File(filename));
         PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
         
-        String content = null;
+        String content ;
         if( options.containsKey("in") ) {
             FileInputStream in = new FileInputStream(new File(options.getString("in")));
             content = IOUtils.toString(in);

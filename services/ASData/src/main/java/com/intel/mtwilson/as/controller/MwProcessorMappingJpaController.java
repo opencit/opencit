@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwProcessorMapping;
 import com.intel.mtwilson.as.data.TblEventType;
@@ -39,25 +40,21 @@ public class MwProcessorMappingJpaController implements Serializable {
     }
 
     public void create(MwProcessorMapping mwProcessorMapping) {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             em.persist(mwProcessorMapping);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
-    public void edit(MwProcessorMapping mwProcessorMapping) throws NonexistentEntityException, Exception {
-        EntityManager em = null;
+    public void edit(MwProcessorMapping mwProcessorMapping) throws NonexistentEntityException, ASDataException {
+        EntityManager em = getEntityManager();;
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
-            mwProcessorMapping = em.merge(mwProcessorMapping);
+            em.merge(mwProcessorMapping);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -67,18 +64,15 @@ public class MwProcessorMappingJpaController implements Serializable {
                     throw new NonexistentEntityException("The mwProcessorMapping with id " + id + " no longer exists.");
                 }
             }
-            throw ex;
+            throw new ASDataException(ex);
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
     public void destroy(Integer id) throws NonexistentEntityException {
-        EntityManager em = null;
+        EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             MwProcessorMapping mwProcessorMapping;
             try {
@@ -90,9 +84,7 @@ public class MwProcessorMappingJpaController implements Serializable {
             em.remove(mwProcessorMapping);
             em.getTransaction().commit();
         } finally {
-            if (em != null) {
-                em.close();
-            }
+            em.close();
         }
     }
 
@@ -165,6 +157,7 @@ public class MwProcessorMappingJpaController implements Serializable {
     
     public MwProcessorMapping findByCPUID(String cpuID) {
         EntityManager em = getEntityManager();
+        MwProcessorMapping result = null;
         try {
 
             Query query = em.createNamedQuery("MwProcessorMapping.findByProcessorCpuid");
@@ -173,13 +166,18 @@ public class MwProcessorMappingJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 
-            MwProcessorMapping result = (MwProcessorMapping) query.getSingleResult();
-            return result;
+            //MwProcessorMapping result = (MwProcessorMapping) query.();
+            //return result; 
+            List<MwProcessorMapping> results =query.getResultList();
+            if (results != null && results.size() > 0)
+                result = results.get(0);
+            
         } catch(NoResultException nre) {
             log.info("No platform matched the CPUID {}.", cpuID);
             return null;
         } finally {
             em.close();
         }
+        return result;
     }
 }

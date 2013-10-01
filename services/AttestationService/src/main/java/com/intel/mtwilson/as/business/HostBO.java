@@ -143,7 +143,7 @@ public class HostBO extends BaseBO {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
                                     X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                     hostAikCert.checkValidity(); // AIK certificate must be valid today
-                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
                                     if( !validCaSignature ) {
                                         throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
                                     }
@@ -477,7 +477,6 @@ public class HostBO extends BaseBO {
                     }
                 }
                 else {
-                    // XXX Stewart Citrix TODO ... probably pem-encode with RSA PUBLIC KEY header
                     PublicKey publicKey = agent.getAik();
                     String pem = X509Util.encodePemPublicKey(publicKey); 
                     tblHosts.setAIKCertificate(null);
@@ -564,7 +563,7 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, Exception {
+	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
 		
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
 		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
@@ -607,7 +606,7 @@ public class HostBO extends BaseBO {
                     log.debug("SaveHostInDatabase caught ex!");
                     e.printStackTrace();
                     log.trace("end print stack trace");
-                    throw e;
+                    throw new ASException(e);
                 }
                 log.debug("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);

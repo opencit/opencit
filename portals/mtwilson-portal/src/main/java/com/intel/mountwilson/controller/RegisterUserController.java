@@ -36,7 +36,7 @@ public class RegisterUserController extends AbstractController {
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
         
 	@Override
-	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws Exception {
+	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res)  {
 		logger.debug("RegisterUserController >>");
 		ModelAndView view = new ModelAndView(new JSONView());
 		
