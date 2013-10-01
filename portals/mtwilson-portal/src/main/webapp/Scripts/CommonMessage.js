@@ -13,9 +13,10 @@ uploadFileHelp[10]="e.g.   citrix|myCitrixHost|https://192.168.1.0:443/;Administ
 uploadFileHelp[11]="* connection strings must be valid urls.  Please notice the / after the port number.  That is required"
 
 var vCenterStringHelp = [];
-vCenterStringHelp[0]="Please provide only the IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.";
-vCenterStringHelp[1]="Ex: 192.168.1.1";
-vCenterStringHelp[2]="Ex: 192.168.1.0:444";
+vCenterStringHelp[0]="Please provide the hostname or IP address of VCenter. If the default port [443] is not used, specify the same after \":\" as shown below.";
+vCenterStringHelp[1]="Ex: hostname.com";
+vCenterStringHelp[2]="Ex: 192.168.1.1";
+vCenterStringHelp[3]="Ex: 192.168.1.0:444";
 
 var addLocationHelp = [];
 addLocationHelp[0]="Please provide Location for server.";

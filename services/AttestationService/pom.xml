@@ -253,7 +253,7 @@
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>my</artifactId>
-	    <version>1.2-SNAPSHOT</version>
+	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>
 	<dependency>

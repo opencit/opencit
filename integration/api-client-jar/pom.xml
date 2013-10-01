@@ -128,7 +128,7 @@
                                 <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
                                     <fileset dir="${project.build.directory}/jars" />
                                     <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
-                                    <fileset dir="${basedir}" includes="pom.xml"/>
+                                    <fileset dir="${basedir}" includes="pom.xml" />
                                 </zip>
                             </target>
                         </configuration>

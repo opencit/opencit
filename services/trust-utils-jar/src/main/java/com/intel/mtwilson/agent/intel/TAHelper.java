@@ -273,16 +273,27 @@ public class TAHelper {
 
         log.debug("created RSA key file for session id: " + sessionId);
         
-        String decodedEventLog = new String(Base64.decodeBase64(clientRequestType.getEventLog()));
-        log.debug("Event log retrieved from the host consists of: " + decodedEventLog);
-        
-        // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
-        PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
+        log.debug("Event log: {}", clientRequestType.getEventLog()); // issue #879
+        byte[] eventLogBytes = Base64.decodeBase64(clientRequestType.getEventLog());// issue #879
+        log.debug("Decoded event log length: {}", eventLogBytes == null ? null : eventLogBytes.length);// issue #879
+        if( eventLogBytes != null ) { // issue #879
+            String decodedEventLog = new String(eventLogBytes);
+            log.debug("Event log retrieved from the host consists of: " + decodedEventLog);
 
-        log.debug("Got PCR map");
-        //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
+            // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
+            PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
+            log.debug("Got PCR map");
+            //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
 
-        return pcrManifest;
+            return pcrManifest;
+        }
+        else {
+            PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
+            log.debug("Got PCR map");
+            //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
+
+            return pcrManifest;
+        }
 
     }
 
@@ -561,6 +572,7 @@ public class TAHelper {
         //<module><pcrNumber>19</pcrNumber><name>vmlinuz</name><value>d3f525b0dc6f7d7c9a3af165bcf6c3e3e02b2599</value></module>
         //<module><pcrNumber>19</pcrNumber><name>initrd</name><value>3dfa5762c78623ccfc778498ab4cb7136bb3f5ab</value></module>
         //</modules>
+        if( eventLog != null ) { // issue #879
         try {
             XMLInputFactory xif = XMLInputFactory.newInstance();
             //FileInputStream fis = new FileInputStream("c:\\temp\\nbtest.txt");
@@ -609,6 +621,7 @@ public class TAHelper {
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
+        }
         }
 
         return pcrManifest;

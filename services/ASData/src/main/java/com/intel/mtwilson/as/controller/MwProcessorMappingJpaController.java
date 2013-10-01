@@ -157,6 +157,7 @@ public class MwProcessorMappingJpaController implements Serializable {
     
     public MwProcessorMapping findByCPUID(String cpuID) {
         EntityManager em = getEntityManager();
+        MwProcessorMapping result = null;
         try {
 
             Query query = em.createNamedQuery("MwProcessorMapping.findByProcessorCpuid");
@@ -165,13 +166,18 @@ public class MwProcessorMappingJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 
-            MwProcessorMapping result = (MwProcessorMapping) query.getSingleResult();
-            return result;
+            //MwProcessorMapping result = (MwProcessorMapping) query.();
+            //return result; 
+            List<MwProcessorMapping> results =query.getResultList();
+            if (results != null && results.size() > 0)
+                result = results.get(0);
+            
         } catch(NoResultException nre) {
             log.info("No platform matched the CPUID {}.", cpuID);
             return null;
         } finally {
             em.close();
         }
+        return result;
     }
 }

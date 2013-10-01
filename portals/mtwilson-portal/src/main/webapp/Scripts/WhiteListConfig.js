@@ -278,6 +278,9 @@ function fnClearAllConfigFiled() {
 //function to select corresponding BIOS/VMM white list config checkbox, on Selection of White List Applicable For
 function fnSelectWhiteListType(element,checkBoxID) {
 	$('#'+checkBoxID).attr('checked','checked');
+        if ($('#Hypervisor_bios_applicable_for').children("option:selected").text() == "Global") {
+            $("#required_pcrs_17").attr('checked',false);
+        } 
 	fnDisableOrEnableUploadButton(true);
 }
 
