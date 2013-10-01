@@ -12,9 +12,10 @@ find_ctl_commands() {
   msctl=`which msctl 2>/dev/null`
   wlmctl=`which wlmctl 2>/dev/null`
   asctl=`which asctl 2>/dev/null`
-  mcctl=`which mcctl 2>/dev/null`
-  wpctl=`which wpctl 2>/dev/null`
-  tdctl=`which tdctl 2>/dev/null`
+  #mcctl=`which mcctl 2>/dev/null`
+  #wpctl=`which wpctl 2>/dev/null`
+  #tdctl=`which tdctl 2>/dev/null`
+  mpctl=`which mpctl 2>/dev/null`
 }
 
 
@@ -24,7 +25,8 @@ all_status() {
   if [ -n "$asctl" ]; then $asctl status; fi
   if [ -n "$msctl" ]; then $msctl status; fi
   if [ -n "$wlmctl" ]; then $wlmctl status; fi
-  if [ -n "$mcctl" ]; then $mcctl status; fi
-  if [ -n "$wpctl" ]; then $wpctl status; fi
-  if [ -n "$tdctl" ]; then $tdctl status; fi
+  #if [ -n "$mcctl" ]; then $mcctl status; fi
+  #if [ -n "$wpctl" ]; then $wpctl status; fi
+  #if [ -n "$tdctl" ]; then $tdctl status; fi
+  if [ -n "$mpctl" ]; then $mpctl status; fi
 }

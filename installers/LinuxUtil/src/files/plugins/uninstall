@@ -4,7 +4,7 @@
 
 # Usage: mtwilson uninstall
 mw_uninstall() {
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
         if using_glassfish; then
           glassfish_require
           echo "Stopping Glassfish..."
@@ -23,19 +23,19 @@ mw_uninstall() {
         # data files
         echo "Removing Mt Wilson data in /var/opt/intel..."
         rm -rf /var/opt/intel
-		echo "Stopping Monit service..."
-		service monit stop &> /dev/null
-		if [ -f /etc/monit/monitrc ]; then
-		 #remove monit config so when it starts back up it has nothing to monitor
-		 # idealy here we should be uninstalling instead
-		 rm -fr /etc/monit/monitrc
-		fi
-        # java:  rm -rf /usr/share/jdk1.6.0_29
         # control scripts
         echo "Removing Mt Wilson control scripts..."
-        echo asctl wlmctl msctl pcactl mcctl wpctl tdctl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
-        # plugins
-        echo "Removing Mt Wilson Components..."
-        rm -rf /usr/share/mtwilson
+        echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+		echo "Stopping Monit service..."
+		service monit stop &> /dev/null
+		# only remove the config files we added to conf.d, not anything else
+		rm -fr /etc/monit/conf.d/*.mtwilson
+        # java:  rm -rf /usr/share/jdk1.6.0_29
+        # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
+        java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
+        tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""
+        glassfish_clear; export GLASSFISH_HOME=""; export glassfish_bin=""; export glassfish=""
+        postgres_clear; export POSTGRES_HOME=""; export psql=""
+        mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"
 }

@@ -1,11 +1,11 @@
 #!/bin/sh
 
-VERSION=1.3
+VERSION=1.2
 BUILD=1000
 
 mw_version() {
   echo "Mt Wilson"
-  echo "Version 1.3"
+  echo "Version ${VERSION}"
   echo "Build ${BUILD}"
 }
 

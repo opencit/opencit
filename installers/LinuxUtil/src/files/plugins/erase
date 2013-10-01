@@ -5,12 +5,12 @@
 
 # Usage: mtwilson erase-data
 mw_erase_data() {
+        call_setupcommand EraseLogs
         call_setupcommand EraseHostRegistrationData
         call_setupcommand EraseWhitelistData
-        call_setupcommand EraseLogs
 }
 
 # Usage: mtwilson erase-users
 mw_erase_users() {
-        call_setupcommand EraseUserAccounts
+        call_setupcommand EraseUserAccounts $@
 }
