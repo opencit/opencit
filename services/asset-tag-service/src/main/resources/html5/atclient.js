@@ -326,6 +326,9 @@ mtwilson.atag = mtwilson.atag || {};
     document.observe("ajax:httpGetSuccess", function(event) {
         log.debug("HTTP GET OK: "+event.memo.resource.name);
         switch(event.memo.resource.name) {
+            case 'resources':
+                    log.debug("resources: "+Object.toJSON(ajax.data.getx("event.memo.resource.datapath")));
+                    break;
             case 'tags':
                     // update various controls that refer to the tags... 
                     selection_create_form_init();  /// TODO:  this control should always have the full list of tags... nto just the search results from the other tab... so maybe instaed of updating it here, we need to make a distinction between a refresh of 'all tags' data and what the search screen asked for.
@@ -499,6 +502,17 @@ mtwilson.atag = mtwilson.atag || {};
         //view.sync();
         mtwilson.rivets.views['certificate-browse-table'].sync();
     };
+
+    mtwilson.atag.revokeCertificate = function (uuid) {
+        var i;
+        for (i = data.certificates.length - 1; i >= 0; i--) {
+            if (('uuid' in data.certificates[i]) && data.certificates[i].uuid == uuid) {
+                //ajax.json.post('certificates', data.certificates[i]); // XXX TODO NEED A POST /certificates/{uuid}  with action=revoke.
+            }
+        }
+        //view.sync();
+        mtwilson.rivets.views['certificate-browse-table'].sync();
+    };
     
     
     mtwilson.atag.findTagByUuid = function(uuid) {
@@ -601,7 +615,7 @@ mtwilson.atag = mtwilson.atag || {};
 //    if( report.isValid ) { ... }
         // each section of the tag search form looks like "Name [equalTo|contains] [argument]" so to create the search criteria
         // we form parameters like nameEqualTo=argument  or nameContains=argument
-        var fields = ['subject', 'issuer', 'valid', 'sha256', 'pcrEvent', 'revoked']; 
+        var fields = ['subject', 'issuer', 'valid', 'sha1', 'sha256', 'pcrEvent', 'revoked']; 
         var i;
         for (i = 0; i < fields.length; i++) {
             if( document.getElementById('certificate-search-'+fields[i]+'-criteria') ) {
@@ -808,3 +822,19 @@ mtwilson.atag = mtwilson.atag || {};
 })();  // end mt wilson asset tag module definition
 
 
+// XXX TODO maybe this should be functionality built into ajax.js ? 
+document.observe("dom:loaded", function() {
+   // look for a "resources" link to automatically load available server resources; 
+   // if not provided then the application should have configured resources via javacript
+   var links = $(document.head).select('link');
+   var i;
+   if( links ) {
+       // look for rel=resources
+       for(i=0; i<links.length; i++) {
+           if( links[i].rel === "resources" ) {
+               log.debug("Found resource links at "+links[i].href+" with type "+links[i].type);
+               ajax.json.get("resources", null, {uri:links[i].href,datapath:"resources"});
+           }
+       }
+   }
+});

@@ -140,8 +140,9 @@ ajax.text = {
 ajax.json = {
     'enctype': 'text/plain',
     'post': function (resourceName, postObject, opt) {
+        var info = ajax.resources[resourceName] || {};
         // if( ajax.resources[resourceName] === undefined ) { use ajax.apistyles.resourceCollectionWithId(resourceName) to create a default }
-        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
+        var my = info.clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         var request = new Ajax.Request(my.uri, {
             method: 'post',
@@ -172,7 +173,8 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'get': function (resourceName, params, opt) {
-        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
+        var info = ajax.resources[resourceName] || {};
+        var my = info.clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         _log.debug("get resource: "+my.uri+"  into: "+keyPath);
         var request = new Ajax.Request(my.uri, {
@@ -227,7 +229,8 @@ ajax.json = {
         log.debug("AJAX PUT opt3: "+Object.toJSON(opt));
 //        log.debug("AJAX PUT "+resourceName+": "+Object.toJSON(putObject)+" WITH OPTIONS: "+Object.toJSON(opt));
         log.debug("AJAX PUT config: "+Object.toJSON(ajax.resources[resourceName]));
-        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
+        var info = ajax.resources[resourceName] || {};
+        var my = info.clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
         var keyPath = my.datapath;
         log.debug("AJAX PUT: "+Object.toJSON(my));
         log.debug("AJAX PUT OBJECT: "+Object.toJSON(putObject));
@@ -262,7 +265,8 @@ ajax.json = {
         ajax.requests.push(request);
     },
     'delete': function (resourceName, deleteObject, opt) {
-        var my = ajax.resources[resourceName].clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
+        var info = ajax.resources[resourceName] || {};
+        var my = info.clone().merge(opt).merge({name:resourceName}); // make a copy of the resource config and override it with passed-in options
 //        var keyPath = my.datapath;
         var request = new Ajax.Request(my.uri+'/'+deleteObject[my.idkey], {
             method: 'delete',

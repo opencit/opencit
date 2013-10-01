@@ -286,11 +286,11 @@ input.button {
 }
 
 /* Navigation */
-#nav {
+nav {
 	clear: both;	
 	padding: 0;			
 }
-#nav ul {
+nav ul {
 	float: left;
 	list-style: none;
 	background: #E4E4E4 url(nav.jpg) repeat-x;	
@@ -300,11 +300,11 @@ input.button {
 	display: inline;
 	text-transform: uppercase;
 }
-#nav ul li {
+nav ul li {
 	display: inline;
 	margin: 0; padding: 0;
 }
-#nav ul li a {
+nav ul li a {
 	display: block;
 	float: left;
 	width: auto;
@@ -319,13 +319,13 @@ input.button {
 	text-decoration: none;	
 	letter-spacing: 1px;
 }
-#nav ul li a:hover, 
-#nav ul li a:active {
+nav ul li a:hover, 
+nav ul li a:active {
 	color: #326ea1;
 }
 
 /* jonathan changed #currrent to .curren so it can be moved to another tab  without reloading page */
-#nav ul li.current a {	
+nav ul li.current a {	
 	background: #DBDBDB url(nav-current.jpg) repeat-x;		
 }
 

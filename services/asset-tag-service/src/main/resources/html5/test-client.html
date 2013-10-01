@@ -211,43 +211,63 @@ function isNumber(n) {
 
 
                         <h2>Create New Tag</h2>
+                        <!-- load the "create new tag" form ... XXX TODO need to try onload="" here with
+                        automatically adding stylesheets and scripts to the form document. -->
                         <script>
-                            function tag_create_form_addValue() {
-                                mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({values:[]}); // sets the values to empty array if it's not already defined (applies first time this function is called)
-                                var value = (""+$F('tag-create-values')).strip();
-                                if( value.empty() ) { return; }
-                                //        alert("add value: "+value);
-                                log.debug("uh? "+Object.toJSON(mtwilson.rivets.forms['tag-create-form']));
-                                mtwilson.rivets.forms['tag-create-form'].input.values.push($F('tag-create-values')); 
-                                $('tag-create-values').focus(); 
-                                $('tag-create-values').clear();        
+                            function showCreateTagForm() {
+                                // XXX TODO use ajax to load /forms/tags/create-tag.html, 
+                                // create a new div centered on the page, set the inner html
+                                // of the div to the content of the body element from create-tag.html 
+                                // and set the action of the form $$('#mydivname form')[0].onsubmit="ws.createTag(this);"
+                                // so that i can get the submissions and handle them as i already do now.
+                                var myform = $('createtagform111');
+                                if( myform ) {
+                                    log.debug("form already exists, showing it");
+                                    myform.show();
+                                }
+                                else {
+                                log.debug("getting new tag form");
+                                new Ajax.Request('/forms/tags/create-tag.html', {
+            method: 'get',
+            //parameters: {},
+            onSuccess: function (transport) {
+                var response = transport.responseText || "no response text";
+                log.debug("Success! \n\n" + response);
+//                var tmp = $(response);
+                var tmp = new Element('div');
+                tmp.update(response);
+                log.debug("got a tmp element: "+tmp);
+                var formbody = tmp.select("form")[0];
+                var myform = $(formbody);
+                myform.id = "createtagform111";
+                myform.setStyle({position: "absolute", top: "50px", left: "50px", backgroundColor: "#fff", zIndex: 10});
+                log.debug("got a form body: "+myform);
+                log.debug("adding to dom...");
+//                document.select("body")[0].insert({bottom:formbody});
+                $$("body")[0].insert({bottom:myform});
+                log.debug("added!");
+                tmp.remove();
+                log.debug("removed the div");
+                /*
+                var tmp = document.createElement("div");
+                tmp.innerHTML = response;
+                tmp.setAttribute("style", "display: none;");
+                log.debug("going to add it to the page");
+                $(document).insert({bottom:tmp});
+                log.debug("now changing innerhtml");
+                var formbody = $(tmp).select("body")[0].innerHTML;
+                tmp.innerHTML = formbody;
+                tmp.id = "createtagform111";
+                tmp.setAttribute("style", "text-align:center;");
+                log.debug("now showing");
+                $('createtagform111').show();
+        */
+            }
+        });
                             }
-                            function tag_create_form_removeValue(tagValue) {
-                                mtwilson.rivets.forms['tag-create-form'].input.values.removeAll(tagValue); 
-                                mtwilson.rivets.views['tag-create-form'].sync(); // XXX TODO the watch.js is supposed to detect the change in the array and the rivets-adapter-watach-findx would then call sync... but it doesn' thappen so we have to call sync() ourselves
                             }
-                            // called when submitting the form... checks that at least one value was added
-                            function tag_create_form_validateValues() {
-                                return mtwilson.rivets.forms['tag-create-form'].input.values.length > 0;
-                            }
-                        </script>
-                        <form id="tag-create-form">
-                            <ul>
-                                <li><label for="tag-create-name">Tag name</label><input type="text" id="tag-create-name" data-bind-value="input.name" name="name" placeholder="Tag name" class="required"/></li>
-                                <li><label for="tag-create-oid">Tag OID</label><input type="text" id="tag-create-oid" data-bind-value="input.oid" name="oid" placeholder="Tag OID" class="required"/></li>
-                                <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
-                                <li><label for="tag-create-values">Tag values</label>
-                                    <input type="text"  id="tag-create-values" placeholder="Value" class="validate-data" data-validator="tag_create_form_validateValues"/>
-                                    <input type="button" value="Add" onclick="tag_create_form_addValue();"/>
-                                    <span style="display: none;" class="validation-advice" id="advice-tag-create-values">You must add at least one value.</span>
-                                    <ul style="max-width: 600px; margin-left: 0px; padding-left: 0px; list-style: none;">
-                                        <li style="display: inline-block; border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="input.values"><span data-bind-text="item"></span> <a data-bind-tagValue="item" href="#" style="color: red; font-weight: bold;" onclick="javascript:tag_create_form_removeValue(this.getAttribute('tagValue'));">X</a></li>
-                                    </ul>
-                                </li>
-                                <li><input type="button" value="Save" onclick="ws.createTag(this); return false;"/></li>
-                            </ul>
-                        </form>
-
+                            </script>
+                        <a href="javascript:showCreateTagForm();">create tag</a>
 
                         <h2>Search Tags</h2>
 
