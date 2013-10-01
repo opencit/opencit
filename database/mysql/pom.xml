@@ -20,7 +20,7 @@ To dump all the tables into one script, you can use this command:
     <parent>
 	<groupId>com.intel.mtwilson.database</groupId>
 	<artifactId>mtwilson-database</artifactId>
-	<version>1.2.1-RELEASE</version>
+	<version>1.2-SNAPSHOT</version>
     </parent>
   
   
