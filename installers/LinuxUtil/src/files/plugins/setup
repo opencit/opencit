@@ -131,7 +131,12 @@ print_env_summary_report() {
     fi
   fi
   if using_postgres; then
-    echo_warning "Postgres: relying on existing install"
+    if [ -n "$POSTGRES_HOME" ]; then
+      echo "Postgres: $POSTGRES_CLIENT_VERSION"
+    else
+      echo_failure "Postgres: not found"
+      error=1
+    fi
   fi
   if using_glassfish; then
     if [ -n "$GLASSFISH_HOME" ]; then
@@ -143,7 +148,12 @@ print_env_summary_report() {
     fi
   fi
   if using_tomcat; then
-    echo_warning "Tomcat: relying on existing install"
+    if [ -n "$TOMCAT_HOME" ]; then
+      echo "Tomcat: $TOMCAT_CLIENT_VERSION"
+    else
+      echo_failure "Tomcat: not found"
+      error=1
+    fi
   fi
   return $error
 }
