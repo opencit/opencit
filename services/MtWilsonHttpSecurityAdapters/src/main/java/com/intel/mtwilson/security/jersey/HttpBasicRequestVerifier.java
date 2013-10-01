@@ -30,8 +30,8 @@ public class HttpBasicRequestVerifier {
 
     public User getUserForRequest(String httpMethod, String requestUrl, MultivaluedMap<String, String> headers, String requestBody) throws CryptographyException {
 
-        String userName = "";
-        String userSpecifiedPassword = "";
+        String userName;
+        String userSpecifiedPassword;
         String authorizationHeader = headers.getFirst("Authorization");
         HttpBasicRequestVerifier.Authorization auth = parseAuthorization(authorizationHeader);
 

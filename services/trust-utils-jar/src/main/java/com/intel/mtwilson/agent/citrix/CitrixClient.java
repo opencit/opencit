@@ -124,8 +124,8 @@ public class CitrixClient {
     }
 	
 	
-    
-    private String removeTags(String xml) {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning    
+    /*private String removeTags(String xml) {
 	
       String resp = "";  
       int i = 0;
@@ -142,7 +142,7 @@ public class CitrixClient {
        resp += xml.charAt(i);
       }
       return resp;
-    }
+    }*/
     
     public class keys {
      public String tpmEndCert;
@@ -204,7 +204,12 @@ public class CitrixClient {
             Map<String, String> myMap = new HashMap<String, String>();
             Set<Host> hostList = Host.getAll(connection);
             Iterator iter = hostList.iterator();
-            Host h = (Host)iter.next();
+            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+            // to throw an exception if the hasNext is false.
+            Host h = null;
+            if (iter.hasNext()) {
+                h = (Host)iter.next();
+            } 
 			
             String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
            
@@ -312,7 +317,8 @@ public class CitrixClient {
         return "quote_" + sessionId +".data";
     }
 
-    private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning
+    /*private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
         if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
             log.debug( "adding newlines to certificate BEGIN tag");            
             aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
@@ -323,7 +329,7 @@ public class CitrixClient {
         }
 
         saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
-    }
+    }*/
 
     private String getCertFileName(String sessionId) {
         return "aikcert_" + sessionId + ".cer";
@@ -369,17 +375,18 @@ public class CitrixClient {
           saveFile(getNonceFileName(sessionId), nonceBytes);
     }
 
-    private void createRSAKeyFile(String sessionId)  {
+    // Commenting the below function since it is not being used and klocwork is throwing a warning
+    /*private void createRSAKeyFile(String sessionId)  {
         
         String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
         log.debug( "RSA Key Command " + command);
         CommandUtil.runCommand(command, false, "CreateRsaKey" );
         //log.log(Level.INFO, "Result - {0} ", result);
-    }
+    } */
 
-    private String getRSAPubkeyFileName(String sessionId) {
+    /*private String getRSAPubkeyFileName(String sessionId) {
         return "rsapubkey_" + sessionId + ".key";
-    }
+    }*/ 
 
     private HashMap<String,Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
         HashMap<String,Pcr> pcrMp = new HashMap<String,Pcr>();
@@ -430,7 +437,7 @@ public class CitrixClient {
     }
     
     
-    public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception  {
+    public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException,  XmlRpcException  {
         //log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
          HostInfo response = new HostInfo();
          
@@ -439,10 +446,15 @@ public class CitrixClient {
        log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
 			
 			 
-       Map<String, String> myMap = new HashMap<String, String>();
+      // Map<String, String> myMap = new HashMap<String, String>();
        Set<Host> hostList = Host.getAll(connection);
        Iterator iter = hostList.iterator();
-       Host h = (Host)iter.next();
+        // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+        // to throw an exception if the hasNext is false.
+       Host h = null;
+        if (iter.hasNext()) {       
+            h = (Host)iter.next();
+        }
        
        response.setClientIp(hostIpAddress);
 
@@ -489,8 +501,8 @@ public class CitrixClient {
        return response;
     }
 
-    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XenAPIException, XmlRpcException, Exception {
-        String resp = new String();
+    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException,  XmlRpcException {
+        String resp = "";
 //        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
                
         if( !isConnected()) { connect(); } 
@@ -501,8 +513,13 @@ public class CitrixClient {
        Map<String, String> myMap = new HashMap<String, String>();
        Set<Host> hostList = Host.getAll(connection);
        Iterator iter = hostList.iterator();
-       Host h = (Host)iter.next();
-       
+        // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+        // to throw an exception if the hasNext is false.
+       Host h = null;
+        if (iter.hasNext()) {       
+          h = (Host)iter.next();
+        }
+        
        String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
        
        int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");

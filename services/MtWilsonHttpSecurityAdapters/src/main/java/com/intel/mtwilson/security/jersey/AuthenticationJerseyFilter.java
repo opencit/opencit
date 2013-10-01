@@ -202,7 +202,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
      * @return 
      */
     private String readEntityBodyQuietly(ContainerRequest request) {
-        String requestBody = null;
+        String requestBody=null;
         try {
             InputStream in = request.getEntityInputStream();
             ByteArrayOutputStream content = new ByteArrayOutputStream();
@@ -210,11 +210,13 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
             byte[] contentBytes = content.toByteArray();
             request.setEntityInputStream(new ByteArrayInputStream(contentBytes));
             requestBody = new String(contentBytes);
+            
             //log.debug("AuthenticationJerseyFilter: content follows:\n"+requestBody+"\n");
+            
         }
         catch(IOException e) {
             log.error("AuthenticationJerseyFilter: cannot read input stream");
-        }
+        }  
         return requestBody;
     }
     

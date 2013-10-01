@@ -124,7 +124,6 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
     public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
         EntityManager em = getEntityManager();
         try {
-            em = getEntityManager();
             em.getTransaction().begin();
             ApiClientX509 apiClientX509;
             try {
