@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.controller;
 
+import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwRequestLog;
 import com.intel.mtwilson.jpa.GenericJpaController;
@@ -47,12 +48,12 @@ public class MwRequestLogJpaController extends GenericJpaController<MwRequestLog
         }
     }
 
-    public void edit(MwRequestLog mwRequestLog) throws NonexistentEntityException, Exception {
+    public void edit(MwRequestLog mwRequestLog) throws NonexistentEntityException, ASDataException {
         EntityManager em = getEntityManager();
         try {
             
             em.getTransaction().begin();
-            mwRequestLog = em.merge(mwRequestLog);
+            em.merge(mwRequestLog);
             em.getTransaction().commit();
         } catch (Exception ex) {
             String msg = ex.getLocalizedMessage();
@@ -62,7 +63,7 @@ public class MwRequestLogJpaController extends GenericJpaController<MwRequestLog
                     throw new NonexistentEntityException("The mwRequestLog with id " + id + " no longer exists.");
                 }
             }
-            throw ex;
+            throw new ASDataException(ex);
         } finally {
                 em.close();
         }

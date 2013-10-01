@@ -52,7 +52,7 @@ public class Wizard implements Command {
         
         // createTextTerminal requires the file stty.exe
         // createUnixTermainal requires the file /bin/sh
-        Terminal terminal = null;
+        Terminal terminal ;
         if( Platform.isWindows() ) {
             terminal = TerminalFacade.createSwingTerminal();
         }

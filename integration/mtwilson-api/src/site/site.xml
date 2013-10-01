@@ -28,6 +28,12 @@ http://maven.apache.org/plugins/maven-site-plugin/examples/sitedescriptor.html
             <item name="License" href="license.html"/>
 			<item name="FAQs" href="troubleshooting.html" />
         </menu>
+		<menu/>
+		<menu>
+			<item name="Attestation Service Dependencies" href="attestation-service-dependencies.html" />
+			<item name="Management Service Dependencies" href="management-service-dependencies.html" />
+			<item name="White List Service Dependencies" href="whitelist-service-dependencies.html" />
+		</menu>
         <!--
         <menu ref="parent"/>
         <menu ref="reports"/>

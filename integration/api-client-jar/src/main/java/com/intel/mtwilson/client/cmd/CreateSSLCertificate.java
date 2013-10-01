@@ -36,8 +36,12 @@ public class CreateSSLCertificate extends AbstractCommand {
             password = in.readLine();
             System.out.print("Password again: ");
             String passwordAgain = in.readLine();
-            if( !password.equals(passwordAgain) ) {
-                throw new IllegalArgumentException("The two passwords don't match");
+            if(password != null && passwordAgain != null) {
+                if( !password.equals(passwordAgain) ) {
+                    throw new IllegalArgumentException("The two passwords don't match");
+                }
+            }else{
+                throw new IllegalArgumentException("Could not read password");
             }
         }
         else if( password.startsWith("env:") && password.length() > 4 ) {

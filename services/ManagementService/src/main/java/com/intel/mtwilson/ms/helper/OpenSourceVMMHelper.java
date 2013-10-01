@@ -9,6 +9,8 @@ import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.ms.common.MSConfig;
+import java.io.IOException;
+import java.security.SignatureException;
 
 /**
  * Bug #497  this class needs to be merged into the IntelHostAgent class.
@@ -33,20 +35,17 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
      * @deprecated use IntelHostAgent.getHostDetails()
      */
     @Override
-    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws Exception {
+    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) {
         throw new UnsupportedOperationException("OpenSourceVMMHelper.getHostDetails");
         /*
         HostInfo hostInfo = new TrustAgentSecureClient(hostObj.IPAddress, hostObj.Port).getHostInfo();
-        
         hostObj.BIOS_Oem = hostInfo.getBiosOem().trim();
         hostObj.BIOS_Version = hostInfo.getBiosVersion().trim();
         hostObj.VMM_Name = hostInfo.getVmmName().trim();
         hostObj.VMM_Version = hostInfo.getVmmVersion().trim();
         hostObj.VMM_OSName = hostInfo.getOsName().trim();
         hostObj.VMM_OSVersion = hostInfo.getOsVersion().trim();
-        
-        return hostObj;*/
-        
+        return hostObj;*/ 
     }
 
     /**
@@ -57,14 +56,15 @@ public class OpenSourceVMMHelper implements HostInfoInterface {
      * @throws Exception 
      */
     @Override
-    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws Exception {
+    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws ClientException, IOException, ApiException, SignatureException {
         throw new UnsupportedOperationException("OpenSourceVMMHelper.getHostDetails");
         
 //        AttestationService asClient = (AttestationService) new ApiClient(ResourceFinder.getFile("management-service.properties"));
-//        AttestationService asClient = (AttestationService) new ApiClient(MSConfig.getConfiguration());
-//
-//        String attestationReport = asClient.getHostAttestationReport(new Hostname(hostObj.HostName));
-//        return attestationReport;
+        //AttestationService asClient = (AttestationService) new ApiClient(MSConfig.getConfiguration());
+
+        //String attestationReport = asClient.getHostAttestationReport(new Hostname(hostObj.HostName));
+        //return attestationReport;
+
     }
     
     

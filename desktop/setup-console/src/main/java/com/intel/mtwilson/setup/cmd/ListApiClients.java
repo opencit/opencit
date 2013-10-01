@@ -68,7 +68,7 @@ public class ListApiClients implements Command {
         }
         catch(SQLException e) {
             throw new SetupException("Cannot query API Client records: "+e.getMessage(), e);
-        }        
+        } 
     }
 
 }

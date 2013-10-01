@@ -156,7 +156,7 @@ public class MwConfigurationJpaController extends GenericJpaController<MwConfigu
      * @throws NonexistentEntityException
      * @throws Exception 
      */
-    public void setMwConfiguration(String key, String value) throws NonexistentEntityException, Exception {
+    public void setMwConfiguration(String key, String value) throws NonexistentEntityException, MSDataException {
         MwConfiguration setting = findMwConfigurationByKey(key);
         if( setting == null ) {
             setting = new MwConfiguration(key, value, null);

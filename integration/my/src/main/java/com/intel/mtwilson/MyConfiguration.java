@@ -99,24 +99,26 @@ public class MyConfiguration {
         conf = gatherConfiguration(custom);
     }
     
-    private Properties getDefaultProperties() {
-        Properties p = new Properties();
+    // commenting out unused function for removal (6/11 1.2)
+    //
+    //private Properties getDefaultProperties() {
+    //    Properties p = new Properties();
         // api client
-        p.setProperty("mtwilson.api.username", System.getProperty("user.name", "anonymous"));
-        p.setProperty("mtwilson.api.password", "password");
-        p.setProperty("mtwilson.api.url", "https://127.0.0.1:8181");
-        p.setProperty("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
+    //    p.setProperty("mtwilson.api.username", System.getProperty("user.name", "anonymous"));
+    //    p.setProperty("mtwilson.api.password", "password");
+    //    p.setProperty("mtwilson.api.url", "https://127.0.0.1:8181");
+    //    p.setProperty("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
         // database
-        p.setProperty("mtwilson.db.protocol", "postgresql"); // new default in mtwilson 1.2
-        p.setProperty("mtwilson.db.driver", "org.postgresql.Driver"); // new default in mtwilson 1.2
-        p.setProperty("mtwilson.db.host", "127.0.0.1");
-        p.setProperty("mtwilson.db.schema", "mw_as");
-        p.setProperty("mtwilson.db.user", ""); // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value; both mysql and postgresql support localhost connection without authentication
-        p.setProperty("mtwilson.db.password", ""); // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value;  both mysql and postgresql support localhost connection without authentication
-        p.setProperty("mtwilson.db.port", "5432"); // in mtwilson 1.2 the default changed from mysql/3306 to postgresql/5432
-        p.setProperty("mtwilson.as.dek", "");   // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value;  we must force customer to create one during install             
-        return p;
-    }
+    //    p.setProperty("mtwilson.db.protocol", "postgresql"); // new default in mtwilson 1.2
+    //    p.setProperty("mtwilson.db.driver", "org.postgresql.Driver"); // new default in mtwilson 1.2
+    //    p.setProperty("mtwilson.db.host", "127.0.0.1");
+    //    p.setProperty("mtwilson.db.schema", "mw_as");
+    //    p.setProperty("mtwilson.db.user", ""); // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value; both mysql and postgresql support localhost connection without authentication
+    //    p.setProperty("mtwilson.db.password", ""); // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value;  both mysql and postgresql support localhost connection without authentication
+    //    p.setProperty("mtwilson.db.port", "5432"); // in mtwilson 1.2 the default changed from mysql/3306 to postgresql/5432
+    //    p.setProperty("mtwilson.as.dek", "");   // we must keep this entry because we use it to write out the "starter" config file;  but in mtwilson 1.2 we remove the default value;  we must force customer to create one during install             
+    //    return p;
+    //}
     
     private void logConfiguration(String source, Configuration config) {
         log.debug("Loaded configuration keys from {}: {}", source, StringUtils.join(config.getKeys(), ", "));
@@ -168,6 +170,7 @@ public class MyConfiguration {
                     // first check if the file is encrypted... if it is, we need to decrypt it before loading!
                     FileInputStream in = new FileInputStream(f);
                     String content = IOUtils.toString(in);
+                    in.close();
                     if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
                         // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
                         String password = null;

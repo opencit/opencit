@@ -1059,7 +1059,7 @@ public class TpmUtils {
 	 * @return The HMAC blob suitable to be used for passing as a TCS parameter
 	 * @throws Exception
 	 */
-	public static byte[] HMAC(byte[] authBlob, byte[] xH1concat) throws Exception{
+	public static byte[] HMAC(byte[] authBlob, byte[] xH1concat) throws NoSuchAlgorithmException, InvalidKeyException {
 		Mac mac = Mac.getInstance("HmacSha1");
 		SecretKey key = new SecretKeySpec(authBlob, "HmacSha1");
 		mac.init(key);

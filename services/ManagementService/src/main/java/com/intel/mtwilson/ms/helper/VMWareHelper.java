@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.StringWriter;
 
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.ms.common.MSException;
 import java.math.BigInteger;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -134,44 +135,42 @@ public class VMWareHelper implements HostInfoInterface {
 	 * @throws Exception
 	 *             the exception
 	 */
-	protected void connect(String url, String userName, String password) throws Exception {
+	protected void connect(String url, String userName, String password) throws MSException {
             
             try {
-		HostnameVerifier hostNameVerifier = new HostnameVerifier() {
+                HostnameVerifier hostNameVerifier = new HostnameVerifier() {
+        			@Override
+                	public boolean verify(String urlHostName, SSLSession session) {
+                            return true;
+                    }
+                };
 
-			@Override
-			public boolean verify(String urlHostName, SSLSession session) {
-				return true;
-			}
-		};
+                trustAllHttpsCertificates();
 
-		trustAllHttpsCertificates();
+                HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
 
-		HttpsURLConnection.setDefaultHostnameVerifier(hostNameVerifier);
+                SVC_INST_REF.setType(SVC_INST_NAME);
+                SVC_INST_REF.setValue(SVC_INST_NAME);
 
-		SVC_INST_REF.setType(SVC_INST_NAME);
-		SVC_INST_REF.setValue(SVC_INST_NAME);
+        		vimService = new VimService();
+                vimPort = vimService.getVimPort();
+                Map<String, Object> ctxt = ((BindingProvider) vimPort).getRequestContext();
 
-		vimService = new VimService();
-		vimPort = vimService.getVimPort();
-		Map<String, Object> ctxt = ((BindingProvider) vimPort)
-				.getRequestContext();
+                ctxt.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
+                ctxt.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
 
-		ctxt.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
-		ctxt.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
-
-		serviceContent = vimPort.retrieveServiceContent(SVC_INST_REF);
+        		serviceContent = vimPort.retrieveServiceContent(SVC_INST_REF);
 		
-		session = vimPort.login(serviceContent.getSessionManager(), userName, password,	null);
+                session = vimPort.login(serviceContent.getSessionManager(), userName, password,	null);
 		
-		printSessionDetails();
+                printSessionDetails();
 		
-		isConnected = true;
+                isConnected = true;
 
-		propCollectorRef = serviceContent.getPropertyCollector();
-		rootRef = serviceContent.getRootFolder();
+        		propCollectorRef = serviceContent.getPropertyCollector();
+                rootRef = serviceContent.getRootFolder();
             } catch (Exception ex) {
-                throw ex;
+                throw new MSException(ex);
             }
 	}
 
@@ -184,17 +183,17 @@ public class VMWareHelper implements HostInfoInterface {
 		
 	}
 
-	protected void connect(String vCenterConnectionString) throws Exception  {
+	protected void connect(String vCenterConnectionString) {
             try {
-		String[] vcenterConn = vCenterConnectionString.split(";");
-		if (vcenterConn.length != 3) {
-			throw new Exception("The vCenter connection information is not valid.");
-		}
-		// Connect to the vCenter server with the passed in parameters
-		connect(vcenterConn[0], vcenterConn[1], vcenterConn[2]);
-            } catch (Exception ex) {
-                throw ex;
-            } 
+                String[] vcenterConn = vCenterConnectionString.split(";");
+                if (vcenterConn.length != 3) {
+                    throw new Exception("The vCenter connection information is not valid.");
+                }
+                // Connect to the vCenter server with the passed in parameters
+                connect(vcenterConn[0], vcenterConn[1], vcenterConn[2]);
+             } catch (Exception ex) {
+                    throw new MSException(ex);
+             } 
 	}
 
 	protected byte[] toByteArray(List<Byte> list) {
@@ -442,14 +441,14 @@ public class VMWareHelper implements HostInfoInterface {
 	// / Retrieves the vCenter version information.
 	// / </summary>
 	// / <returns>Version details.</returns>
-	protected String getVCenterVersion(String vcenterString) throws Exception{
+	protected String getVCenterVersion(String vcenterString) throws MSException{
 		try {
 			connect(vcenterString);
 
 			String vCenterVersion = serviceContent.getAbout().getVersion();
 			return vCenterVersion;
 		} catch (Exception e) {
-			throw new Exception("Error while getting VCenter Version.", e);
+			throw new MSException(e);
 		} finally {
 			disconnect();
 		}
@@ -461,7 +460,7 @@ public class VMWareHelper implements HostInfoInterface {
 
 	}
 
-	protected ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg, Exception {
+	protected ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg, MSException {
 		// Get the host objects in the vcenter
 		ManagedObjectReference[] hostObjects = getEntitiesByType("HostSystem");
 		if (hostObjects != null && hostObjects.length != 0) {
@@ -475,7 +474,7 @@ public class VMWareHelper implements HostInfoInterface {
 			}
 		}
 		// If the code reaches here that means that we did not find the host
-		throw new Exception(String.format("Requested Host %s does not exist in vCenter.", hostName));
+		throw new MSException(new Exception(String.format("Requested Host %s does not exist in vCenter.", hostName)));
 	}
 
 	protected String byteArrayToBase64String(List<Byte> digestValue) {
@@ -516,7 +515,7 @@ public class VMWareHelper implements HostInfoInterface {
      * VM Name::POWERED_ON
      * @throws Exception 
      */
-    public ArrayList getVMsForHost(String hostName, String vCenterConnectionString) throws Exception {
+    public ArrayList getVMsForHost(String hostName, String vCenterConnectionString)  {
         ArrayList vmList = new ArrayList();
         ManagedObjectReference hostMOR = null;
         try
@@ -545,7 +544,7 @@ public class VMWareHelper implements HostInfoInterface {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new MSException(ex);
         }
         finally
         {
@@ -568,7 +567,7 @@ public class VMWareHelper implements HostInfoInterface {
      * @throws Exception 
      */
     @Override
-    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws Exception {
+    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws MSException {
         ManagedObjectReference hostMOR = null;
         boolean doNotDisconnect = false;
         
@@ -609,7 +608,7 @@ public class VMWareHelper implements HostInfoInterface {
         catch (Exception ex)
         {
             //log.log(Level.SEVERE, "Unexpected errror during host information retrieval from vCenter. " + ex.getMessage());
-            throw ex;
+            throw new MSException(ex);
         }
         finally
         {
@@ -628,8 +627,8 @@ public class VMWareHelper implements HostInfoInterface {
      * @return : Array list of all the host names
      * @throws Exception 
      */
-    public ArrayList getHostDetailsForCluster(String clusterName, String connectionString) throws Exception {
-        ArrayList hostList = new ArrayList();
+    public ArrayList getHostDetailsForCluster(String clusterName, String connectionString) throws MSException {
+        ArrayList hostList;
         ArrayList hostDetailList = new ArrayList <TxtHostRecord> ();
         ManagedObjectReference clusterMOR = null;
         try
@@ -661,7 +660,7 @@ public class VMWareHelper implements HostInfoInterface {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new MSException(ex);
         }
         finally
         {
@@ -682,7 +681,7 @@ public class VMWareHelper implements HostInfoInterface {
      * @param vCenterConnectionString : Connection string to the vCenter server.
      * @throws Exception 
      */
-    public void powerOnOffVM(String vmName, String hostName, Boolean powerOn, String vCenterConnectionString) throws Exception {
+    public void powerOnOffVM(String vmName, String hostName, Boolean powerOn, String vCenterConnectionString) throws MSException {
         ManagedObjectReference hostMOR = null;
         ManagedObjectReference vmMOR = null;
         ManagedObjectReference powerTaskMOR = null;
@@ -693,13 +692,13 @@ public class VMWareHelper implements HostInfoInterface {
             vmMOR = getDecendentMoRef(vmMOR, "VirtualMachine", vmName);
             
             if (vmMOR == null)
-                throw new Exception ("Invalid virtual machine specified for the power operation.");
+                throw new MSException(new Exception ("Invalid virtual machine specified for the power operation."));
             
             if (powerOn)
             {
                 hostMOR = getDecendentMoRef(hostMOR, "HostSystem", hostName);
                 if (vmMOR == null)
-                    throw new Exception ("Invalid host specified for the virtual machine power on operation.");
+                    throw new MSException(new Exception ("Invalid host specified for the virtual machine power on operation."));
                 powerTaskMOR = vimPort.powerOnVMTask(vmMOR, hostMOR);
             }
             else
@@ -719,7 +718,7 @@ public class VMWareHelper implements HostInfoInterface {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new MSException(ex);
         }
         finally
         {
@@ -736,10 +735,10 @@ public class VMWareHelper implements HostInfoInterface {
      * @param vCenterConnectionString : Connection string to the vCenter server
      * @throws Exception 
      */
-    public void migrateVM(String vmName, String destHostName, String vCenterConnectionString) throws Exception {
+    public void migrateVM(String vmName, String destHostName, String vCenterConnectionString) throws MSException {
         ManagedObjectReference hostMOR = null;
         ManagedObjectReference vmMOR = null;
-        ManagedObjectReference migrateTaskMOR = null;
+        ManagedObjectReference migrateTaskMOR;
         try
         {
             connect(vCenterConnectionString);
@@ -748,7 +747,7 @@ public class VMWareHelper implements HostInfoInterface {
             vmMOR = getDecendentMoRef(vmMOR, "VirtualMachine", vmName);
             
             if (vmMOR == null || hostMOR == null)
-                throw new Exception ("Invalid virtual machine or host specified for the VM migration.");
+                throw new MSException(new Exception ("Invalid virtual machine or host specified for the VM migration."));
             
             String vmPowerState = getMORProperty(vmMOR, "runtime.powerState").toString();
             
@@ -768,12 +767,12 @@ public class VMWareHelper implements HostInfoInterface {
                     String delims = "[.\\n]+";
                     result = result.split(delims)[0];
                 }
-                throw new Exception("Error during the VM migration." + result);
+                throw new MSException(new Exception("Error during the VM migration." + result));
             }
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new MSException(ex);
         }
         finally
         {
@@ -789,9 +788,9 @@ public class VMWareHelper implements HostInfoInterface {
      * @return : String containing the BIOS PCR 0 value.
      * @throws Exception 
      */
-    public String getHostBIOSPCRHash(ManagedObjectReference hostMOR) throws Exception  {
+    public String getHostBIOSPCRHash(ManagedObjectReference hostMOR) throws MSException {
         String biosPCRHash = "";
-        List<HostTpmDigestInfo> pcrList = null;
+        List<HostTpmDigestInfo> pcrList;
         
         try
         {
@@ -844,7 +843,7 @@ public class VMWareHelper implements HostInfoInterface {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new MSException(ex);
         }
         return biosPCRHash;
     } 
@@ -861,9 +860,9 @@ public class VMWareHelper implements HostInfoInterface {
      * @throws Exception 
      */
     @Override
-    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws Exception {
+    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws MSException {
         ManagedObjectReference hostMOR = null;
-        String attestationReport = "";
+        String attestationReport;
         boolean doNotDisconnect = false;
 
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
@@ -1047,7 +1046,7 @@ public class VMWareHelper implements HostInfoInterface {
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw new MSException(ex);
         }
         finally
         {
@@ -1067,7 +1066,7 @@ public class VMWareHelper implements HostInfoInterface {
     * @throws Exception
     */
    private List<ObjectContent> retrievePropertiesAllObjects(List<PropertyFilterSpec> listpfs)
-      throws Exception {
+                                                            throws MSException{
 
       RetrieveOptions propObjectRetrieveOpts = new RetrieveOptions();
 
@@ -1097,7 +1096,7 @@ public class VMWareHelper implements HostInfoInterface {
             }
          }
       } catch (Exception e) {
-         throw e;
+         throw new MSException(e);
       }
 
       return listobjcontent;
@@ -1162,11 +1161,8 @@ public class VMWareHelper implements HostInfoInterface {
     *
     * @return retrieved object contents
     */
-   private List<ObjectContent>
-      getContentsRecursively(ManagedObjectReference collector,
-                             ManagedObjectReference root,
-                             String[][] typeinfo, boolean recurse)
-      throws Exception {
+   private List<ObjectContent> getContentsRecursively(ManagedObjectReference collector,
+                             ManagedObjectReference root,String[][] typeinfo, boolean recurse) {
       if (typeinfo == null || typeinfo.length == 0) {
          return null;
       }
@@ -1199,12 +1195,11 @@ public class VMWareHelper implements HostInfoInterface {
       List<PropertyFilterSpec> listpfs = new ArrayList<PropertyFilterSpec>();
       listpfs.add(spec);
       List<ObjectContent> listobjcont = retrievePropertiesAllObjects(listpfs);
-
       return listobjcont;
+     
    }
 
-   private boolean typeIsA(String searchType,
-                                  String foundType) {
+   private boolean typeIsA(String searchType, String foundType) {
       if(searchType.equals(foundType)) {
          return true;
       } else if(searchType.equals("ManagedEntity")) {
@@ -1240,51 +1235,52 @@ public class VMWareHelper implements HostInfoInterface {
     * @return First ManagedObjectReference of the type / name pair found
     */
    private ManagedObjectReference getDecendentMoRef(ManagedObjectReference root,
-                                                           String type,
-                                                           String name)
-      throws Exception {
+                                                    String type, String name)
+                                                    throws MSException {
       if (name == null || name.length() == 0) {
          return null;
       }
-
-      String[][] typeinfo =
-         new String[][] {new String[] {type, "name"}, };
-
-      List<ObjectContent> ocary =
-         getContentsRecursively(null, root, typeinfo, true);
-
-      if (ocary == null || ocary.size() == 0) {
-         return null;
-      }
-
-      ObjectContent oc = null;
       ManagedObjectReference mor = null;
-      List<DynamicProperty> propary = null;
-      String propval = null;
-      boolean found = false;
-      for (int oci = 0; oci < ocary.size() && !found; oci++) {
-         oc = ocary.get(oci);
-         mor = oc.getObj();
-         propary = oc.getPropSet();
+      try {
+        String[][] typeinfo =
+             new String[][] {new String[] {type, "name"}, };
 
-         propval = null;
-         if (type == null || typeIsA(type, mor.getType())) {
-            if (propary != null && !propary.isEmpty()) {
-               propval = (String) propary.get(0).getVal();
+        List<ObjectContent> ocary =
+             getContentsRecursively(null, root, typeinfo, true);
+
+        if (ocary == null || ocary.size() == 0) {
+             return null;
+        }
+
+        ObjectContent oc;
+      
+        List<DynamicProperty> propary;
+        String propval ;
+        boolean found = false;
+        for (int oci = 0; oci < ocary.size() && !found; oci++) {
+            oc = ocary.get(oci);
+            mor = oc.getObj();
+            propary = oc.getPropSet();
+            propval = null;
+            if (type == null || typeIsA(type, mor.getType())) {
+                if (propary != null && !propary.isEmpty()) {
+                    propval = (String) propary.get(0).getVal();
+                }
+                found = propval != null && name.equals(propval);
             }
-            found = propval != null && name.equals(propval);
-         }
-      }
+        }
 
-      if (!found) {
-         mor = null;
+        if (!found) {
+             mor = null;
+        }
+      }catch(Exception ex){
+          throw new MSException(ex);
       }
-
       return mor;
    }
 
    private String getProp(ManagedObjectReference obj,
-                                 String prop) throws Exception{
+                                 String prop) throws MSException{
       String propVal = null;
       try {
          List<DynamicProperty> dynaProArray
@@ -1295,41 +1291,41 @@ public class VMWareHelper implements HostInfoInterface {
             }
          }
       }  catch (Exception e) {
-         throw e;
+         throw new MSException(e);
       }
       return propVal;
    }
 
-   private ArrayList filterMOR(ArrayList mors,
-                                      String [][] filter)
-      throws Exception {
-      ArrayList filteredmors =
-         new ArrayList();
-      for(int i = 0; i < mors.size(); i++) {
-         for(int k = 0; k < filter.length; k++) {
-            String prop = filter[k][0];
-            String reqVal = filter[k][1];
-            String value = getProp(((ManagedObjectReference) mors.get(i)), prop);
-            if(reqVal == null) {
-               continue;
-            } else if(value == null && reqVal == null) {
-               continue;
-            } else if(value == null && reqVal != null) {
-               k = filter.length + 1;
-            } else if(value != null && value.equalsIgnoreCase(reqVal)) {
-               filteredmors.add(mors.get(i));
-            } else {
-               k = filter.length + 1;
-            }
+   private ArrayList filterMOR(ArrayList mors, String [][] filter) throws MSException {
+      ArrayList filteredmors = new ArrayList();
+      try { 
+            for(int i = 0; i < mors.size(); i++) {
+             for(int k = 0; k < filter.length; k++) {
+                String prop = filter[k][0];
+                String reqVal = filter[k][1];
+                String value = getProp(((ManagedObjectReference) mors.get(i)), prop);
+                if(reqVal == null) {
+                    continue;
+                } else if(value == null && reqVal == null) {
+                    continue;
+                } else if(value == null && reqVal != null) {
+                    k = filter.length + 1;
+                } else if(value != null && value.equalsIgnoreCase(reqVal)) {
+                    filteredmors.add(mors.get(i));
+                } else {
+                    k = filter.length + 1;
+                }
          }
+      }
+      }catch(Exception ex){
+          throw new MSException(ex);
       }
       return filteredmors;
    }
 
    private ArrayList getDecendentMoRefs(ManagedObjectReference root,
-                                               String type,
-                                               String [][] filter)
-      throws Exception {
+                                        String type, String [][] filter)
+                                        {
       String[][] typeinfo
          = new String[][] {new String[] {type, "name"}, };
 
@@ -1358,6 +1354,8 @@ public class VMWareHelper implements HostInfoInterface {
     *
     * @return TraversalSpec specification to get to the VirtualMachine managed object.
     */
+   // commenting out unused function for removal
+   /*
    private TraversalSpec getVMTraversalSpec() {
       // Create a traversal spec that starts from the 'root' objects
       // and traverses the inventory tree to get to the VirtualMachines.
@@ -1412,13 +1410,15 @@ public class VMWareHelper implements HostInfoInterface {
       traversalSpec.getSelectSet().addAll(sSpecArr);
       return traversalSpec;
    }
-
+   */
    /**
     * Get the MOR of the Virtual Machine by its name.
     * @param vmName The name of the Virtual Machine
     * @return The Managed Object reference for this VM
     */
-   private ManagedObjectReference getVmByVMname(String vmname) throws Exception {
+   // commenting out unused function for removal (6/11 1.2)
+   /*
+   private ManagedObjectReference getVmByVMname(String vmname) throws MSException {
       ManagedObjectReference retVal = null;
       try {
          TraversalSpec tSpec = getVMTraversalSpec();
@@ -1461,10 +1461,11 @@ public class VMWareHelper implements HostInfoInterface {
             }
          }
       }  catch (Exception e) {
-         throw e;
+         throw new MSException(e);
       }
       return retVal;
    }
+   */
 
    /*
     * @return An array of SelectionSpec covering VM, Host, Resource pool,
@@ -1588,9 +1589,7 @@ public class VMWareHelper implements HostInfoInterface {
    }
 
    private List<DynamicProperty> getDynamicProarray(ManagedObjectReference ref,
-                                                           String type,
-                                                           String propertyString)
-      throws Exception {
+                                                    String type, String propertyString){
       PropertySpec propertySpec = new PropertySpec();
       propertySpec.setAll(Boolean.FALSE);
       propertySpec.getPathSet().add(propertyString);
@@ -1614,8 +1613,7 @@ public class VMWareHelper implements HostInfoInterface {
       return objList;
    }
 
-   private boolean getTaskInfo(ManagedObjectReference taskmor)
-      throws Exception {
+   private boolean getTaskInfo(ManagedObjectReference taskmor) throws InvalidPropertyFaultMsg, MSException, RuntimeFaultFaultMsg {
       boolean valid = false;
       String res = waitForTask(taskmor);
       if(res.equalsIgnoreCase("success")) {
@@ -1655,8 +1653,7 @@ public class VMWareHelper implements HostInfoInterface {
    private Object[] waitForValues(ManagedObjectReference objmor,
                                          List<String> filterProps,
                                          List<String> endWaitProps,
-                                         Object[][] expectedVals)
-      throws Exception {
+                                         Object[][] expectedVals) throws InvalidPropertyFaultMsg, MSException, RuntimeFaultFaultMsg   {
       // version string is initially null
       String version = "";
       Object[] endVals = new Object[endWaitProps.size()];
@@ -1677,12 +1674,12 @@ public class VMWareHelper implements HostInfoInterface {
       boolean reached = false;
 
       UpdateSet updateset = null;
-      List<PropertyFilterUpdate> filtupary = null;
-      PropertyFilterUpdate filtup = null;
-      List<ObjectUpdate> objupary = null;
-      ObjectUpdate objup = null;
-      List<PropertyChange> propchgary = null;
-      PropertyChange propchg = null;
+      List<PropertyFilterUpdate> filtupary;
+      PropertyFilterUpdate filtup;
+      List<ObjectUpdate> objupary;
+      ObjectUpdate objup;
+      List<PropertyChange> propchgary;
+      PropertyChange propchg ;
       while (!reached) {
          boolean retry = true;
          while (retry) {
@@ -1691,7 +1688,7 @@ public class VMWareHelper implements HostInfoInterface {
                vimPort.waitForUpdates(propCollectorRef, version);
                retry = false;
             }  catch (Exception e) {
-               throw e;
+               throw new MSException(e);
             }
          }
          if(updateset != null) {
@@ -1703,12 +1700,9 @@ public class VMWareHelper implements HostInfoInterface {
 
          // Make this code more general purpose when PropCol changes later.
          filtupary = updateset.getFilterSet();
-         filtup = null;
          for (int fi = 0; fi < filtupary.size(); fi++) {
             filtup = filtupary.get(fi);
             objupary = filtup.getObjectSet();
-            objup = null;
-            propchgary = null;
             for (int oi = 0; oi < objupary.size(); oi++) {
                objup = objupary.get(oi);
 
@@ -1742,7 +1736,7 @@ public class VMWareHelper implements HostInfoInterface {
       return filterVals;
    }
 
-   private String waitForTask(ManagedObjectReference taskmor) throws Exception {
+   private String waitForTask(ManagedObjectReference taskmor) throws InvalidPropertyFaultMsg, MSException, RuntimeFaultFaultMsg {
       List<String> infoList = new ArrayList<String>();
       infoList.add("info.state");
       infoList.add("info.error");
