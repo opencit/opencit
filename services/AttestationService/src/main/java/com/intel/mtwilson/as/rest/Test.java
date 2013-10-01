@@ -4,17 +4,19 @@
  */
 package com.intel.mtwilson.as.rest;
 
-import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.agent.vmware.VMwareClient;
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.security.annotations.RolesAllowed;
 import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,11 +31,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
-import com.intel.mtwilson.agent.vmware.VMwareConnectionPool;
-import com.intel.mtwilson.agent.vmware.VMwareConnectionException;
-import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.agent.HostAgentFactory;
-import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,7 +144,7 @@ public class Test {
             this.hostname = hostname;
         }
         
-        public void loadConnectionString() throws CryptographyException {
+        public void loadConnectionString() throws IOException, CryptographyException {
             hostRecord = dao.getHostByName(new Hostname(hostname));
 //            this.connectionString = host.getAddOnConnectionInfo();
         }
@@ -163,7 +160,7 @@ public class Test {
                 hostAgent = hostAgentFactory.getHostAgent(hostRecord);
 //                VMwareClient client = hostAgent.getgetClient(host);
 	                result = hostAgent.getVendorHostReport(); //getHostAttestationReport(host, "0,17,18,20");
-	                log.info("Got response for "+hostname);
+	                log.debug("Got response for "+hostname);
             } catch (Exception ex) {
                 error = ex.toString();
             }

@@ -5,6 +5,7 @@
 package com.intel.mtwilson.setup.cmd;
 
 import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
@@ -23,6 +24,7 @@ import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
 import com.intel.mtwilson.setup.helper.SCPersistenceManager;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -30,6 +32,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.configuration.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -37,9 +41,13 @@ import org.apache.commons.configuration.Configuration;
  */
 public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
-    private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
+//    private MwPortalUserJpaController keystoreJpa ;// new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
+    private static final Logger logger = LoggerFactory.getLogger(BootstrapUser.class.getName());
     private SetupContext ctx = null;
-
+    public static final Console console = System.console();
+    MSPersistenceManager persistenceManager = new MSPersistenceManager();
+    MwPortalUserJpaController portalUserJpa; // new MwPortalUserJpaController(persistenceManager.getEntityManagerFactory("MSDataPU")); 
+    
     @Override
     public void setContext(SetupContext ctx) {
         this.ctx = ctx;
@@ -60,7 +68,8 @@ public class BootstrapUser implements Command {
     @Override
     public void execute(String[] args) throws Exception {
         Configuration serviceConf = MSConfig.getConfiguration();
-        
+//        keystoreJpa = My.jpa().mwKeystore();
+        portalUserJpa = My.jpa().mwPortalUser();
         //File directory;
         //String directoryPath = options.getString("keystore.users.dir", "/var/opt/intel/management-console/users"); //serviceConf.getString("mtwilson.mc.keystore.dir", "/var/opt/intel/management-console/users");
         //if( directoryPath == null || directoryPath.isEmpty() ) {
@@ -78,8 +87,8 @@ public class BootstrapUser implements Command {
             baseurl = readInputStringWithPromptAndDefault("Mt Wilson URL", baseurl);
         }
         
-        String username = null;
-        String password = null;
+        String username ;
+        String password ;
         if( args.length > 0 ) { username = args[0]; } else { username = readInputStringWithPrompt("Username"); }
         if( args.length > 1 ) { password = args[1]; } else { password = readInputStringWithPrompt("Password"); }
         if( password != null && password.startsWith("env:") && password.length() > 4 ) {
@@ -89,6 +98,18 @@ public class BootstrapUser implements Command {
             System.out.println("Password is required");
             return;
         }
+        
+        MwPortalUser keyTest = portalUserJpa.findMwPortalUserByUserName(username);
+        // Bug # 883: We should be checking the status since the user could be deleted, in which case the status would be "cancelled".
+        // The possible values for the status include approved, cancelled, rejected, expired and pending. We should allow the
+        // creation of the user if the status is not "approved" or "pending" in which cases the user already is in active state or someone has
+        // not yet approved the user creation request.
+        // if(keyTest != null) {
+        if ((keyTest != null) && (keyTest.getStatus().equalsIgnoreCase("approved") || keyTest.getStatus().equalsIgnoreCase("pending"))) {        
+          logger.info("A user already exists with the specified User Name: {}", username);
+          throw new SetupException("User account with that name already exists. Please select different User Name.");
+        }
+        
         // create user
         System.out.println(String.format("Creating keystore for %s in db and registering user with service at %s", username,baseurl));        
         /*
@@ -107,11 +128,14 @@ public class BootstrapUser implements Command {
         // load the new key
          ByteArrayResource certResource = new ByteArrayResource();
          SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
-         MwPortalUser keyTable = new MwPortalUser();
-         keyTable.setUsername(username);
-         keyTable.setKeystore(certResource.toByteArray());
-         keyTable.setStatus("PENDING");
-         keystoreJpa.create(keyTable);
+         MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);
+         if(apiClient == null){
+            MwPortalUser keyTable = new MwPortalUser();
+            keyTable.setUsername(username);
+            keyTable.setKeystore(certResource.toByteArray());
+            keyTable.setStatus("PENDING");
+            portalUserJpa.create(keyTable);
+         }
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();
@@ -119,12 +143,12 @@ public class BootstrapUser implements Command {
 //        ApiClientInfo apiClientRecord = findApiClientRecord(serviceConf, rsaCredentialX509.identity());
 //        if( apiClientRecord == null ) {
         // approve user
-        approveApiClientRecord(serviceConf, rsaCredentialX509.identity());
-        System.out.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
+        approveApiClientRecord(serviceConf,  username, rsaCredentialX509.identity());
+        System.err.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
     }
     
-    private void approveApiClientRecord(Configuration conf, byte[] fingerprint) throws SetupException {
-        SetupWizard wizard = new SetupWizard(conf);
+    private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
+        //SetupWizard wizard = new SetupWizard(conf);
         try {
             // XXX UNTESTED postgres support: instead of using hard-coded query, we use the JPA mechanism here and move the compatibility problem to JPA
             /*
@@ -136,12 +160,17 @@ public class BootstrapUser implements Command {
             s.close();
             c.close();
             */
-            MSPersistenceManager persistenceManager = new MSPersistenceManager();
-            ApiClientX509JpaController jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
-            ApiClientX509 apiClient = jpaController.findApiClientX509ByFingerprint(fingerprint);
+           
+            MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);   
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
-            jpaController.edit(apiClient);
+            portalUserJpa.edit(apiClient);
+            System.err.println(String.format("Attempt to approved %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
+            ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
+            ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
+            client.setStatus("Approved");
+            client.setEnabled(true);
+            x509jpaController.edit(client);
         }
         catch(Exception e) {
             throw new SetupException("Cannot update API Client record: "+e.getMessage(), e);
@@ -160,6 +189,9 @@ public class BootstrapUser implements Command {
     }
     
     private String readInputStringWithPrompt(String prompt) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s: ", prompt));
         String input = in.readLine();
@@ -168,6 +200,9 @@ public class BootstrapUser implements Command {
     }
 
     private String readInputStringWithPromptAndDefault(String prompt, String defaultValue) throws IOException {
+        if (console == null) {
+            throw new IOException("no console.");
+        }
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         System.out.print(String.format("%s [%s]: ", prompt, defaultValue));
         String input = in.readLine();

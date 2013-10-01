@@ -24,6 +24,22 @@
 		    <skip>false</skip>
                 </configuration>
             </plugin>
+            
+            
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+            
         </plugins>
     </build>
 
@@ -142,7 +158,7 @@
 
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
     

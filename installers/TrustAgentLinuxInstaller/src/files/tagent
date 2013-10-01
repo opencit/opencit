@@ -41,7 +41,10 @@ function read_local_config() {
     serviceLogFile="/var/log/$serviceNameLo.log"               # log file for StdOut/StdErr
     maxShutdownTime=15                                         # maximum number of seconds to wait for the daemon to terminate normally
     pidFile="/var/run/$serviceNameLo.pid"                      # name of PID file (PID = process ID number)
-    javaVMArgs="-Djavax.net.ssl.trustStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStorePassword=intelinc -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
+	storePass=`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
+	#-Djavax.net.ssl.keyStorePassword=$storePass
+	export TaKeyStorePassword=$storePass
+    javaVMArgs="-Djavax.net.ssl.trustStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
     javaArgs="-classpath $CLASSPATH com.intel.mountwilson.trustagent.TASecureServer"  # arguments for Java launcher
     javaCommandLine="$java $javaVMArgs  $javaArgs"                       # command line to start the Java service application
     javaCommandLineKeyword="TrustAgent.jar"                   # a keyword that occurs on the commandline, used to detect an already running service process and to distinguish it from others
@@ -75,7 +78,7 @@ function checkProcessIsOurService {
    isTrustAgent=`ps -p $pid -o cmd | grep "$javaCommandLineKeyword" | wc -l`
    if [ "$isTrustAgent" == "0" ]; then return 1; fi
    return 0; }
- 
+
 # Returns 0 when the service is running and sets the variable $pid to the PID.
 function getServicePID {
    if [ ! -f $pidFile ]; then return 1; fi
@@ -88,6 +91,7 @@ function getServicePID {
 function startServiceProcess {
    cd $package_dir || return 1
    rm -f $pidFile
+   read_local_config
    makeFileWritable $pidFile || return 1
    makeFileWritable $serviceLogFile || return 1
    cmd="nohup $javaCommandLine >>$serviceLogFile 2>&1 & echo \$! >$pidFile"
@@ -216,6 +220,9 @@ setup_interactive_install() {
         fi
         # This is the place to do any setup while trust agent is not running
         /usr/local/bin/pcakey
+		if [ $? == 1 ]; then
+			exit 1
+		fi
         # After setup is done, start the trust agent:
 	checkServiceStatus
 	if [ -z "$TRUST_AGENT_RUNNING" ]; then
@@ -296,9 +303,17 @@ function main {
           rm -rf "${package_dir}"
         fi
 	rm /usr/local/bin/${script_name}
+        rm -fr /etc/monit/monitrc
+	echo "Stopping Monit service..."
+	service monit stop &> /dev/null
+	if [ -f /etc/monit/monitrc ]; then
+	 #remove monit config so when it starts back up it has nothing to monitor
+	 # idealy here we should be uninstalling instead
+	 rm -fr /etc/monit/monitrc
+        fi
         ;;
       *)
-         echo "Usage: $0 {start|stop|restart|status|setup}"
+         echo "Usage: $0 {version|restart|setup|edit|show|fixek|newid|tpmstatus|uninstall}"
          exit 1
          ;;
       esac

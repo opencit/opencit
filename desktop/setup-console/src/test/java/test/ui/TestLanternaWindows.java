@@ -14,7 +14,7 @@ import org.junit.Test;
  */
 public class TestLanternaWindows {
     @Test
-    public void testWindow() throws SetupException, IOException {
+    public void testWindow() throws Exception {
         Wizard w = new Wizard();
         w.execute(null);
         System.out.println("hit enter to continue"); System.in.read();

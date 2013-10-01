@@ -3,34 +3,23 @@ package com.intel.mtwilson.as.rest;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.ca.TrustAgentCertificateAuthority;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.*;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.List;
+import javax.ws.rs.GET;
 import org.apache.commons.codec.binary.Base64;
-import org.codehaus.enunciate.jaxrs.TypeHint;
+//import org.codehaus.enunciate.jaxrs.TypeHint;
 
 /**
  * REST Web Service
@@ -38,9 +27,16 @@ import org.codehaus.enunciate.jaxrs.TypeHint;
  */
 
 @Stateless
-@Path("/ca")
+@Path("/ca2")
 public class CA {
     private TrustAgentCertificateAuthority ca = new TrustAgentCertificateAuthority();
+    
+    
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    public String defaultCaGetAction() {
+        return ""; // note:  we are not doing anything here, this function exists only to work around this error: SEVERE: Conflicting URI templates. The URI template /ca for root resource class com.intel.mtwilson.ms.rest.CA and the URI template /ca transform to the same regular expression /ca(/.*)?
+    }
     
     /**
      * Sign a Trust Agent's SSL Certificate. 

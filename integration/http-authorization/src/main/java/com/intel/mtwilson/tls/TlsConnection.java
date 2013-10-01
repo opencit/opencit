@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.tls;
 
+import java.net.URL;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -12,14 +13,14 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
  * @author jbuhacoff
  */
 public class TlsConnection {
-    private final String connectionString;
+    private final URL url;
     private final TlsPolicy tlsPolicy;
     private transient Integer hashCode = null;
-    public TlsConnection(String connectionString, TlsPolicy tlsPolicy) {
-        this.connectionString = connectionString;
+    public TlsConnection(URL url, TlsPolicy tlsPolicy) {
+        this.url = url;
         this.tlsPolicy = tlsPolicy;
     }
-    public String getConnectionString() { return connectionString; }
+    public URL getURL() { return url; }
     public TlsPolicy getTlsPolicy() { return tlsPolicy; }
     
     /**
@@ -33,7 +34,7 @@ public class TlsConnection {
     @Override
     public int hashCode() {
         if( hashCode != null ) { return hashCode; }
-        return new HashCodeBuilder(19,47).append(connectionString).append(tlsPolicy.getClass().getName()).append(tlsPolicy.getCertificateRepository()).toHashCode(); 
+        return new HashCodeBuilder(19,47).append(url.toExternalForm()).append(tlsPolicy.getClass().getName()).append(tlsPolicy.getCertificateRepository()).toHashCode(); 
     }
     
     @Override
@@ -42,7 +43,7 @@ public class TlsConnection {
         if( other == this ) { return true; }
         if( other.getClass() != this.getClass() ) { return false; }
         TlsConnection rhs = (TlsConnection)other;
-        return new EqualsBuilder().append(connectionString, rhs.connectionString).append(tlsPolicy.getClass().getName(), rhs.tlsPolicy.getClass().getName()).append(tlsPolicy.getCertificateRepository(), rhs.tlsPolicy.getCertificateRepository()).isEquals(); // XXX TODO see note in hashCode about comparing the tls policy
+        return new EqualsBuilder().append(url.toExternalForm(), rhs.url.toExternalForm()).append(tlsPolicy.getClass().getName(), rhs.tlsPolicy.getClass().getName()).append(tlsPolicy.getCertificateRepository(), rhs.tlsPolicy.getCertificateRepository()).isEquals(); // XXX TODO see note in hashCode about comparing the tls policy
     }
     
 }

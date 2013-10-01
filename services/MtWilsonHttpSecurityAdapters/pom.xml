@@ -25,7 +25,22 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
-        </plugins>
+
+            <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
     </build>
 
 
@@ -47,6 +62,11 @@
 		<scope>provided</scope>
     </dependency>
 
+    <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-api</artifactId>
+        <version>${project.version}</version>
+    </dependency>
     <dependency>
         <groupId>com.intel.mtwilson.common</groupId>
         <artifactId>mtwilson-crypto</artifactId>
@@ -83,7 +103,13 @@
 			<version>${project.version}</version>
 		</dependency>
 
-	<dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ASData</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+        <dependency>
 		<groupId>commons-net</groupId>
 		<artifactId>commons-net</artifactId>
 		<version>3.1</version>

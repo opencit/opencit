@@ -54,7 +54,8 @@ import javax.xml.bind.annotation.XmlType;
     "biosOem",
     "biosVersion",
     "vmmName",
-    "vmmVersion"
+    "vmmVersion",
+    "processorInfo"
 })
 @XmlRootElement(name = "host_info")
 public class HostInfo {
@@ -77,6 +78,8 @@ public class HostInfo {
     protected String vmmName;
     @XmlElement(required = true)
     protected String vmmVersion;
+    @XmlElement(required = true)
+    protected String processorInfo;
 
     /**
      * Gets the value of the timeStamp property.
@@ -302,4 +305,11 @@ public class HostInfo {
         this.vmmVersion = value;
     }
 
+    public String getProcessorInfo() {
+        return processorInfo;
+    }
+
+    public void setProcessorInfo(String processorInfo) {
+        this.processorInfo = processorInfo;
+    }
 }

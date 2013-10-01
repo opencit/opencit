@@ -13,7 +13,7 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 #package_install_filename=${package_dir}/${package_name}.install
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
-mysql_required_version=5.0
+#mysql_required_version=5.0
 #glassfish_required_version=3.0
 #java_required_version=1.6.0_29
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
@@ -59,15 +59,16 @@ fi
 # copy default user to /var/opt
 mkdir -p "${package_var_dir}/users"
 chmod 700 "${package_var_dir}"
-#cp Admin.jks "${package_var_dir}/users"
 
 
 # SCRIPT EXECUTION
 #chmod +x $APICLIENT_PACKAGE
 #./$APICLIENT_PACKAGE
 
-#mysql_server_install
-#mysql_install
+if using_mysql; then
+  mysql_server_install
+  mysql_install
+fi
 #java_install $JAVA_PACKAGE
 #glassfish_install $GLASSFISH_PACKAGE
 
@@ -79,6 +80,12 @@ cp mcctl /usr/local/bin
 /usr/local/bin/mcctl setup
 register_startup_script /usr/local/bin/mcctl mcctl >> $INSTALL_LOG_FILE
 
-glassfish_permissions "${intel_conf_dir}"
-glassfish_permissions "${package_dir}"
-glassfish_permissions "${package_var_dir}"
+if using_glassfish; then
+  glassfish_permissions "${intel_conf_dir}"
+  glassfish_permissions "${package_dir}"
+  glassfish_permissions "${package_var_dir}"
+elif using_tomcat; then
+  tomcat_permissions "${intel_conf_dir}"
+  tomcat_permissions "${package_dir}"
+  tomcat_permissions "${package_var_dir}"
+fi

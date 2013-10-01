@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.model;
 
-import com.intel.mtwilson.datatypes.InternetAddress;
+import com.intel.mtwilson.model.InternetAddress;
 
 /**
  *

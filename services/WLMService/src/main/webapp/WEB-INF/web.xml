@@ -48,7 +48,7 @@
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-            <param-value>com.intel.mtwilson.wlm.helper.WLMAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter,com.intel.mtwilson.wlm.helper.WLMAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>

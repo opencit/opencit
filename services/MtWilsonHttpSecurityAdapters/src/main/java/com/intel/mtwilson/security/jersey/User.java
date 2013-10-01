@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.security.jersey;
 
+import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.datatypes.Role;
 import java.security.Principal;
         
@@ -17,35 +18,9 @@ public class User implements Principal {
     
     private String name;
     private Role[] roles;
-    private String loginName;
+    private String loginName = "";
+    private Md5Digest md5Hash;
 
-    /**
-     * Initializes a User object with the given name.
-     * 
-     * Retained for backward-compatibility with 0.5.1 code that does not
-     * include role-based access control.
-     * 
-     * @since 0.5.1
-     * @param name 
-     */
-    protected User(String name) {
-        this.name = name;
-        this.roles = new Role[] { };
-        this.loginName = "";
-    }
-    
-    /**
-     * Initializes a User object with the given name and authorized roles.
-     * @since 0.5.2
-     * @param name
-     * @param roles 
-     */
-    protected User(String name, Role[] roles) {
-        this.name = name;
-        this.roles = roles;
-        this.loginName = "";
-    }
-    
     /**
      * Initializes a User object with the given name, authorized roles and login Name. The name would be the fingerprint. Since
      * we need to store the log in name of the user also, we are storing the same.
@@ -54,10 +29,11 @@ public class User implements Principal {
      * @param roles 
      * @param loginName
      */
-    protected User(String name, Role[] roles, String loginName) {
+    protected User(String name, Role[] roles, String loginName, Md5Digest md5Hash) {
         this.name = name;
         this.roles = roles;
-        this.loginName = loginName;
+        if( loginName != null ) { this.loginName = loginName; }
+        this.md5Hash = md5Hash;
     }
     
     @Override
@@ -76,6 +52,8 @@ public class User implements Principal {
     public void setLoginName(String loginName) {
         this.loginName = loginName;
     }
+    
+    public Md5Digest getMd5Hash() { return md5Hash; }
     
     @Override
     public String toString() { return name; }

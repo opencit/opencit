@@ -11,4 +11,4 @@ CREATE TABLE `mw_location_pcr` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Mapping between the pcr values and location';
 
 
-INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20130108232900,NOW(),'patch for 1.1 adding mw_location_pcr table');
+INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20130108232900,NOW(),'premium - patch for 1.1 adding mw_location_pcr table');

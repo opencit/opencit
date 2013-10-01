@@ -5,13 +5,11 @@
 package com.intel.mtwilson.tls;
 
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.datatypes.InternetAddress;
-import com.intel.mtwilson.x500.DN;
+//import com.intel.mtwilson.model.InternetAddress;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
@@ -47,6 +45,7 @@ public class ArrayCertificateRepository implements CertificateRepository {
      */
     // XXX not being used;  was part of previous draft interface of CertificateRepository
 //    @Override
+    /*
     public X509Certificate getCertificateForAddress(InternetAddress dnsHostnameOrIpAddress) {
         System.out.println("ArrayCertificateRepository: getCertificateForAddress("+dnsHostnameOrIpAddress.toString()+")");
         for(X509Certificate x509 : keystore) {
@@ -67,6 +66,7 @@ public class ArrayCertificateRepository implements CertificateRepository {
         }
         return null;
     }
+    */
     
     // XXX not being used;  was part of previous draft interface of CertificateRepository
 //    @Override

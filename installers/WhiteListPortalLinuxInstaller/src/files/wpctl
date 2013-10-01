@@ -17,11 +17,11 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.${package_name}.install.log
-mysql_script_dir=${package_dir}/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=WhiteListPortal
+webservice_application_name=WhiteListPortal
 #java_required_version=1.6.0_29
 
 
@@ -32,24 +32,24 @@ shell_include_files "${package_env_filename}" "${package_install_filename}"
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
-configure_api_baseurl() {
-  # setup mtwilson.api.baseurl
-  local input_api_baseurl
-  if [ -n "${MTWILSON_API_BASEURL}" ]; then
-    input_api_baseurl="$MTWILSON_API_BASEURL"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
-    input_api_baseurl="https://${MTWILSON_SERVER}:8181"
-  else
-    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
-    prompt_with_default MTWILSON_API_BASEURL "Mt Wilson Server:" "${configured_server_url}"
-    if [[ "$MTWILSON_API_BASEURL" == "http*" ]]; then
-      input_api_baseurl="$MTWILSON_API_BASEURL"
-    else
-      input_api_baseurl="https://${MTWILSON_API_BASEURL}:8181"
-    fi
-  fi
-  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${input_api_baseurl}"
-}
+#configure_api_baseurl() {
+#  # setup mtwilson.api.baseurl
+#  local input_api_baseurl
+#  if [ -n "${MTWILSON_API_BASEURL}" ]; then
+#    input_api_baseurl="$MTWILSON_API_BASEURL"
+#  elif [ -n "${MTWILSON_SERVER}" ]; then
+#    input_api_baseurl="https://${MTWILSON_SERVER}:8181"
+#  else
+#    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+#    prompt_with_default MTWILSON_API_BASEURL "Mt Wilson Server:" "${configured_server_url}"
+#    if [[ "$MTWILSON_API_BASEURL" == "http*" ]]; then
+#      input_api_baseurl="$MTWILSON_API_BASEURL"
+#    else
+#      input_api_baseurl="https://${MTWILSON_API_BASEURL}:8181"
+#    fi
+#  fi
+#  update_property_in_file mtwilson.api.baseurl "${package_config_filename}" "${input_api_baseurl}"
+#}
 
 setup_print_summary() {
   echo "Requirements summary:"
@@ -69,19 +69,43 @@ setup_print_summary() {
 }
 
 setup_interactive_install() {
-  configure_api_baseurl
+  configure_api_baseurl "${package_config_filename}"
+  
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.wlmp.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      postgres_configure_connection "${package_config_filename}" mountwilson.wlmp.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
+  fi
+  
   if [ -n "$GLASSFISH_HOME" ]; then
     glassfish_running
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
-    fi    
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
-    else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/WhiteListPortal.war
-      webservice_running_report "${glassfish_application_name}"
     fi
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
+    fi
+  fi  
+ 
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/WhiteListPortal.war
+    webservice_running_report "${webservice_application_name}"
   fi
 }
 
@@ -90,11 +114,11 @@ setup() {
   #mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
-      echo_warning "Missing one or more required packages"
-      setup_print_summary
-      exit 1
-  fi
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME"  ]]; then
+#      echo_warning "Missing one or more required packages"
+#      setup_print_summary
+#      exit 1
+#  fi
   setup_interactive_install
 }
 
@@ -105,23 +129,27 @@ RETVAL=0
 case "$1" in
   version)
         echo "${package_name}"
-	echo "Version ${VERSION:-Unknown}"
-	echo "Build ${BUILD:-Unknown}"
+  echo "Version ${VERSION:-Unknown}"
+  echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
-        glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+        if using_glassfish; then  
+          glassfish_running_report
+        elif using_tomcat; then
+          tomcat_running_report
+        fi
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -149,7 +177,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         if [ -f "${package_config_filename}" ]; then
           mkdir -p "${intel_conf_dir}"
           cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
@@ -159,7 +187,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-	rm /usr/local/bin/${script_name}
+  rm /usr/local/bin/${script_name}
         ;;
   help)
         echo "Usage: ${script_name} {setup|start|stop|status|uninstall}"

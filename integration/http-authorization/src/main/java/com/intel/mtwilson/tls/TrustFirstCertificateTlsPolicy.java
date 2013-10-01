@@ -66,6 +66,7 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
     public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {
         if( xcs == null || xcs.length == 0 ) { throw new IllegalArgumentException("Server did not present any certificates"); }
         List<X509Certificate> trustedCertificates = repository.getCertificates(); //repository.getCertificateForSubject(xcs[0].getSubjectX500Principal().getName());  
+        log.debug("TrustFirstCertificatePolicy with {} trusted certificates", trustedCertificates.size());
         if( trustedCertificates.isEmpty() ) {
             addServerCertificatesToRepository(xcs);
             return;
@@ -84,7 +85,7 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
                 }
             }
         }
-        throw new CertificateException("Server certificate is not trusted");
+        throw new UnknownCertificateException("Server certificate is not trusted", xcs);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
     
     private void addServerCertificatesToRepository(X509Certificate[] xcs) {
         for(X509Certificate cert : xcs) {
-            System.out.println("server certificate: "+cert.getSubjectX500Principal().getName());
+            log.debug("server certificate: "+cert.getSubjectX500Principal().getName());
         }
         for(int i=0; i<xcs.length; i++) {
             try {

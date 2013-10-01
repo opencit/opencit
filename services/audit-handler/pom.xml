@@ -29,6 +29,11 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>audit-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>audit-data</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -37,6 +42,11 @@
 	<artifactId>jackson-mapper-asl</artifactId>
 	<version>1.9.9</version>
 </dependency>
+<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency> 
     <dependency>
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
@@ -52,10 +62,19 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>my</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- 
+    Removed this dependency since it was causing cyclic reference exception and also this project is not
+    needed in the Audit Handler.
+     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>MtWilsonHttpSecurityAdapters</artifactId>
       <version>${project.version}</version>
-    </dependency>
+      </dependency> 
+    -->
     <dependency>
 		<groupId>javax</groupId>
 		<artifactId>javaee-web-api</artifactId>

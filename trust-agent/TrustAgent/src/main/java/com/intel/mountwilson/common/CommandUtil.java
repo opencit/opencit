@@ -26,8 +26,7 @@ public class CommandUtil {
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
 
     public static List<String> runCommand(String commandLine) throws TAException, IOException {
-
-
+        
         if(StringUtils.isBlank(commandLine))
             throw new TAException(ErrorCode.ERROR,"Command cannot be empty.");
         
@@ -35,14 +34,11 @@ public class CommandUtil {
         
         if(new File(Config.getBinPath() + File.separator + command[0]).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
-//        commandLine = System.getProperty("app.path", ".") + "/bin/./" + commandLine;
+
         if(new File(Config.getBinPath() + File.separator + commandLine).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
         
-
-        if (Config.isDebug()) {
-            log.info( "\"{0}\"", commandLine);
-        }
+        log.info("Command to be executed is :" + commandLine);
 
         Process p = Runtime.getRuntime().exec(commandLine);
 
@@ -132,7 +128,9 @@ public class CommandUtil {
         } finally {
            
                 try {
-                    fStream.close();
+                    if(fStream != null){
+                        fStream.close();
+                    }
                 } catch (IOException e) {
                     log.warn("Error while closing stream", e);
                 }
@@ -188,16 +186,22 @@ public class CommandUtil {
     }
 
     public static String generateErrorResponse(ErrorCode errorCode) {
-
+        return generateErrorResponse(errorCode, null);
+    }
+    
+    public static String generateErrorResponse(ErrorCode errorCode, String optionalDescription) {
+        String extra = "";
+        if( optionalDescription != null ) {
+            extra = ": "+optionalDescription;
+        }
         String responseXML =
                 "<client_request> "
                 + "<timestamp>" + new Date(System.currentTimeMillis()).toString() + "</timestamp>"
                 + "<clientIp>" + StringEscapeUtils.escapeXml(CommandUtil.getHostIpAddress()) + "</clientIp>"
                 + "<error_code>" + errorCode.getErrorCode() + "</error_code>"
-                + "<error_message>" + StringEscapeUtils.escapeXml(errorCode.getMessage()) + "</error_message>"
+                + "<error_message>" + StringEscapeUtils.escapeXml(errorCode.getMessage() + extra) + "</error_message>"
                 + "</client_request>";
         return responseXML;
     }
-    
     
 }

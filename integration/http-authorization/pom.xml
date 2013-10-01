@@ -24,6 +24,21 @@
 		    <skip>false</skip>
                 </configuration>
             </plugin>
+            
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+            
         </plugins>
     </build>
 
@@ -84,12 +99,27 @@
 		<artifactId>slf4j-api</artifactId>
 		<version>1.6.4</version>
     </dependency>
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+                <scope>test</scope>
+        </dependency>
+
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.0.9</version>
+                <scope>test</scope>
+        </dependency>
+    <!--
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-simple</artifactId>
 		<version>1.6.4</version>
 		<scope>provided</scope>
     </dependency>
+    -->
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
@@ -134,12 +164,14 @@
 		<scope>provided</scope>
         </dependency>        
         <!-- end restassured support -->
+        <!--
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>api-datatypes</artifactId>
+      <artifactId>mtwilson-api</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
+    -->
     <dependency>
       <groupId>com.intel.mtwilson.common</groupId>
       <artifactId>mtwilson-crypto</artifactId>

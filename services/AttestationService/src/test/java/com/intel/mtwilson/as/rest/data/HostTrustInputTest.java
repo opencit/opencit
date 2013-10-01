@@ -1,22 +1,20 @@
 package com.intel.mtwilson.as.rest.data;
 
-import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
-import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
+import com.intel.mtwilson.model.*;
 import static com.jayway.restassured.path.json.JsonPath.with;
-import static org.junit.Assert.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.util.Arrays;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import static org.junit.Assert.*;
 import org.junit.Test;
-
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mountwilson.as.common.ASException;
-import java.util.Arrays;
 
 /**
  * These tests verify that the data model serializes and de-serializes properly.

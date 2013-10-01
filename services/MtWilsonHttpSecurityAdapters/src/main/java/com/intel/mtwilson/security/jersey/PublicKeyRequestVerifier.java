@@ -4,6 +4,7 @@ import com.intel.mtwilson.security.core.PublicKeyUserFinder;
 import com.intel.mtwilson.security.core.PublicKeyUserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.model.Md5Digest;
 import com.sun.jersey.core.header.HttpDateFormat;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class PublicKeyRequestVerifier {
     private static Logger log = LoggerFactory.getLogger(PublicKeyRequestVerifier.class);
     private PublicKeyUserFinder finder;
-    private int requestsExpireAfterMs = 5 * 60 * 1000; // 5 minutes
+    private int requestsExpireAfterMs = 60 * 60 * 1000; // 60 minutes
     
     private String headerAttributeNameValuePair = "([a-zA-Z0-9_-]+)=\"([^\"]+)\"";
     private Pattern headerAttributeNameValuePairPattern = Pattern.compile(headerAttributeNameValuePair);
@@ -70,30 +71,13 @@ public class PublicKeyRequestVerifier {
 //        try {
             Authorization a = parseAuthorization(authorizationHeader);
             
-            // check if the request has expired by looking at the HTTP Date header
-            if( headers.containsKey("Date") ) {
-                try {
-                    Date requestDate = HttpDateFormat.readDate(headers.getFirst("Date")); // http date must be in RFC 1123 date format (as specified by email RFC 822 and http RFC 2616)
-                    if( isRequestExpired(requestDate) ) {
-                        log.error("PublicKeyAuthorization: Request expired; date="+requestDate);
-                        return null;
-                    }
-                }
-                catch(ParseException e) {
-                    throw new IllegalArgumentException("Authorization timestamp must conform to ISO 8601 format", e);
-                }
-            }
-
             log.debug("PublicKeyAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
             
-            if( headers.containsKey("X-HTTP-Method-Override") ) {
-                signatureBlock.httpMethod = headers.getFirst("X-HTTP-Method-Override");
-            }
-            else {
-                signatureBlock.httpMethod = a.httpMethod;
-            }
+            signatureBlock.httpMethod = a.httpMethod;
             
+            /*
+             * Bug #383 disabling support for this because it creates a security vulnerability
             if( headers.containsKey("X-Original-URL") ) {
                 signatureBlock.url = headers.getFirst("X-Original-URL");
             }
@@ -103,6 +87,8 @@ public class PublicKeyRequestVerifier {
             else {
                 signatureBlock.url = a.url;
             }
+            */
+            signatureBlock.url = a.url;
             
             signatureBlock.realm = a.realm;
             signatureBlock.fingerprintBase64 = a.fingerprintBase64;
@@ -118,7 +104,7 @@ public class PublicKeyRequestVerifier {
             signatureBlock.body = requestBody;
             String content = signatureBlock.toString(); // may throw IllegalArgumentException if any required field is null or invalid
 
-            log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
+            //log.debug("PublicKeyAuthorization: Signed content ("+content.length()+") follows:\n"+content);
             
             // locate the public key or x509 certificate that can verify the signature
             // XXX TODO: need to also load the roles from the database (in case we're successful, so we don't do 2 queries) and also in future versions the roles may be in the x509 certificate so we need to get it directly and save it so we can examine after verifying
@@ -163,8 +149,24 @@ public class PublicKeyRequestVerifier {
             
 
             if( isValid ) {
-                log.info("Request is authenticated");
-                return new User(a.fingerprintBase64, userInfo.roles);
+                log.debug("Request is authenticated");
+                
+                // check if the request has expired by looking at the HTTP Date header, but only if it was signed.
+                if( signatureBlock.headers.containsKey("Date") ) {
+                    try {
+                        Date requestDate = HttpDateFormat.readDate(signatureBlock.headers.get("Date")); // http date must be in RFC 1123 date format (as specified by email RFC 822 and http RFC 2616)
+                        if( isRequestExpired(requestDate) ) {
+                            log.error("PublicKeyAuthorization: Request expired; date="+requestDate);
+                            return null;
+                        }
+                    }
+                    catch(ParseException e) {
+                        throw new IllegalArgumentException("Authorization timestamp must conform to ISO 8601 format", e);
+                    }
+                }
+
+                
+                return new User(a.fingerprintBase64, userInfo.roles, "", Md5Digest.valueOf(signature));
             }
         /*}
         catch (ParseException e) {
@@ -182,7 +184,7 @@ public class PublicKeyRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.info("Request is NOT AUTHENTICATED");
+        log.debug("Request is NOT AUTHENTICATED");
         return null;
     }
     
@@ -268,14 +270,15 @@ Authorization: MtWilson
         rsa.update(document);
         return rsa.verify(signature);
     }
-
+    // commenting out unused function (6/11 1.2)
+    /*
     private boolean verifySignature(byte[] document, Certificate certificate, String signatureAlgorithm, byte[] signature) throws NoSuchAlgorithmException,InvalidKeyException, SignatureException {
         Signature rsa = Signature.getInstance(signatureAlgorithm); 
         rsa.initVerify(certificate);
         rsa.update(document);
         return rsa.verify(signature);
     }
-    
+    */
     /**
      * Standardizes signature algorithm names to the Java name.
      * "SHA256withRSA".equals(signatureAlgorithm("RSA-SHA256a")); // true

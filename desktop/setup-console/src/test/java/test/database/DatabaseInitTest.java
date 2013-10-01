@@ -14,7 +14,7 @@ import org.junit.Test;
  */
 public class DatabaseInitTest {
     @Test
-    public void testFindMysqlFiles() throws SetupException {
+    public void testFindMysqlFiles() throws Exception {
         InitDatabase cmd = new InitDatabase();
         cmd.execute(new String[] { "mysql" });
     }

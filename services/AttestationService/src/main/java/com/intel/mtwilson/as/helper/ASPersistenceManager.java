@@ -4,22 +4,28 @@
  */
 package com.intel.mtwilson.as.helper;
 
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mtwilson.audit.helper.AuditConfig;
 import com.intel.mtwilson.jpa.PersistenceManager;
-import com.intel.mtwilson.ms.common.MSConfig;
-
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyPersistenceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  *
  * @author jbuhacoff
  */
 public class ASPersistenceManager extends PersistenceManager {
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public void configure() {
-        addPersistenceUnit("ASDataPU", ASConfig.getJpaProperties());
-        addPersistenceUnit("MSDataPU", MSConfig.getJpaProperties());
-        addPersistenceUnit("AuditDataPU", AuditConfig.getJpaProperties());
+        try {
+        addPersistenceUnit("ASDataPU", MyPersistenceManager.getASDataJpaProperties(My.configuration())); // ASConfig.getJpaProperties());
+        addPersistenceUnit("MSDataPU", MyPersistenceManager.getMSDataJpaProperties(My.configuration())); // MSConfig.getJpaProperties());
+        addPersistenceUnit("AuditDataPU", MyPersistenceManager.getAuditDataJpaProperties(My.configuration())); // AuditConfig.getJpaProperties());
+        }
+        catch(Exception e) {
+            log.error("Cannot add persistence unit: {}", e.toString(), e);
+        }
     }
     
 }

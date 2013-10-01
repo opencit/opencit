@@ -4,12 +4,16 @@
  */
 package com.intel.mtwilson.as.data;
 
+import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
+import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.io.Resource;
+import com.intel.mtwilson.util.ASDataCipher;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import javax.crypto.BadPaddingException;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -29,10 +33,11 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblHosts.findAll", query = "SELECT t FROM TblHosts t"),
     @NamedQuery(name = "TblHosts.findById", query = "SELECT t FROM TblHosts t WHERE t.id = :id"),
     @NamedQuery(name = "TblHosts.findByName", query = "SELECT t FROM TblHosts t WHERE t.name = :name"),
+    @NamedQuery(name = "TblHosts.findByAikSha1", query = "SELECT t FROM TblHosts t WHERE t.aikSha1 = :aikSha1"), // XXX TODO NEED TO ADD A COLUMN TO DATABASE, AND POPULATE IT WITH SHA1(AIK) WHENEVER WE UPDATE THE AIK ITSELF
     @NamedQuery(name = "TblHosts.findByIPAddress", query = "SELECT t FROM TblHosts t WHERE t.iPAddress = :iPAddress"),
     @NamedQuery(name = "TblHosts.findByPort", query = "SELECT t FROM TblHosts t WHERE t.port = :port"),
     @NamedQuery(name = "TblHosts.findByDescription", query = "SELECT t FROM TblHosts t WHERE t.description = :description"),
-    @NamedQuery(name = "TblHosts.findByAddOnConnectionInfo", query = "SELECT t FROM TblHosts t WHERE t.addOnConnectionInfo = :addOnConnectionInfo"),
+    @NamedQuery(name = "TblHosts.findByAddOnConnectionInfo", query = "SELECT t FROM TblHosts t WHERE t.addOnConnectionInfo_cipherText = :addOnConnectionInfo"),
     @NamedQuery(name = "TblHosts.findByEmail", query = "SELECT t FROM TblHosts t WHERE t.email = :email"),
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
 //    @NamedQuery(name = "TblHosts.findByCreatedOn", query = "SELECT t FROM TblHosts t WHERE t.createdOn = :createdOn"),
@@ -43,6 +48,7 @@ import org.slf4j.LoggerFactory;
 public class TblHosts implements Serializable {
     @Transient
     private transient Logger log = LoggerFactory.getLogger(getClass());
+    
     // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
     /*
     @Basic(optional =     false)
@@ -76,12 +82,26 @@ public class TblHosts implements Serializable {
     private int port;
     @Column(name = "Description")
     private String description;
+    
+    
+    
     @Column(name = "AddOn_Connection_Info")
-    private String addOnConnectionInfo;
+    private String addOnConnectionInfo_cipherText;   // must be encrypted 
+    
+    @Transient
+    private transient String addOnConnectionInfo_plainText; // the decrypted version
+    
+    
     @Lob
     @Column(name = "AIK_Certificate")
-    private String aIKCertificate;
+    private String aikCertificate;
 
+    @Lob
+    @Column(name = "AIK_PublicKey")
+    private String aikPublicKey;
+    
+    @Column(name = "AIK_SHA1")
+    private String aikSha1;
     
     @Column(name = "TlsPolicy")
     private String tlsPolicyName;
@@ -176,19 +196,76 @@ public class TblHosts implements Serializable {
     }
 
     public String getAddOnConnectionInfo() {
-        return addOnConnectionInfo;
+        if( addOnConnectionInfo_plainText == null && addOnConnectionInfo_cipherText != null ) {
+            try {
+                //log.info("XXX TblHosts ASDataCipher ref = {}", ASDataCipher.cipher.hashCode());
+                addOnConnectionInfo_plainText = ASDataCipher.cipher.decryptString(addOnConnectionInfo_cipherText);
+                //log.info("XXX TblHosts ASDataCipher plainText = {}", addOnConnectionInfo_plainText);
+                //log.info("XXX TblHosts ASDataCipher cipherText = {}", addOnConnectionInfo_cipherText);
+            }
+            catch(Exception e) {
+                log.error("Cannot decrypt host connection credentials", e);
+                // this will happen if the data is being decrypted with the wrong key (which will happen if someone reinstalled mt wilson and kept the data but didn't save the data encryption key)
+                // it may also happen if the data wasn't encrypted in the first place
+                if( addOnConnectionInfo_cipherText.startsWith("http") ) {
+                    return addOnConnectionInfo_plainText; // data was not encrypted
+                }
+                else {
+                    throw new IllegalArgumentException("Cannot decrypt host connection credentials; check the key or delete and re-register the host");
+                }
+            }
+        }
+        return addOnConnectionInfo_plainText;
     }
 
     public void setAddOnConnectionInfo(String addOnConnectionInfo) {
-        this.addOnConnectionInfo = addOnConnectionInfo;
+        this.addOnConnectionInfo_plainText = addOnConnectionInfo;
+        // TODO  encrypt it and set addOnConnectionInfo_cipherText
+        if( addOnConnectionInfo == null ) { addOnConnectionInfo_cipherText = null; }
+        else {
+             addOnConnectionInfo_cipherText = ASDataCipher.cipher.encryptString(addOnConnectionInfo_plainText);
+        }
     }
 
     public String getAIKCertificate() {
-        return aIKCertificate;
+        return aikCertificate;
     }
 
-    public void setAIKCertificate(String aIKCertificate) {
-        this.aIKCertificate = aIKCertificate;
+    public void setAIKCertificate(String aikCertificate) {
+        this.aikCertificate = aikCertificate;
+    }
+
+    public String getAikPublicKey() {
+        return aikPublicKey;
+    }
+
+    /**
+     * You should set this anytime you set the AIK Certificate
+     * @param aikPublicKey 
+     */
+    public void setAikPublicKey(String aikPublicKey) {
+        this.aikPublicKey = aikPublicKey;
+    }
+    
+    /**
+     * The AIK SHA1 hash is ALWAYS a hash of the Public Key, NOT the Certificate
+     * @return 
+     */
+    public String getAikSha1() {
+        return aikSha1;
+    }
+    
+    /**
+     * You should set this anytime you set the AIK Public Key.
+     * The value should be hex-encoded sha1 of the DER-ENCODED (binary) AIK Public Key
+     * Even if someone has signed the AIK and created an AIK CERTIFICATE, this value
+     * should remain as the AIK PUBLIC KEY SHA1 so that it is unambiguous. 
+     * It is trivial to extract the AIK PUBLIC KEY from the AIK CERTIFICATE in order
+     * to compute the SHA1.
+     * @param aikSha1 
+     */
+    public void setAikSha1(String aikSha1) {
+        this.aikSha1 = aikSha1;
     }
     
     public String getTlsPolicyName() { return tlsPolicyName; }

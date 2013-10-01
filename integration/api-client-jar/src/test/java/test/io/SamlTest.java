@@ -5,14 +5,13 @@
 package test.io;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.TrustAssertion;
-import com.intel.mtwilson.io.ConfigurationUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.datatypes.Hostname;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
+import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.mtwilson.model.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
@@ -164,7 +164,7 @@ public class SamlTest {
     /**
      * same as the xml function in ApiClient, for testing purposes
      */
-    private <T> T xml(String document, Class<T> valueType) throws Exception {
+    private <T> T xml(String document, Class<T> valueType) throws JAXBException  {
             JAXBContext jc = JAXBContext.newInstance( valueType.getPackage().getName() ); // was just valueType
             javax.xml.bind.Unmarshaller u = jc.createUnmarshaller();
 //            Object o = u.unmarshal( new StreamSource( new StringReader( document ) ) );
@@ -173,7 +173,7 @@ public class SamlTest {
     }
     
     @Test
-    public void testCreateBulkHostTrustXmlResponse() throws Exception {
+    public void testCreateBulkHostTrustXmlResponse() throws JAXBException  {
         JAXBContext jc = JAXBContext.newInstance( "com.intel.mtwilson.datatypes.xml" );
         com.intel.mtwilson.datatypes.xml.ObjectFactory factory = new com.intel.mtwilson.datatypes.xml.ObjectFactory();
         HostTrustXmlResponseList list = factory.createHostTrustXmlResponseList();
@@ -195,7 +195,7 @@ public class SamlTest {
     }
     
     @Test
-    public void testBulkHostTrustXmlResponse() throws Exception {
+    public void testBulkHostTrustXmlResponse() throws IOException, JAXBException  {
         String xmlResponse = IOUtils.toString(getClass().getResourceAsStream("/bulk-hosts-saml-155,205.xml")); // or get via apiclient like in testGetSamlForHost()
 //        String xmlResponse = IOUtils.toString(getClass().getResourceAsStream("/bulk-hosts-saml-155,205-simple.xml")); // or get via apiclient like in testGetSamlForHost()
         log.debug(xmlResponse);

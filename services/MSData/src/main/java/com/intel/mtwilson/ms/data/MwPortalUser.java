@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.ms.data;
 
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.Resource;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -15,6 +17,7 @@ import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -25,10 +28,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "mw_portal_user")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "MwPortalUser.findAll", query = "SELECT a FROM MwPortalUser a"),
-    @NamedQuery(name = "MwPortalUser.findById", query = "SELECT a FROM MwPortalUser a WHERE a.id = :id"),
     @NamedQuery(name = "MwPortalUser.findByUsername", query = "SELECT a FROM MwPortalUser a WHERE a.username = :username"),
     @NamedQuery(name = "MwPortalUser.findByUsernameEnabled", query = "SELECT a FROM MwPortalUser a WHERE a.username = :username AND a.enabled = :enabled"),
+    @NamedQuery(name = "MwPortalUser.findAll", query = "SELECT a FROM MwPortalUser a"),
+    @NamedQuery(name = "MwPortalUser.findById", query = "SELECT a FROM MwPortalUser a WHERE a.id = :id"),
     @NamedQuery(name = "MwPortalUser.findByUsernameLike", query = "SELECT a FROM MwPortalUser a WHERE a.username LIKE :username"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "MwPortalUser.findByCommentLike", query = "SELECT a FROM MwPortalUser a WHERE a.comment LIKE :comment"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "MwPortalUser.findByEnabled", query = "SELECT a FROM MwPortalUser a WHERE a.enabled = :enabled"),
@@ -57,6 +60,9 @@ public class MwPortalUser implements Serializable {
     @Basic(optional = true)
     @Column(name = "comment")
     private String comment;
+    
+    @Transient
+    private ByteArrayResource keystoreResource;
 
     public MwPortalUser() {
     }
@@ -95,8 +101,21 @@ public class MwPortalUser implements Serializable {
 
     public void setKeystore(byte[] keystore) {
         this.keystore = keystore;
+        keystoreResource = null;
     }
 
+    public Resource getKeystoreResource() { 
+        if( keystoreResource == null ) {
+            keystoreResource = new ByteArrayResource(keystore) {
+                @Override
+                protected void onClose() {
+                    keystore = array; // array is a protected member of ByteArrayResource
+                }
+            };
+        }
+        return keystoreResource; 
+    }
+    
     public boolean getEnabled() {
         return enabled;
     }

@@ -66,31 +66,30 @@
                 </configuration>
             </plugin>	    
 		
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-shade-plugin</artifactId>
+                      <version>2.0</version>
+                      <executions>
+                        <execution>
+                          <phase>package</phase>
+                          <goals>
+                            <goal>shade</goal>
+                          </goals>
+                          <configuration>
+                              <!-- <forceCreation>true</forceCreation> --> <!-- should prevent "we have a duplicate class" warnings because classes are already in the jar built from last time, but does not work, we still get the warnings, probably because several dependencies share the same dependencies and it's trying to do each one instead of consolidating first like dependency-tree and picking just one to include -->
+                      <shadedArtifactAttached>true</shadedArtifactAttached>
+                      <shadedClassifierName>with-dependencies</shadedClassifierName> <!-- Any name that makes sense -->
+                            <transformers>
+                              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <mainClass>com.intel.mtwilson.setup.TextConsole</mainClass>
+                              </transformer>
+                            </transformers>
+                          </configuration>
+                        </execution>
+                      </executions>
+                    </plugin>     
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-                <!-- <forceCreation>true</forceCreation> --> <!-- should prevent "we have a duplicate class" warnings because classes are already in the jar built from last time, but does not work, we still get the warnings, probably because several dependencies share the same dependencies and it's trying to do each one instead of consolidating first like dependency-tree and picking just one to include -->
-		<shadedArtifactAttached>true</shadedArtifactAttached>
-		<shadedClassifierName>with-dependencies</shadedClassifierName> <!-- Any name that makes sense -->
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>com.intel.mtwilson.setup.TextConsole</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>      
-      
         </plugins>
     </build>
 
@@ -104,18 +103,18 @@
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
-		<version>1.6.4</version>
+		<version>1.7.5</version>
     </dependency>
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
+                <version>1.0.13</version>
         </dependency>
 
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
-                <version>1.0.9</version>
+                <version>1.0.13</version>
         </dependency>
 	
     <!-- <dependency>
@@ -138,22 +137,43 @@
 		<version>3.1</version>
 	</dependency>
 
+	<dependency>
+		<groupId>com.intel.mtwilson.integration</groupId>
+		<artifactId>my</artifactId>
+		<version>${project.version}</version>
+	</dependency>
                 
 	<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-mysql</artifactId>
 		<version>${project.version}</version>
 	</dependency>
-    <!--  
+    <!-- 
+    ***IMPORTANT NOTE***
+    The MySQL Connector/J is included here with scope "test" so that we can run JUnit tests against
+    a MySQL database. You MUST NOT change the scope to anything that would cause the MySQL Connector/J
+    to be included with the Mt Wilson distribution. Intel does not have a license to redistribute MySQL
+    with Mt Wilson.
+    -->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <scope>test</scope>
+	</dependency>
 	<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-postgres</artifactId>
 		<version>${project.version}</version>
 	</dependency>
-    -->    
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>8.2-507.jdbc4</version>
+        </dependency>
+    
 	<dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>vmware-util-jar</artifactId>
+		<artifactId>trust-util-jar</artifactId>
 		<version>${project.version}</version>
 	</dependency>
         
@@ -180,7 +200,7 @@
 	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>
@@ -216,6 +236,29 @@
 	    <version>0.8.1</version>
 	</dependency>
 	<!-- end sshj for remote administration  -->
+    
+    
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-io</artifactId>
+	<version>0.1-SNAPSHOT</version>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-crypto</artifactId>
+	<version>0.1.1-SNAPSHOT</version>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-net</artifactId>
+	<version>0.1-SNAPSHOT</version>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-console</artifactId>
+	<version>0.1-SNAPSHOT</version>
+</dependency>
+    
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>webservice-util</artifactId>
@@ -300,12 +343,14 @@
       <type>jar</type>
       <classifier>classes</classifier>
     </dependency>
+    
   </dependencies>  
 
 
     <!-- to enable aspectj weaving, run maven with -Daspectj option on the command line -->
     <profiles>
         <profile>
+            <id>aspectj</id>
             <activation>
                 <property>
                     <name>aspectj</name>
@@ -351,5 +396,21 @@
                 </plugins>
             </build>
         </profile>
+        <!--
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+ 
+
+                </plugins>
+            </build>
+        </profile>
+        -->
     </profiles>
 </project>

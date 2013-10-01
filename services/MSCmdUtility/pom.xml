@@ -37,7 +37,7 @@
   <dependencies>
       <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>vmware-util-jar</artifactId>
+            <artifactId>trust-util-jar</artifactId>
             <version>${project.version}</version>         
       </dependency>
     <dependency>
@@ -57,12 +57,17 @@
     </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>api-datatypes</artifactId>
+            <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
     </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>api-client</artifactId>
+            <version>${project.version}</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>my</artifactId>
             <version>${project.version}</version>
     </dependency>
     <dependency>

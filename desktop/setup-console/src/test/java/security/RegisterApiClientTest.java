@@ -5,9 +5,10 @@
 package security;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.ApiException;
-import com.intel.mtwilson.ClientException;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.KeystoreUtil;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyConfiguration;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
@@ -125,6 +126,29 @@ public class RegisterApiClientTest {
         c.updateApiClient(update); // ApiException, SignatureException
     }
     
+    
+    
+    
+    
+    @Test
+    public void testApproveMyApiClient() throws ClientException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException, ApiException, SignatureException  {
+        // grant access to a given key by using the trusted ip feature on the server to trust all requests from this ip
+        KeyStore keystore = KeystoreUtil.open(new FileInputStream(My.configuration().getKeystoreFile()), "changeit"); // KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, [FileNotFoundException]
+        RsaCredential credential = KeystoreUtil.loadX509(keystore, My.configuration().getKeystoreUsername(), My.configuration().getKeystorePassword()); // UnrecoverableEntryException, [CertificateEncodingException]
+        ApiClientUpdateRequest update = new ApiClientUpdateRequest();
+        update.fingerprint = credential.identity();
+        update.enabled = true;
+        update.roles = new String[] { Role.Attestation.toString(), Role.Whitelist.toString() };
+        update.status = ApiClientStatus.APPROVED.toString();
+        update.comment = "Bootstrap approval sample code in JavaIntegrationTests project";
+        Properties p = new Properties();
+        p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "false");
+        p.setProperty("mtwilson.api.ssl.verifyHostname", "false");
+        ApiClient c = new ApiClient(baseurl, credential, p); // KeyManagementException, [MalformedURLException], [UnsupportedEncodingException]
+        c.updateApiClient(update); // ApiException, SignatureException
+    }
+    
+    
     /**
      * Executes a remote command with no timeout
      * 
@@ -185,7 +209,7 @@ public class RegisterApiClientTest {
             remote(ssh, "asctl restart");
             // grant privileges to ourselves
             testUpdateApiClient();
-            log.info("Granted privileges to self");
+            log.debug("Granted privileges to self");
             // now restore the original trusted hosts whitelist
             remote(ssh, String.format("asctl edit mtwilson.api.trust \"%s\"", previousWhitelistString));        
             log.debug("Restored previous trusted clients network address list");

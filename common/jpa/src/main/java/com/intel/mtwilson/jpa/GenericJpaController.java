@@ -6,7 +6,6 @@ package com.intel.mtwilson.jpa;
 
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

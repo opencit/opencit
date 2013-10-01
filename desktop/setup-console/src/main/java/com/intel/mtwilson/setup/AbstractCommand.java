@@ -43,7 +43,7 @@ public abstract class AbstractCommand extends ObjectModel implements Command {
                 continue;
             }
             if( value.isEmpty() ) {
-                fault("requierd option %s is empty", arg);
+                fault("required option %s is empty", arg);
                 continue;
             }
         }

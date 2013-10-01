@@ -1,30 +1,18 @@
 
 package com.intel.mtwilson.as.rest;
 
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.security.annotations.*;
+import java.io.IOException;
 import javax.ejb.Stateless;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.Hostname;
-import com.intel.mtwilson.as.helper.saml.SamlGenerator;
-import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
-import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
-import com.intel.mtwilson.datatypes.HostLocation;
-import com.intel.mtwilson.datatypes.HostResponse;
-import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.datatypes.TxtHost;
-import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-//import javax.annotation.security.RolesAllowed;
-import com.intel.mtwilson.security.annotations.*;
-import javax.ws.rs.DefaultValue;
 
 /**
  * REST Web Service
@@ -61,10 +49,14 @@ public class SAML {
     @Produces({"application/samlassertion+xml"})
     @Path("/assertions/host")
     public String getHostAssertions(
-            @QueryParam("ID")String hostName,
+            @QueryParam("hostName")String hostName,
             @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify
-            ) {
-        return hostTrustBO.getTrustWithSaml(hostName);
+            ) throws IOException {
+        // bug #783, "missing hostname" we were not validating the input from the dashboard
+        if( hostName == null || hostName.isEmpty() ) {
+            throw new ASException(ErrorCode.AS_MISSING_INPUT, "Hostname or IP address is required");
+        }
+        return hostTrustBO.getTrustWithSaml(hostName, forceVerify);
     }
 
 

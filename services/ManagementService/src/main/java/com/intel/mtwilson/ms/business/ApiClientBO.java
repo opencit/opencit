@@ -1,10 +1,9 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2012 Intel Corporation
+ * All rights reserved.
  */
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
@@ -20,11 +19,14 @@ import com.intel.mtwilson.ms.helper.BaseBO;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 /**
  *
@@ -33,7 +35,8 @@ import org.slf4j.LoggerFactory;
 public class ApiClientBO extends BaseBO {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-
+    Marker sysLogMarker = MarkerFactory.getMarker(LogMarkers.USER_CONFIGURATION.getValue());
+    
     public ApiClientBO() {
     }
 
@@ -45,7 +48,7 @@ public class ApiClientBO extends BaseBO {
 
 
         try {
-            X509Certificate x509Certificate = null;
+            X509Certificate x509Certificate;
             try {
                 x509Certificate = X509Util.decodeDerCertificate(apiClientRequest.getCertificate());
             } catch (CertificateException e) {
@@ -53,6 +56,10 @@ public class ApiClientBO extends BaseBO {
             }
             validate(apiClientRequest, x509Certificate);
             createApiClientAndRole(apiClientRequest, x509Certificate);
+            
+            // Log the details into the syslog
+            Object[] paramArray = {Arrays.toString(getFingerPrint(x509Certificate)), Arrays.toString(apiClientRequest.getRoles())};
+            log.info(sysLogMarker, "Created a request for new API Client: {} with roles: {}", paramArray);
 
         } catch (MSException me) {
             log.error("Error during API Client registration. " + me.getErrorMessage());
@@ -225,6 +232,10 @@ public class ApiClientBO extends BaseBO {
 
             clearRolesForApiClient(apiClientX509);
             setRolesForApiClient(apiClientX509, apiClientRequest.roles);
+            
+            // Capture the change in the syslog
+            Object[] paramArray = {Arrays.toString(apiClientRequest.fingerprint), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
+            log.info(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {
             log.error("Error during API Client update. " + me.getErrorMessage());
@@ -295,7 +306,7 @@ public class ApiClientBO extends BaseBO {
         
         try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
-            List<ApiClientX509> list = null;
+            List<ApiClientX509> list;
             if( criteria.enabledEqualTo != null && criteria.statusEqualTo != null ) {
                 list = apiClientX509JpaController.findApiClientX509ByEnabledStatus(criteria.enabledEqualTo, criteria.statusEqualTo); // findByEnabledStatus
             }

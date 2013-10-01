@@ -393,7 +393,7 @@ public class TblModuleManifestJpaController implements Serializable {
     
         EntityManager em = getEntityManager();
         try {
-            
+            log.debug(String.format("Module Manifest for MLE: %d Component: %s Event: %s", mleId,componentName, eventName));
             Query query = em.createNamedQuery("TblModuleManifest.findByMleNameEventName");
             query.setParameter("name", componentName);
             query.setParameter("eventName", eventName);

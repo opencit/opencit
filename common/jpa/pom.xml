@@ -24,6 +24,22 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
+            
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+            
+            
         </plugins>
 
 <testResources>
@@ -125,7 +141,13 @@
     	<artifactId>mysql-connector-java</artifactId>
         <scope>test</scope>
     </dependency>
-                
+        <dependency>
+    	<groupId>postgresql</groupId>
+    	<artifactId>postgresql</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+                                
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
@@ -163,7 +185,7 @@
         
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-datatypes</artifactId>
+	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
   </dependencies>  

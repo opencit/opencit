@@ -53,7 +53,9 @@ public class CreateNonceFileCmd implements ICommand {
 		} finally{
 			
 				try {
-					stream.close();
+                    if(stream != null){
+                        stream.close();
+                    }
 				} catch (IOException e) {
 					log.warn("Error while closing the file stream");
 					throw new TAException(ErrorCode.ERROR, "Error while closing file",e );

@@ -65,8 +65,7 @@ public class OemBO extends BaseBO {
             TblOem tblOem = tblOemJpaController.findTblOemByName(oemData.getName());
             
             if(tblOem == null)
-                throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST, String.format(ErrorCode.WS_OEM_DOES_NOT_EXIST.getMessage(),
-                    oemData.getName()));
+                throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST,  oemData.getName());
             
             tblOem.setDescription(oemData.getDescription());
             

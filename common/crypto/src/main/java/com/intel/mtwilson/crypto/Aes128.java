@@ -66,7 +66,7 @@ public class Aes128 {
         }
     }
     
-    public byte[] encrypt(byte[] plaintext) throws CryptographyException {
+    public synchronized byte[] encrypt(byte[] plaintext) throws CryptographyException {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
             byte[] iv = cipher.getIV();
@@ -92,7 +92,7 @@ public class Aes128 {
         }
     }
         
-    public byte[] decrypt(byte[] ciphertext) throws CryptographyException {
+    public synchronized byte[] decrypt(byte[] ciphertext) throws CryptographyException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(ciphertext, 0, BLOCK_SIZE));
             return cipher.doFinal(ciphertext, BLOCK_SIZE, ciphertext.length - BLOCK_SIZE); // skip the first 16 bytes (IV)

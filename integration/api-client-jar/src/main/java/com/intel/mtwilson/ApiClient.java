@@ -5,19 +5,22 @@
 package com.intel.mtwilson;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
+import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.HmacCredential;
 import com.intel.mtwilson.crypto.Password;
+import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
+import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
 import com.intel.mtwilson.io.ConfigurationUtil;
 import com.intel.mtwilson.security.http.*;
+import com.intel.mtwilson.tls.TlsPolicy;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -68,7 +71,7 @@ import org.slf4j.LoggerFactory;
  * @since 0.5.2
  * @author jbuhacoff
  */
-public class ApiClient implements AttestationService, WhitelistService, ManagementService {
+public class ApiClient implements MtWilson, AttestationService, WhitelistService, ManagementService {
     private static Logger log = LoggerFactory.getLogger(ApiClient.class);
 //    private JerseyHttpClient httpClient;
     private ApacheHttpClient httpClient;
@@ -110,7 +113,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     public ApiClient(Configuration config) throws ClientException {
         try {
         setBaseURL(config.getString("mtwilson.api.baseurl"));
-        log.debug("Base URL: "+baseURL.toExternalForm());
+        //log.debug("Base URL: "+baseURL.toExternalForm());
         /*
         httpClient = new JerseyHttpClient(baseURL.toExternalForm(), config.getString("mtwilson.api.clientId"), config.getString("mtwilson.api.secretKey"));
         */
@@ -212,6 +215,19 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         setKeystore(keystore);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
+        }
+        catch(Exception e) {
+            throw new ClientException("Cannot initialize client", e);
+        }
+    }
+
+    public ApiClient(URL baseURL, RsaCredential credential, SimpleKeystore keystore, TlsPolicy tlsPolicy) throws ClientException {
+        try {
+        setBaseURL(baseURL);
+        setKeystore(keystore);
+        log.debug("Base URL: "+baseURL.toExternalForm());
+        httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, tlsPolicy);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -589,15 +605,27 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }
 
     @Override
-    public HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException {
+    public HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException {
         HostResponse added = fromJSON(httpPost(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;
     }
 
     @Override
-    public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException {
+    public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPost(asurl("/hosts/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;
+    }
+
+    @Override
+    public HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException {
         HostResponse added = fromJSON(httpPut(asurl("/hosts"), toJSON(new TxtHostRecord(host))), HostResponse.class);
         return added;        
+    }
+
+    @Override
+    public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException {
+        HostConfigResponseList results = fromJSON(httpPut(asurl("/hosts/bulk"), toJSON(hostRecords)), HostConfigResponseList.class);
+        return results;
     }
 
     @Override
@@ -749,11 +777,11 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     
     
 
-    @Override
+   /* @Override
     public CaInfo getCaStatus() throws IOException, ApiException, SignatureException {
         throw new UnsupportedOperationException("Not supported yet.");
         // TODO: create a CaInfo object, which combines data from two sources:  1) the Mt Wilson CA Certificate, 2) the "ca" user in the HMAC users table
-    }
+    }*/
 
     /**
      * XXX needs a rename, because we're talking about the host provisioning ca specifically
@@ -762,7 +790,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
      * @throws ApiException
      * @throws SignatureException 
      */
-    @Override
+  /*  @Override
     public void enableCaWithPassword(String newPasswordString) throws IOException, ApiException, SignatureException {
         try {
             Password newPassword = new Password(newPasswordString, new byte[0]); // XXX currently using an empty salt, so the user doesn't need to also copy the salt, but maybe we should use a generated salt and return it to the user to paste when using the password....
@@ -773,7 +801,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         catch(CryptographyException e) {
             throw new ApiException("Cannot hash password", e);
         }
-    }
+    }*/
 
     /**
      * XXX needs a rename, because we're talking about the host provisioning ca specifically
@@ -781,18 +809,35 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
      * @throws ApiException
      * @throws SignatureException 
      */
-    @Override
+   /* @Override
     public void disableCa() throws IOException, ApiException, SignatureException {
             //String result = 
             text(httpPost(msurl("/ca/disable"), null));
         // TODO:  an update on the "ca" user in the HMAC users table,  set enabled=false
-    }
+    }*/
 
     @Override
     public List<AuditLogEntry> searchAuditLog(AuditLogSearchCriteria criteria) throws IOException, ApiException, SignatureException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
+        HostTrustResponse trust = fromJSON(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.json")), HostTrustResponse.class);
+        return trust;
+    }
+
+   /* @Override
+    public X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
+        byte[] trust = binary(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trustcert.x509")));
+        try {
+            X509Certificate cert = X509Util.decodeDerCertificate(trust);
+            return cert;
+        }
+        catch(Exception e) {
+            throw new IOException("Cannot decode X509 certificate ("+trust.length+" bytes)");
+        }
+    }*/
     
     // this is required so that the jackson mapper will create an instance of ListMleData (List<MleData>) instead of creating an instance of List<LinkedHashMap>
     public static class ListHostData extends ArrayList<TxtHostRecord> { };
@@ -830,7 +875,7 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     public HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("hostName", hostname.toString());
-        HostManifestReportType report = fromXML(httpGet(asurl("/hosts/reports/trust", query)), HostManifestReportType.class);        
+        HostManifestReportType report = fromXML(httpGet(asurl("/hosts/reports/manifest", query)), HostManifestReportType.class);        
         return report;
     }
     
@@ -844,11 +889,22 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     @Override
     public String getSamlForHost(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
-        query.add("ID", hostname.toString());
+        query.add("hostName", hostname.toString());
+        // By default we will get it from cache.
+        query.add("force_verify", Boolean.toString(false));
         String saml = text(httpGet(asurl("/saml/assertions/host", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
         return saml;
     }
 
+    @Override
+    public String getSamlForHost(Hostname hostname, boolean forceVerify) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("hostName", hostname.toString());
+        query.add("force_verify", Boolean.toString(forceVerify));
+        String saml = text(httpGet(asurl("/saml/assertions/host", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        return saml;
+    }
+    
     public TrustAssertion verifyTrustAssertion(String saml) throws IOException, ApiException, SignatureException {
         X509Certificate[] trustedSamlCertificates;
         try {
@@ -865,6 +921,9 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         }
         catch(CertificateEncodingException e) {
             throw new ApiException("Cannot load trusted SAML certificates", e);
+        }
+        catch(Exception e) {
+            throw new ApiException("Cannot load SAML certificates: keystore not loaded", e);
         }
         TrustAssertion trustAssertion = new TrustAssertion(trustedSamlCertificates, saml);
         return trustAssertion;
@@ -894,20 +953,20 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
     }
     
     /**
-     * @deprecated this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
+     *  this method is used only by OpenSourceVMMHelper which is being replaced by IntelHostAgent; also the service implementation of this method only supports hosts with trust agents (even though vmware hosts also have their own attestation report)
      * @param hostname
      * @return
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException 
      */
-    @Override
+    /*@Override
     public String getHostAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException {
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("hostName", hostname.toString());
         String attReport = text(httpGet(asurl("/hosts/reports/attestation", query)));
         return attReport;
-    }
+    }*/
 
     // Whitelist Management API
     @Override
@@ -1043,7 +1102,11 @@ public class ApiClient implements AttestationService, WhitelistService, Manageme
         //return "true".equals(result);        
     }
 
-    
+    @Override
+    public boolean registerApiClient(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException {
+       String result = text(httpPost(msurl("/apiclient/register"), toJSON(apiClient)));
+        return true;        
+    }
     // Credential Management API
     
     // this is required so that the jackson mapper will create an instance of ListOsData (List<OsData>) instead of creating an instance of List<LinkedHashMap>

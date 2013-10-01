@@ -1,5 +1,5 @@
 
-INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172740,NOW(),'create 0.5.1 schema');
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172740,NOW(),'core - create 0.5.1 schema');
 
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -21,6 +21,10 @@ CREATE TABLE `tbl_db_portal_user` (
   PRIMARY KEY (`ID`),
   UNIQUE KEY `User_ID` (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172741,NOW(),'premium - create 0.5.1 schema api client and portal user');
+
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -30,6 +34,9 @@ CREATE TABLE `tbl_event_type` (
   `FieldName` varchar(45) NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172742,NOW(),'premium - create 0.5.1 schema module event');
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -39,6 +46,9 @@ CREATE TABLE `tbl_location_pcr` (
   `pcr_value` varchar(100) NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT='Mapping between the pcr values and location';
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172743,NOW(),'premium - create 0.5.1 schema location pcr');
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -59,6 +69,7 @@ ALTER TABLE `tbl_mle` MODIFY COLUMN `Name` VARCHAR(100) NOT NULL;
 ALTER TABLE `tbl_mle` MODIFY COLUMN `Version` VARCHAR(100) NOT NULL;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tbl_hosts` (
@@ -72,11 +83,8 @@ CREATE TABLE `tbl_hosts` (
   `AddOn_Connection_Info` varchar(80) DEFAULT NULL,
   `AIK_Certificate` text,
   `Email` varchar(45) DEFAULT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_On` datetime NOT NULL,
   `Error_Code` int(11) DEFAULT NULL,
   `Error_Description` varchar(100) DEFAULT NULL,
-  `Location` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`ID`),
   KEY `BIOS_MLE_ID` (`BIOS_MLE_ID`),
   KEY `VMM_MLE_ID` (`VMM_MLE_ID`),
@@ -84,6 +92,10 @@ CREATE TABLE `tbl_hosts` (
   CONSTRAINT `VMM_MLE_ID` FOREIGN KEY (`VMM_MLE_ID`) REFERENCES `tbl_mle` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+ALTER TABLE `tbl_hosts` ADD COLUMN `Location` varchar(200) DEFAULT NULL;
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172744,NOW(),'premium - create 0.5.1 schema add host location');
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -114,6 +126,10 @@ CREATE TABLE `tbl_package_namespace` (
   `VendorName` varchar(45) NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172745,NOW(),'premium - create 0.5.1 schema module package namespace');
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -122,17 +138,12 @@ CREATE TABLE `tbl_pcr_manifest` (
   `MLE_ID` int(11) NOT NULL,
   `Name` varchar(20) NOT NULL,
   `Value` varchar(100) NOT NULL,
-  `Created_By` int(11) NOT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_By` int(11) NOT NULL,
-  `Updated_On` datetime NOT NULL,
+ 
   `PCR_Description` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`),
   KEY `PCR_MLE_ID` (`MLE_ID`),
-  KEY `PCR_Created_By` (`Created_By`),
-  KEY `PCR_Last_Updated_By` (`Updated_By`),
-  CONSTRAINT `PCR_Created_By` FOREIGN KEY (`Created_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `PCR_Last_Updated_By` FOREIGN KEY (`Updated_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+ 
+ 
   CONSTRAINT `PCR_MLE_ID` FOREIGN KEY (`MLE_ID`) REFERENCES `tbl_mle` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -178,23 +189,19 @@ CREATE TABLE `tbl_module_manifest` (
   `PackageVersion` varchar(45) DEFAULT NULL,
   `UseHostSpecificDigestValue` tinyint(1) DEFAULT NULL,
   `Description` varchar(100) DEFAULT NULL,
-  `Created_By` int(11) NOT NULL,
-  `Created_On` datetime NOT NULL,
-  `Updated_By` int(11) DEFAULT NULL,
-  `Updated_On` datetime DEFAULT NULL,
+
   PRIMARY KEY (`ID`),
   KEY `Module_MLE_ID` (`MLE_ID`),
-  KEY `Module_Created_By` (`Created_By`),
-  KEY `Module_Last_Updated_By` (`Updated_By`),
+
   KEY `Module_NameSpace_ID` (`NameSpace_ID`),
   KEY `Module_Event_ID` (`Event_ID`),
   CONSTRAINT `Module_MLE_ID` FOREIGN KEY (`MLE_ID`) REFERENCES `tbl_mle` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Module_Created_By` FOREIGN KEY (`Created_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Module_Last_Updated_By` FOREIGN KEY (`Updated_By`) REFERENCES `tbl_db_portal_user` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `Module_NameSpace_ID` FOREIGN KEY (`NameSpace_ID`) REFERENCES `tbl_package_namespace` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `Module_Event_ID` FOREIGN KEY (`Event_ID`) REFERENCES `tbl_event_type` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172746,NOW(),'premium - create 0.5.1 schema module manifest');
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -208,3 +215,5 @@ CREATE TABLE `tbl_host_specific_manifest` (
   CONSTRAINT `Module_Manifest_ID` FOREIGN KEY (`Module_Manifest_ID`) REFERENCES `tbl_module_manifest` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120328172747,NOW(),'premium - create 0.5.1 schema host specific manifest');

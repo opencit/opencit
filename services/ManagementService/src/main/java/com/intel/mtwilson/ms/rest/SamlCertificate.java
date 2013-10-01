@@ -39,7 +39,24 @@ public class SamlCertificate {
      */
     public SamlCertificate() {
     }
+    
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    public String defaultCaGetAction() {
+        return ""; // note:  we are not doing anything here, this function exists only to work around this error: SEVERE: Conflicting URI templates. The URI template /ca for root resource class com.intel.mtwilson.ms.rest.CA and the URI template /ca transform to the same regular expression /ca(/.*)?
+    }
 
+    /**
+     * Same as getSamlCertificate but with suggested filename
+     */
+    @GET
+    @Path("/certificate/mtwilson-saml.crt")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM})
+    @PermitAll
+    public byte[] getSamlCertificateFilename() {
+        return getSamlCertificate();
+    }    
+    
     /**
      * Retrieves representation of an instance of
      * com.intel.mountwilson.ms.business.SamlCertificate
@@ -54,7 +71,7 @@ public class SamlCertificate {
 
         try {
             File certFile = ResourceFinder.getFile(MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file", "saml.crt.pem"));
-            log.info("Certificate File " + certFile.getPath());
+            log.debug("Certificate File " + certFile.getPath());
             FileInputStream in = new FileInputStream(certFile);
 //            byte[] certificate = IOUtils.toByteArray(in);
             String certificate = IOUtils.toString(in);
@@ -62,7 +79,7 @@ public class SamlCertificate {
 //            X509Certificate cert = X509Util.decodeDerCertificate(certificate);
             X509Certificate cert = X509Util.decodePemCertificate(certificate); // XXX assuming only one, should assume multiple and decide whetehr to sign first (end-subject) or last (root ca). 
             
-            log.info("Read certificate successfully");
+            log.debug("Read certificate successfully");
 
             return cert.getEncoded();
         } catch (CertificateException e) {

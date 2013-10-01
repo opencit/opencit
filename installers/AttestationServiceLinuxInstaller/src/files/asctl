@@ -11,11 +11,11 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
-mysql_required_version=5.0
-mysql_setup_log=/var/log/intel.${package_name}.install.log
-mysql_script_dir=${package_dir}/database
+#mysql_required_version=5.0
+#mysql_setup_log=/var/log/intel.${package_name}.install.log
+#mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
-glassfish_application_name=AttestationService
+webservice_application_name=AttestationService
 #java_required_version=1.6.0_29
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
@@ -72,7 +72,6 @@ download_privacyca_certs() {
   if [ -n "${PRIVACYCA_SERVER}" ]; then
     # check if the privacy ca password is saved in a properties file
     local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
-    local default_privacyca_password=${PRIVACYCA_DOWNLOAD_PASSWORD:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`}
     echo "Login to download the Privacy CA client files"
     if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME}" ]; then
       prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
@@ -88,17 +87,39 @@ download_privacyca_certs() {
     touch $zipfile
     chmod 600 $zipfile
     # XXX password in URL is insecure in systems that have user accounts or software which should not know this password
-    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:8181/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${PRIVACYCA_DOWNLOAD_PASSWORD}" -O ${zipfile}
+	encodedPW=$(echo "${PRIVACYCA_DOWNLOAD_PASSWORD}" | sed -e 's/%/%25/g' -e 's/ /%20/g' -e 's/!/%21/g' -e 's/"/%22/g' -e 's/#/%23/g' -e 's/\$/%24/g' -e 's/\&/%26/g' -e 's/'\''/%27/g' -e 's/(/%28/g' -e 's/)/%29/g' -e 's/\*/%2a/g' -e 's/+/%2b/g' -e 's/,/%2c/g' -e 's/-/%2d/g' -e 's/\./%2e/g' -e 's/\//%2f/g' -e 's/:/%3a/g' -e 's/;/%3b/g' -e 's//%3e/g' -e 's/?/%3f/g' -e 's/@/%40/g' -e 's/\[/%5b/g' -e 's/\\/%5c/g' -e 's/\]/%5d/g' -e 's/\^/%5e/g' -e 's/_/%5f/g' -e 's/`/%60/g' -e 's/{/%7b/g' -e 's/|/%7c/g' -e 's/}/%7d/g' -e 's/~/%7e/g')
+    wget --no-proxy --no-check-certificate -q "https://${PRIVACYCA_SERVER}:$DEFAULT_API_PORT/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${encodedPW}" -O ${zipfile}
     if [ -s ${zipfile} ]; then
       mkdir -p /tmp/clientfiles.x
       chmod -R 600 /tmp/clientfiles.x
       unzip -o ${zipfile} -d /tmp/clientfiles.x
       rm -f ${zipfile}
-      glassfish_permissions /tmp/clientfiles.x
+
+      if using_glassfish; then
+        glassfish_permissions /tmp/clientfiles.x
+      else
+        tomcat_permissions /tmp/clientfiles.x
+      fi
+
       mv /tmp/clientfiles.x/hisprovisioner.properties ${intel_conf_dir}/hisprovisioner.properties
       mv /tmp/clientfiles.x/PrivacyCA.cer ${intel_conf_dir}/PrivacyCA.cer
       mv /tmp/clientfiles.x/endorsement.p12 ${intel_conf_dir}/endorsement.p12
       rm -r /tmp/clientfiles.x
+
+      # create the PrivacyCA.pem cert so it can be download from the portal
+      if [ -f "$intel_conf_dir/PrivacyCA.cer" ]; then
+        openssl x509 -inform der -in "$intel_conf_dir/PrivacyCA.cer" -out "$intel_conf_dir/PrivacyCA.pem"
+      else
+        echo_warning "Missing PrivacyCA.cer.  File will not be available via portals"
+      fi
+
+      # create the list of trusted privacy ca's if it doesn't exist.  the list is in PrivacyCA.p12.pem
+      if [ ! -f "${intel_conf_dir}/PrivacyCA.p12.pem" ]; then
+          touch "${intel_conf_dir}/PrivacyCA.p12.pem"
+          chmod 600 "${intel_conf_dir}/PrivacyCA.p12.pem"
+      fi
+      # add the privacy ca certificate to a list of trusted privacy ca's
+      openssl x509 -in "${intel_conf_dir}/PrivacyCA.cer" -inform der -outform pem >> "${intel_conf_dir}/PrivacyCA.p12.pem"
       # if we got here with user input then save the Privacy CA server name in properties file
       if [ -z "${privacyca_server_config}" ]; then
         update_property_in_file privacyca.server "${package_config_filename}" "${PRIVACYCA_SERVER}"
@@ -112,7 +133,7 @@ download_privacyca_certs() {
         rm ${intel_conf_dir}/endorsement.p12
         openssl x509 -inform pem -in ${intel_conf_dir}/privacyca-endorsement.pem -out ${intel_conf_dir}/privacyca-endorsement.crt -outform der
         chmod 600 ${intel_conf_dir}/privacyca-endorsement.crt
-        glassfish_permissions ${intel_conf_dir}/privacyca-endorsement.crt
+        #glassfish_permissions ${intel_conf_dir}/privacyca-endorsement.crt
         rm ${intel_conf_dir}/privacyca-endorsement.pem
       else
         echo_failure "Cannot unzip package from Privacy CA"
@@ -158,33 +179,47 @@ create_saml_key() {
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
 
   #saml.issuer=https://localhost:8181
-  local saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
-   update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
+  local saml_issuer=""
+  if using_glassfish; then
+    saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
+  else
+    saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8443"
+    #saml_issuer=`echo $saml_issuer |  sed -e 's/\\//g'`
+  fi
+  update_property_in_file saml.issuer "${package_config_filename}" "${saml_issuer}"
 }
 
 create_data_encryption_key() {
-  # first check to see if there is a key already set
-  data_encryption_key=`read_property_from_file mtwilson.as.dek ${package_config_filename}`
-  if [[ -n "${data_encryption_key}" ]]; then
-    echo "Data encryption key already exists"
-  else
-    echo "Creating data encryption key"
+#  # first check to see if there is a key already set
+#  data_encryption_key=`read_property_from_file mtwilson.as.dek ${package_config_filename}`
+#  if [[ -n "${data_encryption_key}" ]]; then
+#    echo "Data encryption key already exists"
+#  else
+#    echo "Creating data encryption key"
     mtwilson setup EncryptDatabase
-  fi
+#  fi
 }
 
 
 setup_interactive_install() {
-  if [ -n "$mysql" ]; then
-    mysql_configure_connection "${package_config_filename}" mountwilson.as.db
-    mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
-    #mysql_configure_connection "${intel_conf_dir}/management-console.properties" mountwilson.mc.db
-    mysql_create_database
-    # bug #509 use java program to set up the database
-    #mysql_scripts=`list_mysql_install_scripts`
-    #mysql_install_scripts ${mysql_scripts}
-
-    mtwilson setup InitDatabase mysql
+  if using_mysql; then   
+    if [ -n "$mysql" ]; then
+      mysql_configure_connection "${package_config_filename}" mountwilson.as.db
+      mysql_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
+      mysql_create_database
+      mtwilson setup InitDatabase mysql
+    fi
+  elif using_postgres; then
+    if [ -n "$psql" ]; then
+      echo "inside psql: $psql"
+      postgres_configure_connection "${package_config_filename}" mountwilson.as.db
+      postgres_configure_connection "${intel_conf_dir}/audit-handler.properties" mountwilson.audit.db
+      postgres_create_database
+      mtwilson setup InitDatabase postgres
+    else
+      echo "psql not defined"
+      exit 1
+    fi
   fi
   create_saml_key 
   download_privacyca_certs
@@ -194,13 +229,19 @@ setup_interactive_install() {
     if [ -z "$GLASSFISH_RUNNING" ]; then
       glassfish_start_report
     fi
-    if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
-      webservice_start_report "${glassfish_application_name}"
-    else
-      webservice_uninstall "${glassfish_application_name}"
-      webservice_install "${glassfish_application_name}" "${package_dir}"/AttestationService.war
-      webservice_running_report "${glassfish_application_name}"
+  elif [ -n "$TOMCAT_HOME" ]; then
+    tomcat_running
+    if [ -z "$TOMCAT_RUNNING" ]; then
+      tomcat_start_report
     fi
+  fi
+  
+  if [ -n "$MTWILSON_SETUP_NODEPLOY" ]; then
+    webservice_start_report "${webservice_application_name}"
+  else
+    webservice_uninstall "${webservice_application_name}"
+    webservice_install "${webservice_application_name}" "${package_dir}"/AttestationService.war
+    webservice_running_report "${webservice_application_name}"
   fi
 }
 
@@ -208,11 +249,11 @@ setup() {
 #  mysql_clear; java_clear; glassfish_clear;
   mtwilson setup-env > "${package_env_filename}"
   . "${package_env_filename}"
-  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
-      echo_warning "Missing one or more required packages"
-      print_env_summary_report
-      exit 1
-  fi
+#  if [[ -z "$JAVA_HOME" || -z "$GLASSFISH_HOME" || -z "$mysql" ]]; then
+#      echo_warning "Missing one or more required packages"
+#      print_env_summary_report
+#      exit 1
+#  fi
   setup_interactive_install
 }
 
@@ -227,23 +268,27 @@ RETVAL=0
 case "$1" in
   version)
         echo "${package_name}"
-	echo "Version ${VERSION:-Unknown}"
-	echo "Build ${BUILD:-Unknown}"
+  echo "Version ${VERSION:-Unknown}"
+  echo "Build ${BUILD:-Unknown}"
         ;;
   start)
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   stop)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         ;;
   status)
+      if using_glassfish; then  
         glassfish_running_report
-        webservice_running_report "${glassfish_application_name}"
+      elif using_tomcat; then
+        tomcat_running_report
+      fi
+        webservice_running_report "${webservice_application_name}"
         ;;
   restart)
-        webservice_stop_report "${glassfish_application_name}"
+        webservice_stop_report "${webservice_application_name}"
         sleep 2
-        webservice_start_report "${glassfish_application_name}"
+        webservice_start_report "${webservice_application_name}"
         ;;
   glassfish-restart)
         glassfish_restart
@@ -270,7 +315,7 @@ case "$1" in
         ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
-        webservice_uninstall "${glassfish_application_name}"
+        webservice_uninstall "${webservice_application_name}"
         if [ -f "${package_config_filename}" ]; then
           mkdir -p "${intel_conf_dir}"
           cp "${package_config_filename}" "${intel_conf_dir}"/${package_name}.properties.${datestr}
@@ -280,7 +325,7 @@ case "$1" in
         if [[ "${package_dir}" == /opt/intel/* ]]; then
           rm -rf "${package_dir}"
         fi
-	rm /usr/local/bin/${script_name}
+  rm /usr/local/bin/${script_name}
         ;;
   saml-createkey)
         create_saml_key

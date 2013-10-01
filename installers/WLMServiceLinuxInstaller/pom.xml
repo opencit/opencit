@@ -17,6 +17,23 @@
     <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
 
+
+  <build>
+      <resources>
+          <resource>
+              <directory>src/files</directory>
+          </resource>
+      </resources>
+  </build>
+ 
+  <profiles>
+      <profile>
+          <activation>
+              <os>
+                  <family>unix</family>
+              </os>
+          </activation>
+
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
@@ -46,23 +63,7 @@
       <classifier>linux-x64</classifier>
     </dependency>	
     -->
-  </dependencies>
-
-  <build>
-      <resources>
-          <resource>
-              <directory>src/files</directory>
-          </resource>
-      </resources>
-  </build>
- 
-  <profiles>
-      <profile>
-          <activation>
-              <os>
-                  <family>unix</family>
-              </os>
-          </activation>
+  </dependencies>          
   <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
