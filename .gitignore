@@ -5,6 +5,8 @@ target
 .project
 .classpath
 /trust-agent/HisPrivacyCAWebServices2/WEB-INF/classes
+pom.xml.versionsBackup
+pom.xml.releaseBackup
 /services/asset-tag-service/derby.log
 /services/asset-tag-model/src/main/resources/html5/nbproject/private/
 /services/asset-tag-dao/src/main/resources/html5/nbproject/private/

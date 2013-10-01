@@ -30,8 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * How to use secure SSL connections:
  *
- * setSslHostnameVerifier();
- * setSslTrustManager(SslUtil.createX509TrustManagerWithKeystore(simpleKeystore));
+ * setSslHostnameVerifier(); setSslTrustManager(SslUtil.createX509TrustManagerWithKeystore(simpleKeystore));
  * connect(...)
  *
  * @author dsmagadX
@@ -88,7 +87,7 @@ public class VMwareClient implements TlsClient {
      public void setSslHostnameVerifier(HostnameVerifier hostnameVerifier) {
      this.hostnameVerifier = hostnameVerifier;
      }
-        
+
      public void setSslCertificateTrustManager(X509TrustManager trustManager) {
      this.trustManager = trustManager;
      }
@@ -226,9 +225,8 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * Issue #784 performance This method returns just the requested host, in
-     * contrast to getEntitiesByType which returns all the hosts and then we
-     * have to query each one to see if it's the one we want
+     * Issue #784 performance This method returns just the requested host, in contrast to getEntitiesByType which
+     * returns all the hosts and then we have to query each one to see if it's the one we want
      */
     public ManagedObjectReference getHostReference(String hostname) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
         ManagedObjectReference hostRef = null;
@@ -552,16 +550,14 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * performance of this method is very bad, it has been observed at 1 second
-     * per iteration of the comparison loop. see getHostReference for obtaining
-     * a managed object reference for a specific host (instead of for all hosts
-     * and then querying each one for the name)
+     * performance of this method is very bad, it has been observed at 1 second per iteration of the comparison loop.
+     * see getHostReference for obtaining a managed object reference for a specific host (instead of for all hosts and
+     * then querying each one for the name)
      *
      *
-     * TODO: this method should return a VCenterHost object, and VCenterHost
-     * should provide convenient access to information such as "is tpm enabled"
-     * and "get attestation report" for that host, wrapping all of the calls
-     * with managed object references to the vmware api.
+     * TODO: this method should return a VCenterHost object, and VCenterHost should provide convenient access to
+     * information such as "is tpm enabled" and "get attestation report" for that host, wrapping all of the calls with
+     * managed object references to the vmware api.
      *
      * XXX temporary public access until this code is refactored
      */
@@ -649,15 +645,11 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Sudhir on June 15, 2012
      *
-     * Retrieves the list of Virtual machines for the specified host along with
-     * the power state of the VM.
+     * Retrieves the list of Virtual machines for the specified host along with the power state of the VM.
      *
-     * @param hostName : Name of the host for which the VM details need to be
-     * retrieved.
-     * @param vCenterConnectionString : Connection string of the vCenter on
-     * which the host is configured
-     * @return : ArrayList consisting of all the VM along with the power state
-     * information. VM Name::POWERED_ON
+     * @param hostName : Name of the host for which the VM details need to be retrieved.
+     * @param vCenterConnectionString : Connection string of the vCenter on which the host is configured
+     * @return : ArrayList consisting of all the VM along with the power state information. VM Name::POWERED_ON
      * @throws Exception
      */
     public ArrayList getVMsForHost(String hostName, String vCenterConnectionString) throws VMwareConnectionException {
@@ -694,16 +686,13 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Sudhir on June 15, 2012
      *
-     * Retrieves the h/w & s/w details of the host including BIOS, OS
-     * information
+     * Retrieves the h/w & s/w details of the host including BIOS, OS information
      *
-     * @param hostName : Name of the host for which the details need to be
-     * retrieved
-     * @param vCenterConnectionString : Connection string to the vCenter server
-     * where the host is configured.
+     * @param hostName : Name of the host for which the details need to be retrieved
+     * @param vCenterConnectionString : Connection string to the vCenter server where the host is configured.
      *
-     * NOTE: this method modifies the input object and then returns the same
-     * object; it does NOT return a new object or a copy
+     * NOTE: this method modifies the input object and then returns the same object; it does NOT return a new object or
+     * a copy
      *
      * @deprecated use VmwareHostAgent.getHostDetails()
      *
@@ -751,11 +740,9 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Sudhir on June 15, 2012
      *
-     * Retrieves the list of hosts along with the s/w and h/w configuration
-     * details within the VMware Cluster.
+     * Retrieves the list of hosts along with the s/w and h/w configuration details within the VMware Cluster.
      *
-     * @param clusterName : Name of the cluster from which we need to retrieve
-     * the host details
+     * @param clusterName : Name of the cluster from which we need to retrieve the host details
      * @param vCenterConnectionString : Connection string to the vCenter server
      * @return : Array list of all the host names
      * @throws Exception
@@ -805,15 +792,14 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Savino on June 28, 2013
      *
-     * Retrieves the list of datacenters from the vcenter to populate dropdown
-     * on webform.
+     * Retrieves the list of datacenters from the vcenter to populate dropdown on webform.
      *
      * @param vCenterConnectionString : Connection string to the vCenter server
      * @return : string list of datacenter names
      * @throws Exception
      */
     public ArrayList getDatacenterNames(String vCenterConnectionString) throws VMwareConnectionException, RuntimeFaultFaultMsg, InvalidPropertyFaultMsg {
-        
+
         ArrayList datacenterDetailList = new ArrayList<String>();
         ConnectionString.VmwareConnectionString vmwareURL;
         List<String> datacenterSystemAttributesArr = new ArrayList<String>();
@@ -896,12 +882,10 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Savino on June 28, 2013
      *
-     * Retrieves the list of clusters from the vcenter to populate dropdown on
-     * webform.
+     * Retrieves the list of clusters from the vcenter to populate dropdown on webform.
      *
      * @param vCenterConnectionString : Connection string to the vCenter server
-     * @param datacenterName : Specify the datacenter that contains the desired
-     * clusters
+     * @param datacenterName : Specify the datacenter that contains the desired clusters
      * @return : string list of cluster names
      * @throws Exception
      */
@@ -947,12 +931,10 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Sudhir on June 14, 2012
      *
-     * This function provides the power on and power off functionality virtual
-     * machines
+     * This function provides the power on and power off functionality virtual machines
      *
      * @param vmName : Name of the VM
-     * @param hostName: Name of the host on which VM should be powered on. For
-     * Power Off, this parameter is not needed.
+     * @param hostName: Name of the host on which VM should be powered on. For Power Off, this parameter is not needed.
      * @param powerOn: Flag that indicates whether to power on or off the VM
      * @param vCenterConnectionString : Connection string to the vCenter server.
      * @throws Exception
@@ -1049,8 +1031,7 @@ public class VMwareClient implements TlsClient {
     /**
      * Added By: Sudhir on June 15, 2012
      *
-     * Retrieves the BIOS PCR 0 value from the attestation reports for the
-     * specified host
+     * Retrieves the BIOS PCR 0 value from the attestation reports for the specified host
      *
      * @param hostMOR: ManagedObjectReference for the host
      * @return : String containing the BIOS PCR 0 value.
@@ -1104,8 +1085,7 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * @deprecated just an adapter for now ; VmwareHostAgent uses
-     * getHostAttestationReport(MOR,HostName,PcrList)
+     * @deprecated just an adapter for now ; VmwareHostAgent uses getHostAttestationReport(MOR,HostName,PcrList)
      * @param hostObj
      * @param pcrList
      * @return
@@ -1124,11 +1104,9 @@ public class VMwareClient implements TlsClient {
      *
      * Retrieves the attestation report as a XML string
      *
-     * @param hostName : Name of the host for which the attestation report has
-     * to be retrieved
+     * @param hostName : Name of the host for which the attestation report has to be retrieved
      * @param pcrList : Required PCR list separated by comma
-     * @param vCenterConnectionString : Connection string to the vCenter server
-     * on which the host is configured
+     * @param vCenterConnectionString : Connection string to the vCenter server on which the host is configured
      * @return : XML string equivalent of the attestation report.
      * @throws Exception
      */
@@ -1198,7 +1176,10 @@ public class VMwareClient implements TlsClient {
                                     //xtw.writeAttribute("ComponentName", swEventLog.getComponentName());
                                     // Bug Fix #491 set componentName == to packageName - packageVersion
                                     //              instead of componentName
-                                    xtw.writeAttribute("ComponentName", swEventLog.getVibName() + "-" + swEventLog.getVibVersion());
+                                    // Bug: 931: To uniquely identify the component name we need to use a combination of the component name without the autogenerated version,
+                                    // VIB name and VIB version. First let us trim the component name to remove the autogenerated version.
+                                    String compName = swEventLog.getComponentName().substring(0, swEventLog.getComponentName().lastIndexOf("."));
+                                    xtw.writeAttribute("ComponentName", compName+ "-" + swEventLog.getVibName()+ "-" +swEventLog.getVibVersion());
                                     xtw.writeAttribute("DigestValue", byteArrayToHexString(swEventLog.getDataHash()));
                                     xtw.writeAttribute("ExtendedToPCR", String.valueOf(eventInfo.getPcrIndex()));
                                     xtw.writeAttribute("PackageName", swEventLog.getVibName());
@@ -1316,8 +1297,7 @@ public class VMwareClient implements TlsClient {
 
     // <editor-fold defaultstate="collapsed" desc="Code copied from VMware SDK's VMPowerOps.Java file.">
     /**
-     * Uses the new RetrievePropertiesEx method to emulate the now deprecated
-     * RetrieveProperties method
+     * Uses the new RetrievePropertiesEx method to emulate the now deprecated RetrieveProperties method
      *
      * @param listpfs
      * @return list of object content
@@ -1361,9 +1341,8 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * This code takes an array of [typename, property, property, ...] and
-     * converts it into a PropertySpec[]. handles case where multiple references
-     * to the same typename are specified.
+     * This code takes an array of [typename, property, property, ...] and converts it into a PropertySpec[]. handles
+     * case where multiple references to the same typename are specified.
      *
      * @param typeinfo 2D array of type and properties to retrieve
      *
@@ -1408,8 +1387,8 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * Retrieve content recursively with multiple properties. the typeinfo array
-     * contains typename + properties to retrieve.
+     * Retrieve content recursively with multiple properties. the typeinfo array contains typename + properties to
+     * retrieve.
      *
      * @param collector a property collector if available or null for default
      * @param root a root folder if available, or null for default
@@ -1488,8 +1467,7 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * Get the ManagedObjectReference for an item under the specified root
-     * folder that has the type and name specified.
+     * Get the ManagedObjectReference for an item under the specified root folder that has the type and name specified.
      *
      * @param root a root folder if available, or null for default
      * @param type type of the managed object
@@ -1610,8 +1588,7 @@ public class VMwareClient implements TlsClient {
 
     /**
      *
-     * @return TraversalSpec specification to get to the VirtualMachine managed
-     * object.
+     * @return TraversalSpec specification to get to the VirtualMachine managed object.
      */
     /* not used ...
      private TraversalSpec getVMTraversalSpec() {
@@ -1901,13 +1878,13 @@ public class VMwareClient implements TlsClient {
     }
 
     /**
-     * Handle Updates for a single object. waits till expected values of
-     * properties to check are reached Destroys the ObjectFilter when done.
+     * Handle Updates for a single object. waits till expected values of properties to check are reached Destroys the
+     * ObjectFilter when done.
      *
      * @param objmor MOR of the Object to wait for </param>
      * @param filterProps Properties list to filter
-     * @param endWaitProps Properties list to check for expected values these be
-     * properties of a property in the filter properties list
+     * @param endWaitProps Properties list to check for expected values these be properties of a property in the filter
+     * properties list
      * @param expectedVals values for properties to end the wait
      * @return true indicating expected values were met, and false otherwise
      */
@@ -2014,7 +1991,7 @@ public class VMwareClient implements TlsClient {
         Object[] result = waitForValues(
                 taskmor, infoList, stateList,
                 new Object[][]{new Object[]{
-                TaskInfoState.SUCCESS, TaskInfoState.ERROR}});
+                        TaskInfoState.SUCCESS, TaskInfoState.ERROR}});
         if (result[0].equals(TaskInfoState.SUCCESS)) {
             return "success";
         } else {
