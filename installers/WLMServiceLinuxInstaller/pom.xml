@@ -37,7 +37,7 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>WLMService</artifactId>
+      <artifactId>mtwilson-whitelist-service</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>	
@@ -82,7 +82,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.services</groupId>
-                  <artifactId>WLMService</artifactId>
+                  <artifactId>mtwilson-whitelist-service</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>

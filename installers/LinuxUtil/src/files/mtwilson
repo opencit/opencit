@@ -22,7 +22,7 @@ is_shell_script() {
     # we could also do firstline=`head -n 1 $file | tr -d '\040\011\012\015'` to strip out newlines
     # but the fact is if a CR at the end of the line is causing an issue  the shell won't load that
     # plugin anyway so we are correctly failing it as a possible shell script to avoid errors.
-    if [ "#\!/bin/sh" == "$firstline" ] || [ "#\!/bin/bash" == "$firstline" ]; then
+    if [ '#!/bin/sh' == "$firstline" ] || [ '#!/bin/bash' == "$firstline" ]; then
       return 0
     fi
     return 2
