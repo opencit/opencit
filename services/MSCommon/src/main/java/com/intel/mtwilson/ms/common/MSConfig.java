@@ -34,8 +34,8 @@ public class MSConfig  {
 
 //        defaults.setProperty("mtwilson.saml.certificate", "saml.cer");// XXX TODO remove this; deprecated in mtwilson-1.1  in favor of mtwilson.saml.certificate.file (PEM format)
         
-        defaults.setProperty("mtwilson.ms.biosPCRs", "0");
-        defaults.setProperty("mtwilson.ms.vmmPCRs", "17;18;19;20");
+        defaults.setProperty("mtwilson.ms.biosPCRs", "0;17");
+        defaults.setProperty("mtwilson.ms.vmmPCRs", "18;19;20");
 //        defaults.setProperty("mtwilson.ms.portalDBConnectionString", "jdbc:mysql://127.0.0.1:3306/cloudportal"); // XXX TODO deprecated;   cloudportal database has been dropped as of 1.0-RC2
 //        defaults.setProperty("mtwilson.ms.portalDBUserName", "root");
 //        defaults.setProperty("mtwilson.ms.portalDBPassword", "password");        

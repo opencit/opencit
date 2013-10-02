@@ -50,10 +50,10 @@
 				<span>4</span>
 				<input type="checkbox" id="required_pcrs_5" name="5">
 				<span>5</span>
+                                <input type="checkbox" id="required_pcrs_17" name="17">
+				<span>17</span>
 			</div>
 			<div class="valueDivConfig" id="vmmPCRsValues">
-				<input type="checkbox" id="required_pcrs_17" name="17">
-				<span>17</span>
 				<input type="checkbox" id="required_pcrs_18" name="18"> 
 				<span>18</span>
 				<input type="checkbox" id="required_pcrs_19" name="19">

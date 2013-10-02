@@ -42,7 +42,7 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.helper.BaseBO;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
-import com.intel.mtwilson.policy.HostReport;
+//import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.StringReader;
 import java.net.URL;
@@ -68,12 +68,12 @@ import org.slf4j.LoggerFactory;
  */
 public class HostBO extends BaseBO {
 
-    private static int MAX_BIOS_PCR = 6;
+    private static int MAX_BIOS_PCR = 17;
     private static int LOCATION_PCR = 22;
     private static String BIOS_PCRs = "0,17";
     private static String VMWARE_PCRs = "18,19,20";
     private static String OPENSOURCE_PCRs = "18";
-    private static String CITRIX_PCRs = "17,18";
+    private static String CITRIX_PCRs = "18"; //"17,18";
     
     //private static String propertiesFile = "management-service.properties";
     //Configuration config = ConfigurationFactory.loadConfiguration(propertiesFile);
@@ -408,40 +408,40 @@ public class HostBO extends BaseBO {
     public boolean registerHost(TxtHostRecord hostObj) {
         HostConfigData hostConfigObj = null;
         boolean registerStatus = false;
-        String biosPCRs = "";
-        String vmmPCRs = "";
-        
+        //String biosPCRs = "";
+        //String vmmPCRs = "";
+
         try {
 
             if (hostObj != null) {
 
                 hostConfigObj = new HostConfigData();
-                TxtHost tempHostObj = new TxtHost(hostObj);
-                ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
-                
+                //TxtHost tempHostObj = new TxtHost(hostObj);
+                //ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
+
                 //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
                 // option to separately configure BIOS and VMM PCRs
-                
+
                 // Bug 957: Since PCR configuration is not needed during host registration, commenting them out.
                 // The below changes are to address the bug in which if the REST API is directly called the default
                 // PCRs were being read from the property file which does not match the UI defaults.
                 /*if (connString.getVendor().equals(Vendor.VMWARE)) {
-                    biosPCRs = "0";
-                    vmmPCRs = "17,18,19,20";
-                } else if (connString.getVendor().equals(Vendor.CITRIX)) {
-                    biosPCRs = "0";
-                    vmmPCRs = "17,18";                    
-                } else {
-                    // Assuming INTEL
-                    biosPCRs = "0";
-                    vmmPCRs = "17,18";                    
-                }
+                 biosPCRs = "0,17";
+                 vmmPCRs = "18,19,20";
+                 } else if (connString.getVendor().equals(Vendor.CITRIX)) {
+                 biosPCRs = "0,17";
+                 vmmPCRs = "18";                    
+                 } else {
+                 // Assuming INTEL
+                 biosPCRs = "0,17";
+                 vmmPCRs = "18";                    
+                 }
                 
-                hostConfigObj.setBiosPCRs(biosPCRs);
-                hostConfigObj.setVmmPCRs(vmmPCRs);*/
+                 hostConfigObj.setBiosPCRs(BIOS_PCRs);
+                 hostConfigObj.setVmmPCRs(vmmPCRs);*/
 
                 hostConfigObj.setTxtHostRecord(hostObj);
-                                
+
                 // Set the default parameters
                 hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
                 hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
@@ -464,78 +464,79 @@ public class HostBO extends BaseBO {
 
  
 
-        /**
-         * Function that supports bulk host registration. If the user has just specified the host details to be registered, then
-         * we would use the default white list target of OEM for both BIOS and VMM.
-         * 
-         * @param hostRecords
-         * @return 
-         */
-        public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) {
-                HostConfigDataList hostList = new HostConfigDataList();
-                HostConfigResponseList hostResponseList = null;
-                String biosPCRs = "";
-                String vmmPCRs = "";
+    /**
+     * Function that supports bulk host registration. If the user has just
+     * specified the host details to be registered, then we would use the
+     * default white list target of OEM for both BIOS and VMM.
+     *
+     * @param hostRecords
+     * @return
+     */
+    public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) {
+        HostConfigDataList hostList = new HostConfigDataList();
+        HostConfigResponseList hostResponseList = null;
+        //String biosPCRs = "";
+        //String vmmPCRs = "";
 
-                try {
-                        
-                        log.error("About to process {0} servers", hostRecords.getHostRecords().size());
+        try {
 
-                      if (hostRecords != null) {
+            log.error("About to process {0} servers", hostRecords.getHostRecords().size());
 
-                                // For all the hosts specified, setup the default parameters and add it to the list
-                                for (TxtHostRecord hostObj : hostRecords.getHostRecords()) {
-                                        HostConfigData hostConfigObj = new HostConfigData();
-                                        TxtHost tempHostObj = new TxtHost(hostObj);
-                                        ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
+            if (hostRecords != null) {
 
-                                        //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
-                                        // option to separately configure BIOS and VMM PCRs
+                // For all the hosts specified, setup the default parameters and add it to the list
+                for (TxtHostRecord hostObj : hostRecords.getHostRecords()) {
+                    HostConfigData hostConfigObj = new HostConfigData();
+                    //TxtHost tempHostObj = new TxtHost(hostObj);
+                    //ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());
 
-                                        // Bug 957: Since PCR configuration is not needed during host registration, commenting them out.
-                                        // The below changes are to address the bug in which if the REST API is directly called the default
-                                        // PCRs were being read from the property file which does not match the UI defaults.
+                    //TODO: Modify the HostVMMType ENUM to match the Vendor ENUM or combine them. Also have the 
+                    // option to separately configure BIOS and VMM PCRs
+
+                    // Bug 957: Since PCR configuration is not needed during host registration, commenting them out.
+                    // The below changes are to address the bug in which if the REST API is directly called the default
+                    // PCRs were being read from the property file which does not match the UI defaults.
                                         /*
-                                        if (connString.getVendor().equals(Vendor.VMWARE)) {
-                                            biosPCRs = "0";
-                                            vmmPCRs = "17,18,19,20";
-                                        } else if (connString.getVendor().equals(Vendor.CITRIX)) {
-                                            biosPCRs = "0";
-                                            vmmPCRs = "17,18";                    
-                                        } else {
-                                            // Assuming INTEL
-                                            biosPCRs = "0";
-                                            vmmPCRs = "17,18";                    
-                                        }*/
+                     if (connString.getVendor().equals(Vendor.VMWARE)) {
+                     biosPCRs = "0,17";
+                     vmmPCRs = "18,19,20";
+                     } else if (connString.getVendor().equals(Vendor.CITRIX)) {
+                     biosPCRs = "0,17";
+                     vmmPCRs = "18";                    
+                     } else {
+                     // Assuming INTEL
+                     biosPCRs = "0,17";
+                     vmmPCRs = "18";                    
+                     }
 
-                                        hostConfigObj.setBiosPCRs(biosPCRs);
-                                        hostConfigObj.setVmmPCRs(vmmPCRs);
-                                        
-                                        hostConfigObj.setTxtHostRecord(hostObj);
+                     hostConfigObj.setBiosPCRs(BIOS_PCRs);
+                     hostConfigObj.setVmmPCRs(vmmPCRs);*/
 
-                                        hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
-                                        hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
-                                        hostList.getHostRecords().add(hostConfigObj);
-                                }
+                    hostConfigObj.setTxtHostRecord(hostObj);
 
-                        }
-
-                        // Call into the overloaded method for actually calling into the ApiClient library and getting the results.
-                       hostResponseList = registerHosts(hostList);
-
-                        return hostResponseList;
-
-                } catch (MSException me) {
-                        log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
-                        throw me;
-
-                } catch (Exception ex) {
-
-                        log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
-                        ex.printStackTrace(System.err);
-                        throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+                    hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
+                    hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
+                    hostList.getHostRecords().add(hostConfigObj);
                 }
+
+            }
+
+            // Call into the overloaded method for actually calling into the ApiClient library and getting the results.
+            hostResponseList = registerHosts(hostList);
+
+            return hostResponseList;
+
+        } catch (MSException me) {
+            log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
+            throw me;
+
+        } catch (Exception ex) {
+
+            log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
+            ex.printStackTrace(System.err);
+            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
         }
+    }
 
     /**
      * Bulk host registration/update function.
@@ -1051,22 +1052,22 @@ public class HostBO extends BaseBO {
 
                 hostConfigObj = new HostConfigData();
                 
-                String biosPCRs = "";
+                //String biosPCRs = "";
                 String vmmPCRs = "";                
                 TxtHost tempHostObj = new TxtHost(gkvHost);
                 ConnectionString connString = new ConnectionString(tempHostObj.getAddOn_Connection_String());                
                 // The below changes are to address the bug in which if the REST API is directly called the default
                 // PCRs were being read from the property file which does not match the UI defaults.
                 if (connString.getVendor().equals(Vendor.VMWARE)) {
-                    biosPCRs = "0";
-                    vmmPCRs = "17,18,19,20";
+                    //biosPCRs = "0,17";
+                    vmmPCRs = VMWARE_PCRs;
                 } else if (connString.getVendor().equals(Vendor.CITRIX)) {
-                    biosPCRs = "0";
-                    vmmPCRs = "17,18";                    
+                    //biosPCRs = "0,17";
+                    vmmPCRs = CITRIX_PCRs;                    
                 } else {
                     // Assuming INTEL
-                    biosPCRs = "0";
-                    vmmPCRs = "17,18";                    
+                    //biosPCRs = "0,17";
+                    vmmPCRs = OPENSOURCE_PCRs;                    
                 }
                 
                 hostConfigObj.setTxtHostRecord(gkvHost);
@@ -1080,7 +1081,7 @@ public class HostBO extends BaseBO {
                 // By default we should not be registering the host since the user wants to just configure the white list.
                 hostConfigObj.setRegisterHost(false);
 
-                hostConfigObj.setBiosPCRs(biosPCRs);
+                hostConfigObj.setBiosPCRs(BIOS_PCRs);
                 hostConfigObj.setVmmPCRs(vmmPCRs);
             }
 
@@ -1484,7 +1485,7 @@ public class HostBO extends BaseBO {
                 // be verified. 
                 String biosPCRs = hostConfigObj.getBiosPCRs();
                 if (biosPCRs.isEmpty()) {
-                    biosPCRs = "0";
+                    biosPCRs = BIOS_PCRs;
                 }
                 String[] biosPCRList = biosPCRs.split(",");
 
