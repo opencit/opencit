@@ -114,7 +114,11 @@ java_detect() {
           fi
         fi
     done
-    
+    echo "JAVA_JDK_CANDIDATES: " & $JAVA_JDK_CANDIDATES
+    echo "JAVA_HOME: " & $JAVA_HOME
+    echo "java: " & $java
+    echo "JAVA_VERSION: " & $JAVA_VERSION
+    echo "min_version: " & ${min_version}
     echo "Cannot find JDK"
 
     JAVA_JRE_CANDIDATES=`find / -name java 2>/dev/null | grep jre | grep bin/java`
