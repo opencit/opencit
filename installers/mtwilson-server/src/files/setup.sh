@@ -403,6 +403,7 @@ export PRIVACYCA_SERVER=$MTWILSON_SERVER
 chmod +x *.bin
 if [ ! -z "$opt_java" ] && [ -n "$java_installer" ]; then
   echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
+  echo "SAVY, java_installer: $java_installer"
   ./$java_installer
   echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
 else
