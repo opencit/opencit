@@ -5,7 +5,7 @@
 # XXX are we using this?
 DEFAULT_MTWILSON_API_BASEURL="http://127.0.0.1"
 
-apiclient_dir=/usr/local/share/mtwilson/apiclient
+apiclient_dir=/usr/local/share/mtwilson/client
 apiclient_java=${apiclient_dir}/java
 
 

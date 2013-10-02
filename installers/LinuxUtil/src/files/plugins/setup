@@ -1,6 +1,6 @@
 #!/bin/sh
 
-setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+setupconsole_dir=/opt/intel/cloudsecurity/mtwilson-console
 
 # REQUIRES: java
 

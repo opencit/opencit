@@ -29,11 +29,11 @@ cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
 # distribute so it cannot be even considered that our product is "based on"
 # or is a "derivative work" of mysql.
 # here is what the customer is supposed to execute before installing mt wilson:
-# # mkdir -p /opt/intel/cloudsecurity/setup-console
-# # cp mysql-connector-java-5.1.x.jar /opt/intel/cloudsecurity/setup-console
+# # mkdir -p /opt/intel/cloudsecurity/mtwilson-console
+# # cp mysql-connector-java-5.1.x.jar /opt/intel/cloudsecurity/mtwilson-console
 # so now we check to see if it's there, and copy it to glassfish so the apps
 # can use it:
-mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/setup-console/* | grep -i mysql`
+mysqlconnector_files=`ls -1 /opt/intel/cloudsecurity/mtwilson-console/* | grep -i mysql`
 if [[ -n "$mysqlconnector_files" ]]; then
   cp $mysqlconnector_files ${GLASSFISH_HOME}/modules/
 fi
