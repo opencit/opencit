@@ -31,6 +31,11 @@
 
   <dependencies>
 	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-i18n</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
 		<groupId>javax</groupId>
 		<artifactId>javaee-web-api</artifactId>
 		<version>6.0</version>

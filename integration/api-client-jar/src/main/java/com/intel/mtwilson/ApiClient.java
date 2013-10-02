@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.api.MtWilson;
@@ -35,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import static javax.ws.rs.core.MediaType.*;
@@ -66,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * Those two constructors provide the two extremes: with (File), all properties in a file,
  * developer specifies the path for easy integration into any system); with
  * (URL,Hmac/RsaCredential,SimpleKeystore) a developer is able to instantiate a secure
- * ApiClient completely in Java without requiring a  configuration file (it will enable
+ * ApiClient completely in Java without requiring a configuration file (it will enable
  * requireTrustedCertificate and verifyHostname).
  * @since 0.5.2
  * @author jbuhacoff
@@ -87,6 +89,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     private ClassLoader jaxbClassLoader = null;
     
     private SimpleKeystore keystore;
+    private Locale locale = Locale.getDefault();
         
     /**
      * Loads configuration from the specified file. 
@@ -118,7 +121,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         httpClient = new JerseyHttpClient(baseURL.toExternalForm(), config.getString("mtwilson.api.clientId"), config.getString("mtwilson.api.secretKey"));
         */
         setKeystore(config);
+        setLocale(config.getString("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         setHttpClientWithConfig(config);
+        httpClient.setLocale(locale);
         }
         catch(Exception e) {
             throw new ClientException("Cannot initialize client", e);
@@ -140,8 +145,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
+        setLocale(properties.getProperty("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("HMAC-256 Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -163,8 +170,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
+        setLocale(properties.getProperty("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -186,8 +195,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
+        setLocale(config.getString("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("HMAC-256 Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -213,8 +224,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
+        setLocale(config.getString("mtwilson.locale", LocaleUtil.toLanguageTag(locale))); // locale.toLanguageTag() is available in Java 7
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -228,6 +241,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setKeystore(keystore);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, tlsPolicy);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -307,6 +321,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      */
     public void setJaxbClassLoader(ClassLoader classLoader) {
         jaxbClassLoader = classLoader;
+    }
+    
+    final public void setLocale(String localeName) {
+        try {
+            locale = LocaleUtil.forLanguageTag(localeName); // Locale.forLanguageTag is available in Java 7
+        }
+        catch(Exception e) {
+            log.debug("Invalid locale: {}", localeName);
+        }
     }
         
     /**
@@ -905,6 +928,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return saml;
     }
     
+    @Override
+    public String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("force_verify", Boolean.toString(forceVerify));
+        String saml = text(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.saml", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        return saml;
+    }
+    
+    
     public TrustAssertion verifyTrustAssertion(String saml) throws IOException, ApiException, SignatureException {
         X509Certificate[] trustedSamlCertificates;
         try {
@@ -967,6 +999,18 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         String attReport = text(httpGet(asurl("/hosts/reports/attestation", query)));
         return attReport;
     }*/
+
+    @Override
+    public boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPost(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
+
+    @Override
+    public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPut(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
 
     // Whitelist Management API
     @Override

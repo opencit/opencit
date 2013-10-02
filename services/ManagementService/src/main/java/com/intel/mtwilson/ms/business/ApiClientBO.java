@@ -66,7 +66,8 @@ public class ApiClientBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during API Client registration. " + ex.getMessage());
+            log.error("Error during API Client registration. " + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_API_CLIENT_CREATE_ERROR);
         }
     }
 
@@ -242,7 +243,7 @@ public class ApiClientBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex);
+            throw new MSException(ex, ErrorCode.MS_API_CLIENT_UPDATE_ERROR);
         }
     }
 
@@ -288,11 +289,11 @@ public class ApiClientBO extends BaseBO {
             return info;
             
         } catch (MSException me) {
-            log.error("Error during retrieving of the API Client information. " + me.getErrorMessage());
+            log.error("Error during retrieving of the API Client information. " + me.getLocalizedMessage());
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex);
+            throw new MSException(ex); // XXX TODO indicate the failure is from a search function by creating ane rror code for it?
         }
     }
 

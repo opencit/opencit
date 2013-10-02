@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>AttestationService</artifactId>
+    <artifactId>mtwilson-attestation-service</artifactId>
     <packaging>war</packaging>
     <name>Attestation Service War</name>
 
@@ -252,8 +252,8 @@
 
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>my</artifactId>
-	    <version>1.2-SNAPSHOT</version>
+	    <artifactId>mtwilson-my</artifactId>
+	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>
 	<dependency>
@@ -271,7 +271,7 @@
     <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>webservice-dependencies</artifactId>
+            <artifactId>mtwilson-webservice-dependencies</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
@@ -303,6 +303,12 @@
 		<version>${project.version}</version>
 	</dependency> 
         -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asset-tag-model</artifactId>
+			<version>${project.version}</version>
+		 <type>jar</type>
+		 </dependency>
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -331,12 +337,12 @@
 		</dependency>
                 <dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>MtWilsonHttpSecurity</artifactId>
+			<artifactId>mtwilson-http-security</artifactId>
 			<version>${project.version}</version>
 		</dependency>
         <dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>MtWilsonHttpSecurityAdapters</artifactId>
+			<artifactId>mtwilson-http-security-server</artifactId>
 			<version>${project.version}</version>
 		</dependency>
         <dependency>
@@ -509,7 +515,7 @@
 		<!--
         <dependency>
             <groupId>com.intel.mtwilson.plugins</groupId>
-            <artifactId>auto-refresh-trust</artifactId>
+            <artifactId>mtwilson-plugin-auto-refresh-trust</artifactId>
             <version>${project.version}</version>
         </dependency>
 		-->

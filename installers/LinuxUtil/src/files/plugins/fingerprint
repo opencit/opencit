@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# REQUIRES: ssh, glassfish, tomcat, saml
+
+# Usage: mtwilson fingerprint
+mw_fingerprint() {
+        # show server ssh fingerprint, glassfish ssl fingerprint, and saml cert fingerprint
+        echo "== SSH HOST KEYS =="
+        ssh_fingerprints
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+          glassfish_require
+          echo "== GLASSFISH SSL CERTIFICATE =="
+          glassfish_sslcert_report
+        elif using_tomcat; then
+          tomcat_require
+          echo "== TOMCAT SSL CERTIFICATE =="
+          tomcat_sslcert_report
+        fi
+        echo "== MT WILSON SAML CERTIFICATE =="
+        mtwilson_saml_cert_report
+}

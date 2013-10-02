@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.intel.mtwilson.linux</groupId>
-  <artifactId>ManagementService</artifactId>
+  <artifactId>mtwilson-management-service-installer</artifactId>
 
   <packaging>pom</packaging>
   <name>Management Service Linux Installer</name>
@@ -37,15 +37,15 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>ManagementService</artifactId>
+      <artifactId>mtwilson-management-service</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>MtWilsonLinuxUtil</artifactId>
+      <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
-      <type>sh</type>
+      <type>bin</type>
     </dependency>	
     <!--
     <dependency>
@@ -82,7 +82,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.services</groupId>
-                  <artifactId>ManagementService</artifactId>
+                  <artifactId>mtwilson-management-service</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
@@ -90,11 +90,11 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <artifactId>mtwilson-linux-util</artifactId>
                   <version>${project.version}</version>
-                  <type>sh</type>
+                  <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>functions</destFileName>
+                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
                 </artifactItem>
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->

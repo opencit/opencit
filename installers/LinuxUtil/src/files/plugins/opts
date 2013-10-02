@@ -1,0 +1,53 @@
+#!/bin/sh
+
+shortopts=
+longopts=
+
+addopt() {
+  local optspec="$1"
+  local optdesc="$2"
+  echo "addopt: $optspec  $optdesc"
+  if [ -n "$shortopts" ]; then
+    # short option names are concatenated for the getopt command
+    # for example to declare options -a -b -c you pass "abc"
+    shortopts="${shortopts}$optspec"
+  else
+    shortopts="-o $optspec"
+  fi
+  echo "new shortoptS: $shortopts"
+}
+
+
+addlongopt() {
+  local optspec="$1"
+  local optdesc="$2"
+  echo "addlongopt: $optspec  $optdesc"
+  if [ -n "$longopts" ]; then
+    longopts="${longopts},$optspec"
+  else
+    longopts="-l $optspec"
+  fi
+  echo "new longopts: $longopts"
+}
+
+parse_args() {
+echo "inside pargs args"
+  if ! options=$(getopt -n mhagent $shortopts $longopts -- "$@"); then exit 1; fi
+echo "inside pargs args"
+  eval set -- "$options"
+echo "inside pargs args"
+  OPTIONS=
+  while [ $# -gt 0 ]
+  do
+### XXX TODO automatically set a variable for each option,
+###  where variable name  is OPT_ followed by all-uppercase version
+###  of the option name  (can use tr '[:lower:]' '[:upper:]'
+echo "option: $1"
+    OPTIONS="$OPTIONS $1"
+    case $1 in
+      --project-id) PROJECT_ID="$2"; shift;;
+      --instance-name) INSTANCE_NAME="$2"; shift;;
+    esac
+    shift
+  done
+}

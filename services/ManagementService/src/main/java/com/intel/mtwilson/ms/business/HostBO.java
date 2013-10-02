@@ -150,7 +150,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Error while creating the Api Client object. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ErrorCode.SYSTEM_ERROR, "Error while creating the Api Client object. " + ex.getMessage(), ex);
+            throw new MSException(ex, ErrorCode.MS_API_CLIENT_CREATE_ERROR);
 
         }
 
@@ -167,6 +167,12 @@ public class HostBO extends BaseBO {
             // Let us first search in the processorName field. If it cannot find, then we will search on the CPU ID field
             MwProcessorMapping procMap = jpaController.findByProcessorType(processorNameOrCPUID);
             if (procMap == null) {
+                // Since we did not find the platform by processor type, the search criteria is very likely to be CPU ID
+                // In some cases we have observed that the stepping can change within a processor generation and can be 
+                // ignored for mapping to the platform time.
+                // EX: C1 06 02. Here 1 is the stepping. To ignore this the below query has been modified to use the LIKE option. So,
+                // we need to set the second character to %
+                processorNameOrCPUID = processorNameOrCPUID.substring(0,1) + "%" + processorNameOrCPUID.substring(2);
                 procMap = jpaController.findByCPUID(processorNameOrCPUID);
             }
             
@@ -178,7 +184,7 @@ public class HostBO extends BaseBO {
             throw me;
         } catch (Exception ex) {
             log.error("Unexpected errror during retrieval of platform name details. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of platform name details." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_GET_HOST_PLATFORM_NAME);
         }
         
         return platformName;
@@ -255,7 +261,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_GET_HOST_MLE_INFO);
         }
     }
 
@@ -293,7 +299,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_BULK_REGISTER_HOST);
         }
     }
 
@@ -356,7 +362,7 @@ public class HostBO extends BaseBO {
 
             log.error("Unexpected errror during host registration. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_REGISTER_HOST);
         }
         return registerStatus;
     }
@@ -430,7 +436,7 @@ public class HostBO extends BaseBO {
 
                         log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
                         ex.printStackTrace(System.err);
-                        throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+                        throw new MSException(ex, ErrorCode.MS_FAILED_BULK_REGISTER_HOST);
                 }
         }
 
@@ -534,7 +540,7 @@ public class HostBO extends BaseBO {
 
             log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
             ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_BULK_REGISTER_HOST);
         }
     }
 
@@ -650,7 +656,7 @@ public class HostBO extends BaseBO {
 
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during host registration. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_REGISTER_HOST);
         }
         return registerStatus;
     }
@@ -691,6 +697,9 @@ public class HostBO extends BaseBO {
             hostObj.VMM_OSVersion = tblHostObj.getVmmMleId().getOsId().getVersion();
             hostObj.Processor_Info = hostConfigObj.getTxtHostRecord().Processor_Info;
 
+            // Retrieve the platform name, which will be used later
+            String platformName = getPlatformName(hostObj.Processor_Info);
+            
             // Find out what is the current White List target that the host is configured. For
             // white list target of "Specified Good Known host", we will have the host name appended
             // to the VMM_Name. For "OEM specific ones" we will have the OEM name appended to it. This
@@ -779,7 +788,6 @@ public class HostBO extends BaseBO {
 
                     // Also we need to add back the OEM name to the VMM_Name. We do not need to add it for
                     // BIOS as BIOS_Name is always OEM specific.                    
-                    String platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty())
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
                     else
@@ -791,9 +799,15 @@ public class HostBO extends BaseBO {
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
 
                     // Now the user wants to change from SPECIFIC HOST option to Global option. So,
-                    // We need to change the name of VMM_Name to remove the Host Name                    
+                    // We need to change the name of VMM_Name to remove the Host Name and ensure that the platform name is added back.                   
                     hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_", hostObj.HostName).length());
 
+                    // We need to add back the platform name
+                    if (!platformName.isEmpty())
+                        hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
+                    else
+                        hostObj.VMM_Name = hostObj.VMM_Name;
+                    
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
                 } else {
@@ -829,10 +843,10 @@ public class HostBO extends BaseBO {
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
 
-                    // Now the user wants to change from VMM_OEM option to Global 
-                    // option. So,we need to change the names of VMM_Name 
-                    String platformName = getPlatformName(hostObj.Processor_Info);                    
-                    hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_%s_", hostObj.BIOS_Oem.split(" ")[0].toString(), platformName).length());
+                    // Now the user wants to change from VMM_OEM option to Global option. So,we need to change the names of VMM_Name 
+                    // Since it is currently using the OEM name, which is a combination of OEM_Platform_VMM name, we just remove the OEM part
+                    // and keep the remaining content as such.
+                    hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_", hostObj.BIOS_Oem.split(" ")[0].toString()).length());
 
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
@@ -862,12 +876,8 @@ public class HostBO extends BaseBO {
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_OEM) {
 
-                    // We need to add OEM name to the VMM_Name.     
-                    String platformName = getPlatformName(hostObj.Processor_Info);
-                    if (!platformName.isEmpty())
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    // We need to add OEM name to the VMM_Name.     Here the VMM_Name would already have the platform name.
+                    hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
                     
                     log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
@@ -919,7 +929,7 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during host update. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host update." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_UPDATE_HOST);
         }
 
         return updateStatus;
@@ -987,7 +997,7 @@ public class HostBO extends BaseBO {
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during white list configuration. " + ex.toString());
             ex.printStackTrace();
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_CONFIGURE_WHITELIST);
         }
 
         return configStatus;
@@ -1194,7 +1204,7 @@ public class HostBO extends BaseBO {
             ex.printStackTrace(System.err);
             log.error("Unexpected errror during white list configuration. " + ex.toString());
             ex.printStackTrace();
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            throw new MSException(ex, ErrorCode.MS_FAILED_CONFIGURE_WHITELIST);
         }
 
         return configStatus;
@@ -1482,7 +1492,14 @@ public class HostBO extends BaseBO {
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
                     else
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
-                }
+                } else if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_GLOBAL) {
+                    // Bug #951 where in we need to append the platform name to the global white lists also.
+                    String platformName = getPlatformName(hostObj.Processor_Info);
+                    if (!platformName.isEmpty())
+                        hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
+                    else
+                        hostObj.VMM_Name = hostObj.VMM_Name;
+            }
                 
                 // Create the VMM MLE
                 MleData mleVMMObj = new MleData();

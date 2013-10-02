@@ -1,0 +1,296 @@
+#!/bin/sh
+
+DEFAULT_JAVA_REQUIRED_VERSION="1.6"
+
+# caller can define JAVA_REQUIRED_VERSION ; if they don't we fall back on DEFAULT_JAVA_REQUIRED_VERSION
+# XXX TODO the variable JAVA_REQUIRED_VERSION should move to /etc/mtwilson/java   (whereas JAVA_HOME, java_bin, and java would be in /var/mtwilson/env/java)
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export java_required_version=${JAVA_REQUIRED_VERSION}
+
+
+### FUNCTION LIBRARY: java
+
+java_clear() {
+  JAVA_HOME=""
+  java=""
+  JAVA_VERSION=""
+}
+
+# Returns success (0) if the JAVA_HOME and java variables are set and if the java binary exists.
+# Returns error (1) otherwise and displays the issue as a warning.
+# Quick and repeatable. No side effects.
+# Example:   if not java_ready; then java_ready_report; fi
+# Note: We do NOT check JAVA_VERSION here because if someone has configured a specific Java they want to use,
+# we don't care what version it is as long as it is present.  In contrast, the java_detect function sets JAVA_VERSION
+java_ready_report() {
+  if [[ -z "$JAVA_HOME" ]]; then echo_warning "JAVA_HOME variable is not set"; return 1; fi
+  if [[ -z "$java" ]]; then echo_warning "Java binary path is not set"; return 1; fi
+  if [[ ! -f "$java" ]]; then echo_warning "Cannot find Java binary at $java"; return 1; fi
+  echo_success "Using Java at $java"
+  return 0
+}
+
+# Returns success (0) if the JAVA_HOME and java variables are set and if the java binary exists.
+# Returns error (1) otherwise.
+# Quick and repeatable. No side effects.
+# Example:   if java_ready; then $java -jar start.jar; fi
+java_ready() {
+  java_ready_report > /dev/null
+  return $?
+}
+
+
+# prints the current java version
+# return codes:
+# 0 - success
+# 1 - java command not found
+# 2 - cannot get version number using java command
+# Environment:
+# - java  (path to java binary) you can get it by calling java_detect 
+#    (or if you are calling this from java_detect you set it yourself)
+java_version() {
+  if [ -n "$java" ]; then
+    # extract the version number from a string like: java version "1.6.0_29"
+    local current_java_version=`$java -version 2>&1 | head -n 1 | sed -e 's/"//g' | awk '{ print $3 }'`
+    if [ -n "$current_java_version" ]; then
+      echo $current_java_version
+      return 0
+    fi
+    return 2
+  fi
+  return 1
+}
+
+# Environment:
+# - java_required_version
+java_version_report() {
+  local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
+  local current_version=`java_version`
+  if is_java_version_at_least "$current_version" "${min_version}"; then
+    echo_success "Java version $current_version is ok"
+    return 0
+  else
+    echo_warning "Java version $current_version is not supported, minimum is ${min_version}"
+    return 1
+  fi
+}
+
+
+# detects possible java installations
+# does nothing if JAVA_HOME is already set; unset before calling to force detection
+# uses the first installation found that meets the version requirement.
+# prefers JDK over JRE installations, and prefers JRE over system-provided java
+# This is not because JDK is better than JRE is better than system-provided java,
+# but because if the system administrator has bothered to install the JDK or JRE
+# it's clear he prefers to use that over the system-provided java.
+# Environment:
+# - JAVA_REQUIRED_VERSION should be set like 1.6 or 1.6.0_29 ; if not set then DEFAULT_JAVA_REQUIRED_VERSION is used
+# Return code:  0 if java matching minimum version is found, 1 otherwise
+# Postcondition:  on success, JAVA_HOME, java, and JAVA_VERSION are set;  on failure to find java they are cleared
+java_detect() {
+  local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
+  # start with JAVA_HOME if it is already configured
+  if [[ -n "$JAVA_HOME" ]]; then
+    if [[ -z "$java" ]]; then
+      java=${JAVA_HOME}/bin/java
+    fi
+    JAVA_VERSION=`java_version`
+    if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+      return 0
+    fi
+  fi
+
+    JAVA_JDK_CANDIDATES=`find / -name java 2>/dev/null | grep jdk | grep -v jre | grep bin/java`
+    for c in $JAVA_JDK_CANDIDATES
+    do
+        local java_bindir=`dirname $c`
+        if [ -f "$java_bindir/java" ]; then
+          export JAVA_HOME=`dirname $java_bindir`
+          java=$c
+          JAVA_VERSION=`java_version`
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE 
+          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+            return 0
+          fi
+        fi
+    done
+    
+    echo "Cannot find JDK"
+
+    JAVA_JRE_CANDIDATES=`find / -name java 2>/dev/null | grep jre | grep bin/java`
+    for c in $JAVA_JRE_CANDIDATES
+    do
+        java_bindir=`dirname $c`
+        if [ -f "$java_bindir/java" ]; then
+          export JAVA_HOME=`dirname $java_bindir`
+          java=$c
+          JAVA_VERSION=`java_version`
+          echo "Found Java: $JAVA_HOME" >> $INSTALL_LOG_FILE
+          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+            return 0
+          fi
+        fi
+    done
+
+    echo "Cannot find JRE"
+
+    JAVA_BIN_CANDIDATES=`find / -name java 2>/dev/null | grep bin/java`
+    for c in $JAVA_BIN_CANDIDATES
+    do
+        java_bindir=`dirname $c`
+        # in non-JDK and non-JRE folders the "java" command may be a symlink:
+        if [ -f "$java_bindir/java" ]; then
+          export JAVA_HOME=`dirname $java_bindir`
+          java=$c
+          JAVA_VERSION=`java_version`
+          echo "Found Java: $c" >> $INSTALL_LOG_FILE
+          if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+            return 0
+          fi
+        elif [ -h "$java_bindir/java" ]; then
+          local javatarget=`readlink $c`
+          if [ -f "$javatarget" ]; then
+            java_bindir=`dirname $javatarget`
+            export JAVA_HOME=`dirname $java_bindir`
+            java=$javatarget
+            JAVA_VERSION=`java_version`
+            echo "Found Java: $java" >> $INSTALL_LOG_FILE
+            if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+              return 0
+            fi
+          else
+            echo_warning "Broken link $c -> $javatarget"
+          fi
+        fi
+    done
+
+    echo "Cannot find system Java"
+
+  echo_failure "Cannot find Java"
+  java_clear
+  return 1
+}
+
+# must load from config file or call java_detect prior to calling this function
+java_env_report() {
+  echo "JAVA_HOME=$JAVA_HOME"
+  echo "java_bindir=$java_bindir"
+  echo "java=$java"
+}
+
+
+# if java home and java bin are already configured and meet the minimum version, does nothing
+# if they are not configured it initiates java detect to find them
+# if
+# Environment:
+# - JAVA_REQUIRED_VERSION in the format "1.6.0_29" (or pass it as a parameter)
+java_require() {
+  local min_version="${1:-${JAVA_REQUIRED_VERSION:-${DEFAULT_JAVA_REQUIRED_VERSION}}}"
+  if [[ -z "$JAVA_HOME" || -z "$java" || ! -f "$java" ]]; then
+    java_detect ${min_version} > /dev/null
+  fi
+  JAVA_VERSION=`java_version`
+  if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
+    return 0
+  fi
+  echo_failure "Cannot find Java version $min_version or later"
+  return 1
+}
+
+# usage:  if no_java 1.6; then echo_failure "Cannot find Java"; exit 1; fi
+no_java() {
+  java_require $1
+  if [ $? -eq 0 ]; then return 1; else return 0; fi
+}
+
+# Environment:
+# - JAVA_REQUIRED_VERSION in the format "1.6.0_29"
+java_install_openjdk() {
+  JAVA_YUM_PACKAGES="java-1.6.0-openjdk java-1.6.0-openjdk-devel"
+  JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
+  java_detect
+  if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
+    auto_install "Java" "JAVA"
+    java_detect
+    if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
+      echo_failure "Cannot install Java"
+      echo "Java download URL:"
+      echo "http://www.java.com/en/download/"
+    fi
+  else
+    echo "Java is already installed"
+  fi
+}
+
+java_install() {
+  local JAVA_PACKAGE="${1-:jdk-6u29-linux-x64.bin}"
+#  JAVA_YUM_PACKAGES="java-1.6.0-openjdk java-1.6.0-openjdk-devel"
+#  JAVA_APT_PACKAGES="openjdk-6-jre openjdk-6-jdk"
+#  auto_install "Java" "JAVA"
+  java_clear; java_detect >> $INSTALL_LOG_FILE
+  if no_java ${JAVA_REQUIRED_VERSION:-1.6} >> $INSTALL_LOG_FILE; then
+    if [[ -z "$JAVA_PACKAGE" || ! -f "$JAVA_PACKAGE" ]]; then
+      echo_failure "Missing Java installer: $JAVA_PACKAGE" | tee -a 
+      return 1
+    fi
+    local javafile=$JAVA_PACKAGE
+    echo "Installing $javafile"  >> $INSTALL_LOG_FILE
+    is_gzip=`echo $javafile | grep ".gz$"`
+    is_bin=`echo $javafile | grep ".bin$"`
+    javaname=`echo $javafile | awk -F . '{ print $1 }'`
+    if [ -n "$is_gzip" ]; then
+      gunzip $javafile 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
+      chmod +x $javaname
+      ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
+    elif [ -n "$is_bin" ]; then
+      chmod +x $javafile
+      ./$javafile | grep -vE "inflating:|creating:|extracting:|linking:|^Creating"  
+    fi
+    # java gets unpacked in current directory but they cleverly
+    # named the folder differently than the archive, so search for it:
+    local java_unpacked=`ls -1d jdk* jre* 2>/dev/null`
+    for f in $java_unpacked
+    do
+      #echo "$f"
+      if [ -d "$f" ]; then
+        mv "$f" /usr/share
+      fi
+    done
+    java_detect  >> $INSTALL_LOG_FILE
+    if [[ -z "$JAVA_HOME" || -z "$java" ]]; then
+      echo_failure "Unable to auto-install Java" | tee -a $INSTALL_LOG_FILE
+      echo "  Java download URL:"                >> $INSTALL_LOG_FILE
+      echo "  http://www.java.com/en/download/"  >> $INSTALL_LOG_FILE
+    fi
+  else
+    echo "Java is already installed"              >> $INSTALL_LOG_FILE
+  fi
+}
+
+java_keystore_cert_report() {
+  local keystore="${1:-keystore.jks}"
+  local keystorePassword="${2:-changeit}"
+  local alias="${3:-s1as}"
+  local keytool=${JAVA_HOME}/bin/keytool
+  local owner_expires=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "^Owner|^Valid"`
+  echo "$owner_expires"
+  local fingerprints=`$keytool -list -v -alias $alias -keystore $keystore -storepass $keystorePassword | grep -E "MD5:|SHA1:"`
+  echo "$fingerprints"
+}
+
+
+
+### JAVA COMMANDS
+
+# Usage: mtwilson java-detect
+mw_java_detect() {
+        java_detect ${2:-${java_required_version:-${JAVA_REQUIRED_VERSION:-1.6}}}
+        java_env_report
+}
+
+# Usage: mtwilson java-install <filename> 
+# Example: mtwilson java-install jdk-6u29-linux-x64.bin
+# If Java is already installed the install will be skipped.
+mw_java_install_file() {
+  java_install $@
+}

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>trust-util-jar</artifactId>
+  <artifactId>mtwilson-trust-utils</artifactId>
   <packaging>jar</packaging>
   <name>Trust Utils Library</name>
     <parent>
@@ -106,7 +106,7 @@
     </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>my</artifactId>
+            <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -139,7 +139,7 @@
     </dependency>
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>api-client</artifactId>
+            <artifactId>mtwilson-client-java6</artifactId>
             <version>${project.version}</version>
             <exclusions>
                 <!-- must exclude this artifact to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->

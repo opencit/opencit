@@ -1,0 +1,83 @@
+#!/bin/sh
+
+#For example, the following function can be replaced:
+#mysql_test_connection_report() {
+#  echo -n "Testing database connection... "
+#  mysql_test_connection
+#  if [ -n "$is_mysql_available" ]; then
+#    echo "OK"
+#  else
+#    echo "FAILED"
+#    echo_failure "${mysql_connection_error}"
+#  fi
+#}
+#with this:
+#test_function_with_var "database connection" "mysql_test_connection" "is_mysql_available" "mysql_connection_error"
+#
+# Returns 0 on success, 1 on failure
+test_function_with_var() {
+  local label_text="$1"
+  local function_name="$2"
+  local testvar_name="$3"
+  local errorvar_name="$4"
+  echo -n "Testing ${label_text:-something}..."
+  local ret=$(eval "$function_name")
+  local testvar_text=$(eval "echo \$${testvar_name}")
+  local errorvar_text=$(eval "echo \$${errorvar_name}")
+  if [ -n "$testvar_text" ]; then
+    echo_success "OK"
+    return 0
+  else
+    echo_failure "FAILED"
+    echo_failure "$testvar_text"
+    return 1
+  fi
+}
+
+
+### FUNCTION LIBARRY: conditional execution functions
+
+# TODO: rename to positive_condition
+# parameters: condition variable name, status line, code to run
+# Will print "status line... " and then "OK" or "FAILED"
+action_condition() {
+  local condvar="${1}"
+  local statusline="${2}"
+  local condfn="${3}"
+  local cond=$(eval "echo \$${condvar}")
+  echo -n "$statusline"
+  echo -n "... "
+  if [ -n "$cond" ]; then
+    echo_success "Skipped"
+  else # if [ -z "$cond" ]; then
+    eval "$condfn"
+    cond=$(eval "echo \$${condvar}")
+    if [ -n "$cond" ]; then
+      echo_success "OK"
+    else
+      echo_failure "FAILED"
+    fi
+  fi
+}
+# TODO: rename to negative_condition
+# similar to action_condition but reverses the logic: empty is OK, defined is FAILED
+inaction_condition() {
+  local condvar="${1}"
+  local statusline="${2}"
+  local condfn="${3}"
+  local cond=$(eval "echo \$${condvar}")
+  echo -n "$statusline"
+  echo -n "... "
+  if [ -z "$cond" ]; then
+    echo_success "Skipped"
+  else # if [ -z "$cond" ]; then
+    eval "$condfn"
+    cond=$(eval "echo \$${condvar}")
+    if [ -z "$cond" ]; then
+      echo_success "OK"
+    else
+      echo_failure "FAILED"
+    fi
+  fi
+}
+
