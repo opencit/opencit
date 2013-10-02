@@ -23,7 +23,7 @@
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.parent.version}</version>
-      <type>sh</type>
+      <type>bin</type>
     </dependency>	
     <dependency>
 	  <groupId>org.apache</groupId>
@@ -86,7 +86,7 @@
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>mtwilson-linux-util</artifactId>
                   <version>${project.parent.version}</version>
-                  <type>sh</type>
+                  <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>functions</destFileName>
                 </artifactItem>
