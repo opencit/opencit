@@ -170,6 +170,12 @@
 								<input type="checkbox" id="RegisterWhiteListHost" checked="yes">
                             </div>
                     </div> 
+                    <div class="singleDiv">
+							<div class="labelDiv"><span>Overwrite Whitelist <br> (If exists): </span></div>
+							<div class="valueDivConfig">
+								<input type="checkbox" id="OverwriteWhitelist">
+                            </div>
+                    </div> 
                     <div class="singleDiv" id="uploadButtonID">
 						<div class="labelDiv">&nbsp;</div>
 						<div class="valueDiv">

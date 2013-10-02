@@ -28,7 +28,7 @@ public class HostConfigData {
         this.registerHost = false;
         this.hostVmmType = null;
         this.txtHostRecord = null;
-        this.overWriteWhiteList = true;
+        this.overWriteWhiteList = false;
     }
     
     @JsonProperty("Host_VMM_Type")
