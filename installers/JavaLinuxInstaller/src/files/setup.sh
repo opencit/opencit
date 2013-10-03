@@ -16,12 +16,3 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # SCRIPT EXECUTION
 java_install $JAVA_PACKAGE
 
-if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
-  echo "Replacing java.security file, existing file will be backed up"
-  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
-  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
-fi
-
-if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
-  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
-fi
