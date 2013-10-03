@@ -94,19 +94,12 @@ if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
 else
-    cp monitrc /etc/monit/monitrc
+	cp monitrc /etc/monit/monitrc
 fi
 
 mkdir -p /etc/monit/conf.d
+echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 
-if grep -q "/etc/monit/conf.d/*" /etc/monit/monitrc; then
- testInclude=`grep "/etc/monit/conf.d/*" /etc/monit/monitrc`
- if grep -q "#" <<< $testInclude; then
-  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
- fi
-else
- echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
-fi
 
 
 

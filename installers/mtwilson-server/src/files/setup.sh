@@ -409,6 +409,17 @@ fi
 
 java_detect
 
+# Post java install setup and configuration
+if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
+  echo "Replacing java.security file, existing file will be backed up"
+  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
+  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
+fi
+
+if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
+  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+fi
+
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE

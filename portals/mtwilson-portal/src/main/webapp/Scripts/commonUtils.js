@@ -410,7 +410,7 @@ function RegistrationDetailsVo(name,fingerprint,requestedRoles,expires,comments)
 	this.comments = comments;
 }
 
-function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,biosPCRs,vmmPCRs,hostLocation,registerHost) {
+function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,biosPCRs,vmmPCRs,hostLocation,registerHost,overWriteWhiteList) {
 	this.biosWhiteList = biosWhiteList;
 	this.vmmWhiteList = vmmWhiteList;
 	this.biosWLTarget = biosWLTarget;
@@ -419,6 +419,7 @@ function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,b
 	this.vmmPCRs = vmmPCRs;
 	this.hostLocation = hostLocation;
 	this.registerHost = registerHost;
+        this.overWriteWhiteList = overWriteWhiteList;
 }
 
 

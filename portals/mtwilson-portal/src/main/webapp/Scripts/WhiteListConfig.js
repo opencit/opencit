@@ -133,7 +133,8 @@ function fnUploadWhiteListConfigurationData() {
             var config = new fnWhiteListConfig();
             config = configurationSaved.whiteListConfig;
             var regHost = $('#RegisterWhiteListHost').attr('checked') == 'checked' ? true : false;
-
+            config.overWriteWhiteList = $('#OverwriteWhitelist').attr('checked') == 'checked' ? true : false;
+                    
             if (selectedBothBiosVMM) {
                 //fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
                 if (regHost) {
