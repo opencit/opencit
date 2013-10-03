@@ -183,7 +183,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
             bios.setName(hostInfo.BIOS_Name);
             bios.setVersion(hostInfo.BIOS_Version);
             bios.setOemId(oem);
-            bios.setRequiredManifestList("0"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
+            bios.setRequiredManifestList("0,17"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
             My.jpa().mwMle().create(bios);
         }
         // whitelist step 3:  create OS
@@ -205,7 +205,7 @@ Pcr 23 = 0000000000000000000000000000000000000000
             vmm.setName(hostInfo.VMM_Name);
             vmm.setVersion(hostInfo.VMM_Version);
             vmm.setOsId(os);
-            vmm.setRequiredManifestList("17,18,19"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
+            vmm.setRequiredManifestList("18,19"); // XXX TODO the required manifest list should actually come from EITHER 1) the vendor agent, because it knows exactly what that vendor does during boot, or 2) the UI, because the user might want specific things...  or a combination of providing UI defaults from the vendor, then allowing the UI to override... eitehr way,  right now these are hard-coded not only in this test class but also in the application, and that needs to change.
             My.jpa().mwMle().create(vmm);
         }
         // whitelist step 5: get PCRs

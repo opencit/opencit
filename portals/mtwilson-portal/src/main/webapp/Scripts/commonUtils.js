@@ -410,7 +410,7 @@ function RegistrationDetailsVo(name,fingerprint,requestedRoles,expires,comments)
 	this.comments = comments;
 }
 
-function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,biosPCRs,vmmPCRs,hostLocation,registerHost) {
+function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,biosPCRs,vmmPCRs,hostLocation,registerHost,overWriteWhiteList) {
 	this.biosWhiteList = biosWhiteList;
 	this.vmmWhiteList = vmmWhiteList;
 	this.biosWLTarget = biosWLTarget;
@@ -419,6 +419,7 @@ function fnWhiteListConfig(biosWhiteList,vmmWhiteList,biosWLTarget,vmmWLTarget,b
 	this.vmmPCRs = vmmPCRs;
 	this.hostLocation = hostLocation;
 	this.registerHost = registerHost;
+        this.overWriteWhiteList = overWriteWhiteList;
 }
 
 
@@ -583,52 +584,59 @@ function fnValidateIpAddress(ipAddress) {
 
 //Function to change UI of Add MLE page if user has selected VMM.
 function updateMlePageForVMM() {
-	$('#mleSubTypeLable').text('Host OS :');
-	$('#mleTypeNameLabel').text('VMM Name :');
-	$('#mleTypeNameValue').html('<select class="textBox_Border" id="MainContent_ddlMLEName"></select>');
-	$('#mleTypeVerLabel').text('VMM Version :');
-	var row = $('#manifestListDiv table');
-	row.html('');
-	for ( var i = 17; i < 21; i++) {
-		var str = '<tr><td><span>'+i+'</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb'+i+'\')" id="MainContent_check'+i+'"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb'+i+'"></td>';
-		if (i==17) {
-			str+='<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
-		}else if (i==18) {
-			str+='<td><div id="successMessage"></div></td><td></td>';
-		}else {
-			str+='<td></td><td></td>';
-		}
-		str+='</tr>';
-		row.append(str);
-	}
+    $('#mleSubTypeLable').text('Host OS :');
+    $('#mleTypeNameLabel').text('VMM Name :');
+    $('#mleTypeNameValue').html('<select class="textBox_Border" id="MainContent_ddlMLEName"></select>');
+    $('#mleTypeVerLabel').text('VMM Version :');
+    var row = $('#manifestListDiv table');
+    row.html('');
+    for (var i = 18; i < 21; i++) {
+        var str = '<tr><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
+        //if (i==17) {
+        //	str+='<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
+        //}else
+        if (i === 18) {
+            str += '<td><div id="successMessage"></div></td><td></td>';
+        } else {
+            str += '<td></td><td></td>';
+        }
+        str += '</tr>';
+        row.append(str);
+    }
 }
 
 //Function to change UI of Add MLE page if user has selected BIOS.
 function updateMlePageForBIOS() {
-	$('#mleSubTypeLable').text('OEM Vendor :');
-	$('#mleTypeNameLabel').text('BIOS Name :');
-	$('#mleTypeNameValue').html('<input type="text" class="inputs textBox_Border" id="MainContent_ddlMLEName" maxlength="200" ><span class="requiredField">*</span>');
-	$('#mleTypeVerLabel').text('BIOS Version :');
-	$('#MainContent_ddlAttestationType').html('<option>PCR</option>');
-	fnToggelManifestList(false);
-	var row = $('#manifestListDiv table');
-	row.html('');
-	for ( var i = 0; i < 6; i++) {
-		var str = '<tr><td><span>'+i+'</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb'+i+'\')" id="MainContent_check'+i+'"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb'+i+'"></td>';
-		if (i==0) {
-			str+='<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
-		}else if (i==1) {
-			str+='<td><div id="successMessage"></div></td><td></td>';
-		}else {
-			str+='<td></td><td></td>';
-		}
-		str+='</tr>';
-		row.append(str);
-	}
-	
-	$('#MainContent_ddlMLEName').blur(function() {
-		fnTestValidation('MainContent_ddlMLEName',normalReg);
-	});	
+    $('#mleSubTypeLable').text('OEM Vendor :');
+    $('#mleTypeNameLabel').text('BIOS Name :');
+    $('#mleTypeNameValue').html('<input type="text" class="inputs textBox_Border" id="MainContent_ddlMLEName" maxlength="200" ><span class="requiredField">*</span>');
+    $('#mleTypeVerLabel').text('BIOS Version :');
+    $('#MainContent_ddlAttestationType').html('<option>PCR</option>');
+    fnToggelManifestList(false);
+    var row = $('#manifestListDiv table');
+    row.html('');
+    for (var i = 0; i < 6; i++) {
+        var str = '<tr><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
+        if (i == 0) {
+            str += '<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
+        } else if (i == 1) {
+            str += '<td><div id="successMessage"></div></td><td></td>';
+        } else {
+            str += '<td></td><td></td>';
+        }
+        str += '</tr>';
+        row.append(str);
+    }
+    
+    var i = 17;
+    var str = '<tr><td><span>' + i + '</span></td><td><input type="checkbox" onclick="fnToggelRegisterValue(checked,\'MainContent_tb' + i + '\')" id="MainContent_check' + i + '"/></td><td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb' + i + '"></td>';
+    str += '<td><form class="uploadForm" method="post" enctype="multipart/form-data"><input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" /><input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()"><input type="image" src="images/helpicon.png" onclick="showDialogUploadFile();return false;" style="float:right;"></form></td><td></td>';
+    str += '</tr>';
+    row.append(str);
+    
+    $('#MainContent_ddlMLEName').blur(function() {
+        fnTestValidation('MainContent_ddlMLEName', normalReg);
+    });
 }
 
 function fnToggelManifestList(elementStatus) {

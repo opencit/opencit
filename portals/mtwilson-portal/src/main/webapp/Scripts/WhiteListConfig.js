@@ -46,116 +46,118 @@ $(function() {
 
 function fnUploadWhiteListConfigurationData() {
 
-	$('#whiteListMessage').html('');
-	var validation = false;
-	var hostVo = new RegisterHostVo();
-	
-	if(checkForPCRConstrain('Oem_Bios_Checkbox','biosPCRsValues','OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox','vmmPCRsValues','VMM')){
-    
-		fnGetWhiteListConfigData();
-        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0 ) {
+    $('#whiteListMessage').html('');
+    var validation = false;
+    var hostVo = new RegisterHostVo();
+
+    if (checkForPCRConstrain('Oem_Bios_Checkbox', 'biosPCRsValues', 'OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox', 'vmmPCRsValues', 'VMM')) {
+
+        fnGetWhiteListConfigData();
+        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0) {
             hostVo.hostType = 'vmware'
-        } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('kvm') >= 0) || 
-                  ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('xen') >= 0)) {
+        } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('kvm') >= 0) ||
+                ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('xen') >= 0)) {
             hostVo.hostType = 'intel'
         } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('citrix')) >= 0) {
             hostVo.hostType = 'citrix'
         }
         // alert(hostVo.hostType);
-		//hostVo.hostType=$('#MainContent_ddlHOSTType').val();
-		hostVo.status = null;
+        //hostVo.hostType=$('#MainContent_ddlHOSTType').val();
+        hostVo.status = null;
         // at this point isVMWare = 1 == VMWare, 2 == Citrix, 0 == TA    // TODO need to change this logic to just use the vendor name instead of 0..2
         // get citrix values
-            if(isVMWare == 2) {
-                if(fnValidateIpAddress($('#whiteListCitrix_Host').val())) {
-                    var valid0 = fnValidateEmptyValue('whiteListCitrix_Host');
-                    var valid1 = fnValidateEmptyValue('whiteListCitrix_portNO');
-                    var valid2 = fnValidateEmptyValue('whiteListCitrix_userName');
-                    var valid3 = fnValidateEmptyValue('whiteListCitrix_password');
-                    
-                    if(valid0 && valid1 && valid2 && valid3){
-                        validation = true;
-                        hostVo.vmWareType = false;
-                        hostVo.hostType = "citrix";
-                        hostVo.hostName=$('#whiteListCitrix_Host').val();
-                        hostVo.hostPortNo=$('#whiteListCitrix_portNO').val();
-                        hostVo.vCenterString="https://"+$('#whiteListCitrix_Host').val()+":"+$('#whiteListCitrix_portNO').val()+
-                                             "/;"+$('#whiteListCitrix_userName').val()+";"+$('#whiteListCitrix_password').val();
-                    }
-                }else{
-                    alert("Please enter a valid ip address and try again.");
+        if (isVMWare == 2) {
+            if (fnValidateIpAddress($('#whiteListCitrix_Host').val())) {
+                var valid0 = fnValidateEmptyValue('whiteListCitrix_Host');
+                var valid1 = fnValidateEmptyValue('whiteListCitrix_portNO');
+                var valid2 = fnValidateEmptyValue('whiteListCitrix_userName');
+                var valid3 = fnValidateEmptyValue('whiteListCitrix_password');
+
+                if (valid0 && valid1 && valid2 && valid3) {
+                    validation = true;
+                    hostVo.vmWareType = false;
+                    hostVo.hostType = "citrix";
+                    hostVo.hostName = $('#whiteListCitrix_Host').val();
+                    hostVo.hostPortNo = $('#whiteListCitrix_portNO').val();
+                    hostVo.vCenterString = "https://" + $('#whiteListCitrix_Host').val() + ":" + $('#whiteListCitrix_portNO').val() +
+                            "/;" + $('#whiteListCitrix_userName').val() + ";" + $('#whiteListCitrix_password').val();
                 }
-            }else if(isVMWare == 1){ // get VMWare values
-                     if(fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val())) {
-                        var valid0 = fnValidateEmptyValue('whiteListVMware_Host');
-                        var valid1 = fnValidateEmptyValue('whiteListVMWare_vCenterServer');
-                        var valid2 = fnValidateEmptyValue('whiteListVMWare_LoginID');
-                        var valid3 = fnValidateEmptyValue('whiteListVMWare_password');
-			
-                        if (valid0 && valid1 && valid2 && valid3) {
-                            validation= true;
-                            hostVo.vmWareType = true;
-                            hostVo.hostType = "vmware";
-                            hostVo.vCenterString=getVCenterServerAddress('whiteListVMWare_vCenterServer')+";"+$('#whiteListVMWare_LoginID').val()+";"+$('#whiteListVMWare_password').val();
-                            hostVo.hostName=$('#whiteListVMware_Host').val();;
-                            hostVo.hostPortNo=null;
-                        }
-                     }else{
-                         alert("Please enter a valid ip address and try again.");
-                     }
-            }else { // TA
-                     
-                        if(fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
-                      
-                            var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
-                            var valid2 = fnValidateEmptyValue('whiteListOpenSource_portNO');
-			
-                            if (valid1 && valid2) {
-                                validation= true;
-                                hostVo.vmWareType = false;
-                                hostVo.vCenterString = "";
-                                hostVo.hostType = "intel";
-                                hostVo.hostName=$('#whiteListOpenSource_Host').val();
-                                hostVo.hostPortNo=$('#whiteListOpenSource_portNO').val();
-				
-                                hostVo.biosWLTarget = null;
-                                hostVo.vmmWLtarget = null;
-                                hostVo.registered = false;
-                            }
-                        }else{
-                            alert("Please enter a valid ip address and try again.");
-                        }
-		}
-	
-	if (validation) {
-		var data = "registerHostVo="+$.toJSON(hostVo)+"&biosWLTagrget="+configurationSaved.biosWLTarget+"&vmmWLTarget="+configurationSaved.vmmWLTarget;
-		var config = new fnWhiteListConfig();
-		config = configurationSaved.whiteListConfig;
-        var regHost = $('#RegisterWhiteListHost').attr('checked') == 'checked'? true : false ;
-        
-		if (selectedBothBiosVMM) {
-			//fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
-            if(regHost){
-                config.registerHost = true;
-                
-                registerHost = true;        
-                $('#mainLoadingDiv').prepend(disabledDiv);
-                sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
-            }else{
-                config.registerHost = false;
-                registerHost = false;        
-                $('#mainLoadingDiv').prepend(disabledDiv);
-                sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
+            } else {
+                alert("Please enter a valid ip address and try again.");
             }
-			/*if(confirm("Do you want Host to be register ?")){
-			}*/
-		}else{
-			$('#mainLoadingDiv').prepend(disabledDiv);
-			sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data+"&whiteListConfigVO="+$.toJSON(config), fnUploadWhiteListSuccess, null);
-			//return false;
-		}
-	}
-  }
+        } else if (isVMWare == 1) { // get VMWare values
+            if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val())) {
+                var valid0 = fnValidateEmptyValue('whiteListVMware_Host');
+                var valid1 = fnValidateEmptyValue('whiteListVMWare_vCenterServer');
+                var valid2 = fnValidateEmptyValue('whiteListVMWare_LoginID');
+                var valid3 = fnValidateEmptyValue('whiteListVMWare_password');
+
+                if (valid0 && valid1 && valid2 && valid3) {
+                    validation = true;
+                    hostVo.vmWareType = true;
+                    hostVo.hostType = "vmware";
+                    hostVo.vCenterString = getVCenterServerAddress('whiteListVMWare_vCenterServer') + ";" + $('#whiteListVMWare_LoginID').val() + ";" + $('#whiteListVMWare_password').val();
+                    hostVo.hostName = $('#whiteListVMware_Host').val();
+                    ;
+                    hostVo.hostPortNo = null;
+                }
+            } else {
+                alert("Please enter a valid ip address and try again.");
+            }
+        } else { // TA
+
+            if (fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
+
+                var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
+                var valid2 = fnValidateEmptyValue('whiteListOpenSource_portNO');
+
+                if (valid1 && valid2) {
+                    validation = true;
+                    hostVo.vmWareType = false;
+                    hostVo.vCenterString = "";
+                    hostVo.hostType = "intel";
+                    hostVo.hostName = $('#whiteListOpenSource_Host').val();
+                    hostVo.hostPortNo = $('#whiteListOpenSource_portNO').val();
+
+                    hostVo.biosWLTarget = null;
+                    hostVo.vmmWLtarget = null;
+                    hostVo.registered = false;
+                }
+            } else {
+                alert("Please enter a valid ip address and try again.");
+            }
+        }
+
+        if (validation) {
+            var data = "registerHostVo=" + $.toJSON(hostVo) + "&biosWLTagrget=" + configurationSaved.biosWLTarget + "&vmmWLTarget=" + configurationSaved.vmmWLTarget;
+            var config = new fnWhiteListConfig();
+            config = configurationSaved.whiteListConfig;
+            var regHost = $('#RegisterWhiteListHost').attr('checked') == 'checked' ? true : false;
+            config.overWriteWhiteList = $('#OverwriteWhitelist').attr('checked') == 'checked' ? true : false;
+                    
+            if (selectedBothBiosVMM) {
+                //fnOpenDialogWithYesNOButton("Do you want the host to be registered ?", "Confirm", 280, 150, fnSendWhiteListWithRegisterHostTrue, fnSendWhiteListWithRegisterHostFalse,data,config);
+                if (regHost) {
+                    config.registerHost = true;
+
+                    registerHost = true;
+                    $('#mainLoadingDiv').prepend(disabledDiv);
+                    sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data + "&whiteListConfigVO=" + $.toJSON(config), fnUploadWhiteListSuccess, null);
+                } else {
+                    config.registerHost = false;
+                    registerHost = false;
+                    $('#mainLoadingDiv').prepend(disabledDiv);
+                    sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data + "&whiteListConfigVO=" + $.toJSON(config), fnUploadWhiteListSuccess, null);
+                }
+                /*if(confirm("Do you want Host to be register ?")){
+                 }*/
+            } else {
+                $('#mainLoadingDiv').prepend(disabledDiv);
+                sendJSONAjaxRequest(false, 'getData/uploadWhiteListConfiguration.html', data + "&whiteListConfigVO=" + $.toJSON(config), fnUploadWhiteListSuccess, null);
+                //return false;
+            }
+        }
+    }
 }
 // Functions no longer needed because we no longer pop up and ask a user if he wants to register a host
 //This method will set resigterHost option to true for fnWhiteListConfig object and send data to upload White List configuration to server.
@@ -276,12 +278,13 @@ function fnClearAllConfigFiled() {
 }
 
 //function to select corresponding BIOS/VMM white list config checkbox, on Selection of White List Applicable For
-function fnSelectWhiteListType(element,checkBoxID) {
-	$('#'+checkBoxID).attr('checked','checked');
-        if ($('#Hypervisor_bios_applicable_for').children("option:selected").text() == "Global") {
-            $("#required_pcrs_17").attr('checked',false);
-        } 
-	fnDisableOrEnableUploadButton(true);
+function fnSelectWhiteListType(element, checkBoxID) {
+    $('#' + checkBoxID).attr('checked', 'checked');
+    //if ($('#Hypervisor_bios_applicable_for').children("option:selected").text() == "Global") {
+    //    $("#required_pcrs_17").attr('checked',false);
+    //} 
+    //fnChangeApplicableFor(checked,'Hypervisor_bios_applicable_for','Oem_Bios_Checkbox');
+    fnDisableOrEnableUploadButton(true);
 }
 
 
@@ -368,17 +371,17 @@ function fnChangeApplicableFor(status,selectID,secondCheckBoxID) {
 
 //function to check the conditions for enabling/disabling "upload white list" button
 function fnDisableOrEnableUploadButton(checkBox) {
-	var status = !checkBox;
-	$('#defineVMWareHostType').find('input').each(function() {
-		$(this).attr('disabled',status);
-	});
-	$('#openSourcesHostType').find('input').each(function() {
-		$(this).attr('disabled',status);
-	});
+    var status = !checkBox;
+    $('#defineVMWareHostType').find('input').each(function() {
+        $(this).attr('disabled', status);
+    });
+    $('#openSourcesHostType').find('input').each(function() {
+        $(this).attr('disabled', status);
+    });
     $('#citrixHostType').find('input').each(function() {
-		$(this).attr('disabled',status);
-	});
-	$('#uploadButtonID').find('input').each(function() {
-		$(this).attr('disabled',status);
-	});
+        $(this).attr('disabled', status);
+    });
+    $('#uploadButtonID').find('input').each(function() {
+        $(this).attr('disabled', status);
+    });
 }

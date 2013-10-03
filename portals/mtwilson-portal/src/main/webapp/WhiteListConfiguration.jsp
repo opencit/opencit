@@ -70,10 +70,10 @@
 								<span>4</span>
 								<input type="checkbox" id="required_pcrs_5" name="5">
 								<span>5</span>
+                                                                <input type="checkbox" id="required_pcrs_17" name="17">
+								<span>17</span>
 							</div>
 							<div class="valueDivConfig" id="vmmPCRsValues">
-								<input type="checkbox" id="required_pcrs_17" name="17">
-								<span>17</span>
 								<input type="checkbox" id="required_pcrs_18" name="18"> 
 								<span>18</span>
 								<input type="checkbox" id="required_pcrs_19" name="19">
@@ -168,6 +168,12 @@
 							<div class="labelDiv"><span>Register Host: </span></div>
 							<div class="valueDivConfig">
 								<input type="checkbox" id="RegisterWhiteListHost" checked="yes">
+                            </div>
+                    </div> 
+                    <div class="singleDiv">
+							<div class="labelDiv"><span>Overwrite Whitelist <br> (If exists): </span></div>
+							<div class="valueDivConfig">
+								<input type="checkbox" id="OverwriteWhitelist">
                             </div>
                     </div> 
                     <div class="singleDiv" id="uploadButtonID">
