@@ -198,10 +198,12 @@ public class APIClient {
         apiClientRequest.fingerprint = fingerprint;
         apiClientRequest.enabled = false;
         apiClientRequest.status = ApiClientStatus.CANCELLED.toString();
-        if (info.comment == null || info.comment.isEmpty())
+        if (info.comment == null || info.comment.isEmpty()){
             apiClientRequest.comment = String.format("Deleted on %s", Rfc822Date.format(new Date()));
-        else
+        }
+        else{
             apiClientRequest.comment = String.format("%s. Deleted on %s", info.comment, Rfc822Date.format(new Date()));
+        }
         apiClientRequest.roles = info.roles;
         bo.update(apiClientRequest);
     }
