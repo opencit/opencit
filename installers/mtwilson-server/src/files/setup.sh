@@ -428,16 +428,9 @@ if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
 
-echo "JAVA_HOME: $JAVA_HOME"
-echo "JRE_HOME: $JRE_HOME"
-echo "java: $java"
-echo "GLASSFISH_HOME: $GLASSFISH_HOME"
-echo "glassfish_bin: $glassfish_bin"
-echo "glassfish: $glassfish"
-
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-    if ! glassfish_detect; then
+    if [ ! glassfish_detect >/dev/null ]; then
       portInUse=`netstat -lnput | grep -E "8080|8181"`
       if [ -n "$portInUse" ]; then 
         #glassfish ports in use. exit install
@@ -445,19 +438,12 @@ if using_glassfish; then
         exit 1
       fi
     fi
-
-  echo "JAVA_HOME: $JAVA_HOME"
-  echo "JRE_HOME: $JRE_HOME"
-  echo "java: $java"
-  echo "GLASSFISH_HOME: $GLASSFISH_HOME"
-  echo "glassfish_bin: $glassfish_bin"
-  echo "glassfish: $glassfish"
-
-  echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
-  # glassfish install here
-  ./$glassfish_installer  >> $INSTALL_LOG_FILE
-  echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
-  # end glassfish installer
+	
+    echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+    # glassfish install here
+    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+    # end glassfish installer
   else
     echo_warning "Relying on an existing glassfish installation" 
   fi
@@ -467,15 +453,14 @@ if using_glassfish; then
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
     mtwilson glassfish-sslcert
-  # glassfish init end
+    # glassfish init end
   else
     echo_warning "Skipping webservice init"
   fi
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
-    
-    if ! tomcat_detect; then
+    if [ ! tomcat_detect >/dev/null ]; then
       portInUse=`netstat -lnput | grep -E "8080|8443"`
       if [ -n "$portInUse" ]; then 
         #tomcat ports in use. exit install

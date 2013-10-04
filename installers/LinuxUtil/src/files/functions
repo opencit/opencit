@@ -2572,14 +2572,6 @@ java_detect() {
       java=${JAVA_HOME}/bin/java
     fi
     JAVA_VERSION=`java_version`
-	
-    echo "JAVA_HOME: $JAVA_HOME"
-    echo "JRE_HOME: $JRE_HOME"
-    echo "java: $java"
-    echo "GLASSFISH_HOME: $GLASSFISH_HOME"
-    echo "glassfish_bin: $glassfish_bin"
-    echo "glassfish: $glassfish"
-
     if is_java_version_at_least "$JAVA_VERSION" "${min_version}"; then
       return 0
     fi
