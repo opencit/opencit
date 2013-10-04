@@ -69,7 +69,7 @@ public class SamlUtil {
 
         XMLSignature signature = factory.unmarshalXMLSignature (context); // MarshalException
         if (!signature.validate (context)) { // XMLSignatureException
-            log.debug("XML signature is not valid");
+            log.warn("XML signature is not valid");
             return false;
         }
         
@@ -90,7 +90,7 @@ public class SamlUtil {
           }
         }
         
-        log.debug("Signature was valid, but signer was not known.");
+        log.warn("Signature was valid, but signer was not known.");
         return false;
     }
 

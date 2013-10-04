@@ -136,7 +136,7 @@ public class RolesAllowedResourceFilterFactory implements ResourceFilterFactory 
             if (!denyAll) {
                 for (String role : rolesAllowed) {
                     if (sc.isUserInRole(role)) {
-                        log.info("Approving request for user {} in role {} to method {} {}", new String[] { sc.getUserPrincipal().getName(), role, request.getMethod(), request.getPath() });
+                        log.debug("Approving request for user {} in role {} to method {} {}", new String[] { sc.getUserPrincipal().getName(), role, request.getMethod(), request.getPath() });
                         return request;
                     }
                 }

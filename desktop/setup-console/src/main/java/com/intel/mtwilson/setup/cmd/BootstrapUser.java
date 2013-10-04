@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class BootstrapUser implements Command {
     private SCPersistenceManager scManager = new SCPersistenceManager();
 //    private MwPortalUserJpaController keystoreJpa ;// new MwPortalUserJpaController(scManager.getEntityManagerFactory("MSDataPU"));
-    private static final Logger logger = LoggerFactory.getLogger(BootstrapUser.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(BootstrapUser.class.getName());
     private SetupContext ctx = null;
     public static final Console console = System.console();
     MSPersistenceManager persistenceManager = new MSPersistenceManager();
@@ -106,7 +106,7 @@ public class BootstrapUser implements Command {
         // not yet approved the user creation request.
         // if(keyTest != null) {
         if ((keyTest != null) && (keyTest.getStatus().equalsIgnoreCase("approved") || keyTest.getStatus().equalsIgnoreCase("pending"))) {        
-          logger.info("A user already exists with the specified User Name: {}", username);
+          log.debug("A user already exists with the specified User Name: {}", username);
           throw new SetupException("User account with that name already exists. Please select different User Name.");
         }
         

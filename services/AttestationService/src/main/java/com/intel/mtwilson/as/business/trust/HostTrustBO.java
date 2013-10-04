@@ -52,7 +52,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.crypto.MarshalException;
@@ -62,8 +61,8 @@ import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.io.MarshallingException;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
@@ -85,7 +84,7 @@ public class HostTrustBO extends BaseBO {
     
     static{
         CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-        log.info("Config saml.validity.seconds = " + CACHE_VALIDITY_SECS);
+        log.debug("Config saml.validity.seconds = " + CACHE_VALIDITY_SECS);
     }
     
     public HostTrustBO() {
@@ -328,7 +327,7 @@ public class HostTrustBO extends BaseBO {
 
         String userName = new AuditLogger().getAuditUserName();
         Object[] paramArray = {userName, hostId, trust.bios, trust.vmm};
-        log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
+        log.debug(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
         
         log.debug( "Verfication Time {}", (System.currentTimeMillis() - start));
 
@@ -596,22 +595,22 @@ public class HostTrustBO extends BaseBO {
                 TblTaLog pcr = taLogMap.get(pcrPolicy.getExpectedPcr().getIndex());
                 // the pcr from the map will be null if it is not mentioned in the Required_Manifest_List of the mle.  for now, if someone has removed it from the required list we skip this. XXX TODO  we should not keep two lists... the "Required Manifest List" field should be deleted and it must be up to the whitelist manager to define only the pcrs that should be checked! in a future release (maybe 1.3) we will store a global whitelist with pcr values for known mles, and for specific hosts the trust poilcy will be stored as a set of rules instead of just pcr values for specific hosts and it will be more evident what the trust policy is supposed to be. 
                 if( pcr == null ) {
-                    log.error("Trust policy includes PCR {} but MLE does not define it", pcrPolicy.getExpectedPcr().getIndex().toInteger());
+                    log.warn("Trust policy includes PCR {} but MLE does not define it", pcrPolicy.getExpectedPcr().getIndex().toInteger());
                     // create the missing pcr record in the report so the user will see it in the UI 
                     pcr = new TblTaLog();
                     // we need to find out if this is a bios pcr or vmm pcr
                     String[] markers = pcrPolicy.getMarkers();
                     List<String> markerList = Arrays.asList(markers);
                     if( markerList.contains("BIOS") ) {
-                        log.error("MLE Type is BIOS");
+                        log.warn("MLE Type is BIOS");
                         pcr.setMleId(host.getBiosMleId().getId());
                     }
                     else if( markerList.contains("VMM") ) {
-                        log.error("MLE Type is VMM");
+                        log.warn("MLE Type is VMM");
                         pcr.setMleId(host.getVmmMleId().getId());
                     }
                     else {
-                        log.error("MLE Type is unknown, markers are: {}", StringUtils.join(markers, ","));
+                        log.warn("MLE Type is unknown, markers are: {}", StringUtils.join(markers, ","));
                     }
                     pcr.setHostID(host.getId());
                     pcr.setUpdatedOn(today);
@@ -870,7 +869,7 @@ public class HostTrustBO extends BaseBO {
                     }
                     else {
                         // Need to update the entry
-                        log.info(String.format("Updating the location value for the white list specified to %s.", hlObj.location));
+                        log.debug(String.format("Updating the location value for the white list specified to %s.", hlObj.location));
                         locPCR.setLocation(hlObj.location);
                         locJpaController.edit(locPCR);
                     }
@@ -880,7 +879,7 @@ public class HostTrustBO extends BaseBO {
                     locPCR.setLocation(hlObj.location);
                     locPCR.setPcrValue(hlObj.white_list_value);
                     locJpaController.create(locPCR);
-                    log.info(String.format("Successfully added a new location value %s with white list %s.", hlObj.location, hlObj.white_list_value));
+                    log.debug(String.format("Successfully added a new location value %s with white list %s.", hlObj.location, hlObj.white_list_value));
                 }
             }
         } catch (ASException e) {
@@ -970,13 +969,13 @@ public class HostTrustBO extends BaseBO {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
                     return tblSamlAssertion.getSaml();
                 }else{
-                    log.debug("Found assertion in cache with error set, returning that.");
+                    log.info("Found assertion in cache with error set, returning that.");
                    throw new ASException(new Exception("("+ tblSamlAssertion.getErrorCode() + ") " + tblSamlAssertion.getErrorMessage() + " (cached on " + tblSamlAssertion.getCreatedTs().toString()  +")"));
                 }
             }
         }
         
-        log.debug("Getting trust and saml assertion from host.");
+        log.info("Getting trust and saml assertion from host.");
         
         try {
             return getTrustWithSaml(host);
@@ -1011,7 +1010,7 @@ public class HostTrustBO extends BaseBO {
                 tblSamlAssertion.setErrorMessage(e.getMessage());
                 new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
             }catch(Exception ex){
-                log.debug("getTrustwithSaml caugh exception while generating error saml assertion");
+                log.error("getTrustwithSaml caugh exception while generating error saml assertion");
                 throw new ASException(new Exception("getTrustWithSaml " + ex.getMessage()));
             } 
             throw new ASException(new Exception(e.getMessage()));
@@ -1040,7 +1039,7 @@ public class HostTrustBO extends BaseBO {
                 }
             }
         
-           log.debug("Getting trust and saml assertion from host.");
+           log.info("Getting trust and saml assertion from host.");
         
            HostTrustStatus status = getTrustStatus(new Hostname(host));
            
@@ -1048,7 +1047,7 @@ public class HostTrustBO extends BaseBO {
            hostTrust.setBiosStatus((status.bios)?1:0);
            hostTrust.setVmmStatus((status.vmm)?1:0);
            hostTrust.setIpAddress(host);
-           log.error("JSONTrust is : ", host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
+           log.warn("JSONTrust is : ", host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
            return hostTrust;
             
         } catch (ASException e) {

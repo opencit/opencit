@@ -177,7 +177,7 @@ public class APIClient {
     @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
-        log.info("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
+        log.debug("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
         new ApiClientBO().create(apiClientRequest);
         return "OK";
     }
@@ -198,10 +198,12 @@ public class APIClient {
         apiClientRequest.fingerprint = fingerprint;
         apiClientRequest.enabled = false;
         apiClientRequest.status = ApiClientStatus.CANCELLED.toString();
-        if (info.comment == null || info.comment.isEmpty())
+        if (info.comment == null || info.comment.isEmpty()){
             apiClientRequest.comment = String.format("Deleted on %s", Rfc822Date.format(new Date()));
-        else
+        }
+        else{
             apiClientRequest.comment = String.format("%s. Deleted on %s", info.comment, Rfc822Date.format(new Date()));
+        }
         apiClientRequest.roles = info.roles;
         bo.update(apiClientRequest);
     }

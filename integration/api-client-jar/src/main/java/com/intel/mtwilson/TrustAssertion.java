@@ -87,7 +87,7 @@ public class TrustAssertion {
             SamlUtil verifier = new SamlUtil(); // ClassNotFoundException, InstantiationException, IllegalAccessException
             boolean isVerified = verifier.verifySAMLSignature(document, trustedSigners);
             if( isVerified ) {
-                log.debug("Validated signature in xml document");
+                log.info("Validated signature in xml document");
                 // populate assertions map
                 DefaultBootstrap.bootstrap(); // required to load default configs that ship with opensaml that specify how to build and parse the xml (if you don't do this you will get a null unmarshaller when you try to parse xml)
                 assertion = readAssertion(document); // ParserConfigurationException, SAXException, IOException, UnmarshallingException

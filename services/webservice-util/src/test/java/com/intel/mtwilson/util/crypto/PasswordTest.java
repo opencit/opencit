@@ -24,7 +24,7 @@ public class PasswordTest {
         Password password = new Password(input);
         String output = password.getHashBase64();
         String salt = password.getSaltBase64();
-        log.info("Input: {}, Output: {}, Salt: {}", new String[] { input, output, salt });
+        log.debug("Input: {}, Output: {}, Salt: {}", new String[] { input, output, salt });
         assertEquals(8, password.getSalt().length); // because it uses 8-byte salts
         assertEquals(32, password.getHash().length); // because it uses sha256
         

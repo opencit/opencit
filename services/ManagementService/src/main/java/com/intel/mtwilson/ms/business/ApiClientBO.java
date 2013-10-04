@@ -59,7 +59,7 @@ public class ApiClientBO extends BaseBO {
             
             // Log the details into the syslog
             Object[] paramArray = {Arrays.toString(getFingerPrint(x509Certificate)), Arrays.toString(apiClientRequest.getRoles())};
-            log.info(sysLogMarker, "Created a request for new API Client: {} with roles: {}", paramArray);
+            log.debug(sysLogMarker, "Created a request for new API Client: {} with roles: {}", paramArray);
 
         } catch (MSException me) {
             log.error("Error during API Client registration. " + me.getErrorMessage());
@@ -235,7 +235,7 @@ public class ApiClientBO extends BaseBO {
             
             // Capture the change in the syslog
             Object[] paramArray = {Arrays.toString(apiClientRequest.fingerprint), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
-            log.info(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
+            log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {
             log.error("Error during API Client update. " + me.getErrorMessage());

@@ -95,7 +95,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
     public void addCertificate(X509Certificate certificate) throws KeyManagementException {
         keystore.addTrustedSslCertificate(certificate, certificate.getSubjectX500Principal().getName());
         try {
-            log.debug("Saving keystore");
+            log.info("Saving keystore");
             keystore.save();
         }
         catch(KeyStoreException e) {
@@ -140,7 +140,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
             return subjectCerts;
         }
         catch(KeyStoreException e) {
-            log.error("Cannot find certificate in keystore", e);
+            log.warn("Cannot find certificate in keystore", e);
             return subjectCerts;
         }
     }
@@ -157,7 +157,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
             return caCerts;
         }
         catch(Exception e) {
-            log.error("Cannot load certificate authorities from repository", e);
+            log.warn("Cannot load certificate authorities from repository", e);
             return caCerts;
         }
     }
@@ -173,7 +173,7 @@ public class KeystoreCertificateRepository implements MutableCertificateReposito
             return allCerts;
         }
         catch(Exception e) {
-            log.error("Cannot load certificates from repository", e);
+            log.warn("Cannot load certificates from repository", e);
             return allCerts;
         }
     }

@@ -38,7 +38,7 @@ public class CommandUtil {
         if(new File(Config.getBinPath() + File.separator + commandLine).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
         
-        log.info("Command to be executed is :" + commandLine);
+        log.debug("Command to be executed is :" + commandLine);
 
         Process p = Runtime.getRuntime().exec(commandLine);
 
@@ -85,7 +85,7 @@ public class CommandUtil {
     }
 
     private static void checkError(int exitValue, String commandLine) throws TAException {
-        log.info( "Return code {0}", exitValue);
+        log.debug( "Return code {0}", exitValue);
 
         if (exitValue != 0) {
             throw new TAException(ErrorCode.FATAL_ERROR, "Error while running command" + commandLine);
@@ -166,7 +166,7 @@ public class CommandUtil {
             networkInterface = NetworkInterface.getNetworkInterfaces();
             for (; networkInterface.hasMoreElements();) {
                 NetworkInterface e = networkInterface.nextElement();
-                log.info( "Interface: {}", new Object[]{e.getName()});
+                log.debug( "Interface: {}", new Object[]{e.getName()});
                 Enumeration<InetAddress> ad = e.getInetAddresses();
                 for (; ad.hasMoreElements();) {
                     InetAddress addr = ad.nextElement();
@@ -174,7 +174,7 @@ public class CommandUtil {
                     if (!returnIpAddress.equals(localIpAddress) && IPAddress.isValid(returnIpAddress)) {
                         return returnIpAddress;
                     } else {
-                        log.info("{} == {} or ip validation failed.", new Object[]{returnIpAddress, localIpAddress});
+                        log.debug("{} == {} or ip validation failed.", new Object[]{returnIpAddress, localIpAddress});
                     }
                 }
             }

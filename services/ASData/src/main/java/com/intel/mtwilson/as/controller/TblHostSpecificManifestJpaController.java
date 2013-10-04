@@ -173,7 +173,7 @@ public class TblHostSpecificManifestJpaController implements Serializable {
             return tblHostSpecificManifest;
 
         }catch (NoResultException e) {
-            log.info("NoResultException: No Host specific manifest for Host [{}]", 
+            log.error("NoResultException: No Host specific manifest for Host [{}]", 
                     String.valueOf(hostId));
             return null;
         } finally {
@@ -193,7 +193,7 @@ public class TblHostSpecificManifestJpaController implements Serializable {
             return tblHostSpecificManifest;
 
         }catch (NoResultException e) {
-            log.info("NoResultException: No Host specific manifest for Host [{}]", 
+            log.error("NoResultException: No Host specific manifest for Host [{}]", 
                     String.valueOf(hostId));
             return null;
         } finally {

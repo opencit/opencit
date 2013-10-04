@@ -85,6 +85,7 @@ compile_aikqverify() {
   make  2>&1 > /dev/null
   rm -f aikqverify.o
   rm -f Makefile
+  rm -f aikqverify.c
   if [ -e aikqverify ]; then
     AIKQVERIFY_OK=yes
   fi

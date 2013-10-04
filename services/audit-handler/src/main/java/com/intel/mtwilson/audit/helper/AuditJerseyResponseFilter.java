@@ -23,13 +23,13 @@ public class AuditJerseyResponseFilter implements ContainerResponseFilter {
         long endTime = System.currentTimeMillis();
         AuditContext auditContext = MtWilsonThreadLocal.get();
         if( auditContext != null ) {
-        log.info("AuditJerseyResponseFilter request for {} {}  Transaction Id {} End {} Time {} ", new String[] 
+        log.debug("AuditJerseyResponseFilter request for {} {}  Transaction Id {} End {} Time {} ", new String[] 
                     { request.getMethod(), request.getPath(), auditContext.getTransactionUuid(), String.valueOf(endTime),String.valueOf(endTime -auditContext.getStartMilliseconds()) });
         }        
         // Remove the context from thread local
         
         MtWilsonThreadLocal.unset();
-        log.debug("Removed the Audit context from thread local.");
+        log.info("Removed the Audit context from thread local.");
         return response;
     }
     

@@ -52,7 +52,7 @@ public class Reports {
     @Path("/trust")
     public JAXBElement<HostsTrustReportType> getTrustReport(@QueryParam("hostNames")String hostNamesCSV) { 
         if( hostNamesCSV == null || hostNamesCSV.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-        return new JAXBElement<HostsTrustReportType>(new QName("hosts_trust_report"),HostsTrustReportType.class, reportsBO.getTrustReport(hostnameListFromCSV(hostNamesCSV))); // datatype.Hostname            
+        else return new JAXBElement<HostsTrustReportType>(new QName("hosts_trust_report"),HostsTrustReportType.class, reportsBO.getTrustReport(hostnameListFromCSV(hostNamesCSV))); // datatype.Hostname            
     }
 
     
@@ -82,7 +82,8 @@ public class Reports {
     @Produces(MediaType.APPLICATION_XML)
     @Path("/manifest")
     public JAXBElement<HostManifestReportType> getManifestReport(@QueryParam("hostName")String hostName) {
-        return new JAXBElement<HostManifestReportType>(new QName("host_manifest_report"), HostManifestReportType.class,reportsBO.getReportManifest(new Hostname(hostName))); // datatype.Hostname        
+        if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+        else return new JAXBElement<HostManifestReportType>(new QName("host_manifest_report"), HostManifestReportType.class,reportsBO.getReportManifest(new Hostname(hostName))); // datatype.Hostname        
     }
 
     @RolesAllowed({"Attestation","Report","Security"})
@@ -91,14 +92,20 @@ public class Reports {
     @Produces(MediaType.APPLICATION_XML)
     @Path("/attestation")
     public String getHostAttestationReport(@QueryParam("hostName")String hostName) {
-        return reportsBO.getHostAttestationReport(new Hostname(hostName));   
+        if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+        else return reportsBO.getHostAttestationReport(new Hostname(hostName));   
     }
     
     private List<Hostname> hostnameListFromCSV(String hostnameCSV) {
         ArrayList<Hostname> list = new ArrayList<Hostname>();
         String stringArray[] = hostnameCSV.split(",");
         for(String hostname : stringArray) {
-            list.add(new Hostname(hostname));
+            if( hostname == null || hostname.isEmpty() ) { throw new ValidationException("Missing hostNames parameter");}
+            else {
+                Hostname h = new Hostname(hostname);
+                if(!h.isValid()){throw new ValidationException("Invaild Hostname");}
+                else{list.add(h);}
+            } 
         }
         return list;
     }
@@ -120,7 +127,8 @@ public class Reports {
     @Path("/attestationreport")
     public AttestationReport getAttestationReport(@QueryParam("hostName")String hostName,
             @QueryParam("failure_only") @DefaultValue("false") Boolean failureOnly) {
-        return reportsBO.getAttestationReport(new Hostname(hostName),failureOnly); // datatype.Hostname        
+        if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+        else return reportsBO.getAttestationReport(new Hostname(hostName),failureOnly); // datatype.Hostname        
     }
     
     

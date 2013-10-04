@@ -326,6 +326,11 @@ case "$1" in
         call_setupcommand EraseWhitelistData
         ;;
   erase-users)
+		if [ -z $MC_FIRST_USERNAME ]; then
+			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
+			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
+		fi
+		export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
   uninstall)
@@ -337,6 +342,13 @@ case "$1" in
           # application files
           echo "Removing Glassfish in /usr/share/glassfish3..."
           rm -rf /usr/share/glassfish3
+		elif using_tomcat; then
+		  tomcat_require
+		  echo "Stopping Tomcat..."
+          tomcat_shutdown
+          # application files
+          echo "Removing Tomcat in $TOMCAT_HOME..."
+          rm -rf "$TOMCAT_HOME"
         fi
         echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
         rm -rf /opt/intel/cloudsecurity

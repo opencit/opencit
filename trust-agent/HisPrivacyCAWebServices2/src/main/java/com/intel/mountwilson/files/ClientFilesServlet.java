@@ -42,7 +42,7 @@ public class ClientFilesServlet extends HttpServlet {
             username = myConf.getString("ClientFilesDownloadUsername");
             String passwordHashed = myConf.getString("ClientFilesDownloadPassword");
             password = PasswordHash.valueOf(passwordHashed);
-            log.debug("Privacy CA ClientFilesServlet read configuration");
+            log.info("Privacy CA ClientFilesServlet read configuration");
         }
         catch(Exception e) {
             log.error("Privacy Error while loading PrivacyCA.properties: {}", e.toString());
@@ -63,7 +63,7 @@ public class ClientFilesServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        log.debug("Client Files request called.");
+        log.info("Client Files request called.");
         String user = request.getParameter("user");
         String pwd = request.getParameter("password");
         try {
@@ -89,7 +89,7 @@ public class ClientFilesServlet extends HttpServlet {
                     while ((read = is.read(bytes)) != -1) {
                         os.write(bytes, 0, read);
                     }
-                    log.debug("PrivacyCA provided clientfiles.zip");
+                    log.info("PrivacyCA provided clientfiles.zip");
                 } finally {
                     if (os != null) {
                         os.flush();
@@ -104,7 +104,7 @@ public class ClientFilesServlet extends HttpServlet {
             }
         }
         }catch(Exception e){
-            log.debug("PrivacyCA cannot validate user credentials for clientfiles.zip request");
+            log.info("PrivacyCA cannot validate user credentials for clientfiles.zip request");
             PrintWriter out = response.getWriter();
             response.setContentType("application/html");
             out.write("Cannot validate your password");

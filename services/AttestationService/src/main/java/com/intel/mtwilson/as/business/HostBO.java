@@ -109,7 +109,7 @@ public class HostBO extends BaseBO {
 
                         getBiosAndVMM(host);
 
-                        log.debug("Getting Server Identity.");
+                        log.info("Getting Server Identity.");
 
                         // BUG #497  setting default tls policy name and empty keystore for all new hosts. XXX TODO allow caller to provide keystore contents in pem format in the call ( in the case of the other tls policies ) or update later
                         TblHosts tblHosts = new TblHosts();
@@ -168,11 +168,11 @@ public class HostBO extends BaseBO {
                         // Bug: 749: We need to handle the host specific modules only if the PCR 19 is selected for attestation
                         List<TblHostSpecificManifest>   tblHostSpecificManifests = null;
                         if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
-                            log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                            log.info("Host specific modules would be retrieved from the host that extends into PCR 19.");
                             // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                         } else {
-                            log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                            log.info("Host specific modules will not be configured since PCR 19 is not selected for attestation");
                         }
                         
                         // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
@@ -187,7 +187,7 @@ public class HostBO extends BaseBO {
                         // If in case it is NULL, it would throw NullPointerException                        
                         log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
-                        log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
+                        log.info("HOST BO CALLING SAVEHOSTINDATABASE");
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
 
 		} catch (ASException ase) {
@@ -222,19 +222,19 @@ public class HostBO extends BaseBO {
         catch(Exception e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file
-            log.warn("Cannot load PrivacyCA.p12.pem");            
+            log.error("Cannot load PrivacyCA.p12.pem");            
         }
         try {
             InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
             IOUtils.closeQuietly(privacyCaIn);
-            log.debug("Added certificate from PrivacyCA.cer");
+            log.info("Added certificate from PrivacyCA.cer");
         }
         catch(Exception e) {
             // FileNotFoundException: cannot find PrivacyCA.cer
             // CertificateException: error while reading certificate from file
-            log.warn("Cannot load PrivacyCA.cer", e);            
+            log.error("Cannot load PrivacyCA.cer", e);            
         }
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
@@ -249,7 +249,7 @@ public class HostBO extends BaseBO {
                 }
             }
             catch(Exception e) {
-                log.warn("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+                log.error("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
             }
         }
         return validCaSignature;
@@ -318,7 +318,7 @@ public class HostBO extends BaseBO {
                         }
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
-                                log.debug("VMM is updated. Update the host specific manifest");
+                                log.info("VMM is updated. Update the host specific manifest");
                                 // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
                                 PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
@@ -348,7 +348,7 @@ public class HostBO extends BaseBO {
                                 }
                             }
 
-                        log.debug("Saving Host in database");
+                        log.info("Saving Host in database");
                         tblHosts.setBiosMleId(biosMleId);
                         // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
                         // tblHosts.setUpdatedOn(new Date(System.currentTimeMillis()));
@@ -361,10 +361,10 @@ public class HostBO extends BaseBO {
                         tblHosts.setVmmMleId(vmmMleId);
 
 			My.jpa().mwHosts().edit(tblHosts);
-			log.info("Updated host: {}", tblHosts.getName());
+			log.debug("Updated host: {}", tblHosts.getName());
                         
                         if(tblHostSpecificManifests != null){
-                            log.debug("Updating Host Specific Manifest in database");
+                            log.info("Updating Host Specific Manifest in database");
                             // Bug 962: Making this call earlier in the function before updating the host with the new MLEs.
                             //deleteHostSpecificManifest(tblHosts);
                             createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
@@ -388,7 +388,7 @@ public class HostBO extends BaseBO {
                         if (tblHosts == null) {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
                         }
-                        log.debug("Deleting Host from database");
+                        log.info("Deleting Host from database");
 
                         deleteHostSpecificManifest(tblHosts);
 
@@ -397,7 +397,7 @@ public class HostBO extends BaseBO {
                         deleteSAMLAssertions(tblHosts);
 
                         My.jpa().mwHosts().destroy(tblHosts.getId());
-                        log.info("Deleted host: {}", hostName.toString());
+                        log.debug("Deleted host: {}", hostName.toString());
                 } catch (ASException ase) {
                         //System.err.println("JIM DEBUG"); 
                         //ase.printStackTrace(System.err);
@@ -444,7 +444,7 @@ public class HostBO extends BaseBO {
                                 try {
                                         tblTaLogJpaController.destroy(taLog.getId());
                                 } catch (NonexistentEntityException e) {
-                                        log.warn("Ta Log is already deleted " + taLog.getId());
+                                        log.error("Ta Log is already deleted " + taLog.getId());
                                 }
                         }
                         log.info("Deleted all the logs for the given host " + hostId);
@@ -468,7 +468,7 @@ public class HostBO extends BaseBO {
                                 try {
                                         samlJpaController.destroy(hostSAML.getId());
                                 } catch (NonexistentEntityException e) {
-                                        log.warn("Ta Log is already deleted " + hostSAML.getId());
+                                        log.error("Ta Log is already deleted " + hostSAML.getId());
                                 }
                         }
                         log.info("Deleted all the logs for the given host " + hostId);
@@ -611,19 +611,19 @@ public class HostBO extends BaseBO {
 //                }
 
                 // create the host
-                log.trace("COMMITING NEW HOST DO DATABASE");
+                log.info("COMMITING NEW HOST DO DATABASE");
                 //log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
                 //          ", aikSha=" + tblHosts.getAikSha1() + ", desc=" + tblHosts.getDescription() + ", email=" + tblHosts.getEmail() + ", error=" + tblHosts.getErrorDescription() + ", ip=" +
                 //          tblHosts.getIPAddress() + ", loc=" + tblHosts.getLocation() + ", name=" + tblHosts.getName() + ", tls=" + tblHosts.getTlsPolicyName() + ", port=" + tblHosts.getPort());
                 try {
                     My.jpa().mwHosts().create(tblHosts);
                 }catch (Exception e){
-                    log.debug("SaveHostInDatabase caught ex!");
+                    log.info("SaveHostInDatabase caught ex!");
                     e.printStackTrace();
-                    log.trace("end print stack trace");
+                    log.info("end print stack trace");
                     throw new ASException(e);
                 }
-                log.debug("Save host specific manifest if any.");
+                log.info("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
 
         }
@@ -781,14 +781,14 @@ public class HostBO extends BaseBO {
 
                         if (tblHostList != null) {
 
-                                log.info(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
+                                log.debug(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
 
                                 for (TblHosts tblHosts : tblHostList) {
                                         TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts);
                                         txtHostList.add(hostObj);
                                 }
                         } else {
-                                log.info(String.format("Found no hosts for search criteria [%s]", searchCriteria));
+                                log.debug(String.format("Found no hosts for search criteria [%s]", searchCriteria));
                         }
 
                         return txtHostList;

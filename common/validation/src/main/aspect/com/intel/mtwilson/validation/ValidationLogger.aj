@@ -52,10 +52,10 @@ public aspect ValidationLogger {
             if( arg instanceof Model && !isUnchecked[i]) {
                 Model model = (Model)arg;
                 if( !model.isValid() ) {
-                    log.warn(String.format("Invalid model %s", arg.getClass().getName()));
+                    log.error(String.format("Invalid model %s", arg.getClass().getName()));
                     List<Fault> faults = model.getFaults();
                     for(Fault fault : faults) {
-                        log.warn(String.format("- %s", fault.toString()));
+                        log.error(String.format("- %s", fault.toString()));
                     }
                     throw new InvalidModelException(model);
                 }

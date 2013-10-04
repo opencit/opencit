@@ -127,7 +127,7 @@ public class CitrixHostAgent implements HostAgent{
         try {
             info = this.client.getHostInfo();
         } catch(Exception ex){
-            log.debug("getHostDetails getHostInfo caught: " + ex.getMessage());
+            log.error("getHostDetails getHostInfo caught: " + ex.getMessage());
             throw new IOException("Cannot get Citrix host info: "+ex.getMessage(), ex);
        }
         
@@ -147,7 +147,7 @@ public class CitrixHostAgent implements HostAgent{
         try {
             record.AIK_Certificate = client.getAIKCertificate();
         }  catch(Exception ex){
-            log.debug("getHostDetails getAikCert caught: " + ex.getMessage());
+            log.error("getHostDetails getAikCert caught: " + ex.getMessage());
        }
         
         return record;
@@ -248,7 +248,7 @@ BwIDAQAB
             pk = X509Util.decodePemPublicKey(crt);
             //client.getAIKCertificate().replace(X509Util.BEGIN_PUBLIC_KEY, "").replace(X509Util.END_PUBLIC_KEY, "").replaceAll("\n","").replaceAll("\r","");  
         }  catch(Exception ex){
-            log.debug("getAik caught: " + ex.getMessage()); 
+            log.error("getAik caught: " + ex.getMessage()); 
             
         }  
         return pk;
@@ -259,7 +259,7 @@ BwIDAQAB
         PcrManifest pcrManifest = new PcrManifest();
         String pcrList = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24";
          HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
-         log.debug("CitrixHostAgent: getQuoteInformationForHost done");
+         log.info("CitrixHostAgent: getQuoteInformationForHost done");
          Iterator it = pcrMap.entrySet().iterator();
          while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
@@ -267,7 +267,7 @@ BwIDAQAB
                 pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcr.getIndex().toString())), new Sha1Digest(pcr.getValue().toString())));
                 //it.remove(); // avoids a ConcurrentModificationException
         }
-         log.debug("CitrixHostAgent: created PcrManifest");
+         log.info("CitrixHostAgent: created PcrManifest");
        return pcrManifest;
     }
 

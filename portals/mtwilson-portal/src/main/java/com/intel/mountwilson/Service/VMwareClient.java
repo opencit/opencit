@@ -184,7 +184,7 @@ public class VMwareClient {
 		if(session != null){
 			log.debug("Logged in Session key " + session.getKey());
 		}else{
-			log.debug("session is null");
+			log.info("session is null");
 		}
 		
 	}

@@ -14,8 +14,6 @@ import java.math.BigInteger;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
@@ -532,8 +530,9 @@ public class VMWareHelper implements HostInfoInterface {
             }
             
             vmList = getDecendentMoRefs(hostMOR, "VirtualMachine", null);
-            if(vmList.isEmpty())
+            if(vmList.isEmpty()){
                 return vmList;
+            }
 
             for (int i=0; i< vmList.size(); i++)
             {
@@ -578,11 +577,12 @@ public class VMWareHelper implements HostInfoInterface {
             // If we have already established a connection, we use it. This will
             // happen when this function will be called by the getHostDetailsForCluster
             // function, which would have opened the connection to vCenter server.
-            if (!isConnected)
+            if (!isConnected){
                 connect(hostObj.AddOn_Connection_String);
-            else
+            }
+            else{
                 doNotDisconnect = true;
-
+            }
             try {
                 hostMOR = getDecendentMoRef(hostMOR, "HostSystem", hostObj.HostName);
                 if(hostMOR == null)
@@ -612,8 +612,9 @@ public class VMWareHelper implements HostInfoInterface {
         }
         finally
         {
-            if (!doNotDisconnect)
+            if (!doNotDisconnect){
                 disconnect();
+            }
         }
         return hostObj;
     }
@@ -645,8 +646,9 @@ public class VMWareHelper implements HostInfoInterface {
             }
             
             hostList = getDecendentMoRefs(clusterMOR, "HostSystem", null);
-            if(hostList.isEmpty())
+            if(hostList.isEmpty()){
                 return hostList;
+            }
 
             for (int i=0; i< hostList.size(); i++)
             {
@@ -691,9 +693,9 @@ public class VMWareHelper implements HostInfoInterface {
 
             vmMOR = getDecendentMoRef(vmMOR, "VirtualMachine", vmName);
             
-            if (vmMOR == null)
+            if (vmMOR == null){
                 throw new MSException(new Exception ("Invalid virtual machine specified for the power operation."));
-            
+            }
             if (powerOn)
             {
                 hostMOR = getDecendentMoRef(hostMOR, "HostSystem", hostName);
@@ -746,17 +748,19 @@ public class VMWareHelper implements HostInfoInterface {
             hostMOR = getDecendentMoRef(hostMOR, "HostSystem", destHostName);
             vmMOR = getDecendentMoRef(vmMOR, "VirtualMachine", vmName);
             
-            if (vmMOR == null || hostMOR == null)
+            if (vmMOR == null || hostMOR == null){
                 throw new MSException(new Exception ("Invalid virtual machine or host specified for the VM migration."));
-            
+            }
             String vmPowerState = getMORProperty(vmMOR, "runtime.powerState").toString();
             
-            if (vmPowerState.equalsIgnoreCase("powered_on"))
+            if (vmPowerState.equalsIgnoreCase("powered_on")){
                 migrateTaskMOR = vimPort.migrateVMTask(vmMOR, null, hostMOR, 
                         VirtualMachineMovePriority.HIGH_PRIORITY, VirtualMachinePowerState.POWERED_ON);
-            else
+            }
+            else{
                 migrateTaskMOR = vimPort.migrateVMTask(vmMOR, null, hostMOR, 
                         VirtualMachineMovePriority.HIGH_PRIORITY, VirtualMachinePowerState.POWERED_OFF);
+            }
             
             // Wait for the power operation to complete and return back
             String result = waitForTask(migrateTaskMOR);
@@ -872,17 +876,18 @@ public class VMWareHelper implements HostInfoInterface {
         try
         {
             // Verify if the PCRList is sent. If not set the default values.
-            if (pcrList == null || pcrList.isEmpty())
+            if (pcrList == null || pcrList.isEmpty()){
                 pcrList = "0,17,18,20";
-            
+            }
             // If we have already established a connection, we use it. This will
             // happen when this function will be called by the getHostDetailsForCluster
             // function, which would have opened the connection to vCenter server.
-            if (!isConnected)
+            if (!isConnected){
                 connect(hostObj.AddOn_Connection_String);
-            else
+            }
+            else{
                 doNotDisconnect = true;
-
+            }
             hostMOR = getDecendentMoRef(hostMOR, "HostSystem", hostObj.HostName);
             if(hostMOR == null)
             {
@@ -1050,8 +1055,9 @@ public class VMWareHelper implements HostInfoInterface {
         }
         finally
         {
-            if (!doNotDisconnect)
+            if (!doNotDisconnect){
                 disconnect();
+            }
         }
         return attestationReport;
     }

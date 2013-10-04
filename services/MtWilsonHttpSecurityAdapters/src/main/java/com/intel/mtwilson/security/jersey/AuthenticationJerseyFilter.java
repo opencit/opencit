@@ -89,7 +89,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         }
         
         if( sslRequired &&  !request.isSecure() ) {
-            log.warn("AuthenticationJerseyFilter: rejecting insecure (http) request");
+            log.error("AuthenticationJerseyFilter: rejecting insecure (http) request");
             throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).entity("Secure connection required").build());            
         }
         
@@ -107,7 +107,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
             String trustedAddress = IPAddressUtil.matchAddressInList(servletRequest.getRemoteAddr(), trustWhitelist);
             if( trustedAddress != null ) {
                 try {
-                    log.info("Request from trusted remote addr "+servletRequest.getRemoteAddr()+" matches "+trustedAddress+" in mtwilson.api.trust");
+                    log.debug("Request from trusted remote addr "+servletRequest.getRemoteAddr()+" matches "+trustedAddress+" in mtwilson.api.trust");
                     User user = new User(servletRequest.getRemoteAddr(), new Role[] { Role.Attestation, Role.Audit, Role.Report, Role.Security, Role.Whitelist }, servletRequest.getRemoteAddr(), Md5Digest.valueOf((request.getMethod()+" "+request.getPath()+" "+String.valueOf(request.getHeaderValue("Date"))).getBytes("UTF-8")));
                     request.setSecurityContext(new MtWilsonSecurityContext(user, request.isSecure()));
                     requestInfo.source = servletRequest.getRemoteAddr();
@@ -164,10 +164,10 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
                     */
                     
                     //requestLog.logRequestInfo(requestInfo); // bug #380.
-                    log.info("User {} with roles {} is authenticated. Security context is being set.", user.getLoginName(), user.getRoles());
-                    log.debug("AuthenticationJerseyFilter: Got user, setting security context");
+                    log.debug("User {} with roles {} is authenticated. Security context is being set.", user.getLoginName(), user.getRoles());
+                    log.info("AuthenticationJerseyFilter: Got user, setting security context");
                     request.setSecurityContext(new MtWilsonSecurityContext(user, request.isSecure()));
-                    log.debug("AuthenticationJerseyFilter: Set security context");
+                    log.info("AuthenticationJerseyFilter: Set security context");
                     // MtWilsonThreadLocal.set(new MtWilsonSecurityContext(user, request.isSecure()));
                     return request;
                 }
@@ -176,7 +176,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build());                
             }
         }
-        log.debug("AuthenticationJerseyFilter: request is NOT AUTHENTICATED (continuing)");
+        log.info("AuthenticationJerseyFilter: request is NOT AUTHENTICATED (continuing)");
         /*
         // we need to send back a challenge but we're only going to challenge on the authentication schemes that are 
         // supported by the current runtime configuration
@@ -215,7 +215,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
             
         }
         catch(IOException e) {
-            log.error("AuthenticationJerseyFilter: cannot read input stream");
+            log.info("AuthenticationJerseyFilter: cannot read input stream");
         }  
         return requestBody;
     }
