@@ -326,6 +326,11 @@ case "$1" in
         call_setupcommand EraseWhitelistData
         ;;
   erase-users)
+		if [ -z $MC_FIRST_USERNAME ]; then
+			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
+			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
+		fi
+		export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
   uninstall)
