@@ -78,7 +78,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	                	if (hostTrustXmlResponse.getAssertion() != null) {
 	                		TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, hostTrustXmlResponse.getAssertion());
 	                		if( trustAssertion.isValid() ) {
-                                log.debug("getTrustStatusForHost: Trust assertion is valid");
+                                log.info("getTrustStatusForHost: Trust assertion is valid");
 	                			hostVOs.add(ConverterUtil.getTrustedHostVoFromTrustAssertion(hostDetails, trustAssertion,null));
 	                		}
 	                		else {
@@ -407,7 +407,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<HostVmMappingVO> getVMsForHost(String hostName,String hostID,Map<String, HostVmMappingVO> vmMappingData,AttestationService service)throws DemoPortalException {
-		log.debug("DemoPortalServicesImpl.getVMsForHost >>");
+		log.info("DemoPortalServicesImpl.getVMsForHost >>");
         List<String> vms = null;
 		String vCenterString;
 		try {
@@ -417,7 +417,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 			log.error("Error while getting vCenterString for host ID, cause is "+e.getMessage());
 			 throw ConnectionUtil.handleDemoPortalException(e);
 		}
-		log.debug("Connecting to VM Client.");
+		log.info("Connecting to VM Client.");
 		try {
 			//Call to get all VM associated with that HOST.
 			vms = VMwareClient.getVMsForHost(hostName, vCenterString);
@@ -470,7 +470,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean powerOnOffHostVMs(String hostName, String vmName,String hostID, boolean isPowerOnCommand,AttestationService service) throws DemoPortalException {
-		log.debug("DemoPortalServicesImpl.powerOnOffHostVMs >>");
+		log.info("DemoPortalServicesImpl.powerOnOffHostVMs >>");
 		String vCenterString;
 		try {
 			//get vCenterString from Services for host.
@@ -507,7 +507,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public boolean migrateVMToHost(String vmName,String sourceHost, String hostToTransfer, String hostID,AttestationService service)throws DemoPortalException {
-		log.debug("DemoPortalServicesImpl.migrateVMToHost >>");
+		log.info("DemoPortalServicesImpl.migrateVMToHost >>");
 		String vCenterString;
 		try {
 			//Get vCenterString for a Host.
@@ -543,7 +543,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public String trustVerificationDetails(String hostName,AttestationService apiClientServices,X509Certificate[] trustedCertificates)throws DemoPortalException {
-		log.debug("DemoPortalServicesImpl.trustVerificationDetails >>");
+		log.info("DemoPortalServicesImpl.trustVerificationDetails >>");
 		String xmloutput  = null;
         Set<Hostname> hostnames = new HashSet<Hostname>();
         hostnames.add(new Hostname(hostName));
@@ -732,7 +732,7 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 	 */
 	@Override
 	public List<PcrLogReport> getFailureReportData(String hostName,ApiClient attestationService) throws DemoPortalException {
-		log.debug("DemoPortalServicesImpl.getFailureReportData >>");
+		log.info("DemoPortalServicesImpl.getFailureReportData >>");
 		
 			AttestationReport report;
 			try {

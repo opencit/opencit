@@ -133,7 +133,7 @@ public class SecurityTest {
         public CustomizedApiClient(URL baseURL, ApacheHttpClient client) {
             this.baseURL = baseURL;
             this.httpClient = client;
-            log.debug("CUSTOMIZED API CLIENT CONSTRUCTOR");
+            log.info("CUSTOMIZED API CLIENT CONSTRUCTOR");
         }
         private String querystring(MultivaluedMap<String,String> query) {
             URLCodec urlsafe = new URLCodec("UTF-8");
@@ -278,7 +278,7 @@ public class SecurityTest {
         private CustomizedRsaAuthorization authority;
     
         public CustomizedApacheRsaHttpAuthorization(RsaCredential credential) {
-            log.debug("CUSTOMIZED APACHE RSA HTTP AUTHORIZATION CONSTRUCTOR");
+            log.info("CUSTOMIZED APACHE RSA HTTP AUTHORIZATION CONSTRUCTOR");
             authority = new CustomizedRsaAuthorization(credential);
         }
     
@@ -309,7 +309,7 @@ public class SecurityTest {
             // CUSTOMIZE:  try null, empty, or arbitrary attestation. if missing should get "Unauthorized: Authorization is missing realm"
             this.realm = "Attestation";
             
-            log.debug("CUSTOMIZED RSA AUTHORIZATION CONSTRUCTOR");
+            log.info("CUSTOMIZED RSA AUTHORIZATION CONSTRUCTOR");
         }
         public String getAuthorizationQuietly(String httpMethod, String requestUrl, Map<String,String> headers) throws SignatureException {
             return getAuthorizationQuietly(httpMethod, requestUrl, null, headers, null);

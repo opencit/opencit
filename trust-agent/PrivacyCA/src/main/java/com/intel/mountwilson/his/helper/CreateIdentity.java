@@ -34,8 +34,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 import javax.security.cert.CertificateException;
 
@@ -44,6 +43,8 @@ import org.bouncycastle.util.encoders.Base64;
 //import com.intel.mountwilson.as.common.ResourceFinder;
 import com.intel.mtwilson.util.ResourceFinder;
 import javax.net.ssl.HttpsURLConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -83,7 +84,7 @@ import javax.net.ssl.HttpsURLConnection;
  *
  */
 public class CreateIdentity  {
-	private static Logger log = Logger.getLogger(CreateIdentity.class.getName());
+	private static Logger log = LoggerFactory.getLogger(CreateIdentity.class);
 	/**
 	 * Entry point into the program. See class description for required properties file elements.
 	 * 
@@ -126,8 +127,8 @@ public class CreateIdentity  {
 			homeFolder = propFile.getAbsolutePath();
 			homeFolder = homeFolder.substring(0,homeFolder.indexOf("hisprovisioner.properties"));
 			
-			log.info("Home folder : " + homeFolder);
-
+			log.debug("Home folder : " + homeFolder);
+                        
 			TpmOwnerAuth = TpmUtils.hexStringToByteArray(HisProvisionerProperties.getProperty(OWNER_AUTH));
 			HisIdentityLabel = HisProvisionerProperties.getProperty(HIS_IDENTITY_LABEL, "");
 			HisIdentityIndex = Integer.parseInt(HisProvisionerProperties.getProperty(HIS_IDENTITY_INDEX, "0"));
@@ -151,7 +152,8 @@ public class CreateIdentity  {
 				try {
 					PropertyFile.close();
 				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing the property file " , e);
+                                    log.error("Error while closing the property file");
+					
 				}
 		}
 		// Check to see if any of the values were not populated with acceptable values
@@ -267,7 +269,7 @@ public class CreateIdentity  {
             System.err.println("Create Identity... Calling into HisPriv second time, size of msg = " + encryptedChallenge.toByteArray().length);
 			byte[] encrypted2 = hisPrivacyCAWebService2.identityRequestSubmitResponse(encryptedChallenge.toByteArray());
 			if(encrypted2.length == 1){
-				log.warning("Identity request was rejected by Privacy CA in phase 2 of process");
+				log.warn("Identity request was rejected by Privacy CA in phase 2 of process");
 				throw new Exception("Identity request was rejected by Privacy CA in phase 2 of process");
 			}
 			byte[] asym2 = new byte[256];
@@ -303,7 +305,7 @@ public class CreateIdentity  {
 				try {
 					pcaFileOut.close();
 				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing pcaFileOut",e);
+					log.error("Error while closing pcaFileOut",e);
 				}
 		}
 	
@@ -313,7 +315,7 @@ public class CreateIdentity  {
 
 	private static void writecert(String clientPath, byte[] decrypted,
 			String fileName) throws CertificateException, IOException {
-			log.info("writing file " + clientPath + fileName);
+			log.debug("writing file " + clientPath + fileName);
 			javax.security.cert.X509Certificate cert = 
 					javax.security.cert.X509Certificate.getInstance(decrypted);
 			
@@ -339,14 +341,14 @@ public class CreateIdentity  {
 	private static void writeFile(String ClientPath,
 			byte[] decrypted2, String fileName) throws FileNotFoundException, IOException, PrivacyCAException {
 		
-		log.info("writing file " + ClientPath + fileName);
+		log.debug("writing file " + ClientPath + fileName);
 		
 		FileOutputStream pcaFileOut;
 		File outPath = new File(ClientPath);
 		File outFile = new File(ClientPath + fileName);
 		if(!outPath.isDirectory()){
 			if(!outPath.mkdirs()){
-				log.warning("Failed to create client installation path!");
+				log.warn("Failed to create client installation path!");
 				throw new PrivacyCAException("Failed to create client installation path!");
 			}
 		}

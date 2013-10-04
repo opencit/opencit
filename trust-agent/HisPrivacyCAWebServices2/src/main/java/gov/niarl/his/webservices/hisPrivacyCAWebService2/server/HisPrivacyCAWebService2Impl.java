@@ -20,8 +20,7 @@ import java.security.*;
 import java.security.cert.*;
 import java.security.interfaces.*;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 import javax.crypto.*;
 
 import gov.niarl.his.privacyca.*;
@@ -29,6 +28,8 @@ import gov.niarl.his.privacyca.TpmUtils.TpmUnsignedConversionException;
 import gov.niarl.his.webservices.hisPrivacyCAWebService2.IHisPrivacyCAWebService2;
 
 public class HisPrivacyCAWebService2Impl implements IHisPrivacyCAWebService2 {
+    
+        private static org.slf4j.Logger log = LoggerFactory.getLogger(HisPrivacyCAWebService2Impl.class);
 
 	private byte[] identityRequestChallenge = null;
 	private RSAPrivateKey caPrivKey = null;
@@ -45,7 +46,7 @@ public class HisPrivacyCAWebService2Impl implements IHisPrivacyCAWebService2 {
                 homeFolder = setUpFile.substring(0,setUpFile.indexOf("privacyca-client.properties"));
 
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(HisPrivacyCAWebService2Impl.class.getName()).log(Level.SEVERE, "Error while getting setup.properties.", ex);
+                log.error("Error while getting setup.properties.", ex);
             }
         }
 

@@ -25,7 +25,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 @Controller
 public class ManagementConsoleViewController extends MultiActionController{
 	
-	private static final Logger logger = LoggerFactory.getLogger(ManagementConsoleViewController.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(ManagementConsoleViewController.class.getName());
 	
 	public ModelAndView getWhiteListConfigurationPage(HttpServletRequest req,HttpServletResponse res){
 		ModelAndView modelAndView = new ModelAndView("WhiteListConfiguration");
@@ -63,7 +63,7 @@ public class ManagementConsoleViewController extends MultiActionController{
                         modelAndView.addObject("vmmWhiteList",wlVMMList);
 			
 		} catch (Exception e) {
-			logger.error("Error while Getting Host Entry from Config file."+e.getMessage());
+			log.error("Error while Getting Host Entry from Config file."+e.getMessage());
 			modelAndView.addObject("result",false);
 			modelAndView.addObject("message","Error while Getting Host Entry from HostVMMType Class.");
 			return modelAndView;
@@ -107,7 +107,7 @@ public class ManagementConsoleViewController extends MultiActionController{
 		return new ModelAndView("ViewRequest");
 	}
     public ModelAndView getRegisterPage(HttpServletRequest req,HttpServletResponse res) {
-	logger.debug("WLMViewController.getRegisterPage >>");
+	log.info("WLMViewController.getRegisterPage >>");
 	return new ModelAndView("Register");
     }	
    /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
@@ -119,7 +119,7 @@ public class ManagementConsoleViewController extends MultiActionController{
     
     /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
     public ModelAndView getSAMLCertificatePage(HttpServletRequest req,HttpServletResponse res ) {
-    	logger.debug("MGViewController.getSAMLCertificatePage >>");
+    	log.info("MGViewController.getSAMLCertificatePage >>");
 		return new ModelAndView("SAMLDownload");
 	
 	}
@@ -128,14 +128,14 @@ public class ManagementConsoleViewController extends MultiActionController{
     
     /*--Begin Added by stdalex on 1/8/13 mc fingerprint */
     public ModelAndView getViewCertPage(HttpServletRequest req,HttpServletResponse res ) {
-    	logger.debug("MGViewController.getViewCertPage >>");
+    	log.info("MGViewController.getViewCertPage >>");
         return new ModelAndView("CertDownload");
     }
     
     /*--End Added by stdale MC fingerprint 1/8/13 */
     
     /*public ModelAndView getDefineWhiteListConfig(HttpServletRequest req,HttpServletResponse res) {
-    	logger.info("WLMViewController.getDefineWhiteListConfig >>");
+    	log.info("WLMViewController.getDefineWhiteListConfig >>");
     	return new ModelAndView("DefineWhiteListConfig");
     }*/
     
@@ -148,37 +148,37 @@ public class ManagementConsoleViewController extends MultiActionController{
     
 	//This method will return home page for TrustDashBoard.
 	public ModelAndView getDashBoardPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("DemoPortalViewController.getDashBoardPage");
+		log.info("DemoPortalViewController.getDashBoardPage");
 		ModelAndView responseView = new ModelAndView("HostTrustStatus");
 		return responseView;
 	}
 	
 	//This method will return Add Host Page.
 	public ModelAndView getAddHostPage(HttpServletRequest req , HttpServletResponse res){
-		logger.debug("DemoPortalViewController.getAddHostPage");
+		log.info("DemoPortalViewController.getAddHostPage");
 		return new ModelAndView("AddHost");
 	}
 	
 	public ModelAndView getViewHostPage(HttpServletRequest req , HttpServletResponse res){
-		logger.debug("DemoPortalViewController.getViewHostPage");
+		log.info("DemoPortalViewController.getViewHostPage");
 		ModelAndView responseView = new ModelAndView("ViewHost");
 		return responseView;
 	}
 	
 	public ModelAndView getEditHostPage(HttpServletRequest req , HttpServletResponse res){
-		logger.debug("DemoPortalViewController.getEditHostPage");
+		log.info("DemoPortalViewController.getEditHostPage");
 		ModelAndView responseView = new ModelAndView("EditHost");
 		return responseView;
 	}
         
         public ModelAndView showbulktrustUpdatePage(HttpServletRequest req , HttpServletResponse res){
-        logger.debug("DemoPortalViewController.showbulktrustUpdatePage");
+        log.info("DemoPortalViewController.showbulktrustUpdatePage");
         ModelAndView responseView = new ModelAndView("BulktrustUpdate");
         return responseView;
 	}
 	
 	public ModelAndView showReportsPage(HttpServletRequest req , HttpServletResponse res){
-		logger.debug("DemoPortalViewController.showReportsPage");
+		log.info("DemoPortalViewController.showReportsPage");
 		ModelAndView responseView = new ModelAndView("ShowReports");
 		return responseView;
 	}
@@ -192,7 +192,7 @@ public class ManagementConsoleViewController extends MultiActionController{
 	 * @return
 	 */
 	public ModelAndView trustVerificationDetails(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("DemoPortalDataController.trustVerificationDetails");
+		log.info("DemoPortalDataController.trustVerificationDetails");
 		ModelAndView responseView = new ModelAndView("TrustSamlDetails");
 		String hostName = req.getParameter("hostName");
 		responseView.addObject("hostName", hostName);
@@ -208,17 +208,17 @@ public class ManagementConsoleViewController extends MultiActionController{
 	 * Method to for OS Component
 	 */
 	public ModelAndView getEditOSPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getEditOSPage >>");
+		log.info("WLMViewController.getEditOSPage >>");
 		return new ModelAndView("EditOS");
 	}
 	
 	public ModelAndView getViewOSPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getViewOSPage >>");
+		log.info("WLMViewController.getViewOSPage >>");
 		return new ModelAndView("ViewOS");
 	}
 	
 	public ModelAndView getAddOSPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getAddOSPage >>");
+		log.info("WLMViewController.getAddOSPage >>");
 		return new ModelAndView("AddOS");
 	}
 	
@@ -226,17 +226,17 @@ public class ManagementConsoleViewController extends MultiActionController{
 	 * Method to for MLE Component
 	 */
 	public ModelAndView getAddMLEPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getAddMLEPage >>");
+		log.info("WLMViewController.getAddMLEPage >>");
 		return new ModelAndView("AddMle");
 	}
 	
 	public ModelAndView getViewMle(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getViewMle >>");
+		log.info("WLMViewController.getViewMle >>");
 		return new ModelAndView("ViewMle");
 	}
 	
 	public ModelAndView getEditMle(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getEditMle >>");
+		log.info("WLMViewController.getEditMle >>");
 		return new ModelAndView("EditMle");
 	}
 	
@@ -245,23 +245,23 @@ public class ManagementConsoleViewController extends MultiActionController{
 	 * Method to for OEM Component
 	 */
 	public ModelAndView getViewOEMPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getViewOEMPage >>");
+		log.info("WLMViewController.getViewOEMPage >>");
 		return new ModelAndView("ViewOEM");
 	}
 	
 	//Method to get Edit page For OEM
 	public ModelAndView getEditOEMPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getEditOEMPage >>");
+		log.info("WLMViewController.getEditOEMPage >>");
 		return new ModelAndView("EditOEM");
 	}
 	
 	public ModelAndView getAddOEMPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getAddOEMPage >>");
+		log.info("WLMViewController.getAddOEMPage >>");
 		return new ModelAndView("AddOEM");
 	}
 	
 	public ModelAndView getAboutPage(HttpServletRequest req,HttpServletResponse res) {
-		logger.debug("WLMViewController.getAddOEMPage >>");
+		log.info("WLMViewController.getAddOEMPage >>");
 		return new ModelAndView("AboutWLM");
 	}    
 }

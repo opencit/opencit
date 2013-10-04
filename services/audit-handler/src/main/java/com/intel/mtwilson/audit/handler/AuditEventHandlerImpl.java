@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadx
  */
 public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
-    private static Logger logger = LoggerFactory.getLogger(AuditEventHandlerImpl.class);
+    private static Logger log = LoggerFactory.getLogger(AuditEventHandlerImpl.class);
     private static boolean isAuditEnabled = true;
     private static boolean isUnchangedColumnsRequired = true;
     
@@ -47,8 +47,8 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
         isAuditEnabled = true; // AuditConfig.isAuditEnabled();
         isUnchangedColumnsRequired = false; // AuditConfig.isUnchangedColumnsRequired();
         
-        logger.info("Audit - {}",isAuditEnabled );
-        logger.info("Log Unchanged Columns  - {}",isUnchangedColumnsRequired);
+        log.debug("Audit - {}",isAuditEnabled );
+        log.debug("Log Unchanged Columns  - {}",isUnchangedColumnsRequired);
     }
     /*
      * Get the security context
@@ -58,11 +58,11 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
 
     private AuditColumnData getAuditColumnData(Column col, Field field, Object table, HashMap<String, Object> changedColumns) throws IllegalAccessException, IllegalArgumentException, SecurityException {
         AuditColumnData auditColumnData = new AuditColumnData();
-        logger.trace("Column: " + col.name());
+        log.trace("Column: " + col.name());
         auditColumnData.setName(col.name());
-        logger.trace("Field: " + field.getName());
+        log.trace("Field: " + field.getName());
         field.setAccessible(true);
-        logger.trace("Value: " + field.get(table));
+        log.trace("Value: " + field.get(table));
         auditColumnData.setValue(field.get(table));
         field.setAccessible(false);
         auditColumnData.setIsUpdated(changedColumns.containsKey(field.getName()));
@@ -89,12 +89,12 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
 
     private void handleEvent(String action,
             DescriptorEvent event) {
-        logger.trace("Thread: {}",Thread.currentThread().getName());
+        log.trace("Thread: {}",Thread.currentThread().getName());
         if(isAuditEnabled){
             try {
 
-                logger.trace("Action: " + action);
-                logger.trace("Class: " + event.getObject());
+                log.trace("Action: " + action);
+                log.trace("Class: " + event.getObject());
                 
                 AuditLog auditLog = getAuditLog(event,action);
                 
@@ -102,7 +102,7 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
                     new AuditLogger().addLog(auditLog);
                 
             } catch (Exception ex) {
-                logger.error("Error while generating json :", new AuditHandlerException(ex));
+                log.error("Error while generating json :", new AuditHandlerException(ex));
             }
         }
     }
@@ -115,7 +115,7 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
 
         for (Field field : table.getClass().getDeclaredFields()) {
             Column col;
-            logger.trace("Is it required to log this column {}" , field.isAnnotationPresent(AuditIgnore.class));
+            log.trace("Is it required to log this column {}" , field.isAnnotationPresent(AuditIgnore.class));
             if ((col = field.getAnnotation(Column.class)) != null && !field.isAnnotationPresent(AuditIgnore.class)){
                 
                 if(isUnchangedColumnsRequired || event.getEventCode() != 7){ // Log all columns
@@ -138,7 +138,7 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
             List<ChangeRecord> changes = query.getObjectChangeSet().getChanges();
 
             for (ChangeRecord change : changes) {
-                logger.debug("Change: " + change.getAttribute() + " " + change.getOldValue());
+                log.debug("Change: " + change.getAttribute() + " " + change.getOldValue());
 
                 changedColumns.put(change.getAttribute(), change.getOldValue());
             }
@@ -164,7 +164,7 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
             auditLog.setAction(action);
             return auditLog;
         }else{
-            logger.debug("No Columns changed. Returning null");
+            log.info("No Columns changed. Returning null");
             return null;
         }
     }
@@ -175,9 +175,9 @@ public class AuditEventHandlerImpl extends DescriptorEventAdapter  {
         Object table = event.getObject();
         for (Field field : table.getClass().getDeclaredFields()) {
             if ((field.getAnnotation(Id.class)) != null) {
-                logger.trace("ID Column Field: " + field.getName());
+                log.trace("ID Column Field: " + field.getName());
                 field.setAccessible(true);
-                logger.trace("ID Data Type :" + field.getType() +  "value: " + field.get(table));
+                log.trace("ID Data Type :" + field.getType() +  "value: " + field.get(table));
                 pk = (Integer) field.get(table);
                 field.setAccessible(false);
             }

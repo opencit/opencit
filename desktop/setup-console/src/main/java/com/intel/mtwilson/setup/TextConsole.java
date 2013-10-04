@@ -27,8 +27,7 @@ public class TextConsole {
         }
         // turn off jdk logging because sshj logs to console
         LogManager.getLogManager().reset();
-//        Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);  
-//        globalLogger.setLevel(java.util.logging.Level.OFF);          
+//        Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);        
 
         try {
             if( args.length > 0 ) {

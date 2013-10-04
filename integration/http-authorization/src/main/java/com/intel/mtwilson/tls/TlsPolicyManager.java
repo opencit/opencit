@@ -45,13 +45,13 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
 
     @Override
     public X509TrustManager getTrustManager() {
-        log.debug("TlsPolicyManager: providing X509TrustManager  (noop)");
+        log.info("TlsPolicyManager: providing X509TrustManager  (noop)");
         return new NopX509TrustManager();
     }
 
     @Override
     public HostnameVerifier getHostnameVerifier() {
-        log.debug("TlsPolicyManager: providing HostnameVerifier (this)");
+        log.info("TlsPolicyManager: providing HostnameVerifier (this)");
         return this;
     }
 

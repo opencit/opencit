@@ -160,7 +160,7 @@ public class TblLocationPcrJpaController implements Serializable {
                 return location;
                 
             } catch (NoResultException e) {
-                log.info( "NoResultException: Location does not exist for pcr value {} ", 
+                log.error( "NoResultException: Location does not exist for pcr value {} ", 
                         pcrValue);
                 return null;
             }
@@ -186,7 +186,7 @@ public class TblLocationPcrJpaController implements Serializable {
                 return locationPcr;
                 
             } catch (NoResultException e) {
-                log.info( "NoResultException: Location does not exist for pcr value {} ", 
+                log.error( "NoResultException: Location does not exist for pcr value {} ", 
                         pcrValue);
                 return null;
             }            

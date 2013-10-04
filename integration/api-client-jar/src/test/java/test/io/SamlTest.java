@@ -84,7 +84,7 @@ public class SamlTest {
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         keystore.addTrustedSamlCertificate(certificate, attestationService.getHost());
         keystore.save();
-        log.debug("Saved SAML certificate in keystore");
+        log.info("Saved SAML certificate in keystore");
     }
     
     @Test
@@ -114,7 +114,7 @@ public class SamlTest {
         TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, xml);
         if( trustAssertion.isValid() ) {
             System.out.println("Assertion is valid");
-            log.debug("Assertion is valid");
+            log.info("Assertion is valid");
             log.debug("Subject: {}", trustAssertion.getSubject());
             log.debug("Issuer: {}", trustAssertion.getIssuer());
             Set<String> attributes = trustAssertion.getAttributeNames();

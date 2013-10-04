@@ -68,7 +68,7 @@ public abstract class BaseServer {
 
 			}
 			
-			log.info("Received data from socket: {}", new String(buf));
+			log.debug("Received data from socket: {}", new String(buf));
 
 			
 			TrustAgent agent = new TrustAgent();

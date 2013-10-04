@@ -181,7 +181,7 @@ public class MyConfiguration {
                             password = env.getString("MTWILSON_PASSWORD");
                         }
                         else {
-                            log.error("Found encrypted configuration file, but no password was found in system properties or environment");
+                            log.warn("Found encrypted configuration file, but no password was found in system properties or environment");
                         }
                         if( password != null ) {
                             ExistingFileResource resource = new ExistingFileResource(f);
@@ -227,14 +227,14 @@ public class MyConfiguration {
                 composite.addConfiguration(classpath);
             }
         } catch (IOException ex) {
-            log.info("Did not find [" + propertiesFilename + "] properties on classpath",
+            log.debug("Did not find [" + propertiesFilename + "] properties on classpath",
                     ex);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    log.warn("Failed to close input stream for "
+                    log.error("Failed to close input stream for "
                             + propertiesFilename);
                 }
             }

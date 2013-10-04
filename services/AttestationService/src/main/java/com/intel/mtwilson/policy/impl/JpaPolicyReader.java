@@ -109,7 +109,7 @@ public class JpaPolicyReader {
             return rule;
         }
         catch(IllegalArgumentException e) {
-            log.warn("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
+            log.error("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
             return null;
         }
     }

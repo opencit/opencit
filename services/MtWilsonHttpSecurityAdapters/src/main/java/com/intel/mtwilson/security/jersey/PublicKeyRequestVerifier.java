@@ -71,7 +71,7 @@ public class PublicKeyRequestVerifier {
 //        try {
             Authorization a = parseAuthorization(authorizationHeader);
             
-            log.debug("PublicKeyAuthorization: Request timestamp ok");
+            log.info("PublicKeyAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
             
             signatureBlock.httpMethod = a.httpMethod;
@@ -120,7 +120,7 @@ public class PublicKeyRequestVerifier {
             
             
             if( userInfo == null ) { 
-                log.warn("PublicKeyAuthorization cannot find user with fingerprint "+a.fingerprintBase64);
+                log.error("PublicKeyAuthorization cannot find user with fingerprint "+a.fingerprintBase64);
                 return null;
             }
             
@@ -149,7 +149,7 @@ public class PublicKeyRequestVerifier {
             
 
             if( isValid ) {
-                log.debug("Request is authenticated");
+                log.info("Request is authenticated");
                 
                 // check if the request has expired by looking at the HTTP Date header, but only if it was signed.
                 if( signatureBlock.headers.containsKey("Date") ) {
@@ -184,7 +184,7 @@ public class PublicKeyRequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.debug("Request is NOT AUTHENTICATED");
+        log.error("Request is NOT AUTHENTICATED");
         return null;
     }
     

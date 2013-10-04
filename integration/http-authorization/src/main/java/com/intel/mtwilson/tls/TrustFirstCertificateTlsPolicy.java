@@ -100,11 +100,11 @@ public class TrustFirstCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
         for(int i=0; i<xcs.length; i++) {
             try {
                 xcs[i].checkValidity(); // CertificateExpiredException, CertificateNotYetValidEception
-                log.info("Saving certificate {}", xcs[i].getSubjectX500Principal().getName());
+                log.debug("Saving certificate {}", xcs[i].getSubjectX500Principal().getName());
                 repository.addCertificate(xcs[i]); // KeyManagementException
             }
             catch(Exception e) {
-                log.trace("TrustFirstCertificateTlsPolicy addServerCertificateToRepository cert was not valid. trying to save next cert");
+                log.warn("TrustFirstCertificateTlsPolicy addServerCertificateToRepository cert was not valid. trying to save next cert");
                 // don't throw an exception because we may be able to save other certificates? throw new CertificateException("Unable to save server certificate", e);
             }
         }        

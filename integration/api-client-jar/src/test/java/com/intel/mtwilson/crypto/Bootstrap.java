@@ -44,8 +44,8 @@ public class Bootstrap {
         String env = "/mtwilson-0.5.2.properties";   // choose your environment (properties file under src/test/env)
 //        String env = "/localhost-0.5.2.properties";   // choose your environment (properties file under src/test/env)
         config = ConfigurationUtil.fromResource(env);
-        log.info("mtwilson.api.baseurl={}",config.getString("mtwilson.api.baseurl"));
-        log.info("mtwilson.api.keystore={}",config.getString("mtwilson.api.keystore"));
+        log.debug("mtwilson.api.baseurl={}",config.getString("mtwilson.api.baseurl"));
+        log.debug("mtwilson.api.keystore={}",config.getString("mtwilson.api.keystore"));
     }
     
     /*
@@ -112,7 +112,7 @@ public class Bootstrap {
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         keystore.addTrustedSamlCertificate(certificate, attestationService.getHost());
         keystore.save();
-        log.debug("Saved SAML certificate in keystore");
+        log.info("Saved SAML certificate in keystore");
     }
     
     

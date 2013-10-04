@@ -157,7 +157,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws ApiException {
-        log.error("About to execute the registerhosts function");
+        log.warn("About to execute the registerhosts function");
           HostConfigResponseList results = new MSComponentFactory().getHostBO().registerHosts(hostRecords);
           return results;        
        /*HostConfigResponseList hostResponses = new HostConfigResponseList();

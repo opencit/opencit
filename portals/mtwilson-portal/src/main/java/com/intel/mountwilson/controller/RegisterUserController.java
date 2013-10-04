@@ -29,7 +29,7 @@ public class RegisterUserController extends AbstractController {
 
 	
 	// variable declaration used during Processing data. 
-        private static final Logger logger = LoggerFactory.getLogger(RegisterUserController.class.getName());
+        private static final Logger log = LoggerFactory.getLogger(RegisterUserController.class.getName());
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
 	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU"));
         
@@ -37,7 +37,7 @@ public class RegisterUserController extends AbstractController {
         
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res)  {
-		logger.debug("RegisterUserController >>");
+		log.info("RegisterUserController >>");
 		ModelAndView view = new ModelAndView(new JSONView());
 		
 		String username;
@@ -59,7 +59,7 @@ public class RegisterUserController extends AbstractController {
                 //Checking for duplicate user registration by seeing if there is already a cert in table for user
                 MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
                 if(keyTest != null) {
-                  logger.info("An user already exists with the specified User Name: {}", username);
+                  log.debug("An user already exists with the specified User Name: {}", username);
 		  view.addObject("result",false);
 		  view.addObject("message","An user already exists with the specified User Name. Please select different User Name.");
 		  return view;      
@@ -71,7 +71,7 @@ public class RegisterUserController extends AbstractController {
 			for (File keystoreName : files) {
 			    if (keystoreName.isFile()) {
 			        if (keystoreName.getName().equalsIgnoreCase(username+".jks")) {
-						logger.info("An user already exists with the specified User Name. Please select different User Name.");
+					log.info("An user already exists with the specified User Name. Please select different User Name.");
 						view.addObject("result",false);
 			            view.addObject("message","An user already exists with the specified User Name. Please select different User Name.");
 			            return view;
@@ -87,13 +87,13 @@ public class RegisterUserController extends AbstractController {
                 //SimpleKeystore response = KeystoreUtil.createUserInDirectory(new File(dirName), username, password, new URL(baseURL), new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
                 
                 ByteArrayResource certResource = new ByteArrayResource();
-                logger.debug("registerusercontroller calling createUserInResource");
+                log.info("registerusercontroller calling createUserInResource");
         	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL),new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
                 MwPortalUser keyTable = new MwPortalUser();
                 keyTable.setUsername(username);
                 keyTable.setStatus("PENDING");
                 keyTable.setKeystore(certResource.toByteArray());
-                logger.debug("registerusercontroller calling create");
+                log.info("registerusercontroller calling create");
                 keystoreJpa.create(keyTable);
         	
             if (response == null) {

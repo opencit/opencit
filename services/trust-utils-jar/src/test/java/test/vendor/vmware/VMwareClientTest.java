@@ -90,10 +90,10 @@ public class VMwareClientTest {
         client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
         ManagedObjectReference ref = client.getHostReference("10.1.71.173");
         if( ref == null ) {
-            log.debug("failed to get reference to host");
+            log.info("failed to get reference to host");
         }
         else {
-            log.debug("got reference!");
+            log.info("got reference!");
         }
         client.disconnect();
     }
