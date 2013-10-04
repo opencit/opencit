@@ -977,7 +977,7 @@ public class HostBO extends BaseBO {
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_OEM) {
 
                     // We need to add OEM name to the VMM_Name.     
-                    String platformName = getPlatformName(hostObj.Processor_Info);
+                    platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
                     }else {
@@ -1337,7 +1337,7 @@ public class HostBO extends BaseBO {
             // Retrieve the host object.
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
 
-            /*
+            
             // Need to do some data massaging. Firstly we need to change the White Spaces
             // in the OS name to underscores. In case of Intel's BIOS, need to trim it since it will be very long.
             hostObj.VMM_OSName = hostObj.VMM_OSName.replace(' ', '_');
