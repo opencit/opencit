@@ -2,7 +2,7 @@
 # WARNING:
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
-
+echo "MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW"
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
@@ -427,6 +427,13 @@ echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
 if [[ -z "$opt_glassfish" && -z "$opt_tomcat" ]]; then
  echo_warning "Relying on an existing webservice installation"
 fi
+
+echo "JAVA_HOME: $JAVA_HOME"
+echo "JRE_HOME: $JRE_HOME"
+echo "java: $java"
+echo "GLASSFISH_HOME: $GLASSFISH_HOME"
+echo "glassfish_bin: $glassfish_bin"
+echo "glassfish: $glassfish"
 
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
