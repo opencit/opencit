@@ -2,7 +2,7 @@
 # WARNING:
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
-echo "MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW"
+
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
@@ -445,7 +445,14 @@ if using_glassfish; then
         exit 1
       fi
     fi
-  
+
+  echo "JAVA_HOME: $JAVA_HOME"
+  echo "JRE_HOME: $JRE_HOME"
+  echo "java: $java"
+  echo "GLASSFISH_HOME: $GLASSFISH_HOME"
+  echo "glassfish_bin: $glassfish_bin"
+  echo "glassfish: $glassfish"
+
   echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
   # glassfish install here
   ./$glassfish_installer  >> $INSTALL_LOG_FILE
