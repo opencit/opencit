@@ -888,10 +888,10 @@ public class HostBO extends BaseBO {
                     // BIOS as BIOS_Name is always OEM specific.                    
                     if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    }
-                    else {
+                    }else {
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;    
                     }
+                    
                     
                     log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
@@ -980,8 +980,7 @@ public class HostBO extends BaseBO {
                     String platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    }
-                    else {
+                    }else {
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;               
                     }
                     
@@ -1603,9 +1602,8 @@ public class HostBO extends BaseBO {
                     String platformName = getPlatformName(hostObj.Processor_Info);
                     if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    }
-                    else {
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;    
+                    } else{
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;      
                     }
                 } else if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_GLOBAL) {
                     // Bug #951 where in we need to append the platform name to the global white lists also.
