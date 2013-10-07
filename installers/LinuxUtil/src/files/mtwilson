@@ -23,6 +23,9 @@ shell_include_files ${env_dir}/*
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
+# load default environment variables
+load_default_env 1>/dev/null
+
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
 export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
@@ -36,7 +39,7 @@ fi
 if using_glassfish; then
     export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
 elif using_tomcat; then
-    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-8.4}
+    export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
 fi
 export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
 export java_required_version=${JAVA_REQUIRED_VERSION}
@@ -46,15 +49,6 @@ call_apiclient() {
   APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.client.TextConsole
   $java -cp "$APICLIENT_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
-}
-
-# The EclipseLink persistence framework sends messages to stdout that start with the text [EL Info] or [EL Warning].
-# We suppress those because they are not useful for the customer, only for debugging.
-call_setupcommand() {
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
-  SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
-  mainclass=com.intel.mtwilson.setup.TextConsole
-  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]"
 }
 
 find_ctl_commands() {
@@ -162,7 +156,6 @@ all_status() {
   if [ -n "$mpctl" ]; then $mpctl status; fi
 }
 
-
 setup_env() {
   local datestr=`date +%Y-%m-%d.%H%M`
   echo "# environment on ${datestr}"
@@ -210,6 +203,36 @@ case "$1" in
         ;;
   setup-env)
         setup_env
+        ;;
+  start)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+		  glassfish_require
+          glassfish_start_report
+        elif using_tomcat; then
+		  tomcat_require
+          tomcat_start_report
+        fi
+        ;;
+  stop)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+		  glassfish_require
+          glassfish_shutdown
+        elif using_tomcat; then
+		  tomcat_require
+          tomcat_shutdown
+        fi
+        ;;
+  restart)
+        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+		  glassfish_require
+          glassfish_restart
+        elif using_tomcat; then
+		  tomcat_require
+          tomcat_restart
+        fi
         ;;
   glassfish-detect)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
@@ -333,6 +356,11 @@ case "$1" in
 		export MC_FIRST_USERNAME=$MC_FIRST_USERNAME
         call_setupcommand EraseUserAccounts $@
         ;;
+  change-db-pass)
+        if [ $# -ne 1 ]; then
+          echo_failure "Usage: $0 $1"; exit -1; fi
+        change_db_pass $@
+        ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
         if using_glassfish; then
@@ -377,12 +405,13 @@ case "$1" in
         echo_success "Done"
         ;;
   help)
-        echo "Usage: mtwilson {api|erase-data|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
-        ;;
+        ;&
   *)
-        echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|glassfish-detect|glassfish-enable-logging|glassfish-start|glassfish-stop|" \
-             "glassfish-restart|glassfish-status|glassfish-sslcert|tomcat-detect|tomcat-start|tomcat-stop|tomcat-restart|tomcat-status|tomcat_sslcert|help|mysql-detect|mysql-sslcert|java-detect|setup|status|uninstall|version}"
+        echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|help|\n" \
+             "|glassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
+			 "|java-detect|mysql-detect|mysql-sslcert|\n" \
+             "|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+			 "|restart|setup|start|status|stop|uninstall|version}"
         exit 1
 esac
 

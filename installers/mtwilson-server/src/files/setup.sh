@@ -622,10 +622,24 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
+#Save variables to properties file
+if using_mysql; then   
+  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+elif using_postgres; then
+  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+fi
+  
+#Restart webserver
 if using_glassfish; then
+  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
   mtwilson glassfish-restart
 elif using_tomcat; then
+  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
   mtwilson tomcat-restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
+
+
+
+
