@@ -738,6 +738,7 @@ function isNumber(n) {
                                         <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">delete</a> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">revoke</a>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.provisionCertificate(this.getAttribute('uuid')); return false;">provision</a>
                                     </td>
                                 </tr>
                             </tbody>

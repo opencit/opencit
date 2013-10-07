@@ -61,9 +61,7 @@ public class MixinTest {
     public void writeActionChoices() throws IOException {
         CertificateResource.CertificateActionChoice[] choices = new CertificateResource.CertificateActionChoice[2];
         choices[0] = new CertificateResource.CertificateActionChoice();
-        choices[0].action = CertificateResource.CertificateActionName.REVOKE;
         choices[1] = new CertificateResource.CertificateActionChoice();
-        choices[1].action = CertificateResource.CertificateActionName.PROVISION;
         choices[1].provision = new CertificateResource.CertificateProvisionAction();
         choices[1].provision.setHost(new InternetAddress("localhost"));
         

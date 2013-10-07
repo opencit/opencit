@@ -9,6 +9,7 @@ import com.intel.mtwilson.atag.model.File;
 import com.intel.mtwilson.atag.dao.jdbi.FileDAO;
 import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
+import com.intel.mtwilson.atag.dao.jooq.generated.tables.records.FileRecord;
 import com.intel.dcsg.cpg.io.UUID;
 import java.sql.SQLException;
 import java.util.ArrayList;

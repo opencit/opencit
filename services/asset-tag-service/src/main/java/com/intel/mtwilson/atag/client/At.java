@@ -64,7 +64,7 @@ public class At {
     }
 
     public static ClientResource certificates(UUID uuid) {
-        return new ClientResource(baseurl() + "/certificate/" + uuid);
+        return new ClientResource(baseurl() + "/certificates/" + uuid);
     }
     
     public static ClientResource selections() {

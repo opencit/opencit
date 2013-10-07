@@ -42,6 +42,8 @@ import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.atag.model.Configuration;
 import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
+import com.intel.mtwilson.atag.resource.CertificateResource.CertificateActionChoice;
+import com.intel.mtwilson.atag.resource.CertificateResource.CertificateRevokeAction;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -496,6 +498,32 @@ public class TagApiTest2 {
         log.debug("testPostCertificateRequests results: {}", mapper.writeValueAsString(results));
         report(results);
     }    
+    
+    @Test
+    public void testRevokeCertificate() throws IOException {
+        // make a request to be automatically approved (must have a default selection and automatic approval configured)
+        CertificateRequest req1 = new CertificateRequest(new UUID().toString()); //Arrays.asList(new CertificateRequestTagValue[]{new CertificateRequestTagValue("country", null, "US"), new CertificateRequestTagValue("state", null, "CA")}));
+        CertificateRequest[] certificateRequests = new CertificateRequest[]{ req1 };
+        log.debug("testPostCertificateRequests: {}", mapper.writeValueAsString(certificateRequests));
+        CertificateRequest[] results = At.certificateRequests().post(certificateRequests, CertificateRequest[].class);
+        log.debug("testPostCertificateRequests results: {}", mapper.writeValueAsString(results));
+        report(results);
+        // get a reference to the automatically approved certificate
+        UUID certificateUuid = results[0].getCertificate();
+        // now revoke the certificate
+        CertificateActionChoice action = new CertificateActionChoice();
+        action.revoke = new CertificateRevokeAction();
+        log.debug("Posting revoke action: {}", mapper.writeValueAsString(action));
+        CertificateActionChoice test = mapper.readValue("{\"revoke\":{\"uuid\":null,\"effective\":1381101239544}}", CertificateActionChoice.class);
+        assertNotNull(test.revoke);
+        assertNotNull(test.revoke.getEffective());
+//        assertNotNull(test.revoke.getAction());
+        CertificateActionChoice result = At.certificates(certificateUuid).post(action, CertificateActionChoice.class);
+        assertNotNull(result.revoke);
+        log.debug("Revoke result: {}", mapper.writeValueAsString(result));
+        log.debug("Revoke certificate: {}", result.revoke.getUuid());
+        log.debug("Revoke effective date: {}", result.revoke.getEffective());
+    }
     
     @Test
     public void testPostMultipleCertificateRequestsWithDefaultSelection() throws IOException {

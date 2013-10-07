@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
@@ -133,19 +134,19 @@ public class CertificateResource extends ServerResource {
             }
             throw new IllegalArgumentException("Unknown action");
         }
-        
     }
     
     /**
-     * Use a jackson mix-in to add a @JsonProperty(name="accepted") to the final isValid() method in ObjectModel.
+     * XXX TODO Use a jackson mix-in to add a @JsonProperty(name="accepted") to the inherited isValid() method from ObjectModel 
+     * (but not to the ObjectModel class itself)
      */
-    public static abstract class CertificateAction extends ObjectModel {
+    public static abstract class CertificateAction /*extends ObjectModel*/ {
         private CertificateActionName name;
         private UUID uuid;
         public CertificateAction(CertificateActionName name) {
             this.name = name;
         }
-        public CertificateActionName getAction() { return name; }
+//        public CertificateActionName getAction() { return name; }
         public UUID getUuid() { return uuid; }
         public void setUuid(UUID certificateUuid) {
             this.uuid = certificateUuid;
@@ -167,10 +168,10 @@ public class CertificateResource extends ServerResource {
             this.effective = effective;
         }
 
-        @Override
+/*        @Override
         protected void validate() {
             // we use today's date as the effective date if it is not provided
-        }
+        }*/
 
     }
     public static class CertificateProvisionAction extends CertificateAction {
@@ -186,66 +187,62 @@ public class CertificateResource extends ServerResource {
         public InternetAddress getHost() {
             return host;
         }
-        
+        /*
         @Override
         protected void validate() {
             if( host == null ) {
                 fault("Host address is required");
             }
-        }
+        }*/
     }
     
     @JsonInclude(Include.NON_NULL)
     public static class CertificateActionChoice {
-        public CertificateActionName action; // "revoke", "provision"
         public CertificateRevokeAction revoke;
         public CertificateProvisionAction provision;
     }
     
     @Post("json:json")
-    public CertificateActionChoice[] actionCertificate(CertificateActionChoice[] actions) throws IOException, ApiException, SignatureException {
+    public CertificateActionChoice actionCertificate(CertificateActionChoice actionChoice) throws IOException, ApiException, SignatureException {
         UUID uuid = UUID.valueOf(getAttribute("id"));
         Certificate certificate = dao.findByUuid(uuid);
         if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        
-        for( CertificateActionChoice action : actions ) {
-            switch(action.action) {
-                case PROVISION:
-                    if( action.provision == null ) {
-                        action.provision = new CertificateProvisionAction(); // but won't validate because hostname was not provided
-                    }
-                    action.provision.setUuid(uuid);
-                    if( action.provision.isValid() ) {
-                        // first post the certificate to mt wilson
-                        AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
-                        request.setCertificate(certificate.getCertificate());
-                        Global.mtwilson().importAssetTagCertificate(request);
-//                        My.client().importAssetTagCertificate(request);
-                        // XXX TODO send it to the host...
-                        
-                    }
-                    break;
-                case REVOKE:
-                    action.revoke.setUuid(uuid);
-                    if( action.revoke.isValid() ) {
-                        // update the database...
-                        dao.updateRevoked(certificate.getId(), true);
-                        // update mt wilson ...
-                        AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
-                        request.setSha256OfAssetCert(certificate.getSha256().toByteArray());
-                        Global.mtwilson().revokeAssetTagCertificate(request);
+        // only one of the actions can be processed for any one request
+        if( actionChoice.revoke != null ) {
+            actionChoice.revoke.setUuid(uuid);
+            if( true /*actionChoice.revoke.isValid()*/ ) {
+                // update the database...
+                dao.updateRevoked(certificate.getId(), true);
+                // update mt wilson ...
+                AssetTagCertRevokeRequest request = new AssetTagCertRevokeRequest();
+                request.setSha256OfAssetCert(certificate.getSha256().toByteArray());
+                Global.mtwilson().revokeAssetTagCertificate(request);
 //                        My.client().revokeAssetTagCertificate(request);
-                        // XXX TODO revoke it from host (send zeros);
-                    }
-                    break;
-                default:
-                    log.error("Unsupported action: {}", action.action.name());
+                // XXX TODO revoke it from host (send zeros);
             }
+            CertificateActionChoice result = new CertificateActionChoice();
+            result.revoke = actionChoice.revoke;
+            return result;
         }
-        return actions;
+        if( actionChoice.provision != null ) {
+            actionChoice.provision.setUuid(uuid);
+            if( true /* actionChoice.provision.isValid()*/ ) {
+                // first post the certificate to mt wilson
+                AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
+                request.setCertificate(certificate.getCertificate());
+                Global.mtwilson().importAssetTagCertificate(request);
+//                        My.client().importAssetTagCertificate(request);
+                // XXX TODO send it to the host...
+            }            
+            CertificateActionChoice result = new CertificateActionChoice();
+            result.provision = actionChoice.provision;
+            return result;
+        }
+        setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+        return null;
     }
 
 }
