@@ -430,7 +430,7 @@ fi
 
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-    if ! glassfish_detect; then
+    if [ ! glassfish_detect >/dev/null ]; then
       portInUse=`netstat -lnput | grep -E "8080|8181"`
       if [ -n "$portInUse" ]; then 
         #glassfish ports in use. exit install
@@ -438,12 +438,12 @@ if using_glassfish; then
         exit 1
       fi
     fi
-  
-  echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
-  # glassfish install here
-  ./$glassfish_installer  >> $INSTALL_LOG_FILE
-  echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
-  # end glassfish installer
+	
+    echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+    # glassfish install here
+    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+    # end glassfish installer
   else
     echo_warning "Relying on an existing glassfish installation" 
   fi
@@ -453,15 +453,14 @@ if using_glassfish; then
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
     mtwilson glassfish-sslcert
-  # glassfish init end
+    # glassfish init end
   else
     echo_warning "Skipping webservice init"
   fi
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
-    
-    if ! tomcat_detect; then
+    if [ ! tomcat_detect >/dev/null ]; then
       portInUse=`netstat -lnput | grep -E "8080|8443"`
       if [ -n "$portInUse" ]; then 
         #tomcat ports in use. exit install
@@ -623,10 +622,24 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
+#Save variables to properties file
+if using_mysql; then   
+  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+elif using_postgres; then
+  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+fi
+  
+#Restart webserver
 if using_glassfish; then
+  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
   mtwilson glassfish-restart
 elif using_tomcat; then
+  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
   mtwilson tomcat-restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
+
+
+
+
