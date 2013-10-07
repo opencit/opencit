@@ -279,8 +279,9 @@ public class Host {
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria) {
-                if( searchCriteria == null || searchCriteria.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-                else return hostBO.queryForHosts(searchCriteria);
+                //if( searchCriteria == null || searchCriteria.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+                //else 
+            return hostBO.queryForHosts(searchCriteria);
         }
 
         @RolesAllowed({"Attestation"})
