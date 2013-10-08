@@ -1,0 +1,17 @@
+#!/bin/sh
+
+### FUNCTION LIBRARY: SSH FUNCTIONS
+
+# Displays the fingerprints of all ssh host keys on this server
+ssh_fingerprints() {
+  local has_ssh_keygen=`which ssh-keygen 2>/dev/null`
+  if [ -z "$has_ssh_keygen" ]; then echo_warning "missing program: ssh-keygen"; return; fi
+  local ssh_pubkeys=`find /etc -name ssh_host_*.pub`
+  for file in $ssh_pubkeys
+  do
+    local keybits=`ssh-keygen -lf "$file" | awk '{ print $1 }'`
+    local keyhash=`ssh-keygen -lf "$file" | awk '{ print $2 }'`
+    local keytype=`ssh-keygen -lf "$file" | awk '{ print $4 }' | tr -d '()'`
+    echo "$keyhash ($keytype-$keybits)"
+  done
+}

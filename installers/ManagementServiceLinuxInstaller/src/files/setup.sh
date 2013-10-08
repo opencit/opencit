@@ -19,8 +19,9 @@ package_env_filename=${package_name}.env
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev mysql-client-5.1"
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
+chmod +x MtWilsonLinuxUtil.bin
+./MtWilsonLinuxUtil.bin
+if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
 
 
 # if there's already a previous version installed, uninstall it
@@ -56,7 +57,9 @@ else
   cp "${package_name}.properties" "${package_config_filename}"
 fi
 
-
+# Create a random password and update the property file of the management service
+mypassword16=`generate_password 16`
+update_property_in_file mtwilson.api.key.password "${package_config_filename}" "$mypassword16"
 
 # SCRIPT EXECUTION
 #if using_mysql; then

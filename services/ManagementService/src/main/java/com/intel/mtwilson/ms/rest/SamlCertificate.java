@@ -83,10 +83,10 @@ public class SamlCertificate {
 
             return cert.getEncoded();
         } catch (CertificateException e) {
-            throw new MSException(ErrorCode.MS_BAD_CERTIFICATE_FILE, ErrorCode.MS_BAD_CERTIFICATE_FILE.getMessage(), e);
+            throw new MSException(ErrorCode.MS_BAD_CERTIFICATE_FILE, e);
 
         } catch (IOException e) {
-            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage(), e);
+            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, e);
         }
 
     }

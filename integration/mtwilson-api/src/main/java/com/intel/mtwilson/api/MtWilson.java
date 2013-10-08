@@ -11,6 +11,8 @@ import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientInfo;
 import com.intel.mtwilson.datatypes.ApiClientSearchCriteria;
 import com.intel.mtwilson.datatypes.ApiClientUpdateRequest;
+import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
+import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.datatypes.AuditLogEntry;
 import com.intel.mtwilson.datatypes.AuditLogSearchCriteria;
@@ -578,6 +580,9 @@ public interface MtWilson {
      */
     HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException;
 
+
+    String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException;
+    
     /**
      * Retrieves the trust status of the host specified as a SAML assertion, which can be verified by caller. The 
      * SAML assertion containing the trust status of the host is signed by Mt.Wilson using its private key.
@@ -968,6 +973,25 @@ public interface MtWilson {
      */
     X509Certificate getTlsCertificateForTrustedHost(Hostname hostname) throws IOException, ApiException, SignatureException;;
 
+    /**
+     * 
+     * @param aTagObj
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException;
+    
+    /**
+     * 
+     * @param aTagObj
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException;
     // WHITELIST SERVICE
     
     /**

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.mtwilson.i18n.ErrorMessage;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -16,14 +17,12 @@ public class HostTrust extends AuthResponse{
     private Integer vmmStatus;
     private Integer biosStatus;
     
-    
+    public HostTrust(ErrorMessage errorMessage) {
+        super(errorMessage);
+    }
 
     public HostTrust(ErrorCode errorCode, String errorMessage) {
-        super(errorCode,new Object[]{errorMessage});
-    }
-    
-    private HostTrust(){
-        
+        super(errorCode, errorMessage);
     }
     
     
@@ -36,7 +35,8 @@ public class HostTrust extends AuthResponse{
     }
     
     public HostTrust(ErrorCode errorCode,String errorMessage,String hostName, Integer vmmStatus, Integer biosStatus  ){
-        super(errorCode,(errorMessage != null)?new Object[]{errorMessage}:null);
+//        super(errorCode,(errorMessage != null)?new Object[]{errorMessage}:null);
+        super(errorCode, errorMessage);
         setIpAddress(hostName);
         setVmmStatus(vmmStatus);
         setBiosStatus(biosStatus);

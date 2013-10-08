@@ -35,9 +35,9 @@
           <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>MtWilsonLinuxUtil</artifactId>
+      <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
-      <type>sh</type>
+      <type>bin</type>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.portals</groupId>
@@ -88,11 +88,11 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <artifactId>mtwilson-linux-util</artifactId>
                   <version>${project.version}</version>
-                  <type>sh</type>
+                  <type>bin</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>functions</destFileName>
+                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
                 </artifactItem>
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->

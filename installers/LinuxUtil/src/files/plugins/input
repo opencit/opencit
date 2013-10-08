@@ -1,0 +1,136 @@
+#!/bin/sh
+
+# REQUIRES: ord from _core 
+# OPTIONAL: color
+
+# Parameters:
+# - variable name to set with result
+# - prompt (string)
+# will accept y, Y, or nothing as yes, anything else as no
+prompt_yes_no() {
+  local resultvarname="${1}"
+  local userprompt="${2}"
+  # bug #512 add support for answer file
+  if [ -n "${!resultvarname}" ]; then
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    echo "$userprompt [Y/n] ${!resultvarname}"
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+    return
+  fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  echo -n "$userprompt [Y/n] "
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+  local userinput
+  read -n 1 userinput
+  echo
+  if [[ $userinput == "Y" || $userinput == "y" || $userinput == "" ]]; then
+    eval $resultvarname="yes"
+  else
+    eval $resultvarname="no"
+  fi
+}
+
+
+# Parameters:
+# - variable name to set with result
+# - prompt text (include any punctuation such as ? or : you want to display)
+# - default setting (do not include any brackets or punctuation). 
+#   If the default setting is omitted, the current value of the output variable name will be used.
+# Output:
+# - result (input or default) is saved into the specified variable name
+#
+# Examples:
+#   prompt_with_default USERNAME "What is your name?"
+#   prompt_with_default USERCOLOR "What is your favorite color?" ${DEFAULT_COLOR}
+prompt_with_default() {
+  local resultvarname="${1}"
+  local userprompt="${2}"
+  local default_value
+  # here $$
+  eval current_value="\$$resultvarname"
+  eval default_value="${3:-$current_value}"
+  # bug #512 add support for answer file
+  if [ -n "${!resultvarname}" ]; then
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    echo "$userprompt [$default_value] ${!resultvarname:-$default_value}"
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+    return
+  fi
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  echo -n "$userprompt [$default_value] "
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+  local userinput
+  read userinput
+  eval $resultvarname=${userinput:-$default_value}
+}
+
+
+
+# Same as prompt_with_default, but the default value is hidden by *******,
+# and if prompt text is not provided then the default prompt is "Password:"
+prompt_with_default_password() {
+  local resultvarname="${1}"
+  local userprompt="${2:-Password:}"
+  # here $$
+  #eval current_value="\$$resultvarname"
+  #eval default_value="${3:-$current_value}"
+  eval variable_name="$resultvarname"
+  #echo_warning "variable name is $variable_name"
+  eval current_value="\$$variable_name"
+  #echo_warning "current value = $current_value"
+  eval default_value="${3:-'$current_value'}"
+  #echo_warning "default value = $default_value"
+
+  local default_value_display="********"
+  if [ -z "$default_value" ]; then default_value_display=""; fi;
+  # bug #512 add support for answer file
+  if [ -n "${!resultvarname}" ]; then
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+    echo "$userprompt [$default_value_display] ${default_value_display}"
+    if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+    return
+  fi
+  if [ -z "$default_value" ]; then default_value_display=""; fi;
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_YELLOW}"; fi
+  echo -n "$userprompt [$default_value_display] "
+  if [ "$TERM_DISPLAY_MODE" = "color" ]; then echo -en "${TERM_COLOR_NORMAL}"; fi
+  local userinput=""
+  #IFS= read -r -s userinput
+  #echo
+  local input_counter=0
+  local char
+  while IFS= read -r -s -n 1 char
+  do
+    local code=`ord $char`
+    if [[ $char == $'\0' ]]; then
+      break
+    elif [[ "$code" == "8" || "$code" == "127" ]]; then
+      if (($input_counter > 0)); then
+        echo -n $'\b \b';
+        ((input_counter--))
+        userinput="${userinput%?}"
+      fi
+    else
+      echo -n '*'
+      userinput+="$char";
+      ((input_counter++))
+    fi
+  done
+  echo
+  if [ ! -z "$userinput" ]; then
+   eval $resultvarname='$userinput'
+  else
+   eval $resultvarname='$default_value'
+  fi
+  #eval $resultvarname="${userinput:-'$default_value'}"
+}
+
+### FUNCTION LIBRARY: escape out input strings for passing to sed
+# you pass it the string you are about to pass to sed that might 
+# contain the following characters ()&#%$+
+# usage examples:
+# new_string=$(sed_escape $string)
+sed_escape() {
+ echo $(echo $1 | sed -e 's/[()&#%$+]/\\&/g' -e 's/[/]/\\&/g')
+}
+

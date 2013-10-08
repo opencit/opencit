@@ -494,6 +494,10 @@ public class CitrixClient {
        String processorInfo = modelInfo.charAt(1) + Integer.toHexString(stepping) + " " + "0" + Integer.toHexString(family) + " " + "0" + modelInfo.charAt(0);
        processorInfo = processorInfo.trim().toUpperCase();
        response.setProcessorInfo(processorInfo);
+       
+       // get the host UUID
+       response.setHostUUID(h.getUuid(connection));
+       
        java.util.Date date= new java.util.Date();
        response.setTimeStamp( new Timestamp(date.getTime()).toString());
 //       log.trace("stdalex-error leaving getHostInfo");

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>api-client</artifactId>
+    <artifactId>mtwilson-client-java6</artifactId>
     <packaging>jar</packaging>
     <name>API Client for Java 6</name>
     <description>
@@ -128,7 +128,7 @@
                                 <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
                                     <fileset dir="${project.build.directory}/jars" />
                                     <fileset dir="${project.build.directory}" includes="${project.artifactId}-${project.version}.jar" />
-                                    <fileset dir="${basedir}" includes="pom.xml"/>
+                                    <fileset dir="${basedir}" includes="pom.xml" />
                                 </zip>
                             </target>
                         </configuration>
@@ -226,7 +226,7 @@
         PLACE THE API TESTS IN THE MT WILSON AUTO-TEST MODULE, FROM WHICH YOU CAN USE BOTH "MY" AND "API-CLIENT"
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>my</artifactId>
+            <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
@@ -325,7 +325,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>MtWilsonHttpSecurity</artifactId>
+            <artifactId>mtwilson-http-security</artifactId>
             <version>${project.version}</version>
         </dependency>
     

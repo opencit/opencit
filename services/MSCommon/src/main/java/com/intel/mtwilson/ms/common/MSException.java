@@ -4,8 +4,6 @@
  */
 package com.intel.mtwilson.ms.common;
 
-import javax.ws.rs.WebApplicationException;
-
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.util.MWException;
 
@@ -18,8 +16,8 @@ public class MSException extends MWException {
     public MSException(ErrorCode errorCode, Object... params) {
     	super(errorCode,params);
     }
-    public MSException(Throwable e,ErrorCode code,Object... msg  ){
-        super(e,code,msg);
+    public MSException(Throwable e,ErrorCode errorCode,Object... params  ){
+        super(e,errorCode,params);
     }
     
     public MSException(Throwable e){

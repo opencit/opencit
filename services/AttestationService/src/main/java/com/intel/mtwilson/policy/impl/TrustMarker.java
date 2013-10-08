@@ -11,5 +11,6 @@ package com.intel.mtwilson.policy.impl;
 public enum TrustMarker {
     BIOS,
     VMM,
+    ASSET_TAG,
     LOCATION;            
 }

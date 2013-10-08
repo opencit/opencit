@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# REQUIRES: java, glassfish, monit, tomcat
+
+# Usage: mtwilson uninstall
+mw_uninstall() {
+        if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
+        if using_glassfish; then
+          glassfish_require
+          echo "Stopping Glassfish..."
+          glassfish_shutdown
+          # application files
+          echo "Removing Glassfish in /usr/share/glassfish3..."
+          rm -rf /usr/share/glassfish3
+        fi
+        echo "Removing Mt Wilson applications in /opt/intel/cloudsecurity..."
+        rm -rf /opt/intel/cloudsecurity
+        echo "Removing Mt Wilson utilities in /usr/local/share/mtwilson..."
+        rm -rf /usr/local/share/mtwilson
+        # configuration files
+        echo "Removing Mt Wilson configuration in /etc/intel/cloudsecurity..."
+        rm -rf /etc/intel/cloudsecurity
+        # data files
+        echo "Removing Mt Wilson data in /var/opt/intel..."
+        rm -rf /var/opt/intel
+        # control scripts
+        echo "Removing Mt Wilson control scripts..."
+        echo mtwilson-portal asctl wlmctl msctl pcactl mtwilson | tr ' ' '\n' | xargs -I file rm -rf /usr/local/bin/file
+		echo "Stopping Monit service..."
+		service monit stop &> /dev/null
+		# only remove the config files we added to conf.d, not anything else
+		rm -fr /etc/monit/conf.d/*.mtwilson
+        # java:  rm -rf /usr/share/jdk1.6.0_29
+        # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
+        java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
+        tomcat_clear; export TOMCAT_HOME=""; export tomcat_bin=""; export tomcat=""
+        glassfish_clear; export GLASSFISH_HOME=""; export glassfish_bin=""; export glassfish=""
+        postgres_clear; export POSTGRES_HOME=""; export psql=""
+        mysql_clear; export MYSQL_HOME=""; export mysql=""
+        echo_success "Done"
+}

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>setup-console</artifactId>
+  <artifactId>mtwilson-console</artifactId>
   <packaging>jar</packaging>
   <name>Setup Console</name>
   
@@ -85,6 +85,16 @@
                                 <mainClass>com.intel.mtwilson.setup.TextConsole</mainClass>
                               </transformer>
                             </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                           </configuration>
                         </execution>
                       </executions>
@@ -139,7 +149,7 @@
 
 	<dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>my</artifactId>
+		<artifactId>mtwilson-my</artifactId>
 		<version>${project.version}</version>
 	</dependency>
                 
@@ -194,7 +204,7 @@
 	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>api-client</artifactId>
+	    <artifactId>mtwilson-client-java6</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>
@@ -241,7 +251,7 @@
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-io</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1.2-SNAPSHOT</version>
 </dependency>
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
@@ -256,7 +266,7 @@
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-console</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 </dependency>
     
 		<dependency>
@@ -286,7 +296,7 @@
 		</dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>MtWilsonHttpSecurity</artifactId>
+      <artifactId>mtwilson-http-security</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
@@ -331,14 +341,14 @@
 </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>ManagementService</artifactId>
+      <artifactId>mtwilson-management-service</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
       <classifier>classes</classifier>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>AttestationService</artifactId>
+      <artifactId>mtwilson-attestation-service</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
       <classifier>classes</classifier>
@@ -383,7 +393,7 @@
                 <weaveDependencies>
                     <weaveDependency>
                         <groupId>com.intel.mtwilson.services</groupId>
-                        <artifactId>ManagementService</artifactId>
+                        <artifactId>mtwilson-management-service</artifactId>
                     </weaveDependency>
                 </weaveDependencies>
                 -->

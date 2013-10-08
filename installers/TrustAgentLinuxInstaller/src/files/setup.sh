@@ -23,8 +23,9 @@ APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-ce
 # other packages in suse:  libopenssl0_9_8 
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
+chmod +x MtWilsonLinuxUtil.bin
+./MtWilsonLinuxUtil.bin
+if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
@@ -48,7 +49,7 @@ JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
 #MTWILSON_UTIL_PACKAGE=`ls -1 mtwilson-util*.bin 2>/dev/null | tail -n 1`
 JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
 
-
+saveD=`pwd`
 # copy application files to /opt
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
@@ -254,6 +255,7 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
+cd $saveD
 if [ ! -d /etc/monit ]; then
  mkdir /etc/monit
 fi
@@ -261,20 +263,16 @@ fi
 if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
+else
+    cp monitrc /etc/monit/monitrc
 fi
-if ! grep -q tagent /etc/monit/monitrc; then 
-	cat >> /etc/monit/monitrc << EOF
-## Monit Process Monitor Config File
-## Configuration options and examples can be found here:
-## http://mmonit.com/monit/documentation/monit.html
-set daemon 60
-# Set path to log file
-set logfile /var/log/monit.log
-# TA monitoring
-check process tagent with pidfile /var/run/tagent.pid
-        start program = "/etc/init.d/tagent start" with timeout 30 seconds
-        stop program  = "/etc/init.d/tagent stop
-EOF
+
+if [ ! -d /etc/monit/conf.d ]; then
+ mkdir -p /etc/monit/conf.d
+fi
+
+if [ ! -f /etc/monit/conf.d/ta.monit ]; then
+ cp ta.monit /etc/monit/conf.d/ta.monit
 fi
 
 chmod 700 /etc/monit/monitrc

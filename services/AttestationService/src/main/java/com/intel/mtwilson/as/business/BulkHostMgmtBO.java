@@ -127,10 +127,10 @@ public class BulkHostMgmtBO {
                     result = dao.updateHost(new TxtHost(hostObj));
             } catch (ASException e) {
                 isError = true;
-                result = new HostResponse(e.getErrorCode(), e.getErrorMessage());
+                result = new HostResponse(e);
             } catch (Exception e) {
                 isError = true;
-                result = new HostResponse(ErrorCode.UNKNOWN_ERROR, e.getLocalizedMessage());
+                result = new HostResponse(ErrorCode.SYSTEM_ERROR, e.getLocalizedMessage());
             }
         }
 
