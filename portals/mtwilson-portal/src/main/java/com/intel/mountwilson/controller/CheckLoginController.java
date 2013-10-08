@@ -76,6 +76,14 @@ public class CheckLoginController extends AbstractController {
                 view.addObject("result", false);
                 return view; 
             }
+
+            // Partial fix for Bug 965 to prevent users in rejected/pending status from logging into the portal.
+            if (!tblKeystore.getEnabled()) {
+                view.addObject("message", "User access has not been approved. Please contact the administrator.");                
+                view.addObject("result", false);
+                return view;                 
+            }
+            
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
             URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
             RsaCredential credential = null;
