@@ -81,7 +81,6 @@ setup_print_summary() {
 }
 
 setup_interactive_install() {
-  java_detect
   configure_privacyca_url
   create_privacyca_keys
   protect_privacyca_files
