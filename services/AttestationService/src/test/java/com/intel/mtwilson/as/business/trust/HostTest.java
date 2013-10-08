@@ -70,7 +70,7 @@ public class HostTest {
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);
 //        assertTrue("BIOS:0,VMM:0".equals(response));
-        String saml = htbo.getTrustWithSaml(knownHost, false);
+        String saml = htbo.getTrustWithSaml(knownHost);
         System.out.println("saml: "+saml);
     }
 
@@ -79,9 +79,9 @@ public class HostTest {
         HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
         String saml = "";
         try {
-            saml = htbo.getTrustWithSaml(knownHost, true);
+            saml = htbo.getTrustWithSaml(knownHost, false);
         } catch (ASException ae) {
-            System.out.println(ae.getLocalizedMessage());
+            System.out.println(ae.getErrorMessage());
         }
         System.out.println("saml: "+saml);
     }

@@ -12,11 +12,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.datatypes.AuthResponse;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
-import com.intel.mtwilson.security.annotations.PermitAll;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.Arrays;
@@ -49,26 +45,6 @@ public class Test {
     private HostBO hostBO = new ASComponentFactory().getHostBO(); 
     private static HostAgentFactory hostAgentFactory = new HostAgentFactory(); 
 //    private static VMwareConnectionPool vcenterPool = new VMwareConnectionPool(); // BUG #497 replacing this with the HostAgentFactory - the underlying implementation uses a pool and respects tls policy for each host
-    
-    
-    @PermitAll
-    @Path("/i18n/message.ok")
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
-    public AuthResponse getI18nMessageOk() {
-        AuthResponse response = new AuthResponse(ErrorCode.OK);
-        return response;
-    }
-
-    @PermitAll
-    @Path("/i18n/message.error")
-    @GET
-    @Produces({ MediaType.APPLICATION_JSON })
-    public AuthResponse getI18nMessageError() {
-        AuthResponse response = new AuthResponse(ErrorCode.SYSTEM_ERROR, "test error");
-        return response;
-    }
-
     
     /**
      *

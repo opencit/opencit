@@ -12,9 +12,8 @@ package_env_filename=${package_dir}/${package_name}.env
 #package_install_filename=${package_name}.install
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-chmod +x MtWilsonLinuxUtil.bin
-./MtWilsonLinuxUtil.bin
-if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 # if there's already a previous version installed, uninstall it
 wlmctl=`which wlmctl 2>/dev/null`

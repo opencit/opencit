@@ -63,7 +63,7 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>mtwilson-my</artifactId>
+      <artifactId>my</artifactId>
       <version>${project.version}</version>
     </dependency>
     <!-- 
@@ -71,7 +71,7 @@
     needed in the Audit Handler.
      <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>mtwilson-http-security-server</artifactId>
+      <artifactId>MtWilsonHttpSecurityAdapters</artifactId>
       <version>${project.version}</version>
       </dependency> 
     -->

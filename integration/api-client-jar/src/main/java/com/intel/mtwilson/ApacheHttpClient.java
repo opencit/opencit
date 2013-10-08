@@ -3,7 +3,6 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
-import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
@@ -20,7 +19,6 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.Locale;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
@@ -66,7 +64,6 @@ public class ApacheHttpClient implements java.io.Closeable {
     private int port = 443;
 //    private boolean requireTrustedCertificate = true;
 //    private boolean verifyHostname = true;
-    private Locale locale = Locale.getDefault();
     
     private ApacheHttpAuthorization authority = null; // can be any implementation - Hmac256 or RSA
     protected static final ObjectMapper mapper = new ObjectMapper();
@@ -371,20 +368,12 @@ public class ApacheHttpClient implements java.io.Closeable {
         return new ApiResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), contentType, content);
     }
     
-    
-    public void setLocale(Locale locale) {
-        if( locale != null ) {
-            this.locale = locale;
-        }
-    }
-    
     public ApiResponse get(String requestURL) throws IOException, ApiException, SignatureException {
         //log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         // send the request and print the response
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
@@ -398,7 +387,6 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         // send the request and print the response
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
@@ -416,7 +404,6 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();
@@ -434,7 +421,6 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();

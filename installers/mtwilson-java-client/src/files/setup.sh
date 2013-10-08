@@ -13,9 +13,7 @@ find_installer() {
   echo $binfile
 }
 
-chmod +x MtWilsonLinuxUtil.bin
-./MtWilsonLinuxUtil.bin
-if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 java_installer=`find_installer java`
 glassfish_installer=`find_installer glassfish`

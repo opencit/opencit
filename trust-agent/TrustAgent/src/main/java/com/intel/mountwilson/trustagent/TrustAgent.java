@@ -322,7 +322,6 @@ public class TrustAgent {
                 + "<vmmName>" + context.getVmmName() + "</vmmName>"
                 + "<vmmVersion>" + context.getVmmVersion() + "</vmmVersion>"
                 + "<processorInfo>" + context.getProcessorInfo() + "</processorInfo>"
-                + "<hostUUID>" + context.getHostUUID() + "</hostUUID>"
                 + "</host_info>";
         return responseXML;
         

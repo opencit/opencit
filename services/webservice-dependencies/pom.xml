@@ -2,14 +2,14 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>mtwilson-webservice-dependencies</artifactId>
+  <artifactId>webservice-dependencies</artifactId>
   <packaging>pom</packaging>
   <name>Dependencies for Web Services</name>
   <description>Aggregated dependencies for Mt Wilson Web Services</description>
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
 

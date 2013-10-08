@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class DashboardTest {
     private Logger log = LoggerFactory.getLogger(getClass());
     
-    //@Test
+    @Test
     public void testGetStatusForVmware173() throws Exception {
         // use the portal user's keystore to validate the saml assertion, since we are getting "invalid saml signature"
 //        List<MwPortalUser> admins = My.jpa().mwPortalUser().findMwPortalUserByUsernameEnabled("admin");
@@ -50,7 +50,7 @@ public class DashboardTest {
         log.debug("Assertion attributes: {}", StringUtils.join(trustAssertion.getAttributeNames(), ", "));
     }
     
-    //@Test
+    @Test
     public void getSamlForMultipleHosts() throws Exception {
         HashSet<Hostname> hostnames = new HashSet<Hostname>();
         hostnames.add(new Hostname("10.1.71.173"));
@@ -66,7 +66,7 @@ public class DashboardTest {
         List<HostTrustXmlResponse> statuslist = My.client().getSamlForMultipleHosts(hostnames, false);
     }
     
-    //@Test
+    @Test
     public void getKeystoreAndTest() throws Exception {
         MwPortalUser admin = My.jpa().mwPortalUser().findMwPortalUserByUserName("admin");
         byte[] bKeystore = admin.getKeystore();

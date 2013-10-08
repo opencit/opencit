@@ -16,9 +16,8 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
-chmod +x MtWilsonLinuxUtil.bin
-./MtWilsonLinuxUtil.bin
-if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 
 
 # if there's already a previous version installed, uninstall it
@@ -38,6 +37,8 @@ WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
 mkdir -p "${package_dir}"
 #mkdir -p "${package_dir}"/database
 chmod 700 "${package_dir}"
+cp version "${package_dir}"
+cp functions "${package_dir}"
 cp $WAR_PACKAGE "${package_dir}"
 #cp sql/*.sql "${package_dir}"/database/
 chmod 600 "${package_name}.properties"

@@ -15,13 +15,7 @@
 	</parent>
   
   <modules>
-	<module>asset-tag-model</module>
-	<module>asset-tag-dao</module>
-	<module>asset-tag-dao-jooq</module>
-	<module>asset-tag-service</module>
     <module>trust-policy</module>
-    <module>aikqverify</module>
-    <module>daa</module>
     <module>webservice-util</module>
     <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
     <module>audit-api</module>
@@ -36,7 +30,7 @@
     <module>AttestationService</module>
     <module>WLMService</module>
     <module>ManagementService</module>
-    <module>MSCmdUtility</module>	
+    <module>MSCmdUtility</module>
   </modules>
 
 </project>

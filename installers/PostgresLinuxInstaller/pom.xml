@@ -21,9 +21,9 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
+      <artifactId>MtWilsonLinuxUtil</artifactId>
       <version>${project.parent.version}</version>
-      <type>bin</type>
+      <type>sh</type>
     </dependency>	
    
     
@@ -62,11 +62,11 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.parent.version}</version>
-                  <type>bin</type>
+                  <type>sh</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
+                  <destFileName>functions</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>

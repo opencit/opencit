@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>mtwilson-management-service</artifactId>
+    <artifactId>ManagementService</artifactId>
     <packaging>war</packaging>
     <name>Management Service War</name>
 
@@ -81,7 +81,7 @@
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-dependencies</artifactId>
+            <artifactId>webservice-dependencies</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
         </dependency>
@@ -144,7 +144,7 @@
 		</dependency>
                 <dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>mtwilson-http-security-server</artifactId>
+			<artifactId>MtWilsonHttpSecurityAdapters</artifactId>
 			<version>${project.version}</version>
 		</dependency>
         
@@ -249,7 +249,7 @@
                 </dependency>
                 <dependency>
                         <groupId>com.intel.mtwilson.integration</groupId>
-                        <artifactId>mtwilson-client-java6</artifactId>
+                        <artifactId>api-client</artifactId>
                         <version>${project.version}</version>
                 </dependency>
                 <dependency>
@@ -288,7 +288,7 @@
         
 		<dependency>
 			<groupId>com.intel.mtwilson.integration</groupId>
-			<artifactId>mtwilson-my</artifactId>
+			<artifactId>my</artifactId>
 			<version>${project.version}</version>
 		</dependency>
                 		

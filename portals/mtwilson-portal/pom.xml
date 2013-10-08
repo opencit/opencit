@@ -12,11 +12,6 @@
     </parent>
 
     <dependencies>
-	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-crypto</artifactId>
-		<version>0.1.4-SNAPSHOT</version>
-	</dependency>
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -24,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-http-security-server</artifactId>
+            <artifactId>MtWilsonHttpSecurityAdapters</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -121,12 +116,12 @@
         </dependency>
         <dependency>
                 <groupId>com.intel.mtwilson.integration</groupId>
-                <artifactId>mtwilson-client-java6</artifactId>
+                <artifactId>api-client</artifactId>
                 <version>${project.version}</version>
         </dependency>
         <dependency>
                 <groupId>com.intel.mtwilson.integration</groupId>
-                <artifactId>mtwilson-my</artifactId>
+                <artifactId>my</artifactId>
                 <version>${project.version}</version>
         </dependency>
         <dependency>

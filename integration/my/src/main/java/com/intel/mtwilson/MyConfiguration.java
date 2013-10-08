@@ -374,7 +374,7 @@ public class MyConfiguration {
     }
 
     public String getMtWilsonRoleString() {
-        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit,AssetTagManagement");
+        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
     }
 
     public String[] getMtWilsonRoleArray() {
@@ -467,30 +467,6 @@ public class MyConfiguration {
     
     public String getTlsKeystorePassword() {
         return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
-    }
-    
-    ///////////////////////// internationalization  //////////////////////////////////
-    
-    // this setting affects the localization of log messages
-    public String getLocale() {
-        return conf.getString("mtwilson.locale", ""); // we do not provide a default; the localization system has its own default handling
-    }
-    
-    // this setting specifies which locales have been translated and are available for localizing APIs and UIs
-    public String[] getAvailableLocales() {
-        return conf.getStringArray("mtwilson.locales");
-    }
-    
-    ///////////////////////// asset tag configuration //////////////////////////////////
-
-    // asset tagging html5 resources (used by the reference implementation)
-    public String getAssetTagHtml5Dir() {
-        return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
-    }
-    
-    // asset tag server url
-    public URL getAssetTagServerURL() throws MalformedURLException {
-        return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
     }
     
 }

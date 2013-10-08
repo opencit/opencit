@@ -52,18 +52,12 @@
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
-            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+            <param-value>com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
         </init-param>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
             <param-value>com.intel.mtwilson.security.jersey.RolesAllowedResourceFilterFactory</param-value>
         </init-param>
-        <!--
-        <init-param>
-            <param-name>com.sun.jersey.config.property.packages</param-name>
-            <param-value>com.intel.mtwilson.util</param-value>
-        </init-param>
-        -->
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>

@@ -213,7 +213,7 @@ public class HostBOTest {
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);
 //        assertTrue("BIOS:0,VMM:0".equals(response));
-        String saml = htbo.getTrustWithSaml(knownHost, false);
+        String saml = htbo.getTrustWithSaml(knownHost);
         System.out.println("saml: "+saml);
     }
 

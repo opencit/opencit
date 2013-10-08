@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
-import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
@@ -48,11 +47,6 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
     @Override
     public Set<Rule> loadTrustRulesForLocation(String location, TblHosts host) {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
-        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
     }
 
 }

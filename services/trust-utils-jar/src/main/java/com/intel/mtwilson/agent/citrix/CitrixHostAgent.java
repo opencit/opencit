@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -274,17 +273,7 @@ BwIDAQAB
 
     @Override
     public Map<String, String> getHostAttributes() throws IOException {
-        HashMap<String,String> hm = new HashMap<String, String>();
-        // Retrieve the data from the host and add it into the hashmap
-        HostInfo hostInfo = null;
-        try {
-            hostInfo = client.getHostInfo();
-        } catch (Exception ex) {
-            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
-        }
-        // Currently we are just adding the UUID of th host. Going ahead we can add additional details
-        hm.put("Host_UUID", hostInfo.getHostUUID());
-        return hm;
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

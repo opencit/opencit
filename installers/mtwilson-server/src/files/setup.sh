@@ -6,9 +6,7 @@
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
-chmod +x MtWilsonLinuxUtil.bin
-./MtWilsonLinuxUtil.bin
-if [ -f /usr/share/mtwilson/script/functions ]; then . /usr/share/mtwilson/script/functions; else echo "Missing file: /usr/share/mtwilson/script/functions"; exit 1; fi
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
@@ -93,10 +91,10 @@ fi
 if using_mysql ; then
   mysqlconnector_file=`ls ~ -1 2>/dev/null | grep -i "^mysql-connector-java"`
   if [ -n "$mysqlconnector_file" ]; then
-    mkdir -p /opt/intel/cloudsecurity/mtwilson-console
-    cp ~/$mysqlconnector_file /opt/intel/cloudsecurity/mtwilson-console
+    mkdir -p /opt/intel/cloudsecurity/setup-console
+    cp ~/$mysqlconnector_file /opt/intel/cloudsecurity/setup-console
   fi
-  mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/mtwilson-console/* 2>/dev/null | grep -i mysql`
+  mysqlconnector_file=`ls -1 /opt/intel/cloudsecurity/setup-console/* 2>/dev/null | grep -i mysql`
   if [ -z "$mysqlconnector_file" ]; then
     echo_failure "Cannot find MySQL Connector/J"
     echo "Recommended steps:"
@@ -132,14 +130,14 @@ auto_install "Installer requirements" "APICLIENT"
 
 
 # api client: ensure destination exists and clean it before copying
-mkdir -p /usr/local/share/mtwilson/client/java6
-rm -rf /usr/local/share/mtwilson/client/java6*
-unzip mtwilson-client-java6*.zip -d /usr/local/share/mtwilson/client/java6 >> $INSTALL_LOG_FILE
+mkdir -p /usr/local/share/mtwilson/apiclient/java
+rm -rf /usr/local/share/mtwilson/apiclient/java/*
+unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
 
 # setup console: create folder and copy the executable jar
-mkdir -p /opt/intel/cloudsecurity/mtwilson-console
-rm -rf /opt/intel/cloudsecurity/mtwilson-console/mtwilson-console*.jar
-cp mtwilson-console*.jar /opt/intel/cloudsecurity/mtwilson-console
+mkdir -p /opt/intel/cloudsecurity/setup-console
+rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
+cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
@@ -403,7 +401,6 @@ export PRIVACYCA_SERVER=$MTWILSON_SERVER
 chmod +x *.bin
 if [ ! -z "$opt_java" ] && [ -n "$java_installer" ]; then
   echo "Installing Java..." | tee -a  $INSTALL_LOG_FILE
-  echo "SAVY, java_installer: $java_installer"
   ./$java_installer
   echo "Java installation done..." | tee -a  $INSTALL_LOG_FILE
 else

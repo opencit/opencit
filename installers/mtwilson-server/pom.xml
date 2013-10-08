@@ -67,7 +67,7 @@
  <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
     <dependency>
       <groupId>com.intel.mtwilson.integration</groupId>
-      <artifactId>mtwilson-client-java6</artifactId>
+      <artifactId>api-client</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
       <!--<classifier>with-dependencies</classifier>-->
@@ -76,7 +76,7 @@
  <!-- this is the setup console -->
     <dependency>
       <groupId>com.intel.mtwilson.desktop</groupId>
-      <artifactId>mtwilson-console</artifactId>
+      <artifactId>setup-console</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
       <classifier>with-dependencies</classifier>
@@ -91,19 +91,19 @@
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-management-service-installer</artifactId>
+      <artifactId>ManagementService</artifactId>
       <version>${project.version}</version>
       <type>bin</type>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-whitelist-service-installer</artifactId>
+      <artifactId>WLMService</artifactId>
       <version>${project.version}</version>
       <type>bin</type>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-attestation-service-installer</artifactId>
+      <artifactId>AttestationService</artifactId>
       <version>${project.version}</version>
       <type>bin</type>
     </dependency>
@@ -118,9 +118,15 @@
      <!-- API Client and Linux Utils -->
     <dependency>
 	<groupId>com.intel.mtwilson.linux</groupId>
-	<artifactId>mtwilson-linux-util</artifactId>
+	<artifactId>MtWilsonLinuxUtil</artifactId>
 	<version>${project.version}</version>
 	<type>bin</type>
+    </dependency>    
+    <dependency>
+	<groupId>com.intel.mtwilson.linux</groupId>
+	<artifactId>MtWilsonLinuxUtil</artifactId>
+	<version>${project.version}</version>
+	<type>sh</type>
     </dependency>    
   </dependencies>
            
@@ -152,33 +158,33 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-management-service-installer</artifactId>
+                  <artifactId>ManagementService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-whitelist-service-installer</artifactId>
+                  <artifactId>WLMService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-attestation-service-installer</artifactId>
+                  <artifactId>AttestationService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
 		<!-- other -->
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
-                  <type>bin</type>
-                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
+                  <type>sh</type>
+                  <destFileName>functions</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
@@ -192,7 +198,7 @@
                 <!-- setup console --> 
                 <artifactItem>
                   <groupId>com.intel.mtwilson.desktop</groupId>
-                  <artifactId>mtwilson-console</artifactId>
+                  <artifactId>setup-console</artifactId>
                   <classifier>with-dependencies</classifier>
                   <version>${project.version}</version>
                   <type>jar</type>
@@ -200,7 +206,7 @@
 		<!-- api client -->
                 <artifactItem>
                   <groupId>com.intel.mtwilson.integration</groupId>
-                  <artifactId>mtwilson-client-java6</artifactId>
+                  <artifactId>api-client</artifactId>
                   <version>${project.version}</version>
                   <type>zip</type>
                 </artifactItem>
@@ -255,55 +261,53 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-management-service-installer</artifactId>
+                  <artifactId>ManagementService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-whitelist-service-installer</artifactId>
+                  <artifactId>WLMService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-attestation-service-installer</artifactId>
+                  <artifactId>AttestationService</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
 		<!-- other -->
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
-                  <type>bin</type>
-                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
+                  <type>sh</type>
+                  <destFileName>functions</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
 		<!-- UI portals -->
-                <!-- 
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>WhiteListPortal</artifactId>
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
-                -->
-		<artifactItem>
-			<groupId>com.intel.mtwilson.linux</groupId>
-			<artifactId>mtwilson-portal-installer</artifactId>
-			<version>${project.version}</version>
-			<type>bin</type>
-		</artifactItem>
+				 <artifactItem>
+					<groupId>com.intel.mtwilson.linux</groupId>
+					<artifactId>mtwilson-portal-installer</artifactId>
+					<version>${project.version}</version>
+					<type>bin</type>
+				</artifactItem>
                 <!-- setup console --> 
                 <artifactItem>
                   <groupId>com.intel.mtwilson.desktop</groupId>
-                  <artifactId>mtwilson-console</artifactId>
+                  <artifactId>setup-console</artifactId>
                   <classifier>with-dependencies</classifier>
                   <version>${project.version}</version>
                   <type>jar</type>
@@ -311,7 +315,7 @@
 		<!-- api client -->
                 <artifactItem>
                   <groupId>com.intel.mtwilson.integration</groupId>
-                  <artifactId>mtwilson-client-java6</artifactId>
+                  <artifactId>api-client</artifactId>
                   <version>${project.version}</version>
                   <type>zip</type>
                 </artifactItem>                

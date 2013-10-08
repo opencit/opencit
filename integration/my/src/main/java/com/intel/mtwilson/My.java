@@ -38,7 +38,6 @@ public class My {
     private static MyJdbc jdbc = null;
     private static MyJpa jpa = null;
     private static MyEnvironment env = null;
-//    private static MyLocale locale = null;
 
     public static void initDataEncryptionKey() throws IOException {
         initDataEncryptionKey(My.configuration().getDataEncryptionKeyBase64());
@@ -68,12 +67,6 @@ public class My {
         return config; 
     }
     
-    /**
-     * XXX TODO add support for loading username/password and keystore file from database (in the MyConfiguration class)
-     * @return
-     * @throws MalformedURLException
-     * @throws IOException 
-     */
     public static MtWilson client() throws MalformedURLException, IOException {
         if( client == null ) {
             log.info("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
@@ -119,13 +112,4 @@ public class My {
         }
         return env;
     }
-    
-    /*
-    public static MyLocale locale() throws IOException {
-        if( locale == null ) {
-            locale = new MyLocale(configuration().getLocale());
-        }
-        return locale;
-    }
-    */
 }

@@ -37,11 +37,7 @@ public class TrustedHostVO {
 	private String hostID;
 	private String location;
 
-        @JsonProperty("asset_tag_status")
-        private String assetTagStatus;
-        
-        @JsonProperty("asset_tag_details")
-        private String assetTagDetails;
+
 	
 
 	/**
@@ -227,23 +223,6 @@ public class TrustedHostVO {
 		this.location = location;
 	}
 
-        public String getAssetTagStatus() {
-            return assetTagStatus;
-        }
-
-        public void setAssetTagStatus(String assetTagStatus) {
-            this.assetTagStatus = assetTagStatus;
-        }
-
-        public String getAssetTagDetails() {
-            return assetTagDetails;
-        }
-
-        public void setAssetTagDetails(String assetTagDetails) {
-            this.assetTagDetails = assetTagDetails;
-        }
-        
-        
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

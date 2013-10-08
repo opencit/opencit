@@ -4,14 +4,12 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.*;
-import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestLogJpaController;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
-import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblLocationPcr;
 import com.intel.mtwilson.as.data.TblModuleManifestLog;
@@ -20,8 +18,6 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.as.helper.saml.SamlAssertion;
 import com.intel.mtwilson.as.helper.saml.SamlGenerator;
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
-import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
@@ -48,7 +44,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -61,7 +56,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.crypto.MarshalException;
 import javax.xml.crypto.dsig.XMLSignatureException;
 import org.apache.commons.configuration.Configuration;
-import org.bouncycastle.asn1.x509.Attribute;
 import org.codehaus.plexus.util.StringUtils;
 import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
@@ -179,10 +173,7 @@ public class HostTrustBO extends BaseBO {
         // XXX TODO need a better feedback mechanism from trust policies... when they succeed, they should be able to set attributes.
         // or else,  just go with the "marks" thing but then we have to post process and look for certain marks and then  set other fields elsewhere based on them ... or maybe that's not necessary??)
 //        trust.location = tblHosts.getLocation() != null; // if location is available (it comes from PCR 22), it's trusted
-        
-        // Going ahead we will not be using location. It would be replaced by asset_tag. Location can be one of the asset tags.
-        //trust.location = trustReport.isTrustedForMarker(TrustMarker.LOCATION.name());
-        trust.asset_tag = trustReport.isTrustedForMarker(TrustMarker.ASSET_TAG.name());
+        trust.location = trustReport.isTrustedForMarker(TrustMarker.LOCATION.name());
         
         Date today = new Date(System.currentTimeMillis()); // create the date here and pass it down, in order to ensure that all created records use the same timestamp
         logOverallTrustStatus(tblHosts, trust, today);
@@ -260,11 +251,12 @@ public class HostTrustBO extends BaseBO {
      * @param tblSamlAssertion must not be null
      * @return 
      */
-    public TxtHost getHostWithTrust(TblHosts tblHosts, String hostId, TblSamlAssertion tblSamlAssertion) throws IOException {
-        HostTrustStatus trust = getTrustStatus(tblHosts, hostId);
-        TxtHostRecord data = createTxtHostRecord(tblHosts);
+    public TxtHost getHostWithTrust(Hostname hostName, TblSamlAssertion tblSamlAssertion) throws IOException {
+        TblHosts record = getHostByName(hostName);
+        HostTrustStatus trust = getTrustStatus(hostName);
+        TxtHostRecord data = createTxtHostRecord(record);
         TxtHost host = new TxtHost(data, trust);
-        tblSamlAssertion.setHostId(tblHosts);
+        tblSamlAssertion.setHostId(record);
         return host;
     }
 
@@ -759,30 +751,20 @@ public class HostTrustBO extends BaseBO {
      * @param hostName
      * @return
      */
-    public String getTrustWithSaml(TblHosts tblHosts, String hostId) {
+    public String getTrustWithSaml(String hostName) {
         try {
             //String location = hostTrustBO.getHostLocation(new Hostname(hostName)).location; // example: "San Jose"
             //HostTrustStatus trustStatus = hostTrustBO.getTrustStatus(new Hostname(hostName)); // example:  BIOS:1,VMM:1
             
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
 
-            TxtHost host = getHostWithTrust(tblHosts, hostId,tblSamlAssertion);
+            TxtHost host = getHostWithTrust(new Hostname(hostName),tblSamlAssertion);
             
             tblSamlAssertion.setBiosTrust(host.isBiosTrusted());
             tblSamlAssertion.setVmmTrust(host.isVmmTrusted());
+
             
-            // We will check if the asset-tag was verified successfully for the host. If so, we need to retrieve
-            // all the attributes for that asset-tag and send it to the saml generator.
-            ArrayList<AttributeOidAndValue> atags = null;
-            if (host.isAssetTagTrusted()) {
-                AssetTagCertBO atagCertBO = new AssetTagCertBO();
-                MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
-                if (atagCertForHost != null) {
-                    atags = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate()).getTags();
-                }
-            }
-            
-            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host, atags);
+            SamlAssertion samlAssertion = getSamlGenerator().generateHostAssertion(host);
 
             log.debug("Expiry {}" , samlAssertion.expiry_ts.toString());
 
@@ -820,33 +802,23 @@ public class HostTrustBO extends BaseBO {
         saml.setIssuer(issuer);
         return saml;
     }
-    
-    public String getTrustWithSamlByAik(Sha1Digest aik, boolean forceVerify) throws IOException {
-        My.initDataEncryptionKey();
-        TblHosts tblHosts = getHostByAik(aik);
-        return getTrustWithSaml(tblHosts, aik.toString(), forceVerify);
-    }
 
     public String getTrustWithSaml(String host, boolean forceVerify) throws IOException {
-        My.initDataEncryptionKey();
-        TblHosts tblHosts = getHostByName(new Hostname((host)));
-        return getTrustWithSaml(tblHosts, tblHosts.getName(), forceVerify);
-    }
-    
-    public String getTrustWithSaml(TblHosts tblHosts, String hostId, boolean forceVerify) throws IOException {
-        log.debug("getTrustWithSaml: Getting trust for host: " + tblHosts.getName() + " Force verify flag: " + forceVerify);
+        log.debug("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
+        My.initDataEncryptionKey();
+        TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
        // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
         
         if (!agent.isTpmPresent()) {
-            throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, hostId);
+            throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, host);
         }
                 
         if(forceVerify != true){
-            TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(hostId);
+            TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
             if(tblSamlAssertion != null){
                 if(tblSamlAssertion.getErrorMessage() == null|| tblSamlAssertion.getErrorMessage().isEmpty()) {
                     log.debug("Found assertion in cache. Expiry time : " + tblSamlAssertion.getExpiryTs());
@@ -861,7 +833,7 @@ public class HostTrustBO extends BaseBO {
         log.debug("Getting trust and saml assertion from host.");
         
         try {
-            return getTrustWithSaml(tblHosts, hostId);
+            return getTrustWithSaml(host);
         }catch(Exception e) {
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertion();
             tblSamlAssertion.setHostId(tblHosts);
@@ -941,7 +913,8 @@ public class HostTrustBO extends BaseBO {
             log.error("Error while getting trust for host " + host,e );
             //System.err.println("JIM DEBUG"); 
             //e.printStackTrace(System.err);
-            return new HostTrust(ErrorCode.SYSTEM_ERROR,e.getMessage(),host,null,null);
+            return new HostTrust(ErrorCode.SYSTEM_ERROR,
+                    new AuthResponse(ErrorCode.SYSTEM_ERROR,e.getMessage()).getErrorMessage(),host,null,null);
         }
 
     }

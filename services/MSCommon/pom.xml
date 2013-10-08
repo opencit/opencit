@@ -96,7 +96,7 @@
   	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>mtwilson-my</artifactId>
+	    <artifactId>my</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>
 	</dependency>

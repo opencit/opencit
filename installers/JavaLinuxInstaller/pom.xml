@@ -18,21 +18,6 @@
     <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
   
-  <dependencies>
-    <dependency>
-      <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
-      <version>${project.parent.version}</version>
-      <type>bin</type>
-    </dependency>	
-    <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>jdk</artifactId>
-      <version>1.6.0_29</version>
-      <type>bin</type>
-      <classifier>linux-x64</classifier>
-    </dependency>	
-  </dependencies>
 
   <build>
       <resources>
@@ -52,9 +37,9 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
+      <artifactId>MtWilsonLinuxUtil</artifactId>
       <version>${project.parent.version}</version>
-      <type>bin</type>
+      <type>sh</type>
     </dependency>	
     <dependency>
       <groupId>com.oracle</groupId>
@@ -82,11 +67,11 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.parent.version}</version>
-                  <type>bin</type>
+                  <type>sh</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
+                  <destFileName>functions</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.oracle</groupId>

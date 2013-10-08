@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.transform.OutputKeys;
@@ -113,28 +112,6 @@ public class ConverterUtil {
 				hostVO.setOverAllStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
 				hostVO.setOverAllStatusBoolean(false);
 			}
-
-                        if (trustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
-                            if (Boolean.parseBoolean(trustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {
-                                    hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_TRUE));
-                                    String assetTagDetails = "";
-                                    // We need to retrive all the asset tag specific attributes and show it to the user
-                                    Set<String> attributeNames = trustAssertion.getAttributeNames();
-                                    for (String attrName : attributeNames) {
-                                        if (attrName.startsWith("ATAG_")) {
-                                            assetTagDetails += trustAssertion.getStringAttribute(attrName);
-                                        }
-                                    }
-                                    hostVO.setAssetTagDetails(assetTagDetails);
-                            }else {
-                                    hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
-                                    hostVO.setAssetTagDetails("Un-Trusted");
-                            }
-                        } else {
-                            hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
-                            hostVO.setAssetTagDetails("Not verified");
-                        }
-                        
                         if(trustAssertion.error() != null){
                             hostVO.setErrorMessage(trustAssertion.error().getMessage());
                             hostVO.setErrorCode(1);
@@ -146,7 +123,6 @@ public class ConverterUtil {
                 } else {
 			hostVO.setBiosStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
 			hostVO.setVmmStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
-                        hostVO.setAssetTagStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
 			hostVO.setOverAllStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_UNKNOWN));
 			hostVO.setOverAllStatusBoolean(false);
 			hostVO.setErrorMessage(errorMessage);

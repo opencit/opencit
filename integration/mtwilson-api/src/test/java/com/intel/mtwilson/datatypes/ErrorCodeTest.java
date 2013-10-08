@@ -24,7 +24,7 @@ public class ErrorCodeTest {
 
     //@Test
     public void testErrorCodeWithFormataAndSingleConcat(){
-        AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_DATA_MISSING,"MLENAME");
+        AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_DATA_MISSING,"MLNAME");
         if(authResponse.getErrorCodeEnum() == ErrorCode.WS_MLE_DATA_MISSING)
             System.out.println(authResponse.getErrorMessage());
     }

@@ -79,9 +79,5 @@ public interface AttestationService {
     
     AttestationReport getAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException;
 
-    X509Certificate getTlsCertificateForTrustedHost(Hostname hostname) throws IOException, ApiException, SignatureException;
-    
-    boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException;
-    
-    boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException;
+    X509Certificate getTlsCertificateForTrustedHost(Hostname hostname) throws IOException, ApiException, SignatureException;;
 }

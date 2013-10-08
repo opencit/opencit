@@ -11,7 +11,7 @@
     <parent>
 		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>mtwilson-services</artifactId>
-		<version>1.2-SNAPSHOT</version>
+		<version>1.1-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -32,7 +32,7 @@
             <configuration>
 		<target>
 	    		<zip destfile="${project.build.directory}/${project.artifactId}-${project.version}.zip">
-				<zipfileset dir="${basedir}/src/main/resources" prefix="${project.artifactId}-${project.version}"/>
+				<fileset dir="${basedir}/src/main/resources" prefix="${project.artifactId}-${project.version}"/>
 			</zip>
 		</target>
             </configuration>

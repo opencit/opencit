@@ -32,7 +32,6 @@ public class TADataContext {
     private String vmmVersion;
     private String modulesStr;
     private String processorInfo;
-    private String hostUUID;
     
 
     public String getBiosOem() {
@@ -215,14 +214,5 @@ public class TADataContext {
     public void setProcessorInfo(String processorInfo) {
         this.processorInfo = processorInfo;
     }
-
-    public String getHostUUID() {
-        return hostUUID;
-    }
-
-    public void setHostUUID(String hostUUID) {
-        this.hostUUID = hostUUID;
-    }
-    
-    
+        
 }

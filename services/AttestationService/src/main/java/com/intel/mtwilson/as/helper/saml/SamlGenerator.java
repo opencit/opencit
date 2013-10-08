@@ -6,7 +6,6 @@ package com.intel.mtwilson.as.helper.saml;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
-import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.io.Resource;
@@ -147,9 +146,9 @@ public class SamlGenerator {
      * @return @SamlAssertion
      * @throws MarshallingException 
      */
-    public SamlAssertion generateHostAssertion(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
+    public SamlAssertion generateHostAssertion(TxtHost host) throws MarshallingException, ConfigurationException, UnknownHostException, GeneralSecurityException, XMLSignatureException, MarshalException {
         samlAssertion = new SamlAssertion();
-        Assertion assertion = createAssertion(host, atags);
+        Assertion assertion = createAssertion(host);
 
         AssertionMarshaller marshaller = new AssertionMarshaller();
         Element plaintextElement = marshaller.marshall(assertion);
@@ -332,7 +331,7 @@ public class SamlGenerator {
 	}
 	*/
         
-        private AttributeStatement createHostAttributes(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws ConfigurationException {
+        private AttributeStatement createHostAttributes(TxtHost host) throws ConfigurationException {
             // Builder Attributes
             SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
             AttributeStatement attrStatement = (AttributeStatement) attrStatementBuilder.buildObject();
@@ -352,21 +351,10 @@ public class SamlGenerator {
                 attrStatement.getAttributes().add(createStringAttribute("VMM_OSName", host.getVmm().getOsName()));
                 attrStatement.getAttributes().add(createStringAttribute("VMM_OSVersion", host.getVmm().getOsVersion()));                
             }
-            
-            //attrStatement.getAttributes().add(createBooleanAttribute("Trusted_Location", host.isLocationTrusted()));
-            //if( host.isLocationTrusted() ) {
-            //    attrStatement.getAttributes().add(createStringAttribute("Location", host.getLocation()));            
-            //}
-            
-            // add the asset tag attestation status and if the status is trusted, then add all the attributes. In order to uniquely
-            // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
-            attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
-            if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
-                for (AttributeOidAndValue atagAttr : atags) {
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG"+ atagAttr.getOid()), atagAttr.getValue()));
-                }
+            attrStatement.getAttributes().add(createBooleanAttribute("Trusted_Location", host.isLocationTrusted()));
+            if( host.isLocationTrusted() ) {
+                attrStatement.getAttributes().add(createStringAttribute("Location", host.getLocation()));            
             }
-
             if( host.getAikCertificate() != null ) {
                 attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
                 attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));
@@ -398,7 +386,7 @@ public class SamlGenerator {
          * @param host
          * @return 
          */
-        private Assertion createAssertion(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws ConfigurationException, UnknownHostException {
+        private Assertion createAssertion(TxtHost host) throws ConfigurationException, UnknownHostException {
             // Create the assertion
             SAMLObjectBuilder assertionBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(Assertion.DEFAULT_ELEMENT_NAME);
             Assertion assertion = (Assertion) assertionBuilder.buildObject();
@@ -408,7 +396,7 @@ public class SamlGenerator {
             assertion.setIssueInstant(now);
             assertion.setVersion(SAMLVersion.VERSION_20);
             assertion.setSubject(createSubject(host));
-            assertion.getAttributeStatements().add(createHostAttributes(host, atags));
+            assertion.getAttributeStatements().add(createHostAttributes(host));
 
             return assertion;
         }

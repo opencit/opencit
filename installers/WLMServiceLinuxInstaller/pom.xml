@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>mtwilson-whitelist-service-installer</artifactId>
+  <artifactId>WLMService</artifactId>
 
   <packaging>pom</packaging>
   <name>Whitelist Manager Service Linux Installer</name>
@@ -37,15 +37,15 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-whitelist-service</artifactId>
+      <artifactId>WLMService</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>mtwilson-linux-util</artifactId>
+      <artifactId>MtWilsonLinuxUtil</artifactId>
       <version>${project.version}</version>
-      <type>bin</type>
+      <type>sh</type>
     </dependency>	
     
     <!--
@@ -82,7 +82,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.services</groupId>
-                  <artifactId>mtwilson-whitelist-service</artifactId>
+                  <artifactId>WLMService</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
@@ -90,11 +90,11 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>mtwilson-linux-util</artifactId>
+                  <artifactId>MtWilsonLinuxUtil</artifactId>
                   <version>${project.version}</version>
-                  <type>bin</type>
+                  <type>sh</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>MtWilsonLinuxUtil.bin</destFileName>
+                  <destFileName>functions</destFileName>
                 </artifactItem>
               </artifactItems>
               <!--<outputDirectory>${project.build.directory}/wars</outputDirectory>-->

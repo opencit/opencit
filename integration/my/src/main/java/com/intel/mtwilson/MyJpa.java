@@ -207,9 +207,5 @@ public class MyJpa {
 //		if( mwProcessorMapping == null ) { mwProcessorMapping = new MwProcessorMappingJpaController(pm.getASData()); }
 //		return mwProcessorMapping;
 	}
-    
-    public MwAssetTagCertificateJpaController mwAssetTagCertificate() throws IOException {
-        return new MwAssetTagCertificateJpaController(pm.getASData());
-    }
 
 }

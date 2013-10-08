@@ -27,6 +27,10 @@ public class HostTrustStatusResponse extends AuthResponse {
         this.hosts = hosts;
     }
 
+    public HostTrustStatusResponse(AuthResponse authResponse) {
+        super(authResponse);
+    }
+
     public HostTrustStatusResponse() {
         
     }
