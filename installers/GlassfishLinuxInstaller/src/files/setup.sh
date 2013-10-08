@@ -50,8 +50,8 @@ if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
 	stop program = \"/usr/local/bin/mtwilson glassfish-stop\"
 	# Glassfish portal
 	check host mtwilson-portal with address 127.0.0.1
-	start program = \"/usr/local/bin/mpctl start\"
-	stop program = \"/usr/local/bin/mpctl stop\"
+	start program = \"/usr/local/bin/mtwilson-portal start\"
+	stop program = \"/usr/local/bin/mtwilson-portal stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
 		and request \"/mtwilson-portal/home.html\" for 1 cycles
 	then restart
