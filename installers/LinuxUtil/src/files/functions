@@ -3281,6 +3281,8 @@ change_db_pass() {
   sed_escaped_value=$(sed_escape $new_db_pass)
   cryptopass="$MTWILSON_PASSWORD"
   
+  load_default_env 1>/dev/null
+  
   # Do not allow a blank password to be specified
   if [ -z $DATABASE_PASSWORD_NEW ]; then
     echo_failure "The new password could not be determined. Please verify \"DATABASE_PASSWORD_NEW\" variable is set."
