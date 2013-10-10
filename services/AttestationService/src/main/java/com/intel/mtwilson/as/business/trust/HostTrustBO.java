@@ -62,6 +62,7 @@ import org.joda.time.DateTime;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.io.MarshallingException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
