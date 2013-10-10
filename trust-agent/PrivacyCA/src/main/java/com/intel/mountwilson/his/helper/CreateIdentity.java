@@ -48,6 +48,7 @@ import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
 import javax.net.ssl.HttpsURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -320,7 +321,7 @@ public class CreateIdentity  {
                         try {
                             pcaFileOut.close();
                         } catch (IOException e) {
-                            log.log(Level.SEVERE,"Error while closing pcaFileOut",e);
+                            log.error("Error while closing pcaFileOut",e);
                         }
                 }
 	
