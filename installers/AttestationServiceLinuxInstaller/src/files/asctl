@@ -211,6 +211,8 @@ setup_interactive_install() {
       echo "waiting for input..."
       read foo
       mtwilson setup InitDatabase mysql
+      echo "waiting for input 2..."
+      read bar
     fi
   elif using_postgres; then
     if [ -n "$psql" ]; then
