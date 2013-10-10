@@ -34,6 +34,8 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import javax.security.cert.CertificateException;
@@ -152,8 +154,7 @@ public class CreateIdentity  {
 				try {
 					PropertyFile.close();
 				} catch (IOException e) {
-                                    log.error("Error while closing the property file");
-					
+					log.error("Error while closing the property file " , e);
 				}
 		}
 		// Check to see if any of the values were not populated with acceptable values
@@ -284,8 +285,9 @@ public class CreateIdentity  {
 
 				decrypted2 = results.get("aikcert");
 				aikblob = results.get("aikblob");
-				
+				log.debug(homeFolder + ClientPath + "/aikcert.cer >>>");
 				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
+                                log.debug(homeFolder + ClientPath + "/aikcert.cer <<<");
 				writeFile(homeFolder + ClientPath, aikblob,"/aikblob.dat");
 				
 				
@@ -329,10 +331,22 @@ public class CreateIdentity  {
 					System.exit(5);
 				}
 			}
+                        // stdale start here when you resume
 			pcaFileOut = new FileOutputStream(outFile);
 			pcaFileOut.write("-----BEGIN CERTIFICATE-----\n".getBytes());
-			pcaFileOut.write(Base64.encode(cert.getEncoded()) );
-			pcaFileOut.write("\n-----END CERTIFICATE-----".getBytes());
+                        String code = new String(Base64.encode(cert.getEncoded()));
+                        //log.debug(Base64.encode(cert.getEncoded()).toString());
+                        //log.debug(code);
+                        int line = 0;
+                        int remaining = code.length();
+                        while(remaining > 76){
+                        pcaFileOut.write((code.substring(line*76, line*76+76)+"\n").getBytes());
+                        line++;
+                        remaining -= 76;
+                        }    
+                        
+                        pcaFileOut.write(code.substring(line*76,line*76+remaining).getBytes());
+			pcaFileOut.write("\n-----END CERTIFICATE-----\n".getBytes());
 			pcaFileOut.flush();
 			pcaFileOut.close();
 		

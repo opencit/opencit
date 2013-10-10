@@ -46,14 +46,14 @@ $(function() {
 
 function fnUploadWhiteListConfigurationData() {
 
-    $('#whiteListMessage').html('');
-    var validation = false;
-    var hostVo = new RegisterHostVo();
-
-    if (checkForPCRConstrain('Oem_Bios_Checkbox', 'biosPCRsValues', 'OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox', 'vmmPCRsValues', 'VMM')) {
-
-        fnGetWhiteListConfigData();
-        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0) {
+	$('#whiteListMessage').html('');
+	var validation = false;
+	var hostVo = new RegisterHostVo();
+	
+	if(checkForPCRConstrain('Oem_Bios_Checkbox','biosPCRsValues','OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox','vmmPCRsValues','VMM')){
+    
+		fnGetWhiteListConfigData();
+        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0 ) {
             hostVo.hostType = 'vmware'
         } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('kvm') >= 0) ||
                 ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('xen') >= 0)) {
