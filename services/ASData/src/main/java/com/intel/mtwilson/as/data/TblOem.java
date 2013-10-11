@@ -26,8 +26,8 @@ import org.eclipse.persistence.annotations.Customizer;
  * @author dsmagadx
  */
 @Entity
-@Table(name = "mw_oem")
 @Customizer(AuditEventHandler.class)
+@Table(name = "mw_oem")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "TblOem.findAll", query = "SELECT t FROM TblOem t"),

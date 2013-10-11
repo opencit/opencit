@@ -189,7 +189,7 @@ monit_detect() {
 }
 
 monit_install() {
-  MONIT_YUM_PACKAGES=""
+  MONIT_YUM_PACKAGES="monit"
   MONIT_APT_PACKAGES="monit"
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"

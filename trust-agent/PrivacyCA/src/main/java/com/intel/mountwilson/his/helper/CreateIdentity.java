@@ -34,6 +34,8 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import javax.security.cert.CertificateException;
@@ -42,10 +44,14 @@ import org.bouncycastle.util.encoders.Base64;
 
 //import com.intel.mountwilson.as.common.ResourceFinder;
 import com.intel.mtwilson.util.ResourceFinder;
+import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.logging.Level;
 import javax.net.ssl.HttpsURLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * <p>This is part 2 of 3 for fully provisioning HIS on a Windows client. This part provisions the identity key (AIK) and certificate (AIC) for a HIS client. 
@@ -152,8 +158,7 @@ public class CreateIdentity  {
 				try {
 					PropertyFile.close();
 				} catch (IOException e) {
-                                    log.error("Error while closing the property file");
-					
+					log.error("Error while closing the property file " , e);
 				}
 		}
 		// Check to see if any of the values were not populated with acceptable values
@@ -241,7 +246,7 @@ public class CreateIdentity  {
                         
 //                        HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
             System.err.println("Create Identity... Calling into HisPriv first time. using url = " + PrivacyCaUrl);
-			IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);
+                        IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);
             System.err.println("Create Identity... Got HisPrivCA ref, making request ize of msg = " + encryptedEkCert.toByteArray().length);
 			byte[] encrypted1 = hisPrivacyCAWebService2.identityRequestGetChallenge(newId.getIdentityRequest(), encryptedEkCert.toByteArray());
 			if(encrypted1.length == 1){
@@ -284,8 +289,9 @@ public class CreateIdentity  {
 
 				decrypted2 = results.get("aikcert");
 				aikblob = results.get("aikblob");
-				
+				log.debug(homeFolder + ClientPath + "/aikcert.cer >>>");
 				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
+                                log.debug(homeFolder + ClientPath + "/aikcert.cer <<<");
 				writeFile(homeFolder + ClientPath, aikblob,"/aikblob.dat");
 				
 				
@@ -296,18 +302,28 @@ public class CreateIdentity  {
 				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
 			}
 			
-			
-		}catch(Exception e){
-			throw new PrivacyCAException("FAILED: " + e.getMessage(),e);
-		}
-		finally{
-			if (pcaFileOut != null)
-				try {
-					pcaFileOut.close();
-				} catch (IOException e) {
-					log.error("Error while closing pcaFileOut",e);
-				}
-		}
+	 
+                }catch(Exception e){
+                    e.printStackTrace();
+                    Throwable t = ErrorUtil.rootCause(e);
+                    if (t instanceof UnknownHostException){
+                        throw new PrivacyCAException("Unknown host. Error connecting to: " + t.getMessage());
+                    }
+                    else if (t instanceof TpmModuleException){
+                        throw new PrivacyCAException("TPM error. Please verify TPM ownership");
+                    }
+                    else {
+                        throw new PrivacyCAException("Error while creating identity.");
+                    }
+                }
+                finally{
+                    if (pcaFileOut != null)
+                        try {
+                            pcaFileOut.close();
+                        } catch (IOException e) {
+                            log.error("Error while closing pcaFileOut",e);
+                        }
+                }
 	
 		log.info("DONE");
 		
@@ -329,10 +345,22 @@ public class CreateIdentity  {
 					System.exit(5);
 				}
 			}
+                        // stdale start here when you resume
 			pcaFileOut = new FileOutputStream(outFile);
 			pcaFileOut.write("-----BEGIN CERTIFICATE-----\n".getBytes());
-			pcaFileOut.write(Base64.encode(cert.getEncoded()) );
-			pcaFileOut.write("\n-----END CERTIFICATE-----".getBytes());
+                        String code = new String(Base64.encode(cert.getEncoded()));
+                        //log.debug(Base64.encode(cert.getEncoded()).toString());
+                        //log.debug(code);
+                        int line = 0;
+                        int remaining = code.length();
+                        while(remaining > 76){
+                        pcaFileOut.write((code.substring(line*76, line*76+76)+"\n").getBytes());
+                        line++;
+                        remaining -= 76;
+                        }    
+                        
+                        pcaFileOut.write(code.substring(line*76,line*76+remaining).getBytes());
+			pcaFileOut.write("\n-----END CERTIFICATE-----\n".getBytes());
 			pcaFileOut.flush();
 			pcaFileOut.close();
 		

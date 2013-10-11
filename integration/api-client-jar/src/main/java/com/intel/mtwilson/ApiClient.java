@@ -380,11 +380,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             // a json error response from the web application. we need to provide the error message to the user.
             ErrorResponse errorResponse;
             try {
+                //log.debug("Parsing JSON error response: "+new String(response.content, "UTF-8"));
                 log.debug("Parsing JSON error response: "+new String(response.content, "UTF-8"));
                 errorResponse = json(new String(response.content, "UTF-8"), ErrorResponse.class);
             }
             catch(Exception e) {
                 // cannot parse the json response, so include the entire response for the user. we ignore the exception "e" because it just means we couldn't parse the response.
+                //e.printstacktrace()
+                // Daniel, do something to print the stack trace so you can follow it.
+                //
                 return new ApiException(response, "Cannot parse response: "+e.getMessage(), ErrorCode.UNKNOWN_ERROR);
             }
             return new ApiException(response, errorResponse.getErrorMessage(), ErrorCode.valueOf(errorResponse.getErrorCode()));

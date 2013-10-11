@@ -30,7 +30,7 @@ public class MleBO extends BaseBO {
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
         private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
-        private static String invalidWhiteList = "[0]{40}|[F]{40}";
+        private static String invalidWhiteList = "[0]{40}|[Ff]{40}";
 
         public MleBO() {
                                 mleJpaController = new TblMleJpaController(getEntityManagerFactory());

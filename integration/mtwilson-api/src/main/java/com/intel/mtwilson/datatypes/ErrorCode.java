@@ -127,7 +127,8 @@ public enum ErrorCode {
     MS_HOST_CONFIGURATION_ERROR(3210, "Unable to retrieve the host configuration details. Please verify the host information."),
     MS_MLE_CONFIGURATION_NOT_FOUND(3211, "BIOS or Hypervisor MLE is not configured correctly."),
     
-    TLS_COMMMUNICATION_ERROR(4001, "Cannot establish secure connection to '%s': %s");
+    TLS_COMMMUNICATION_ERROR(4001, "Cannot establish secure connection to '%s': %s"),
+    ETC_ERROR(9999, "Unknown Error");
    
     
     
