@@ -1,4 +1,0 @@
-check process tagent with pidfile /var/run/tagent.pid
-        start program = "/etc/init.d/tagent start" with timeout 30 seconds
-        stop program  = "/etc/init.d/tagent stop
-

@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwProcessorMapping.findById", query = "SELECT m FROM MwProcessorMapping m WHERE m.id = :id"),
     @NamedQuery(name = "MwProcessorMapping.findByPlatformName", query = "SELECT m FROM MwProcessorMapping m WHERE m.platformName = :platformName"),
     @NamedQuery(name = "MwProcessorMapping.findByProcessorType", query = "SELECT m FROM MwProcessorMapping m WHERE m.processorType = :processorType"),
-    @NamedQuery(name = "MwProcessorMapping.findByProcessorCpuid", query = "SELECT m FROM MwProcessorMapping m WHERE m.processorCpuid LIKE :processorCpuid")})
+    @NamedQuery(name = "MwProcessorMapping.findByProcessorCpuid", query = "SELECT m FROM MwProcessorMapping m WHERE m.processorCpuid = :processorCpuid")})
 public class MwProcessorMapping implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id

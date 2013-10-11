@@ -11,8 +11,6 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
-import com.vmware.vim25.ArrayOfHostCpuPackage;
-import com.vmware.vim25.HostCpuPackage;
 import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
@@ -307,28 +305,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             host.BIOS_Oem = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString();
             host.BIOS_Name = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString(); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
             host.BIOS_Version = vmware.getMORProperty(hostMOR, "hardware.biosInfo.biosVersion").toString();
-            host.Processor_Info = "";
             
-            log.debug("About to retrieve the EAX contents for {}.", host.HostName);
-            // Bug : 933
-            // In order to retrieve the platform name we first need to get the CPU ID, for which we need to get the EAX register contents
-            ArrayOfHostCpuPackage  hcps = (ArrayOfHostCpuPackage) vmware.getMORProperty(hostMOR, "hardware.cpuPkg");
-            if (hcps != null) {
-                HostCpuPackage hcptemp = (HostCpuPackage) hcps.getHostCpuPackage().get(0);
-                String eaxContents = hcptemp.getCpuFeature().get(1).getEax();
-                log.debug("EAX Register contents for {} is {}.", host.HostName, eaxContents);
-                // Now that we got the EAX register contents, lets convert it to HEX value, since CPU ID is stored as HEX value in the DB
-                String cpuIDInHex = "";
-                // EAX String would have a format shown below
-                // 0000:0000:0000:0010:0000:0110:1100:0010
-                String[] split = eaxContents.split(":");
-                for (int i =0; i < split.length; i+=2){
-                   cpuIDInHex = (Integer.toHexString(Integer.valueOf(split[i], 2)) + Integer.toHexString(Integer.valueOf(split[i+1], 2))) + " " + cpuIDInHex;
-                }
-                cpuIDInHex = cpuIDInHex.substring(0, 8).toUpperCase().trim();       
-                log.debug("CPU ID for {} is {}.", host.HostName, cpuIDInHex);
-                host.Processor_Info = cpuIDInHex;
-            }
             /*
             // Possible values for this processor Info includes. So, if there is a "-", we are assuming that it is either a Sandy Bridge or a IVY bridge system
             // For others starting with X56, they are Westmere systems belonging to Thurley platform
@@ -344,13 +321,11 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             // There is one more attribute in the vCenter that actually provides the processor name directly unlike the open source hosts where we
             // need to do the mapping
             // Possible values include: "intel-westmere", "intel-sandybridge"
-            // Bug: 933 Since on some hosts we have seen this value to be unset, we will use the EAX register values to get the CPU ID and use
-            // the mapping table to get the platform name.
-             /*String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
+             String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
              if (processorInfo.contains("intel")) {
                  processorInfo = processorInfo.substring( "intel".length()+1);
              }
-            host.Processor_Info = processorInfo.substring(0, 1).toUpperCase() + processorInfo.substring(1);*/
+            host.Processor_Info = processorInfo.substring(0, 1).toUpperCase() + processorInfo.substring(1);
             
             return host;
         } catch (InvalidPropertyFaultMsg ex) {

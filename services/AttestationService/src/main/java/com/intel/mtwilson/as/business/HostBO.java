@@ -143,7 +143,7 @@ public class HostBO extends BaseBO {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
                                     X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                     hostAikCert.checkValidity(); // AIK certificate must be valid today
-                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
                                     if( !validCaSignature ) {
                                         throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
                                     }
