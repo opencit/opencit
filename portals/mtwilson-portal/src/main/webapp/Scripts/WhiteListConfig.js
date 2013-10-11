@@ -50,7 +50,7 @@ function fnUploadWhiteListConfigurationData() {
 	var validation = false;
 	var hostVo = new RegisterHostVo();
 	
-	if(checkForPCRConstrain('Oem_Bios_Checkbox','biosPCRsValues','OEM BIOS') && fnSelectWhiteListType('Hypervisor_Checkbox','vmmPCRsValues','VMM')){
+	if(checkForPCRConstrain('Oem_Bios_Checkbox','biosPCRsValues','OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox','vmmPCRsValues','VMM')){
     
 		fnGetWhiteListConfigData();
         if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0 ) {
