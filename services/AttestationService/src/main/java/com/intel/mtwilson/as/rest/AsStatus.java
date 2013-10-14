@@ -20,6 +20,6 @@ public class AsStatus {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     public String getServiceStatus() {
-        return "AS Service Running 1.2.2 premium ";
+        return "AS Service Running " + getClass().getPackage().getImplementationVersion() + " premium ";
     }
 }

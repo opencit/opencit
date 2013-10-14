@@ -20,6 +20,6 @@ public class WlmStatus {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     public String getServiceStatus() {
-        return "WLM Service Running 1.2.2 premium ";
+        return "WLM Service Running " + getClass().getPackage().getImplementationVersion() + " premium ";
     }
 }

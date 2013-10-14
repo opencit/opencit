@@ -22,6 +22,6 @@ public class MsStatus {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
     public String getServiceStatus() {
-        return "MS Service Running 1.2.2 premium ";
+        return "MS Service Running " + getClass().getPackage().getImplementationVersion() + " premium ";
     }
 }
