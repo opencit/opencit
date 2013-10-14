@@ -625,7 +625,7 @@ if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
 	start program = \"/usr/local/bin/mtwilson glassfish-start\"
 	stop program = \"/usr/local/bin/mtwilson glassfish-stop\"
 	# Glassfish portal
-	check host mtwilson-portal with address 127.0.0.1
+	check host mtwilson-portal-glassfish with address 127.0.0.1
 	start program = \"/usr/local/bin/mtwilson-portal start\"
 	stop program = \"/usr/local/bin/mtwilson-portal stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
@@ -644,7 +644,7 @@ if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	# tomcat portal
-	check host mtwilson-portal with address 127.0.0.1
+	check host mtwilson-portal-tomcat with address 127.0.0.1
 	start program = \"/usr/local/bin/mtwilson-portal start\"
 	stop program = \"/usr/local/bin/mtwilson-portal stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
