@@ -98,8 +98,10 @@ else
 fi
 
 mkdir -p /etc/monit/conf.d
-echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 
+if ! grep -q "^include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+ echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+fi
 
 
 

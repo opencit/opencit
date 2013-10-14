@@ -618,6 +618,61 @@ if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
+# create the monit rc files
+if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
+ echo "# Monitoring the glassfish java service
+	check process glassfish matching \"glassfish.jar\"
+	start program = \"/usr/local/bin/mtwilson glassfish-start\"
+	stop program = \"/usr/local/bin/mtwilson glassfish-stop\"
+	# Glassfish portal
+	check host mtwilson-portal with address 127.0.0.1
+	start program = \"/usr/local/bin/mtwilson-portal start\"
+	stop program = \"/usr/local/bin/mtwilson-portal stop\"
+	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/mtwilson-portal/home.html\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/glassfish.mtwilson
+fi
+
+if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
+ echo "#tomcat monitor
+	check host tomcat with address 127.0.0.1
+	start program = \"/usr/local/bin/mtwilson tomcat-start\"
+	stop program = \"/usr/local/bin/mtwilson tomcat-stop\"
+	if failed port 8443 TYPE TCP PROTOCOL HTTP
+		and request \"/\" for 3 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	# tomcat portal
+	check host mtwilson-portal with address 127.0.0.1
+	start program = \"/usr/local/bin/mtwilson-portal start\"
+	stop program = \"/usr/local/bin/mtwilson-portal stop\"
+	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/mtwilson-portal/home.html\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout" > /etc/monit/conf.d/tomcat.mtwilson
+fi
+
+if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
+      echo "# postgres monitor
+      check process postgresql matching \"postgresql\"
+      group database
+      start program = \"/usr/sbin/service postgresql start\"
+      stop program = \"/usr/sbin/service postgresql stop\"
+      if failed host 127.0.0.1 port 5432 then restart
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/postgres.mtwilson
+fi
+
+if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+      echo "# mysql monitor
+      check process mysql matching \"mysql\"
+      group database
+      start program = \"/usr/sbin/service mysql start\"
+      stop program = \"/usr/sbin/service mysql stop\"
+      if failed host 127.0.0.1 port 3306 then restart
+      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.mtwilson
+fi
+
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
