@@ -618,6 +618,8 @@ if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
+mkdir -p /etc/monit/conf.d
+
 # create the monit rc files
 if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
  echo "# Monitoring the glassfish java service
