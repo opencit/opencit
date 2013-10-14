@@ -3,6 +3,7 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+export MTWILSON_OWNER=`whoami`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
