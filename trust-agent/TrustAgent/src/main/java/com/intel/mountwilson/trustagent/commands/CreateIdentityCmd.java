@@ -11,6 +11,7 @@ import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.his.helper.CreateIdentity;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.File;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,10 @@ public class CreateIdentityCmd implements ICommand {
                 log.info("New AIK certificate will not be created.");
             } else {
                 // this will create the AIK in the configured folder
-                CreateIdentity.createIdentity();
+                Properties configuration = new Properties();
+                configuration.setProperty("aikcert.filename", context.getAikCertFileName());
+                configuration.setProperty("aikblob.filename", context.getAikBlobFileName());
+                CreateIdentity.createIdentity(configuration);
 
             }
 

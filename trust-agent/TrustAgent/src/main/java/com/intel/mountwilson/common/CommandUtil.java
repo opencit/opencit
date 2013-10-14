@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.common;
 
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mountwilson.trustagent.datatype.IPAddress;
 import java.io.*;
 import java.net.InetAddress;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -141,18 +143,11 @@ public class CommandUtil {
 
     public static String readCertificate(String fileName) throws TAException {
         try {
-            javax.security.cert.X509Certificate cert = javax.security.cert.X509Certificate.getInstance(readfile(fileName));
-            //        return "-----BEGIN CERTIFICATE-----" + new String(Base64.encodeBase64(cert.getEncoded())) + "-----END CERTIFICATE-----";
-            // Important: the certificate data MUST be chunked to 76 character blocks for proper interpretation by openssl on the client.
-            // TODO:removed this till we fix AS
-            return "-----BEGIN CERTIFICATE-----"
-                    + new String(Base64.encodeBase64(cert.getEncoded(), true))
-                    + "-----END CERTIFICATE-----";
-
-
-//			return "-----BEGIN CERTIFICATE-----\n"
-//					+ new String(Base64.encodeBase64Chunked(cert.getEncoded()))
-//					+ "-----END CERTIFICATE-----";
+            FileInputStream in = new FileInputStream(new File(fileName));
+            String pem = IOUtils.toString(in);
+            in.close();
+//            X509Certificate certificate = X509Util.decodePemCertificate(pem);
+            return pem;
         } catch (Exception e) {
             throw new TAException(ErrorCode.ERROR, "Error while reading AIK Cert", e);
         }
