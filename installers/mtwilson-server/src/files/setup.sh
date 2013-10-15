@@ -32,6 +32,7 @@ else
   pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
   useradd -m -p $pass $MTWILSON_OWNER
   echo "Account Created!"
+ fi
 fi
 
 if [ -z "$INSTALL_PKGS" ]; then
