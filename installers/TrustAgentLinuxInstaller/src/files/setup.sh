@@ -266,6 +266,10 @@ else
     cp monitrc /etc/monit/monitrc
 fi
 
+if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+ echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+fi
+
 if [ ! -d /etc/monit/conf.d ]; then
  mkdir -p /etc/monit/conf.d
 fi

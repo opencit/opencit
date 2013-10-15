@@ -53,7 +53,6 @@ generate_password() {
   < /dev/urandom tr -dc _A-Za-z0-9- | head -c${1:-32}
 }
 
-
 ### FUNCTION LIBRARY: escape out input strings for passing to sed
 # you pass it the string you are about to pass to sed that might 
 # contain the following characters ()&#%$+
@@ -301,15 +300,12 @@ prompt_with_default_password() {
   local userprompt="${2:-Password:}"
   local default_value
   # here $$
-  #eval current_value="\$$resultvarname"
-  #eval default_value="${3:-$current_value}"
   eval variable_name="$resultvarname"
   #echo_warning "variable name is $variable_name"
   eval current_value="\$$variable_name"
   #echo_warning "current value = $current_value"
   eval default_value="${3:-'$current_value'}"
   #echo_warning "default value = $default_value"
-
   local default_value_display="********"
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file

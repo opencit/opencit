@@ -143,7 +143,7 @@ public class HostBO extends BaseBO {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
                                     X509Certificate hostAikCert = X509Util.decodePemCertificate(tblHosts.getAIKCertificate());
                                     hostAikCert.checkValidity(); // AIK certificate must be valid today
-                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert); // XXX TODO this check belongs in the trust policy rules
+                                    boolean validCaSignature = isAikCertificateTrusted(hostAikCert);
                                     if( !validCaSignature ) {
                                         throw new ASException(ErrorCode.AS_INVALID_AIK_CERTIFICATE, host.getHostName().toString());
                                     }
@@ -274,7 +274,7 @@ public class HostBO extends BaseBO {
     }
 
 
-        public HostResponse updateHost(TxtHost host) {
+        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -320,7 +320,8 @@ public class HostBO extends BaseBO {
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
                                 log.info("VMM is updated. Update the host specific manifest");
                                 // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
-                                PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
+                                if (pcrManifest == null)
+                                    pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
 
                                 // send the pcr manifest to a vendor-specific class in order to extract any host-specific information

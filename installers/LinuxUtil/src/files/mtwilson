@@ -347,6 +347,7 @@ case "$1" in
         call_setupcommand EraseLogs
         call_setupcommand EraseHostRegistrationData
         call_setupcommand EraseWhitelistData
+        
         ;;
   erase-users)
 		if [ -z $MC_FIRST_USERNAME ]; then
