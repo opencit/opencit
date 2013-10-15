@@ -31,6 +31,13 @@ public class InitDatabase extends AtagCommand {
     private static Logger log = LoggerFactory.getLogger(InitDatabase.class);
     public final static String OID_CUSTOMER_ROOT = "1.3.6.1.4.1.99999";
     
+    private    ConfigurationDAO configurationDao;
+    private    TagDAO tagDao;
+    private    TagValueDAO tagValueDao;
+    private    SelectionDAO selectionDao;
+    private    SelectionTagValueDAO selectionTagValueDao;
+    private    RdfTripleDAO rdfTripleDao;
+    
     private String oid(String relative) {
         return OID_CUSTOMER_ROOT+"."+relative;
     }
@@ -40,21 +47,52 @@ public class InitDatabase extends AtagCommand {
         log.debug("Starting Derby...");
         Derby.startDatabase();
         log.debug("Derby started");
-        insertMainConfiguration();
+        try {
+            open();
+            if( isDatabaseEmpty() ) {
+                insertMainConfiguration();            
+            }
+        }
+        catch(Exception e) {
+            log.error("Cannot initialize database", e);
+        }
+        finally {
+            close();
+        }
         log.debug("Stopping Derby...");
         Derby.stopDatabase();
         log.debug("Derby stopped");
     }
     
+    public void open() throws SQLException {
+        log.debug("get daos");
+         configurationDao = Derby.configurationDao();
+         tagDao = Derby.tagDao();
+         tagValueDao = Derby.tagValueDao();
+         selectionDao = Derby.selectionDao();
+         selectionTagValueDao = Derby.selectionTagValueDao();
+         rdfTripleDao = Derby.rdfTripleDao();        
+    }
+    
+    public void close() {
+        // close daos'
+        if(configurationDao!=null) {configurationDao.close(); configurationDao = null;}
+        if(tagDao!=null) {tagDao.close(); tagDao = null; }
+        if(tagValueDao!=null) {tagValueDao.close(); tagValueDao = null;}
+        if(selectionDao!=null) {selectionDao.close(); selectionDao = null; }
+        if(selectionTagValueDao!=null) {selectionTagValueDao.close(); selectionTagValueDao = null;        }
+    }
+    
+    public boolean isDatabaseEmpty() throws SQLException, IOException {
+        Configuration main = configurationDao.findByName("main");
+        if( main == null ) {
+            return true;
+        }
+        return false;
+    }
+    
     public void insertMainConfiguration() throws SQLException, IOException {
         // open daos
-        log.debug("get daos");
-        ConfigurationDAO configurationDao = Derby.configurationDao();
-        TagDAO tagDao = Derby.tagDao();
-        TagValueDAO tagValueDao = Derby.tagValueDao();
-        SelectionDAO selectionDao = Derby.selectionDao();
-        SelectionTagValueDAO selectionTagValueDao = Derby.selectionTagValueDao();
-        RdfTripleDAO rdfTripleDao = Derby.rdfTripleDao();
         // example tags
         log.debug("inserting tags");
         long countryTagId = tagDao.insert(new UUID(), "country", oid("1"));
@@ -126,12 +164,6 @@ public class InitDatabase extends AtagCommand {
         Configuration configuration = new Configuration("main", p);
         configurationDao.insert(new UUID(), configuration.getName(), configuration.getXmlContent());
         
-        // close daos'
-        configurationDao.close();
-        tagDao.close();
-        tagValueDao.close();
-        selectionDao.close();
-        selectionTagValueDao.close();
     }
     
 

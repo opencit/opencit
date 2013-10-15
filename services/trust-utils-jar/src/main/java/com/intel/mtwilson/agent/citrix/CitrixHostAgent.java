@@ -287,4 +287,14 @@ BwIDAQAB
         return hm;
     }
     
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        try {
+            client.setAssetTag(tag);
+        }
+        catch(Exception e) {
+            log.error("Unexpected error while setting asset tag", e);
+            throw new IOException(e);
+        }
+    }
 }

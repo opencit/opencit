@@ -24,6 +24,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This command exports a file from the database to the filesystem
+ * 
+ * Usage: create-ca-key "CN=mykey,O=myorg,C=US"
+ * 
+ * Use double-quotes; on Windows especially do not use single quotes around the argument because it will be a part of it
+ * 
+ * If a distinguished name is not provided, a default name will be used
+ * 
  * @author jbuhacoff
  */
 public class CreateCaKey extends AtagCommand {
@@ -34,8 +41,13 @@ public class CreateCaKey extends AtagCommand {
     @Override
     public void execute(String[] args) throws Exception {
         // file name, and either outfile or stdout
-        if( args.length < 1 ) { throw new IllegalArgumentException("Usage: create-ca-key \"CN=mykey,O=myorg,C=US\""); } // on Windows especially do not use single quotes around the argument because it will be a part of it
-        String dn = args[0];
+        String dn;
+        if( args.length > 0 ) { 
+            dn = args[0];
+        } 
+        else {
+            dn = "CN=asset-tag-service,OU=mtwilson";
+        }
         
         // create a new key pair
         KeyPair cakey = RsaUtil.generateRsaKeyPair(2048);

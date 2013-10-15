@@ -519,6 +519,12 @@ our customers.
         <scope>test</scope>
     </dependency>
     
+
+    <dependency>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>trust-util-jar</artifactId>
+        <version>${project.version}</version>
+    </dependency>
                     
         <!--
     <dependency>

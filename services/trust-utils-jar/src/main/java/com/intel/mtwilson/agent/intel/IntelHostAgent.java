@@ -203,4 +203,8 @@ public class IntelHostAgent implements HostAgent {
         return hm;
     }
     
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

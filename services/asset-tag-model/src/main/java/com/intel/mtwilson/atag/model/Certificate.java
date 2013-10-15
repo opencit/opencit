@@ -17,6 +17,8 @@ import org.apache.commons.codec.binary.Base64;
  * @author jbuhacoff
  */
 public class Certificate extends Document {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Certificate.class);
+
     private byte[] certificate; // variable size
     private Sha1Digest sha1; // 20 bytes      SHA1(CERTIFICATE)  the certificate fingerprint
     private Sha256Digest sha256; // 32 bytes      SHA256(CERTIFICATE)  the certificate fingerprint
@@ -128,6 +130,7 @@ public class Certificate extends Document {
         certificate.setNotBefore(attrcert.getNotBefore());
         certificate.setNotAfter(attrcert.getNotAfter());
         // assuming revoked = false (default value)
+        log.debug("valueOf ok");
         return certificate;
     }
     

@@ -12,7 +12,7 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.tls.TlsConnection;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
@@ -184,6 +184,28 @@ public class CitrixClient {
         Session.logout(connection);
 //        connection.dispose();
     }
+    
+    /**
+     * This is a Citrix-specific API, not implemented by vmware hosts ;  trust agent will implement it
+     * when it's merged with provisioning agent from the asset tag branch
+     * @param tag 
+     */
+    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException {
+            Set<Host> hostList = Host.getAll(connection);
+            Iterator iter = hostList.iterator();
+            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+            // to throw an exception if the hasNext is false.
+            Host h = null;
+            if (iter.hasNext()) {
+                h = (Host)iter.next();
+            }
+			
+            Map<String, String> myMap = new HashMap<String, String>();
+            myMap.put("tag", Base64.encodeBase64String(tag.toByteArray()));
+            String retval = h.callPlugin(connection,  "tpm","tpm_set_asset_tag", myMap);
+            log.debug("xenapi returned: {}", retval);
+    }
+    
     
     public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
           log.debug("getQuoteInformationForHost pcrList == " + pcrList);
@@ -419,7 +441,7 @@ public class CitrixClient {
                 if( validPcrNumber && validPcrValue ) {
                 	log.debug("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
-                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
+                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new com.intel.mtwilson.model.Sha1Digest(pcrValue))); // TODO later replace com.intel.mtwilson.model.Sha1Digest with com.intel.dscg.cpg.crypto.Sha1Digest.valueOfHex(pcrValue);
                                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }

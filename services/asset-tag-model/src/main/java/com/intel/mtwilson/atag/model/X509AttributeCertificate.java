@@ -140,7 +140,7 @@ public class X509AttributeCertificate {
                  */
             }
         }
-        
+        log.debug("valueOf ok");
         return result;
     }
     

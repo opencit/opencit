@@ -738,11 +738,45 @@ function isNumber(n) {
                                         <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">delete</a> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">revoke</a>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.provisionCertificate(this.getAttribute('uuid')); return false;">provision</a>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">provision</a>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                        
+                        <form id="certificate-provision-form" action="#" onsubmit="return false;">
+                            <p>Currently push-provisioning works only with Citrix Xen hosts.</p>
+                            <input type="hidden" name="certificateUuid" id="certificate-provision-uuid"/>
+                            <ul>
+                                <li>
+                                    <label for="certificate-provision-host">Internet Address</label>
+                                    <input type="text" id="certificate-provision-host" name="host" size="40" placeholder="Hostname or IP Address"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-provision-username">Username</label>
+                                    <input type="text" id="certificate-provision-username" name="username" placeholder="Username"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-provision-password">Password</label>
+                                    <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
+                                </li>
+                                <!--
+                                <li>
+                                    <label>SHA-1</label>
+                                    <span id="certificate-provision-sha1"></span>
+                                </li>
+                                <li>
+                                    <label>SHA256</label>
+                                    <span id="certificate-provision-sha256"></span>
+                                </li>
+                                -->
+                                 <li>
+                                        <input type="button" value="Provision" onclick="ws.provisionCertificate(this); return false;"/>
+                                        <input type="button" value="Cancel" onclick="$('certificate-provision-form').hide(); return false;"/>
+                                 </li>
+                            </ul>
+                        </form>
+                        
                         
                     </div> <!-- end certificates tab -->
 
@@ -1021,6 +1055,7 @@ function isNumber(n) {
             navTabs.setActiveTab('tags');
 //            navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
+            $('certificate-provision-form').hide();
         </script>
 
 
