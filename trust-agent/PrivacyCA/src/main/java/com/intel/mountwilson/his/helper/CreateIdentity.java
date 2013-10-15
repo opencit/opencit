@@ -351,7 +351,7 @@ public class CreateIdentity  {
     private static void mkdir(File file) throws PrivacyCAException {
         if( !file.getParentFile().isDirectory() ) {
             if( !file.getParentFile().mkdirs() ) {
-				log.warning("Failed to create client installation path!");
+				log.warn("Failed to create client installation path!");
 				throw new PrivacyCAException("Failed to create client installation path!");
             }
         }
