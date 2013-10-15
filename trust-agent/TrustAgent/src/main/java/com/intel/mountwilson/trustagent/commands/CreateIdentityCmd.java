@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Properties;
 
 /**
  *
@@ -45,7 +46,10 @@ public class CreateIdentityCmd implements ICommand {
                 log.info("New AIK certificate will not be created.");
             } else {
                 // this will create the AIK in the configured folder
-                CreateIdentity.createIdentity();
+                 Properties configuration = new Properties();
+                configuration.setProperty("aikcert.filename", context.getAikCertFileName());
+                configuration.setProperty("aikblob.filename", context.getAikBlobFileName());
+                CreateIdentity.createIdentity(configuration);
 
             }
 

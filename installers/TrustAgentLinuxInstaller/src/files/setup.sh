@@ -167,6 +167,20 @@ fix_redhat_libcrypto
 echo "Registering tagent in start up"
 register_startup_script /usr/local/bin/tagent tagent
 
+fix_existing_aikcert() {
+  local aikdir=${intel_conf_dir}/cert
+  if [ ! -f $aikdir/aikcert.pem ] && [ -f $aikdir/aikcert.cer ]; then
+    # trust agent aikcert.cer is in broken PEM format... it needs newlines every 76 characters to be correct
+    cat $aikdir/aikcert.cer | sed 's/.\{76\}/&\n/g' > $aikdir/aikcert.pem
+    rm $aikdir/aikcert.cer
+    if [ -f ${package_config_filename} ]; then 
+       # update aikcert.filename=aikcert.cer to aikcert.filename=aikcert.pem
+       update_property_in_file aikcert.filename ${package_config_filename} aikcert.pem
+    fi
+  fi
+}
+
+fix_existing_aikcert
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
 /usr/local/bin/tagent setup

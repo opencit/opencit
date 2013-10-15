@@ -14,7 +14,7 @@ package com.intel.mountwilson.his.helper;
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.crypto.NopX509HostnameVerifier;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmIdentity;
@@ -50,6 +50,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import javax.net.ssl.HttpsURLConnection;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,9 +94,11 @@ public class CreateIdentity  {
 	private static Logger log = LoggerFactory.getLogger(CreateIdentity.class);
 	/**
 	 * Entry point into the program. See class description for required properties file elements.
-	 * 
+	 * Properties configuration can override default values for:
+     * aikcert.filename  (aikcert.pem)
+     * aikblob.filename  (aikblob.dat)
 	 */
-	public static void createIdentity() throws PrivacyCAException{
+	public static void createIdentity(Properties configuration) throws PrivacyCAException{
 		//Properties file
 		// Define properties file strings
 		final String OWNER_AUTH = "TpmOwnerAuth";
@@ -283,23 +286,25 @@ public class CreateIdentity  {
 			System.arraycopy(encrypted2, 256, sym2, 0, sym2.length);
 			byte[] decrypted2;
 			byte[] aikblob;
+            
+            String aikcertfilepath = configuration.getProperty("aikcert.filename", homeFolder+ClientPath+"/aikcert.pem");
+            String aikblobfilepath = configuration.getProperty("aikblob.filename", homeFolder+ClientPath+"/aikblob.dat");
+            
 			if (os==1){//linux
 				HashMap<String, byte[]> results = TpmModule.activateIdentity2(ownerAuthRaw, keyAuthRaw,asym2, sym2, HisIdentityIndex);
 				System.out.println(results);
 
 				decrypted2 = results.get("aikcert");
 				aikblob = results.get("aikblob");
-				log.debug(homeFolder + ClientPath + "/aikcert.cer >>>");
-				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
-                                log.debug(homeFolder + ClientPath + "/aikcert.cer <<<");
-				writeFile(homeFolder + ClientPath, aikblob,"/aikblob.dat");
 				
+                writecert(aikcertfilepath, decrypted2);
+				writeblob(aikblobfilepath, aikblob);
 				
 			}else{
 				//decrypted1 = TpmModuleJava.ActivateIdentity(asym1, sym1, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw); 
 				//decrypted2 = TpmModuleJava.ActivateIdentity(asym2, sym2, aik, keyAuthRaw, srkAuthRaw, ownerAuthRaw);//Comments  temporarily due to TSSCoreService.jar compiling issue 
 				decrypted2 = TpmModule.activateIdentity(ownerAuthRaw, keyAuthRaw,asym2, sym2, HisIdentityIndex);
-				writecert(homeFolder + ClientPath, decrypted2,"/aikcert.cer");
+                writecert(aikcertfilepath, decrypted2);
 			}
 			
 	 
@@ -329,42 +334,16 @@ public class CreateIdentity  {
 		
 	}
 
-	private static void writecert(String clientPath, byte[] decrypted,
-			String fileName) throws CertificateException, IOException {
-			log.debug("writing file " + clientPath + fileName);
-			javax.security.cert.X509Certificate cert = 
-					javax.security.cert.X509Certificate.getInstance(decrypted);
-			
-			FileOutputStream pcaFileOut;
-			
-			File outPath = new File(clientPath);
-			File outFile = new File(clientPath + fileName);
-			if(!outPath.isDirectory()){
-				if(!outPath.mkdirs()){
-					System.out.println("Failed to create client installation path!");
-					System.exit(5);
-				}
-			}
-                        // stdale start here when you resume
-			pcaFileOut = new FileOutputStream(outFile);
-			pcaFileOut.write("-----BEGIN CERTIFICATE-----\n".getBytes());
-                        String code = new String(Base64.encode(cert.getEncoded()));
-                        //log.debug(Base64.encode(cert.getEncoded()).toString());
-                        //log.debug(code);
-                        int line = 0;
-                        int remaining = code.length();
-                        while(remaining > 76){
-                        pcaFileOut.write((code.substring(line*76, line*76+76)+"\n").getBytes());
-                        line++;
-                        remaining -= 76;
-                        }    
-                        
-                        pcaFileOut.write(code.substring(line*76,line*76+remaining).getBytes());
-			pcaFileOut.write("\n-----END CERTIFICATE-----\n".getBytes());
-			pcaFileOut.flush();
-			pcaFileOut.close();
-		
-	}
+	 // issue #878
+    private static void writecert(String absoluteFilePath, byte[] certificateBytes) throws FileNotFoundException, java.security.cert.CertificateException, IOException, PrivacyCAException {
+        File file = new File(absoluteFilePath);
+        mkdir(file); // ensure the parent directory exists
+        X509Certificate certificate = X509Util.decodeDerCertificate(certificateBytes); // throws CertificateException
+        String certificatePem = X509Util.encodePemCertificate(certificate);
+        FileOutputStream out = new FileOutputStream(file); // throws FileNotFoundException
+        IOUtils.write(certificatePem, out); // throws IOException
+        out.close();
+    }
 
 	private static void writeFile(String ClientPath,
 			byte[] decrypted2, String fileName) throws FileNotFoundException, IOException, PrivacyCAException {
