@@ -69,7 +69,7 @@ function fnUploadWhiteListConfigurationData() {
         if (isVMWare == 2) {
             if (fnValidateIpAddress($('#whiteListCitrix_Host').val())) {
                 var valid0 = fnValidateEmptyValue('whiteListCitrix_Host');
-                var valid1 = fnValidateEmptyValue('whiteListCitrix_portNO');
+                var valid1 = fnMWValidatePort('whiteListCitrix_portNO', true); //fnValidateEmptyValue('whiteListCitrix_portNO');
                 var valid2 = fnValidateEmptyValue('whiteListCitrix_userName');
                 var valid3 = fnValidateEmptyValue('whiteListCitrix_password');
 
@@ -109,7 +109,7 @@ function fnUploadWhiteListConfigurationData() {
             if (fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
 
                 var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
-                var valid2 = fnValidateEmptyValue('whiteListOpenSource_portNO');
+                var valid2 = fnMWValidatePort('whiteListOpenSource_portNO', true); //fnValidateEmptyValue('whiteListOpenSource_portNO');
 
                 if (valid1 && valid2) {
                     validation = true;
