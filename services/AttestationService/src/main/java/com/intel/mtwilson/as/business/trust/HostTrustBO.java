@@ -20,6 +20,7 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.as.helper.saml.SamlAssertion;
 import com.intel.mtwilson.as.helper.saml.SamlGenerator;
+import com.intel.mtwilson.as.premium.PremiumHostBO;
 import com.intel.mtwilson.audit.api.AuditLogger;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
@@ -155,6 +156,8 @@ public class HostTrustBO extends BaseBO {
         
         try {
             
+            long getTrustStatusOfHostNotInDBStart = System.currentTimeMillis();
+
             TblMleJpaController mleJpa = My.jpa().mwMle();
 
             TblHosts tblHosts = new TblHosts();
@@ -268,6 +271,9 @@ public class HostTrustBO extends BaseBO {
                 throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.VMM_Name, hostObj.VMM_Version);
             }
 
+            long getTrustStatusOfHostNotInDBStop = System.currentTimeMillis();
+            log.debug("GetTrustStatusOfHostNotInDB performance overhead is {} milliseconds", (getTrustStatusOfHostNotInDBStop - getTrustStatusOfHostNotInDBStart));            
+            
             // Let us return back the MLE names that should be used to map the host to
             return biosMLEName + "||" + vmmMLEName;
             
@@ -286,6 +292,246 @@ public class HostTrustBO extends BaseBO {
         }        
     }
     
+    /**
+     * This function verifies the host's PCR measurements against the possible MLE whitelists that it could be mapped to
+     * and accordingly returns backs the caller the correct MLE name (both BIOS and VMM) using which the host can be 
+     * registered.
+     * @param hostObj
+     * @return
+     * @throws IOException 
+     */
+    public TrustReport updateHostIfUntrusted(TblHosts tblHosts, HostReport hostReport, TrustReport trustReport) {
+        String regExForNumericExtNames = ".*_([^_][0-9]*)$"; // Regular expression to match the host names with numeric extenstions
+        boolean updateBIOSMLE = false, updateVMMMLE = false;
+        
+        try {
+            
+            long updateHostIfUntrustedStart = System.currentTimeMillis();
+            
+            log.debug("Checking to see if the host needs to be mapped to a different MLE in case of untrusted status of either BIOS or VMM");
+            if (trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) && trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
+                // since both BIOS and VMM are trusted, we do not need to update the host.
+                log.debug("Since the host is trusted, there is no need to update the host to map to other MLEs.");
+                return trustReport;
+            }                            
+
+            HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+            TblMleJpaController mleJpa = My.jpa().mwMle();
+            TblMle currentBIOSMLE = tblHosts.getBiosMleId();
+            TblMle currentVMMMLE = tblHosts.getVmmMleId();
+            Integer hostID = tblHosts.getId();
+            TblMle newBIOSMLE = new TblMle();
+            TblMle newVMMMLE = new TblMle();
+            
+            // Since either BIOS or VMM or both are untrusted, we need to check if the host has been updated and would match any other
+            // MLE already configured in the system. If yes, then we need to update the host to map to the new MLE. Otherwise the host
+            // will not be updated
+            
+            // First create a TxtHostRecord object holder to hold the names of the MLEs that would be used to update the host if needed
+            TxtHostRecord hostUpdateObj = new TxtHostRecord();
+            hostUpdateObj.HostName = tblHosts.getName();
+            hostUpdateObj.AddOn_Connection_String = tblHosts.getAddOnConnectionInfo();
+            
+            long updateHostIfUntrustedBIOSStart = System.currentTimeMillis();
+            // Find a new matching MLE is the host becomes untrusted because of BIOS MLE
+            if (!trustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
+                
+                // BIOS has become untrusted. So, we need to check if there is any other BIOS MLE that matches the host. If so, then we
+                // use that MLE or else we will keep the same one even though the BIOS is untrusted.
+                log.debug("UpdateHostIfUntrusted: Starting to find the matching BIOS MLE.");
+                
+                // In order to look for other MLE names, we need to search on the default MLE name without extensions so that when the 
+                // search results are returned all the MLEs with numeric extensions are also retrieved.
+                // Ex: If the current BIOS MLE is Intel_Corp_002, and if we just do a search using the complete name, it will not
+                // return back any other existing MLEs. So, we ned to remove "_002" and then do a search
+                String biosName = tblHosts.getBiosMleId().getName();
+                if (biosName.matches(regExForNumericExtNames)) {
+                    biosName = biosName.substring(0, (biosName.lastIndexOf("_")));
+                } else {
+                    // host is already mapped to the default MLE. So, no need for any further name manipulation
+                }
+
+                log.debug("UpdateHostIfUntrusted: Search criteria for BIOS MLE name is {}.", biosName);
+                
+                List<TblMle> biosMLEList = mleJpa.findBIOSMLEByNameSearchCriteria(biosName);
+                if (biosMLEList != null && !biosMLEList.isEmpty()) {
+                    for (TblMle biosMLE : biosMLEList) {
+                        
+                        log.debug("UpdateHostIfUntrusted: Checking BIOS MLE {} - {} for the match of whitelist.", biosMLE.getName(), biosMLE.getVersion());
+                        
+                        // Skip the MLE which is currently assigned to the host
+                        if ((tblHosts.getBiosMleId().getName().equalsIgnoreCase(biosMLE.getName())) && 
+                                (tblHosts.getBiosMleId().getVersion().equalsIgnoreCase(biosMLE.getVersion()))) {
+                            continue;
+                        }
+                        
+                        // We need to set the VMM MLE ID to null so that we won't verify the VMM policy now. We will do
+                        // it later.
+                        tblHosts.setBiosMleId(biosMLE);
+                        tblHosts.setVmmMleId(null);
+
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        PolicyEngine policyEngine = new PolicyEngine();
+                        TrustReport tempTrustReport = policyEngine.apply(hostReport, trustPolicy);
+
+                        if (tempTrustReport != null && tempTrustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
+                            // We found the new MLE to map to. We need to see if the VMM MLE also needs to be updated
+                            log.debug("UpdateHostIfUntrusted: Found the new matching BIOS MLE '{}' for host '{}'.", biosMLE.getName(), tblHosts.getName());
+                            
+                            // Update the TXTHostRecord object with the MLE details
+                            hostUpdateObj.BIOS_Name = biosMLE.getName();
+                            hostUpdateObj.BIOS_Version = biosMLE.getVersion();
+                            hostUpdateObj.BIOS_Oem = biosMLE.getOemId().getName();
+                            
+                            updateBIOSMLE = true;
+                            newBIOSMLE = biosMLE;
+                            
+                            break;
+                        } else {
+                            // Since there was a mismatch we need to continue looking for additonal MLEs. 
+                            log.debug("UpdateHostIfUntrusted: BIOS attestation failed for host '{}' against MLE '{}'.", tblHosts.getName(), biosMLE.getName());
+                        }
+                    }
+                } 
+            }
+            
+            log.debug("UpdateHostIfUntrusted: Status of BIOS MLE update is {}", updateBIOSMLE);
+            
+            // if either the BIOS was trusted to start with or we did not find another BIOS MLE to map to, we store the current BIOS MLE
+            // value in the TxtHostRecord object.
+            if (trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) || updateBIOSMLE == false) {
+                // Since the BIOS is trusted, we need not update the BIOS. So, just store the existing BIOS details in the TxtHostRecord Object
+                hostUpdateObj.BIOS_Name = currentBIOSMLE.getName();
+                hostUpdateObj.BIOS_Version = currentBIOSMLE.getVersion();
+                hostUpdateObj.BIOS_Oem = currentBIOSMLE.getOemId().getName();               
+            } 
+            
+            long updateHostIfUntrustedBIOSStop = System.currentTimeMillis();
+            log.debug("UpdateHostIfUntrusted BIOS update performance {}", (updateHostIfUntrustedBIOSStop - updateHostIfUntrustedBIOSStart));
+            
+            // Reset the MLE IDs back in the TblHosts object
+            tblHosts.setBiosMleId(currentBIOSMLE);
+            tblHosts.setVmmMleId(currentVMMMLE);
+            
+            long updateHostIfUntrustedVMMStart = System.currentTimeMillis();
+            // Find a new matching MLE is the host becomes untrusted because of VMM MLE
+            if (!trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
+
+                // VMM has become untrusted. So, we need to check if there is any other VMM MLE that matches the host. If so, then we
+                // use that MLE or else we will keep the same one even though the VMM is untrusted.
+                log.debug("UpdateHostIfUntrusted: Starting to find the matching VMM MLE.");
+                
+                // Since we want to skip doing the host specific module attestation we will set the tblHosts ID to null
+                tblHosts.setId(null);
+                
+                // In order to look for other MLE names, we need to search on the default MLE name without extensions so that when the 
+                // search results are returned all the MLEs with numeric extensions are also retrieved.
+                String vmmName = tblHosts.getVmmMleId().getName();
+                if (vmmName.matches(regExForNumericExtNames)) {
+                    vmmName = vmmName.substring(0, (vmmName.lastIndexOf("_")));
+                } else {
+                    // host is already mapped to the default MLE. So, no need for any further name manipulation
+                }
+
+                log.debug("UpdateHostIfUntrusted: Search criteria for VMM MLE name is {}.", vmmName);
+                
+                List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(vmmName);
+                if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
+                    for (TblMle vmmMLE : vmmMLEList) {
+                        
+                        log.debug("UpdateHostIfUntrusted: Checking VMM MLE {} - {} for the match of whitelist.", vmmMLE.getName(), vmmMLE.getVersion());
+                        
+                        // Skip the MLE which is currently assigned to the host
+                        if ((tblHosts.getVmmMleId().getName().equalsIgnoreCase(vmmMLE.getName())) && 
+                                (tblHosts.getVmmMleId().getVersion().equalsIgnoreCase(vmmMLE.getVersion()))) {
+                            continue;
+                        }
+                        
+                        // We need to set the BIOS MLE ID to null so that we won't verify the BIOS policy again.
+                        tblHosts.setBiosMleId(null);
+                        tblHosts.setVmmMleId(vmmMLE);
+
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        PolicyEngine policyEngine = new PolicyEngine();
+                        TrustReport tempTrustReport = policyEngine.apply(hostReport, trustPolicy);
+
+                        if (tempTrustReport != null && tempTrustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
+                            // We found the new VMM MLE to map to. 
+                            log.debug("UpdateHostIfUntrusted: Found the new matching VMM MLE '{}' for host '{}'.", vmmMLE.getName(), tblHosts.getName());
+                            
+                            // Update the TXTHostRecord object with the MLE details
+                            hostUpdateObj.VMM_Name = vmmMLE.getName();
+                            hostUpdateObj.VMM_Version = vmmMLE.getVersion();
+                            hostUpdateObj.VMM_OSName = vmmMLE.getOsId().getName();
+                            hostUpdateObj.VMM_OSVersion = vmmMLE.getOsId().getVersion();
+                            
+                            updateVMMMLE = true;
+                            newVMMMLE = vmmMLE;
+                            
+                            break;
+                        } else {
+                            // Since there was a mismatch we need to continue looking for additonal MLEs. 
+                            log.debug("UpdateHostIfUntrusted: VMM attestation failed for host '{}' against MLE '{}'.", tblHosts.getName(), vmmMLE.getName());
+                        }
+                    }
+                } 
+            }
+            
+            log.debug("UpdateHostIfUntrusted: Status of VMM MLE update is {}", updateVMMMLE);
+            
+            // if either the VMM was trusted to start with or we did not find another VMM MLE to map to, we store the current VMM MLE
+            // value in the TxtHostRecord object.
+            if (trustReport.isTrustedForMarker(TrustMarker.VMM.name()) || updateVMMMLE == false) {
+                // Since the BIOS is trusted, we need not update the BIOS. So, just store the existing BIOS details in the TxtHostRecord Object
+                hostUpdateObj.VMM_Name = currentVMMMLE.getName();
+                hostUpdateObj.VMM_Version = currentVMMMLE.getVersion();
+                hostUpdateObj.VMM_OSName = currentVMMMLE.getOsId().getName();
+                hostUpdateObj.VMM_OSVersion = currentVMMMLE.getOsId().getVersion();                
+            } 
+
+            long updateHostIfUntrustedVMMStop = System.currentTimeMillis();
+            log.debug("UpdateHostIfUntrusted: VMM update performance {}", (updateHostIfUntrustedVMMStop - updateHostIfUntrustedVMMStart));
+            
+            // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
+            if (updateBIOSMLE || updateVMMMLE) {
+                HostBO hostBO = new HostBO();
+                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest);
+            }
+
+            if (updateBIOSMLE)
+                tblHosts.setBiosMleId(newBIOSMLE);
+            else
+                tblHosts.setBiosMleId(currentBIOSMLE);
+            
+            if (updateVMMMLE)
+                tblHosts.setVmmMleId(newVMMMLE);
+            else
+                tblHosts.setVmmMleId(currentVMMMLE);
+
+            tblHosts.setId(hostID);
+            Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+            PolicyEngine policyEngine = new PolicyEngine();
+            TrustReport finalTrustReport = policyEngine.apply(hostReport, trustPolicy);            
+            
+            long updateHostIfUntrustedStop = System.currentTimeMillis();
+            log.debug("UpdateHostIfUntrusted Performance {}", (updateHostIfUntrustedStop - updateHostIfUntrustedStart));
+            
+            return finalTrustReport;
+                                   
+        } catch (ASException ae) {
+            throw ae;
+            
+        } catch (IOException ioex) {
+            // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
+            log.error("IO Exception during automatic host update since the host became untrusted. {}.", ioex.getMessage());
+            return trustReport;
+            
+        } catch (Exception ex) {
+            // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
+            log.error("Error during automatic host update since the host became untrusted. {}.", ex.getMessage());
+            return trustReport;
+        }           
+    }
     /**
      * 
      * @param tblHosts
@@ -386,6 +632,10 @@ public class HostTrustBO extends BaseBO {
         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
         long applyPolicyStop = System.currentTimeMillis(); // XXX jonathan performance
         log.debug("XXX jonathan performance  apply trust policy: {}", applyPolicyStop-applyPolicyStart); // XXX jonathan performance
+        
+        if (!trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) || !trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
+            trustReport = updateHostIfUntrusted(tblHosts, hostReport, trustReport);
+        }
         
         return trustReport;
     }
@@ -954,15 +1204,18 @@ public class HostTrustBO extends BaseBO {
         log.debug("getTrustWithSaml: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         // Bug: 702: For host not supporting TXT, we need to return back a proper error
         // make sure the DEK is set for this thread
+        
+
         My.initDataEncryptionKey();
         TblHosts tblHosts = getHostByName(new Hostname((host)));
-        HostAgentFactory factory = new HostAgentFactory();
+        //TODO:SUDHIR - Checking to see if this code is needed or not
+        /* HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
        // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
         
         if (!agent.isTpmPresent()) {
             throw new ASException(ErrorCode.AS_TPM_NOT_SUPPORTED, host);
-        }
+        }*/
                 
         if(forceVerify != true){
             TblSamlAssertion tblSamlAssertion = new TblSamlAssertionJpaController((getEntityManagerFactory())).findByHostAndExpiry(host);
@@ -1061,7 +1314,7 @@ public class HostTrustBO extends BaseBO {
            hostTrust.setBiosStatus((status.bios)?1:0);
            hostTrust.setVmmStatus((status.vmm)?1:0);
            hostTrust.setIpAddress(host);
-           log.info("JSONTrust is : ", host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
+           log.info("JSONTrust is : "+ host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
            //log.warn("JSONTrust is : ", host + ":" + Boolean.toString(status.bios) + ":" + Boolean.toString(status.vmm));
            return hostTrust;
             

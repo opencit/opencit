@@ -344,9 +344,10 @@ case "$1" in
         all_status
         ;;
   erase-data)
+        call_setupcommand EraseLogs
         call_setupcommand EraseHostRegistrationData
         call_setupcommand EraseWhitelistData
-        call_setupcommand EraseLogs
+        
         ;;
   erase-users)
 		if [ -z $MC_FIRST_USERNAME ]; then

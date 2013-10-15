@@ -25,15 +25,3 @@ set logfile /var/log/monit.log
 # pemfile <pemfile>.pem
 # clientpemfile <pemfile>.pem
 
-
-# Below are the specific triggers and responses used when 
-# checking the above process.  By default, Intel configures 
-# Monit to detect likely process hangs or nonresponsive portals, 
-# and automatically restarts the relevant services.  This does 
-# not require user interaction.  Monit will also automatically 
-# start any monitored process that has been shut down.
-
-if cpu > 80% for 5 cycles then restart
-if totalmem > 2000.0 MB for 5 cycles then restart
-group server
-

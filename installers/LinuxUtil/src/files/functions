@@ -53,6 +53,14 @@ generate_password() {
   < /dev/urandom tr -dc _A-Za-z0-9- | head -c${1:-32}
 }
 
+### FUNCTION LIBRARY: escape out input strings for passing to sed
+# you pass it the string you are about to pass to sed that might 
+# contain the following characters ()&#%$+
+# usage examples:
+# new_string=$(sed_escape $string)
+sed_escape() {
+ echo $(echo $1 | sed -e 's/[()&#%$+]/\\&/g' -e 's/[/]/\\&/g')
+}
 
 ### FUNCTION LIBRARY: terminal display functions
 
@@ -292,8 +300,12 @@ prompt_with_default_password() {
   local userprompt="${2:-Password:}"
   local default_value
   # here $$
-  eval current_value="\$$resultvarname"
-  eval default_value="${3:-$current_value}"
+  eval variable_name="$resultvarname"
+  #echo_warning "variable name is $variable_name"
+  eval current_value="\$$variable_name"
+  #echo_warning "current value = $current_value"
+  eval default_value="${3:-'$current_value'}"
+  #echo_warning "default value = $default_value"
   local default_value_display="********"
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
@@ -329,7 +341,12 @@ prompt_with_default_password() {
     fi
   done
   echo
-  eval $resultvarname=${userinput:-$default_value}
+  if [ ! -z "$userinput" ]; then
+   eval $resultvarname='$userinput'
+  else
+   eval $resultvarname='$default_value'
+  fi
+  #eval $resultvarname="${userinput:-'$default_value'}"
 }
 
 ### FUNCTION LIBRARY: environment information functions
@@ -464,8 +481,9 @@ update_property_in_file() {
   if [ -n "$ispresent" ]; then
       # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
       local escaped_value=`echo "${value}" | sed 's/|/\\|/g'`
+      local sed_escaped_value=$(sed_escape $escaped_value)
       # replace just that line in the file and save the file
-      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${escaped_value}|" "${filename}"`
+      updatedcontent=`sed -re "s|^(${property})\s*=\s*(.*)|\1=${sed_escaped_value}|" "${filename}"`
       # protect against an error
       if [ -n "$updatedcontent" ]; then
         echo "$updatedcontent" > "${filename}"
@@ -921,17 +939,6 @@ mysql_server_install() {
     echo_failure "Unable to auto-install MySQL server" | tee -a $INSTALL_LOG_FILE
     echo "MySQL download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.mysql.com/downloads/" >> $INSTALL_LOG_FILE
-  else #create the monitrc script
-    mkdir -p /etc/monit/conf.d
-    if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
-      echo "# mysql monitor
-      check process mysql matching \"mysql\"
-      group database
-      start program = \"/usr/sbin/service mysql start\"
-      stop program = \"/usr/sbin/service mysql stop\"
-      if failed host 127.0.0.1 port 3306 then restart
-      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.mtwilson
-    fi
   fi
 }
 
@@ -1212,18 +1219,8 @@ postgres_server_install(){
     echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
     return 1
-  else
-    mkdir -p /etc/monit/conf.d
-    if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
-      echo "# postgres monitor
-      check process postgresql matching \"postgresql\"
-      group database
-      start program = \"/usr/sbin/service postgresql start\"
-      stop program = \"/usr/sbin/service postgresql stop\"
-      if failed host 127.0.0.1 port 5432 then restart
-      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/postgres.mtwilson
-    fi  
   fi
+
 }
 
 # Environment:
