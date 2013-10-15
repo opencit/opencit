@@ -334,7 +334,7 @@ public class CreateIdentity  {
 		
 	}
 
-	 // issue #878
+ // issue #878
     private static void writecert(String absoluteFilePath, byte[] certificateBytes) throws FileNotFoundException, java.security.cert.CertificateException, IOException, PrivacyCAException {
         File file = new File(absoluteFilePath);
         mkdir(file); // ensure the parent directory exists
@@ -345,25 +345,26 @@ public class CreateIdentity  {
         out.close();
     }
 
-	private static void writeFile(String ClientPath,
-			byte[] decrypted2, String fileName) throws FileNotFoundException, IOException, PrivacyCAException {
-		
-		log.debug("writing file " + ClientPath + fileName);
-		
-		FileOutputStream pcaFileOut;
-		File outPath = new File(ClientPath);
-		File outFile = new File(ClientPath + fileName);
-		if(!outPath.isDirectory()){
-			if(!outPath.mkdirs()){
-				log.warn("Failed to create client installation path!");
+    // issue #878
+    // given a File, ensures that its parent directory exists, creating it if necessary, and throwing PrivacyCAException 
+    // if there is a failure
+    private static void mkdir(File file) throws PrivacyCAException {
+        if( !file.getParentFile().isDirectory() ) {
+            if( !file.getParentFile().mkdirs() ) {
+				log.warning("Failed to create client installation path!");
 				throw new PrivacyCAException("Failed to create client installation path!");
-			}
-		}
-		pcaFileOut = new FileOutputStream(outFile);
-		pcaFileOut.write(decrypted2);
-		pcaFileOut.flush();
-		pcaFileOut.close();
-	}
+            }
+        }
+    }
+    
+    // issue #878
+    private static void writeblob(String absoluteFilePath, byte[] encryptedBytes) throws IOException, PrivacyCAException {
+        File file = new File(absoluteFilePath);
+        mkdir(file); // ensure the parent directory exists
+        FileOutputStream out = new FileOutputStream(file); // throws FileNotFoundException
+        IOUtils.write(encryptedBytes, out); // throws IOException
+        out.close();        
+    }
 }
 
 
