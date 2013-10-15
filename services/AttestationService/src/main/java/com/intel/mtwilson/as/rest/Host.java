@@ -215,7 +215,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse put(TxtHostRecord hostRecord) {
             if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-            else return hostBO.updateHost(new TxtHost(hostRecord));
+            else return hostBO.updateHost(new TxtHost(hostRecord),null);
     }
     
         /**

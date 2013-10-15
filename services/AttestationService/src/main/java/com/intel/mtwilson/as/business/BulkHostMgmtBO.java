@@ -124,7 +124,7 @@ public class BulkHostMgmtBO {
                 if (!updateHost)
                     result = dao.addHost(new TxtHost(hostObj));
                 else
-                    result = dao.updateHost(new TxtHost(hostObj));
+                    result = dao.updateHost(new TxtHost(hostObj), null);
             } catch (ASException e) {
                 isError = true;
                 result = new HostResponse(e.getErrorCode(), e.getErrorMessage());
