@@ -23,7 +23,7 @@ if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
  echo_warnring "Program files are writable by the web service container, this is a possible security issue"
 else
  ret=false
- getent passwd $1 >/dev/null 2>&1 && ret=true
+ getent passwd $MTWILSON_OWNER >/dev/null && ret=true
  if $ret; then
   echo "Mt Wilson owner account already created, moving on"
  else
