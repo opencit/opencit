@@ -3,7 +3,14 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-export MTWILSON_OWNER=`whoami`
+currentUser=`whoami`
+if [ ! $currentUser == "root" ]; then
+ echo_warning "You must be root user to install Mt Wilson."
+ exit -1
+fi
+
+
+export MTWILSON_OWNER=$currentUser
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
@@ -11,6 +18,21 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+
+if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
+ echo_warnring "Program files are writable by the web service container, this is a possible security issue"
+else
+ ret=false
+ getent passwd $1 >/dev/null 2>&1 && ret=true
+ if $ret; then
+  echo "Mt Wilson owner account already created, moving on"
+ else
+  echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
+  prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
+  pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
+  useradd -m -p $pass $MTWILSON_OWNER
+  echo "Account Created!"
+fi
 
 if [ -z "$INSTALL_PKGS" ]; then
               #opt_postgres|opt_mysql opt_java opt_tomcat|opt_glassfish opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
