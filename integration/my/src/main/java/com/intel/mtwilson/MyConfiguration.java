@@ -469,4 +469,7 @@ public class MyConfiguration {
         return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
     }
     
+    public boolean getAutoUpdateHosts() {
+        return conf.getBoolean("mtwilson.as.autoUpdateHost", true);
+    }
 }
