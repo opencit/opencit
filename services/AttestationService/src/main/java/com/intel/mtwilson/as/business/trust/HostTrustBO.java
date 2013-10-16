@@ -308,10 +308,17 @@ public class HostTrustBO extends BaseBO {
             
             long updateHostIfUntrustedStart = System.currentTimeMillis();
             
-            log.debug("Checking to see if the host needs to be mapped to a different MLE in case of untrusted status of either BIOS or VMM");
+            log.debug("UpdateHostIfUntrusted: Checking to see if the host needs to be mapped to a different MLE in case of untrusted status of either BIOS or VMM");
+            
+            // Check the configuration in the property file to see if we need to update the host or not
+            if (!My.configuration().getAutoUpdateHosts()) {
+                log.info("UpdateHostIfUntrusted: Skipping the auto host update as per the configuration in the mtwilson.properties file.");
+                return trustReport;
+            }
+            
             if (trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) && trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
                 // since both BIOS and VMM are trusted, we do not need to update the host.
-                log.debug("Since the host is trusted, there is no need to update the host to map to other MLEs.");
+                log.debug("UpdateHostIfUntrusted: Since the host is trusted, there is no need to update the host to map to other MLEs.");
                 return trustReport;
             }                            
 
