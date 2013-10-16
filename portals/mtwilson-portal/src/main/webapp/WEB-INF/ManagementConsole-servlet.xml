@@ -9,10 +9,12 @@
 
 <!-- <bean id="oemClientService" class="com.intel.mountwilson.Service.OEMClientServiceImpl" /> -->
     <bean id="services" class="com.intel.mountwilson.Service.ManagementConsoleServicesImpl" /> 
-	
 
-  	<bean name="/index.html" class="com.intel.mountwilson.controller.LoginController"/>
+    <bean name="" class="com.intel.mountwilson.controller.LoginController"/>
+    <bean name="/" class="com.intel.mountwilson.controller.LoginController"/>
+    <bean name="/index.html" class="com.intel.mountwilson.controller.LoginController"/>
     <bean name="/index.htm" class="com.intel.mountwilson.controller.LoginController"/>
+    <bean name="/login.html" class="com.intel.mountwilson.controller.LoginController"/>
     <bean name="/login.htm" class="com.intel.mountwilson.controller.LoginController"/>
     <bean name="/checkLogin.htm" class="com.intel.mountwilson.controller.CheckLoginController"/>
     <bean name="/home.html" class="com.intel.mountwilson.controller.HomeController"/>
