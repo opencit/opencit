@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.dao.jdbi.CertificateDAO;
@@ -20,9 +21,15 @@ import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.io.pem.Pem;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import com.intel.dcsg.cpg.validation.ObjectModel;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.atag.Global;
+import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.sql.SQLException;
@@ -176,6 +183,11 @@ public class CertificateResource extends ServerResource {
     }
     public static class CertificateProvisionAction extends CertificateAction {
         public InternetAddress host;
+        
+        // for citrix:
+        public String username;
+        public String password;
+        
         public CertificateProvisionAction() {
             super(CertificateActionName.PROVISION);
         }
@@ -187,6 +199,20 @@ public class CertificateResource extends ServerResource {
         public InternetAddress getHost() {
             return host;
         }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+        
+        
         /*
         @Override
         protected void validate() {
@@ -194,6 +220,10 @@ public class CertificateResource extends ServerResource {
                 fault("Host address is required");
             }
         }*/
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
     }
     
     @JsonInclude(Include.NON_NULL)
@@ -236,6 +266,13 @@ public class CertificateResource extends ServerResource {
                 Global.mtwilson().importAssetTagCertificate(request);
 //                        My.client().importAssetTagCertificate(request);
                 // XXX TODO send it to the host...
+                try {
+                    deployAssetTagToHost(certificate.getSha1(), actionChoice.provision.getHost(), actionChoice.provision.getUsername(), actionChoice.provision.getPassword());
+                }
+                catch(IOException e) {
+                    // need a way to send the error in the result... i18n Message and error code
+                    log.error("Cannot deploy asset tag to host {}", actionChoice.provision.getHost(), e);
+                }
             }            
             CertificateActionChoice result = new CertificateActionChoice();
             result.provision = actionChoice.provision;
@@ -243,6 +280,15 @@ public class CertificateResource extends ServerResource {
         }
         setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         return null;
+    }
+    
+    private void deployAssetTagToHost(Sha1Digest tag, InternetAddress host, String username, String password) throws IOException {
+        HostAgentFactory hostAgentFactory = new HostAgentFactory();
+        ByteArrayResource tlsKeystore = new ByteArrayResource();
+//        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
+        ConnectionString connectionString = ConnectionString.forCitrix(new Hostname(host.toString()), username, password);
+        HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
+        hostAgent.setAssetTag(tag);
     }
 
 }

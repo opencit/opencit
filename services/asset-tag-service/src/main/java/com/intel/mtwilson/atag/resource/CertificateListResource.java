@@ -210,23 +210,28 @@ public class CertificateListResource extends ServerResource {
         int i = -1; //  index into the target array certificates
         long c = -1; // id of the current certificate request object built, used to detect when it's time to build the next one
         for(Record r : result) {
+            log.debug("Next record:  i={}, c={}", i, c);
             if( r.getValue(CERTIFICATE.ID) != c ) {
                 i++;
                 c = r.getValue(CERTIFICATE.ID);
                 try {
+                    log.debug("Creating certificate record at i={}, c={}", i, c);
                     certificates[i] = Certificate.valueOf((byte[])r.getValue(CERTIFICATE.CERTIFICATE_));  // unlike other table queries, here we can get all the info from the certificate itself... except for the revoked flag
                     certificates[i].setId(r.getValue(CERTIFICATE.ID));
                     certificates[i].setUuid(UUID.valueOf(r.getValue(CERTIFICATE.UUID)));
                     if( r.getValue(CERTIFICATE.REVOKED) != null ) {
                         certificates[i].setRevoked(r.getValue(CERTIFICATE.REVOKED));
                     }
+                    log.debug("Created certificate record {}", certificates[i].getUuid());
                 }
                 catch(Exception e) {
-                    log.error("Cannot load certificate #{}", r.getValue(CERTIFICATE.ID));
+                    log.error("Cannot load certificate #{}", r.getValue(CERTIFICATE.ID), e);
                 }
             }
         }
+        log.debug("Closing sql");
         sql.close();
+        log.debug("Returning {} certificates", certificates.length);
         return certificates;
     }
 }

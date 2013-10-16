@@ -131,7 +131,7 @@ Object.extend(Validation, {
 			onElementValidate : function(result, elm) {}
 		}, options || {});
 		elm = $(elm);
-        log.debug("validating element "+elm.id); // jonathan
+        log.debug("validating element "+elm.id+" with value: "+elm.value); // jonathan ; N/A for selects etc
 		var cn = elm.classNames();
 		var result = cn.all(function(value) {
 			var test = Validation.test(value,elm,options.useTitle);

@@ -415,4 +415,10 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
         hm.put("Host_UUID", hostUUID);
         return hm;
    }
+    
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        throw new UnsupportedOperationException("Unsupported operation");
+    }
+    
 }
