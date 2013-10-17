@@ -10,7 +10,12 @@
 
   <servlet-mapping>
     <servlet-name>ManagementConsole</servlet-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ManagementConsole</servlet-name>
+    <url-pattern>*.htm</url-pattern>
   </servlet-mapping>
   
   <filter>
@@ -27,7 +32,7 @@
   </filter-mapping>
   
   <welcome-file-list>
-  	<welcome-file>index.html</welcome-file>
+  	<welcome-file>Login.jsp</welcome-file>
   </welcome-file-list>
   
     <listener>
