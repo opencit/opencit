@@ -141,7 +141,11 @@ public class BulkHostTrust {
                 newHostRecords.getHostRecords().add(host);
             }
             BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
-            return bulkHostMgmtBO.addHosts(newHostRecords);
+            HostConfigResponseList results =  bulkHostMgmtBO.addHosts(newHostRecords);
+            for (HostConfigResponse hr : results.getHostRecords()) {
+                log.debug("Bulk Add Hosts: " + hr.getHostName() + ":" + hr.getStatus() + ":" + hr.getErrorMessage());
+            }
+            return results;            
         }
 
         /**
@@ -158,12 +162,15 @@ public class BulkHostTrust {
               TxtHostRecordList newHostRecords = new TxtHostRecordList();
             for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
             if(host.HostName.isEmpty() || host.HostName == null)
-                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
-                                "host");
+                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,"host");
             else
                 newHostRecords.getHostRecords().add(host);
             }
             BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
-            return bulkHostMgmtBO.updateHosts(newHostRecords);
+            HostConfigResponseList results = bulkHostMgmtBO.updateHosts(newHostRecords);
+            for (HostConfigResponse hr : results.getHostRecords()) {
+                log.debug("Bulk Update Hosts: " + hr.getHostName() + ":" + hr.getStatus() + ":" + hr.getErrorMessage());
+            }
+            return results;            
         }
 }

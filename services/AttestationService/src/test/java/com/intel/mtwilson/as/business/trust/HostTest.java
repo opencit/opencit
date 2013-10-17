@@ -52,15 +52,15 @@ public class HostTest {
         TxtHostRecord hostObj = new TxtHostRecord();
         hostObj.HostName = "10.1.71.154";
         hostObj.AddOn_Connection_String = new ConnectionString("https://10.1.71.87:443/sdk;Administrator;P@ssw0rd").getConnectionStringWithPrefix();
-        hostObj.BIOS_Name = "Intel_Corporation";
-        hostObj.BIOS_Version = "01.00.0060";
+        hostObj.BIOS_Name = "Dell_Inc.";
+        hostObj.BIOS_Version = "6.3.0";
         hostObj.BIOS_Oem = "Intel Corporation";
-        hostObj.VMM_Name = "Thurley_VMware_ESXi";
-        hostObj.VMM_Version = "5.0.0-469512";
+        hostObj.VMM_Name = "Intel_Thurley_VMware_ESXi";
+        hostObj.VMM_Version = "5.1.0-799733";
         hostObj.VMM_OSName = "VMware_ESXi";
-        hostObj.VMM_OSVersion = "5.0.0";
+        hostObj.VMM_OSVersion = "5.1.0";
         
-        String result = hostTrustBO.getTrustStatusOfHostNotInDB(hostObj);
+        HostResponse result = hostTrustBO.getTrustStatusOfHostNotInDBAndRegister(hostObj);
         System.out.println(result);
     }
     
@@ -114,7 +114,7 @@ public class HostTest {
         TxtHost host1 = new TxtHost(hostRecord);
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
-        hostBO.addHost(host2);
+        hostBO.addHost(host2, null);
     }
     
     @Test
