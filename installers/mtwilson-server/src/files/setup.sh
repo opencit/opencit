@@ -191,6 +191,8 @@ fi
 # copy default logging settings to /etc
 chmod 700 logback.xml
 cp logback.xml /etc/intel/cloudsecurity
+chmod 700 logback-stderr.xml
+cp logback-stderr.xml /etc/intel/cloudsecurity
 
 
 
