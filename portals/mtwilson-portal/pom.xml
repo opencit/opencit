@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.intel.mtwilson.portals</groupId>
         <artifactId>mtwilson-portals</artifactId>
-        <version>1.2.1-RELEASE</version>
+        <version>1.2.2</version>
     </parent>
 
     <dependencies>
@@ -148,6 +148,13 @@
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1.2-SNAPSHOT</version>
+            <scope>test</scope>
+            <type>jar</type>
         </dependency>
     </dependencies>
 

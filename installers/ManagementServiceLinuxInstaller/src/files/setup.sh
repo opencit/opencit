@@ -60,6 +60,7 @@ fi
 mypassword16=`generate_password 16`
 update_property_in_file mtwilson.api.key.password "${package_config_filename}" "$mypassword16"
 
+
 # SCRIPT EXECUTION
 #if using_mysql; then
 #  mysql_server_install

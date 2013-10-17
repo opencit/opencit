@@ -109,7 +109,7 @@ public class JpaPolicyReader {
             return rule;
         }
         catch(IllegalArgumentException e) {
-            log.warn("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
+            log.error("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
             return null;
         }
     }
@@ -164,17 +164,21 @@ public class JpaPolicyReader {
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
 
-        if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue() ) {
-            TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
-            if( hostSpecificModule == null ) {
-                log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
-                Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
-                return m;
-            }
-            else {
-                Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
-                return m;
-            }
+        // Since we can call this function even without registering the host, the hostID will not be present. So, we need to skip adding this host specific module
+        if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue()) {
+            if (host.getId() != null && host.getId() != 0) {
+                TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
+                if( hostSpecificModule == null ) {
+                    log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
+                    Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
+                    return m;
+                }
+                else {
+                    Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
+                    return m;
+                }
+            } else
+                return null;
         }
         else {
             // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
@@ -192,7 +196,9 @@ public class JpaPolicyReader {
         PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
         log.debug("... MODULE for PCR {}", pcrIndex.toString());
         Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
-        PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, m);
+        PcrEventLogIncludes rule = null;
+        if (m != null)
+            rule = new PcrEventLogIncludes(pcrIndex, m);
         rule.setMarkers(markers);
         return rule;
     }
@@ -212,7 +218,8 @@ public class JpaPolicyReader {
             }
             
             Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
-            measurements.get(pcrIndex).add(m);
+            if (m != null)
+                measurements.get(pcrIndex).add(m);
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {

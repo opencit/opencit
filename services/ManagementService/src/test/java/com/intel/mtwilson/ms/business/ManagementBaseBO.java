@@ -21,8 +21,7 @@ import javax.persistence.Persistence;
  * @author dsmagadx
  */
 public class ManagementBaseBO {
-    private static final Logger log = LoggerFactory.getLogger(ManagementBaseBO.class);
-//    private static Logger log = Logger.getLogger(BaseBO.class.getName());
+    private static Logger log = LoggerFactory.getLogger(ManagementBaseBO.class);
 
     private static final EntityManagerFactory entityManagerFactory; // one static factory for all the Business Object classes during the application lifecycle
 

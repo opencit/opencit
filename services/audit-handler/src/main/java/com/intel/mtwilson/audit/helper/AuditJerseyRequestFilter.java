@@ -33,7 +33,7 @@ public class AuditJerseyRequestFilter implements ContainerRequestFilter{
         
         AuditContext auditContext = new AuditContext(user, UUID.randomUUID().toString(), System.currentTimeMillis()) ;
         
-        log.info("AuditJerseyRequestFilter request for {} {}  Transaction Id {} Start {}", new String[] 
+        log.debug("AuditJerseyRequestFilter request for {} {}  Transaction Id {} Start {}", new String[] 
         { request.getMethod(), request.getPath(), auditContext.getTransactionUuid(), String.valueOf(auditContext.getStartMilliseconds()) });
         
         MtWilsonThreadLocal.set(auditContext);

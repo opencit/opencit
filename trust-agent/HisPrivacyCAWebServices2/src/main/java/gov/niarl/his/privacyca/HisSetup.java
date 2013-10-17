@@ -17,10 +17,9 @@ import com.intel.mtwilson.util.ResourceFinder;
 import java.io.*;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.slf4j.LoggerFactory;
 
 /**
  * @deprecated
@@ -34,6 +33,8 @@ import java.util.zip.ZipOutputStream;
  *
  */
 public class HisSetup {
+    
+    private static org.slf4j.Logger log = LoggerFactory.getLogger(HisSetup.class);
 
     /**
      * @param args
@@ -123,7 +124,7 @@ public class HisSetup {
                 String setUpFile = ResourceFinder.getFile("privacyca-client.properties").getAbsolutePath();
                 fileLocation = setUpFile.substring(0, setUpFile.indexOf("privacyca-client.properties"));
 
-                Logger.getLogger(HisSetup.class.getName()).info("Using File Location Home " + fileLocation);
+                log.debug("Using File Location Home " + fileLocation);
                 //FileLocation = SetupProperties.getProperty(FILE_LOCATION, "null");
                 clientPath = SetupProperties.getProperty(CLIENT_PATH, "clientfiles");
                 checkAndCreateDirectory(fileLocation, clientPath);
@@ -515,7 +516,7 @@ public class HisSetup {
 
         if (!file.exists()) {
             if (file.mkdir()) {
-                Logger.getLogger(HisSetup.class.getName()).log(Level.INFO, "Folder {0} didn not exist. Created directory ", clientPath);
+                log.debug("Folder {0} didn not exist. Created directory ", clientPath);
             }
         }
 

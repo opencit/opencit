@@ -53,7 +53,6 @@ generate_password() {
   < /dev/urandom tr -dc _A-Za-z0-9- | head -c${1:-32}
 }
 
-
 ### FUNCTION LIBRARY: escape out input strings for passing to sed
 # you pass it the string you are about to pass to sed that might 
 # contain the following characters ()&#%$+
@@ -301,15 +300,12 @@ prompt_with_default_password() {
   local userprompt="${2:-Password:}"
   local default_value
   # here $$
-  #eval current_value="\$$resultvarname"
-  #eval default_value="${3:-$current_value}"
   eval variable_name="$resultvarname"
   #echo_warning "variable name is $variable_name"
   eval current_value="\$$variable_name"
   #echo_warning "current value = $current_value"
   eval default_value="${3:-'$current_value'}"
   #echo_warning "default value = $default_value"
-
   local default_value_display="********"
   if [ -z "$default_value" ]; then default_value_display=""; fi;
   # bug #512 add support for answer file
@@ -943,17 +939,6 @@ mysql_server_install() {
     echo_failure "Unable to auto-install MySQL server" | tee -a $INSTALL_LOG_FILE
     echo "MySQL download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.mysql.com/downloads/" >> $INSTALL_LOG_FILE
-  else #create the monitrc script
-    mkdir -p /etc/monit/conf.d
-    if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
-      echo "# mysql monitor
-      check process mysql matching \"mysql\"
-      group database
-      start program = \"/usr/sbin/service mysql start\"
-      stop program = \"/usr/sbin/service mysql stop\"
-      if failed host 127.0.0.1 port 3306 then restart
-      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/mysql.mtwilson
-    fi
   fi
 }
 
@@ -1234,18 +1219,8 @@ postgres_server_install(){
     echo "Postgres download URL:"  >> $INSTALL_LOG_FILE
     echo "http://www.postgresql.org/download/" >> $INSTALL_LOG_FILE
     return 1
-  else
-    mkdir -p /etc/monit/conf.d
-    if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
-      echo "# postgres monitor
-      check process postgresql matching \"postgresql\"
-      group database
-      start program = \"/usr/sbin/service postgresql start\"
-      stop program = \"/usr/sbin/service postgresql stop\"
-      if failed host 127.0.0.1 port 5432 then restart
-      if 5 restarts within 5 cycles then timeout" > /etc/monit/conf.d/postgres.mtwilson
-    fi  
   fi
+
 }
 
 # Environment:
@@ -1704,9 +1679,8 @@ glassfish_version_report() {
 # - minimum required version
 glassfish_detect() {
   local min_version="${1:-${GLASSFISH_REQUIRED_VERSION:-${DEFAULT_GLASSFISH_REQUIRED_VERSION}}}"
-
-  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
-  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+  if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
+  if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
 
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
@@ -2243,8 +2217,8 @@ tomcat_detect() {
   local min_version="${1:-${tomcat_required_version:-${DEFAULT_TOMCAT_REQUIRED_VERSION}}}"
   echo "min_version for tomcat_detect is $min_version" >>  $INSTALL_LOG_FILE
 
-  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then java_detect; fi
-  if [[ -z $JAVA_HOME && -z $JRE_HOME ]]; then return 1; fi
+  if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then java_detect; fi
+  if [[ (-z $JAVA_HOME && -z $JRE_HOME) || -z $java ]]; then return 1; fi
 
       if [[ -n "$java" ]]; then    
         local java_bindir=`dirname $java`
@@ -2271,8 +2245,8 @@ tomcat_detect() {
       fi
     fi
   fi
-#echo "tomcat variable is $tomcat"
-#echo "TOMCAT_VERSION is $TOMCAT_VERSION"
+  #echo "tomcat variable is $tomcat"
+  #echo "TOMCAT_VERSION is $TOMCAT_VERSION"
 
   TOMCAT_CANDIDATES=`find / -name tomcat-users.xml 2>/dev/null`
   tomcat_clear
@@ -2284,9 +2258,9 @@ tomcat_detect() {
       local bin_dir=`dirname $c`
       local parent=`dirname $bin_dir`
       if [ -f "$parent/bin/catalina.sh" ]; then
-        export TOMCAT_HOME="$parent"
+	    export TOMCAT_HOME="$parent"
         export TOMCAT_BASE="$parent"
-        conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
+		conf_dir=`find / -name tomcat-users.xml 2>/dev/null`
         export TOMCAT_CONF=`dirname $conf_dir`
         tomcat_bin=$parent/bin/catalina.sh
         tomcat="env PATH=$java_bindir:$PATH JAVA_HOME=$JAVA_HOME CATALINA_HOME=$TOMCAT_HOME CATALINA_BASE=$TOMCAT_BASE CATALINA_CONF=$TOMCAT_CONF $tomcat_bin"
@@ -2296,11 +2270,11 @@ tomcat_detect() {
         if is_version_at_least "$TOMCAT_VERSION" "${min_version}"; then
           return 0
         fi
-        tomcat_clear
       fi
     fi
   done
-
+  echo_failure "Cannot find Tomcat"
+  tomcat_clear
   return 1
 }
 
@@ -3139,3 +3113,231 @@ set_config_db_properties() {
   package_env_filename=${package_dir}/${packagename}.env
   package_install_filename=${package_dir}/${packagename}.install
 }
+
+# The EclipseLink persistence framework sends messages to stdout that start with the text [EL Info] or [EL Warning].
+# We suppress those because they are not useful for the customer, only for debugging.
+call_setupcommand() {
+  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+  SETUP_CONSOLE_JARS=$(JARS=(${setupconsole_dir}/*.jar); IFS=:; echo "${JARS[*]}")
+  mainclass=com.intel.mtwilson.setup.TextConsole
+  $java -cp "$SETUP_CONSOLE_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@ | grep -vE "^\[EL Info\]|^\[EL Warning\]"
+}
+
+file_encrypted() {
+  local filename="${1}"
+  if grep -q "ENCRYPTED DATA" "$filename"; then
+    return 0 #"File encrypted: $filename"
+  else
+    return 1 #"File NOT encrypted: $filename"
+  fi
+}
+
+decrypt_file() {
+  local filename="${1}"
+  export PASSWORD="${2}"
+  if [ -f "$filename" ]; then
+    echo -n "Decrypting file [$filename]....."
+    call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
+    if file_encrypted $filename; then
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."; exit -1; fi
+    echo_success " Done"
+  else
+    echo_warning "File NOT found: $filename"
+  fi
+}
+
+encrypt_file() {
+  local filename="${1}"
+  export PASSWORD="${2}"
+  if [ -f "$filename" ]; then
+    echo -n "Encrypting file [$filename]....."
+    call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"
+    if ! file_encrypted $filename; then
+      echo_failure "Password failure. Please check password for illegal characters."; exit -1; fi
+    echo_success " Done"
+  else
+    echo_warning "File NOT found: $filename"
+  fi
+}
+
+load_default_env() {
+  local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+  local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+  
+  # Verify properties files exist
+  if [ ! -f "$mtw_props_path" ]; then
+    echo_failure "File NOT found: $mtw_props_path"
+	exit -1
+  fi
+  if [ ! -f "$as_props_path" ]; then
+    echo_failure "File NOT found: $as_props_path"
+	exit -1
+  fi
+  
+  # Verify MTWILSON_PASSWORD variable set
+  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
+    if [ -z "$MTWILSON_PASSWORD" ]; then
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."
+      exit -1
+    fi
+  fi
+  
+  # mtwilson.properties file
+  echo -n "Reading properties from "
+  if file_encrypted "$mtw_props_path"; then
+    echo -n "encrypted file [$mtw_props_path]....."
+    temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
+    if [[ "$temp" == *"Incorrect password"* ]]; then
+      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."
+      exit -1
+    fi
+    export DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+    export DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
+    export DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
+    export DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
+    export DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
+    export DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
+    export WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
+  else
+    echo -n "file [$mtw_props_path]....."
+    export DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
+    export DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
+    export DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
+    export DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
+    export DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
+    export DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
+    export WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
+  fi
+  echo_success "Done"
+  
+  # attestation-service.properties
+  echo -n "Reading properties from "
+  if file_encrypted "$as_props_path"; then
+    echo -n "encrypted file [$as_props_path]....."
+    temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
+    if [[ "$temp" == *"Incorrect password"* ]]; then
+      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."
+      exit -1
+    fi
+    export PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+  else
+    echo -n "file [$as_props_path]....."
+	export PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
+  fi
+  echo_success "Done"
+  
+  # Determine DATABASE_VENDOR
+  if grep -q "postgres" <<< "$DATABASE_DRIVER"; then
+    export DATABASE_VENDOR="postgres";
+  elif grep -q "mysql" <<< "$DATABASE_DRIVER"; then
+    export DATABASE_VENDOR="mysql";
+  fi
+  
+  if using_mysql; then
+    export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}
+    export MYSQL_PORTNUM=${DATABASE_PORTNUM}
+    export MYSQL_DATABASE=${DATABASE_SCHEMA}
+    export MYSQL_USERNAME=${DATABASE_USERNAME}
+    export MYSQL_PASSWORD=${DATABASE_PASSWORD}
+  elif using_postgres; then
+    export POSTGRES_HOSTNAME=${DATABASE_HOSTNAME}
+    export POSTGRES_PORTNUM=${DATABASE_PORTNUM}
+    export POSTGRES_DATABASE=${DATABASE_SCHEMA}
+    export POSTGRES_USERNAME=${DATABASE_USERNAME}
+    export POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+  fi
+}
+
+change_db_pass() {
+  mysqladmin=`which mysqladmin 2>/dev/null`
+  psql=`which psql 2>/dev/null`
+  mtwilson=`which mtwilson 2>/dev/null`
+  new_db_pass="$DATABASE_PASSWORD_NEW"
+  sed_escaped_value=$(sed_escape $new_db_pass)
+  cryptopass="$MTWILSON_PASSWORD"
+  
+  load_default_env 1>/dev/null
+  
+  # Do not allow a blank password to be specified
+  if [ -z $DATABASE_PASSWORD_NEW ]; then
+    echo_failure "The new password could not be determined. Please verify \"DATABASE_PASSWORD_NEW\" variable is set."
+    exit -1
+  fi
+  
+  # Check for encryption, add to array if encrypted
+  encrypted_files=()
+  count=0
+  for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
+    if file_encrypted "$i"; then
+      encrypted_files[count]="$i"
+    fi
+    let count++
+  done
+  
+  for i in ${encrypted_files[@]}; do
+    decrypt_file "$i" "$cryptopass"
+  done
+  
+  # Test DB connection and change password
+  if using_mysql; then #MYSQL
+    echo_success "using mysql"
+    mysql_detect
+    mysql_version
+    mysql_test_connection_report
+    if [ $? -ne 0 ]; then exit; fi
+    $mysqladmin -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" password "$new_db_pass"
+    if [ $? -ne 0 ]; then echo_failure "Issue building mysql command."; exit; fi
+  elif using_postgres; then #POSTGRES
+    echo_success "using postgres"
+    postgres_detect
+    postgres_version
+    postgres_test_connection_report
+    if [ $? -ne 0 ]; then exit; fi
+    temp=$(sudo "$psql" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
+    echo ""
+    if [ $? -ne 0 ]; then echo_failure "Issue building postgres or expect command."; exit; fi
+    # Edit postgres password file if it exists
+    if [ -f /root/.pgpass ]; then
+      echo -n "Updating database password value in .pgpass file...."
+      temp=`cat /root/.pgpass | cut -f1,2,3,4 -d":"`
+      temp="$temp:$new_db_pass"
+      echo $temp > /root/.pgpass; fi
+	  echo_success "Done"
+  fi
+
+  # Edit .properties files
+  for i in `ls -1 /etc/intel/cloudsecurity/*.properties`; do
+    echo -n "Updating database password value in $i...."
+    sed -i -e 's/db.password=[^\n]*/db.password='"$sed_escaped_value"'/g' "$i"
+    echo_success "Done"
+  done
+
+  # Update password in mtwilson.env file
+  if [ -f /root/mtwilson.env ]; then
+    echo -n "Updating database password value in mtwilson.env file...."
+    export sed_escaped_value=$(sed_escape $new_db_pass)
+    sed -i -e 's/DATABASE_PASSWORD=[^\n]*/DATABASE_PASSWORD='\'"$sed_escaped_value"\''/g' "/root/mtwilson.env"
+    echo_success "Done"
+  fi
+
+  # Restart
+  if using_glassfish; then
+    echo_success "using glassfish"
+    echo "Restarting mtwilson......"
+    $mtwilson glassfish-restart
+  elif using_tomcat; then
+    echo_success "using tomcat"
+    echo "Restarting mtwilson......"
+    $mtwilson tomcat-restart
+  fi
+  echo_success "RESTART COMPLETED"
+
+  # Encrypt files
+  for i in ${encrypted_files[@]}; do
+    encrypt_file "$i" "$cryptopass"
+  done
+
+  echo_success "DB PASSWORD CHANGE FINISHED"
+}
+
+echoerr() { echo_failure "$@" 1>&2; }

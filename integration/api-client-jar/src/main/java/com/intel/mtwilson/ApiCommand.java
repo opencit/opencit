@@ -183,7 +183,7 @@ public class ApiCommand {
             // download server's saml certificate and save in the keystore
             X509Certificate samlCertificate = c.getSamlCertificate();
             keystore.addTrustedSamlCertificate(samlCertificate, server.getHost());
-            log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost() });
+            log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost() });
             keystore.save();        
 
             /*

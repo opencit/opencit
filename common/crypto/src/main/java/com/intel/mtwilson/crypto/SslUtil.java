@@ -104,7 +104,7 @@ public class SslUtil {
                     certificateNumber++;
                     String alias = String.format("%s-%d", aliasBasename, certificateNumber);
                     keystore.addTrustedSslCertificate(cert, alias);
-                    log.info("Added SSL certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[]{alias, cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), aliasBasename});
+                    log.debug("Added SSL certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[]{alias, cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), aliasBasename});
                 }
                 keystore.save();
             }
@@ -197,7 +197,7 @@ public class SslUtil {
             httpClient.getConnectionManager().shutdown();
         }
         catch(Exception e) {
-            log.debug("Error while sending https request", e); // not fatal since we may still have the ssl certificate from the handshake, which is all we want here
+            log.warn("Error while sending https request", e); // not fatal since we may still have the ssl certificate from the handshake, which is all we want here
         }
         return trustManager.getStoredCertificates();
     }

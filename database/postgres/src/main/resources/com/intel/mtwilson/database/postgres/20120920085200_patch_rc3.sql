@@ -24,10 +24,6 @@ ALTER TABLE tbl_host_specific_manifest RENAME TO mw_host_specific_manifest;
 ALTER TABLE tbl_saml_assertion RENAME TO mw_saml_assertion;
 ALTER TABLE audit_log_entry RENAME TO mw_audit_log_entry;
 
--- No longer using the "portal user" table
--- DROP TABLE mw_portal_user;
--- INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20120920085201,NOW(),'dropped mw_portal_user');
-
 -- The certificate table holds signing certificates for distribution to clients, and holds Privacy CA certificates for validating AIK's
 CREATE SEQUENCE mw_certificate_x509_serial;
 CREATE TABLE mw_certificate_x509 (

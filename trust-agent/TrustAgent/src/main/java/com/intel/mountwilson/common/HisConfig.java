@@ -55,7 +55,7 @@ public class HisConfig {
 	private void readPropertiesFile(String propertiesFilename,
 			CompositeConfiguration composite) throws IOException {
 		InputStream in = getClass().getResourceAsStream(propertiesFilename);
-		log.info("Reading property file " +  propertiesFilename);
+		log.debug("Reading property file " +  propertiesFilename);
 		if (in != null) {
 			try {
 				Properties properties = new Properties();

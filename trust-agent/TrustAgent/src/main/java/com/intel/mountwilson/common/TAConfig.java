@@ -50,7 +50,7 @@ public class TAConfig {
         defaults.setProperty("nonce.filename", "nonce");
         defaults.setProperty("aikquote.filename", "aikquote");
         defaults.setProperty("aikblob.filename", "aikblob.dat");
-        defaults.setProperty("aikcert.filename", "aikcert.cer");
+        defaults.setProperty("aikcert.filename", "aikcert.pem"); // issue #878 the aikcert is in PEM format so we label it properly
         defaults.setProperty("ekcert.filename", "ekcert.cer");
         defaults.setProperty("daa.challenge.filename", "daa-challenge");
         defaults.setProperty("daa.response.filename.filename", "daa-response");        
@@ -78,7 +78,7 @@ public class TAConfig {
 	private void readPropertiesFile(String propertiesFilename,
 			CompositeConfiguration composite) throws IOException {
 		InputStream in = getClass().getResourceAsStream(propertiesFilename);
-		log.info("Reading property file " +  propertiesFilename);
+		log.debug("Reading property file " +  propertiesFilename);
 		if (in != null) {
 			try {
 				Properties properties = new Properties();

@@ -65,7 +65,7 @@ if [[ -s $zipfile ]]; then
   unzip -o $zipfile -d /etc/intel/cloudsecurity
   rm $zipfile
 else
-  wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate -q "${PRIVACYCA_SERVER}/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${encodedPW}" -O $zipfile
+    wget --secure-protocol=SSLv3 --no-proxy --no-check-certificate -q "${PRIVACYCA_SERVER}/HisPrivacyCAWebServices2/clientfiles.zip?user=${PRIVACYCA_DOWNLOAD_USERNAME}&password=${encodedPW}" -O $zipfile
   if [[ -s $zipfile ]]; then
     unzip -o $zipfile -d /etc/intel/cloudsecurity
     rm $zipfile

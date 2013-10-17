@@ -81,12 +81,12 @@ public class VmwareWhitelistHostTest679 {
         log.debug("Host2: {}", host2);
         
         // compare pcr 19 value
-        log.debug("PCR 19");
+        log.info("PCR 19");
         log.debug("Host1: {}", pcr1.getValue().toString());
         log.debug("Host2: {}", pcr2.getValue().toString());
 
         // compare pcr 19 event log:
-        log.debug("MEASUREMENTS");
+        log.info("MEASUREMENTS");
         HashSet<Measurement> extraHost1 = new HashSet<Measurement>(list1);
         extraHost1.removeAll(list2);
         HashSet<Measurement> extraHost2 = new HashSet<Measurement>(list2);

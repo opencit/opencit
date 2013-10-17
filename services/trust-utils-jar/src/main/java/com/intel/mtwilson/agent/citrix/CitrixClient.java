@@ -106,7 +106,7 @@ public class CitrixClient {
         for(String filename : required) {
             File file = new File(filename);
             if( !file.exists() ) {
-                log.info( String.format("Invalid service configuration: Cannot find %s", filename ));
+                log.debug( String.format("Invalid service configuration: Cannot find %s", filename ));
                 foundAllRequiredFiles = false;
             }
         }
@@ -206,6 +206,7 @@ public class CitrixClient {
             Iterator iter = hostList.iterator();
             // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
             // to throw an exception if the hasNext is false.
+            File f, q, n;
             Host h = null;
             if (iter.hasNext()) {
                 h = (Host)iter.next();
@@ -234,14 +235,14 @@ public class CitrixClient {
 
             log.debug("extracted quote from response: "+ quote);
             //saveFile(getCertFileName(sessionId), Base64.decodeBase64(aikCertificate));
-            saveFile(getCertFileName(sessionId),aikCertificate.getBytes());
+            f = saveFile(getCertFileName(sessionId),aikCertificate.getBytes());
             log.debug( "saved certificate with session id: "+sessionId);
             
-            saveQuote(quote, sessionId);
+            q = saveQuote(quote, sessionId);
 
             log.debug( "saved quote with session id: "+sessionId);
             
-            saveNonce(nonce,sessionId);
+            n = saveNonce(nonce,sessionId);
             
             log.debug( "saved nonce with session id: "+sessionId);
             
@@ -251,9 +252,12 @@ public class CitrixClient {
             
             HashMap<String, Pcr> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
             
-            log.debug( "Got PCR map");
+            log.info( "Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-            
+
+            f.delete();
+            q.delete();
+            n.delete();          
             return pcrMap;
             
         } catch (ASException e) {
@@ -277,7 +281,7 @@ public class CitrixClient {
 //            nonce = new BASE64Encoder().encode( bytes);
             String nonce = Base64.encodeBase64String(bytes);
 
-            log.info( "Nonce Generated " + nonce);
+            log.debug( "Nonce Generated " + nonce);
             return nonce;
         } catch (NoSuchAlgorithmException e) {
             throw new ASException(e);
@@ -301,7 +305,7 @@ public class CitrixClient {
             String sessionId = "" + ((nextInt < 0)?nextInt *-1 :nextInt); 
 
 
-            log.info( "Session Id Generated [" + sessionId + "]");
+            log.debug( "Session Id Generated [" + sessionId + "]");
 
         
 
@@ -335,13 +339,15 @@ public class CitrixClient {
         return "aikcert_" + sessionId + ".cer";
     }
 
-    private void saveFile(String fileName, byte[] contents) throws IOException  {
+    private File saveFile(String fileName, byte[] contents) throws IOException  {
+        File file = null;
         FileOutputStream fileOutputStream = null;
 
         try {
             assert aikverifyhome != null;
             log.debug( String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
-            fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator +fileName);
+            file = new File(aikverifyhomeData + File.separator +fileName);
+            fileOutputStream = new FileOutputStream(file);
             assert fileOutputStream != null;
             assert contents != null;
             fileOutputStream.write(contents);
@@ -359,20 +365,23 @@ public class CitrixClient {
                 }
             }
         }
-
-
+        return file;
     }
 
-    private void saveQuote(String quote, String sessionId) throws IOException  {
+    private File saveQuote(String quote, String sessionId) throws IOException  {
 //          byte[] quoteBytes = new BASE64Decoder().decodeBuffer(quote);
+        File q;
         byte[] quoteBytes = Base64.decodeBase64(quote);
-          saveFile(getQuoteFileName(sessionId), quoteBytes);
+          q = saveFile(getQuoteFileName(sessionId), quoteBytes);
+          return q;
     }
 
-    private void saveNonce(String nonce, String sessionId) throws IOException  {
+    private File saveNonce(String nonce, String sessionId) throws IOException  {
 //          byte[] nonceBytes = new BASE64Decoder().decodeBuffer(nonce);
+        File n;
         byte[] nonceBytes = Base64.decodeBase64(nonce);
-          saveFile(getNonceFileName(sessionId), nonceBytes);
+          n = saveFile(getNonceFileName(sessionId), nonceBytes);
+          return n;
     }
 
     // Commenting the below function since it is not being used and klocwork is throwing a warning
@@ -424,7 +433,7 @@ public class CitrixClient {
                 }            	
             }
             else {
-            	log.debug( "Result PCR invalid");
+            	log.info( "Result PCR invalid");
             }
             /*
             if(pcrs.contains(parts[0].trim()))

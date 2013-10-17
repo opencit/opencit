@@ -209,10 +209,10 @@ public class RegisterApiClientTest {
             remote(ssh, "asctl restart");
             // grant privileges to ourselves
             testUpdateApiClient();
-            log.debug("Granted privileges to self");
+            log.info("Granted privileges to self");
             // now restore the original trusted hosts whitelist
             remote(ssh, String.format("asctl edit mtwilson.api.trust \"%s\"", previousWhitelistString));        
-            log.debug("Restored previous trusted clients network address list");
+            log.info("Restored previous trusted clients network address list");
     }
     
     /**

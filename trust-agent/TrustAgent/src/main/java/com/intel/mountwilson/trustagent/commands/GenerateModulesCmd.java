@@ -50,11 +50,11 @@ public class GenerateModulesCmd implements ICommand {
      */
     private void getXmlFromMeasureLog() throws TAException, IOException {
         
-        log.info("About to run the command: " + context.getMeasureLogLaunchScript());
+        log.debug("About to run the command: " + context.getMeasureLogLaunchScript());
         long startTime = System.currentTimeMillis();
         CommandUtil.runCommand( context.getMeasureLogLaunchScript());
         long endTime = System.currentTimeMillis();
-        log.info("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
+        log.debug("measureLog.xml is created from txt-stat in Duration MilliSeconds {}", (endTime - startTime));
 
         BufferedReader in = null;
         String str;

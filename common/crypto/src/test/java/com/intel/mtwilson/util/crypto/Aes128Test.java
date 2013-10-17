@@ -39,7 +39,7 @@ public class Aes128Test {
         log.debug("Input: {} (str length: {})", new String[] { input, String.valueOf(input.length()) });
         
         SecretKey secretKey = Aes128.generateKey(); // NoSuchAlgorithmException
-        log.info("Secret Key: {} (raw length: {})", new String[] { Base64.encodeBase64String(secretKey.getEncoded()), String.valueOf(secretKey.getEncoded().length) });
+        log.debug("Secret Key: {} (raw length: {})", new String[] { Base64.encodeBase64String(secretKey.getEncoded()), String.valueOf(secretKey.getEncoded().length) });
         Aes128 aes = new Aes128(secretKey); // NoSuchPaddingException
         
         byte[] plaintext = input.getBytes("UTF-8"); //UnsupportedEncodingException

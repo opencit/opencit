@@ -38,14 +38,14 @@ public class CheckLoginController extends AbstractController {
     private Logger log = LoggerFactory.getLogger(getClass());
 	
 	// variable declaration used during Processing data. 
-        private static final Logger logger = LoggerFactory.getLogger(CheckLoginController.class.getName());       
+            
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
 	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU"));
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws MalformedURLException, IOException {
-            logger.debug("CheckLoginController >>");
+            log.debug("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
             
             
@@ -76,6 +76,14 @@ public class CheckLoginController extends AbstractController {
                 view.addObject("result", false);
                 return view; 
             }
+
+            // Partial fix for Bug 965 to prevent users in rejected/pending status from logging into the portal.
+            if (!tblKeystore.getEnabled()) {
+                view.addObject("message", "User access has not been approved. Please contact the administrator.");                
+                view.addObject("result", false);
+                return view;                 
+            }
+            
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
             URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
             RsaCredential credential = null;

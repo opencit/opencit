@@ -24,7 +24,7 @@ monit_detect() {
 }
 
 monit_install() {
-  MONIT_YUM_PACKAGES=""
+  MONIT_YUM_PACKAGES="monit"
   MONIT_APT_PACKAGES="monit"
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
@@ -94,17 +94,12 @@ if [ -f /etc/monit/monitrc ]; then
     echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
     backup_file /etc/monit/monitrc
 else
-    cp monitrc /etc/monit/monitrc
+	cp monitrc /etc/monit/monitrc
 fi
 
 mkdir -p /etc/monit/conf.d
 
-if grep -q "/etc/monit/conf.d/*" /etc/monit/monitrc; then
- testInclude=`grep "/etc/monit/conf.d/*" /etc/monit/monitrc`
- if grep -q "#" <<< $testInclude; then
-  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
- fi
-else
+if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
  echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 fi
 

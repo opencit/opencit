@@ -384,7 +384,7 @@ public class KeystoreUtil {
             Set<X509Certificate> cacerts = c.getRootCaCertificates();
             for(X509Certificate cacert : cacerts) {
                 try {
-                    log.info("Adding CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                    log.debug("Adding CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
                     keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
                 }
                 catch(Exception e) {
@@ -401,7 +401,7 @@ public class KeystoreUtil {
             Set<X509Certificate> cacerts = c.getPrivacyCaCertificates();
             for(X509Certificate cacert : cacerts) {
                 try {
-                    log.info("Adding Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                    log.debug("Adding Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
                     keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
                 }
                 catch(Exception e) {
@@ -420,11 +420,11 @@ public class KeystoreUtil {
                 try {
                     if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert; so we add it as the saml cert
                         keystore.addTrustedSamlCertificate(cert, server.getHost());
-                        log.info("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                        log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
                     }
                     else {
                         keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
-                        log.info("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                        log.debug("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
                     }
                 }
                 catch(Exception e) {
