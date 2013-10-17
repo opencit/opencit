@@ -81,5 +81,5 @@ public interface AttestationService {
 
     X509Certificate getTlsCertificateForTrustedHost(Hostname hostname) throws IOException, ApiException, SignatureException;
     
-    String findMLEForHost(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
+    HostResponse registerHostByFindingMLE(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
 }

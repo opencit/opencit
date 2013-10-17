@@ -832,8 +832,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     }
 
     @Override
-    public String findMLEForHost(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException {
-        String result = text(httpPost(asurl("/hosts/mle"), toJSON(hostObj)));
+    public HostResponse registerHostByFindingMLE(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException {
+        HostResponse result = fromJSON(httpPost(asurl("/hosts/mle"), toJSON(hostObj)), HostResponse.class);
         return result;
     }
 

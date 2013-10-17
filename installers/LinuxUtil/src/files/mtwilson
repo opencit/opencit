@@ -408,11 +408,10 @@ case "$1" in
   help)
         ;&
   *)
-        echo "Usage: mtwilson {api|erase-data|erase-users|fingerprint|help|\n" \
-             "|glassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
-			 "|java-detect|mysql-detect|mysql-sslcert|\n" \
-             "|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
-			 "|restart|setup|start|status|stop|uninstall|version}"
+        echo -e "Usage: mtwilson {api|erase-data|erase-users|fingerprint|help|\n" \
+				"\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
+				"\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
+				"\t\trestart|setup|start|status|stop|uninstall|version}"
         exit 1
 esac
 

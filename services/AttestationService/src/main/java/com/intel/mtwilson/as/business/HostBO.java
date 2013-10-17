@@ -24,6 +24,7 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
@@ -92,7 +93,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -151,7 +152,8 @@ public class HostBO extends BaseBO {
                         }
 
                         // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
-                        PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
+                        if (pcrManifest == null)
+                            pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
                         
 
                         // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
@@ -821,4 +823,21 @@ public class HostBO extends BaseBO {
 
                 return hostObj;
         }
+        
+        public HostResponse addHostByFindingMLE(TxtHostRecord hostObj) {
+            try {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+            } catch (ASException ae){
+                throw ae;
+            }
+        }
+        
+        public HostResponse updateHostByFindingMLE(TxtHostRecord hostObj) {
+            try {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+            } catch (ASException ae) {
+                throw ae;
+            }
+        }
+        
 }
