@@ -191,6 +191,7 @@ public class CitrixClient {
      * @param tag 
      */
     public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException {
+            if( !isConnected()) { connect(); } 
             Set<Host> hostList = Host.getAll(connection);
             Iterator iter = hostList.iterator();
             // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need

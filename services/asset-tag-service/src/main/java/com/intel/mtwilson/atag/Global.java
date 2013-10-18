@@ -154,8 +154,9 @@ public class Global {
             try {
             String keystoreUsername = My.configuration().getKeystoreUsername(); //configuration().getMtWilsonClientKeystoreUsername();
             String keystorePassword = My.configuration().getKeystorePassword(); //configuration().getMtWilsonClientKeystorePassword();
-                SimpleKeystore keystore = new SimpleKeystore(keystoreResource, keystorePassword);
-                KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
+            
+            SimpleKeystore keystore = new SimpleKeystore(keystoreResource, keystorePassword);
+            KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
             URL url = My.configuration().getMtWilsonURL();  //configuration().getMtWilsonURL();
             ApiClientFactory factory = new ApiClientFactory();
             mtwilson = factory.clientForUserInResource(keystoreResource, keystoreUsername, keystorePassword, url, new TrustFirstCertificateTlsPolicy(respository));
