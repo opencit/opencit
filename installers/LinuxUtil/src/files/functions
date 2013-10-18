@@ -3141,7 +3141,7 @@ decrypt_file() {
     echo -n "Decrypting file [$filename]....."
     call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
     if file_encrypted $filename; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."; exit -1; fi
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; exit -1; fi
     echo_success " Done"
   else
     echo_warning "File NOT found: $filename"
@@ -3190,7 +3190,7 @@ load_default_env() {
     echo -n "encrypted file [$mtw_props_path]....."
     temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
     if [[ "$temp" == *"Incorrect password"* ]]; then
-      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."
+      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       exit -1
     fi
     export DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3218,7 +3218,7 @@ load_default_env() {
     echo -n "encrypted file [$as_props_path]....."
     temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
     if [[ "$temp" == *"Incorrect password"* ]]; then
-      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."
+      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       exit -1
     fi
     export PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
