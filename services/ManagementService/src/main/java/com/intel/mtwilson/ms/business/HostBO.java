@@ -275,7 +275,7 @@ public class HostBO extends BaseBO {
 * @param hostConfigObj
      * @return
      */
-    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj, ApiClient apiClientObj) {
+    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj, ApiClient apiClientObj, boolean registerHost) {
         
         try {           
              My.initDataEncryptionKey();
@@ -333,8 +333,10 @@ public class HostBO extends BaseBO {
             
             // Here we need to capture the correct MLE names and update the hostConfigObj accordingly, which would be used during host registration
             // If in case no BIOS/VMM MLE exists, this function would thrown an exception
-            String mleNamesToUse = apiClientObj.findMLEForHost(hostObj);
-            log.debug("Host should be mapped to {} MLEs.", mleNamesToUse);
+            if (registerHost) {
+                HostResponse hostResponse = apiClientObj.registerHostByFindingMLE(hostObj);
+            }
+            /*log.debug("Host should be mapped to {} MLEs.", mleNamesToUse);
             String [] mleNames = mleNamesToUse.split("\\|\\|");
             if (mleNames.length == 2) {
                 hostConfigObj.getTxtHostRecord().BIOS_Name = mleNames[0];
@@ -342,7 +344,7 @@ public class HostBO extends BaseBO {
             } else {
                 log.error("Unable to retrieve the MLE names to be mapped to the host.");
                 throw new MSException(ErrorCode.MS_MLE_CONFIGURATION_NOT_FOUND);
-            }
+            }*/
             
             return hostConfigObj;
             
@@ -371,7 +373,7 @@ public class HostBO extends BaseBO {
         try {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getASEntityManagerFactory());
 
-            log.debug("Processing host {0}.", hostObj.HostName);
+            log.debug("Processing host {}.", hostObj.HostName);
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
             //if (hostSearchObj == null) {
             //    hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
@@ -480,7 +482,7 @@ public class HostBO extends BaseBO {
 
         try {
 
-            log.error("About to process {0} servers", hostRecords.getHostRecords().size());
+            log.error("About to process {} servers", hostRecords.getHostRecords().size());
 
             if (hostRecords != null) {
 
@@ -552,7 +554,7 @@ public class HostBO extends BaseBO {
         try {
             ApiClient apiClient = createAPIObject();
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
-            log.debug("About to start processing {0} the hosts", hostRecords.getHostRecords().size());
+            log.debug("About to start processing {} the hosts", hostRecords.getHostRecords().size());
         
             // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
             // One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
@@ -564,7 +566,7 @@ public class HostBO extends BaseBO {
                     // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
                     // return back the same error to the user
                     try {
-                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient);
+                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
                         hostsToBeUpdatedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
@@ -577,7 +579,7 @@ public class HostBO extends BaseBO {
                 } else {
                     log.debug(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
                     try {
-                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient);
+                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
                         hostsToBeAddedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
@@ -605,13 +607,17 @@ public class HostBO extends BaseBO {
                 }
             }
 
+            // PERFORMANCE ISSUE: Now that we are mapping the hosts to the MLEs that actually match, and perform attestation as part of
+            // that we do not need to do the below explict attestation again.
+
+            /*
             // Before we return back errors let us update the trust status of the hosts that were updated.
             Set<Hostname> hostsToBeAttested = new HashSet<Hostname>();
             if (!hostsToBeUpdatedList.getHostRecords().isEmpty()) {
                 for(TxtHostRecord hostsUpdated: hostsToBeUpdatedList.getHostRecords()) {
                     hostsToBeAttested.add(new Hostname(hostsUpdated.HostName));
                 }
-                
+                                
                 try {
                     log.debug("Refreshing the trust status of the hosts that were updated : {}.", hostsToBeAttested.toString());
                     List<HostTrustXmlResponse> samlForMultipleHosts = apiClient.getSamlForMultipleHosts(hostsToBeAttested, true);
@@ -621,7 +627,7 @@ public class HostBO extends BaseBO {
                     log.error("Error refreshing the trust status of the hosts {}. {}.", hostsToBeAttested.toString(), ex.getMessage());
 
                 }
-            }
+            } */
             // Return back the results
             return results;
 
@@ -671,8 +677,9 @@ public class HostBO extends BaseBO {
 
             // This helper function verifies if all the required MLEs are present for the host registration. If no exception is 
             // thrown, we can go ahead with the host registration.
-            hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient);
+            hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, true);
 
+            /*
             // First let us check if the host is already configured.
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
             //if (hostSearchObj == null) {
@@ -687,7 +694,7 @@ public class HostBO extends BaseBO {
                         hostSearchObj.getName()));
                 boolean updateHostStatus = updateHost(apiClient, hostSearchObj, hostConfigObj);
                 return updateHostStatus;
-            }
+            }*/
             
             /*
             // bug #497   this should be a different object than TblHosts  
@@ -733,8 +740,8 @@ public class HostBO extends BaseBO {
             if (verifyStatus == true) {
 
                 // Finally register the host. */
-            txtHost = new TxtHost(hostConfigObj.getTxtHostRecord());
-            apiClient.addHost(txtHost);
+            /*txtHost = new TxtHost(hostConfigObj.getTxtHostRecord());
+            apiClient.addHost(txtHost);*/
            // }
 
             // If everything is successful, set the status flag to true
@@ -744,11 +751,6 @@ public class HostBO extends BaseBO {
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
-
-        } catch (ApiException ae) {
-
-            log.error("API Client error during host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
-            throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
 
         } catch (Exception ex) {
 

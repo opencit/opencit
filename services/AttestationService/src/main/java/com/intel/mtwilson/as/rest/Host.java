@@ -179,7 +179,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse post(TxtHostRecord hostRecord) { 
         if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-        else return hostBO.addHost(new TxtHost(hostRecord)); 
+        else return hostBO.addHost(new TxtHost(hostRecord), null); 
     }
     
     
@@ -289,8 +289,8 @@ public class Host {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/mle")
-        public String findMLEForHost(TxtHostRecord hostRecord) {
-                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDB(hostRecord);
+        public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
         }
         
 }

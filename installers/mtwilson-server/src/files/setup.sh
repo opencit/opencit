@@ -5,7 +5,7 @@
 
 currentUser=`whoami`
 if [ ! $currentUser == "root" ]; then
- echo_warning "You must be root user to install Mt Wilson."
+ echo_failure "You must be root user to install Mt Wilson."
  exit -1
 fi
 
@@ -191,6 +191,8 @@ fi
 # copy default logging settings to /etc
 chmod 700 logback.xml
 cp logback.xml /etc/intel/cloudsecurity
+chmod 700 logback-stderr.xml
+cp logback-stderr.xml /etc/intel/cloudsecurity
 
 
 
@@ -530,18 +532,6 @@ if [ ! -z "$opt_privacyca" ]; then
   #echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
   #/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
   #echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 
@@ -549,54 +539,18 @@ if [ ! -z "opt_attservice" ]; then
   echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 if [ ! -z "$opt_mangservice" ]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 if [ ! -z "$opt_wlmservice" ]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 #if [ ! -z "$mangportal" ]; then
@@ -621,18 +575,6 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 #TODO-stdale monitrc needs to be customized depending on what is installed
@@ -811,10 +753,10 @@ fi
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
-  mtwilson glassfish-restart
+  glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
-  mtwilson tomcat-restart
+  tomcat_restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
