@@ -68,7 +68,7 @@ public class AssetTagCertBO extends BaseBO{
             atagCert.setNotBefore(x509AttrCert.getNotBefore());
             atagCert.setRevoked(false);
             atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
-            atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
+            //atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
             atagCert.setPCREvent(Sha1Digest.digestOf(atagCert.getSHA1Hash()).toByteArray());
             log.debug("assetTag writing cert to DB");
             My.jpa().mwAssetTagCertificate().create(atagCert);
@@ -95,8 +95,8 @@ public class AssetTagCertBO extends BaseBO{
         
         try {
             // Find the asset tag certificate for the specified Sha256Hash value
-            if (atagObj.getSha256OfAssetCert() != null) {
-                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha256Hash(atagObj.getSha256OfAssetCert());
+            if (atagObj.getSha1OfAssetCert() != null) {
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
                 if (atagCerts.isEmpty() || atagCerts.size() > 1) {
                     log.error("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
@@ -179,8 +179,8 @@ public class AssetTagCertBO extends BaseBO{
         
         try {
             // Find the asset tag certificate for the specified Sha256Hash value
-            if (atagObj.getSha256OfAssetCert() != null) {
-                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha256Hash(atagObj.getSha256OfAssetCert());
+            if (atagObj.getSha1fAssetCert() != null) {
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1fAssetCert());
                 if (atagCerts.isEmpty() || atagCerts.size() > 1) {
                     log.error("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);

@@ -12,28 +12,28 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class AssetTagCertAssociateRequest {
     
-    private byte[]  sha256OfAssetCert;
+    private byte[]  sha1OfAssetCert;
     private int     hostID;
 
     public AssetTagCertAssociateRequest() {
-        this.sha256OfAssetCert = null;
+        this.sha1OfAssetCert = null;
         this.hostID = 0;
     }
             
-    public AssetTagCertAssociateRequest(byte[] sha256OfAssetCert, int hostID) {
-        this.sha256OfAssetCert = sha256OfAssetCert;
+    public AssetTagCertAssociateRequest(byte[] sha1OfAssetCert, int hostID) {
+        this.sha1OfAssetCert = sha1OfAssetCert;
         this.hostID = hostID;
     }
 
     
-    @JsonProperty("SHA256Hash")
-    public byte[] getSha256OfAssetCert() {
-        return sha256OfAssetCert;
+    @JsonProperty("SHA1Hash")
+    public byte[] getSha1OfAssetCert() {
+        return sha1OfAssetCert;
     }
 
-    @JsonProperty("SHA256Hash")
-    public void setSha256OfAssetCert(byte[] sha256OfAssetCert) {
-        this.sha256OfAssetCert = sha256OfAssetCert;
+    @JsonProperty("SHA1Hash")
+    public void setSha1OfAssetCert(byte[] sha1OfAssetCert) {
+        this.sha1OfAssetCert = sha1OfAssetCert;
     }
 
     @JsonProperty("Host_ID")

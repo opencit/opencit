@@ -12,15 +12,15 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 public class AssetTagCertRevokeRequest {
 
-    private byte[] sha256OfAssetCert;
+    private byte[] sha1OfAssetCert;
 
-    @JsonProperty("SHA256Hash")
-    public byte[] getSha256OfAssetCert() {
-        return sha256OfAssetCert;
+    @JsonProperty("SHA1Hash")
+    public byte[] getSha1fAssetCert() {
+        return sha1OfAssetCert;
     }
 
-    @JsonProperty("SHA256Hash")
-    public void setSha256OfAssetCert(byte[] sha256OfAssetCert) {
-        this.sha256OfAssetCert = sha256OfAssetCert;
+    @JsonProperty("SHA1Hash")
+    public void setSha256OfAssetCert(byte[] sha1OfAssetCert) {
+        this.sha1OfAssetCert = sha1OfAssetCert;
     }
 }
