@@ -2365,7 +2365,8 @@ tomcat_stop() {
 }
 tomcat_restart() {
   if [ -n "$tomcat" ]; then
-    if tomcat_running; then
+    sleep 5
+	if tomcat_running_report; then
       sleep 5
       $tomcat stop
     fi  
