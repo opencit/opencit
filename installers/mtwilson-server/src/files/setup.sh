@@ -753,10 +753,10 @@ fi
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
-  mtwilson glassfish-restart
+  glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
-  mtwilson tomcat-restart
+  tomcat_restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
