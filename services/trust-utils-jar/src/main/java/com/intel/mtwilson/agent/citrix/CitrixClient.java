@@ -190,7 +190,7 @@ public class CitrixClient {
      * when it's merged with provisioning agent from the asset tag branch
      * @param tag 
      */
-    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException, NoSuchAlgorithmException  {
+    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException, NoSuchAlgorithmException, KeyManagementException  {
             if( !isConnected()) { connect(); } 
             Set<Host> hostList = Host.getAll(connection);
             Iterator iter = hostList.iterator();
