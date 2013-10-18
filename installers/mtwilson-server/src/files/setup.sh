@@ -5,7 +5,7 @@
 
 currentUser=`whoami`
 if [ ! $currentUser == "root" ]; then
- echo_warning "You must be root user to install Mt Wilson."
+ echo_failure "You must be root user to install Mt Wilson."
  exit -1
 fi
 

@@ -116,7 +116,7 @@ public class EraseUserAccounts implements Command {
             }
             System.out.println(count + " API clients deleted.");
         } catch (Exception ex) {
-            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
+            System.err.println("Exception occured: \r\n\r\n" + ex.toString());  
         }
     }
 }

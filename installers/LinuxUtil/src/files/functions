@@ -3177,7 +3177,7 @@ load_default_env() {
   # Verify MTWILSON_PASSWORD variable set
   if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
     if [ -z "$MTWILSON_PASSWORD" ]; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set."
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       exit -1
     fi
   fi
