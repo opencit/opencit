@@ -545,10 +545,12 @@ mtwilson.atag = mtwilson.atag || {};
                     'datapath': null, // prevent result from being stored in global data model
                     'onSuccess': function(result) {
                         log.debug("provisionCertificate success! " + Object.toJSON(result));
+                        alert("Certificate provisioned succesfully");
                         $('certificate-provision-form').hide();
                     },
                     'onFailure': function(result) {
                         log.error("provisionCertificate failed! " + Object.toJSON(result));
+                        alert("Certificate provisioned failed");
                     }
                 }
         );
