@@ -10,7 +10,7 @@ CREATE TABLE mw_asset_tag_certificate (
   Host_ID integer DEFAULT NULL,
   UUID character varying(100) DEFAULT NULL,
   Certificate bytea NOT NULL,
-  SHA256_Hash bytea DEFAULT NULL,
+  SHA1_Hash bytea DEFAULT NULL,
   PCREvent bytea DEFAULT NULL,
   Revoked boolean DEFAULT NULL,
   NotBefore timestamp without time zone DEFAULT NULL,

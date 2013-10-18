@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.intel.mtwilson.as.business.AssetTagCertBO;
 
 /**
  *
@@ -40,7 +41,9 @@ public class AssetTagCert {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String importAssetTagCertificate(AssetTagCertCreateRequest atagObj)  {
-        boolean result = true;
+        log.debug(("assetTagDemo are we landing in here instead?"));
+        AssetTagCertBO object = new AssetTagCertBO();
+        boolean result = object.importAssetTagCertificate(atagObj);
         return Boolean.toString(result);
     }
     
