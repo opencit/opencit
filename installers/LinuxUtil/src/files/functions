@@ -2371,6 +2371,7 @@ tomcat_restart() {
       $tomcat stop
     fi  
   
+    tomcat_running_report
     $tomcat start
   fi
 }
