@@ -532,18 +532,6 @@ if [ ! -z "$opt_privacyca" ]; then
   #echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
   #/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
   #echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 
@@ -551,54 +539,18 @@ if [ ! -z "opt_attservice" ]; then
   echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 if [ ! -z "$opt_mangservice" ]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 if [ ! -z "$opt_wlmservice" ]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 #if [ ! -z "$mangportal" ]; then
@@ -623,18 +575,6 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 #TODO-stdale monitrc needs to be customized depending on what is installed
