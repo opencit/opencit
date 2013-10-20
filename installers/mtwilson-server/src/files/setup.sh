@@ -204,6 +204,7 @@ find_installer() {
 
 java_installer=`find_installer java`
 monit_installer=`find_installer monit`
+logrotate_installer=`find_installer logrotate`
 mtwilson_util=`find_installer MtWilsonLinuxUtil`
 privacyca_service=`find_installer PrivacyCAService`
 management_service=`find_installer ManagementService`
@@ -575,6 +576,36 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
+fi
+
+if [ ! -z "$opt_logrotate" ]; then
+  echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
+  ./$logrotate
+  echo "Log Rotate installed..." | tee -a  $INSTALL_LOG_FILE
+fi
+
+mkdir -p /etc/logrotate.d
+
+if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
+ echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
+	daily
+	rotate $LOG_OLD
+	compress
+	delaycompress
+	missingok
+	notifempty
+	size $LOG_SIZE
+}
+
+/usr/share/apache-tomcat-6.0.29/logs/catalina.out {
+	daily
+	rotate $LOG_OLD
+	compress
+	delaycompress
+	missingok
+	notifempty
+	size $LOG_SIZE
+}" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
 #TODO-stdale monitrc needs to be customized depending on what is installed
