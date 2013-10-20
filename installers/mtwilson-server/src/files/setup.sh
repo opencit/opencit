@@ -581,7 +581,7 @@ fi
 
 if [ ! -z "$opt_logrotate" ]; then
   echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
-  ./$logrotate
+  ./$logrotate_installer
   echo "Log Rotate installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
