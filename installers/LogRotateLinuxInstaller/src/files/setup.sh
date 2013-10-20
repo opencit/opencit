@@ -9,8 +9,7 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 # SCRIPT EXECUTION
 
 logRotate_clear() {
-  #MONIT_HOME=""
-  monit=""
+  logrotate=""
 }
 
 logRotate_detect() {
