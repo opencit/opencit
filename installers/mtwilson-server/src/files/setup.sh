@@ -9,7 +9,8 @@ if [ ! $currentUser == "root" ]; then
  exit -1
 fi
 
-
+export LOG_SIZE=100M
+export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
