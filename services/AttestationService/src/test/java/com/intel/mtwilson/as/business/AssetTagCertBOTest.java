@@ -5,15 +5,18 @@
 package com.intel.mtwilson.as.business;
 
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
+import java.io.IOException;
+import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
-
+import com.intel.mtwilson.model.Sha1Digest;
 /**
  *
  * @author ssbangal
@@ -29,6 +32,21 @@ public class AssetTagCertBOTest {
         
         boolean importAssetTagCertificate = atagBO.importAssetTagCertificate(atagRequest);        
         System.out.println(importAssetTagCertificate);
+    }
+    
+    @Test
+    public void testAssetTagCert() throws IOException{
+        List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
+         if (atagCerts.isEmpty()) {
+                    System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
+         } else {
+                 // For each of the asset tag certs that are returned back, we need to validate the certificate first.
+                 for (MwAssetTagCertificate atagTempCert : atagCerts){
+                     Sha1Digest certSha1 = Sha1Digest.valueOf(atagTempCert.getCertificate());
+                     System.out.println("sha1 of cert == " + certSha1.toString());
+                     Sha1Digest certExtend = certSha1.extend(Sha1Digest.ZERO);
+                 }
+          }
     }
     
     @Test
