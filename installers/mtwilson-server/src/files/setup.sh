@@ -595,6 +595,7 @@ if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
 	delaycompress
 	missingok
 	notifempty
+	copytruncate
 	size $LOG_SIZE
 }
 
@@ -605,6 +606,7 @@ if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
 	delaycompress
 	missingok
 	notifempty
+	copytruncate
 	size $LOG_SIZE
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
