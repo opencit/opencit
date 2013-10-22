@@ -27,7 +27,7 @@ logRotate_install() {
     if [[ -z "$logrotate" ]]; then
       echo_failure "Unable to auto-install Log Rotate"     
     else
-      echo "Log Rotate installed in $logrotate"
+      echo  "Log Rotate installed in $logrotate"
     fi
 }
 
