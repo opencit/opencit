@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.business;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
@@ -16,12 +17,29 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
-import com.intel.mtwilson.model.Sha1Digest;
 /**
  *
  * @author ssbangal
  */
 public class AssetTagCertBOTest {
+    
+    @Test
+    public void testAssetTagCert() throws IOException{
+        List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
+         if (atagCerts.isEmpty()) {
+                    System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
+         } else {
+                 // For each of the asset tag certs that are returned back, we need to validate the certificate first.
+                 for (MwAssetTagCertificate atagTempCert : atagCerts){
+                     Sha1Digest certSha1 = Sha1Digest.digestOf(atagTempCert.getCertificate());
+                     System.out.println("sha1 of cert == " + certSha1.toString());
+                     certSha1 = certSha1.extend(certSha1);
+                     System.out.println("sha1 of sha1 of cert == " + certSha1.toString());
+                     certSha1 = Sha1Digest.ZERO.extend(certSha1);
+                     System.out.println("sha1 of sha1 of cert extended with zero == " + certSha1.toString());
+                }
+          }
+    }
     
     @Test
     public void insertAssetTagCert() {
@@ -35,7 +53,7 @@ public class AssetTagCertBOTest {
     }
     
     @Test
-    public void testAssetTagCert() throws IOException{
+    public void mytestAssetTagCert() throws IOException{
         List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
          if (atagCerts.isEmpty()) {
                     System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
