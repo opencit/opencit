@@ -26,6 +26,7 @@
     <module>mtwilson-server</module>
     <module>TomcatLinuxInstaller</module>
     <module>PostgresLinuxInstaller</module>
+	<module>LogRotateLinuxInstaller</module>
   </modules>
 
   <profiles>

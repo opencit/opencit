@@ -41,5 +41,4 @@ cp *.jar ${GLASSFISH_HOME}/modules/
 glassfish_stop
 glassfish_start
 
-
 echo

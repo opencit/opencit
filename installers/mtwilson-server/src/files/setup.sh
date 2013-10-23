@@ -9,8 +9,17 @@ if [ ! $currentUser == "root" ]; then
  exit -1
 fi
 
-
+#define defaults so that they can be overwriten 
+#if the value appears in mtwilson.env
+export INSTALLED_MARKER_FILE=/tmp/.mtwilsonInstalled
+export LOG_ROTATION_PERIOD=daily
+export LOG_COMPRESS=compress
+export LOG_DELAYCOMPRESS=delaycompress
+export LOG_COPYTRUNCATE=copytruncate
+export LOG_SIZE=100M
+export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
+
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
@@ -204,6 +213,7 @@ find_installer() {
 
 java_installer=`find_installer java`
 monit_installer=`find_installer monit`
+logrotate_installer=`find_installer logrotate`
 mtwilson_util=`find_installer MtWilsonLinuxUtil`
 privacyca_service=`find_installer PrivacyCAService`
 management_service=`find_installer ManagementService`
@@ -475,6 +485,14 @@ if using_glassfish; then
   fi
 
   glassfish_detect
+
+  if [ -e $glassfish_bin ]; then
+    echo "Disabling glassfish log rotation in place of system wide log rotation"
+	$glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+  else
+	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation"
+	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+  fi
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
@@ -575,6 +593,38 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
+fi
+
+if [ ! -z "$opt_logrotate" ]; then
+  echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
+  ./$logrotate_installer
+  echo "Log Rotate installed..." | tee -a  $INSTALL_LOG_FILE
+fi
+
+mkdir -p /etc/logrotate.d
+
+if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
+ echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
+	missingok
+	notifempty
+	rotate $LOG_OLD
+	size $LOG_SIZE
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
+}
+
+/usr/share/apache-tomcat-6.0.29/logs/catalina.out {
+    missingok
+	notifempty
+	rotate $LOG_OLD
+	size $LOG_SIZE
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
+}" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
 #TODO-stdale monitrc needs to be customized depending on what is installed
@@ -760,7 +810,9 @@ elif using_tomcat; then
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
-
+if [ -n "$INSTALLED_MARKER_FILE" ]; then
+ touch $INSTALLED_MARKER_FILE
+fi
 
 
 
