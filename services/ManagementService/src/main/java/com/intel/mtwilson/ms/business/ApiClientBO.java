@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyJpa;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
@@ -234,14 +236,22 @@ public class ApiClientBO extends BaseBO {
 
             clearRolesForApiClient(apiClientX509);
             setRolesForApiClient(apiClientX509, apiClientRequest.roles);
-            
-            MwPortalUserJpaController mwPortalUserJpaController = new MwPortalUserJpaController(getMSEntityManagerFactory());
-            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(apiClientX509.getName());
+                        
+            MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser();//new MwPortalUserJpaController(getMSEntityManagerFactory());
+            String x509UserName = apiClientX509.getName();
+            // username at this point looks like 'CN=admin,OU=Mt Wilson,O=Trusted Data Center,C=US'
+            String[] parts = x509UserName.split(",");
+            String[] subParts = parts[0].split("=");
+            String userName = subParts[1];
+            log.debug("editing portal user " + userName);
+            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(apiClientX509.getUserNameFromName());
             if(portalUser != null) {
-                portalUser.setEnabled(true);
+                portalUser.setEnabled(apiClientRequest.enabled);
                 portalUser.setStatus(apiClientRequest.status);
+                portalUser.setComment(apiClientRequest.comment);
+                mwPortalUserJpaController.edit(portalUser);
             }
-            mwPortalUserJpaController.edit(portalUser);
+            
             
             // Capture the change in the syslog
             Object[] paramArray = {Arrays.toString(apiClientRequest.fingerprint), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
