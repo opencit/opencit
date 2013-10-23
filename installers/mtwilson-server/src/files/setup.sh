@@ -477,6 +477,14 @@ if using_glassfish; then
   fi
 
   glassfish_detect
+
+  if [ -e $glassfish_bin ]; then
+    echo "Disabling glassfish log rotation in place of system wide log rotation"
+	$glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+  else
+	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation"
+	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+  fi
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
