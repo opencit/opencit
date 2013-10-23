@@ -285,6 +285,11 @@ public class HostBO extends BaseBO {
             TblHosts tblHosts = new TblHosts();
             tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
             
+            // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
+            // first and make up the complete connection string.
+            ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
+            hostObj.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
+            
             // TODO: Check with jonathan on the policy used.
             // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a 
             //man-in-the-middle attack against us at the moment.  TODO maybe we need an option for a global default 
@@ -292,7 +297,7 @@ public class HostBO extends BaseBO {
             //assumption, it's the operator who knows the environment.
             tblHosts.setTlsKeystore(null);
             tblHosts.setName(hostObj.HostName);
-            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);            
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
@@ -1160,6 +1165,11 @@ public class HostBO extends BaseBO {
                     ConnectionString cs = ConnectionString.from(gkvHost);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                     //System.err.println("configureWhiteListFromCustomData cs now == " + gkvHost.AddOn_Connection_String );
+                } else {
+                    // Oct 23, 2013: We just make sure that the connection string has the prefix. Otherwise the agent factory will not be
+                    // able to instantiate the correct one.
+                    ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
+                    gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 }
                 // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
