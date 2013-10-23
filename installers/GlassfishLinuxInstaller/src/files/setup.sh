@@ -41,5 +41,12 @@ cp *.jar ${GLASSFISH_HOME}/modules/
 glassfish_stop
 glassfish_start
 
+glassfish_detect
+if [ -e $glassfish_bin ]; then
+ $glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+else
+ echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation"
+ echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+fi
 
 echo
