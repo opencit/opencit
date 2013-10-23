@@ -9,9 +9,17 @@ if [ ! $currentUser == "root" ]; then
  exit -1
 fi
 
+#define defaults so that they can be overwriten 
+#if the value appears in mtwilson.env
+export INSTALLED_MARKER_FILE=/tmp/.mtwilsonInstalled
+export LOG_ROTATION_PERIOD=daily
+export LOG_COMPRESS=compress
+export LOG_DELAYCOMPRESS=delaycompress
+export LOG_COPYTRUNCATE=copytruncate
 export LOG_SIZE=100M
 export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
+
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
@@ -597,25 +605,25 @@ mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
  echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
-	daily
-	rotate $LOG_OLD
-	compress
-	delaycompress
 	missingok
 	notifempty
-	copytruncate
+	rotate $LOG_OLD
 	size $LOG_SIZE
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
 }
 
 /usr/share/apache-tomcat-6.0.29/logs/catalina.out {
-	daily
-	rotate $LOG_OLD
-	compress
-	delaycompress
-	missingok
+    missingok
 	notifempty
-	copytruncate
+	rotate $LOG_OLD
 	size $LOG_SIZE
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
@@ -802,7 +810,9 @@ elif using_tomcat; then
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
-
+if [ -n "$INSTALLED_MARKER_FILE" ]; then
+ touch $INSTALLED_MARKER_FILE
+fi
 
 
 

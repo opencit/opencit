@@ -398,6 +398,10 @@ case "$1" in
 		service monit stop &> /dev/null
 		# only remove the config files we added to conf.d, not anything else
 		rm -fr /etc/monit/conf.d/*.mtwilson
+		echo "Removing mtwilson logrotate files"
+		rm -fr /etc/logrotate.d/mtwilson.logrotate
+		echo "Restarting logrotate after removing config"
+		service logrotate restart &> /dev/null
         # java:  rm -rf /usr/share/jdk1.6.0_29
         # Finally, clear variables so that detection will work properly if mt wilson is re-installed  XXX TODO need to export
         java_clear; export JAVA_HOME=""; export java=""; export JAVA_VERSION=""
@@ -406,6 +410,9 @@ case "$1" in
         postgres_clear; export POSTGRES_HOME=""; export psql=""
         mysql_clear; export MYSQL_HOME=""; export mysql=""
         echo_success "Done"
+		if [ -n "$INSTALLED_MARKER_FILE" ]; then
+			rm -fr $INSTALLED_MARKER_FILE
+		fi
         ;;
   help)
         ;&
