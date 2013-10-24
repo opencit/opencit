@@ -126,20 +126,20 @@ public class AssetTagCertBO extends BaseBO{
                     ConnectionString cs = new ConnectionString(hostObj.getAddOnConnectionInfo());
                     if (cs.getVendor() == Vendor.CITRIX) {
                         // Citrix stores the SHA1 digest value as such in the NVRAM
-                        Sha1Digest certSha1 = Sha1Digest.digestOf(atagCert.getCertificate());
-                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", certSha1.toString());
+                        Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
+                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", tag.toString());
                         
                         // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
-                        certSha1 = Sha1Digest.digestOf(certSha1.toString().getBytes("UTF-8"));
-                        log.debug("mapAssetTagCertToHost : Sha1 of Sha1 Hash of the certificate with UUID {} is {}.", certSha1.toString());
+                        Sha1Digest citrixInput = Sha1Digest.digestOf(tag.toBase64().getBytes()); // Sha1Digest.digestOf(tag.toString().getBytes("UTF-8"));
+                        log.debug("mapAssetTagCertToHost : Sha1 of Sha1 Hash of the certificate with UUID {} is {}.", citrixInput.toString());
                         
                         // It then appends a 20 byte zero array to the SHA1 of SHA1 hash for extending into PCR 22
-                        byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + certSha1.toByteArray().length];                   
-                        System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
-                        System.arraycopy(certSha1.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, certSha1.toByteArray().length); 
+                        //byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + citrixInput.toByteArray().length];                   
+                        //System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
+                        //System.arraycopy(citrixInput.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, citrixInput.toByteArray().length); 
                         
                         // Final value that is written into PCR 22 is the SHA1 of the zero appended value
-                        expectedHash = Sha1Digest.digestOf(destination);
+                        expectedHash =Sha1Digest.ZERO.extend(citrixInput);
                         log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", expectedHash.toString());
                         
                     } else if (cs.getVendor() == Vendor.VMWARE) {
@@ -258,6 +258,7 @@ public class AssetTagCertBO extends BaseBO{
      * @return 
      */
     public MwAssetTagCertificate findValidAssetTagCertForHost(String uuid){
+        uuid = uuid.replace("\n", "");
         MwAssetTagCertificate atagCert = null;
 
         try {
