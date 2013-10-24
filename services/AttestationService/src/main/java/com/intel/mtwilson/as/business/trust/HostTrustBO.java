@@ -780,6 +780,7 @@ public class HostTrustBO extends BaseBO {
                 MwAssetTagCertificate atagCertForHost = atagCertBO.findValidAssetTagCertForHost(tblSamlAssertion.getHostId().getId());
                 if (atagCertForHost != null) {
                     atags = X509AttributeCertificate.valueOf(atagCertForHost.getCertificate()).getTags();
+                    atags.add(new AttributeOidAndValue("UUID", atagCertForHost.getUuid()));
                 }
             }
             
