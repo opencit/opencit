@@ -16,7 +16,9 @@ import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import java.io.IOException;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.util.encoders.Base64Encoder;
 import org.junit.Test;
+
 /**
  *
  * @author ssbangal
@@ -29,15 +31,24 @@ public class AssetTagCertBOTest {
          if (atagCerts.isEmpty()) {
                     System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
          } else {
-                 // For each of the asset tag certs that are returned back, we need to validate the certificate first.
-                 for (MwAssetTagCertificate atagTempCert : atagCerts){
+                  //For each of the asset tag certs that are returned back, we need to validate the certificate first.
+                  for (MwAssetTagCertificate atagTempCert : atagCerts){
+                      //This is what is stored in NVRAM
                      Sha1Digest certSha1 = Sha1Digest.digestOf(atagTempCert.getCertificate());
                      System.out.println("sha1 of cert == " + certSha1.toString());
-                     certSha1 = certSha1.extend(certSha1);
+                     
+                     // When Citrix code reads NVRAM, it reads it as string
+                     certSha1 = Sha1Digest.digestOf(certSha1.toString().getBytes("UTF-8"));
                      System.out.println("sha1 of sha1 of cert == " + certSha1.toString());
-                     certSha1 = Sha1Digest.ZERO.extend(certSha1);
-                     System.out.println("sha1 of sha1 of cert extended with zero == " + certSha1.toString());
-                }
+                     
+                    byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + certSha1.toByteArray().length];                   
+                    System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
+                    System.arraycopy(certSha1.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, certSha1.toByteArray().length);  
+
+                    // Final sha1 from citrix
+                     Sha1Digest finalDigest = Sha1Digest.digestOf(destination);
+                     System.out.println("Final SHA1 :" + finalDigest.toString());
+                 }
           }
     }
     
@@ -50,21 +61,6 @@ public class AssetTagCertBOTest {
         
         boolean importAssetTagCertificate = atagBO.importAssetTagCertificate(atagRequest);        
         System.out.println(importAssetTagCertificate);
-    }
-    
-    @Test
-    public void mytestAssetTagCert() throws IOException{
-        List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
-         if (atagCerts.isEmpty()) {
-                    System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
-         } else {
-                 // For each of the asset tag certs that are returned back, we need to validate the certificate first.
-                 for (MwAssetTagCertificate atagTempCert : atagCerts){
-                     Sha1Digest certSha1 = Sha1Digest.valueOf(atagTempCert.getCertificate());
-                     System.out.println("sha1 of cert == " + certSha1.toString());
-                     Sha1Digest certExtend = certSha1.extend(Sha1Digest.ZERO);
-                 }
-          }
     }
     
     @Test

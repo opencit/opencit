@@ -10,12 +10,15 @@ import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
@@ -69,7 +72,11 @@ public class AssetTagCertBO extends BaseBO{
             atagCert.setRevoked(false);
             atagCert.setSHA1Hash(Sha1Digest.digestOf(atagObj.getCertificate()).toByteArray());
             //atagCert.setSHA256Hash(Sha256Digest.digestOf(atagObj.getCertificate()).toByteArray()); // not used with TPM 1.2
+            
+            // We are just writing some default value here, which would be changed when the host would be mapped to this
+            // certificate.
             atagCert.setPCREvent(Sha1Digest.digestOf(atagCert.getSHA1Hash()).toByteArray());
+            
             log.debug("assetTag writing cert to DB");
             My.jpa().mwAssetTagCertificate().create(atagCert);
             result = true;
@@ -92,20 +99,57 @@ public class AssetTagCertBO extends BaseBO{
      */
     public boolean mapAssetTagCertToHost(AssetTagCertAssociateRequest atagObj) {
         boolean result = false;
+        Sha1Digest expectedHash = null;
         
         try {
+            My.initDataEncryptionKey(); // needed for connection string decryption
             // Find the asset tag certificate for the specified Sha256Hash value
             if (atagObj.getSha1OfAssetCert() != null) {
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
+                // below code is for debugging.. we will delete it later.
+                // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
                 if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                    log.error("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                    log.error("mapAssetTagCertToHost : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
                 } else {
                     // Now that we have the asset tag identified, let us update the entry with the host ID for which it has
                     // to be associated.
                     MwAssetTagCertificate atagCert = atagCerts.get(0);
                     atagCert.setHostID(atagObj.getHostID());
+                    
+                    // Now that the mapping is done, we need to calculate what the expected PCR value should be and put it in
+                    // the PCREvent column. Since this is host specific, we need to check the host type and accordingly update
+                    TblHosts hostObj = My.jpa().mwHosts().findTblHosts(atagObj.getHostID());
+                    ConnectionString cs = new ConnectionString(hostObj.getAddOnConnectionInfo());
+                    if (cs.getVendor() == Vendor.CITRIX) {
+                        // Citrix stores the SHA1 digest value as such in the NVRAM
+                        Sha1Digest certSha1 = Sha1Digest.digestOf(atagCert.getCertificate());
+                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", certSha1.toString());
+                        
+                        // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
+                        certSha1 = Sha1Digest.digestOf(certSha1.toString().getBytes("UTF-8"));
+                        log.debug("mapAssetTagCertToHost : Sha1 of Sha1 Hash of the certificate with UUID {} is {}.", certSha1.toString());
+                        
+                        // It then appends a 20 byte zero array to the SHA1 of SHA1 hash for extending into PCR 22
+                        byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + certSha1.toByteArray().length];                   
+                        System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
+                        System.arraycopy(certSha1.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, certSha1.toByteArray().length); 
+                        
+                        // Final value that is written into PCR 22 is the SHA1 of the zero appended value
+                        expectedHash = Sha1Digest.digestOf(destination);
+                        log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", expectedHash.toString());
+                        
+                    } else if (cs.getVendor() == Vendor.VMWARE) {
+                        
+                        // TODO : Need to implement how VMware calculates PCR 22
+                    } else {
+                        // Default open source
+                        // TODO : Need to implement how VMware calculates PCR 22
+                    }
+                    
+                    atagCert.setPCREvent(expectedHash.toByteArray());
                     My.jpa().mwAssetTagCertificate().edit(atagCert);
+                    
                     result = true;
                 }
             } else {
