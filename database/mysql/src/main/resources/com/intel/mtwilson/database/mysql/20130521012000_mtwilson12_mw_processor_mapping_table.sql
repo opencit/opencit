@@ -10,12 +10,12 @@ CREATE  TABLE `mw_as`.`mw_processor_mapping` (
   PRIMARY KEY (`ID`) );
 
 INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Romley', 'Sandybridge', 'A7 06 02');
---INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Romley', 'Sandybridge', 'D6 06 02');
+INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Romley', 'Sandybridge', 'D6 06 02');
 INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Romley', 'Sandybridge', 'D7 06 02');
 INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Romley', 'Ivybridge', 'A9 06 03');
 INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Thurley', 'Westmere', 'C2 06 02');
 INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Thurley', 'Westmere', 'F2 06 02');
---INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Thurley', 'Westmere', '52 06 02');
+INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Thurley', 'Westmere', '52 06 02');
 INSERT INTO `mw_as`.`mw_processor_mapping` (`platform_name`, `processor_type`, `processor_cpuid`) VALUES ('Thurley', 'Westmere', '55 06 02');
 
 INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20130521012000,NOW(),'Patch for creating the processor mapping table.');
