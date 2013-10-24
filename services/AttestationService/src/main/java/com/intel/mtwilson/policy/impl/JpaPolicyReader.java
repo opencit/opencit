@@ -163,8 +163,9 @@ public class JpaPolicyReader {
         HashSet<Rule> rules = new HashSet<Rule>();
         log.debug("Adding the asset tag rule for host {} with asset tag ID {}", tblHosts.getName(), atagCert.getId());
         log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", atagCert.getPCREvent().toString());
-        Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
-        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, pcrValue));
+        // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
+        // Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
+        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
         rule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(rule);
         return rules;
