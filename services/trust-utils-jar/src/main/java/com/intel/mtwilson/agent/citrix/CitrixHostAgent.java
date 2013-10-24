@@ -5,6 +5,7 @@
 package com.intel.mtwilson.agent.citrix;
 
 
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -273,7 +274,7 @@ BwIDAQAB
     }
 
     @Override
-    public Map<String, String> getHostAttributes() throws IOException {
+    public Map<String, String> getHostAttributes()  {
         HashMap<String,String> hm = new HashMap<String, String>();
         // Retrieve the data from the host and add it into the hashmap
         HostInfo hostInfo = null;
@@ -282,8 +283,12 @@ BwIDAQAB
         } catch (Exception ex) {
             log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
         }
-        // Currently we are just adding the UUID of th host. Going ahead we can add additional details
-        hm.put("Host_UUID", hostInfo.getHostUUID());
+        try {
+            // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+            hm.put("Host_UUID", client.getSystemUUID());
+        } catch(Exception ex){
+            throw new ASException(ex);
+        }
         return hm;
     }
     

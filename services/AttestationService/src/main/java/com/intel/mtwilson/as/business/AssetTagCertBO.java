@@ -75,8 +75,11 @@ public class AssetTagCertBO extends BaseBO{
             
             // We are just writing some default value here, which would be changed when the host would be mapped to this
             // certificate.
-            atagCert.setPCREvent(Sha1Digest.digestOf(atagCert.getSHA1Hash()).toByteArray());
-            
+            //atagCert.setPCREvent(Sha1Digest.digestOf(atagCert.getSHA1Hash()).toByteArray());
+            Sha1Digest sha1D = Sha1Digest.digestOf(atagObj.getCertificate());
+            Sha1Digest expectedPcr = Sha1Digest.ZERO.extend( Sha1Digest.digestOf( sha1D.toBase64().getBytes() ) );
+            atagCert.setPCREvent(expectedPcr.toByteArray() );
+
             log.debug("assetTag writing cert to DB");
             My.jpa().mwAssetTagCertificate().create(atagCert);
             result = true;
