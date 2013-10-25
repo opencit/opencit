@@ -11,7 +11,8 @@ import com.intel.mtwilson.as.business.trust.Util;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.model.*;
+//import com.intel.mtwilson.model;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
@@ -28,6 +29,9 @@ import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrManifest;
 import java.io.StringWriter;
 import java.util.*;
 import java.io.IOException;
@@ -259,7 +263,9 @@ public class ReportsBO extends BaseBO {
                 PcrLogReport manifest = new PcrLogReport();
                 manifest.setName(22);
                 manifest.setValue(pcr.getValue().toString());
-                manifest.setWhiteListValue( Sha1Digest.valueOf(atagCert.getPCREvent()).toString());
+                //Sha1Digest sha1d = new Sha1Digest(atagCert.getPCREvent());
+                
+                manifest.setWhiteListValue(new  Sha1Digest(atagCert.getPCREvent()).toString());
                 if(manifest.getValue().equals(manifest.getWhiteListValue())) {
                     manifest.setTrustStatus(1);
                 }else{
