@@ -445,7 +445,7 @@ public class CitrixClient {
                 if( validPcrNumber && validPcrValue ) {
                 	log.debug("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
-                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new com.intel.mtwilson.model.Sha1Digest(pcrValue))); // TODO later replace com.intel.mtwilson.model.Sha1Digest with com.intel.dscg.cpg.crypto.Sha1Digest.valueOfHex(pcrValue);
+                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue))); // TODO later replace com.intel.mtwilson.model.Sha1Digest with com.intel.dscg.cpg.crypto.Sha1Digest.valueOfHex(pcrValue);
                                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }

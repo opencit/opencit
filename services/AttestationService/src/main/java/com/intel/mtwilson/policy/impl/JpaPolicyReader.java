@@ -21,7 +21,7 @@ import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
@@ -162,10 +162,11 @@ public class JpaPolicyReader {
     public Set<Rule> loadPcrMatchesConstantRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts tblHosts) {
         HashSet<Rule> rules = new HashSet<Rule>();
         log.debug("Adding the asset tag rule for host {} with asset tag ID {}", tblHosts.getName(), atagCert.getId());
-        log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", atagCert.getPCREvent().toString());
+        log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", Sha1Digest.valueOf(atagCert.getPCREvent()).toString());
         // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
         // Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
-        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
+        //PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
+        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
         rule.setMarkers(TrustMarker.ASSET_TAG.name());
         rules.add(rule);
         return rules;
