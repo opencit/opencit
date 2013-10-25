@@ -363,7 +363,7 @@ public class SamlGenerator {
             attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
             if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
                 for (AttributeOidAndValue atagAttr : atags) {
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG"+ atagAttr.getOid()), atagAttr.getValue()));
+                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+ atagAttr.getOid()), atagAttr.getValue()));
                 }
             }
 

@@ -1,6 +1,8 @@
 package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
+
 //import org.codehaus.jackson.annotate.JsonValue;
 
 /**
@@ -78,7 +80,8 @@ public class Pcr extends ObjectModel {
         if( pcrIndex == null ) { fault("Pcr index is null"); }
         else if( !pcrIndex.isValid() ) { fault(pcrIndex, "Invalid pcr index"); }
         if( pcrValue == null ) { fault("SHA1 Digest is null"); }
-        else if (!pcrValue.isValid()) { fault(pcrValue, "Invalid pcr value"); }
+        //else if (!pcrValue.isValid()) { fault(pcrValue, "Invalid pcr value"); }
+        else if (!Sha1Digest.isValid(pcrValue.toByteArray())) { fault("Invalid pcr value"); }
     }
 
 }

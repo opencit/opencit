@@ -103,5 +103,11 @@
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.intel.dcsg.cpg</groupId>
+      <artifactId>cpg-crypto</artifactId>
+      <version>0.1.4-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>  
 </project>
