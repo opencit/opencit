@@ -532,6 +532,7 @@ mtwilson.atag = mtwilson.atag || {};
                 log.debug("Sending deploy-certificate request");
                 // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
                 ajax.json.post('deploy-certificate', {'deploy': {}}, {'uri': '/certificates/' + uuid, datapath: 'deployCertificates', idkey: 'uuid'});
+                alert("Certificate deployed to Mt. Wilson");
             }
         }
         //view.sync();
@@ -555,20 +556,25 @@ mtwilson.atag = mtwilson.atag || {};
 //            delete provisionObject['certificateUuid'];
         var wrappedProvisionObject = {'provision': provisionObject};
         // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
+        var pass = false;
         ajax.json.post('provision-certificate', wrappedProvisionObject,
                 {'uri': '/certificates/' + certificateUuid,
                     'datapath': null, // prevent result from being stored in global data model
                     'onSuccess': function(result) {
-                        log.debug("provisionCertificate success! " + Object.toJSON(result));
-                        alert("Certificate provisioned succesfully");
+                        log.debug("provisionCertificate success! " + Object.toJSON(result));                       
                         $('certificate-provision-form').hide();
+                        pass = true;
                     },
                     'onFailure': function(result) {
                         log.error("provisionCertificate failed! " + Object.toJSON(result));
-                        alert("Certificate provisioned failed");
+                        pass = false;
                     }
                 }
         );
+        if( pass = true ) 
+            alert("Certificate provisioned to host");
+        else
+            alert("Unable to provision certificate to host");
         // TODO  on success :  $('certificate-provision-form').hide();
 //            view.sync(); //view.update(data);
 //        }
