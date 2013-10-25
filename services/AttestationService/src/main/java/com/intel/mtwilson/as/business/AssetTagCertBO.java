@@ -139,7 +139,7 @@ public class AssetTagCertBO extends BaseBO{
                         //System.arraycopy(citrixInput.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, citrixInput.toByteArray().length); 
                         
                         // Final value that is written into PCR 22 is the SHA1 of the zero appended value
-                        expectedHash =Sha1Digest.ZERO.extend(citrixInput);
+                        expectedHash = Sha1Digest.ZERO.extend( Sha1Digest.digestOf(tag.toHexString().getBytes()) );
                         log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
                         
                     } else if (cs.getVendor() == Vendor.VMWARE) {
