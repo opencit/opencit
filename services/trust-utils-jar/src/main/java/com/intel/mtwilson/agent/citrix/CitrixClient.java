@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.citrix;
 
+import java.lang.Process;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
@@ -203,11 +204,12 @@ public class CitrixClient {
 			
             Map<String, String> myMap = new HashMap<String, String>();
             log.debug("sending the following to the xenserver: " + tag.toBase64());
-            myMap.put("tag", tag.toBase64());
+            myMap.put("tag", Base64.encodeBase64String(tag.toHexString().getBytes()));
             
             //toByteArray()
             String retval = h.callPlugin(connection,  "tpm","tpm_set_asset_tag", myMap);
             log.debug("xenapi returned: {}", retval);
+            
     }
     
     
@@ -445,7 +447,7 @@ public class CitrixClient {
                 if( validPcrNumber && validPcrValue ) {
                 	log.debug("Result PCR "+pcrNumber+": "+pcrValue);
                         if(pcrs.contains(pcrNumber)) 
-                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new com.intel.mtwilson.model.Sha1Digest(pcrValue))); // TODO later replace com.intel.mtwilson.model.Sha1Digest with com.intel.dscg.cpg.crypto.Sha1Digest.valueOfHex(pcrValue);
+                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue))); // TODO later replace com.intel.mtwilson.model.Sha1Digest with com.intel.dscg.cpg.crypto.Sha1Digest.valueOfHex(pcrValue);
                                     //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
                 }            	
             }

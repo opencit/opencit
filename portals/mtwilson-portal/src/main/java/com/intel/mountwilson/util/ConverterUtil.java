@@ -121,8 +121,8 @@ public class ConverterUtil {
                                     // We need to retrive all the asset tag specific attributes and show it to the user
                                     Set<String> attributeNames = trustAssertion.getAttributeNames();
                                     for (String attrName : attributeNames) {
-                                        if (attrName.startsWith("ATAG_")) {
-                                            assetTagDetails += trustAssertion.getStringAttribute(attrName);
+                                        if (attrName.startsWith("ATAG") && !attrName.contains("UUID")) {
+                                            assetTagDetails += trustAssertion.getStringAttribute(attrName) + "\n";
                                         }
                                     }
                                     hostVO.setAssetTagDetails(assetTagDetails);
