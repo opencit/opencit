@@ -204,6 +204,7 @@ public class CitrixClient {
             Map<String, String> myMap = new HashMap<String, String>();
             log.debug("sending the following to the xenserver: " + tag.toBase64());
             myMap.put("tag", tag.toBase64());
+            
             //toByteArray()
             String retval = h.callPlugin(connection,  "tpm","tpm_set_asset_tag", myMap);
             log.debug("xenapi returned: {}", retval);
