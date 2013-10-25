@@ -130,8 +130,8 @@ public class AssetTagCertBO extends BaseBO{
                         log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
                         
                         // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
-                        Sha1Digest citrixInput = Sha1Digest.digestOf(tag.toBase64().getBytes()); // Sha1Digest.digestOf(tag.toString().getBytes("UTF-8"));
-                        log.debug("mapAssetTagCertToHost : Sha1 of Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), citrixInput.toString());
+                        
+                        
                         
                         // It then appends a 20 byte zero array to the SHA1 of SHA1 hash for extending into PCR 22
                         //byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + citrixInput.toByteArray().length];                   
