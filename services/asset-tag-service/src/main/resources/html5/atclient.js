@@ -523,6 +523,21 @@ mtwilson.atag = mtwilson.atag || {};
         //view.sync();
 //        mtwilson.rivets.views['certificate-browse-table'].sync();
     };
+    mtwilson.atag.deployCertificate = function(uuid) {
+        var i;
+        for (i = data.certificates.length - 1; i >= 0; i--) {
+            if (('uuid' in data.certificates[i]) && data.certificates[i].uuid == uuid) {
+                // optional argument:  "effective" date
+                //ajax.json.post('certificates', data.certificates[i]); // XXX TODO NEED A POST /certificates/{uuid}  with action=revoke.
+                log.debug("Sending deploy-certificate request");
+                // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
+                ajax.json.post('deploy-certificate', {'deploy': {}}, {'uri': '/certificates/' + uuid, datapath: 'deployCertificates', idkey: 'uuid'});
+            }
+        }
+        //view.sync();
+//        mtwilson.rivets.views['certificate-browse-table'].sync();
+    };
+
 
     mtwilson.atag.provisionCertificate = function(input) {
 //        var report = validate(input);

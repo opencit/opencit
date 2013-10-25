@@ -129,7 +129,7 @@ public class CertificateResource extends ServerResource {
     }
     
     public static enum CertificateActionName {
-        REVOKE, PROVISION;
+        REVOKE, PROVISION, DEPLOY;
         @Override
         public String toString() {
             return name().toLowerCase();
@@ -159,6 +159,27 @@ public class CertificateResource extends ServerResource {
             this.uuid = certificateUuid;
         }
         
+    }
+    public static class CertificateDeployAction extends CertificateAction {
+        public Date effective;
+        public CertificateDeployAction() {
+            super(CertificateActionName.DEPLOY);
+            effective = new Date();
+        }
+
+        public Date getEffective() {
+            return effective;
+        }
+
+        public void setEffective(Date effective) {
+            this.effective = effective;
+        }
+
+/*        @Override
+        protected void validate() {
+            // we use today's date as the effective date if it is not provided
+        }*/
+
     }
     public static class CertificateRevokeAction extends CertificateAction {
         public Date effective;
@@ -230,6 +251,7 @@ public class CertificateResource extends ServerResource {
     public static class CertificateActionChoice {
         public CertificateRevokeAction revoke;
         public CertificateProvisionAction provision;
+        public CertificateDeployAction deploy;
     }
     
     @Post("json:json")
@@ -240,6 +262,7 @@ public class CertificateResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
+        
         // only one of the actions can be processed for any one request
         if( actionChoice.revoke != null ) {
             actionChoice.revoke.setUuid(uuid);
@@ -277,6 +300,18 @@ public class CertificateResource extends ServerResource {
             CertificateActionChoice result = new CertificateActionChoice();
             result.provision = actionChoice.provision;
             return result;
+        }
+        if( actionChoice.deploy != null ) {
+         actionChoice.deploy.setUuid(uuid);
+         log.debug("assetTag deploying cert to MTW");
+         if(true){
+             AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
+             request.setCertificate(certificate.getCertificate());
+             Global.mtwilson().importAssetTagCertificate(request);
+         }
+         CertificateActionChoice result = new CertificateActionChoice();
+         result.deploy = actionChoice.deploy;
+         return result;
         }
         setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         return null;
