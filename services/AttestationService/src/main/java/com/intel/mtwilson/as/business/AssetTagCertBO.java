@@ -127,11 +127,11 @@ public class AssetTagCertBO extends BaseBO{
                     if (cs.getVendor() == Vendor.CITRIX) {
                         // Citrix stores the SHA1 digest value as such in the NVRAM
                         Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
-                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", tag.toString());
+                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
                         
                         // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
                         Sha1Digest citrixInput = Sha1Digest.digestOf(tag.toBase64().getBytes()); // Sha1Digest.digestOf(tag.toString().getBytes("UTF-8"));
-                        log.debug("mapAssetTagCertToHost : Sha1 of Sha1 Hash of the certificate with UUID {} is {}.", citrixInput.toString());
+                        log.debug("mapAssetTagCertToHost : Sha1 of Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), citrixInput.toString());
                         
                         // It then appends a 20 byte zero array to the SHA1 of SHA1 hash for extending into PCR 22
                         //byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + citrixInput.toByteArray().length];                   
@@ -140,11 +140,16 @@ public class AssetTagCertBO extends BaseBO{
                         
                         // Final value that is written into PCR 22 is the SHA1 of the zero appended value
                         expectedHash =Sha1Digest.ZERO.extend(citrixInput);
-                        log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", expectedHash.toString());
+                        log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
                         
                     } else if (cs.getVendor() == Vendor.VMWARE) {
                         
-                        // TODO : Need to implement how VMware calculates PCR 22
+                        Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
+                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
+
+                        expectedHash =Sha1Digest.ZERO.extend(tag.toByteArray());
+                        log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
+                        
                     } else {
                         // Default open source
                         // TODO : Need to implement how VMware calculates PCR 22
