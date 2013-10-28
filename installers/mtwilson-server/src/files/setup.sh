@@ -627,6 +627,11 @@ if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
+echo  -n "Restarting logrotate service so new configs take effect... "
+service logrotate restart 
+echo "Done"
+
+
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
@@ -789,9 +794,15 @@ if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then
    if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
 fi
 
+echo  -n "Restarting monit service so new configs take effect... "
+service monit restart 
+echo "Done"
+
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
+
+
 
 #Save variables to properties file
 if using_mysql; then   
