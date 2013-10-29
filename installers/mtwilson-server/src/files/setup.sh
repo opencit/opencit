@@ -603,7 +603,7 @@ fi
 
 mkdir -p /etc/logrotate.d
 
-if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
+if [ ! -a /etc/logrotate.d/mtwilson ]; then
  echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
 	missingok
 	notifempty
@@ -764,9 +764,9 @@ if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then
    group pg-db
    start program = \"/usr/sbin/service postgresql start\"
    stop program = \"/usr/sbin/service postgresql stop\"
-   if failed unixsocket /var/run/postgresql/.s.PGSQL.5432 protocol pgsql 
+   if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
       then restart
-   if failed host 127.0.0.1 port 5432 protocol pgsql then restart
+   if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
    if 5 restarts within 5 cycles then timeout
 	depends on pg_bin
 
@@ -780,7 +780,7 @@ if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then
    group mysql_db
    start program = \"/usr/sbin/service mysql start\"
    stop program = \"/usr/sbin/service mysql stop\"
-   if failed host 127.0.0.1 port 3306 protocol mysql then restart
+   if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
    if 5 restarts within 5 cycles then timeout
    depends on mysql_bin
    depends on mysql_rc
