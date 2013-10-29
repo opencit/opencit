@@ -627,11 +627,6 @@ if [ ! -a /etc/logrotate.d/mtwilson ]; then
 }" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
-echo  -n "Restarting logrotate service so new configs take effect... "
-service logrotate restart 
-echo "Done"
-
-
 #TODO-stdale monitrc needs to be customized depending on what is installed
 if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Installing Monit..." | tee -a  $INSTALL_LOG_FILE
@@ -810,6 +805,9 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
+if [ -n "${AUTO_UPDATE_ON_UNTRUST}" ]; then
+  update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
+fi
 
 
 #Save variables to properties file
