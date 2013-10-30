@@ -358,8 +358,10 @@ function fnRegisterMultipleHostSuccess(responseJSON) {
             $('#registerHostTableContent tr').each(function() {
                 var row = $(this);
                 if ($(row).find('td:eq(0)').text() == hostname) {
-                    if (hoststatus == "true")
+                    if (hoststatus == "true") {
                         $(row).find('td:eq(6)').find('textarea').val("Successfully registered/updated the host.");
+                        $(row).find('td:eq(3)').find('input').prop('checked', false);
+                    }
                     else
                         $(row).find('td:eq(6)').find('textarea').val(hosterrormessage);
                 }
