@@ -107,11 +107,7 @@ public class BulkHostRegBO {
                 return;
             }
             try {
-                long regHostStart = System.currentTimeMillis(); // XXX savy performance
                 boolean success = dao.registerHost(hostObj);
-                long regHostStop = System.currentTimeMillis();// XXX savy performance
-                log.debug("XXX savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
-                
                 
                 if (success)
                     result = new HostResponse(ErrorCode.OK);
