@@ -603,7 +603,7 @@ fi
 
 mkdir -p /etc/logrotate.d
 
-if [ ! -a /etc/logrotate.d/mtwilson.logrotate ]; then
+if [ ! -a /etc/logrotate.d/mtwilson ]; then
  echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
 	missingok
 	notifempty
@@ -637,6 +637,7 @@ fi
 mkdir -p /etc/monit/conf.d
 
 # create the monit rc files
+if [ -z "$NO_GLASSFISH_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
  echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
 check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
@@ -693,7 +694,9 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	depends on gf_installed
 	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
 fi
+fi
 
+if [ -z "$NO_TOMCAT_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
  echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
 check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina.sh\"
@@ -753,15 +756,17 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	depends on tc_installed
 	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
 fi
+fi
 
+if [ -z "$NO_POSTGRES_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
       echo "check process postgres matching \"postgresql\"
    group pg-db
    start program = \"/usr/sbin/service postgresql start\"
    stop program = \"/usr/sbin/service postgresql stop\"
-   if failed unixsocket /var/run/postgresql/.s.PGSQL.5432 protocol pgsql 
+   if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
       then restart
-   if failed host 127.0.0.1 port 5432 protocol pgsql then restart
+   if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
    if 5 restarts within 5 cycles then timeout
 	depends on pg_bin
 
@@ -769,13 +774,15 @@ check file pg_bin with path \"/usr/bin/psql\"
 	group pg-db
 	if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
 fi
+fi
 
+if [ -z "$NO_MYSQL_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
       echo "check process mysql matching \"mysql\"
    group mysql_db
    start program = \"/usr/sbin/service mysql start\"
    stop program = \"/usr/sbin/service mysql stop\"
-   if failed host 127.0.0.1 port 3306 protocol mysql then restart
+   if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
    if 5 restarts within 5 cycles then timeout
    depends on mysql_bin
    depends on mysql_rc
@@ -788,10 +795,20 @@ if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then
    group mysql_db
    if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
 fi
+fi
+
+echo  -n "Restarting monit service so new configs take effect... "
+service monit restart 
+echo "Done"
 
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
+
+if [ -n "${AUTO_UPDATE_ON_UNTRUST}" ]; then
+  update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
+fi
+
 
 #Save variables to properties file
 if using_mysql; then   
