@@ -511,12 +511,15 @@ public class CitrixClient {
         String resp = "";
 //        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
 
-        if (AIKCert == null) {
+        if (AIKCert != null) {
+            log.debug("CitrixClient: AIKCert already generated: " + AIKCert);
+            return AIKCert;
+        }
+        else {
             if (!isConnected()) {
                 connect();
             }
-
-            log.debug("CitrixClient: connected to server [" + hostIpAddress + "]");
+            log.debug("CitrixClient: generating AIKCert");
 
 
             Map<String, String> myMap = new HashMap<String, String>();
@@ -546,8 +549,6 @@ public class CitrixClient {
 
 //       log.trace("stdalex-error getAIKCert: returning back: " + resp);
             AIKCert = resp;
-            return resp;
-        } else {
             return AIKCert;
         }
     }

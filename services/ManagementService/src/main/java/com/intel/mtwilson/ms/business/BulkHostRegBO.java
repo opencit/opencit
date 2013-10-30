@@ -107,9 +107,12 @@ public class BulkHostRegBO {
                 return;
             }
             try {
-                log.error("SAVY START: " + hostObj.HostName.toString());
+                long regHostStart = System.currentTimeMillis(); // XXX savy performance
                 boolean success = dao.registerHost(hostObj);
-                log.error("SAVY END: " + hostObj.HostName.toString());
+                long regHostStop = System.currentTimeMillis();// XXX savy performance
+                log.debug("XXX savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
+                
+                
                 if (success)
                     result = new HostResponse(ErrorCode.OK);
                 else
