@@ -36,7 +36,7 @@
 			<div class="singleDiv">
 				<div class="labelDiv">OS-VMM Info :</div>
 				<div class="valueDiv">
-					<select onchange="javascript:SetRequired(this);" id="MainContent_LstVmm" size="4" class="textBoxClass" style="height: auto;">
+					<select onchange="javascript:SetRequired(this);" id="MainContent_LstVmm" size="4" class="textBoxClass" style="height: auto; width: auto">
 					</select>
 				</div>
 			</div>
