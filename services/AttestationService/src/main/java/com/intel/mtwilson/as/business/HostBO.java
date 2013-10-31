@@ -582,13 +582,13 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
-		
+	private synchronized void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
+		checkForDuplicate(host);
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
 		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		
 		String cs = host.getAddOn_Connection_String();
-        //log.info("saveHostInDatabase cs = " + cs);
+                //log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
@@ -613,7 +613,6 @@ public class HostBO extends BaseBO {
 //                if (location != null) {
 //                    tblHosts.setLocation(location);
 //                }
-
                 // create the host
                 log.info("COMMITING NEW HOST DO DATABASE");
                 //log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
@@ -629,7 +628,6 @@ public class HostBO extends BaseBO {
                 }
                 log.info("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
-
         }
 
     /*
