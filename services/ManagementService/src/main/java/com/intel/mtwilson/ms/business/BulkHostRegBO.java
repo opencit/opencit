@@ -54,6 +54,7 @@ public class BulkHostRegBO {
         try {
             
             for (TxtHostRecord hostRecord : hostRecords.getHostRecords()) {
+                log.error("SAVY START: " + hostRecord.HostName.toString());
                 HostMgmt task = new HostMgmt(hostBO, hostRecord);
                 tasks.add(task);
                 Future<?> status = scheduler.submit(task);
@@ -107,6 +108,7 @@ public class BulkHostRegBO {
             }
             try {
                 boolean success = dao.registerHost(hostObj);
+                
                 if (success)
                     result = new HostResponse(ErrorCode.OK);
                 else

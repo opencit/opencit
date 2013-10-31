@@ -72,7 +72,10 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(TxtHostRecord hostObj) throws ApiException {
+        long regHostStart = System.currentTimeMillis(); // XXX savy performance
         boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
+        long regHostStop = System.currentTimeMillis();// XXX savy performance
+        log.debug("XXX savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
         return Boolean.toString(result);
     }
 
@@ -82,7 +85,10 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(HostConfigData hostConfigObj) throws ApiException {
+        long regHostStart = System.currentTimeMillis(); // XXX savy performance
         boolean result = new MSComponentFactory().getHostBO().registerHostFromCustomData(hostConfigObj);
+        long regHostStop = System.currentTimeMillis();// XXX savy performance
+        log.debug("XXX savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
         return Boolean.toString(result);
     }
 

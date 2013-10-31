@@ -138,7 +138,7 @@ public class HostBO extends BaseBO {
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                                 // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
-                                setAikForHost(tblHosts, host); 
+                                setAikForHost(tblHosts, host, agent); 
                                 // Intel hosts return an X509 certificate for the AIK public key, signed by the privacy CA.  so we must verify the certificate is ok.
                                 if( agent.isAikCaAvailable() ) {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
@@ -316,7 +316,7 @@ public class HostBO extends BaseBO {
                         HostAgent agent = factory.getHostAgent(tblHosts);
                         if( agent.isAikAvailable() ) {
                             log.debug("Getting identity.");
-                                setAikForHost(tblHosts, host);
+                                setAikForHost(tblHosts, host, agent);
                         }
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
@@ -479,9 +479,9 @@ public class HostBO extends BaseBO {
                 }
         }
 
-	private void setAikForHost(TblHosts tblHosts, TxtHost host) {
-            HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
-            HostAgent agent = factory.getHostAgent(tblHosts);
+	private void setAikForHost(TblHosts tblHosts, TxtHost host, HostAgent agent) {
+            //HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
+            //HostAgent agent = factory.getHostAgent(tblHosts);
             if( agent.isAikAvailable() ) {
                 if( agent.isAikCaAvailable() ) {
                     X509Certificate cert = agent.getAikCertificate();
