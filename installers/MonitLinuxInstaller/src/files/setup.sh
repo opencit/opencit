@@ -89,18 +89,19 @@ monit_src_install() {
 
 monit_install $MONIT_PACKAGE
 
-chmod 700 monitrc
-if [ -f /etc/monit/monitrc ]; then
-    echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
-    backup_file /etc/monit/monitrc
-else
-	cp monitrc /etc/monit/monitrc
-fi
+#if [ -f /etc/monit/monitrc ]; then
+#    echo_warning "Monit configuration already exists in /etc/monit/monitrc; backing up"
+#    backup_file /etc/monit/monitrc
+#else
+#	cp monitrc /etc/monit/monitrc
+#fi
+
+monitrc=`cat /etc/init.d/monit | grep CONFIG= | cut -d= -f2 | sed 's/\"//g'`
 
 mkdir -p /etc/monit/conf.d
 
-if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
- echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
+if ! grep -q "include /etc/monit/conf.d/*" $monitrc; then 
+ echo "include /etc/monit/conf.d/*" >> $monitrc
 fi
 
 
