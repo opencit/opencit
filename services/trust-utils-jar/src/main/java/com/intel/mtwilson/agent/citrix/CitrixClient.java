@@ -511,7 +511,7 @@ public class CitrixClient {
         String resp = "";
 //        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
 
-        log.debug("CitrixClient: AIKCert: " + AIKCert);
+        //log.debug("CitrixClient: AIKCert: " + AIKCert);
         
         if (AIKCert != null) {
             log.debug("CitrixClient: AIKCert already generated: " + AIKCert);
