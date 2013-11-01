@@ -118,7 +118,7 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
         // third, if the list included pcr 19, at this point the pcr matches constant was rmoved and
         // we will replace it with module/eventlog checks. 
         if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
-            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host);
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host  /*  NEW FLAG to exclude dynamic and host specific modules , default false here  and true in the new function getComparisonRulesForVmm */);
             rules.addAll(pcrEventLogRules);
         }
         return rules;
