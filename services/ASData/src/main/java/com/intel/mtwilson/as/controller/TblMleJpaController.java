@@ -426,7 +426,8 @@ public class TblMleJpaController implements Serializable {
             if(biosList != null && vmmList.size() > 0)
                 mleList.addAll(vmmList);
             
-            mleList.addAll(vmmList);
+            // This would be adding duplicate entries
+            //mleList.addAll(vmmList);
 
 
         } finally {
@@ -547,7 +548,8 @@ public class TblMleJpaController implements Serializable {
             if(vmmList != null && vmmList.size() > 0)
                 mleList.addAll(vmmList);
             
-            mleList.addAll(vmmList);
+            // The below statement used to add the values again causing duplicates.
+            //mleList.addAll(vmmList);
         } finally {
             em.close();
         }
