@@ -78,8 +78,10 @@ public class VMwareClient implements TlsClient {
     // Bug: 579 - This method is added so that we can connect to the vCenter without any TLS policy settings and connection pooling options.
     // This would be needed by the Management Console to retrive the list of hosts from the cluster.
     protected void connect2(URL url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, IOException {
+        log.debug("VMwareClient: connect2 | setting TlsPolicy...");
         setTlsPolicy(new InsecureTlsPolicy());
         TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
+        log.debug("VMwareClient: calling connect...");
         connect(url.toExternalForm(), userName, password);
 
     }
@@ -135,15 +137,13 @@ public class VMwareClient implements TlsClient {
         log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
         log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
 
-        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext
-                .getInstance("SSL");
+        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("SSL");
         javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
         sslsc.setSessionTimeout(0);
         sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
-
-
+        
         SVC_INST_REF.setType(SVC_INST_NAME);
         SVC_INST_REF.setValue(SVC_INST_NAME);
 

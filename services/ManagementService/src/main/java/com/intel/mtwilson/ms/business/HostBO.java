@@ -200,16 +200,20 @@ public class HostBO extends BaseBO {
     }
     
     private HostConfigData calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) {
-
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+        log.debug("YYY SAVY 001|" +  hostObj.HostName + "|stamp");
         
         if (isBIOSMLE) {
+            log.debug("YYY SAVY 002|" +  hostObj.HostName + "|isBIOSMLE");
                 if (hostObj.BIOS_Oem.contains("Intel")) {
+                    log.debug("YYY SAVY 003|" +  hostObj.HostName + "|IntelBios");
                     // For Romley servers, below is the format of the BIOS string. We need to split the string on . and 
                     // consider the 3,4 & 5 substrings to make up the complete BIOS string. This will not work for Thurley
                     // which is ok since we will support just Romley servers.
                     String [] biosSubStrings = hostObj.BIOS_Version.split("\\.");
+                    log.debug("YYY SAVY 004|" +  hostObj.HostName + "|" + biosSubStrings.toString());
                     hostObj.BIOS_Version = biosSubStrings[2] + "." + biosSubStrings[3] + "." + biosSubStrings[4];
+                    log.debug("YYY SAVY 005|" +  hostObj.HostName + "|" + hostObj.BIOS_Version);
                 }
 
                 // Update the host object with the names of BIOS. For the name we are using a combination of the OEM
@@ -220,25 +224,31 @@ public class HostBO extends BaseBO {
                 // Now that we know that the PCR 0 should be cosistent across the different hypervisors for the same BIOS version, we
                 // need not append the OS name
                 hostObj.BIOS_Name = hostObj.BIOS_Oem.replace(' ', '_');
+                log.debug("YYY SAVY 006|" +  hostObj.HostName + "|" + hostObj.BIOS_Name);
                 
                 // If we are setting host specific MLE, then we need to append the host name to the BIOS Name as well
                 if (hostConfigObj.getBiosWLTarget() == HostWhiteListTarget.BIOS_HOST) {
                     hostObj.BIOS_Name = hostObj.HostName + "_" + hostObj.BIOS_Name;
                 }
+                log.debug("YYY SAVY 007|" +  hostObj.HostName + "|" + hostObj.BIOS_Name);
             
         } else {
+            log.debug("YYY SAVY 008|" +  hostObj.HostName + "|isVMMMLE");
                 // Need to do some data massaging. Firstly we need to change the White Spaces in the OS name to underscores. This is to ensure that it works correctly with
                 // the WLM portal. In case of Intel's BIOS, need to trim it since it will be very long.
                 hostObj.VMM_OSName = hostObj.VMM_OSName.replace(' ', '_');
+                log.debug("YYY SAVY 009|" +  hostObj.HostName + "|" + hostObj.VMM_OSName);
 
                 // Update the host object with the names of BIOS and VMM, which is needed during
                 // host registration.
                 hostObj.VMM_Version = hostObj.VMM_OSVersion + "-" + hostObj.VMM_Version;
+                log.debug("YYY SAVY 010|" +  hostObj.HostName + "|" + hostObj.VMM_Version);
 
                 // For VMware since there is no separate OS and VMM, we use the same name
                 if (hostObj.VMM_OSName.contains("ESX")) {
                     hostObj.VMM_Name = hostObj.VMM_OSName;
                 }
+                log.debug("YYY SAVY 011|" +  hostObj.HostName + "|" + hostObj.VMM_Name);
 
                 // If we are setting host specific MLE, then we need to append the host name to the VMM Name as well
                 if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_HOST) {
@@ -257,10 +267,12 @@ public class HostBO extends BaseBO {
                         hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
                     else
                         hostObj.VMM_Name = hostObj.VMM_Name;
-                }            
+                }
+                log.debug("YYY SAVY 012|" +  hostObj.HostName + "|" + hostObj.VMM_Name);
         }
-
+        log.debug("YYY SAVY 013|" +  hostObj.HostName + "|stamp");
         hostConfigObj.setTxtHostRecord(hostObj);
+        log.debug("YYY SAVY 014|" +  hostObj.HostName + "|stamp");
         return hostConfigObj;
     }
     
@@ -277,18 +289,21 @@ public class HostBO extends BaseBO {
      */
     private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj, ApiClient apiClientObj, boolean registerHost) {
         
-        try {           
-             My.initDataEncryptionKey();
+        try {
+            My.initDataEncryptionKey();
             // Retrieve the host object.
             //System.err.println("JIM DEBUG: Retrieve the host object."); 
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
+            log.debug("ZZZ SAVY 001|" + hostObj.HostName + "|stamp");
             TblHosts tblHosts = new TblHosts();
             tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+            log.debug("ZZZ SAVY 002|" +  hostObj.HostName + "|" + My.configuration().getDefaultTlsPolicyName());
             
             // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
             // first and make up the complete connection string.
             ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
             hostObj.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
+            log.debug("ZZZ SAVY 003|" +  hostObj.HostName + "|" + hostObj.AddOn_Connection_String);
             
             // TODO: Check with jonathan on the policy used.
             // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a 
@@ -296,42 +311,60 @@ public class HostBO extends BaseBO {
             //policy (including global default trusted certs or ca's) to choose here and that way instead of us making this 
             //assumption, it's the operator who knows the environment.
             tblHosts.setTlsKeystore(null);
+            int i=0;
+            log.debug("ZZZ SAVY 004|" +  hostObj.HostName + "|stamp");
             tblHosts.setName(hostObj.HostName);
-            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);            
+            log.debug("ZZZ SAVY 005|" +  hostObj.HostName + "|stamp");
+            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            log.debug("ZZZ SAVY 006|" +  hostObj.HostName + "|stamp");
             tblHosts.setIPAddress(hostObj.HostName);
+            log.debug("ZZZ SAVY 007|" +  hostObj.HostName + "|stamp");
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
             }
-            //System.err.println("JIM DEBUG: Get Host Agent.");
+            log.debug("ZZZ SAVY 008|" +  hostObj.HostName + "|stamp");
             HostAgentFactory factory = new HostAgentFactory();
+            log.debug("ZZZ SAVY 009|" +  hostObj.HostName + "|" + factory.toString());
             HostAgent agent = factory.getHostAgent(tblHosts);
+            log.debug("ZZZ SAVY 010|" +  hostObj.HostName + "|" + agent.toString());
             try {
                 TxtHostRecord hostDetails = agent.getHostDetails();
                 hostObj.BIOS_Oem = hostDetails.BIOS_Oem;
+                log.debug("ZZZ SAVY 011|" +  hostObj.HostName + "|" + hostObj.BIOS_Oem);
                 hostObj.BIOS_Version = hostDetails.BIOS_Version;
+                log.debug("ZZZ SAVY 012|" +  hostObj.HostName + "|" + hostObj.BIOS_Version);
                 hostObj.VMM_Name = hostDetails.VMM_Name;
+                log.debug("ZZZ SAVY 013|" +  hostObj.HostName + "|" + hostObj.BIOS_Version);
                 hostObj.VMM_Version = hostDetails.VMM_Version;
+                log.debug("ZZZ SAVY 014|" +  hostObj.HostName + "|" + hostObj.VMM_Version);
                 hostObj.VMM_OSName = hostDetails.VMM_OSName;
+                log.debug("ZZZ SAVY 015|" +  hostObj.HostName + "|" + hostObj.VMM_OSName);
                 hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
+                log.debug("ZZZ SAVY 016|" +  hostObj.HostName + "|" + hostObj.VMM_OSVersion);
                 hostObj.Processor_Info = hostDetails.Processor_Info;
+                log.debug("ZZZ SAVY 017|" +  hostObj.HostName + "|" + hostObj.Processor_Info);
             } catch (Throwable te) {
                 log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
                 throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
             }
             
+            log.debug("ZZZ SAVY 018|" +  hostObj.HostName + "|stamp");
             // Let us verify if we got all the data back correctly or not 
             if (hostObj.BIOS_Oem == null || hostObj.BIOS_Version == null || hostObj.VMM_OSName == null || hostObj.VMM_OSVersion == null || hostObj.VMM_Version == null) {
                 throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
             }
             
+            log.debug("ZZZ SAVY 019|" +  hostObj.HostName + "|stamp");
             hostConfigObj.setTxtHostRecord(hostObj);
+            log.debug("ZZZ SAVY 020|" +  hostObj.HostName + "|stamp");
             log.debug("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
                     + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version + ":" + hostObj.Processor_Info);
 
             // Change the BIOS and VMM MLE names as per the target white list chosen by the user
             hostConfigObj = calibrateMLENames(hostConfigObj, true);
+            log.debug("ZZZ SAVY 021|" +  hostObj.HostName + "|stamp");
             hostConfigObj = calibrateMLENames(hostConfigObj, false);
-            
+            log.debug("ZZZ SAVY 022|" +  hostObj.HostName + "|stamp");
             // Let us first verify if all the configuration details required for host registration already exists. If not, it will throw
             // corresponding exception.
             // verifyMLEForHost(hostConfigObj);
@@ -341,6 +374,7 @@ public class HostBO extends BaseBO {
             if (registerHost) {
                 HostResponse hostResponse = apiClientObj.registerHostByFindingMLE(hostObj);
             }
+            log.debug("ZZZ SAVY 023|" +  hostObj.HostName + "|stamp");
             /*log.debug("Host should be mapped to {} MLEs.", mleNamesToUse);
             String [] mleNames = mleNamesToUse.split("\\|\\|");
             if (mleNames.length == 2) {
