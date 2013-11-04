@@ -137,7 +137,7 @@ public class CheckLoginController extends AbstractController {
 			session.setMaxInactiveInterval(Integer.parseInt(TDPConfig.getConfiguration().getString("mtwilson.tdbp.sessionTimeOut")));
                 
             } catch (Exception ex) {
-
+                log.error("Login failed", ex);
                 view.addObject("message", "Error during user authentication. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
                 return view;                    
                 

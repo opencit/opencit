@@ -292,5 +292,17 @@ public class Host {
         public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
                 return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
         }
+
+        @RolesAllowed({"Attestation"})
+        @POST
+        @Consumes({MediaType.APPLICATION_JSON})
+        @Produces({MediaType.APPLICATION_JSON})
+        @Path("/mle/verify")
+        public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
+                String result = new ASComponentFactory().getHostTrustBO().checkMatchingMLEExists(hostRecord, 
+                        hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
+                System.out.println("checkMatchingMLEExists RESULT:" + result);
+                return result;
+        }
         
 }

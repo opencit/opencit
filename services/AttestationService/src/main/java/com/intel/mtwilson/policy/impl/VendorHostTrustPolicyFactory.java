@@ -29,7 +29,8 @@ public interface VendorHostTrustPolicyFactory {
 //    Set<Rule> createWhitelistFromHost(HostReport hostReport); // without host-specific rules
 //    Set<Rule> createHostSpecificRules(HostReport hostReport); // my conceptual problem is ... these could be BIOS or VMM .... does it really matter ?????????
     Set<Rule> loadTrustRulesForBios(Bios bios, TblHosts host);
+//    Set<Rule> loadComparisonRulesForBios(Bios vmm, TblHosts host); // not needed currently
     Set<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts host);
+    Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host); // similar to loadTrustRulesForVmm  but excluding the dynamic modules and excluding the host specific modules
     Set<Rule> loadTrustRulesForLocation(String location, TblHosts host);
-
 }

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HostTest {
     //private static final HostTrustBO htbo = new HostTrustBO();
-    private static final String knownHost = "10.1.71.149";
+    private static final String knownHost = "10.1.71.154";
     private static HostBO hostBO;
     private static HostTrustBO hostTrustBO;
     private static ObjectMapper mapper = new ObjectMapper();
@@ -45,6 +45,26 @@ public class HostTest {
     public static void releaseBusinessObject()  {
         hostBO = null;
         hostTrustBO = null;
+    }
+
+    @Test
+    public void checkMatchingMLEExists () throws IOException {
+        TxtHostRecord hostObj = new TxtHostRecord();
+        hostObj.HostName = "10.1.71.169";
+        hostObj.Port = 9999;
+        hostObj.AddOn_Connection_String = ConnectionString.forIntel(hostObj.HostName, hostObj.Port).getConnectionStringWithPrefix();
+        hostObj.BIOS_Name = "Intel_Corp.";
+        hostObj.BIOS_Version = "01.00.T060";
+        hostObj.VMM_Name = "Intel_Thurley_Xen";
+        hostObj.VMM_Version = "11-4.1.0";
+//        hostObj.HostName = "10.1.71.154";
+//        hostObj.AddOn_Connection_String = new ConnectionString("https://10.1.71.87:443/sdk;Administrator;P@ssw0rd").getConnectionStringWithPrefix();        
+//        hostObj.BIOS_Name = "Intel_Corporation";
+//        hostObj.BIOS_Version = "01.00.0060";
+//        hostObj.VMM_Name = "Intel_Thurley_VMware_ESXi";
+//        hostObj.VMM_Version = "5.1.0-799733";
+        String result = hostTrustBO.checkMatchingMLEExists(hostObj, "0,1", "18,19,20");
+        System.out.println(result);
     }
 
     @Test
@@ -86,8 +106,8 @@ public class HostTest {
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);
 //        assertTrue("BIOS:0,VMM:0".equals(response));
-        String saml = htbo.getTrustWithSaml(knownHost);
-        System.out.println("saml: "+saml);
+        //String saml = htbo.getTrustWithSaml(knownHost);
+        //System.out.println("saml: "+saml);
     }
 
         @Test

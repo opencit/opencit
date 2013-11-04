@@ -46,7 +46,7 @@ public class PcrEventLogEquals extends BaseRule {
             report.fault(new PcrEventLogMissing());
         }
         else {
-            PcrEventLog pcrEventLog = hostReport.pcrManifest.getPcrEventLog(expected.getPcrIndex());
+            PcrEventLog pcrEventLog = getPcrEventLog(hostReport); 
             if( pcrEventLog == null ) {
                 report.fault(new PcrEventLogMissing(expected.getPcrIndex()));
             }
@@ -55,7 +55,7 @@ public class PcrEventLogEquals extends BaseRule {
                 if( moduleManifest == null || moduleManifest.isEmpty() ) {
                     report.fault(new PcrEventLogMissing(expected.getPcrIndex()));
                 }
-                else {
+                else {                    
                     // we check that for the PCR defined in the policy, the HostReport's PcrModuleManifest contains the exact set of expected modules
                     ArrayList<Measurement> hostActualUnexpected = new ArrayList<Measurement>(moduleManifest);
                     hostActualUnexpected.removeAll(expected.getEventLog()); //  hostActualUnexpected = actual modules - expected modules = only extra modules that shouldn't be there;  comparison is done BY HASH VALUE,  not by name or any "other info"
@@ -71,6 +71,10 @@ public class PcrEventLogEquals extends BaseRule {
             }
         }
         return report;
+    }
+    
+    protected PcrEventLog getPcrEventLog(HostReport hostReport) {
+        return hostReport.pcrManifest.getPcrEventLog(expected.getPcrIndex());        
     }
     
 }
