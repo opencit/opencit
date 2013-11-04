@@ -14,7 +14,9 @@ import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblLocationPcr;
 import com.intel.mtwilson.as.data.TblMle;
+import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblModuleManifestLog;
+import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.helper.BaseBO;
@@ -47,8 +49,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -507,7 +511,7 @@ public class HostTrustBO extends BaseBO {
                         tblHosts.setBiosMleId(null);
                         tblHosts.setVmmMleId(vmmMLE);
 
-                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport tempTrustReport = policyEngine.apply(hostReport, trustPolicy);
 
@@ -588,6 +592,8 @@ public class HostTrustBO extends BaseBO {
             return trustReport;
         }           
     }
+    
+    
     /**
      * 
      * @param tblHosts
@@ -1408,6 +1414,173 @@ public class HostTrustBO extends BaseBO {
         return hostTrust;
     }
 
+    public String checkMatchingMLEExists(TxtHostRecord hostObj, String biosPCRs, String vmmPCRs) {
+        boolean biosMLEFound = false, VMMMLEFound = false;
+        
+        try {
+            
+            long getTrustStatusOfHostNotInDBStart = System.currentTimeMillis();
+            
+            log.debug("checkMatchingMLEExists: Starting to find the matching MLEs for host {}.", hostObj.HostName);
+            TblMleJpaController mleJpa = My.jpa().mwMle();
+            
+            TblHosts tblHosts = new TblHosts();
+            tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+            tblHosts.setTlsKeystore(null);
+            tblHosts.setName(hostObj.HostName);
+            tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
+            tblHosts.setIPAddress(hostObj.HostName);
+            if (hostObj.Port != null) {
+                tblHosts.setPort(hostObj.Port);
+            }
+            
+            HostAgentFactory factory = new HostAgentFactory();
+            HostAgent agent = factory.getHostAgent(tblHosts);
+            if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
+                throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
+            }
+
+            PcrManifest pcrManifest = agent.getPcrManifest();
+            if( pcrManifest == null ) {
+                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+            }
+
+            HostReport hostReport = new HostReport();
+            hostReport.pcrManifest = pcrManifest;
+            hostReport.tpmQuote = null; // TODO
+            hostReport.variables = new HashMap<String,String>(); // TODO
+
+            log.debug("checkMatchingMLEExists: Successfully retrieved the TPM meausrements from host '{}' for checking against the matching MLE.", hostObj.HostName);
+            HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+            
+            // We need to check for the BIOS MLE matching only if the user wants. This is applicable in cases where the user wants to just
+            // create the new VMM MLE instead of both.
+            if (biosPCRs != null && !biosPCRs.isEmpty()) {
+                // First let us find the matching BIOS MLE for the host. This should retrieve all the MLEs with additional
+                // numeric extensions if any.
+                List<TblMle> biosMLEList = mleJpa.findBIOSMLEByNameSearchCriteria((hostObj.BIOS_Name));
+                if (biosMLEList != null && !biosMLEList.isEmpty()) {
+                    for (TblMle biosMLE : biosMLEList) {
+                        log.debug("checkMatchingMLEExists: Processing BIOS MLE {} with version {}.", biosMLE.getName(), biosMLE.getVersion());
+                        // Now that we have a matching BIOS MLE, we need to verify the version againist the host BIOS version as well 
+                        // since the BIOS name would be same for different versions also.
+                        if (!biosMLE.getVersion().equals(hostObj.BIOS_Version)) {                        
+                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as it does not match the version on the host.", biosMLE.getName(), biosMLE.getVersion());
+                            continue;
+                        } 
+
+                        // If the list of bios PCRs that need to be configured does not match the list of the MLE in the DB, we have to create a new MLE
+                        // So, we can skip the current one and check the remaining if exists.
+                        if (!doPcrsListMatch(biosPCRs, biosMLE.getRequiredManifestList())) {
+                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as the PCR list does not match.", biosMLE.getName(), biosMLE.getVersion());                        
+                            continue;
+                        }
+
+                        tblHosts.setBiosMleId(biosMLE);
+
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
+                        PolicyEngine policyEngine = new PolicyEngine();
+                        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+
+                        if (trustReport != null && trustReport.isTrustedForMarker(TrustMarker.BIOS.name())) {
+                            // We found the MLE to map to. So, need not create a new BIOS MLE. We can use the existing one
+                            log.info("checkMatchingMLEExists: BIOS MLE '{}' matches the whitelists on whitelisting host '{}'. No new BIOS MLE would be created", biosMLE.getName(), hostObj.HostName);
+                            biosMLEFound = true;
+                            break;
+                        } else {
+                            // Since there was a mismatch we need to continue looking for additonal MLEs.
+                            log.debug("checkMatchingMLEExists: BIOS MLE '{}' does not match the whitelists from the whitelisting host '{}'.", biosMLE.getName(), hostObj.HostName);
+                        }
+                    }
+                } else {
+                    log.info("checkMatchingMLEExists: BIOS MLE search for '{}' did not retrieve any matching MLEs. New BIOS MLE would be created.", hostObj.BIOS_Name);
+                }
+
+                // If at the end of the above loop, we do not find any BIOS MLE, we will create a new one.
+                if (!biosMLEFound) {
+                    log.info("checkMatchingMLEExists: No matching BIOS MLE found. New BIOS MLE would be created.");
+                }
+
+                // Reset the BIOS MLE ID so that we don't verify that again along with VMM MLE
+                tblHosts.setBiosMleId(null);
+            }
+            
+            if (vmmPCRs != null && !vmmPCRs.isEmpty()) {
+                // First let us find the matching VMM MLEs for the host that is configured in the system.
+                List<TblMle> vmmMLEList = mleJpa.findVMMMLEByNameSearchCriteria(hostObj.VMM_Name);
+                if (vmmMLEList != null && !vmmMLEList.isEmpty()) {
+                    for (TblMle vmmMLE : vmmMLEList) {
+
+                        log.debug("checkMatchingMLEExists: Processing VMM MLE {} with version {}.", vmmMLE.getName(), vmmMLE.getVersion());                    
+
+                        // Now that we have a matching VMM MLE, we need to verify the version againist the version the host is running 
+                        // since the VMM name would be same for different versions.
+                        if (!vmmMLE.getVersion().equals(hostObj.VMM_Version)) {                      
+                            log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as it does not match the version on the whitelisting host.", vmmMLE.getName(), vmmMLE.getVersion());                       
+                            continue;
+                        } 
+
+                        // If the list of bios PCRs that need to be configured does not match the list of the MLE in the DB, we have to create a new MLE
+                        // So, we can skip the current one and check the remaining if exists.
+                        if (!doPcrsListMatch(vmmPCRs, vmmMLE.getRequiredManifestList())) {
+                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as the PCR list does not match.", vmmMLE.getName(), vmmMLE.getVersion());                        
+                            continue;
+                        }
+
+                        tblHosts.setVmmMleId(vmmMLE);
+
+                        Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForMLEVerification(tblHosts, tblHosts.getName()); 
+                        PolicyEngine policyEngine = new PolicyEngine();
+                        TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
+
+
+                        if (trustReport != null && trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
+                            // We found the MLE to map to. 
+                            log.info("checkMatchingMLEExists: VMM MLE '{}' matches the whitelist from the whitelisting host '{}'. No new VMM MLE would be created.", 
+                                    vmmMLE.getName(), hostObj.HostName);
+                            VMMMLEFound = true;
+                            break;
+                        } else {
+                            // Since there was a mismatch we need to continue looking for additonal MLEs. We still need to track
+                            // the BIOS MLE name so that if nothing matches, we assign the host to the last MLE found.
+                            log.debug("checkMatchingMLEExists: VMM MLE '{}' does not match whitelist from the whitelisting host '{}'.", vmmMLE.getName(), hostObj.HostName);
+                        }                        
+                    }
+                } else {
+                    log.info("checkMatchingMLEExists: VMM MLE search for '{}' did not retrieve any matching MLEs. New VMM MLE would be created.", hostObj.VMM_Name);
+                }
+
+                // If at the end of the above loop, we do not find any VMM MLE matching the whitelisting host we need to create a new VMM MLE.
+                if (!VMMMLEFound) {
+                    log.info("checkMatchingMLEExists: No matching VMM MLE found. New VMM MLE would be created.");
+                }
+            }    
+            
+            long getTrustStatusOfHostNotInDBStop = System.currentTimeMillis();
+            log.debug("checkMatchingMLEExists performance overhead is {} milliseconds", (getTrustStatusOfHostNotInDBStop - getTrustStatusOfHostNotInDBStart));            
+            
+            return "BIOS:"+biosMLEFound+"|VMM:"+VMMMLEFound;
+            
+        } catch (ASException ae) {
+            throw ae;
+                        
+        } catch (Exception ex) {
+            // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
+            log.error("Error during host registration/update. {}.", ex.getMessage());
+            throw new ASException(ErrorCode.SYSTEM_ERROR, ex);
+        }        
+    }
+    
+    private boolean doPcrsListMatch(String requestedPCRs, String dbMLEPCRs) {
+        
+        Collection<String> pcrsFromDB = Arrays.asList(dbMLEPCRs.split(","));
+        Collection<String> pcrsFromRequest = Arrays.asList(requestedPCRs.split(","));
+
+        if (!(pcrsFromDB.size() == pcrsFromRequest.size()) || !(pcrsFromDB.containsAll(pcrsFromRequest)) || !(pcrsFromRequest.containsAll(pcrsFromDB)))
+            return false;
+                    
+        return true;
+    }
     /*
     private void saveModuleManifestLog(PcrModuleManifest pcrModuleManifest, TblTaLog taLog) {
         TblModuleManifestLogJpaController controller = new TblModuleManifestLogJpaController(getEntityManagerFactory());
