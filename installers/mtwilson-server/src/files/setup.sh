@@ -456,7 +456,10 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
 fi
 
 if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
+  sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+  sed -i '/PATH/s,$,:'"$JAVA_HOME"'\",' /etc/environment
   echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  . /etc/environment
 fi
 
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
