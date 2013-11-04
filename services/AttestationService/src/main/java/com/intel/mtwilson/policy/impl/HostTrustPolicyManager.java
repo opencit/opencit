@@ -152,6 +152,23 @@ public class HostTrustPolicyManager {
         return policy;
     }
     
+    public Policy loadTrustPolicyForMLEVerification(TblHosts host, String hostId) {
+        VendorHostTrustPolicyFactory factory = getVendorHostTrustPolicyFactoryForHost(host);        
+        HashSet<Rule> rules = new HashSet<Rule>();
+        // only add bios policy if the host is linked with a bios mle
+        if( host.getBiosMleId() != null ) {
+            Bios bios = new Bios(host.getBiosMleId().getName(), host.getBiosMleId().getVersion(), host.getBiosMleId().getOemId().getName());
+            rules.addAll(factory.loadTrustRulesForBios(bios, host));
+        }
+        // only add vmm policy if the host is linked with a vmm mle
+        if( host.getVmmMleId() != null ) {
+            Vmm vmm = new Vmm(host.getVmmMleId().getName(), host.getVmmMleId().getVersion(), host.getVmmMleId().getOsId().getName(), host.getVmmMleId().getOsId().getVersion());
+            rules.addAll(factory.loadComparisonRulesForVmm(vmm,host));
+        }
+        Policy policy = new Policy(String.format("Host trust policy for host with AIK %s", hostId), rules);
+        return policy;
+    }
+
     /*
     public Policy createWhitelistFromHost(TblHosts host) throws IOException {
         HostAgentFactory agentFactory = new HostAgentFactory();
