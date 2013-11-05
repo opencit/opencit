@@ -36,13 +36,9 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
             }
             // Original call 
           URL url = new URL(vendorConnectionString);
-          log.debug("XXX SAVY vmware url = {}", url.toString());
-          log.debug("XXX SAVY vmware url.getHost = {}", url.getHost());
-          log.debug("XXX SAVY vmware tlsPolicy = {}", tlsPolicy.toString());
+          
           TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
-          log.debug("XXX SAVY STAMP 1");
             VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance()));
-            log.debug("XXX SAVY STAMP 2");
 //            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
             return new VmwareHostAgent(client, hostAddress.toString());
         }
