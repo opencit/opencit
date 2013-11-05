@@ -72,6 +72,12 @@ public class VMwareClientTest {
     
     @Test
     public void testConnectAndFindHost() throws Exception {
+        // these settings force the jvm to use the local fiddler proxy so we can see the traffic...
+  System.setProperty("http.proxyHost", "127.0.0.1");
+    System.setProperty("https.proxyHost", "127.0.0.1");
+    System.setProperty("http.proxyPort", "8888");
+    System.setProperty("https.proxyPort", "8888");
+    System.setProperty("com.sun.management.jmxremote","true"); // to inform jconsole we want to be monitored
         /*
         VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
         VmwareHostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
@@ -94,6 +100,7 @@ public class VMwareClientTest {
         }
         else {
             log.info("got reference!");
+            client.getHostAttestationReport(ref, "10.1.71.173", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24");
         }
         client.disconnect();
     }
