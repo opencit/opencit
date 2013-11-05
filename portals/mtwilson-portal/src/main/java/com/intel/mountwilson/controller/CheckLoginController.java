@@ -7,6 +7,7 @@ import com.intel.mountwilson.common.MCPConfig;
 import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mountwilson.common.TDPConfig;
 import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
@@ -40,7 +41,7 @@ public class CheckLoginController extends AbstractController {
 	// variable declaration used during Processing data. 
             
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
-	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU"));
+	
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
@@ -70,6 +71,7 @@ public class CheckLoginController extends AbstractController {
             //    return view;                    
             //}
             //stdalex 1/15 jks2db!disk
+            MwPortalUserJpaController keystoreJpa = My.jpa().mwPortalUser();
             MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
             if(tblKeystore == null){
                 view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
