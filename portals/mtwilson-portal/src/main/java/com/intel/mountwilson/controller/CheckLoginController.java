@@ -87,7 +87,7 @@ public class CheckLoginController extends AbstractController {
             }
             
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
-            URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
+            URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
             RsaCredential credential = null;
             SimpleKeystore keystore = null;
             try {

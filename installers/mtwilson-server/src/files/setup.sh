@@ -431,6 +431,9 @@ elif using_postgres; then
  
 fi
 
+
+
+
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
@@ -453,7 +456,10 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
 fi
 
 if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
+  sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+  sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
   echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  . /etc/environment
 fi
 
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
@@ -490,8 +496,16 @@ if using_glassfish; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
 	$glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
   else
-	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation"
+	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
 	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+  fi
+
+  if [ -e $glassfish_bin ]; then
+    echo "Increasing glassfish max thread pool size to 200..."
+      $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+  else
+    echo_warning "Unable to locate asadmin, please run the following command on your system to increase HTTP-max-thread-size: "
+    echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
   fi
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
