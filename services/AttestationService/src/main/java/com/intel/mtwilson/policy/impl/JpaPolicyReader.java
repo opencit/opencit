@@ -19,10 +19,12 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;
+import com.intel.mtwilson.policy.rule.PcrEventLogEqualsExcluding;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
@@ -163,6 +165,7 @@ public class JpaPolicyReader {
         // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
+        info.put("HostSpecificModule", moduleInfo.getUseHostSpecificDigestValue().toString());
 
         // Since we can call this function even without registering the host, the hostID will not be present. So, we need to skip adding this host specific module
         if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue()) {
@@ -253,5 +256,51 @@ public class JpaPolicyReader {
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.VMM.name());
     }
     
-    
+    public Set<Rule> loadPcrEventLogEqualExcludingVmm(Vmm vmm, TblHosts tblHosts, boolean verifyMLE) {
+        TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
+        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();       // XXX event logs shouldn't be associated directly to a vmm, they should be associated to a specific pcr digest ...  
+        return createPcrEventLogEqualExcludingRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, verifyMLE, TrustMarker.VMM.name());
+    }
+
+    // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
+    public Set<Rule> createPcrEventLogEqualExcludingRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, TblHosts host, boolean verifyMLE, String... markers) {
+        HashSet<Rule> list = new HashSet<Rule>();
+        // XXX unfortunately because of our database design, we don't know in advance which  pcr's these modules belong to.
+        // so we need to collect the set of measurements for each pcr, and then for every pcr that has modules/events, we need to add the rules (second section below)
+        HashMap<PcrIndex,ArrayList<Measurement>> measurements = new HashMap<PcrIndex,ArrayList<Measurement>>();
+        for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
+            PcrIndex pcrIndex = PcrIndex.valueOf(Integer.valueOf(moduleInfo.getExtendedToPCR()));
+            
+            if( !measurements.containsKey(pcrIndex) ) {
+                measurements.put(pcrIndex, new ArrayList<Measurement>());
+            }
+            
+            Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
+            if (m != null)
+                measurements.get(pcrIndex).add(m);
+        }
+        // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
+        for(PcrIndex pcrIndex : measurements.keySet()) {
+            // XXX TODO for first phase of this implementation in mt wilson 1.2,  we only support pcr 19 ...  in next phase, need to rewrite the way data is stored and also the UI so we can remove this "pcr 19" check and just do it generally for any pcr with modules
+            if( pcrIndex.toInteger() == 19 ) {
+                // event log rule
+                log.debug("Adding PcrEventLogEqualsExcluding rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
+                
+                PcrEventLogEqualsExcluding eventLogEqualsExcludingRule = new PcrEventLogEqualsExcluding(new PcrEventLog(pcrIndex, measurements.get(pcrIndex)));
+                if (verifyMLE)
+                    eventLogEqualsExcludingRule.setExcludeHostSpecificModules(verifyMLE);
+                eventLogEqualsExcludingRule.setMarkers(markers);
+                list.add(eventLogEqualsExcludingRule);
+                // We need to add the integrity only only for attestation and not for verification of MLE
+                if (!verifyMLE) {
+                    log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
+                    PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(pcrIndex);
+                    integrityRule.setMarkers(markers);
+                    list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity            
+                }
+            }
+        }
+        
+        return list;
+    }    
 }

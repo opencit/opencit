@@ -122,6 +122,101 @@ public class HostBO extends BaseBO {
     }
     */
     
+    
+    /**
+     * Private class to support multithreading to retrieve the attestation report from the target host.
+     */
+    private class HostAttReport extends Thread {
+
+        private HostAgent agent;
+        private String requiredPCRs;
+        private String attestationReport;
+        private boolean isError = false;
+        private String errorMessage = "";
+        
+        public HostAttReport(HostAgent agent, String requiredPCRs) {
+            this.agent = agent;
+            this.requiredPCRs = requiredPCRs;
+        }
+
+        @Override
+        public void run() {
+            if (isError()) {
+                return;
+            }
+            try {
+                 attestationReport = agent.getHostAttestationReport(requiredPCRs);
+            } catch (Throwable te) {
+                isError = true;
+                attestationReport = null;
+                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
+                errorMessage = te.getMessage();
+            }
+        }
+
+        public boolean isError() {
+            return isError;
+        }
+
+        public String getResult() {
+            return attestationReport;
+        }
+        
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
+
+    /**
+     * Private class to support multithreading of checking the existence of MLE before creating a new one.
+     */
+    private class MLEVerify extends Thread {
+
+        private ApiClient apiClient;
+        private MLEVerificationRequest mleVerifyObj;
+        private String result;
+        private boolean isError = false;
+        private String errorMessage = "";
+
+        public MLEVerify(ApiClient apiClient, MLEVerificationRequest mleVerifyObj) {
+            this.apiClient = apiClient;
+            this.mleVerifyObj = mleVerifyObj;
+        }
+
+        @Override
+        public void run() {
+            if (isError()) {
+                return;
+            }
+            try {
+                //result = apiClient.checkMatchingMLEExists(mleVerifyObj);
+                TxtHostRecord hostObj = mleVerifyObj.getHostObj();
+                hostObj.Location = mleVerifyObj.getBiosPCRs() + "|" + mleVerifyObj.getVmmPCRs();
+                result = apiClient.checkMatchingMLEExists(hostObj);
+            } catch (MSException e) {
+                isError = true;
+                result = null;
+                errorMessage = e.getErrorMessage();
+            } catch (Exception e) {
+                isError = true;
+                result = null;
+                errorMessage = e.getMessage();
+            }
+        }
+
+        public boolean isError() {
+            return isError;
+        }
+
+        public String getResult() {
+            return result;
+        }
+        
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
+
     public HostBO() {
     }
 
@@ -1223,25 +1318,70 @@ public class HostBO extends BaseBO {
                 if (!agent.isTpmEnabled()) {
                     throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                 }
-
-                // Now that we have retrieved the details of the host, let us configure the BIOS MLE if needed
-                if (hostConfigObj.addBiosWhiteList()) {
-                    configureBIOSMLE(apiClient, hostConfigObj);
+                
+                hostConfigObj = calibrateMLENames(hostConfigObj, true);
+                hostConfigObj = calibrateMLENames(hostConfigObj, false);
+                if (hostConfigObj.addBiosWhiteList())
                     reqdManifestList = hostConfigObj.getBiosPCRs();
-                }
-
-                // Configure the VMM MLE if needed
                 if (hostConfigObj.addVmmWhiteList()) {
-                    // XXX UPDATE-VMM-MLE issue here
-                    configureVMMMLE(apiClient, hostConfigObj);
                     if (reqdManifestList.isEmpty()) {
                         reqdManifestList = hostConfigObj.getVmmPCRs();
                     } else {
                         reqdManifestList = reqdManifestList + "," + hostConfigObj.getVmmPCRs();
                     }
                 }
+                // Now we need to spawn 2 threads. One for retriving the attestation report from the host and another one for checking whether MLE with
+                // matching whitelists exists or not.
+                HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList);
+                hostAttReportObj.start();
+                
+                MLEVerify mleVerifyObj = new MLEVerify(apiClient, new MLEVerificationRequest(hostConfigObj.getTxtHostRecord(), 
+                        hostConfigObj.getBiosPCRs(), hostConfigObj.getVmmPCRs()));
+                mleVerifyObj.start();
+                
+                hostAttReportObj.join();
+                mleVerifyObj.join();
+                
+                attestationReport = hostAttReportObj.getResult();
+                String mleVerifyStatus = mleVerifyObj.getResult();
+                // Verify the retrived attestation status report. If null, throw an error
+                if ((attestationReport == null || attestationReport.isEmpty()) && hostAttReportObj.isError)
+                {
+                    throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, hostAttReportObj.errorMessage);
+                }
+                
+                boolean biosMLEExists = false;
+                boolean vmmMLEExists = false;
+                // Verify the MLE status. If in case the MLE verification status is NULL, we will just create new MLE
+                if (mleVerifyStatus != null || !mleVerifyStatus.isEmpty()) {
+                    // The return format would be BIOS:true|VMM:true
+                    biosMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(new String ("BIOS:").length(), mleVerifyStatus.indexOf("|")));
+                    vmmMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(mleVerifyStatus.lastIndexOf(":")+1));                    
+                }
+                                
+                // If either the BIOS or VMM or both already exists, then we should not be creating them again even if the user has requested for
+                // as it will create duplicates and leads to confusion.
+                
+                // The reason we are updating the hostConfigObj flags is because when the attestation report is getting uploaded to the
+                // DB, these flags are checked before making the DB transaction.
+                if (hostConfigObj.addBiosWhiteList() && biosMLEExists)
+                    hostConfigObj.setBiosWhiteList(false);
+                if (hostConfigObj.addVmmWhiteList() && vmmMLEExists)
+                    hostConfigObj.setVmmWhiteList(false);
+                
+                // Now that we have retrieved the details of the host, let us configure the BIOS MLE if needed
+                if (hostConfigObj.addBiosWhiteList()) {
+                    configureBIOSMLE(apiClient, hostConfigObj);
+                }
 
-                try {
+                // Configure the VMM MLE if needed
+                if (hostConfigObj.addVmmWhiteList()) {
+                    // XXX UPDATE-VMM-MLE issue here
+                    configureVMMMLE(apiClient, hostConfigObj);
+                }
+
+                // Commenting out the below code as we are retrieving the attestation report in a separate thread above.
+                /*try {
 
                     // Retrieve the attestation report from the host
                     attestationReport = agent.getHostAttestationReport(reqdManifestList);   // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
@@ -1249,7 +1389,7 @@ public class HostBO extends BaseBO {
                     System.err.println("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
                     te.printStackTrace();
                     throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
-                }
+                }*/
 
                 // We are checking for component name since in the attestation report all the pcr and the event logs would use componentname as the label 
                 if (attestationReport != null && !attestationReport.isEmpty()) {
@@ -1445,7 +1585,7 @@ public class HostBO extends BaseBO {
 
                 WhitelistService wlApiClient = (WhitelistService) apiClientObj;
 
-                hostConfigObj = calibrateMLENames(hostConfigObj, true);
+                //hostConfigObj = calibrateMLENames(hostConfigObj, true);
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();  
                 
                 // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
@@ -1570,7 +1710,7 @@ public class HostBO extends BaseBO {
 
                 WhitelistService wlApiClient = (WhitelistService) apiClientObj;
 
-                hostConfigObj = calibrateMLENames(hostConfigObj, false);
+                //hostConfigObj = calibrateMLENames(hostConfigObj, false);
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
                 
                 // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
