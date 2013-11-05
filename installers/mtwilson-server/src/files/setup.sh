@@ -812,7 +812,7 @@ fi
 fi
 
 echo  -n "Restarting monit service so new configs take effect... "
-service monit restart > /dev/null
+service monit restart > /dev/null 2>&1
 echo "Done"
 
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
