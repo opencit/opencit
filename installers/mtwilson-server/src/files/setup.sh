@@ -798,7 +798,7 @@ fi
 fi
 
 echo  -n "Restarting monit service so new configs take effect... "
-service monit restart 
+service monit restart > /dev/null
 echo "Done"
 
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
@@ -817,6 +817,7 @@ elif using_postgres; then
   postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 fi
   
+echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
