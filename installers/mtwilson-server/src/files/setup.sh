@@ -457,7 +457,7 @@ fi
 
 if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
   sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
-  sed -i '/PATH/s,$,:'"$JAVA_HOME"'\",' /etc/environment
+  sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
   echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
   . /etc/environment
 fi
