@@ -108,9 +108,9 @@ public class CheckLoginController extends AbstractController {
                 Properties p = new Properties();
 //                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "false");
 //                p.setProperty("mtwilson.api.ssl.verifyHostname", "false");
-                p.setProperty("mtwilson.api.ssl.policy", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
-                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
-                p.setProperty("mtwilson.api.ssl.verifyHostname", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.policy", My.configuration().getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", My.configuration().getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.verifyHostname",My.configuration().getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
 
                 ApiClient rsaApiClient = null;
                 // Instantiate the API Client object and store it in the session. Otherwise either we need
@@ -126,7 +126,7 @@ public class CheckLoginController extends AbstractController {
                 HttpSession session = req.getSession();
                 session.setAttribute("logged-in", true);
                 	session.setAttribute("username", keyAliasName);
-                session.setMaxInactiveInterval(MCPConfig.getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800));
+                session.setMaxInactiveInterval(My.configuration().getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800));
                 
 
                         X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
@@ -136,7 +136,6 @@ public class CheckLoginController extends AbstractController {
             session.setAttribute("api-object", rsaApiClient);
 			session.setAttribute("apiClientObject",rsaApiClient);
 			session.setAttribute("trustedCertificates",trustedCertificates);
-			session.setMaxInactiveInterval(Integer.parseInt(TDPConfig.getConfiguration().getString("mtwilson.tdbp.sessionTimeOut")));
                 
             } catch (Exception ex) {
                 log.error("Login failed", ex);
