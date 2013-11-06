@@ -66,7 +66,7 @@ public class VMwareConnectionPoolTest {
 
     @Test
     public void testConnect() throws KeyManagementException, IOException {
-        HostAgent agent = getAgentWithDenyAllTlsPolicy(); //getAgentWithMyKeystore(); // getAgentWithEmptyKeystore();
+        HostAgent agent = getAgentWithMyKeystore(); //getAgentWithEmptyKeystore(); //getAgentWithDenyAllTlsPolicy(); //
         PcrManifest pcrManifest = agent.getPcrManifest();
         log.debug("Pcr manifest is valid? {}", pcrManifest.isValid());
         List<X509Certificate> certs = repository.getCertificates();
