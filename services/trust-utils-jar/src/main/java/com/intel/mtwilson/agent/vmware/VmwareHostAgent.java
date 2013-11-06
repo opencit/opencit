@@ -14,17 +14,22 @@ import com.intel.mtwilson.model.TpmQuote;
 import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
-import com.vmware.vim25.InvalidPropertyFaultMsg;
+import com.vmware.vim25.InvalidProperty;
+import com.vmware.vim25.RuntimeFault;
+import java.rmi.RemoteException;
+//import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
+//import com.vmware.vim25.RuntimeFaultFaultMsg;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -77,19 +82,22 @@ public class VmwareHostAgent implements HostAgent {
      */
     @Override
     public boolean isTpmPresent() {
-            try {
-                if( isTpmAvailable == null ) {
-                    isTpmAvailable = (Boolean)vmware.getMORProperty(hostMOR,
-                                "capability.tpmSupported");
-                }
-                return isTpmAvailable;
-            } catch (InvalidPropertyFaultMsg ex) {
-                log.error("VCenter host does not support 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
-                return false;
-            } catch (RuntimeFaultFaultMsg ex) {
-                log.error("Runtime fault while fetching 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
-                return false;
+        try {
+            if (isTpmAvailable == null) {
+                isTpmAvailable = (Boolean) vmware.getMORProperty(hostMOR,
+                        "capability.tpmSupported");
             }
+            return isTpmAvailable;
+        } catch (InvalidProperty ex) {
+            log.error("VCenter host does not support 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
+            return false;
+        } catch (RuntimeFault ex) {
+            log.error("Runtime fault while fetching 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
+            return false;
+        } catch (RemoteException ex) {
+            log.error("Runtime fault while fetching 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
+            return false;
+        }
     }
 
     @Override
@@ -263,7 +271,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMORProperty(hostMOR, "runtime");
 //                                        vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
 					// Now process the digest information
-					List<HostTpmDigestInfo> htdis = runtimeInfo.getTpmPcrValues();
+					List<HostTpmDigestInfo> htdis = Arrays.asList(runtimeInfo.getTpmPcrValues());
 					log.info("Retreived HostTpmDigestInfo.");
                     // ESX 5.0 did not support module measurement so we return only the PCR's
                     pcrManifest = VMWare50Esxi50.createPcrManifest(htdis); // bug #607 new
@@ -328,10 +336,10 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             host.Processor_Info = processorInfo.substring(0, 1).toUpperCase() + processorInfo.substring(1);
             
             return host;
-        } catch (InvalidPropertyFaultMsg ex) {
+        } catch (InvalidProperty ex) {
             log.error("VCenter host does not support host details property: {}", ex.getLocalizedMessage());
             throw new IOException(ex);
-        } catch (RuntimeFaultFaultMsg ex) {
+        } catch (RuntimeFault ex) {
             log.error("Runtime fault while fetching host details: {}", ex.getLocalizedMessage());
             throw new IOException(ex);
         }

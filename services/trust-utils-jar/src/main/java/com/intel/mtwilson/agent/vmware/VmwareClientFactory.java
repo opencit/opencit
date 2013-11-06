@@ -9,9 +9,9 @@ import com.intel.mtwilson.tls.TlsConnection;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
 import java.rmi.RemoteException;
-import com.vmware.vim25.InvalidLocaleFaultMsg;
-import com.vmware.vim25.InvalidLoginFaultMsg;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
+//import com.vmware.vim25.InvalidLocaleFaultMsg;
+//import com.vmware.vim25.InvalidLoginFaultMsg;
+//import com.vmware.vim25.RuntimeFaultFaultMsg;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.KeyManagementException;
@@ -31,14 +31,14 @@ import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 public class VmwareClientFactory extends BaseKeyedPoolableObjectFactory<TlsConnection,VMwareClient> {
     
     @Override
-    public VMwareClient makeObject(TlsConnection tlsConnection) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, 
-    KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException  {
+    public VMwareClient makeObject(TlsConnection tlsConnection) throws InvalidProperty, RuntimeFault, RemoteException,
+            KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException {
         VMwareClient client = new VMwareClient();
         client.setTlsPolicy(tlsConnection.getTlsPolicy());
-        client.connect(tlsConnection.getURL().toExternalForm());        
+        client.connect(tlsConnection.getURL().toExternalForm());
         return client;
     }
-    
+
     /**
      * This gets called every time an object is being borrowed from the pool.
      * We don't need to do anything here, as vmware clients in the pool should
