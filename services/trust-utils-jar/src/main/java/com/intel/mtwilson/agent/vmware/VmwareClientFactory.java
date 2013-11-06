@@ -6,6 +6,9 @@ package com.intel.mtwilson.agent.vmware;
 
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsConnection;
+import com.vmware.vim25.InvalidProperty;
+import com.vmware.vim25.RuntimeFault;
+import java.rmi.RemoteException;
 import com.vmware.vim25.InvalidLocaleFaultMsg;
 import com.vmware.vim25.InvalidLoginFaultMsg;
 import com.vmware.vim25.RuntimeFaultFaultMsg;

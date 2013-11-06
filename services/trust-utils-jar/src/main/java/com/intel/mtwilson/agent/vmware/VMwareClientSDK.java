@@ -9,13 +9,6 @@ import com.intel.mtwilson.tls.TlsClient;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TlsPolicyManager;
 import com.vmware.vim25.*;
-import com.vmware.vim25.InvalidProperty;
-import com.vmware.vim25.RuntimeFault;
-import java.rmi.RemoteException;
-import com.vmware.vim25.mo.Folder;
-import com.vmware.vim25.mo.InventoryNavigator;
-import com.vmware.vim25.mo.ManagedEntity;
-import com.vmware.vim25.mo.ServiceInstance;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigInteger;
@@ -24,7 +17,6 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.Map.Entry;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
@@ -44,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dsmagadX
  */
-public class VMwareClient implements TlsClient {
+public class VMwareClientSDK implements TlsClient {
 
     private Logger log = LoggerFactory.getLogger(getClass());
     private static final ManagedObjectReference SVC_INST_REF = new ManagedObjectReference();
@@ -52,16 +44,13 @@ public class VMwareClient implements TlsClient {
     protected ServiceContent serviceContent;
     private ManagedObjectReference propCollectorRef;
     private ManagedObjectReference rootRef;
-    private ServiceInstance servInst;
+    private VimService vimService;
     private VimPortType vimPort;
-    private Folder rootFolder;
-    //private VimService vimService;
-    //private VimPortType vimPort;
     UserSession session = null;
     private String vcenterEndpoint = null;
     private TlsPolicy tlsPolicy = null;
-    //private HostnameVerifier hostnameVerifier = null;
-    //private X509TrustManager trustManager = null;
+//	private HostnameVerifier hostnameVerifier = null;
+//        private X509TrustManager trustManager = null;
     private boolean isConnected = false;
     private static String[] meTree = {
         "ManagedEntity",
@@ -83,12 +72,12 @@ public class VMwareClient implements TlsClient {
         "TaskHistoryCollector"
     };
 
-    public VMwareClient() {
+    public VMwareClientSDK() {
     }
 
     // Bug: 579 - This method is added so that we can connect to the vCenter without any TLS policy settings and connection pooling options.
     // This would be needed by the Management Console to retrive the list of hosts from the cluster.
-    protected void connect2(URL url, String userName, String password) throws KeyManagementException, NoSuchAlgorithmException, IOException {
+    protected void connect2(URL url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, IOException {
         log.debug("VMwareClient: connect2 | setting TlsPolicy...");
         setTlsPolicy(new InsecureTlsPolicy());
         TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
@@ -115,7 +104,7 @@ public class VMwareClient implements TlsClient {
         try {
             if (isConnected()) {
                 isConnected = false;
-                servInst.getServerConnection().logout();
+                vimPort.logout(serviceContent.getSessionManager());
             }
         } catch (Exception e) {
             log.error("Error while logging out from VCenter Api.", e);
@@ -133,7 +122,7 @@ public class VMwareClient implements TlsClient {
      *
      * @throws Exception the exception
      */
-    public void connect(String url, String userName, String password) throws KeyManagementException, NoSuchAlgorithmException, IOException {
+    public void connect(String url, String userName, String password) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, IOException {
         vcenterEndpoint = url;
 
         /*
@@ -156,23 +145,25 @@ public class VMwareClient implements TlsClient {
         HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
 
         SVC_INST_REF.setType(SVC_INST_NAME);
-        SVC_INST_REF.setVal(SVC_INST_NAME);
+        SVC_INST_REF.setValue(SVC_INST_NAME);
+
+        vimService = new VimService();
+        vimPort = vimService.getVimPort();
+        Map<String, Object> ctxt = ((BindingProvider) vimPort)
+                .getRequestContext();
+
+        ctxt.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
+        ctxt.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
+
+        serviceContent = vimPort.retrieveServiceContent(SVC_INST_REF);
 
         try {
             log.debug("Login to vcenter with username: {} {}", userName, password == null || password.isEmpty() ? "without password" : "with password");
-            servInst = new ServiceInstance(new URL(url), userName, password, true);
-            vimPort = servInst.getServerConnection().getVimService();
-            serviceContent = servInst.getServiceContent();
-            rootFolder = servInst.getRootFolder();
-            session = vimPort.login(serviceContent.getSessionManager(), userName, password, null);
-            log.debug("Login complete.");
+            session = vimPort.login(serviceContent.getSessionManager(), userName, password,
+                    null);
         } catch (Exception e) {
             throw new IOException("Cannot login to vcenter: " + e.toString(), e);
         }
-        
-        Map<String, Object> ctxt = ((BindingProvider)vimPort).getRequestContext();
-        ctxt.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url);
-        ctxt.put(BindingProvider.SESSION_MAINTAIN_PROPERTY, true);
 
         printSessionDetails();
 
@@ -210,7 +201,7 @@ public class VMwareClient implements TlsClient {
         return vcenterEndpoint;
     }
 
-    public void connect(String vCenterConnectionString) throws KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException {
+    public void connect(String vCenterConnectionString) throws RuntimeFaultFaultMsg, InvalidLocaleFaultMsg, InvalidLoginFaultMsg, KeyManagementException, NoSuchAlgorithmException, MalformedURLException, IOException {
         //ConnectionString cs = ConnectionString.forVmware(new URL(vCenterConnectionString));
         /*
          String[] vcenterConn = vCenterConnectionString.split(";");
@@ -239,7 +230,7 @@ public class VMwareClient implements TlsClient {
      * contrast to getEntitiesByType which returns all the hosts and then we
      * have to query each one to see if it's the one we want
      */
-    public ManagedObjectReference getHostReference(String hostname) throws Exception {
+    public ManagedObjectReference getHostReference(String hostname) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
         ManagedObjectReference hostRef = null;
 
         //ManagedObjectReference searchIndex;
@@ -267,20 +258,171 @@ public class VMwareClient implements TlsClient {
     // back</param>
     // / <returns>Array of Management Oject References to all the objects of the
     // type specified.</returns>
-    protected ManagedEntity[] getEntitiesByType(String entityType) throws InvalidProperty, RuntimeFault, RemoteException {
-        return new InventoryNavigator(rootFolder).searchManagedEntities(entityType);
-    }
+    protected ManagedObjectReference[] getEntitiesByType(String entityType) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        List<ManagedObjectReference> resultEntities = null;
+        ManagedObjectReference[] finalEntityList = null;
+//		int entityIndex = 0;
 
-    protected String getHostInfo(ManagedObjectReference hostObj) throws InvalidProperty, RuntimeFault, RemoteException {
-        ManagedEntity me = new InventoryNavigator(rootFolder).searchManagedEntity(hostObj.type, hostObj.val);
-        return me.getName();
-    }
+        // Since each TraversalSpec does one level of traversal, we need to
+        // define
+        // multiple ones if we need to traverse recursively.
+
+        // Traversal through Cluster branch
+        // Traversal through Cluster branch
+        TraversalSpec crToH = new TraversalSpec();
+        crToH.setName("crToH");
+        crToH.setType("ComputeResource");
+        crToH.setPath("host");
+        crToH.setSkip(false);
+
+        // Traversal through the DataCenter branch
+        SelectionSpec sspecvfolders = new SelectionSpec();
+        sspecvfolders.setName("visitFolders");
+
+        TraversalSpec dcToHf = new TraversalSpec();
+        dcToHf.setSkip(false);
+        dcToHf.setType("Datacenter");
+        dcToHf.setPath("hostFolder");
+        dcToHf.setName("dcToHf");
+        dcToHf.getSelectSet().add(sspecvfolders);
+
+        // Recurse through the folders
+        TraversalSpec tSpec = new TraversalSpec();
+        tSpec.setName("visitFolders");
+        tSpec.setType("Folder");
+        tSpec.setPath("childEntity");
+        tSpec.setSkip(false);
+        SelectionSpec visitFoldersSS = new SelectionSpec();
+        visitFoldersSS.setName("visitFolders");
+
+        tSpec.getSelectSet().add(visitFoldersSS);
+
+        SelectionSpec visitFoldersdcToHf = new SelectionSpec();
+        visitFoldersdcToHf.setName("dcToHf");
+
+        tSpec.getSelectSet().add(visitFoldersdcToHf);
+
+        SelectionSpec visitFolderscrToH = new SelectionSpec();
+        visitFolderscrToH.setName("crToH");
+
+        tSpec.getSelectSet().add(visitFolderscrToH);
+
+        // Create Property Spec
+        PropertySpec propertySpec = new PropertySpec();
+        propertySpec.setAll(false);
+        propertySpec.getPathSet().add("name");// add all the properties that
+        // needs to be retrieved
+
+        propertySpec.setType("ManagedEntity"); // Having ManagedEntity
+        // refers to all managed
+        // objects
+        PropertySpec[] propertySpecs = new PropertySpec[]{propertySpec};
+
+        // Now create Object Spec
+        ObjectSpec objectSpec = new ObjectSpec();
+        objectSpec.setObj(rootRef);
+        objectSpec.setSkip(true);
+
+        objectSpec.getSelectSet().add(tSpec);
+        objectSpec.getSelectSet().add(dcToHf);
+
+        objectSpec.getSelectSet().add(crToH);
+
+        ObjectSpec[] objectSpecs = new ObjectSpec[]{objectSpec};
+
+        // Create PropertyFilterSpec using the PropertySpec and ObjectSpec
+        // created above.
+        PropertyFilterSpec propertyFilterSpec = new PropertyFilterSpec();
+        propertyFilterSpec.getPropSet().addAll(Arrays.asList(propertySpecs));
+        propertyFilterSpec.getObjectSet().addAll(Arrays.asList(objectSpecs));
+
+        List<PropertyFilterSpec> propertyFilterSpecs = new ArrayList<PropertyFilterSpec>();
+        propertyFilterSpecs.add(propertyFilterSpec);
+
+        List<ObjectContent> oContent = vimPort.retrieveProperties(
+                propCollectorRef, propertyFilterSpecs);
+
+        if (oContent != null) {
+            // allocate memory for all the MOR references found.
+            resultEntities = new ArrayList<ManagedObjectReference>();
+            for (int i = 0; i < oContent.size(); i++) {
+                ManagedObjectReference mor = oContent.get(i).getObj();
+                // DynamicProperty[] dProps = oContent[i].propSet;
+
+                if (mor.getType().equals(entityType)) {
+                    resultEntities.add(mor);
+                }
+            }
+        }
+
+
+        if (resultEntities != null && resultEntities.size() != 0) {
+            finalEntityList = new ManagedObjectReference[resultEntities.size()];
+            finalEntityList = resultEntities.toArray(finalEntityList);
+        }
+        // return back the final entity array
+        return finalEntityList;
+
+    } // end of GetEntitiesByType()
+
+    protected String getHostInfo(ManagedObjectReference hostObj) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        String hostName = "";
+
+        // Create Property Spec
+        PropertySpec propertySpec = new PropertySpec();
+        propertySpec.setAll(false);
+        // We need to retrieve both the name of the host and as well as all
+        // the
+        // VMs associated with the host.
+        propertySpec.getPathSet().add("name");
+        // Specify the entity that will have both of the above parameters.
+        propertySpec.setType("HostSystem");
+        PropertySpec[] propertySpecs = new PropertySpec[]{propertySpec};
+
+        // Now create Object Spec
+        ObjectSpec objectSpec = new ObjectSpec();
+        objectSpec.setObj(hostObj);
+        ObjectSpec[] objectSpecs = new ObjectSpec[]{objectSpec};
+
+        // Create PropertyFilterSpec using the PropertySpec and ObjectPec
+        // created above.
+        PropertyFilterSpec propertyFilterSpec = new PropertyFilterSpec();
+        propertyFilterSpec.getPropSet().addAll(Arrays.asList(propertySpecs));
+        propertyFilterSpec.getObjectSet().addAll(Arrays.asList(objectSpecs));
+
+        List<PropertyFilterSpec> propertyFilterSpecs = new ArrayList<PropertyFilterSpec>();
+        propertyFilterSpecs.add(propertyFilterSpec);
+
+        List<ObjectContent> contents = vimPort.retrieveProperties(
+                propCollectorRef, propertyFilterSpecs);
+
+        if (contents != null) {
+            for (ObjectContent content : contents) {
+                for (DynamicProperty dps : content.getPropSet()) {
+                    if (dps.getName().equals("name")) {
+                        hostName = dps.getVal().toString();
+                    }
+                }
+
+            }
+        }
+
+        return hostName;
+    }// GetHostInfo
+    // / <summary>
+    // / Retrieves the specified property for the specified entity.
+    // / </summary>
+    // / <param name="moRef">Entity for which the property should be
+    // retrieved</param>
+    // / <param name="propertyName">Name of the property that should be
+    // retrieved</param>
+    // / <returns>Value of the property</returns>
 
     /**
      * XXX temporary public access until the code is refactored
      */
-    public Object getMORProperty(ManagedObjectReference moRef, String propertyName)
-            throws InvalidProperty, RuntimeFault, RemoteException {
+    public Object getMORProperty(ManagedObjectReference moRef,
+            String propertyName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
         return getMORProperties(moRef, new String[]{propertyName})[0];
     }
 
@@ -292,19 +434,54 @@ public class VMwareClient implements TlsClient {
     // / <param name="properties">Array of properties that should be
     // retrieved</param>
     // / <returns>Array of values corresponding to the properties.</returns>
-    protected Object[] getMORProperties(ManagedObjectReference moRef,String[] properties)
-            throws InvalidProperty, RuntimeFault, RemoteException {
-        Object[] ret = null;
-        Hashtable ht = new InventoryNavigator(rootFolder).searchManagedEntity(moRef.type, moRef.val).getPropertiesByPaths(properties);
-        int i = 0;
-        for (Object entry : ht.entrySet()) {
-            ret[i] = entry;
-            i++;
+    protected Object[] getMORProperties(ManagedObjectReference moRef,
+            String[] properties) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        // Return object array
+        Object[] ret;
+        // PropertySpec specifies what properties to
+        // retrieve and from type of Managed Object
+        PropertySpec pSpec = new PropertySpec();
+        pSpec.setType(moRef.getType());
+        pSpec.getPathSet().addAll(Arrays.asList(properties));
+
+        // ObjectSpec specifies the starting object and
+        // any TraversalSpecs used to specify other objects
+        // for consideration
+        ObjectSpec oSpec = new ObjectSpec();
+        oSpec.setObj(moRef);
+
+        // PropertyFilterSpec is used to hold the ObjectSpec and
+        // PropertySpec for the call
+        PropertyFilterSpec pfSpec = new PropertyFilterSpec();
+        pfSpec.getPropSet().add(pSpec);
+        pfSpec.getObjectSet().add(oSpec);
+
+        // retrieveProperties() returns the properties
+        // selected from the PropertyFilterSpec
+
+        List<PropertyFilterSpec> pfSpecs = new ArrayList<PropertyFilterSpec>();
+        pfSpecs.add(pfSpec);
+
+        List<ObjectContent> ocs = vimPort.retrieveProperties(propCollectorRef,
+                pfSpecs);
+
+        // Return value, one object for each property specified
+        ret = new Object[properties.length];
+
+        for (ObjectContent oc : ocs) {
+            List<DynamicProperty> dps = oc.getPropSet();
+            for (DynamicProperty dp : dps) {
+                for (int p = 0; p < ret.length; ++p) {
+                    if (properties[p].equals(dp.getName())) {
+                        ret[p] = dp.getVal();
+                    }
+                }
+            }
         }
         return ret;
     }
 
-    public List<String> getPropertyNames(TxtHostRecord hostObj) throws InvalidProperty, RuntimeFault, RemoteException, VMwareConnectionException {
+    public List<String> getPropertyNames(TxtHostRecord hostObj) throws InvalidPropertyFaultMsg, InvalidPropertyFaultMsg, RuntimeFaultFaultMsg, VMwareConnectionException {
         ManagedObjectReference moRef = getDecendentMoRef(null, "HostSystem", hostObj.HostName);
         // Return object array
         ArrayList<String> list = new ArrayList<String>();
@@ -369,7 +546,7 @@ public class VMwareClient implements TlsClient {
      * XXX temporary public access until the code is refactored
      */
     public HostTpmAttestationReport getAttestationReport(
-            ManagedObjectReference hostObj) throws RuntimeFault {
+            ManagedObjectReference hostObj) throws RuntimeFaultFaultMsg {
         return vimPort.queryTpmAttestationReport(hostObj);
 
     }
@@ -388,7 +565,7 @@ public class VMwareClient implements TlsClient {
      *
      * XXX temporary public access until this code is refactored
      */
-    public ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidProperty, RuntimeFault {
+    public ManagedObjectReference getManagedObjectReference(String hostName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
         // Get the host objects in the vcenter
         ManagedObjectReference[] hostObjects = getEntitiesByType("HostSystem");
         if (hostObjects != null && hostObjects.length != 0) {
@@ -635,7 +812,7 @@ public class VMwareClient implements TlsClient {
      * @return : string list of datacenter names
      * @throws Exception
      */
-    public ArrayList getDatacenterNames(String vCenterConnectionString) throws VMwareConnectionException, InvalidProperty, RuntimeFault {
+    public ArrayList getDatacenterNames(String vCenterConnectionString) throws VMwareConnectionException, RuntimeFaultFaultMsg, InvalidPropertyFaultMsg {
         
         ArrayList datacenterDetailList = new ArrayList<String>();
         ConnectionString.VmwareConnectionString vmwareURL;
@@ -728,7 +905,7 @@ public class VMwareClient implements TlsClient {
      * @return : string list of cluster names
      * @throws Exception
      */
-    public ArrayList getClusterNames(String vCenterConnectionString, String datacenterName) throws VMwareConnectionException, InvalidProperty, RuntimeFault {
+    public ArrayList getClusterNames(String vCenterConnectionString, String datacenterName) throws VMwareConnectionException, RuntimeFaultFaultMsg, InvalidPropertyFaultMsg {
 
         ArrayList clusterList;
         ArrayList clusterDetailList = new ArrayList<String>();
@@ -996,9 +1173,9 @@ public class VMwareClient implements TlsClient {
 
                 // Process the event log only for the ESXi 5.1 or higher
                 if (hostTrustReport != null && getMORProperty(hostMOR, "config.product.version").toString().contains("5.1")) {
-                    int numOfEvents = hostTrustReport.getTpmEvents().length;
+                    int numOfEvents = hostTrustReport.getTpmEvents().size();
                     for (int k = 0; k < numOfEvents; k++) {
-                        HostTpmEventLogEntry eventInfo = (HostTpmEventLogEntry) hostTrustReport.getTpmEvents()[k];
+                        HostTpmEventLogEntry eventInfo = (HostTpmEventLogEntry) hostTrustReport.getTpmEvents().get(k);
                         switch (eventInfo.getPcrIndex()) {
                             // We will process only the components that gets extended into PCR 19. We
                             // will ignore the rest of the event entries.
@@ -1081,9 +1258,9 @@ public class VMwareClient implements TlsClient {
                 // The TPM values have to be captured for both ESXi 5.0 or 5.1 hosts
                 if (hostTrustReport != null) {
                     List<String> pcrs = Arrays.asList(pcrList.split(","));
-                    int numTPMValues = hostTrustReport.getTpmPcrValues().length;
+                    int numTPMValues = hostTrustReport.getTpmPcrValues().size();
                     for (int j = 0; j < numTPMValues; j++) {
-                        HostTpmDigestInfo pcrInfo = hostTrustReport.getTpmPcrValues()[j];
+                        HostTpmDigestInfo pcrInfo = hostTrustReport.getTpmPcrValues().get(j);
                         if (pcrs.contains(String.valueOf(pcrInfo.getPcrNumber()))) {
                             xtw.writeStartElement("PCRInfo");
                             xtw.writeAttribute("ComponentName", String.valueOf(pcrInfo.getPcrNumber()));
@@ -1098,9 +1275,9 @@ public class VMwareClient implements TlsClient {
 
                 // Now process the digest information
                 List<String> pcrs = Arrays.asList(pcrList.split(","));
-                int numTPMValues = runtimeInfo.getTpmPcrValues().length;
+                int numTPMValues = runtimeInfo.getTpmPcrValues().size();
                 for (int j = 0; j < numTPMValues; j++) {
-                    HostTpmDigestInfo pcrInfo = runtimeInfo.getTpmPcrValues()[j];
+                    HostTpmDigestInfo pcrInfo = runtimeInfo.getTpmPcrValues().get(j);
                     if (pcrs.contains(String.valueOf(pcrInfo.getPcrNumber()))) {
                         xtw.writeStartElement("PCRInfo");
                         xtw.writeAttribute("ComponentName", String.valueOf(pcrInfo.getPcrNumber()));
@@ -1135,7 +1312,7 @@ public class VMwareClient implements TlsClient {
      * @return
      */
     public static String getMyClusterNames() {
-        VMwareClient client = new VMwareClient();
+        VMwareClientSDK client = new VMwareClientSDK();
         return null;
 
     }
@@ -1151,18 +1328,19 @@ public class VMwareClient implements TlsClient {
      */
     private List<ObjectContent> retrievePropertiesAllObjects(List<PropertyFilterSpec> listpfs)
             throws VMwareConnectionException {
-        
+
         RetrieveOptions propObjectRetrieveOpts = new RetrieveOptions();
+
         List<ObjectContent> listobjcontent = new ArrayList<ObjectContent>();
 
         try {
-            RetrieveResult rslts = vimPort.retrievePropertiesEx(propCollectorRef, (PropertyFilterSpec[])listpfs.toArray(), propObjectRetrieveOpts);
-            if (rslts != null && rslts.getObjects() != null && rslts.getObjects().length != 0) {
-                for (ObjectContent oc : rslts) {
-                    
-                }
-                
-                listobjcontent.add(null);.addAll(rslts.objects);
+            RetrieveResult rslts =
+                    vimPort.retrievePropertiesEx(propCollectorRef,
+                    listpfs,
+                    propObjectRetrieveOpts);
+            if (rslts != null && rslts.getObjects() != null
+                    && !rslts.getObjects().isEmpty()) {
+                listobjcontent.addAll(rslts.getObjects());
             }
             String token = null;
             if (rslts != null && rslts.getToken() != null) {
