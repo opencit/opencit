@@ -51,11 +51,6 @@
             <version>1.6.4</version>
     </dependency>
     <dependency>
-            <groupId>com.vmware</groupId>
-            <artifactId>VSphere5.1beta</artifactId>
-            <version>2.5</version>
-    </dependency>
-    <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
