@@ -6,6 +6,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.tls.TlsClient;
+import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
 import com.intel.mtwilson.tls.TlsPolicyManager;
 import com.vmware.vim25.*;
@@ -60,6 +61,7 @@ public class VMwareClient implements TlsClient {
     //private VimPortType vimPort;
     UserSession session = null;
     private String vcenterEndpoint = null;
+    private String vmwareConnectionString;
     private TlsPolicy tlsPolicy = null;
     //private HostnameVerifier hostnameVerifier = null;
     //private X509TrustManager trustManager = null;
@@ -136,6 +138,7 @@ public class VMwareClient implements TlsClient {
      */
     public void connect(String url, String userName, String password) throws KeyManagementException, NoSuchAlgorithmException, IOException {
         vcenterEndpoint = url;
+        vmwareConnectionString = url + ";" + userName + ";" + password;
 
         /*
          if( hostnameVerifier == null ) {
@@ -285,89 +288,6 @@ public class VMwareClient implements TlsClient {
         return hostObj.getName();
     }
 
-//    /**
-//     * XXX temporary public access until the code is refactored
-//     */
-//    public Object getMORProperty(ManagedObjectReference moRef, String propertyName)
-//            throws InvalidProperty, RuntimeFault, RemoteException {
-//        return getMORProperties(moRef, new String[]{propertyName})[0];
-//    }
-//
-//    // / <summary>
-//    // / Retrieves the list of properties for the speicified entity.
-//    // / </summary>
-//    // / <param name="moRef">Entity for which the properties should be
-//    // retrieved</param>
-//    // / <param name="properties">Array of properties that should be
-//    // retrieved</param>
-//    // / <returns>Array of values corresponding to the properties.</returns>
-//    protected Object[] getMORProperties(ManagedObjectReference moRef, String[] properties)
-//            throws InvalidProperty, RuntimeFault, RemoteException {
-////        Object[] ret = null;
-////        log.debug("VSPHERE: moRef.type: " + moRef.type);
-////        log.debug("VSPHERE: moRef.val1: " + moRef.val);
-////        log.debug("VSPHERE: moRef.val2: " + moRef.getVal());
-////        log.debug("VSPHERE: moRef.val3: " + moRef.get_value());
-////        log.debug("VSPHERE: moRef.val4: " + moRef.toString());
-////        log.debug("VSPHERE: moRef.val5: " + moRef.getClass().getName());
-////        for (String s : properties) { log.debug("VSPHERE: properties: " + s); }
-////        //Hashtable ht = 
-////        ManagedEntity me = new InventoryNavigator(rootFolder).searchManagedEntity(moRef.type, moRef.val); //.getPropertiesByPaths(properties);
-////        log.debug("VSPHERE: Hashtable: " + me.toString());
-////        Hashtable ht = me.getPropertiesByPaths(properties);
-////        log.debug("VSPHERE: Hashtable: " + ht.toString());
-////        int i = 0;
-////        for (Object entry : ht.entrySet()) {
-////            ret[i] = entry;
-////            i++;
-////        }
-////        log.debug("VSPHERE: ret: " + ret.toString());
-////        return ret;
-//        
-//        // Return object array
-//        Object[] ret;
-//        // PropertySpec specifies what properties to
-//        // retrieve and from type of Managed Object
-//        PropertySpec pSpec = new PropertySpec();
-//        pSpec.setType(moRef.getType());
-//        pSpec.getPathSet().equals(Arrays.asList(properties));
-//
-//        // ObjectSpec specifies the starting object and
-//        // any TraversalSpecs used to specify other objects
-//        // for consideration
-//        ObjectSpec oSpec = new ObjectSpec();
-//        oSpec.setObj(moRef);
-//
-//        // PropertyFilterSpec is used to hold the ObjectSpec and
-//        // PropertySpec for the call
-//        PropertyFilterSpec pfSpec = new PropertyFilterSpec();
-//        pfSpec.getPropSet().equals(pSpec);
-//        pfSpec.getObjectSet().equals(oSpec);
-//
-//        // retrieveProperties() returns the properties
-//        // selected from the PropertyFilterSpec
-//
-//        List<PropertyFilterSpec> pfSpecs = new ArrayList<PropertyFilterSpec>();
-//        pfSpecs.add(pfSpec);
-//
-//        ObjectContent[] ocs = vimPort.retrieveProperties(propCollectorRef, (PropertyFilterSpec[])pfSpecs.toArray());
-//
-//        // Return value, one object for each property specified
-//        ret = new Object[properties.length];
-//
-//        for (ObjectContent oc : ocs) {
-//            DynamicProperty[] dps = oc.getPropSet();
-//            for (DynamicProperty dp : dps) {
-//                for (int p = 0; p < ret.length; ++p) {
-//                    if (properties[p].equals(dp.getName())) {
-//                        ret[p] = dp.getVal();
-//                    }
-//                }
-//            }
-//        }
-//        return ret;
-//    }
-//    
     public Object getMEProperty(String meType, String meName, String propertyName)
             throws InvalidProperty, RuntimeFault, RemoteException {
         return getMEProperties(meType, meName, new String[]{propertyName}).get(propertyName);
@@ -434,23 +354,6 @@ public class VMwareClient implements TlsClient {
         return serviceContent.getAbout().getVersion();
     }
 
-    // / <summary>
-    // / Retrieves the vCenter version information.
-    // / </summary>
-    // / <returns>Version details.</returns>
-        /*
-     protected String getVCenterVersion(String vcenterString) {
-     try {
-     connect(vcenterString);
-
-     String vCenterVersion = serviceContent.getAbout().getVersion();
-     return vCenterVersion;
-     } catch (Exception e) {
-     throw new ASException(e);
-     } finally {
-     disconnect();
-     }
-     }*/
     /**
      * XXX temporary public access until the code is refactored
      */
@@ -718,83 +621,16 @@ public class VMwareClient implements TlsClient {
      * @return : string list of datacenter names
      * @throws Exception
      */
-    public ArrayList getDatacenterNames(String vCenterConnectionString) throws VMwareConnectionException {
+    public List<String> getDatacenterNames() throws InvalidProperty, RuntimeFault, RemoteException {
+        List<String> ret = new ArrayList<String>();
+        log.debug("Acquiring datacenters...");
+        ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("Datacenter");
+        for (ManagedEntity me : mes) {
+            log.debug("Datacenter found: " + me.getName());
+            ret.add(me.getName());
+        }
         
-        ArrayList datacenterDetailList = new ArrayList<String>();
-        ConnectionString.VmwareConnectionString vmwareURL;
-        List<String> datacenterSystemAttributesArr = new ArrayList<String>();
-        datacenterSystemAttributesArr.add("name");
-
-        try {
-            vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
-        } catch (Exception e) {
-            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); // XXX could result in a leaked secret
-        }
-        try {
-            // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet
-            connect2(vmwareURL.toURL(), vmwareURL.getUsername(), vmwareURL.getPassword());
-            ManagedObjectReference viewManager = serviceContent.getViewManager();
-            //ManagedObjectReference propColl = serviceContent.getPropertyCollector();
-            ManagedObjectReference containerView = vimPort.createContainerView(
-                    viewManager, serviceContent.getRootFolder(), new String[] {"Datacenter"}, true);    //viewManager, container, Arrays.asList(morefType), true);
-            Map<ManagedObjectReference, Map<String, Object>> tgtMoref =
-                    new HashMap<ManagedObjectReference, Map<String, Object>>();
-
-            // Create Property Spec
-            PropertySpec propertySpec = new PropertySpec();
-            propertySpec.setAll(Boolean.FALSE);
-            propertySpec.setType("Datacenter");  //propertySpec.setType(morefType);
-            propertySpec.getPathSet().equals(datacenterSystemAttributesArr.toArray(new String[]{})); //propertySpec.getPathSet().addAll(Arrays.asList(morefProperties));
-
-            TraversalSpec ts = new TraversalSpec();
-            ts.setName("view");
-            ts.setPath("view");
-            ts.setSkip(false);
-            ts.setType("ContainerView");
-
-            // Now create Object Spec
-            ObjectSpec objectSpec = new ObjectSpec();
-            objectSpec.setObj(containerView);
-            objectSpec.setSkip(Boolean.TRUE);
-            objectSpec.getSelectSet().equals(ts);
-
-            // Create PropertyFilterSpec using the PropertySpec and ObjectPec
-            // created above.
-            PropertyFilterSpec propertyFilterSpec = new PropertyFilterSpec();
-            propertyFilterSpec.getPropSet().equals(propertySpec);
-            propertyFilterSpec.getObjectSet().equals(objectSpec);
-
-            List<PropertyFilterSpec> propertyFilterSpecs =
-                    new ArrayList<PropertyFilterSpec>();
-            propertyFilterSpecs.add(propertyFilterSpec);
-
-            ObjectContent[] oCont = vimPort.retrieveProperties(serviceContent.getPropertyCollector(), (PropertyFilterSpec[])propertyFilterSpecs.toArray());
-            if (oCont != null) {
-                for (ObjectContent oc : oCont) {
-                    Map<String, Object> propMap = new HashMap<String, Object>();
-                    DynamicProperty[] dps = oc.getPropSet();
-                    if (dps != null) {
-                        for (DynamicProperty dp : dps) {
-                            propMap.put(dp.getName(), dp.getVal());
-                        }
-                    }
-                    tgtMoref.put(oc.getObj(), propMap);
-                }
-            }
-
-            for (ManagedObjectReference datacenter : tgtMoref.keySet()) {
-                Map<String, Object> datacenterprops = tgtMoref.get(datacenter);
-                for (String prop : datacenterprops.keySet()) {
-                    datacenterDetailList.add(/*prop + " : " + */datacenterprops.get(prop));
-                }
-            }
-        } catch (Exception ex) {
-            throw new VMwareConnectionException(ex);
-        } finally {
-            disconnect();
-        }
-
-        return datacenterDetailList;
+        return ret;
     }
 
     /**
@@ -809,46 +645,44 @@ public class VMwareClient implements TlsClient {
      * @return : string list of cluster names
      * @throws Exception
      */
-    public ArrayList getClusterNames(String vCenterConnectionString, String datacenterName) throws VMwareConnectionException {
-
-        ArrayList clusterList;
-        ArrayList clusterDetailList = new ArrayList<String>();
-        ManagedObjectReference datacenterMOR = null;
-        ConnectionString.VmwareConnectionString vmwareURL;
-        try {
-            vmwareURL = ConnectionString.VmwareConnectionString.forURL(vCenterConnectionString);
-        } catch (Exception e) {
-            throw new ASException(ErrorCode.AS_VMWARE_INVALID_CONNECT_STRING, vCenterConnectionString); // XXX could result in a leaked secret
+    public List<String> getClusterNamesWithDC() throws InvalidProperty, RuntimeFault, RemoteException {
+        List<String> ret = new ArrayList<String>();
+        log.debug("Acquiring clusters...");
+        ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("ComputeResource");
+        for (ManagedEntity me : mes) {
+            log.debug("Cluster found: " + "[" + me.getParent().getParent().getName() + "] " + me.getName());
+            ret.add("[" + me.getParent().getParent().getName() + "] " + me.getName());
         }
-        try {
-            // Connect to the vCenter server with the passed in parameters,  but insecure tls policy since we don't know this host yet
-            connect2(vmwareURL.toURL(), vmwareURL.getUsername(), vmwareURL.getPassword());
-
-            if (datacenterName != null) {
-                datacenterMOR = getDecendentMoRef(null, "Datacenter", datacenterName);
-                if (datacenterMOR == null) {
-                    throw new Exception("Datacenter configuration not found in the vCenter database.");
-                }
-            }
-
-            clusterList = getDecendentMoRefs(datacenterMOR, "ComputeResource", null);
-            if (clusterList.isEmpty()) {
-                return clusterList;
-            }
-
-            for (int i = 0; i < clusterList.size(); i++) {
-                log.debug("VSPHERE: Cluster " + i + " = " + clusterList.get(i).toString());
-                String clusterName = getMEProperty("ComputeResource", clusterList.get(i).toString(), "name").toString();
-                clusterDetailList.add(clusterName);
-            }
-        } catch (Exception ex) {
-            throw new VMwareConnectionException(ex);
-        } finally {
-            disconnect();
-        }
-        return clusterDetailList;
+        
+        return ret;
     }
-
+    
+    public ArrayList getHostNamesForCluster(String clusterName) throws InvalidProperty, RuntimeFault, RemoteException {
+        ArrayList hostDetailList = new ArrayList<TxtHostRecord>();
+        log.debug("Acquiring host systems...");
+        
+        ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("HostSystem");
+        for (ManagedEntity me : mes) {
+            if (me.getParent().getName().trim().equalsIgnoreCase(clusterName.trim())) {
+                log.debug("Host System found for cluster " + clusterName + ": " + me.getName());
+                TxtHostRecord hostObj = new TxtHostRecord();
+                hostObj.HostName = me.getName();
+                hostObj.AddOn_Connection_String = vmwareConnectionString;
+                hostObj.VMM_OSName = getMEProperty("HostSystem", hostObj.HostName, "config.product.name").toString();
+                hostObj.VMM_OSVersion = getMEProperty("HostSystem", hostObj.HostName, "config.product.version").toString();
+                hostObj.VMM_Version = getMEProperty("HostSystem", hostObj.HostName, "config.product.build").toString();
+                hostObj.BIOS_Oem = getMEProperty("HostSystem", hostObj.HostName, "hardware.systemInfo.vendor").toString();
+                hostObj.BIOS_Version = getMEProperty("HostSystem", hostObj.HostName, "hardware.biosInfo.biosVersion").toString();
+                hostDetailList.add(hostObj);
+            }
+            else {
+                log.debug(me.getName() + ": parent \"" + me.getParent().getName() + "\" does not match cluster name \"" + clusterName + "\"");
+            }
+        }
+        
+        return hostDetailList;
+    }
+    
     /**
      * Added By: Sudhir on June 14, 2012
      *

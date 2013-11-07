@@ -101,49 +101,23 @@ public class VMwareClientTest {
     @Test
     public void clusterTest() throws Exception {
         
-        VMwareClient client = new VMwareClient();
-        client.setTlsPolicy(new InsecureTlsPolicy());
-        client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
-        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "Folsom");
-        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "IBM DC");
-        List<String> ref = client.getDatacenterNames("https://10.1.71.162:443/sdk;Administrator;intel123!");
-        
-        
-        if( ref != null ) {
-            for (String str:ref){                
-                System.out.println(str);
-                System.out.println("\n\n***************************************************************");
-            }
-        }
-        else {
-            System.err.println("fail");
-        }
-        client.disconnect();
+//        VMwareClient client = new VMwareClient();
+//        client.setTlsPolicy(new InsecureTlsPolicy());
+//        client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
+//        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "Folsom");
+//        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "IBM DC");
+//        List<String> ref = client.getDatacenterNames("https://10.1.71.162:443/sdk;Administrator;intel123!");
+//        
+//        
+//        if( ref != null ) {
+//            for (String str:ref){                
+//                System.out.println(str);
+//                System.out.println("\n\n***************************************************************");
+//            }
+//        }
+//        else {
+//            System.err.println("fail");
+//        }
+//        client.disconnect();
     }
-    
-    @Test
-    public void SavyTest() throws Exception {
-        
-        String host1 = "vmware:https://10.1.71.162:443/sdk;Administrator;intel123!;10.1.71.173";
-        
-        VMwareClient client = new VMwareClient();
-        client.setTlsPolicy(new InsecureTlsPolicy());
-        client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
-        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "Folsom");
-        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "IBM DC");
-        List<String> ref = client.getDatacenterNames("https://10.1.71.162:443/sdk;Administrator;intel123!");
-        
-        
-        if( ref != null ) {
-            for (String str:ref){                
-                System.out.println(str);
-                System.out.println("\n\n***************************************************************");
-            }
-        }
-        else {
-            System.err.println("fail");
-        }
-        client.disconnect();
-    }
-    
 }

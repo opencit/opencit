@@ -8,6 +8,7 @@ import com.intel.mountwilson.datamodel.ApiClientDetails;
 import com.intel.mountwilson.datamodel.ApiClientListType;
 import com.intel.mountwilson.datamodel.HostDetails;
 import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
 import com.intel.mtwilson.datatypes.Role;
@@ -22,11 +23,11 @@ public interface IManagementConsoleServices {
 	
         public boolean saveWhiteListConfiguration(HostDetails hostDetailsObj,HostConfigData hostConfig, ApiClient apiObj) throws ManagementConsolePortalException, MalformedURLException;
 
-        public List<String> getDatacenters(String vCenterConnection)throws ManagementConsolePortalException;
+        public List<String> getDatacenterNames(VMwareClient client)throws ManagementConsolePortalException;
         
-        public List<String> getClusters(String vCenterConnection, String datacenter)throws ManagementConsolePortalException;
+        public List<String> getClusterNamesWithDC(VMwareClient client)throws ManagementConsolePortalException;
         
-        public List<HostDetails> getHostEntryFromVMWareCluster(String clusterName,String vCenterConnection)throws ManagementConsolePortalException;
+        public List<HostDetails> getHostNamesForCluster(VMwareClient client, String clusterName)throws ManagementConsolePortalException;
 
         public HostDetails registerNewHost(HostDetails hostDetailList, ApiClient apiObj)throws ManagementConsolePortalException;
 
