@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.crypto;
 
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
 import java.io.*;
@@ -43,7 +44,13 @@ public class SimpleKeystore {
     private final KeyStore keystore;
     private final String keystorePassword;
     private final Resource keystoreResource;
+
     
+    public SimpleKeystore(KeyStore keystore, String password) throws KeyManagementException {
+        this.keystore = keystore;
+        this.keystorePassword = password;
+        this.keystoreResource = new ByteArrayResource();
+    }
     /**
      * If you are creating a new keystore, you can pass a FileResource that wraps
      * a non-existent (but writable) File, or you can pass a ByteArrayResource

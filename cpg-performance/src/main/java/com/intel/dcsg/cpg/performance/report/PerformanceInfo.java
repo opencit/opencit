@@ -28,7 +28,7 @@ public class PerformanceInfo {
         values = new long[sample.length];
         System.arraycopy(sample, 0, values, 0, sample.length);
     }
-
+    
     public long[] getData() {
         return values;
     }

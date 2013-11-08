@@ -97,6 +97,10 @@ public class Main {
                 System.err.println("Unrecognized command: "+commandName);                
             }
             else {
+                if( log.isTraceEnabled() ) {
+                    log.trace("Number of args: {}", args.length);
+                    for(String arg : args) { log.trace("Arg: {}", arg); }                    
+                }
                 String[] subargs = Arrays.copyOfRange(args, 1, args.length);
     //            command.setContext(ctx);
                 ExtendedOptions getopt = new ExtendedOptions(subargs);
@@ -108,13 +112,22 @@ public class Main {
             }
         }
         catch(ClassNotFoundException e) {
+            // XXX TODO we already check for unrecognized command by checking if command == null above ... so
+            // any other classnotfoudnexception is probably something else and ought to be caught by the general
+            // exception handler below, or possibly here but with a message that a component may be missing from
+            // the classpath.
+            System.err.println("Unrecognized command");
+            log.debug("Unrecognized command", e);
         }
         catch(IOException e){
+            // XXX TODO there could be other IO errors... need to move this exception handler down to where it happens
+            // and wrap it in a "No console" IOException if necessary to be caught by the general exception handler below
             System.err.println("No console.");
             e.printStackTrace(System.err);   
         }
         catch(Exception e) {
-            e.printStackTrace(System.err);
+            System.err.println("Error: "+e.getLocalizedMessage());
+            log.debug("Error", e);
         }
         
     }

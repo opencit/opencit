@@ -39,9 +39,9 @@ public class TaskTest {
     
     private static void printPerformanceInfo(PerformanceInfo info) {
         log.debug("Number of executions: {}", info.getData().length);
-        log.debug("Average time: {}", info.getAverage());
-        log.debug("Min time: {}", info.getMin());
-        log.debug("Max time: {}", info.getMax());
+        log.debug("Average time: {} ms", info.getAverage());
+        log.debug("Min time: {} ms", info.getMin());
+        log.debug("Max time: {} ms", info.getMax());
     }
     
     @Test

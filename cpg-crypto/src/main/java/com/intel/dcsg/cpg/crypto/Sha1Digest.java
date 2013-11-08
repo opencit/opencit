@@ -6,10 +6,20 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Representation of a single SHA1 Digest. An SHA1 Digest is a 20-byte value.
- * 
- * Implementation is flexible about the SHA1 input format
- * and allows spaces, colons, uppercase and lowercase characters
+ * Represents a SHA-1 digest. A SHA-1 digest is a 20-byte value.
+ * <p>
+ * When serializing, the default is to represent the digest as a hex string.
+ * When deserializing, both hex and base-64 strings are recognized by {@link #valueOf(String)} but you can also
+ * call more specific methods {@link #valueOfHex(String)} and {@link #valueOfBase64(String)} or pass in an 
+ * existing byte array with {@link #valueOf(byte[])}.
+ * <p>
+ * The value methods take a representation and return an equivalent Sha1Digest instance. The static 
+ * {@link #digestOf(byte[])} method computes the digest of the given byte array and returns a Sha1Digest instance
+ * as the result.
+ * <p>
+ * The {@link #extend(byte[])} and {@link #extend(com.intel.dcsg.cpg.crypto.Sha1Digest)} methods return a new
+ * Sha1Digest instance whose value is equal to SHA-1(object-value||argument-value). The original object is
+ * not modified.
  * 
  * @since 0.1
  * @author jbuhacoff
@@ -132,16 +142,17 @@ public class Sha1Digest extends AbstractDigest {
     }
 
     /**
-     * Assumes the input represents an SHA1 digest and creates a new instance of Sha1Digest to wrap it.
+     * Interprets a hex or base64-encoded value and returns a Sha1Digest instance with that value.
+     * <p> 
      * This method does NOT compute a digest. If the input is not a valid SHA1 representation, a null
      * will be returned.
-     * 
+     * <p>
      * Callers must always check the return value for null. 
-     * 
+     * <p>
      * Starting with version 0.1.2 this method also allows base64 input.
      * 
-     * @param hex
-     * @return 
+     * @param text can be either hex or base-64 encoded representation of a SHA-1 digest (20 bytes)
+     * @return a Sha1Digest instance or null if the input was not a valid SHA-1 representation
      */
     @org.codehaus.jackson.annotate.JsonCreator // jackson 1.x
     @com.fasterxml.jackson.annotation.JsonCreator // jackson 2.x

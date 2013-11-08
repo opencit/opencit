@@ -7,6 +7,7 @@ package com.intel.dcsg.cpg.console;
 
 
 //import java.io.IOException;
+import com.intel.dcsg.cpg.performance.AlarmClock;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.slf4j.Logger;

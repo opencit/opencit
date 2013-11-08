@@ -76,7 +76,7 @@ public class PerformanceUtil {
                 status.get(timeout, TimeUnit.SECONDS); // return value will always be null because we submitted "Runnable" tasks
             } catch (Exception ex) {
                 // we will log the exception and ignore the error.
-                log.error("Exception while retrieving the status of the tasks. {}", ex.getMessage());
+                log.error("Exception while retrieving the status of the tasks: {}", ex.toString());
             }
         }
         // get the status of each task

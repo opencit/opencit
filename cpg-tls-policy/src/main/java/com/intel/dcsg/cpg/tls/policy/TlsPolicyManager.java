@@ -41,7 +41,17 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
 
     public void setTlsPolicy(String address, TlsPolicy tlsPolicy) {
         log.debug("TlsPolicyManager: adding {} with policy: {}", address, tlsPolicy.getClass().toString());
-        map.put(address, tlsPolicy);
+        /*
+        TlsPolicy previousValue = map.get(address);
+        if( previousValue != null ) {
+            // XXX TODO unfortuantely we don't have a good way right now to give any more details about the policy...
+            // so the two policies might be of the same class yet their trusted certs etc. might be different.
+            // maybe we need a toString() override in each TlsPolicy implementation that summarizes what's in the policy?
+            // then instead of tlsPolicy.getClass().toString() we would call tlsPolicy.toString() 
+            log.warn("TlsPolicyManager: policy for address {} replaced {} with {}", address, previousValue.getClass().toString(), tlsPolicy.getClass().toString());
+        }
+        */
+         map.put(address, tlsPolicy);        
     }
 
     @Override

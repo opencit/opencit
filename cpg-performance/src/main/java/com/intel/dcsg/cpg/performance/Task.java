@@ -15,6 +15,7 @@ package com.intel.dcsg.cpg.performance;
  * @author jbuhacoff
  */
 public class Task implements Runnable {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Task.class);
 
     private final String id;
     private Runnable runnable = null;
@@ -52,6 +53,7 @@ public class Task implements Runnable {
             execute();
             stopTime = System.currentTimeMillis();
             done = true;
+            log.debug("Task is done");
         } catch (Throwable e) {
             stopTime = System.currentTimeMillis();
             error = e;

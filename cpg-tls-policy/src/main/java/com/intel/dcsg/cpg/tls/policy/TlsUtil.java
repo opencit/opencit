@@ -61,7 +61,7 @@ public class TlsUtil {
     
     /**
      * 
-     * DEPRECATED,  USE TLS-POLICY
+     * DEPRECATED,  USE TLS-POLICY or KeystoreUtil
      * 
      * Used by registerUserWithKeystore to automatically add a server's ssl certificates to the keystore.
      * It's important for the user to later review the keystore and validate those certificate fingerprints!!

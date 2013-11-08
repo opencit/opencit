@@ -6,8 +6,8 @@ package com.intel.dcsg.cpg.tls.policy;
 
 /*
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.InternetAddress;
 import com.intel.dcg.io.ByteArrayResource;
 import java.security.KeyPair;

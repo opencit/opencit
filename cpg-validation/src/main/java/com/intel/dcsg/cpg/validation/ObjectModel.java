@@ -53,8 +53,20 @@ public abstract class ObjectModel implements Model {
     
     /**
      * If the model has changed since the last call to isValid() then it will be revalidated.
+     * We rely on the model's hashCode to detect changes so classes that extend ObjectModel
+     * are responsible for implmenting a hashCode() function that reflects changes.
+     * 
+     * This method is marked @JsonIgnore because when a Model instance is serialized and later
+     * deserialized, the application should not rely on the previous validity of the data
+     * and should instead instantiate a new Model and call isValid() and getFaults() to check
+     * the validity of the instance data. If an application needs to serialize these values,
+     * like for reporting, wrap the Model instance in a ModelReport decorator, which 
+     * allows isValid() and getFaults() to be serialized.
+     * 
      * @return true if the model is valid
      */
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@com.fasterxml.jackson.annotation.JsonIgnore
     @Override
     public final boolean isValid() {
         if( faults == null || lastHashCode == null || lastHashCode != hashCode() ) {
@@ -66,9 +78,18 @@ public abstract class ObjectModel implements Model {
     }
     
     /**
+     * This method is marked @JsonIgnore because when a Model instance is serialized and later
+     * deserialized, the application should not rely on the previous validity of the data
+     * and should instead instantiate a new Model and call isValid() and getFaults() to check
+     * the validity of the instance data. If an application needs to serialize these values,
+     * like for reporting, wrap the Model instance in a ModelReport decorator, which 
+     * allows isValid() and getFaults() to be serialized but is not a Model itself.
+     * 
      * 
      * @return a list of faults 
      */
+	@org.codehaus.jackson.annotate.JsonIgnore
+	@com.fasterxml.jackson.annotation.JsonIgnore
     @Override
     public final List<Fault> getFaults() {
         return faults;

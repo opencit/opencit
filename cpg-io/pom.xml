@@ -9,9 +9,20 @@
     <parent>
 	  <groupId>com.intel.dcsg.cpg</groupId>
 	  <artifactId>cpg</artifactId>
-	  <version>0.1-SNAPSHOT</version>
+	  <version>0.2-SNAPSHOT</version>
     </parent>
 
+		<build>
+	<plugins>
+		<!-- git commit info -->
+		<plugin>
+		<groupId>org.codehaus.groovy.maven</groupId>
+		<artifactId>gmaven-plugin</artifactId>
+        <version>1.0</version>
+		</plugin>
+		
+	</plugins>
+	</build>
 
   <dependencies>
       
@@ -20,7 +31,13 @@
 	  <artifactId>cpg-validation</artifactId>
 	  <version>0.1-SNAPSHOT</version>
     </dependency>
-      
+    <dependency>
+	  <groupId>com.intel.dcsg.cpg</groupId>
+	  <artifactId>cpg-util</artifactId>
+	  <version>0.1-SNAPSHOT</version>
+    </dependency>
+
+            
     <dependency>
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
@@ -30,7 +47,6 @@
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
-		<version>1.6.4</version>
     </dependency>
         <!--
         <dependency>
@@ -43,8 +59,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.10</version>
-            <scope>provided</scope>
+        <optional>true</optional>
         </dependency>        
     <dependency>
 		<groupId>commons-beanutils</groupId>
@@ -80,14 +95,14 @@
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
-        <scope>provided</scope>
+        <optional>true</optional>
     </dependency>
     <!-- see also: jackson 2.0 explanation http://www.cowtowncoder.com/blog/archives/2012/03/entry_466.html -->
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-annotations</artifactId>
     	<version>2.2.2</version>
-        <scope>provided</scope>
+        <optional>true</optional>
     </dependency>
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
@@ -107,6 +122,7 @@
     	<version>2.2.2</version>
         <scope>test</scope>
     </dependency>
+
 
   </dependencies>  
 </project>
