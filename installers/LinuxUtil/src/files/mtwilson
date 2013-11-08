@@ -352,7 +352,7 @@ case "$1" in
         ;;
   erase-users)
 		load_default_env 1>/dev/null
-		if [ -z $MC_FIRST_USERNAME] && [ $@ -ne "--all" ]; then
+		if [ -z $MC_FIRST_USERNAME] && [ "$@" != "--all" ]; then
 			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
 			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
 		fi
