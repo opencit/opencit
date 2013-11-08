@@ -59,7 +59,7 @@ find_ctl_commands() {
   #mcctl=`which mcctl 2>/dev/null`
   #wpctl=`which wpctl 2>/dev/null`
   #tdctl=`which tdctl 2>/dev/null`
-  mpctl=`which mpctl 2>/dev/null`
+  mpctl=`which mtwilson-portal 2>/dev/null`
 }
 
 mtwilson_saml_cert_report() {

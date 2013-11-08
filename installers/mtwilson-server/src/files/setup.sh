@@ -112,7 +112,7 @@ elif [ ! -z "$opt_mysql" ]; then
 fi
 
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
