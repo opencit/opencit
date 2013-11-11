@@ -49,7 +49,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.intel.mtwilson.as.business.AssetTagCertBO;
 /**
  * All settings should be via setters, not via constructor, because this class
  * may be instantiated by a factory.
@@ -380,7 +380,9 @@ public class HostBO extends BaseBO {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
                         }
                         log.debug("Deleting Host from database");
-
+                        
+                        deleteHostAssetTagMapping(tblHosts);
+                        
                         deleteHostSpecificManifest(tblHosts);
 
                         deleteTALogs(tblHosts.getId());
@@ -408,7 +410,14 @@ public class HostBO extends BaseBO {
                 }
                 return new HostResponse(ErrorCode.OK);
         }
-
+        
+        private void deleteHostAssetTagMapping(TblHosts tblHosts) throws NonexistentEntityException, IOException {
+            AssetTagCertAssociateRequest atagRequest = new AssetTagCertAssociateRequest();
+            atagRequest.setHostID(tblHosts.getId());
+            AssetTagCertBO atagBO = new AssetTagCertBO();
+            atagBO.unmapAssetTagCertFromHost(atagRequest);            
+        }
+        
         // PREMIUM FEATURE ? 
         private void deleteHostSpecificManifest(TblHosts tblHosts)
                 throws NonexistentEntityException, IOException {
