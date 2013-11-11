@@ -736,11 +736,12 @@ function isNumber(n) {
                                     <td data-bind-text="item.sha1 | wrap 16"></td>
                                     <td data-bind-text="item.sha256 | wrap 16"></td>
                                     <td>
-                                        <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
+                                        
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> <br/>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import To MT. Wilson</a>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>                                        
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> <br/>
+                                        <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import To MT. Wilson</a> <br/>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a> <br/>                                       
                                     </td>
                                 </tr>
                             </tbody>
@@ -825,7 +826,7 @@ function isNumber(n) {
                                     </select>
                                     <input type="text" id="rdf-triple-search-object" name="object" placeholder="Attribute value"/>
                                 </li>
-                                !--
+                                Add back comment start here !--
                                 <li>
                                     <label for="rdf-triple-search-description">Rdf Triple description</label>
                                     <select id="rdf-triple-search-description-criteria">
@@ -834,7 +835,7 @@ function isNumber(n) {
                                     </select>
                                     <input type="text" id="rdf-triple-create-description" name="predicate"/>
                                 </li>
-                                --
+                                -- finish comment here
                                 <li><input type="button" value="Search..." onclick="ws.searchRdfTriples(this); return false;"/></li>
                             </ul>
                         </form>
