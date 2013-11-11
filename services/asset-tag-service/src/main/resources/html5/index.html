@@ -165,15 +165,16 @@ function isNumber(n) {
             <!--header -->
             <div id="header">			
 
+                <!--
                 <div id="header-links">
                     <p>
                         <a href="http://www.intel.com" target="_blank">Intel</a> | 
-                        <!-- <a href="http://http://cloudsecurityportal.intel.com/" target="_blank">Mt Wilson</a> -->
+                        <a href="http://http://cloudsecurityportal.intel.com/" target="_blank">Mt Wilson</a>
                     </p>		
                 </div>		
-
+                -->
                 <div id="header-caption">
-                    <h1>Asset Tag Reference Implementation</h1>
+                    <h1>Asset Tag Management UI</h1>
                 </div>
 
                 <!--header ends-->					
@@ -182,11 +183,11 @@ function isNumber(n) {
             <!-- navigation starts-->	
             <nav id="nav">
                 <ul id="navtabs"> <!-- put  id="current"  on the li tag that is currently displayed -->
-                    <li class="tab"><a href="#tags">Tags</a></li>  <!-- red color:  style="color: #c55" -->
-                    <li class="tab"><a href="#rdf">RDF</a></li>			
-                    <li class="tab"><a href="#selections">Selection</a></li>
-                    <li class="tab"><a href="#certificates">Certificates</a></li>			
-                    <li class="tab"><a href="#configure">Configure</a></li>
+                    <li class="tab"><a href="#tags">Tag Creation</a></li>  <!-- red color:  style="color: #c55" -->
+                    <!-- <li class="tab"><a href="#rdf">RDF</a></li> -->
+                    <li class="tab"><a href="#selections">Tag Selection</a></li>
+                    <li class="tab"><a href="#certificates">Certificate Management</a></li>			
+                    <li class="tab"><a href="#configure">Settings</a></li>
                     <li class="tab"><a href="#log">Log</a></li>
                 </ul>
                 <!-- navigation ends-->	
@@ -736,10 +737,10 @@ function isNumber(n) {
                                     <td data-bind-text="item.sha256 | wrap 16"></td>
                                     <td>
                                         <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">delete</a> <br/>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">revoke</a>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">deploy</a>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">provision</a>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> <br/>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import To MT. Wilson</a>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a>                                        
                                     </td>
                                 </tr>
                             </tbody>
@@ -967,15 +968,15 @@ function isNumber(n) {
                                     <legend>Mt Wilson</legend>
                                     <ul>
                                         <li>
-                                            <label for="mtwilson-url">MtWilson URL</label>
+                                            <label for="mtwilson-url">MtWilson Base URL (https://mtwilson:port/)</label>
                                             <input type="text" data-bind-value="mtwilsonUrl" id="mtwilson-url" name="mtwilsonUrl" class="validate-url"/>
                                         </li>
                                         <li>
-                                            <label for="mtwilson-client-keystore-username">MtWilson Client Username</label>
+                                            <label for="mtwilson-client-keystore-username">MtWilson API Client Username</label>
                                             <input type="text" data-bind-value="mtwilsonClientKeystoreUsername" id="mtwilson-client-keystore-username" name="mtwilsonClientKeystoreUsername"/>
                                         </li>
                                         <li>
-                                            <label for="mtwilson-client-keystore-password">MtWilson Client Password</label>
+                                            <label for="mtwilson-client-keystore-password">MtWilson API Client Password</label>
                                             <input type="password" data-bind-value="mtwilsonClientKeystorePassword" id="mtwilson-client-keystore-password" name="mtwilsonClientKeystorePassword"/>
                                         </li>
                                     </ul>                                    
