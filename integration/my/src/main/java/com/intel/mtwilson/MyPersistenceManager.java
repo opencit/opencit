@@ -65,6 +65,7 @@ public class MyPersistenceManager extends PersistenceManager {
         prop.put("javax.persistence.jdbc.url", url);
         prop.put("javax.persistence.jdbc.user", config.getDatabaseUsername());
         prop.put("javax.persistence.jdbc.password", config.getDatabasePassword());
+        log.debug("javax.persistence.jdbc.url={}", url);
         //System.err.println("getJpaProps Default url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
     }
@@ -98,6 +99,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mountwilson.as.db.password", 
                 myConfig.getString("mtwilson.db.password", 
                 "password")));
+        log.debug("ASData javax.persistence.jdbc.url={}", prop.getProperty("javax.persistence.jdbc.url"));
         //System.err.println("getJpaProps ASdata url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
     }    
@@ -133,6 +135,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mountwilson.ms.db.password", 
                 myConfig.getString("mtwilson.db.password", 
                 "password")));
+        log.debug("MSData javax.persistence.jdbc.url={}", prop.getProperty("javax.persistence.jdbc.url"));
         //System.err.println("getJpaProps MSData url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
@@ -170,6 +173,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mountwilson.audit.db.password", 
                 myConfig.getString("mtwilson.db.password", 
                 "password")));
+        log.debug("AuditData javax.persistence.jdbc.url={}", prop.getProperty("javax.persistence.jdbc.url"));
         //System.err.println("getJpaProps audit url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         
@@ -206,6 +210,7 @@ public class MyPersistenceManager extends PersistenceManager {
                 myConfig.getString("mountwilson.mc.db.password", 
                 myConfig.getString("mtwilson.db.password", 
                 "password")));
+        log.debug("MCData javax.persistence.jdbc.url={}", prop.getProperty("javax.persistence.jdbc.url"));
         //System.err.println("getJpaProps MCData url == " + prop.getProperty("javax.persistence.jdbc.url"));
         return prop;
         

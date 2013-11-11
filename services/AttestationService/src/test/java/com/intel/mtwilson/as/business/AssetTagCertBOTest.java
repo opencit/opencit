@@ -14,7 +14,10 @@ import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.util.encoders.Base64Encoder;
 import org.junit.Test;
@@ -24,6 +27,17 @@ import org.junit.Test;
  * @author ssbangal
  */
 public class AssetTagCertBOTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AssetTagCertBOTest.class);
+    
+    @Test
+    public void testJdbcConnection() throws Exception {
+        log.debug("JDBC URL: {}", My.jdbc().url());        
+        Connection c = My.jdbc().connection();
+        Statement s = c.createStatement();
+        s.executeQuery("SELECT 1");
+        s.close();
+        c.close();
+    }
     
     @Test
     public void testAssetTagCert() throws IOException{
