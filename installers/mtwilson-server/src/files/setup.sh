@@ -680,7 +680,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/asctl start\"
 	stop program = \"/usr/local/bin/asctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/status\" for 1 cycles
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -691,7 +691,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/msctl start\"
 	stop program = \"/usr/local/bin/msctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/status\" for 1 cycles
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -702,7 +702,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/wlmctl start\"
 	stop program = \"/usr/local/bin/wlmctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/status\" for 1 cycles
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -742,7 +742,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/asctl start\"
 	stop program = \"/usr/local/bin/asctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/status\" for 1 cycles
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -753,7 +753,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/msctl start\"
 	stop program = \"/usr/local/bin/msctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/status\" for 1 cycles
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -764,7 +764,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/wlmctl start\"
 	stop program = \"/usr/local/bin/wlmctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/status\" for 1 cycles
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
