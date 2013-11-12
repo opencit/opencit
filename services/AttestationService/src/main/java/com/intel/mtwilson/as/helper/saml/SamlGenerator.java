@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.helper.saml;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
