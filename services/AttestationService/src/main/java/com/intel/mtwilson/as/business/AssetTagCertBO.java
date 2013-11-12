@@ -5,10 +5,12 @@
 package com.intel.mtwilson.as.business;
 
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
+import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.BaseBO;
@@ -23,10 +25,15 @@ import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -378,5 +385,34 @@ public class AssetTagCertBO extends BaseBO{
         }
                 
         return isValid;        
+    }
+    
+    protected static final ObjectMapper mapper = new ObjectMapper();
+     
+    private <T> T fromJSON(String document, Class<T> valueType) throws IOException, ApiException {
+        try {
+            return mapper.readValue(document, valueType);
+        }
+        catch(org.codehaus.jackson.JsonParseException e) {
+           
+            throw new ApiException("Cannot parse response", e);
+        }
+    }
+    
+    public TagDataType getTagInfoByOID(String oid) throws IOException, ApiException {
+        TagDataType ret = null;
+        
+        String requestURL = My.configuration().getAssetTagServerURL() + "/tags?oidEqualTo="+oid;
+                //1.3.6.1.4.1.99999.3";
+        HttpGet request = new HttpGet(requestURL);
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpResponse response = httpClient.execute(request);      
+        String str = IOUtils.toString(response.getEntity().getContent());
+        System.out.println("getTagInfoByOID response = " + str);        
+        TagDataType[] tag = fromJSON(str, TagDataType[].class);       
+        httpClient.getConnectionManager().shutdown();
+        if(tag == null || tag[0] == null)
+            throw new ApiException("Error while getting tag from server");
+        return tag[0];
     }
 }

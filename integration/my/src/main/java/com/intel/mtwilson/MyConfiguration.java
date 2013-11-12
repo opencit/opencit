@@ -482,4 +482,7 @@ public class MyConfiguration {
         return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
     }
     
+    public String getAssetTagServerString() throws MalformedURLException {
+        return conf.getString("mtwilson.atag.url", "http://localhost:1700");
+    }
 }

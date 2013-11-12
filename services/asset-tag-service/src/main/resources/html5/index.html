@@ -525,7 +525,8 @@ function isNumber(n) {
                                             </tbody>
                                         </table>
                                     </td>
-                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">delete</a></td>
+                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a></td>
+                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -740,7 +741,7 @@ function isNumber(n) {
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> <br/>
                                         <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
-                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import To MT. Wilson</a> <br/>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deployCertificate(this.getAttribute('uuid')); return false;">Import</a> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.revokeCertificate(this.getAttribute('uuid')); return false;">Revoke</a> <br/>                                       
                                     </td>
                                 </tr>

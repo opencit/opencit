@@ -7,12 +7,14 @@ package com.intel.mtwilson.as.business;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
+import com.intel.mtwilson.datatypes.TagDataType;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -37,6 +39,14 @@ public class AssetTagCertBOTest {
         s.executeQuery("SELECT 1");
         s.close();
         c.close();
+    }
+    
+    @Test
+    public void testAtagConfigValues() throws IOException, ApiException {
+        AssetTagCertBO certBO = new AssetTagCertBO();
+        String oid = "1.3.6.1.4.1.99999.3";
+        TagDataType tag = certBO.getTagInfoByOID(oid);
+        System.out.println(tag.name);
     }
     
     @Test

@@ -480,7 +480,14 @@ mtwilson.atag = mtwilson.atag || {};
         mtwilson.rivets.views['selection-browse-table'].sync();
 
     };
+     // removes all tags with this oid
+    mtwilson.atag.exportXmlSelection = function(uuid) {
+        log.debug("exportXmlSelection: " + uuid);
+        
 
+    };
+    
+    
     mtwilson.atag.removeCertificateRequest = function(uuid) {
         var i;
         for (i = data.certificateRequests.length - 1; i >= 0; i--) {

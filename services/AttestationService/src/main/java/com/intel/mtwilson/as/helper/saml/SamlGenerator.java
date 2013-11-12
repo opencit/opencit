@@ -6,8 +6,10 @@ package com.intel.mtwilson.as.helper.saml;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.hostmanifestreport.data.ManifestType;
+import com.intel.mtwilson.as.business.AssetTagCertBO;
 import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
+import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.io.Resource;
 import java.io.IOException;
@@ -362,8 +364,24 @@ public class SamlGenerator {
             // identify all the asset tags on the client side, we will just append the text ATAG for all of them.
             attrStatement.getAttributes().add(createBooleanAttribute("Asset_Tag", host.isAssetTagTrusted()));
             if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
+                AssetTagCertBO certBO = new AssetTagCertBO();
                 for (AttributeOidAndValue atagAttr : atags) {
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+ atagAttr.getOid()), atagAttr.getValue()));
+                    // stdalex convert tag OID to actual tag name
+                    String name = "Name Not Found";
+                    try {
+                        TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
+                        log.debug("createHostAttributes found tag for oid " + atagAttr.getOid() );
+                        name = tag.name;
+                    }catch (IOException ioEx){
+                        // we can't translate the oid to a name, just leave oid
+                    }
+                    catch (ApiException apiEx){
+                        
+                    }
+                    catch (Exception ex){
+                        
+                    }
+                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+ name+"["+atagAttr.getOid()+"]"), atagAttr.getValue()));
                 }
             }
 
