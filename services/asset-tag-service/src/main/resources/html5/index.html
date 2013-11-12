@@ -235,7 +235,7 @@ function isNumber(n) {
                         <form id="tag-create-form">
                             <ul>
                                 <li><label for="tag-create-name">Tag name</label><input type="text" id="tag-create-name" data-bind-value="input.name" name="name" placeholder="Tag name" class="required"/></li>
-                                <li><label for="tag-create-oid">Tag OID</label><input type="text" id="tag-create-oid" data-bind-value="input.oid" name="oid" placeholder="Tag OID" class="required"/></li>
+                                <li><label for="tag-create-oid">Tag OID(optional)</label><input type="text" id="tag-create-oid" data-bind-value="input.oid" name="oid" value="2.5.4.789.1" class="required"/></li>  <!-- no longer a required field  -->
                                 <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
                                 <li><label for="tag-create-values">Tag values</label>
                                     <input type="text"  id="tag-create-values" placeholder="Value" class="validate-data" data-validator="tag_create_form_validateValues"/>
