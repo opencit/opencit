@@ -455,10 +455,15 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
-if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
-  sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
-  sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
-  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
+  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
+    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
+  fi
+  if ! grep -q "JAVA_HOME" /etc/environment; then
+    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  fi
+  
   . /etc/environment
 fi
 
