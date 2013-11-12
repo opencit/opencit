@@ -334,7 +334,7 @@ public class SamlGenerator {
             return attr;
 	}
 	*/
-        
+        private final String DEFAULT_OID = "2.5.4.789.1";
         private AttributeStatement createHostAttributes(TxtHost host, ArrayList<AttributeOidAndValue> atags) throws ConfigurationException {
             // Builder Attributes
             SAMLObjectBuilder attrStatementBuilder = (SAMLObjectBuilder)  builderFactory.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
@@ -367,22 +367,23 @@ public class SamlGenerator {
             if( host.isAssetTagTrusted() && atags != null && !atags.isEmpty()) {
                 AssetTagCertBO certBO = new AssetTagCertBO();
                 for (AttributeOidAndValue atagAttr : atags) {
-                    // stdalex convert tag OID to actual tag name
-                    String name = "Name Not Found";
-                    try {
-                        TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
-                        log.debug("createHostAttributes found tag for oid " + atagAttr.getOid() );
-                        name = tag.name;
-                    }catch (IOException ioEx){
-                        // we can't translate the oid to a name, just leave oid
+                    String tagValue = atagAttr.getValue();
+                    if (! atagAttr.getOid().equalsIgnoreCase(DEFAULT_OID)) { 
+                        // not the default oid that means value == key/value
+                        // so we need to query the service and try and get the mapping from there
+                        try {
+                            TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
+                            log.debug("createHostAttributes found tag for oid " + atagAttr.getOid());
+                            tagValue = tag.name + "=" + atagAttr.getValue();
+                        } catch (IOException ioEx) {
+                          
+                        } catch (ApiException apiEx) {
+                           
+                        } catch (Exception ex) {
+                          
+                        }
                     }
-                    catch (ApiException apiEx){
-                        
-                    }
-                    catch (Exception ex){
-                        
-                    }
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+ name+"["+atagAttr.getOid()+"]"), atagAttr.getValue()));
+                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid()),tagValue));
                 }
             }
 
