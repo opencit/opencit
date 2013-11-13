@@ -124,7 +124,7 @@ function getAssetTagPage() {
     //$('#mainContainer').html('<div id="AssetTagPage"></div>');
     //$('#AssetTagPage').html('<iframe src="http://10.1.71.207:9999/" width="100%" height="100%" > </iframe>');
             //'<iframe height="410" width="100%" frameBorder="3" src="http://www.google.com.au/webhp?sourceid=navclient&ie=UTF-8/index.php">your browser does not support IFRAMEs</iframe>'    
-    window.open("http://10.1.71.207:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
+    window.open("http://127.0.0.1:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
 }
 
 function getAddHostPage() {
