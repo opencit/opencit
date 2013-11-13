@@ -38,7 +38,14 @@ public class StartHttpServer extends AtagCommand {
     
     public void start() throws Exception {
         component = new Component();
-        component.getServers().add(Protocol.HTTP, port);
+        Server server = component.getServers().add(Protocol.HTTPS, port);
+        Series<Parameter> parameters = server.getContext().getParameters();
+        // TODO-stdalex these values need to come from a config file
+        parameters.add("sslContextFactory", "org.restlet.ext.ssl.PkixSslContextFactory");
+        parameters.add("keystorePath", "serverX.jks");
+        parameters.add("keystorePassword", "password");
+        parameters.add("keyPassword", "password");
+        parameters.add("keystoreType", "JKS");
         component.getClients().add(Protocol.FILE); // filesystem resources
         component.getClients().add(Protocol.CLAP); // classpath resources
         component.getDefaultHost().attach("", new RestletApplication()); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"

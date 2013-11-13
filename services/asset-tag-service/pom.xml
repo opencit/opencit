@@ -278,7 +278,16 @@ our customers.
    <version>2.2-M4</version>
    <scope>test</scope>
 </dependency>
-        
+ <dependency>  
+   <groupId>org.restlet.jse</groupId>  
+   <artifactId>org.restlet.ext.simple</artifactId>  
+   <version>2.2-M4</version>
+ </dependency>
+   <dependency>  
+   <groupId>org.restlet.jse</groupId>  
+   <artifactId>org.restlet.ext.ssl</artifactId>  
+   <version>2.2-M4</version>
+ </dependency>
     <dependency>
 	<groupId>javax.servlet</groupId>
 	<artifactId>servlet-api</artifactId>
@@ -399,6 +408,19 @@ our customers.
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
+            <type>jar</type>
+        </dependency>
+        <!-- deps to support ssl -->
+        <dependency>
+            <groupId>simple-framework</groupId>
+            <artifactId>simple-framework</artifactId>
+            <version>5.1</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>simple-framework</groupId>
+            <artifactId>simple-framework</artifactId>
+            <version>5.1</version>
             <type>jar</type>
         </dependency>
     <!--
