@@ -837,6 +837,12 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return result;
     }
 
+    @Override
+    public String checkMatchingMLEExists(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException {
+        return text(httpPost(asurl("/hosts/mle/verify"), toJSON(hostObj)));
+        //return result;
+    }
+
    /* @Override
     public X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
         byte[] trust = binary(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trustcert.x509")));

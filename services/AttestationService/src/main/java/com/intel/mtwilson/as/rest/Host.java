@@ -33,6 +33,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ws.rs.DefaultValue;
 
 /**
  * REST Web Service *
@@ -229,18 +230,22 @@ public class Host {
          * Sample output for trusted host: BIOS:1,VMM:1
          *
          * @param hostName unique name of the host to query
+         * @param forceVerify
          * @return a string like BIOS:0,VMM:0 representing the trust status
          */
         @RolesAllowed({"Attestation", "Report"})
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/trust")
-        public HostTrustResponse get(@QueryParam("hostName") String hostName) throws ASException {
+        public HostTrustResponse get(
+                @QueryParam("hostName") String hostName,
+                @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify) throws ASException {
                 try {
                         // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
                         Hostname hostname = new Hostname(hostName);
                         if(hostname.isValid()){
-                        HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatus(hostname);
+                            //HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatus(hostname);
+                            HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatusWithCache(hostName, forceVerify);
                         return new HostTrustResponse(hostname, trust);
                         }
                         else throw new ASException(ErrorCode.AS_MISSING_INPUT, "hostName");
@@ -291,6 +296,18 @@ public class Host {
         @Path("/mle")
         public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
                 return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
+        }
+
+        @RolesAllowed({"Attestation"})
+        @POST
+        @Consumes({MediaType.APPLICATION_JSON})
+        @Produces({MediaType.APPLICATION_JSON})
+        @Path("/mle/verify")
+        public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
+                String result = new ASComponentFactory().getHostTrustBO().checkMatchingMLEExists(hostRecord, 
+                        hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
+                System.out.println("checkMatchingMLEExists RESULT:" + result);
+                return result;
         }
         
 }

@@ -57,8 +57,14 @@ public class VMwareConnectionPool {
      */
     public VMwareClient getClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
         VMwareClient client = reuseClientForConnection(tlsConnection);
-        if( client != null ) { return client; } // already validated
-        return createClientForConnection(tlsConnection);
+        if( client != null ) { // already validated
+            log.debug("Found an already created vcenter connection. Reusing...");
+            return client;
+        }
+        else {
+            log.debug("Could not find vcenter connection. Creating a new vcenter connection...");
+            return createClientForConnection(tlsConnection);
+        }
     }
     
     /**

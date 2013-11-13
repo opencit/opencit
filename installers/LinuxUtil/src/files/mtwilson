@@ -59,7 +59,7 @@ find_ctl_commands() {
   #mcctl=`which mcctl 2>/dev/null`
   #wpctl=`which wpctl 2>/dev/null`
   #tdctl=`which tdctl 2>/dev/null`
-  mpctl=`which mpctl 2>/dev/null`
+  mpctl=`which mtwilson-portal 2>/dev/null`
 }
 
 mtwilson_saml_cert_report() {
@@ -352,7 +352,7 @@ case "$1" in
         ;;
   erase-users)
 		load_default_env 1>/dev/null
-		if [ -z $MC_FIRST_USERNAME ]; then
+		if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* ]]; then
 			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
 			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
 		fi
@@ -360,12 +360,13 @@ case "$1" in
         call_setupcommand EraseUserAccounts $@
         ;;
   change-db-pass)
-        if [ $# -ne 1 ]; then
+        if [ $ -ne 1 ]; then
           echo_failure "Usage: $0 $1"; exit -1; fi
         change_db_pass $@
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        load_default_env 1>/dev/null
         if using_glassfish; then
           glassfish_require
           echo "Stopping Glassfish..."
@@ -373,9 +374,9 @@ case "$1" in
           # application files
           echo "Removing Glassfish in /usr/share/glassfish3..."
           rm -rf /usr/share/glassfish3
-		elif using_tomcat; then
-		  tomcat_require
-		  echo "Stopping Tomcat..."
+        elif using_tomcat; then
+          tomcat_require
+          echo "Stopping Tomcat..."
           tomcat_shutdown
           # application files
           echo "Removing Tomcat in $TOMCAT_HOME..."
@@ -416,7 +417,7 @@ case "$1" in
   help)
         ;&
   *)
-        echo -e "Usage: mtwilson {api|erase-data|erase-users|fingerprint|help|\n" \
+        echo -e "Usage: mtwilson {api|change-db-pass|erase-data|erase-users|fingerprint|help|\n" \
 				"\t\tglassfish-detect|glassfish-enable-logging|glassfish-sslcert|glassfish-status|\n" \
 				"\t\tjava-detect|mysql-detect|mysql-sslcert|tomcat-detect|tomcat_sslcert|tomcat-status|\n" \
 				"\t\trestart|setup|start|status|stop|uninstall|version}"

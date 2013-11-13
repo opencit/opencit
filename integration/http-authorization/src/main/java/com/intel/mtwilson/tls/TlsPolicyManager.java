@@ -37,7 +37,7 @@ public class TlsPolicyManager implements TlsPolicy, HostnameVerifier {
     }
     private static Logger log = LoggerFactory.getLogger(TlsPolicyManager.class);
     private ConcurrentHashMap<String, TlsPolicy> map = new ConcurrentHashMap<String, TlsPolicy>(32); // default capacity 16 but we're starting with 32, default load factor 0.75
-
+    
     public void setTlsPolicy(String address, TlsPolicy tlsPolicy) {
         log.debug("TlsPolicyManager: adding {} with policy: {}", address, tlsPolicy.getClass().toString());
         map.put(address, tlsPolicy);

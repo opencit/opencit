@@ -86,7 +86,7 @@ function fnUploadWhiteListConfigurationData() {
                 alert("Please enter a valid ip address and try again.");
             }
         } else if (isVMWare == 1) { // get VMWare values
-            if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val())) {
+            if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val()) && fnValidateIpAddress($('#whiteListVMware_Host').val())) {
                 var valid0 = fnValidateEmptyValue('whiteListVMware_Host');
                 var valid1 = fnValidateEmptyValue('whiteListVMWare_vCenterServer');
                 var valid2 = fnValidateEmptyValue('whiteListVMWare_LoginID');

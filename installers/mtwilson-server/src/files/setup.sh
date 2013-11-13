@@ -112,7 +112,7 @@ elif [ ! -z "$opt_mysql" ]; then
 fi
 
 export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
@@ -431,6 +431,9 @@ elif using_postgres; then
  
 fi
 
+
+
+
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
@@ -452,8 +455,16 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
-if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
-  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
+  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
+    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
+  fi
+  if ! grep -q "JAVA_HOME" /etc/environment; then
+    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  fi
+  
+  . /etc/environment
 fi
 
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
@@ -490,8 +501,16 @@ if using_glassfish; then
     echo "Disabling glassfish log rotation in place of system wide log rotation"
 	$glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
   else
-	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation"
+	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
 	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+  fi
+
+  if [ -e $glassfish_bin ]; then
+    echo "Increasing glassfish max thread pool size to 200..."
+      $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+  else
+    echo_warning "Unable to locate asadmin, please run the following command on your system to increase HTTP-max-thread-size: "
+    echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
   fi
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
@@ -666,7 +685,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/asctl start\"
 	stop program = \"/usr/local/bin/asctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/status\" for 1 cycles
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -677,7 +696,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/msctl start\"
 	stop program = \"/usr/local/bin/msctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/status\" for 1 cycles
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -688,7 +707,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/wlmctl start\"
 	stop program = \"/usr/local/bin/wlmctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/status\" for 1 cycles
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -728,7 +747,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/asctl start\"
 	stop program = \"/usr/local/bin/asctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/status\" for 1 cycles
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -739,7 +758,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/msctl start\"
 	stop program = \"/usr/local/bin/msctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/status\" for 1 cycles
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -750,7 +769,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/wlmctl start\"
 	stop program = \"/usr/local/bin/wlmctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/status\" for 1 cycles
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -798,7 +817,7 @@ fi
 fi
 
 echo  -n "Restarting monit service so new configs take effect... "
-service monit restart 
+service monit restart > /dev/null 2>&1
 echo "Done"
 
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
@@ -817,6 +836,7 @@ elif using_postgres; then
   postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 fi
   
+echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"

@@ -103,7 +103,7 @@ public interface MtWilson {
      * @throws ApiException All the errors from the Mt.Wilson system would be thrown as ApiException. Users can access the 
      * error code and error message for details.
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      * 
      */
     HostTrustResponse getHostTrust(Hostname hostname) throws IOException, ApiException, SignatureException;
@@ -158,7 +158,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
      * @see MtWilson#registerHost(com.intel.mtwilson.datatypes.TxtHostRecord) registerHost function for automation of host registration.
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     HostResponse addHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
     
@@ -216,7 +216,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
      * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) registerHosts function for automation of host registration.
-     * @since MW 1.2
+     * @since MTW 1.2 Enterprise
      */    
     HostConfigResponseList addHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
 
@@ -252,7 +252,7 @@ public interface MtWilson {
      * @throws ApiException All the errors from the Mt.Wilson system would be thrown as ApiException. Users can access the 
      * error code and error message for details.
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */
     HostTrustResponse getHostTrustByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException;
     
@@ -338,7 +338,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
      * @see MtWilson#registerHost(com.intel.mtwilson.datatypes.TxtHostRecord) registerHost function for automation of host updates.
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     HostResponse updateHost(TxtHost host) throws IOException, ApiException, SignatureException, MalformedURLException;
 
@@ -393,7 +393,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
      * @see MtWilson#registerHosts(com.intel.mtwilson.datatypes.TxtHostRecordList) registerHosts function for automation of host registration.
-     * @since MW 1.2 
+     * @since MTW 1.2 Enterprise 
      */    
     HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
     
@@ -420,7 +420,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */        
     HostResponse deleteHost(Hostname hostname) throws IOException, ApiException, SignatureException;
 
@@ -448,7 +448,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException;
 
@@ -484,7 +484,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     OpenStackHostTrustLevelReport pollHosts(List<Hostname> hostnames) throws IOException, ApiException, SignatureException;
 
@@ -531,7 +531,7 @@ public interface MtWilson {
      * @throws ApiException
      * @throws SignatureException
      * @throws JAXBException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     HostsTrustReportType getHostTrustReport (List<Hostname> hostnames) throws IOException, ApiException, SignatureException, JAXBException;
 
@@ -574,7 +574,7 @@ public interface MtWilson {
      * @throws ApiException
      * @throws SignatureException
      * @throws JAXBException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     HostManifestReportType getHostManifestReport (Hostname hostname) throws IOException, ApiException, SignatureException, JAXBException;
 
@@ -655,7 +655,7 @@ public interface MtWilson {
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */
     String getSamlForHost(Hostname hostname) throws IOException, ApiException, SignatureException;
 
@@ -737,7 +737,7 @@ public interface MtWilson {
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */
     String getSamlForHost(Hostname hostname, boolean forceVerify) throws IOException, ApiException, SignatureException;
 
@@ -831,7 +831,7 @@ public interface MtWilson {
      * @throws ApiException
      * @throws SignatureException 
      * @see  HostTrustXmlResponse
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
     */
     List<HostTrustXmlResponse> getSamlForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) throws IOException, ApiException, SignatureException;
 
@@ -873,7 +873,7 @@ public interface MtWilson {
      * @throws IOException
      * @throws ApiException
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */
     BulkHostTrustResponse getTrustForMultipleHosts(Set<Hostname> hostnames, boolean forceVerify) throws IOException, ApiException, SignatureException;
 
@@ -917,7 +917,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     AttestationReport getAttestationFailureReport(Hostname hostname)throws IOException, ApiException, SignatureException;
     
@@ -954,7 +954,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     AttestationReport getAttestationReport(Hostname hostname) throws IOException, ApiException, SignatureException;
 
@@ -1037,7 +1037,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean addMLE(MleData mle) throws IOException, ApiException, SignatureException;
     
@@ -1082,7 +1082,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean updateMLE(MleData mle) throws IOException, ApiException, SignatureException;
 
@@ -1116,7 +1116,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     List<MleData> searchMLE(String name) throws IOException, ApiException, SignatureException;
 
@@ -1154,7 +1154,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     MleData getMLEManifest(MLESearchCriteria criteria) throws IOException, ApiException, SignatureException;
 
@@ -1193,7 +1193,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     boolean deleteMLE(MLESearchCriteria criteria) throws IOException, ApiException, SignatureException;
 
@@ -1222,7 +1222,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     List<OemData> listAllOEM() throws IOException, ApiException, SignatureException;
 
@@ -1259,7 +1259,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution like OEM already exists or so, this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean addOEM(OemData oem) throws IOException, ApiException, SignatureException;
 
@@ -1296,7 +1296,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 Core/Premium
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean updateOEM(OemData oem) throws IOException, ApiException, SignatureException;
 
@@ -1330,7 +1330,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 Core/Premium
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     boolean deleteOEM(String name) throws IOException, ApiException, SignatureException;
 
@@ -1359,7 +1359,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 Core/Premium
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */        
     List<OsData> listAllOS() throws IOException, ApiException, SignatureException;
 
@@ -1393,7 +1393,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution like OS already exists or so, this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean updateOS(OsData os) throws IOException, ApiException, SignatureException;
 
@@ -1428,7 +1428,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution like OS already exists or so, this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean addOS(OsData os) throws IOException, ApiException, SignatureException;
 
@@ -1463,7 +1463,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */         
     boolean deleteOS(OsData os) throws IOException, ApiException, SignatureException;
 
@@ -1511,7 +1511,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */
     boolean addPCRWhiteList(PCRWhiteList pcrObj) throws IOException, ApiException, SignatureException;
     
@@ -1555,7 +1555,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     boolean updatePCRWhiteList(PCRWhiteList pcrObj) throws IOException, ApiException, SignatureException;
     
@@ -1594,7 +1594,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise/1.2 Opensource
      */    
     boolean deletePCRWhiteList(PCRWhiteList pcrObj) throws IOException, ApiException, SignatureException;
     
@@ -1641,7 +1641,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */    
     boolean addModuleWhiteList(ModuleWhiteList moduleObj) throws IOException, ApiException, SignatureException;
     
@@ -1683,7 +1683,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */    
     boolean updateModuleWhiteList(ModuleWhiteList moduleObj) throws IOException, ApiException, SignatureException;
     
@@ -1718,7 +1718,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */    
     boolean deleteModuleWhiteList(ModuleWhiteList moduleObj) throws IOException, ApiException, SignatureException;    
     
@@ -1751,7 +1751,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */    
     List<ModuleWhiteList> listModuleWhiteListForMLE(String mleName, String mleVersion, 
             String osName, String osVersion, String oemName) throws IOException, ApiException, SignatureException;
@@ -1795,7 +1795,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise/1.2 Opensource
      */    
     boolean addMleSource(MleSource mleSourceObj) throws IOException, ApiException, SignatureException;
     
@@ -1839,7 +1839,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise/1.2 Opensource
      */    
     boolean updateMleSource(MleSource mleSourceObj) throws IOException, ApiException, SignatureException;
     
@@ -1873,7 +1873,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise/1.2 Opensource
      */    
     boolean deleteMleSource(MleData mleDataObj) throws IOException, ApiException, SignatureException;
     
@@ -1906,7 +1906,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise/1.2 Opensource
      */        
     String getMleSource(MleData mleDataObj) throws IOException, ApiException, SignatureException;    
     
@@ -1948,7 +1948,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */            
     List<ApiClientInfo> searchApiClients(ApiClientSearchCriteria criteria) throws IOException, ApiException, SignatureException;
     
@@ -1988,7 +1988,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller. 
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */            
     List<ApiClientInfo> listPendingAccessRequests() throws IOException, ApiException, SignatureException;
 
@@ -2022,7 +2022,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
      * @see ApiClientInfo
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */                
     ApiClientInfo getApiClientInfo(byte[] fingerprint) throws IOException, ApiException, SignatureException;
 
@@ -2063,7 +2063,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     boolean registerApiClient(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException;
     
@@ -2102,7 +2102,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     boolean updateApiClient(ApiClientUpdateRequest info) throws IOException, ApiException, SignatureException;
     
@@ -2132,7 +2132,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
      * @see ApiClientInfo
-     * @since MW 1.0
+     * @since MTW 1.0 Enterprise
      */                    
     boolean deleteApiClient(byte[] fingerprint) throws IOException, ApiException, SignatureException;
 
@@ -2160,7 +2160,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     Role[] listAvailableRoles() throws IOException, ApiException, SignatureException;
     
@@ -2206,7 +2206,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     boolean registerHost(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
     
@@ -2259,7 +2259,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     boolean registerHost(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException;
     
@@ -2307,7 +2307,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     boolean configureWhiteList(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
     
@@ -2324,7 +2324,9 @@ public interface MtWilson {
      * that the host can be registered successfully if both the BIOS and VMM MLEs have been configured.
      * <p>
      * <i><u>Note:</u></i> If the white list is already configured, then executing this function again would update the current
-     * white lists in the database.
+     * white lists in the database if the Overwrite_Whitelist flag is set to true. Otherwise, if the MLE already exists and the
+     * white lists matches, new MLE will not be created. If in case the white list does not match (because of new modules, 
+     * new tBoot version etc), then a new MLE will be created with a numeric extension (_001, 002).
      * <p>
      * <i><u>Roles needed:</u></i>Whitelist
      * <p>
@@ -2337,7 +2339,7 @@ public interface MtWilson {
      * https://192.168.1.101:8181/ManagementService/resources/host/whitelist/custom<br>
      * <i>Sample Input.</i><br>
      * {"Add_BIOS_WhiteList":true,"Add_VMM_WhiteList":true,"BIOS_WhiteList_Target":"BIOS_OEM","VMM_WhiteList_Target":"VMM_OEM",
-     * "BIOS_PCRS":"0","VMM_PCRS":"17,18","Register_Host":true,"TXT_Host_Record":{"HostName":"192.168.1.201","AddOn_Connection_String":"intel:https://192.168.1.201:9999"}}
+     * "BIOS_PCRS":"0,17","VMM_PCRS":"18,19","Register_Host":true,"Overwrite_Whitelist":false,"TXT_Host_Record":{"HostName":"192.168.1.201","AddOn_Connection_String":"intel:https://192.168.1.201:9999"}}
      * <p>
      * <i><u>Sample Output:</u></i><br>
      * true<br>
@@ -2354,6 +2356,7 @@ public interface MtWilson {
             hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);<br>
             hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);<br>
             hostConfigObj.setRegisterHost(true);<br>
+            hostConfigObj.setOverWriteWhiteList(false);<br>
             hostConfigObj.setTxtHostRecord(hostObj);<br>
             boolean configureWhiteList = apiClientObj.configureWhiteList(hostConfigObj);<br>
      * <p>
@@ -2367,7 +2370,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.0 Enterprise
      */    
     boolean configureWhiteList(HostConfigData hostConfigObj) throws IOException, ApiException, SignatureException;
 
@@ -2398,7 +2401,7 @@ public interface MtWilson {
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
      * @since MW 1.0
-     * @deprecated As of MW 1.2 replaced by {@link ManagementService#getSamlCertificates() }
+     * @deprecated As of MTW 1.2 Enterprise replaced by {@link ManagementService#getSamlCertificates() }
      */    
     X509Certificate getSamlCertificate() throws IOException, ApiException, SignatureException;
 
@@ -2428,7 +2431,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise
      */    
     Set<X509Certificate> getRootCaCertificates() throws IOException, ApiException, SignatureException;
 
@@ -2456,7 +2459,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise
      */    
     Set<X509Certificate> getPrivacyCaCertificates() throws IOException, ApiException, SignatureException;
     
@@ -2485,7 +2488,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise
      */    
     Set<X509Certificate> getSamlCertificates() throws IOException, ApiException, SignatureException;
     
@@ -2515,7 +2518,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.1 
+     * @since MTW 1.1 Enterprise
      */    
     Set<X509Certificate> getTlsCertificates() throws IOException, ApiException, SignatureException;
 
@@ -2638,7 +2641,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.2
+     * @since MTW 1.2 Enterprise
      */        
     HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
     
@@ -2705,7 +2708,7 @@ public interface MtWilson {
      * @throws ApiException If there are any errors during the execution this exception would be returned to the caller.
      * The caller can use the getErrorCode() and getMessage() functions to retrieve the exception details.
      * @throws SignatureException 
-     * @since MW 1.0 
+     * @since MTW 1.2 Enterprise
      */        
     HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws IOException, ApiException, SignatureException;
     

@@ -36,6 +36,7 @@ public class VmwareHostAgentFactory implements VendorHostAgentFactory {
             }
             // Original call 
           URL url = new URL(vendorConnectionString);
+          
           TlsPolicyManager.getInstance().setTlsPolicy(url.getHost(), tlsPolicy);
             VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance()));
 //            VMwareClient client = pool.createClientForConnection(new TlsConnection(vendorConnectionString, tlsPolicy));
