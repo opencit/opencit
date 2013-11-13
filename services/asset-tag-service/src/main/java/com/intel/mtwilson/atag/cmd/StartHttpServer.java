@@ -34,7 +34,7 @@ public class StartHttpServer extends AtagCommand {
     
     public void start() throws Exception {
         component = new Component();
-        component.getServers().add(Protocol.HTTP, port);
+        component.getServers().add(Protocol.HTTPS, port);
         component.getClients().add(Protocol.FILE); // filesystem resources
         component.getClients().add(Protocol.CLAP); // classpath resources
         component.getDefaultHost().attach("", new RestletApplication()); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
