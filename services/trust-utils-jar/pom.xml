@@ -40,13 +40,6 @@
             <artifactId>vijava</artifactId>
             <version>5.5</version>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>com.vmware</groupId>
-            <artifactId>VSphere5.1</artifactId>
-            <version>2.5-774886</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
