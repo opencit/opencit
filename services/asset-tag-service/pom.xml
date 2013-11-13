@@ -170,9 +170,32 @@ our customers.
         </executions>
 </plugin>-->
 <!-- end jetty plugin  for junit testing -->
-                           
-                                                                   
-                                                                                                                                                   
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaIncludes>
+                                <include>jaxb/intel-mtwilson-asset-tag-attribute-selections/*.xsd</include>
+                            </schemaIncludes>
+                            <episodeFile>${project.build.directory}/generated-sources/xjc/META-INF/jaxb-intel-mtwilson-asset-tag-attribute-selections.episode</episodeFile>
+                            <generatePackage>com.intel.mtwilson.atag.xml.attrselect</generatePackage>
+                        </configuration>
+                        <id>jaxb-generate-intel-mtwilson-asset-tag-attribute-selections</id>
+                    </execution>
+                </executions>
+                <configuration>
+                    <catalog>src/main/resources/jaxb/catalog.xml</catalog>
+                    <catalogResolver>org.jvnet.jaxb2.maven2.resolver.tools.ClasspathCatalogResolver</catalogResolver>
+                    <forceRegenerate>true</forceRegenerate>
+                    <generateDirectory>${project.build.directory}/generated-sources/xjc</generateDirectory>
+                    <verbose>true</verbose>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

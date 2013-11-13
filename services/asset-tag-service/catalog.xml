@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
+    <system systemId="file:/C:/Users/jbuhacof/workspace/mtwilson-dev/services/asset-tag-service/src/main/resources/attribute-selections.xsd" uri="src/main/resources/jaxb/intel-mtwilson-asset-tag-attribute-selections/attribute-selections.xsd"/>
+</catalog>
