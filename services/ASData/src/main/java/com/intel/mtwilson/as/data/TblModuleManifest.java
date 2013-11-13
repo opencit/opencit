@@ -44,7 +44,8 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblModuleManifest.findByDescription", query = "SELECT t FROM TblModuleManifest t WHERE t.description = :description"),
 //    @NamedQuery(name = "TblModuleManifest.findByCreatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.createdOn = :createdOn"),
     @NamedQuery(name = "TblModuleManifest.findByMleId", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId"),
-    @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName")
+    @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName"),
+    @NamedQuery(name = "TblModuleManifest.findByMleIDEventID", query = "SELECT t.id FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.eventID.id = :eventId and t.componentName= :name")
     })
 //    @NamedQuery(name = "TblModuleManifest.findByUpdatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.updatedOn = :updatedOn")
 

@@ -201,8 +201,9 @@ public class TblPackageNamespaceJpaController implements Serializable {
             Query query = em.createNamedQuery("TblPackageNamespace.findByName");
             query.setParameter("name", name);
             
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            // Nov 14, 2013: Commenting out the below setting for better performance and updating the cacheusage to check cache and then DB                        
+            //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             
             TblPackageNamespace tblPNS = (TblPackageNamespace) query.getSingleResult();
             return tblPNS;

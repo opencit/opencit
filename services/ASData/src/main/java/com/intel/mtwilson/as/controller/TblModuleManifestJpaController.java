@@ -417,5 +417,31 @@ public class TblModuleManifestJpaController implements Serializable {
     }
 
     
+    public Integer findByMleIdEventId(Integer mleId, String componentName, Integer eventId){
+    
+        EntityManager em = getEntityManager();
+        try {
+            log.debug(String.format("Module Manifest for MLE: %d Component: %s Event: %s", mleId,componentName, eventId));
+            Query query = em.createNamedQuery("TblModuleManifest.findByMleIDEventID");
+            query.setParameter("name", componentName);
+            query.setParameter("eventId", eventId);
+            query.setParameter("mleId", mleId);
+            
+            
+            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
+            
+            Integer componentId = (Integer) query.getSingleResult();
+            
+            return componentId;
+            
+        } catch(NoResultException e){
+        	log.error(String.format("Module Manifest for MLE %d Component %s Event %s  Not found in Database ", mleId,componentName, eventId), e);
+        	return null;
+        } finally {
+            em.close();
+        }
+            	
+    }
     
 }
