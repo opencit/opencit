@@ -363,6 +363,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
 
     mtwilson.atag.createTag = function(input) {
+        
         var report = validate(input);
         if (report.isValid) {
             var tagObject = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
