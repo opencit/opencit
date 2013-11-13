@@ -76,7 +76,8 @@ public class AttrCertificateTest {
     public final static String OID_ASSET_TAG_SOLUTION = OID_DCSG_CPG + ".3";  // with mt wilson = 1 and mystery hill = 2
     public final static String OID_ASSET_TAG_HOST_UUID = OID.HOST_UUID; // same as "2.25"; // see http://oid-info.com/get/2.25  for standard OID for UUIDs // OID_ASSET_TAG_SOLUTION + ".1";
     public final static String OID_CUSTOMER_ROOT = "1.3.6.1.4.1.99999"; // instead of OID_ASSET_TAG_SOLUTION + ".9"; // http://oid-info.com/get/1.3.6.1.4.1  is private organizations on internet, 999999 is INVENTED value that is not curently registered , for use in our demonstrations
-
+    public final static String OID_NAMEVALUE_UTF8 = "2.5.4.789.1";
+    
     @BeforeClass
     public static void addBouncyCastleProvider() {
         Security.addProvider(new BouncyCastleProvider());
@@ -107,9 +108,9 @@ public class AttrCertificateTest {
         notAfter.add(Calendar.MONTH, 1);
         X509v2AttributeCertificateBuilder builder = new X509v2AttributeCertificateBuilder(holder, issuer, serialNumber, notBefore.getTime(), notAfter.getTime());
         // example of customer-defined location tags,  
-        builder.addAttribute(new ASN1ObjectIdentifier(OID_CUSTOMER_ROOT + ".1.1.1.1"), new DERUTF8String("US")); // a country tag
-        builder.addAttribute(new ASN1ObjectIdentifier(OID_CUSTOMER_ROOT + ".2.2.2.2"), new DERUTF8String("CA")); // a state tag
-        builder.addAttribute(new ASN1ObjectIdentifier(OID_CUSTOMER_ROOT + ".3.3.3.3"), new DERUTF8String("Folsom")); // a city tag
+        builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_UTF8), new DERUTF8String("Country=US")); // a country tag
+        builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_UTF8), new DERUTF8String("State=CA")); // a state tag
+        builder.addAttribute(new ASN1ObjectIdentifier(OID_NAMEVALUE_UTF8), new DERUTF8String("City=Folsom")); // a city tag
         // third, sign the attribute certificate
         X509AttributeCertificateHolder cert = builder.build(authority);
         log.debug("cert: {}", Base64.encodeBase64String(cert.getEncoded())); // MIICGDCCAQACAQEwH6EdpBswGTEXMBUGAWkEEJKnGiKMF0UioYv9PtPQCzmgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjIyMTEzWhgPMjAxMzA5MDgyMjIxMTNaMEMwEwYLKwYBBAG9hDcBAQExBAwCVVMwEwYLKwYBBAG9hDgCAgIxBAwCQ0EwFwYLKwYBBAG9hDkDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQCcN8KjjmR2H3LT5aL1SCFS4joy/7vAd3/xdJtkqrb3UAQHMdUUJQHf3frJsMJs22m0So0xs/f1sB15frC1LsQGF5+RYVXsClv0glStWbPYiqEfdM7dc/RDMRtrXKEH3sBlxMT7YS/g5E6qwmKZX9shQ3BYmeZi5A3DTzgHCbA3Cm4/MQbgWGjoamfWZ9EDk4Bww2y0ueRi60PfoLg43rcijr8Wf+JEzCRw040vIaH3DtFdmzvvGRdqE3YlEkrUL3gEIZNY3Po1NL4cb238vT5CHZTt9NyD7xSv0XkwOY4RbSUdYBsxfH3mEcdQ6LtJdfF1BUXfMThKN3TctFcY/dLF
@@ -144,7 +145,8 @@ public class AttrCertificateTest {
      */
     @Test
     public void readAttrCertificate() throws IOException {
-        String input = "MIICGzCCAQMCAQEwH6EdpBswGTEXMBUGAWkEEDN2amNcVURhioRZNld99FCgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjI0NDI3WhgPMjAxMzA5MDgyMjQ0MjdaMEYwFAYMKwYBBAGGjR8BAQEBMQQMAlVTMBQGDCsGAQQBho0fAgICAjEEDAJDQTAYBgwrBgEEAYaNHwMDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQAIPESDSy8TLMzlhO3kpOSUU2Y063qS4iaSHEaX4CDG1hMD/VMcu0MKIaZnr83RzHIv1Z+01s8HDbW5IMwU3rOE99sR1e4DmP0a4hh3GLL38Rta6FkxSt8vL2ie7irK4BWCgWZd3Oc1xeCyLZ7uK6jerw+Qt6zzMRy74z6+5k2jLsveF1XqJvdTQZZYeyeSLFBYc74akWGGYJ29eB6y8dKp/UWJ5VU21NldfpW5hBap2v1wQpUih7+CcRIZ7fvZaZbONEBU+UyYbT8OASJkvxmLB5eKLTXftz5gQkCPyR8oKacc5n0alU/DMWkKOOQUc2VzIAkJMR7DLwD1fnb+msnx";
+//        String input = "MIICGzCCAQMCAQEwH6EdpBswGTEXMBUGAWkEEDN2amNcVURhioRZNld99FCgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBBQUAAgEBMCIYDzIwMTMwODA4MjI0NDI3WhgPMjAxMzA5MDgyMjQ0MjdaMEYwFAYMKwYBBAGGjR8BAQEBMQQMAlVTMBQGDCsGAQQBho0fAgICAjEEDAJDQTAYBgwrBgEEAYaNHwMDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBBQUAA4IBAQAIPESDSy8TLMzlhO3kpOSUU2Y063qS4iaSHEaX4CDG1hMD/VMcu0MKIaZnr83RzHIv1Z+01s8HDbW5IMwU3rOE99sR1e4DmP0a4hh3GLL38Rta6FkxSt8vL2ie7irK4BWCgWZd3Oc1xeCyLZ7uK6jerw+Qt6zzMRy74z6+5k2jLsveF1XqJvdTQZZYeyeSLFBYc74akWGGYJ29eB6y8dKp/UWJ5VU21NldfpW5hBap2v1wQpUih7+CcRIZ7fvZaZbONEBU+UyYbT8OASJkvxmLB5eKLTXftz5gQkCPyR8oKacc5n0alU/DMWkKOOQUc2VzIAkJMR7DLwD1fnb+msnx";
+        String input = "MIICGTCCAQECAQEwH6EdpBswGTEXMBUGAWkEENP3IYWWPU+wgLZwdbugFQygXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTMxMTEyMjE0MDAwWhgPMjAxMzEyMTIyMTQwMDBaMEQwFQYFVQSGFQExDAwKQ291bnRyeT1VUzATBgVVBIYVATEKDAhTdGF0ZT1DQTAWBgVVBIYVATENDAtDaXR5PUZvbHNvbTANBgkqhkiG9w0BAQsFAAOCAQEAY8PvE89R+qxymMSnyH6Tg19x0v6A7BqeliIEingP/NIKTp07McubBo1kJ8UsogmeSZ4UOtxA+0GIjfec6DPNyH/J9u+dLfEFi6EV8Qrigi56SJRGa3VuK4ElZSmyk5lwhORtAW2oISGp/z5prOiItN1JEv4X/FTrJ62OBqK0+nzduRo0fjYizPc1+bI0zPsevBRvvPjtSwKnjq4DLjs7i6/SQMT4Tkq7QF7JM4TJthCbepUimXWXb1QrH9VTs4fzFGSn2JVVCWw/g/aPyQaLCo+Z1VVf4odDCOkVd9sHEAL1cXGIhGmWKuLTPZbz+XYJlHb5qUdi9rBTqVqJ6LQAqQ==";
         X509AttributeCertificateHolder cert = new X509AttributeCertificateHolder(Base64.decodeBase64(input));
         log.debug("issuer: {}", StringUtils.join(cert.getIssuer().getNames(), ", "));  // calls toString() on each X500Name so we get the default representation; we can do it ourselves for custom display;  output example: CN=Attr CA,OU=CPG,OU=DCSG,O=Intel,ST=CA,C=US
         log.debug("serial number: {}", cert.getSerialNumber().toString()); // output example:   1

@@ -199,8 +199,13 @@ public class CertificateRequestListResource extends ServerResource {
                             .subjectUuid(UUID.valueOf(certificateRequest.getSubject()))
                             .expires(7, TimeUnit.DAYS);
                     for (SelectionTagValue tag : selection.getTags()) {
-                        log.debug("Adding attribute: {} = {}", tag.getTagOid(), tag.getTagValue());
-                        builder.attribute(tag.getTagOid(), tag.getTagValue());
+                        log.debug("Adding attribute OID: {} Content: {}={}", tag.getTagOid(), tag.getTagName()+"="+ tag.getTagValue());
+                        if( tag.getTagOid().equals("2.5.4.789.1") ) { // name=value pair IN THE ATTRIBUTE VALUE 
+                            builder.attribute(tag.getTagOid(), tag.getTagName()+"="+tag.getTagValue());
+                        }
+                        else {
+                            builder.attribute(tag.getTagOid(), tag.getTagValue());                            
+                        }
                     }
                     byte[] attributeCertificateBytes = builder.build();
                     if( attributeCertificateBytes == null ) {
