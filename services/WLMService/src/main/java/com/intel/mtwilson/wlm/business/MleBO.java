@@ -30,7 +30,7 @@ public class MleBO extends BaseBO {
         TblEventTypeJpaController eventTypeJpaController = null;
         TblPackageNamespaceJpaController packageNSJpaController = null;
         private static String hexadecimalRegEx = "[0-9A-Fa-f]{40}";  // changed from + to 40 because sha1 is always 40 characters long when it's in hex
-        private static String invalidWhiteList = "[0]{40}|[F]{40}";
+        private static String invalidWhiteList = "[0]{40}|[Ff]{40}";
 
         public MleBO() {
                                 mleJpaController = new TblMleJpaController(getEntityManagerFactory());
@@ -195,7 +195,7 @@ public class MleBO extends BaseBO {
                                         tblHostsCollection = tblMle.getTblHostsCollection1();
                                     }
                                     if( tblHostsCollection != null ) {
-                                        log.info(String.format("MLE '%s' is currently associated with '%d' hosts. ", mleName, tblHostsCollection.size()));
+                                        log.debug(String.format("MLE '%s' is currently associated with '%d' hosts. ", mleName, tblHostsCollection.size()));
 
                                         if (!tblHostsCollection.isEmpty()) {
                                             throw new ASException(ErrorCode.WS_MLE_ASSOCIATION_EXISTS, mleName, mleVersion, tblHostsCollection.size());
@@ -245,14 +245,14 @@ public class MleBO extends BaseBO {
                                             tblMleList = mleJpaController.findTblMleEntities();
 
                                     if (tblMleList != null) {
-                                            log.info(String.format("Found [%d] mle results for search criteria [%s]", tblMleList.size(), searchCriteria));
+                                            log.debug(String.format("Found [%d] mle results for search criteria [%s]", tblMleList.size(), searchCriteria));
 
                                             for (TblMle tblMle : tblMleList) {
                                                     MleData mleData = createMleDataFromDatabaseRecord(tblMle, false);
                                                     mleDataList.add(mleData);
                                             }
                                     } else {
-                                            log.info(String.format("Found [%d] mle results for search criteria [%s]", 0,searchCriteria));
+                                            log.debug(String.format("Found [%d] mle results for search criteria [%s]", 0,searchCriteria));
                                     }
 
                                 } catch (ASException ase) {
@@ -303,7 +303,7 @@ public class MleBO extends BaseBO {
                          */
 	private TblMle getMleDetails(String mleName, String mleVersion,	String osName, String osVersion, String oemName) {
                                 TblMle tblMle;
-                                log.info(String.format("Mle name '%s' version '%s' os '%s' os version '%s' oem '%s'. ",
+                                log.debug(String.format("Mle name '%s' version '%s' os '%s' os version '%s' oem '%s'. ",
                                                 mleName, mleVersion, osName, osVersion, oemName));
                                 validateNull("mleName", mleName);
                                 validateNull("mleVersion", mleVersion);
@@ -391,7 +391,7 @@ public class MleBO extends BaseBO {
                          */
 	private String getRequiredManifestList(List<ManifestData> mleManifests) {
 		String manifestList = mleManifests == null ? "" : StringUtils.join(manifestNames(mleManifests), ",");
-		log.info("Required Manifest list: " + manifestList);
+		log.debug("Required Manifest list: " + manifestList);
 		return manifestList;
 	}
 
@@ -403,7 +403,7 @@ public class MleBO extends BaseBO {
                          */
 	private String validateNull(String label, String input) {
 		if (input == null || input.isEmpty()) {
-			log.info(String.format("Required input parameter '%s' is null or missing.", label));
+			log.debug(String.format("Required input parameter '%s' is null or missing.", label));
 			throw new ASException(ErrorCode.WS_MLE_DATA_MISSING, label);
 		}
 		return input;
@@ -472,7 +472,7 @@ public class MleBO extends BaseBO {
 
 			for (TblPcrManifest pcrManifest : tblMle.getTblPcrManifestCollection()) {
 				if (newPCRMap.containsKey(pcrManifest.getName())) {
-					log.info(String.format("Updating Pcr manifest value for mle %s  version %s pcr name %s",
+					log.debug(String.format("Updating Pcr manifest value for mle %s  version %s pcr name %s",
                                                                                                                                         pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),  pcrManifest.getName()));
 					// Bug 375
                                                                                                                         validateWhitelistValue(pcrManifest.getName(), newPCRMap.get(pcrManifest.getName())); // throws exception if invalid
@@ -484,7 +484,7 @@ public class MleBO extends BaseBO {
 					pcrManifestJpaController.edit(pcrManifest);
 					newPCRMap.remove(pcrManifest.getName());
 				} else {
-					log.info(String.format("Deleting Pcr manifest value for mle %s  version %s pcr name %s",
+					log.debug(String.format("Deleting Pcr manifest value for mle %s  version %s pcr name %s",
 						pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(),  pcrManifest.getName()));
 					pcrManifestJpaController.destroy(pcrManifest.getId());
 				}
@@ -506,7 +506,7 @@ public class MleBO extends BaseBO {
                                                                                                 */
 				pcrManifest.setMleId(tblMle);
 
-				log.info(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s",
+				log.debug(String.format("Creating Pcr manifest value for mle %s  version %s pcr name %s",
 					pcrManifest.getMleId().getName(), pcrManifest.getMleId().getVersion(), pcrManifest.getName()));
 
 				pcrManifestJpaController.create(pcrManifest);

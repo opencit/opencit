@@ -45,5 +45,10 @@ public class CitrixHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
     public Set<Rule> loadTrustRulesForLocation(String location, TblHosts host) {
         return reader.loadPcrMatchesConstantRulesForLocation(location, host);
     }
+
+    @Override
+    public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
+        return reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+    }
     
 }

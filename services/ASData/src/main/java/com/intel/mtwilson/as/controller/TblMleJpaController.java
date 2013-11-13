@@ -426,7 +426,8 @@ public class TblMleJpaController implements Serializable {
             if(biosList != null && vmmList.size() > 0)
                 mleList.addAll(vmmList);
             
-            mleList.addAll(vmmList);
+            // This would be adding duplicate entries
+            //mleList.addAll(vmmList);
 
 
         } finally {
@@ -475,7 +476,7 @@ public class TblMleJpaController implements Serializable {
             	TblMle mle = (TblMle) query.getSingleResult();
             	return mle;
             } catch (NoResultException e) {
-                log.info( "NoResultException: BIOS MLE does not exist Name {} Version {} Oem Name {} ", 
+                log.error( "NoResultException: BIOS MLE does not exist Name {} Version {} Oem Name {} ", 
                         new String[]{mleName, mleVersion, oemName});
                 return null;
             }
@@ -504,7 +505,7 @@ public class TblMleJpaController implements Serializable {
                 return mle;
 
             } catch (NoResultException e) {
-                log.info( "NoResultException: VMM MLE does not exist Name {} Version {} Os Name {} Os Version {}", 
+                log.error( "NoResultException: VMM MLE does not exist Name {} Version {} Os Name {} Os Version {}", 
                         new String[]{mleName, mleVersion, osName, osVersion});
                 return null;
             }
@@ -547,7 +548,8 @@ public class TblMleJpaController implements Serializable {
             if(vmmList != null && vmmList.size() > 0)
                 mleList.addAll(vmmList);
             
-            mleList.addAll(vmmList);
+            // The below statement used to add the values again causing duplicates.
+            //mleList.addAll(vmmList);
         } finally {
             em.close();
         }

@@ -142,7 +142,7 @@ public class TrustAgentSecureClient {
             InputStream sockInput = sock.getInputStream();
             OutputStream sockOutput = sock.getOutputStream();
 
-            log.debug("About to start reading/writing to/from socket.");
+            log.info("About to start reading/writing to/from socket.");
             log.debug("Writing: {}", new String(data));
             byte[] buf = new byte[5000];
                 sockOutput.write(data, 0, data.length);
@@ -183,7 +183,7 @@ public class TrustAgentSecureClient {
         try {
             byte buf[] = sendRequestWithSSLSocket();
 
-            log.debug("Unmarshalling to Jaxb object.");
+            log.info("Unmarshalling to Jaxb object.");
             
             JAXBContext jc = JAXBContext.newInstance("com.intel.mountwilson.ta.data");
             assert jc != null;
@@ -200,7 +200,7 @@ public class TrustAgentSecureClient {
             
             checkQuoteError(response);
 
-            log.debug("Done reading/writing to/from socket, closing socket.");
+            log.info("Done reading/writing to/from socket, closing socket.");
             return response;
         } finally {
         }
@@ -275,7 +275,7 @@ public class TrustAgentSecureClient {
     public String getAIKCertificate() {
         try {
 
-            log.debug("Sending Generate Identity");
+            log.info("Sending Generate Identity");
             byte[] identityInput = "<identity_request></identity_request>".getBytes();
             this.data = identityInput;
 
@@ -301,7 +301,7 @@ public class TrustAgentSecureClient {
         quoteRequest.setNonce(nonce);
         this.data = getXml(quoteRequest).getBytes();
         ClientRequestType clientRequestType = sendQuoteRequest();
-        log.debug("Got quote from server");
+        log.info("Got quote from server");
         return clientRequestType;
     }
 
@@ -321,7 +321,7 @@ public class TrustAgentSecureClient {
     private void checkQuoteError(ClientRequestType response) {
         int errorCode = response.getErrorCode();
         
-        log.warn(String.format("Trust Agent Error %d [%s]: %s", response.getErrorCode(), response.getClientIp(), response.getErrorMessage()));
+        log.error(String.format("Trust Agent Error %d [%s]: %s", response.getErrorCode(), response.getClientIp(), response.getErrorMessage()));
         if (errorCode != 0) {
             throw new ASException(ErrorCode.AS_TRUST_AGENT_ERROR, response.getErrorCode(),response.getErrorMessage());
         }
@@ -370,7 +370,7 @@ public class TrustAgentSecureClient {
         }*/
        
         int errorCode = response.getErrorCode();
-        log.warn(String.format("Trust Agent Error %d [%s]: %s", response.getErrorCode(), response.getClientIp(), response.getErrorMessage()));
+        log.error(String.format("Trust Agent Error %d [%s]: %s", response.getErrorCode(), response.getClientIp(), response.getErrorMessage()));
         if (errorCode != 0) {
             throw new ASException(ErrorCode.AS_TRUST_AGENT_ERROR, errorCode,response.getErrorMessage());
         }

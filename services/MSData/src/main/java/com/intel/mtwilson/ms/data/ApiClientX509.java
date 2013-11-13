@@ -186,7 +186,14 @@ public class ApiClientX509 implements Serializable {
     public void setComment(String comment) {
         this.comment = comment;
     }
-
+    
+    public String getUserNameFromName() {
+        String x509UserName = name;
+        String[] parts = x509UserName.split(",");
+        String[] subParts = parts[0].split("=");
+        String userName = subParts[1];
+        return userName;
+    }
     
     @Override
     public int hashCode() {

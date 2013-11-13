@@ -203,7 +203,7 @@ monit_detect() {
 }
 
 monit_install() {
-  MONIT_YUM_PACKAGES=""
+  MONIT_YUM_PACKAGES="monit"
   MONIT_APT_PACKAGES="monit"
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
@@ -278,6 +278,10 @@ if [ -f /etc/monit/monitrc ]; then
     backup_file /etc/monit/monitrc
 else
     cp monitrc /etc/monit/monitrc
+fi
+
+if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+ echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 fi
 
 if [ ! -d /etc/monit/conf.d ]; then

@@ -166,14 +166,14 @@ public class MwProcessorMappingJpaController implements Serializable {
             query.setHint(QueryHints.REFRESH, HintValues.TRUE);
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 
-            //MwProcessorMapping result = (MwProcessorMapping) query.();
-            //return result; 
+            // MwProcessorMapping result = (MwProcessorMapping) query.getSingleResult();
+            // return result;
             List<MwProcessorMapping> results =query.getResultList();
             if (results != null && results.size() > 0)
-                result = results.get(0);
+                result = results.get(0);            
             
         } catch(NoResultException nre) {
-            log.info("No platform matched the CPUID {}.", cpuID);
+            log.error("No platform matched the CPUID {}.", cpuID);
             return null;
         } finally {
             em.close();

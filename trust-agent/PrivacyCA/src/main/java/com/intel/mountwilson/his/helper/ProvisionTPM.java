@@ -23,11 +23,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 //import com.intel.mountwilson.as.common.ResourceFinder;
 import com.intel.mtwilson.util.ResourceFinder;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * <p>This is part 1 of 3 for fully provisioning HIS on a Windows client. This class does the initial provisioning of the TPM.</p>
@@ -52,7 +52,8 @@ import com.intel.mtwilson.util.ResourceFinder;
  */
 public class ProvisionTPM {
 
-	private static Logger log = Logger.getLogger(CreateIdentity.class.getName());
+	
+        private static Logger log = LoggerFactory.getLogger(ProvisionTPM.class);
 
 	/**
 	 * Entry point into the program
@@ -87,7 +88,7 @@ public class ProvisionTPM {
 			homeFolder = propFile.getAbsolutePath();
 			homeFolder = homeFolder.substring(0,homeFolder.indexOf("hisprovisioner.properties"));
 			
-			log.info("Home folder : " + homeFolder);
+			log.debug("Home folder : " + homeFolder);
 			
 			
 			TpmEndorsmentP12 = HisProvisionerProperties.getProperty(EC_P12_FILE, "");
@@ -107,7 +108,7 @@ public class ProvisionTPM {
 				try {
 					PropertyFile.close();
 				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing the property file ", e);
+					log.error("Error while closing the property file ", e);
 				}
 			}
 		}
@@ -141,7 +142,7 @@ public class ProvisionTPM {
 			if (cert != null)
 				TpmClient.provisionTpm(TpmOwnerAuth, TpmUtils.privKeyFromP12(homeFolder + TpmEndorsmentP12, EndorsementP12Pass), cert, EcValidityDays);
 			else
-				log.warning("Certificate was null. Skipping provisioning of TPM. ");
+				log.warn("Certificate was null. Skipping provisioning of TPM. ");
 			
 		}catch (TpmModule.TpmModuleException e){
 			throw new PrivacyCAException("Caught a TPM Module exception: " + e.toString());

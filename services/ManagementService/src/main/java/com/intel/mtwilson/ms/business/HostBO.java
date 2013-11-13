@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.business;
 import com.intel.mtwilson.*;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.api.*;
+//import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.MwProcessorMappingJpaController;
 import com.intel.mtwilson.as.controller.TblEventTypeJpaController;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -44,6 +45,7 @@ import com.intel.mtwilson.ms.helper.BaseBO;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 //import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.mtwilson.wlm.business.MleBO;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -122,6 +124,122 @@ public class HostBO extends BaseBO {
     }
     */
     
+    
+    /**
+     * Private class to support multithreading to retrieve the attestation report from the target host.
+     */
+    private class HostAttReport extends Thread {
+
+        private HostAgent agent;
+        private String requiredPCRs;
+        private String attestationReport;
+        private boolean isError = false;
+        private String errorMessage = "";
+        
+        public HostAttReport(HostAgent agent, String requiredPCRs) {
+            this.agent = agent;
+            this.requiredPCRs = requiredPCRs;
+        }
+
+        @Override
+        public void run() {
+            if (isError()) {
+                return;
+            }
+            try {
+                long threadStart = System.currentTimeMillis();
+                 attestationReport = agent.getHostAttestationReport(requiredPCRs);
+                 log.debug("TIMETAKEN: by the attestation report thread:" + (System.currentTimeMillis() - threadStart));
+            } catch (Throwable te) {
+                isError = true;
+                attestationReport = null;
+                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
+                errorMessage = te.getMessage();
+            }
+        }
+
+        public boolean isError() {
+            return isError;
+        }
+
+        public String getResult() {
+            return attestationReport;
+        }
+        
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
+
+    /**
+     * Private class to support multithreading of checking the existence of MLE before creating a new one.
+     */
+    private class MLEVerify extends Thread {
+
+        private ApiClient apiClient;
+        private MLEVerificationRequest mleVerifyObj;
+        private String result;
+        private boolean isError = false;
+        private String errorMessage = "";
+        private HostAgent agent;
+        private boolean overwriteWhiteList = false;
+
+        public MLEVerify(HostAgent agent, ApiClient apiClient, boolean overwriteWhiteList, MLEVerificationRequest mleVerifyObj) {
+            this.apiClient = apiClient;
+            this.mleVerifyObj = mleVerifyObj;
+            this.agent = agent;
+            this.overwriteWhiteList = overwriteWhiteList;
+        }
+
+        @Override
+        public void run() {
+            if (isError()) {
+                return;
+            }
+            try {
+                // If the user has chosen to overwrite the white list, then we do need to check anything. Just 
+                // return back as not found.
+                if (overwriteWhiteList) {
+                    result = "BIOS:false|VMM:false";
+                } else {
+                    long threadStart = System.currentTimeMillis();
+                    //result = apiClient.checkMatchingMLEExists(mleVerifyObj);
+                    TxtHostRecord hostObj = mleVerifyObj.getHostObj();
+                    hostObj.Location = mleVerifyObj.getBiosPCRs() + "|" + mleVerifyObj.getVmmPCRs();
+                    result = apiClient.checkMatchingMLEExists(hostObj);
+                    /*PcrManifest pcrManifest = agent.getPcrManifest();
+                    log.debug("TIMETAKEN: for getting pcr manifest is: " + (System.currentTimeMillis() - threadStart));
+                    HostTrustBO hostTrustBO = new HostTrustBO();
+                    log.debug("About to call into the checkMatchingMLEExists");
+                    result = hostTrustBO.checkMatchingMLEExists(pcrManifest, mleVerifyObj.getHostObj(), 
+                            mleVerifyObj.getBiosPCRs(), mleVerifyObj.getVmmPCRs());*/
+                    log.debug("TIMETAKEN: by the checkMLE thread:" + (System.currentTimeMillis() - threadStart));
+                }
+
+            } catch (MSException e) {
+                isError = true;
+                result = null;
+                errorMessage = e.getErrorMessage();
+            } catch (Exception e) {
+                isError = true;
+                result = null;
+                errorMessage = e.getMessage();
+            }
+        }
+
+        public boolean isError() {
+            return isError;
+        }
+
+        public String getResult() {
+            return result;
+        }
+        
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
+
     public HostBO() {
     }
 
@@ -184,9 +302,9 @@ public class HostBO extends BaseBO {
                 procMap = jpaController.findByCPUID(processorNameOrCPUID);
             }
             
-            if (procMap != null)
+            if (procMap != null){
                 platformName = procMap.getPlatformName();
-            
+            }
         } catch (MSException me) {
             log.error("Error during retrieval of platform name details. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
@@ -200,7 +318,6 @@ public class HostBO extends BaseBO {
     }
     
     private HostConfigData calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) {
-
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
         
         if (isBIOSMLE) {
@@ -257,9 +374,8 @@ public class HostBO extends BaseBO {
                         hostObj.VMM_Name = platformName + "_" + hostObj.VMM_Name;
                     else
                         hostObj.VMM_Name = hostObj.VMM_Name;
-                }            
+                }
         }
-
         hostConfigObj.setTxtHostRecord(hostObj);
         return hostConfigObj;
     }
@@ -275,15 +391,20 @@ public class HostBO extends BaseBO {
 * @param hostConfigObj
      * @return
      */
-    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj, ApiClient apiClientObj) {
+    private HostConfigData getHostMLEDetails(HostConfigData hostConfigObj, ApiClient apiClientObj, boolean registerHost) {
         
-        try {           
-             My.initDataEncryptionKey();
+        try {
+            My.initDataEncryptionKey();
             // Retrieve the host object.
             //System.err.println("JIM DEBUG: Retrieve the host object."); 
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
             TblHosts tblHosts = new TblHosts();
             tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+            
+            // Since the connection string passed in by the caller may not be complete (including the vendor), we need to parse it
+            // first and make up the complete connection string.
+            ConnectionString cs = new ConnectionString(hostObj.AddOn_Connection_String);
+            hostObj.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
             
             // TODO: Check with jonathan on the policy used.
             // XXX  we are assuming that the host is in an initial trusted state and that no attackers are executing a 
@@ -291,13 +412,13 @@ public class HostBO extends BaseBO {
             //policy (including global default trusted certs or ca's) to choose here and that way instead of us making this 
             //assumption, it's the operator who knows the environment.
             tblHosts.setTlsKeystore(null);
+            int i=0;
             tblHosts.setName(hostObj.HostName);
             tblHosts.setAddOnConnectionInfo(hostObj.AddOn_Connection_String);
             tblHosts.setIPAddress(hostObj.HostName);
             if (hostObj.Port != null) {
                 tblHosts.setPort(hostObj.Port);
             }
-            //System.err.println("JIM DEBUG: Get Host Agent.");
             HostAgentFactory factory = new HostAgentFactory();
             HostAgent agent = factory.getHostAgent(tblHosts);
             try {
@@ -320,21 +441,22 @@ public class HostBO extends BaseBO {
             }
             
             hostConfigObj.setTxtHostRecord(hostObj);
-            log.info("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
+            log.debug("Successfully retrieved the host information. Details: " + hostObj.BIOS_Oem + ":" + hostObj.BIOS_Version + ":"
                     + hostObj.VMM_OSName + ":" + hostObj.VMM_OSVersion + ":" + hostObj.VMM_Version + ":" + hostObj.Processor_Info);
 
             // Change the BIOS and VMM MLE names as per the target white list chosen by the user
             hostConfigObj = calibrateMLENames(hostConfigObj, true);
             hostConfigObj = calibrateMLENames(hostConfigObj, false);
-            
             // Let us first verify if all the configuration details required for host registration already exists. If not, it will throw
             // corresponding exception.
             // verifyMLEForHost(hostConfigObj);
             
             // Here we need to capture the correct MLE names and update the hostConfigObj accordingly, which would be used during host registration
             // If in case no BIOS/VMM MLE exists, this function would thrown an exception
-            String mleNamesToUse = apiClientObj.findMLEForHost(hostObj);
-            log.debug("Host should be mapped to {} MLEs.", mleNamesToUse);
+            if (registerHost) {
+                HostResponse hostResponse = apiClientObj.registerHostByFindingMLE(hostObj);
+            }
+            /*log.debug("Host should be mapped to {} MLEs.", mleNamesToUse);
             String [] mleNames = mleNamesToUse.split("\\|\\|");
             if (mleNames.length == 2) {
                 hostConfigObj.getTxtHostRecord().BIOS_Name = mleNames[0];
@@ -342,7 +464,7 @@ public class HostBO extends BaseBO {
             } else {
                 log.error("Unable to retrieve the MLE names to be mapped to the host.");
                 throw new MSException(ErrorCode.MS_MLE_CONFIGURATION_NOT_FOUND);
-            }
+            }*/
             
             return hostConfigObj;
             
@@ -371,16 +493,16 @@ public class HostBO extends BaseBO {
         try {
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getASEntityManagerFactory());
 
-            log.info("Processing host {0}.", hostObj.HostName);
+            log.debug("Processing host {}.", hostObj.HostName);
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
             //if (hostSearchObj == null) {
             //    hostSearchObj = hostsJpaController.findByIPAddress(hostObj.IPAddress);
             //}
             if (hostSearchObj != null) {
-                log.info(String.format("Host '%s' is already configured in the system.", hostObj.HostName));
+                log.debug(String.format("Host '%s' is already configured in the system.", hostObj.HostName));
                 isHostConfigured = true;
             } else {
-                log.info(String.format("Host '%s' is currently not configured. ", hostObj.HostName));
+                log.debug(String.format("Host '%s' is currently not configured. ", hostObj.HostName));
                 isHostConfigured = false;
             }
 
@@ -480,7 +602,7 @@ public class HostBO extends BaseBO {
 
         try {
 
-            log.error("About to process {0} servers", hostRecords.getHostRecords().size());
+            log.error("About to process {} servers", hostRecords.getHostRecords().size());
 
             if (hostRecords != null) {
 
@@ -552,7 +674,7 @@ public class HostBO extends BaseBO {
         try {
             ApiClient apiClient = createAPIObject();
             TblHostsJpaController hostsJpaController = My.jpa().mwHosts();// new TblHostsJpaController(getASEntityManagerFactory());
-            log.info("About to start processing {0} the hosts", hostRecords.getHostRecords().size());
+            log.debug("About to start processing {} the hosts", hostRecords.getHostRecords().size());
         
             // We first need to check if the hosts are already registered or not. Accordingly we will create 2 separate TxtHostRecordLists
             // One will be for the new hosts that need to be registered and the other one would be for the existing hosts that
@@ -560,11 +682,11 @@ public class HostBO extends BaseBO {
             for (HostConfigData hostConfigObj : hostRecords.getHostRecords()) {
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
                 if (isHostConfigured(hostObj)) {
-                    log.info(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
+                    log.debug(String.format("Since '%s' is already configured, we will update the host with the new MLEs.", hostObj.HostName));
                     // Retrieve the details of the MLEs for the host. If we get any exception that we will not process that host and 
                     // return back the same error to the user
                     try {
-                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient);
+                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
                         hostsToBeUpdatedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
@@ -575,9 +697,9 @@ public class HostBO extends BaseBO {
                         results.getHostRecords().add(error);
                     }
                 } else {
-                    log.info(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
+                    log.debug(String.format("Host '%s' is currently not configured. Host will be registered.", hostObj.HostName));
                     try {
-                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient);
+                        hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, false);
                         hostsToBeAddedList.getHostRecords().add(hostConfigObj.getTxtHostRecord());
                     } catch (MSException mse) {
                         HostConfigResponse error = new HostConfigResponse();
@@ -605,15 +727,19 @@ public class HostBO extends BaseBO {
                 }
             }
 
+            // PERFORMANCE ISSUE: Now that we are mapping the hosts to the MLEs that actually match, and perform attestation as part of
+            // that we do not need to do the below explict attestation again.
+
+            /*
             // Before we return back errors let us update the trust status of the hosts that were updated.
             Set<Hostname> hostsToBeAttested = new HashSet<Hostname>();
             if (!hostsToBeUpdatedList.getHostRecords().isEmpty()) {
                 for(TxtHostRecord hostsUpdated: hostsToBeUpdatedList.getHostRecords()) {
                     hostsToBeAttested.add(new Hostname(hostsUpdated.HostName));
                 }
-                
+                                
                 try {
-                    log.info("Refreshing the trust status of the hosts that were updated : {}.", hostsToBeAttested.toString());
+                    log.debug("Refreshing the trust status of the hosts that were updated : {}.", hostsToBeAttested.toString());
                     List<HostTrustXmlResponse> samlForMultipleHosts = apiClient.getSamlForMultipleHosts(hostsToBeAttested, true);
                     
                 } catch (Exception ex) {
@@ -621,7 +747,7 @@ public class HostBO extends BaseBO {
                     log.error("Error refreshing the trust status of the hosts {}. {}.", hostsToBeAttested.toString(), ex.getMessage());
 
                 }
-            }
+            } */
             // Return back the results
             return results;
 
@@ -671,8 +797,9 @@ public class HostBO extends BaseBO {
 
             // This helper function verifies if all the required MLEs are present for the host registration. If no exception is 
             // thrown, we can go ahead with the host registration.
-            hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient);
+            hostConfigObj = getHostMLEDetails(hostConfigObj, apiClient, true);
 
+            /*
             // First let us check if the host is already configured.
             TblHosts hostSearchObj = hostsJpaController.findByName(hostObj.HostName);
             //if (hostSearchObj == null) {
@@ -683,11 +810,11 @@ public class HostBO extends BaseBO {
             // that the user has opted for, update the host with the corresponding MLEs.
             if (hostSearchObj != null) {
 
-                log.info(String.format("Since '%s' is already configured, we will update the host with the new MLEs.",
+                log.debug(String.format("Since '%s' is already configured, we will update the host with the new MLEs.",
                         hostSearchObj.getName()));
                 boolean updateHostStatus = updateHost(apiClient, hostSearchObj, hostConfigObj);
                 return updateHostStatus;
-            }
+            }*/
             
             /*
             // bug #497   this should be a different object than TblHosts  
@@ -733,8 +860,8 @@ public class HostBO extends BaseBO {
             if (verifyStatus == true) {
 
                 // Finally register the host. */
-            txtHost = new TxtHost(hostConfigObj.getTxtHostRecord());
-            apiClient.addHost(txtHost);
+            /*txtHost = new TxtHost(hostConfigObj.getTxtHostRecord());
+            apiClient.addHost(txtHost);*/
            // }
 
             // If everything is successful, set the status flag to true
@@ -744,11 +871,6 @@ public class HostBO extends BaseBO {
         } catch (MSException me) {
             log.error("Error during host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
-
-        } catch (ApiException ae) {
-
-            log.error("API Client error during host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
-            throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
 
         } catch (Exception ex) {
 
@@ -806,7 +928,7 @@ public class HostBO extends BaseBO {
             // First we will process the BIOS MLE
             if (hostObj.BIOS_Name.startsWith(String.format("%s_", hostObj.HostName))) {
 
-                log.info(String.format("'%s' is currently configured to use '%s' BIOS MLE '%s'.",
+                log.debug(String.format("'%s' is currently configured to use '%s' BIOS MLE '%s'.",
                         hostObj.HostName, HostWhiteListTarget.BIOS_HOST.getValue(), hostObj.BIOS_Name));
 
                 // The host is currently configured for BIOS_HOST option. 
@@ -814,7 +936,7 @@ public class HostBO extends BaseBO {
                 if (hostBIOSWLTargetObj == HostWhiteListTarget.BIOS_HOST) {
 
                     // Then we do not need to do anything. We are set. 
-                    log.info(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.BIOS_HOST.getValue(), hostObj.BIOS_Name));
 
                 } else if (hostBIOSWLTargetObj == HostWhiteListTarget.BIOS_OEM) {
@@ -823,7 +945,7 @@ public class HostBO extends BaseBO {
                     // We need to change the name of BIOS_Name to remove the Host Name                    
                     hostObj.BIOS_Name = hostObj.BIOS_Name.substring(String.format("%s_", hostObj.HostName).length());
 
-                    log.info(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.BIOS_OEM.getValue(), hostObj.BIOS_Name));
 
                 } else {
@@ -833,7 +955,7 @@ public class HostBO extends BaseBO {
 
             } else {
 
-                log.info(String.format("'%s' is currently configured to use '%s' BIOS MLE '%s'.",
+                log.debug(String.format("'%s' is currently configured to use '%s' BIOS MLE '%s'.",
                         hostObj.HostName, HostWhiteListTarget.BIOS_OEM.getValue(), hostObj.BIOS_Name));
 
                 // The host is currently configured for BIOS_OEM option. 
@@ -844,7 +966,7 @@ public class HostBO extends BaseBO {
                     // NOTE: This condition is there only if people use the API directly. If the user uses UI
                     // This option will not be allowed. You can only change from HOST SPECIFIC option but not to
                     // HOST SPECIFIC.  
-                    log.info(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.BIOS_HOST.getValue(), hostObj.BIOS_Name));
 
                     throw new MSException(ErrorCode.MS_INVALID_WHITELIST_TARGET, hostBIOSWLTargetObj.toString() + "."
@@ -853,7 +975,7 @@ public class HostBO extends BaseBO {
                 } else if (hostBIOSWLTargetObj == HostWhiteListTarget.BIOS_OEM) {
 
                     // We do not need to do anything;
-                    log.info(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' BIOS MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.BIOS_OEM.getValue(), hostObj.BIOS_Name));
 
                 } else {
@@ -866,7 +988,7 @@ public class HostBO extends BaseBO {
             // Now let us process the VMM MLE and modify the MLE Names if needed
             if (hostObj.VMM_Name.startsWith(String.format("%s_", hostObj.HostName))) {
 
-                log.info(String.format("'%s' is currently configured to use '%s' VMM MLE '%s'.",
+                log.debug(String.format("'%s' is currently configured to use '%s' VMM MLE '%s'.",
                         hostObj.HostName, HostWhiteListTarget.VMM_HOST.getValue(), hostObj.VMM_Name));
 
                 // The host is currently configured for VMM_HOST option. 
@@ -875,7 +997,7 @@ public class HostBO extends BaseBO {
 
                     // Then we do not need to do anything. We are set. Just ignore the register host
                     // request and send back success.
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_HOST.getValue(), hostObj.VMM_Name));
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_OEM) {
@@ -886,12 +1008,14 @@ public class HostBO extends BaseBO {
 
                     // Also we need to add back the OEM name to the VMM_Name. We do not need to add it for
                     // BIOS as BIOS_Name is always OEM specific.                    
-                    if (!platformName.isEmpty())
+                    if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    }else {
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;    
+                    }
                     
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
@@ -906,7 +1030,7 @@ public class HostBO extends BaseBO {
                     else
                         hostObj.VMM_Name = hostObj.VMM_Name;
                     
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
                 } else {
 
@@ -916,7 +1040,7 @@ public class HostBO extends BaseBO {
 
             } else if (hostObj.VMM_Name.startsWith(String.format("%s_", hostObj.BIOS_Oem.split(" ")[0].toString()))) {
 
-                log.info(String.format("'%s' is currently configured to use '%s' VMM MLE '%s'.",
+                log.debug(String.format("'%s' is currently configured to use '%s' VMM MLE '%s'.",
                         hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
 
                 // The host is currently configured for VMM_OEM option. 
@@ -927,7 +1051,7 @@ public class HostBO extends BaseBO {
                     // This option will not be allowed. You can only change from HOST SPECIFIC option but not to
                     // HOST SPECIFIC.  
 
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_HOST.getValue(), hostObj.VMM_Name));
 
                     throw new MSException(ErrorCode.MS_INVALID_WHITELIST_TARGET, hostVMMWLTargetObj.toString() + "."
@@ -936,7 +1060,7 @@ public class HostBO extends BaseBO {
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_OEM) {
 
                     // We do not need to do anything;
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
@@ -946,7 +1070,7 @@ public class HostBO extends BaseBO {
                     // and keep the remaining content as such.
                     hostObj.VMM_Name = hostObj.VMM_Name.substring(String.format("%s_", hostObj.BIOS_Oem.split(" ")[0].toString()).length());
 
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
                 } else {
 
@@ -955,7 +1079,7 @@ public class HostBO extends BaseBO {
 
             } else {
 
-                log.info(String.format("'%s' is currently configured to use '%s' VMM MLE '%s'.",
+                log.debug(String.format("'%s' is currently configured to use '%s' VMM MLE '%s'.",
                         hostObj.HostName, HostWhiteListTarget.VMM_GLOBAL.getValue(), hostObj.VMM_Name));
 
                 // The host is currently configured for VMM_GLOBAL option. 
@@ -966,7 +1090,7 @@ public class HostBO extends BaseBO {
                     // This option will not be allowed. You can only change from HOST SPECIFIC option but not to
                     // HOST SPECIFIC.  
 
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_HOST.getValue(), hostObj.VMM_Name));
 
                     throw new MSException(ErrorCode.MS_INVALID_WHITELIST_TARGET, hostVMMWLTargetObj + "."
@@ -974,16 +1098,21 @@ public class HostBO extends BaseBO {
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_OEM) {
 
-                    // We need to add OEM name to the VMM_Name.     Here the VMM_Name would already have the platform name.
-                    hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    // We need to add OEM name to the VMM_Name.     
+                    platformName = getPlatformName(hostObj.Processor_Info);
+                    if (!platformName.isEmpty()){
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
+                    }else {
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;               
+                    }
                     
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
 
                 } else if (hostVMMWLTargetObj == HostWhiteListTarget.VMM_GLOBAL) {
 
                     // We do not need to do anything here.
-                    log.info(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
+                    log.debug(String.format("'%s' is being updated to use '%s' VMM MLE '%s'.",
                             hostObj.HostName, HostWhiteListTarget.VMM_OEM.getValue(), hostObj.VMM_Name));
                 } else {
 
@@ -998,13 +1127,13 @@ public class HostBO extends BaseBO {
 
             // Call into the API client to update the host with the updated MLEs
             apiClientObj.updateHost(new TxtHost(hostObj));
-            log.info(String.format("'%s' has been successfully updated to use the '%s' BIOS MLE and '%s' VMM MLE.",
+            log.debug(String.format("'%s' has been successfully updated to use the '%s' BIOS MLE and '%s' VMM MLE.",
                     hostObj.HostName, hostObj.BIOS_Name, hostObj.VMM_Name));
 
             updateStatus = true;
             
             try {
-                log.info("Refreshing the trust status of the host {}.", hostObj.HostName);
+                log.debug("Refreshing the trust status of the host {}.", hostObj.HostName);
                 // Now that the host status is updated, let us refresh the trust status
                 Set<Hostname> hostsToBeAttested = new HashSet<Hostname>();
                 hostsToBeAttested.add(new Hostname(hostObj.HostName));
@@ -1119,6 +1248,8 @@ public class HostBO extends BaseBO {
         //boolean biosMLEAlreadyExists = false;
         //boolean vmmMLEAlreadyExists = false;
 
+        long configWLStart = System.currentTimeMillis();
+        
         try {
              My.initDataEncryptionKey();
             // Let us ensure that the user has specified the PCRs to be used
@@ -1151,6 +1282,11 @@ public class HostBO extends BaseBO {
                     ConnectionString cs = ConnectionString.from(gkvHost);
                     gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                     //System.err.println("configureWhiteListFromCustomData cs now == " + gkvHost.AddOn_Connection_String );
+                } else {
+                    // Oct 23, 2013: We just make sure that the connection string has the prefix. Otherwise the agent factory will not be
+                    // able to instantiate the correct one.
+                    ConnectionString cs = new ConnectionString(gkvHost.AddOn_Connection_String);
+                    gkvHost.AddOn_Connection_String = cs.getConnectionStringWithPrefix();
                 }
                 // bug #497   this should be a different object than TblHosts  
                 TblHosts tblHosts = new TblHosts();
@@ -1180,6 +1316,8 @@ public class HostBO extends BaseBO {
                     throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
                 }
 
+                log.debug("TIMETAKEN: for getting host information is: " + (System.currentTimeMillis() - configWLStart));
+                
                 System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
 
                 // Let us verify if we got all the data back correctly or not (Bug: 442)
@@ -1197,6 +1335,8 @@ public class HostBO extends BaseBO {
                 TblHostsJpaController hostsJpaController =  My.jpa().mwHosts();//new TblHostsJpaController(getASEntityManagerFactory());
                 ApiClient apiClient = createAPIObject();
 
+                log.debug("TIMETAKEN: for getting API Client object is: " + (System.currentTimeMillis() - configWLStart));                
+                
                 // Similar to VMware even TA supports retrieval of Host information and attestation report without needing the host to be registered. So,
                 // we don't need to handle these host types differently.
 
@@ -1204,17 +1344,12 @@ public class HostBO extends BaseBO {
                 if (!agent.isTpmEnabled()) {
                     throw new MSException(ErrorCode.AS_VMW_TPM_NOT_SUPPORTED, tblHosts.getName());
                 }
-
-                // Now that we have retrieved the details of the host, let us configure the BIOS MLE if needed
-                if (hostConfigObj.addBiosWhiteList()) {
-                    configureBIOSMLE(apiClient, hostConfigObj);
+                
+                hostConfigObj = calibrateMLENames(hostConfigObj, true);
+                hostConfigObj = calibrateMLENames(hostConfigObj, false);
+                if (hostConfigObj.addBiosWhiteList())
                     reqdManifestList = hostConfigObj.getBiosPCRs();
-                }
-
-                // Configure the VMM MLE if needed
                 if (hostConfigObj.addVmmWhiteList()) {
-                    // XXX UPDATE-VMM-MLE issue here
-                    configureVMMMLE(apiClient, hostConfigObj);
                     if (reqdManifestList.isEmpty()) {
                         reqdManifestList = hostConfigObj.getVmmPCRs();
                     } else {
@@ -1222,14 +1357,29 @@ public class HostBO extends BaseBO {
                     }
                 }
 
-                try {
-
-                    // Retrieve the attestation report from the host
-                    attestationReport = agent.getHostAttestationReport(reqdManifestList);   // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
-                } catch (Throwable te) {
-                    System.err.println("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
-                    te.printStackTrace();
-                    throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                log.debug("TIMETAKEN: for calibrating MLE names: " + (System.currentTimeMillis() - configWLStart));                
+                
+                // Now we need to spawn 2 threads. One for retriving the attestation report from the host and another one for checking whether MLE with
+                // matching whitelists exists or not.
+                HostAttReport hostAttReportObj = new HostAttReport(agent, reqdManifestList);
+                hostAttReportObj.start();
+                
+                MLEVerify mleVerifyObj = new MLEVerify(agent, apiClient, hostConfigObj.getOverWriteWhiteList(),
+                        new MLEVerificationRequest(hostConfigObj.getTxtHostRecord(), hostConfigObj.getBiosPCRs(), hostConfigObj.getVmmPCRs()));
+                mleVerifyObj.start();
+                
+                hostAttReportObj.join();
+                log.debug("TIMETAKEN: for generating host report: " + (System.currentTimeMillis() - configWLStart));
+                
+                mleVerifyObj.join();
+                log.debug("TIMETAKEN: for checking MLE names: " + (System.currentTimeMillis() - configWLStart));
+                
+                attestationReport = hostAttReportObj.getResult();
+                String mleVerifyStatus = mleVerifyObj.getResult();
+                // Verify the retrived attestation status report. If null, throw an error
+                if ((attestationReport == null || attestationReport.isEmpty()) && hostAttReportObj.isError)
+                {
+                    throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, hostAttReportObj.errorMessage);
                 }
 
                 // We are checking for component name since in the attestation report all the pcr and the event logs would use componentname as the label 
@@ -1242,11 +1392,58 @@ public class HostBO extends BaseBO {
 
                 System.err.println("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
                 System.err.println("Attestation report is : " + attestationReport);
+                
+                boolean biosMLEExists = false;
+                boolean vmmMLEExists = false;
+                // Verify the MLE status. If in case the MLE verification status is NULL, we will just create new MLE
+                if (!mleVerifyObj.isError && mleVerifyStatus != null && !mleVerifyStatus.isEmpty()) {
+                    // The return format would be BIOS:true|VMM:true
+                    biosMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(new String ("BIOS:").length(), mleVerifyStatus.indexOf("|")));
+                    vmmMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(mleVerifyStatus.lastIndexOf(":")+1));                    
+                } else {
+                    log.error("Error during verification of MLE. Details: {}. So, defaulting to creation of new MLEs.", mleVerifyObj.errorMessage);
+                }
+                                
+                // If either the BIOS or VMM or both already exists, then we should not be creating them again even if the user has requested for
+                // as it will create duplicates and leads to confusion.
+                
+                // The reason we are updating the hostConfigObj flags is because when the attestation report is getting uploaded to the
+                // DB, these flags are checked before making the DB transaction.
+                if (hostConfigObj.addBiosWhiteList() && biosMLEExists)
+                    hostConfigObj.setBiosWhiteList(false);
+                if (hostConfigObj.addVmmWhiteList() && vmmMLEExists)
+                    hostConfigObj.setVmmWhiteList(false);
+                
+                // Now that we have retrieved the details of the host, let us configure the BIOS MLE if needed
+                if (hostConfigObj.addBiosWhiteList()) {
+                    configureBIOSMLE(apiClient, hostConfigObj);
+                }
+
+                // Configure the VMM MLE if needed
+                if (hostConfigObj.addVmmWhiteList()) {
+                    // XXX UPDATE-VMM-MLE issue here
+                    configureVMMMLE(apiClient, hostConfigObj);
+                }
+
+                log.debug("TIMETAKEN: for configuring MLES : " + (System.currentTimeMillis() - configWLStart));
+                
+                // Commenting out the below code as we are retrieving the attestation report in a separate thread above.
+                /*try {
+
+                    // Retrieve the attestation report from the host
+                    attestationReport = agent.getHostAttestationReport(reqdManifestList);   // generic HostAgent interface but we know we are talking to a vmware host and we expect that format
+                } catch (Throwable te) {
+                    System.err.println("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
+                    te.printStackTrace();
+                    throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                }*/
 
                 // Finally store the attestation report by calling into the WhiteList REST APIs
                 uploadToDB(hostConfigObj, attestationReport, apiClient);
                 System.err.println("Successfully updated the white list database with the good known white list from host: " + gkvHost.HostName);
 
+                log.debug("TIMETAKEN: for uploading to DB: " + (System.currentTimeMillis() - configWLStart));
+                
                 // Register host only if required.
                 if (hostConfigObj.isRegisterHost() == true) {
                     // First let us check if the host is already configured. If yes, we will return back success
@@ -1276,6 +1473,8 @@ public class HostBO extends BaseBO {
                     }
                 }
 
+                log.debug("TIMETAKEN: for registering host: " + (System.currentTimeMillis() - configWLStart));
+                
                 // Now we need to configure the MleSource table with the details of the host that was used for white listing the MLE.
                 if (hostConfigObj.addBiosWhiteList()) {
                     configureMleSource(apiClient, gkvHost, true);
@@ -1286,6 +1485,9 @@ public class HostBO extends BaseBO {
                     configureMleSource(apiClient, gkvHost, false);
                     System.err.println("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
                 }
+                
+                log.debug("TIMETAKEN: for configuring MLE source: " + (System.currentTimeMillis() - configWLStart));
+                
                 configStatus = true;
             }
         } catch (MSException me) {
@@ -1330,7 +1532,7 @@ public class HostBO extends BaseBO {
             // Retrieve the host object.
             TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
 
-            /*
+            
             // Need to do some data massaging. Firstly we need to change the White Spaces
             // in the OS name to underscores. In case of Intel's BIOS, need to trim it since it will be very long.
             hostObj.VMM_OSName = hostObj.VMM_OSName.replace(' ', '_');
@@ -1357,11 +1559,12 @@ public class HostBO extends BaseBO {
             // Bug 799 & 791: Need to append the platform name too
             String platformName = getPlatformName(hostObj.Processor_Info);
             if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM) {
-                if (!platformName.isEmpty())
+                if (!platformName.isEmpty()){
                     hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                else
+                }else {
                     hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;
-            }*/
+                }
+            }
 
             TblOem oemTblObj = oemJpa.findTblOemByName(hostObj.BIOS_Oem);
             if (oemTblObj == null) {
@@ -1425,7 +1628,7 @@ public class HostBO extends BaseBO {
 
                 WhitelistService wlApiClient = (WhitelistService) apiClientObj;
 
-                hostConfigObj = calibrateMLENames(hostConfigObj, true);
+                //hostConfigObj = calibrateMLENames(hostConfigObj, true);
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();  
                 
                 // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
@@ -1464,10 +1667,10 @@ public class HostBO extends BaseBO {
 
                     OemData oemObj = new OemData(hostObj.BIOS_Oem, hostObj.BIOS_Oem);
                     wlApiClient.addOEM(oemObj);
-                    log.info("Successfully created the OEM : " + hostObj.BIOS_Oem);
+                    log.debug("Successfully created the OEM : " + hostObj.BIOS_Oem);
 
                 } else {
-                    log.info("Database already has the configuration details for OEM : " + hostObj.BIOS_Oem);
+                    log.debug("Database already has the configuration details for OEM : " + hostObj.BIOS_Oem);
                 }
 
                 // Create the BIOS MLE for the host. 
@@ -1501,11 +1704,11 @@ public class HostBO extends BaseBO {
                 if (tblMleObj == null) {
 
                     wlApiClient.addMLE(mleObj);
-                    log.info("Successfully created the BIOS MLE : " + hostObj.BIOS_Name);
+                    log.debug("Successfully created the BIOS MLE : " + hostObj.BIOS_Name);
 
                 } else {
                     biosMLEAlreadyExists = true;
-                    log.info("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
+                    log.debug("Database already has the configuration details for BIOS MLE : " + hostObj.BIOS_Name);
                 }
             }
         } catch (MSException me) {
@@ -1550,7 +1753,7 @@ public class HostBO extends BaseBO {
 
                 WhitelistService wlApiClient = (WhitelistService) apiClientObj;
 
-                hostConfigObj = calibrateMLENames(hostConfigObj, false);
+                //hostConfigObj = calibrateMLENames(hostConfigObj, false);
                 TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
                 
                 // Bug: 957 Need to change the MLE file name only if the user has requested for it. Otherwise we will update the
@@ -1572,6 +1775,18 @@ public class HostBO extends BaseBO {
                     hostObj.VMM_Name = hostObj.VMM_OSName;
                 }
 
+                TblOs tblOsObj = osJpa.findTblOsByNameVersion(hostObj.VMM_OSName, hostObj.VMM_OSVersion);
+                if (tblOsObj == null) {
+
+                    // Now let us create the OS information corresponding to the host
+                    OsData osObj = new OsData(hostObj.VMM_OSName, hostObj.VMM_OSVersion, "");
+                    wlApiClient.addOS(osObj);
+                    log.debug("Successfully created the OS : " + hostObj.VMM_OSName);
+
+                } else {
+                    log.debug("Database already has the configuration details for the OS : " + hostObj.VMM_OSName);
+                }
+
                 // If we are setting host specific MLE, then we need to append the host name to the VMM Name as well
                 boolean value = (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_HOST);
                 boolean value2 = (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_OEM);
@@ -1580,10 +1795,11 @@ public class HostBO extends BaseBO {
                 } else if (hostConfigObj != null && value2) {
                     // Bug 799 & 791: Need to append the platform name too
                     String platformName = getPlatformName(hostObj.Processor_Info);
-                    if (!platformName.isEmpty())
+                    if (!platformName.isEmpty()){
                         hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" + platformName + "_" + hostObj.VMM_Name;
-                    else
-                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;                    
+                    } else{
+                        hostObj.VMM_Name = hostObj.BIOS_Oem.split(" ")[0].toString() + "_" +  hostObj.VMM_Name;      
+                    }
                 } else if (hostConfigObj.getVmmWLTarget() == HostWhiteListTarget.VMM_GLOBAL) {
                     // Bug #951 where in we need to append the platform name to the global white lists also.
                     String platformName = getPlatformName(hostObj.Processor_Info);
@@ -1642,11 +1858,20 @@ public class HostBO extends BaseBO {
                 if (tblMleObj == null) {
 
                     wlApiClient.addMLE(mleVMMObj);
-                    log.info("Successfully created the VMM MLE : " + hostObj.VMM_Name);
+                    log.debug("Successfully created the VMM MLE : " + hostObj.VMM_Name);
+                    
+                    // NOTE: In order to avoid the look up queries to decide whether to do a add or a update
+                    // to the white lists, we will use the overwrite flag. If the overwrite flag is set to false
+                    // then, we will do a "ADD" operation. If the overwrite flag is set to "TRUE", then we do an
+                    // "UPDATE" operation. But users can set the overwrite flag to "TRUE" for MLEs that dont exist.
+                    // So, here we know that the VMM MLE does not exist since we just created a new one. So, if
+                    // the overwrite flag is set, we will unset it here.
+                    if (hostConfigObj.getOverWriteWhiteList())
+                        hostConfigObj.setOverWriteWhiteList(false);
 
                 } else {
                     vmmMLEAlreadyExists = true;
-                    log.info("Database already has the configuration details for VMM MLE : " + hostObj.VMM_Name);
+                    log.debug("Database already has the configuration details for VMM MLE : " + hostObj.VMM_Name);
                 }
             }
         } catch (MSException me) {
@@ -1707,13 +1932,13 @@ public class HostBO extends BaseBO {
                 mleSourceObj.setHostName(hostObj.HostName);
             } 
 
-            log.info("Host details for MLE white list host mapping are: " + hostObj.HostName + ":" + hostObj.HostName);
+            log.debug("Host details for MLE white list host mapping are: " + hostObj.HostName + ":" + hostObj.HostName);
             // Since this function would be called during both creation and updation, we need to handle both the scenarios.
             try {
                 apiClientObj.addMleSource(mleSourceObj);
             } catch (ApiException iae) {
                 if (iae.getErrorCode() == ErrorCode.WS_MLE_SOURCE_MAPPING_ALREADY_EXISTS.getErrorCode()) {
-                    log.error("Mapping already exists for the MLE white list host for MLE: " + mleSourceObj.getHostName());
+                    log.warn("Mapping already exists for the MLE white list host for MLE: " + mleSourceObj.getHostName());
                     // Since the mapping already exists, it means that the user is updating the white list. So, let us call the update method
                     apiClientObj.updateMleSource(mleSourceObj);
                 } else {
@@ -1803,11 +2028,18 @@ public class HostBO extends BaseBO {
         TblModuleManifestJpaController moduleJpa = My.jpa().mwModuleManifest(); //new TblModuleManifestJpaController(getASEntityManagerFactory());
         TblEventTypeJpaController eventJpa = My.jpa().mwEventType(); //new TblEventTypeJpaController(getASEntityManagerFactory());
         TblMleJpaController mleJpa = My.jpa().mwMle(); //new TblMleJpaController(getASEntityManagerFactory());
+        MleBO mleBO = new MleBO();
         
         // Bug:817: We need to refresh the trust status of all the hosts after the MLE update. 
         boolean isBiosMLEUpdated = false;
         boolean isVmmMLEUpdated = false;
 
+        // NOTE: In order to avoid the look up queries to decide whether to do a add or a update
+        // to the white lists, we will use the overwrite flag. If the overwrite flag is set to false
+        // then, we will do a "ADD" operation. If the overwrite flag is set to "TRUE", then we do an
+        // "UPDATE" operation. We have already modified this flag during the creation of VMM MLE to address
+        // the scenario of user's setting the flag to "TRUE" even if the MLE does not exist.
+        
         //TO REVIEW: Should we even move this whitelisting functionality to the HostAgents. Right now we have specific things for
         // each different type of of hosts.
 
@@ -1857,7 +2089,7 @@ public class HostBO extends BaseBO {
                             // bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
                             if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
                                 moduleObj.setComponentName(" ");
-                                log.debug("uploadToDB: component name set to single-space");
+                                log.info("uploadToDB: component name set to single-space");
                             } else {
                                 moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
                             }
@@ -1877,7 +2109,10 @@ public class HostBO extends BaseBO {
 
                             // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
                             // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
-                            String fullComponentName = "";                            
+                            
+                            // PLEASE SEE THE NOTE ABOVE at the start of the function. The following code has been commented out for performance improvements.
+                            
+                            /*String fullComponentName = "";                            
                             if (moduleObj.getEventName().contains("Vim25")) {
                                 TblEventType eventSearchObj = eventJpa.findEventTypeByName(moduleObj.getEventName());
                                 if (eventSearchObj != null) {
@@ -1892,16 +2127,33 @@ public class HostBO extends BaseBO {
                                 log.debug("trimming fullComponentName: " + fullComponentName);
                                 fullComponentName = fullComponentName.trim(); 
                             }
-                            log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
-                            TblModuleManifest moduleSearchObj = moduleJpa.findByMleNameEventName(mleSearchObj.getId(),
+                            log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");*/
+                            /*TblModuleManifest moduleSearchObj = moduleJpa.findByMleNameEventName(mleSearchObj.getId(),
                                     fullComponentName, moduleObj.getEventName());
                             if (moduleSearchObj == null) {
-                                wlsClient.addModuleWhiteList(moduleObj);
-                                log.info("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                mleBO.addModuleWhiteList(moduleObj);
+                                //wlsClient.addModuleWhiteList(moduleObj);
+                                log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
 
                             } else {
-                                wlsClient.updateModuleWhiteList(moduleObj);
-                                log.info("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                mleBO.updateModuleWhiteList(moduleObj);
+                                //wlsClient.updateModuleWhiteList(moduleObj);
+                                log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+                                isVmmMLEUpdated = true;
+                            }*/
+                            if (!hostConfigObj.getOverWriteWhiteList()) {
+                                if (isWhiteListServiceLocal())
+                                    mleBO.addModuleWhiteList(moduleObj);
+                                else
+                                    wlsClient.addModuleWhiteList(moduleObj);
+                                log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+
+                            } else {
+                                if (isWhiteListServiceLocal())
+                                    mleBO.updateModuleWhiteList(moduleObj);
+                                else
+                                    wlsClient.updateModuleWhiteList(moduleObj);
+                                log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
                                 isVmmMLEUpdated = true;
                             }
                         }
@@ -1929,13 +2181,17 @@ public class HostBO extends BaseBO {
                                     //log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
-                                        //log.info("tblPCR is null. Attempt to create new");
-                                        wlsClient.addPCRWhiteList(pcrObj);
+                                        if (isWhiteListServiceLocal())
+                                            mleBO.addPCRWhiteList(pcrObj);
+                                        else
+                                            wlsClient.addPCRWhiteList(pcrObj);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
 
                                     } else {
-                                        //log.info("tblPCR is not null. Attempt to update");
-                                        wlsClient.updatePCRWhiteList(pcrObj);
+                                        if (isWhiteListServiceLocal())
+                                            mleBO.updatePCRWhiteList(pcrObj);
+                                        else
+                                            wlsClient.updatePCRWhiteList(pcrObj);
                                         log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                         isBiosMLEUpdated = true;
                                     }
@@ -1978,10 +2234,16 @@ public class HostBO extends BaseBO {
 
                                 tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                 if (tblPCR == null) {
-                                    wlsClient.addPCRWhiteList(pcrObj);
+                                    if (isWhiteListServiceLocal())
+                                        mleBO.addPCRWhiteList(pcrObj);
+                                    else
+                                        wlsClient.addPCRWhiteList(pcrObj);
                                     log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                 } else {
-                                    wlsClient.updatePCRWhiteList(pcrObj);
+                                    if (isWhiteListServiceLocal())
+                                        mleBO.updatePCRWhiteList(pcrObj);
+                                    else
+                                        wlsClient.updatePCRWhiteList(pcrObj);
                                     log.debug("Successfully updated the VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                     isVmmMLEUpdated = true;
                                 }
@@ -1996,26 +2258,28 @@ public class HostBO extends BaseBO {
             // the list of all the hosts for those MLEs and update their trust status.
             Collection<TblHosts> tblHostsCollection = null;
             if (isBiosMLEUpdated) {
-                log.debug("Retrieving the list of hosts to be updated because of BIOS update");
+                log.info("Retrieving the list of hosts to be updated because of BIOS update");
                 Collection<TblHosts> biosHostCollection = mleBiosSearchObj.getTblHostsCollection1();
                 if (biosHostCollection!= null && !biosHostCollection.isEmpty()) {
                     log.debug("Retrieved {} hosts for updates.", biosHostCollection.size());
                     tblHostsCollection = biosHostCollection;
                 } else {
-                    log.debug("No hosts to be updated because of BIOS MLE update.");
+                    log.info("No hosts to be updated because of BIOS MLE update.");
                 }
             }
             if (isVmmMLEUpdated) {
-                log.debug("Retrieving the list of hosts to be updated because of VMM update");                
+                log.info("Retrieving the list of hosts to be updated because of VMM update");                
                 Collection<TblHosts> vmmHostCollection = mleSearchObj.getTblHostsCollection();
                 if (vmmHostCollection != null && !vmmHostCollection.isEmpty()) {
                     log.debug("Retrieved {} hosts for updates.", vmmHostCollection.size());                    
-                    if (tblHostsCollection == null)
+                    if (tblHostsCollection == null){
                         tblHostsCollection = vmmHostCollection;
-                    else
+                    }
+                    else{
                         tblHostsCollection.addAll(vmmHostCollection);
+                    }
                 } else {
-                        log.debug("No hosts to be updated because of VMM MLE update.");
+                        log.info("No hosts to be updated because of VMM MLE update.");
                 }
             }
             
@@ -2038,7 +2302,7 @@ public class HostBO extends BaseBO {
                 //List<HostTrustXmlResponse> samlForMultipleHosts =
                 apiClientObj.getSamlForMultipleHosts(hostsToBeAttested, true);
             }
-            log.debug("Successfully refreshed the status of all the hosts. ");
+            log.info("Successfully refreshed the status of all the hosts. ");
 
         } catch (MSException me) {
             log.error("Error during white list upload to database. " + me.getErrorCode() + " :" + me.getErrorMessage());
@@ -2130,10 +2394,29 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             log.error("Unexpected errror during VMM MLE name generation. " + ex.getMessage());
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during VMM MLE name generation. " + ex.getMessage());
-        }        
+        }   
     }
 
-    /*public void TestMLENameIssue() {
+    /**
+     * TODO: In 2.0 we need to add additional properties having the URL of attestation service.
+     * If the attestation service is local, then we can instantiate the Business layer directly. If
+     * not we need to use the REST API service.
+     * @return 
+     */
+    private boolean isAttestationServiceLocal(){
+        return true;
+    }
+        
+    /**
+     * TODO: In 2.0 we need to add additional properties having the URL of White List service.
+     * If the white list service is local, then we can instantiate the Business layer directly. If
+     * not we need to use the REST API service.
+     * @return 
+     */
+    private boolean isWhiteListServiceLocal(){
+        return true;
+    }
+        /*public void TestMLENameIssue() {
         try {
 
             TxtHostRecord hostObj = new TxtHostRecord();

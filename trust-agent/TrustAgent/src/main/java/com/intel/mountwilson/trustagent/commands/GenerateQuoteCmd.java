@@ -52,7 +52,7 @@ public class GenerateQuoteCmd implements ICommand {
 
         try {
 			/*String result = */CommandUtil.runCommand(commandLine);
-			log.info("Create the quote {} ",
+			log.debug("Create the quote {} ",
 					context.getQuoteFileName());
 			context.setTpmQuote(CommandUtil.readfile(context.getQuoteFileName()));
 		}catch (Exception e) {

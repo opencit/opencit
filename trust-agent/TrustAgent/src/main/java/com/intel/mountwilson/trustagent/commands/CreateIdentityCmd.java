@@ -12,8 +12,10 @@ import com.intel.mountwilson.his.helper.CreateIdentity;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.File;
 import java.util.Properties;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Properties;
 
 /**
  *
@@ -41,7 +43,7 @@ public class CreateIdentityCmd implements ICommand {
             // Let us first check if the AIK is already created or not. If it already exists, then we do not need to create the AIK again.
             File aikCertFile = new File(context.getAikCertFileName());
             if (aikCertFile.exists()) {
-                log.info("AIK Certificate already exists at ", context.getAikCertFileName());
+                log.debug("AIK Certificate already exists at ", context.getAikCertFileName());
                 log.info("New AIK certificate will not be created.");
             } else {
                 // this will create the AIK in the configured folder
@@ -54,11 +56,13 @@ public class CreateIdentityCmd implements ICommand {
 
             context.setAIKCertificate(CommandUtil.readCertificate(context.getAikCertFileName()));
 
-            log.info("AIK Certificate Read to memory - {}", context.getAikCertFileName());
+            log.debug("AIK Certificate Read to memory - {}", context.getAikCertFileName());
 
-        } catch (Exception e) {
-
-            throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", e);
+        } 
+        
+        catch (Exception e) {
+            throw new TAException(ErrorCode.COMMAND_ERROR, e.toString(), e);
+            //throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
         }
     }
 }

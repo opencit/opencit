@@ -130,7 +130,7 @@ public class OsBO extends BaseBO {
             
             Collection<TblMle> tblMleCollection = tblOs.getTblMleCollection();
             if( tblMleCollection != null ) {
-                log.info("OS is currently associated with # MLEs: " + tblMleCollection.size());
+                log.debug("OS is currently associated with # MLEs: " + tblMleCollection.size());
             
                 if(!tblMleCollection.isEmpty()){
                       throw new ASException(ErrorCode.WS_OS_ASSOCIATION_EXISTS, osName, osVersion, tblMleCollection.size());

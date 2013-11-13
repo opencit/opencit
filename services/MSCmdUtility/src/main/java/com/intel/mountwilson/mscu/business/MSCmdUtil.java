@@ -173,7 +173,7 @@ public class MSCmdUtil {
                             boolean configureWhiteList = msClient.configureWhiteList(gkvHostObj);
                             System.out.println("About to configure whitelist");
                             if (configureWhiteList) {
-                                log.info("Successfully configured the white list database using the host : " + gkvHostObj.HostName);
+                                log.debug("Successfully configured the white list database using the host : " + gkvHostObj.HostName);
                                 System.out.println("Successfully configured the white list database using the host : " + gkvHostObj.HostName);
                             }
 
@@ -230,7 +230,7 @@ public class MSCmdUtil {
                                         // Process the host registration
                                         boolean registerHost = msClient.registerHost(newHostObj);
                                         if (registerHost) {
-                                            log.info("Successfully registered the host : " + newHostObj.HostName);
+                                            log.debug("Successfully registered the host : " + newHostObj.HostName);
                                             System.out.println("Successfully registered the host : " + newHostObj.HostName);
                                         }
 
@@ -295,7 +295,7 @@ public class MSCmdUtil {
 
                                     boolean registerHost = msClient.registerHost(hostObj);
                                     if (registerHost) {
-                                        log.info("Successfully registered the host : " + hostObj.HostName);
+                                        log.debug("Successfully registered the host : " + hostObj.HostName);
                                         System.out.println("Successfully registered the host : " + hostObj.HostName);
                                     }
 

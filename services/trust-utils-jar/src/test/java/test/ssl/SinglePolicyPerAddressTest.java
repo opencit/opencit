@@ -101,7 +101,7 @@ public class SinglePolicyPerAddressTest {
                 connect(url,tlsPolicy); // throws NoSuchAlgorithmException, KeyManagementException, IOException
             }
             catch(FileNotFoundException e) {
-                log.debug("File not found (but ssl connection worked): {}", url.toString());
+                log.error("File not found (but ssl connection worked): {}", url.toString());
             }
         }
     }

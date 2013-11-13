@@ -46,14 +46,14 @@ $(function() {
 
 function fnUploadWhiteListConfigurationData() {
 
-    $('#whiteListMessage').html('');
-    var validation = false;
-    var hostVo = new RegisterHostVo();
-
-    if (checkForPCRConstrain('Oem_Bios_Checkbox', 'biosPCRsValues', 'OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox', 'vmmPCRsValues', 'VMM')) {
-
-        fnGetWhiteListConfigData();
-        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0) {
+	$('#whiteListMessage').html('');
+	var validation = false;
+	var hostVo = new RegisterHostVo();
+	
+	if(checkForPCRConstrain('Oem_Bios_Checkbox','biosPCRsValues','OEM BIOS') && checkForPCRConstrain('Hypervisor_Checkbox','vmmPCRsValues','VMM')){
+    
+		fnGetWhiteListConfigData();
+        if ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('vmware') >= 0 ) {
             hostVo.hostType = 'vmware'
         } else if (($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('kvm') >= 0) ||
                 ($('#MainContent_ddlHOSTType').val().toLowerCase().indexOf('xen') >= 0)) {
@@ -69,7 +69,7 @@ function fnUploadWhiteListConfigurationData() {
         if (isVMWare == 2) {
             if (fnValidateIpAddress($('#whiteListCitrix_Host').val())) {
                 var valid0 = fnValidateEmptyValue('whiteListCitrix_Host');
-                var valid1 = fnValidateEmptyValue('whiteListCitrix_portNO');
+                var valid1 = fnMWValidatePort('whiteListCitrix_portNO', true); //fnValidateEmptyValue('whiteListCitrix_portNO');
                 var valid2 = fnValidateEmptyValue('whiteListCitrix_userName');
                 var valid3 = fnValidateEmptyValue('whiteListCitrix_password');
 
@@ -86,7 +86,7 @@ function fnUploadWhiteListConfigurationData() {
                 alert("Please enter a valid ip address and try again.");
             }
         } else if (isVMWare == 1) { // get VMWare values
-            if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val())) {
+            if (fnValidateIpAddress($('#whiteListVMWare_vCenterServer').val()) && fnValidateIpAddress($('#whiteListVMware_Host').val())) {
                 var valid0 = fnValidateEmptyValue('whiteListVMware_Host');
                 var valid1 = fnValidateEmptyValue('whiteListVMWare_vCenterServer');
                 var valid2 = fnValidateEmptyValue('whiteListVMWare_LoginID');
@@ -109,7 +109,7 @@ function fnUploadWhiteListConfigurationData() {
             if (fnValidateIpAddress($('#whiteListOpenSource_Host').val())) {
 
                 var valid1 = fnValidateEmptyValue('whiteListOpenSource_Host');
-                var valid2 = fnValidateEmptyValue('whiteListOpenSource_portNO');
+                var valid2 = fnMWValidatePort('whiteListOpenSource_portNO', true); //fnValidateEmptyValue('whiteListOpenSource_portNO');
 
                 if (valid1 && valid2) {
                     validation = true;

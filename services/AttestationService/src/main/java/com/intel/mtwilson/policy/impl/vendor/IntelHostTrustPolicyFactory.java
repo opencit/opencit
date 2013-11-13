@@ -49,4 +49,19 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
+        HashSet<Rule> rules = new HashSet<Rule>();
+        // first, load the list of pcr's marked for this host's vmm mle 
+        Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+        rules.addAll(pcrConstantRules);
+
+        // Next we need to add all the modules
+        if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host);
+            rules.addAll(pcrEventLogRules);
+        }
+        return rules;    
+    }
+
 }

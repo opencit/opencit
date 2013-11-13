@@ -61,10 +61,10 @@ public class HttpBasicRequestVerifier {
             throw new CryptographyException("User specified is currently not configured in the system.");
         }
 
-        log.debug("VerifyAuthorization:   Retrieved the user credentials from DB");
+        log.info("VerifyAuthorization:   Retrieved the user credentials from DB");
 
         if (!userPasswordInSystem.equals(userSpecifiedPassword)) {
-            log.debug("Request is NOT Authenticated");
+            log.error("Request is NOT Authenticated");
             throw new CryptographyException("Either the user name or password specified is not correct.");
         }
 
@@ -74,7 +74,7 @@ public class HttpBasicRequestVerifier {
         // Because of security reasons, the users using HttpBasic would be able to just retrieve the attestation status and will 
         // not have previleges for any any other operations.
         try {
-            log.debug("Request is authenticated");
+            log.info("Request is authenticated");
             User userInfo = new User(userName, new Role[]{Role.Report}, userName, Md5Digest.valueOf(insecureRequestSummary.getBytes("UTF-8"))); 
             return userInfo;
         }
