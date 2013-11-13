@@ -58,6 +58,7 @@ import java.util.Properties;
 import java.util.Set;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -1389,6 +1390,8 @@ public class HostBO extends BaseBO {
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                     }
                 }
+                
+                //validateAttestationReport(attestationReport, reqdManifestList);
 
                 System.err.println("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
                 System.err.println("Attestation report is : " + attestationReport);
@@ -1509,6 +1512,208 @@ public class HostBO extends BaseBO {
 
         return configStatus;
     }
+    
+    /**
+     * Author: Savino
+     *
+     * Verifies that the attestation report is valid.
+     *
+     * @param hostObj: Host object having the details of the host to be registered.
+     * @param wlTarget: Indicates whether the host to be registered has to use global white list or OEM specific white
+     * list.
+     * @return : True if all the backend configuration exists, if not throws an exception.
+     */
+//    private Boolean validateAttestationReport(String attestationReport, String reqdManifestList) throws XMLStreamException {
+//        String hexadecimalRegEx = "[0-9A-Fa-f]{40}";
+//        String invalidWhiteList = "[0]{40}|[Ff]{40}";
+//
+//        XMLInputFactory xif = XMLInputFactory.newInstance();
+//        StringReader sr = new StringReader(attestationReport);
+//        XMLStreamReader reader = xif.createXMLStreamReader(sr);
+//
+//        // Process all the Event and PCR nodes in the attestation report.
+//        while (reader.hasNext()) {
+//            if (reader.getEventType() == XMLStreamConstants.START_ELEMENT) {
+//                if (reader.getLocalName().equalsIgnoreCase("Host_Attestation_Report")) {
+//                } else if (reader.getLocalName().equalsIgnoreCase("EventDetails")) {
+//                    // Check if the package is a dynamic package. If it is, then we should not be storing it in the database
+//                    if (reader.getAttributeValue("", "PackageName").length() == 0
+//                            && reader.getAttributeValue("", "EventName").equalsIgnoreCase("Vim25Api.HostTpmSoftwareComponentEventDetails")) {
+//                        reader.next();
+//                        continue;
+//                    }
+//
+//                    if ((pcrsSupportedForEventLog.contains(Integer.parseInt(reader.getAttributeValue("", "ExtendedToPCR"))))
+//                            && (pcrsToWhiteList.contains(reader.getAttributeValue("", "ExtendedToPCR")))) {
+//                        ModuleWhiteList moduleObj = new ModuleWhiteList();
+//                        // bug 2013-02-04 inserting the space here worked with mysql because mysql automatically trims spaces in queries but other database systems DO NOT;  it's OK for componentName to be empty string but somewhere else we have validation check and throw an error if it's empty
+//                        if (reader.getAttributeValue("", "ComponentName").isEmpty()) {
+//                            moduleObj.setComponentName(" ");
+//                            log.info("uploadToDB: component name set to single-space");
+//                        } else {
+//                            moduleObj.setComponentName(reader.getAttributeValue("", "ComponentName")); // it could be empty... see TestVmwareEsxi51.java in AttestationService/src/test/java to see how this can be easily handled using the vendor-specific classes, where the vmware implementation automatically sets component name to something appropriate
+//                        }
+//                        // check the value, if fails, return false;
+//                        moduleObj.setDigestValue(reader.getAttributeValue("", "DigestValue"));
+//                        moduleObj.setEventName(reader.getAttributeValue("", "EventName"));
+//                        moduleObj.setExtendedToPCR(reader.getAttributeValue("", "ExtendedToPCR"));
+//                        moduleObj.setPackageName(reader.getAttributeValue("", "PackageName"));
+//                        moduleObj.setPackageVendor(reader.getAttributeValue("", "PackageVendor"));
+//                        moduleObj.setPackageVersion(reader.getAttributeValue("", "PackageVersion"));
+//                        moduleObj.setUseHostSpecificDigest(Boolean.valueOf(reader.getAttributeValue("", "UseHostSpecificDigest")));
+//                        moduleObj.setDescription("");
+//                        moduleObj.setMleName(hostObj.VMM_Name);
+//                        moduleObj.setMleVersion(hostObj.VMM_Version);
+//                        moduleObj.setOsName(hostObj.VMM_OSName);
+//                        moduleObj.setOsVersion(hostObj.VMM_OSVersion);
+//                        moduleObj.setOemName("");
+//
+//                        if (!hostConfigObj.getOverWriteWhiteList()) {
+//                            if (isWhiteListServiceLocal()) {
+//                                mleBO.addModuleWhiteList(moduleObj);
+//                            } else {
+//                                wlsClient.addModuleWhiteList(moduleObj);
+//                            }
+//                            log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+//
+//                        } else {
+//                            if (isWhiteListServiceLocal()) {
+//                                mleBO.updateModuleWhiteList(moduleObj);
+//                            } else {
+//                                wlsClient.updateModuleWhiteList(moduleObj);
+//                            }
+//                            log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
+//                            isVmmMLEUpdated = true;
+//                        }
+//                    }
+//                } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) { // pcr information would be available for all the hosts.
+//                    //log.info(String.format("Reading PCRInfo node"));
+//                    // We need to white list only thos pcrs that were requested by the user. We will ignore the remaining ones
+//                    if (pcrsToWhiteList.contains(reader.getAttributeValue(null, "ComponentName"))) {
+//                        TblPcrManifest tblPCR;
+//                        PCRWhiteList pcrObj = new PCRWhiteList();
+//                        // check and if fails, return false
+//                        pcrObj.setPcrName(reader.getAttributeValue(null, "ComponentName"));
+//                        pcrObj.setPcrDigest(reader.getAttributeValue(null, "DigestValue"));
+//                        Integer mleID;
+//
+//                        if (pcrObj.getPcrName() == null) {
+//                            log.error("uploadToDB: PCR name is null: " + hostObj.toString());
+//                        } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) <= MAX_BIOS_PCR)) {
+//
+//                            if (hostConfigObj.addBiosWhiteList() == true) {
+//                                pcrObj.setMleName(hostObj.BIOS_Name);
+//                                pcrObj.setMleVersion(hostObj.BIOS_Version);
+//                                pcrObj.setOsName("");
+//                                pcrObj.setOsVersion("");
+//                                pcrObj.setOemName(hostObj.BIOS_Oem);
+//                                mleID = mleBiosSearchObj.getId();
+//                                //log.info(String.format("Adding BiosWhiteList: Name=%s Version=%s OEM=%s mleID=%s",hostObj.BIOS_Name,hostObj.BIOS_Version,hostObj.BIOS_Oem,mleBiosSearchObj.getId().toString()));
+//                                tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
+//                                if (tblPCR == null) {
+//                                    if (isWhiteListServiceLocal()) {
+//                                        mleBO.addPCRWhiteList(pcrObj);
+//                                    } else {
+//                                        wlsClient.addPCRWhiteList(pcrObj);
+//                                    }
+//                                    log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
+//
+//                                } else {
+//                                    if (isWhiteListServiceLocal()) {
+//                                        mleBO.updatePCRWhiteList(pcrObj);
+//                                    } else {
+//                                        wlsClient.updatePCRWhiteList(pcrObj);
+//                                    }
+//                                    log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
+//                                    isBiosMLEUpdated = true;
+//                                }
+//                            }
+//
+//                        } else if ((Integer.parseInt(reader.getAttributeValue(null, "ComponentName")) == LOCATION_PCR)) {
+//                            // We will add the location white list only if it is valid. If now we will skip it. Today only VMware supports PCR 22
+//                            if (!reader.getAttributeValue(null, "DigestValue").equals(Sha1Digest.ZERO.toString())) {
+//                                //  Here we need update the location table. Since we won't know what the readable location string for the hash value we will just add it with host  name
+//                                TblLocationPcrJpaController locationJpa = My.jpa().mwLocationPcr(); //new TblLocationPcrJpaController((getASEntityManagerFactory()));
+//                                TblLocationPcr tblLoc = locationJpa.findTblLocationPcrByPcrValueEx(reader.getAttributeValue(null, "DigestValue"));
+//                                // check and return false
+//                                if (tblLoc == null) {
+//                                    tblLoc = new TblLocationPcr();
+//                                    tblLoc.setLocation(hostObj.HostName);
+//                                    tblLoc.setPcrValue(reader.getAttributeValue(null, "DigestValue"));
+//
+//                                    locationJpa.create(tblLoc);
+//                                    log.info("Created a white list location entry using PCR 22 for location: {} with PCR value: {}.", tblLoc.getLocation(), tblLoc.getPcrValue());
+//                                } else {
+//                                    log.info("White list location entry using PCR 22 for location: {} with PCR value: {} already exists.", tblLoc.getLocation(), tblLoc.getPcrValue());
+//                                }
+//                            }
+//                        } else if (hostConfigObj.addVmmWhiteList() == true) {
+//                            //log.info(String.format("Adding VMM white list: Name=%s Version=%s OsName=%s OsVersion=%s mleID=%s", hostObj.VMM_Name,hostObj.VMM_Version,hostObj.VMM_OSName,hostObj.VMM_OSVersion,mleSearchObj.getId().toString()));
+//                            pcrObj.setMleName(hostObj.VMM_Name);
+//                            pcrObj.setMleVersion(hostObj.VMM_Version);
+//                            pcrObj.setOsName(hostObj.VMM_OSName);
+//                            pcrObj.setOsVersion(hostObj.VMM_OSVersion);
+//                            pcrObj.setOemName("");
+//                            mleID = mleSearchObj.getId();
+//
+//                            // TODO : After the integration with the master branch, we need to use the ConnectionString class and determine the type of the vendor
+//                            // If the vendor is Citrix, then only we need to write the PCR 19. Otherwise we need to null it out. 
+//                            if (!hostObj.AddOn_Connection_String.toLowerCase().contains("citrix")) {
+//                                if (pcrObj.getPcrName() != null && pcrObj.getPcrName().equalsIgnoreCase("19")) {
+//                                    pcrObj.setPcrDigest(""); // XXX hack, because the pcr value is dynamic / different across hosts and the whitelist service requires a value
+//                                }
+//                            }
+//
+//                            tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
+//                            if (tblPCR == null) {
+//                                if (isWhiteListServiceLocal()) {
+//                                    mleBO.addPCRWhiteList(pcrObj);
+//                                } else {
+//                                    wlsClient.addPCRWhiteList(pcrObj);
+//                                }
+//                                log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
+//                            } else {
+//                                if (isWhiteListServiceLocal()) {
+//                                    mleBO.updatePCRWhiteList(pcrObj);
+//                                } else {
+//                                    wlsClient.updatePCRWhiteList(pcrObj);
+//                                }
+//                                log.debug("Successfully updated the VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
+//                                isVmmMLEUpdated = true;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            reader.next();
+//        }
+//        
+//        
+//        
+//        
+//        
+//        
+//        
+//        String componentName, String whiteList
+//        if (!isWhiteListValid(whiteList)) {
+//            log.error("White list '{0}' specified for '{1}' is not valid.", whiteList, componentName);
+//            throw new MSException(ErrorCode.WS_INVALID_WHITE_LIST_VALUE, whiteList, componentName);
+//        }
+//
+//        if (whiteList == null || whiteList.trim().isEmpty()) {
+//            return true;
+//        } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
+//        // Bug:775 & 802: If the TPM is reset we have seen that all the PCR values would be set to Fs. So, we need to disallow that since it is invalid. Also, all 0's are also invalid.
+//        if (whiteList.matches(invalidWhiteList)) {
+//            return false;
+//        }
+//        if (whiteList.matches(hexadecimalRegEx)) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+//
+//    }
 
     /**
      * Author: Sudhir

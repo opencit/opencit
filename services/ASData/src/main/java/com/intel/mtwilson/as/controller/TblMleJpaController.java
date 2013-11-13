@@ -467,8 +467,9 @@ public class TblMleJpaController implements Serializable {
             query.setParameter("version", mleVersion);
             query.setParameter("oemName", oemName);
 
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            // Nov 14, 2013: Commenting out the below setting for better performance and updating the cacheusage to check cache and then DB                        
+            //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
             
             
             try {
@@ -496,8 +497,9 @@ public class TblMleJpaController implements Serializable {
             query.setParameter("osName", osName);
             query.setParameter("osVersion", osVersion);
             
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            // Nov 14, 2013: Commenting out the below setting for better performance and updating the cacheusage to check cache and then DB            
+            //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
 
             
             try {

@@ -763,6 +763,7 @@ public class MleBO extends BaseBO {
             TblPackageNamespace nsPackNS;
             TblModuleManifest tblModule;
             String fullComponentName ;
+            long addModule = System.currentTimeMillis();
             
             try {
 
@@ -774,7 +775,8 @@ public class MleBO extends BaseBO {
                 } catch (NoResultException nre){
                     throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, moduleData.getMleName(), moduleData.getMleVersion());
                 }
-                                
+                long addModule1 = System.currentTimeMillis();
+                log.debug("ADDMLETIME: after retrieving MLE info - " + (addModule1 - addModule));                
                 try {
                     // Before we insert the record, we need the identity for the event name
                     tblEvent = eventTypeJpaController.findEventTypeByName(moduleData.getEventName());
@@ -805,26 +807,38 @@ public class MleBO extends BaseBO {
                     }
                     log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
 
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+                    long addModule2 = System.currentTimeMillis();
+                    log.debug("ADDMLETIME: after retrieving Event info - " + (addModule2 - addModule1));  
                     
-                    if (tblModule != null) {
+                    //tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+                    Integer componentID = moduleManifestJpaController.findByMleIdEventId(tblMle.getId(), fullComponentName, tblEvent.getId());
+                    
+                    if (componentID != null && componentID != 0) {
                         throw new ASException(ErrorCode.WS_MODULE_WHITELIST_ALREADY_EXISTS, moduleData.getComponentName());
                     }
 //                } catch (NoResultException nre){
                     // This is expected since we are adding the module white list. So, continue.
 //                }
                 
+                    long addModule3 = System.currentTimeMillis();
+                    log.debug("ADDMLETIME: after searching for Module info - " + (addModule3 - addModule2));  
+                    
                 try {
 
                     // Since there will be only one entry for now, we will just hardcode it for now.
                     // TO-DO: See if we can change this.
+                    // Nov-12,2013: Changed to use the function that accepts the ID instead of the name for better
+                    // performance.
                     nsPackNS = packageNSJpaController.findByName("Standard_Global_NS");
 
                 } catch (NoResultException nre){
                     throw new ASException(ErrorCode.WS_NAME_SPACE_DOES_NOT_EXIST);
                 }
                                 
-                TblModuleManifest newModuleRecord = new TblModuleManifest();
+                    long addModule4 = System.currentTimeMillis();
+                    log.debug("ADDMLETIME: after searching for package info - " + (addModule4 - addModule3));  
+
+                    TblModuleManifest newModuleRecord = new TblModuleManifest();
                 newModuleRecord.setMleId(tblMle);
                 newModuleRecord.setEventID(tblEvent);
                 newModuleRecord.setNameSpaceID(nsPackNS);
@@ -847,7 +861,10 @@ public class MleBO extends BaseBO {
                 newModuleRecord.setCreatedOn(new Date(System.currentTimeMillis()));
                 */
                 // Create the new white list record.
+                long addModule5 = System.currentTimeMillis();
+                log.debug("ADDMLETIME: before insert " + (addModule5 - addModule4));
                 moduleManifestJpaController.create(newModuleRecord);
+                log.debug("ADDMLETIME: after insert" + (System.currentTimeMillis() - addModule5));
 
             } catch (ASException ase) {
                     throw ase;
