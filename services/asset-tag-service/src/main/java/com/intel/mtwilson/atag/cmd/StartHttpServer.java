@@ -60,11 +60,10 @@ public class StartHttpServer extends AtagCommand {
         // Load a single static login/secret pair.
         mapVerifier.getLocalSecrets().put("admin", "password".toCharArray());
         guard.setVerifier(mapVerifier);
-        guard.setNext(component);
-        component.getDefaultHost().attachDefault(guard);        
-        //
+        guard.setNext(server);
         
         component.getDefaultHost().attach("", new RestletApplication()); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
+        component.getDefaultHost().attachDefault(guard);
         component.start();
     }
     
