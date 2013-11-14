@@ -13,8 +13,11 @@ import org.apache.commons.configuration.MapConfiguration;
 
 import org.restlet.Component;
 import org.restlet.Server;
+import org.restlet.data.ChallengeScheme;
 import org.restlet.data.Protocol;
 import org.restlet.data.Parameter;
+import org.restlet.security.ChallengeAuthenticator;
+import org.restlet.security.MapVerifier;
 import org.restlet.util.Series;
 
 /**
@@ -48,6 +51,19 @@ public class StartHttpServer extends AtagCommand {
         parameters.add("keystoreType", "JKS");
         component.getClients().add(Protocol.FILE); // filesystem resources
         component.getClients().add(Protocol.CLAP); // classpath resources
+        
+        // setup the http-basic stuff
+        // Guard the restlet with BASIC authentication.
+        ChallengeAuthenticator guard = new ChallengeAuthenticator(null, ChallengeScheme.HTTP_BASIC, "testRealm");
+        // Instantiates a Verifier of identifier/secret couples based on a simple Map.
+        MapVerifier mapVerifier = new MapVerifier();
+        // Load a single static login/secret pair.
+        mapVerifier.getLocalSecrets().put("admin", "password".toCharArray());
+        guard.setVerifier(mapVerifier);
+        guard.setNext(component);
+        component.getDefaultHost().attachDefault(guard);        
+        //
+        
         component.getDefaultHost().attach("", new RestletApplication()); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
         component.start();
     }
