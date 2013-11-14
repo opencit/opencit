@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import javax.persistence.EntityManager;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
@@ -2033,16 +2034,16 @@ public class HostBO extends BaseBO {
         // Bug:817: We need to refresh the trust status of all the hosts after the MLE update. 
         boolean isBiosMLEUpdated = false;
         boolean isVmmMLEUpdated = false;
-
         // NOTE: In order to avoid the look up queries to decide whether to do a add or a update
         // to the white lists, we will use the overwrite flag. If the overwrite flag is set to false
         // then, we will do a "ADD" operation. If the overwrite flag is set to "TRUE", then we do an
         // "UPDATE" operation. We have already modified this flag during the creation of VMM MLE to address
         // the scenario of user's setting the flag to "TRUE" even if the MLE does not exist.
-        
         //TO REVIEW: Should we even move this whitelisting functionality to the HostAgents. Right now we have specific things for
         // each different type of of hosts.
-
+        EntityManager emt = My.jpa().mwModuleManifest().getEntityManager();
+        emt.getTransaction().begin();
+        
         // If in case we need to support additional pcrs for event logs, we need to just update this and add the new PCR
         List<Integer> pcrsSupportedForEventLog = Arrays.asList(19);
         // Since the attestation report has all the PCRs we need to upload only the required PCR values into the white list tables.
@@ -2143,7 +2144,7 @@ public class HostBO extends BaseBO {
                             }*/
                             if (!hostConfigObj.getOverWriteWhiteList()) {
                                 if (isWhiteListServiceLocal())
-                                    mleBO.addModuleWhiteList(moduleObj);
+                                    mleBO.addModuleWhiteList(moduleObj, emt);
                                 else
                                     wlsClient.addModuleWhiteList(moduleObj);
                                 log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
@@ -2182,7 +2183,7 @@ public class HostBO extends BaseBO {
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
                                         if (isWhiteListServiceLocal())
-                                            mleBO.addPCRWhiteList(pcrObj);
+                                            mleBO.addPCRWhiteList(pcrObj, emt);
                                         else
                                             wlsClient.addPCRWhiteList(pcrObj);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2235,7 +2236,7 @@ public class HostBO extends BaseBO {
                                 tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                 if (tblPCR == null) {
                                     if (isWhiteListServiceLocal())
-                                        mleBO.addPCRWhiteList(pcrObj);
+                                        mleBO.addPCRWhiteList(pcrObj, emt);
                                     else
                                         wlsClient.addPCRWhiteList(pcrObj);
                                     log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2253,6 +2254,9 @@ public class HostBO extends BaseBO {
                 }
                 reader.next();
             }
+            emt.getTransaction().commit();
+            
+            emt.close();
             
             // Now that we have uploaded all the whitelists, let us check if we updated/modified an existing one. If yes, then we need to retrieve 
             // the list of all the hosts for those MLEs and update their trust status.

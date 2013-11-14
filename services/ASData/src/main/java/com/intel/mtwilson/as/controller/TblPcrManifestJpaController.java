@@ -84,6 +84,23 @@ public class TblPcrManifestJpaController implements Serializable {
         }
     }
 
+    public void create_v2(TblPcrManifest tblPcrManifest, EntityManager em) {
+        try {
+            TblMle mleId = tblPcrManifest.getMleId();
+            if (mleId != null) {
+                mleId = em.getReference(mleId.getClass(), mleId.getId());
+                tblPcrManifest.setMleId(mleId);
+            }
+            em.persist(tblPcrManifest);
+
+            if (mleId != null) {
+                mleId.getTblPcrManifestCollection().add(tblPcrManifest);
+                em.merge(mleId);
+            }
+        } finally {
+        }
+    }
+
     public void edit(TblPcrManifest tblPcrManifest) throws NonexistentEntityException, ASDataException {
         EntityManager em = getEntityManager();
         try {

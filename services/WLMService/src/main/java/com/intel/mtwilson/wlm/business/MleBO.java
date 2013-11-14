@@ -12,6 +12,7 @@ import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.wlm.helper.BaseBO;
 import java.util.*;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -110,7 +111,7 @@ public class MleBO extends BaseBO {
                                         }
                                         mleJpaController.create(tblMle);
                                         // now add the PCRs that were validated above
-                                        addPcrManifest(tblMle, mleData.getManifestList());
+                                        addPcrManifest(tblMle, mleData.getManifestList(),null);
 
                                 } catch (ASException ase) {
                                     //log.error("Exception while adding MLE data." + ase.getErrorMessage());
@@ -412,7 +413,7 @@ public class MleBO extends BaseBO {
                         /**
                          * 
                          */
-	private void addPcrManifest(TblMle tblMle, List<ManifestData> mleManifests) {
+	private void addPcrManifest(TblMle tblMle, List<ManifestData> mleManifests, EntityManager em) {
 		
 		tblMle.setTblPcrManifestCollection(new ArrayList<TblPcrManifest>());
 
@@ -436,7 +437,10 @@ public class MleBO extends BaseBO {
 				pcrManifest.setUpdatedOn(today);
                                                                                                 */
 				pcrManifest.setMleId(tblMle);
-				pcrManifestJpaController.create(pcrManifest);
+                                if (em == null)
+                                    pcrManifestJpaController.create(pcrManifest);
+                                else
+                                    pcrManifestJpaController.create_v2(pcrManifest, em);
                 }
                 catch(Exception e) {
                     log.error("Cannot add PCR "+manifestData.getName()+" to MLE: "+e.toString());
@@ -579,7 +583,9 @@ public class MleBO extends BaseBO {
 
 	}
 
-        
+	public String addPCRWhiteList(PCRWhiteList pcrData) {
+            return addPCRWhiteList(pcrData, null);
+        }        
                         /**
                          * Added By: Sudhir on June 20, 2012
                          * 
@@ -588,7 +594,7 @@ public class MleBO extends BaseBO {
                          * @param pcrData: White list data sent by the user
                          * @return : true if the call is successful or else exception.
                          */
-	public String addPCRWhiteList(PCRWhiteList pcrData) {
+	public String addPCRWhiteList(PCRWhiteList pcrData, EntityManager em) {
                                 TblMle tblMle;
                                 TblPcrManifest tblPcr;
                                 try {
@@ -621,7 +627,7 @@ public class MleBO extends BaseBO {
                                     pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest()));
 
                                     // Now add the pcr to the database.
-                                    addPcrManifest(tblMle, pcrWhiteList);
+                                    addPcrManifest(tblMle, pcrWhiteList, em);
 
                                 } catch (ASException ase) {
                                     throw ase;
@@ -748,6 +754,9 @@ public class MleBO extends BaseBO {
                                 return "true";
 	}
         
+        public String addModuleWhiteList(ModuleWhiteList moduleData) {
+            return addModuleWhiteList(moduleData, null);
+        }
 
         /**
          * Added By: Sudhir on June 21, 2012
@@ -757,7 +766,7 @@ public class MleBO extends BaseBO {
          * @param moduleData: Data of the white list
          * @return : "true" if everything is successful or else exception
          */
-        public String addModuleWhiteList(ModuleWhiteList moduleData) {
+        public String addModuleWhiteList(ModuleWhiteList moduleData, EntityManager em) {
             TblMle tblMle;
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
@@ -863,7 +872,12 @@ public class MleBO extends BaseBO {
                 // Create the new white list record.
                 long addModule5 = System.currentTimeMillis();
                 log.debug("ADDMLETIME: before insert " + (addModule5 - addModule4));
-                moduleManifestJpaController.create(newModuleRecord);
+                if (em == null) {
+                    moduleManifestJpaController.create(newModuleRecord);
+                } else {
+                    log.debug("ADDMLETIME: Using the new create method of having EM.");
+                    moduleManifestJpaController.create_v2(newModuleRecord, em);
+                }
                 log.debug("ADDMLETIME: after insert" + (System.currentTimeMillis() - addModule5));
 
             } catch (ASException ase) {
