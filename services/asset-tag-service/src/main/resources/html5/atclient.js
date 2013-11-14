@@ -367,7 +367,9 @@ mtwilson.atag = mtwilson.atag || {};
         var report = validate(input);
         if (report.isValid) {
             var tagObject = report.input.clone(); // or use report.input.cloneJSON() if it has circular references (it shouldn't!) or another way is Object.toJSON(report.input).evalJSON(); 
-            
+             if(tagObject.oid == undefined) {
+                 tagObject.oid = "2.5.4.789.1";
+             }
             ajax.json.post('tags', [tagObject], {app: report}); // pass {app:report} so it will be passed to the event handler after the request is complete
         }
     };
