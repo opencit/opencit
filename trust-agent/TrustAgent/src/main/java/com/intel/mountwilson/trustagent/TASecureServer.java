@@ -38,6 +38,7 @@ public class TASecureServer extends BaseServer {
                 String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
                 //System.err.println("Tagent keystore from config was " + propKeyPass);
                 System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+                System.setProperty("javax.net.ssl.trustStorePassword",propKeyPass);
             }else if(keyPass.startsWith("env:")) {
                 String[] envVar = keyPass.split(":");
                 if(envVar.length != 2) {
@@ -46,6 +47,7 @@ public class TASecureServer extends BaseServer {
                     String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
                     //System.err.println("Tagent keystore from config was " + propKeyPass);
                     System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+                    System.setProperty("javax.net.ssl.trustStorePassword",propKeyPass);
                 }else {
                     String newKeyPass = System.getenv(envVar[1]);
                     if(newKeyPass == null){ 
@@ -54,9 +56,11 @@ public class TASecureServer extends BaseServer {
                       newKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
                       //System.err.println("Tagent keystore from config was " + newKeyPass);
                       System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);
+                      System.setProperty("javax.net.ssl.trustStorePassword",newKeyPass);
                     }else{
                      //System.err.println("Tagent read pw from env, setting it to " + newKeyPass);
                      System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass); 
+                     System.setProperty("javax.net.ssl.trustStorePassword",newKeyPass);
                     }                
                 }
             }
