@@ -14,16 +14,29 @@
 # if you add any other headers to the file (to be included in the hmac)
 # you need to adjust the +/- numbers on the head and tail commands below.
 
-infile=t
-outfile=x
-export PASSWORD=uifsjksjksdhhsdffsljklzakldasfk
+parse_args() {
+  if ! options=$(getopt -n encrypt.sh -l infile:,outfile:,enc-passwd:,auth-passwd: -- "$@"); then exit 1; fi
+  eval set -- "$options"
+  while [ $# -gt 0 ]
+  do
+    case $1 in
+      --infile) INFILE="$2"; shift;;
+      --outfile) OUTFILE="$2"; shift;;
+      --enc-passwd) ENC_PASSWORDFILE="$2"; shift;;
+      --auth-passwd) AUTH_PASSWORDFILE="$2"; shift;;
+    esac
+    shift
+  done
+}
+
+parse_args $@
 
 # assume the mac value is the last line of the file
-inputmac=$(tail -n 1 $infile)
+inputmac=$(tail -n 1 $INFILE)
 #echo $inputmac
 
 # calculate the hmac over the entire file except fo rthe last line
-calcmac=$(head -n -1 $infile | openssl dgst -sha256 -hmac env:PASSWORD -hex | awk '{ print $2 }')
+calcmac=$(head -n -1 $INFILE | openssl dgst -sha256 -hmac file:AUTH_PASSWORDFILE -hex | awk '{ print $2 }')
 #echo $calcmac
 
 if [ "$inputmac" != "$calcmac" ]; then
@@ -34,4 +47,4 @@ fi
 # decrypt the base64 content but first need to extract it from message:
 # skip three lines from the beginning (content-type, date, and blank)
 # and skip three lines from the end (content-type, blank line, and hmac)
-tail -n +3 $infile | head -n -3 | openssl enc -d -aes-256-ofb -pass env:PASSWORD -md sha256 -base64 > $outfile
+tail -n +3 $INFILE | head -n -3 | openssl enc -d -aes-256-ofb -pass file:ENC_PASSWORDFILE -md sha256 -base64 > $OUTFILE

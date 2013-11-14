@@ -6,7 +6,7 @@
 #       number of iterations but the openssl command line program does not implement
 #       this option so only ONE iteration is used, which is not good enough.
 # SEE ALSO:
-#       OpenSSL support for RFC2898 / PBKDF2
+#       OpenSSL support for RFC2898 / PBKDF2  (and how the tool doesn't implement the iteration count, which is important and is a reason to use another program until openssl fixes the tool)
 #       http://www.mail-archive.com/openssl-users@openssl.org/msg54143.html
 #       
 
