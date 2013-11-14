@@ -301,7 +301,7 @@ public class VMwareClient implements TlsClient {
             log.debug("VSPHERE: properties: " + s);
         }
         ManagedEntity me = new InventoryNavigator(rootFolder).searchManagedEntity(meType, meName);
-        log.debug("VSPHERE: Hashtable: " + me.toString());
+        log.debug("VSPHERE: ManagedEntity: " + me.toString());
         Hashtable ht = me.getPropertiesByPaths(properties);
         log.debug("VSPHERE: Hashtable: " + ht.toString());
         
@@ -872,6 +872,7 @@ public class VMwareClient implements TlsClient {
      * @throws Exception
      */
     public String getHostAttestationReport(ManagedObjectReference hostMOR, String hostName, String pcrList) throws VMwareConnectionException {
+        log.debug("getHostAttestationReport >> START");
 
 //        boolean doNotDisconnect;
 
@@ -904,16 +905,21 @@ public class VMwareClient implements TlsClient {
             xtw.writeStartElement("Host_Attestation_Report");
             xtw.writeAttribute("Host_Name", hostName);
             xtw.writeAttribute("vCenterVersion", serviceContent.getAbout().getVersion());
-            xtw.writeAttribute("HostVersion", getMEProperty(hostMOR.type, hostName, "config.product.version").toString());
+            String hostVer = getMEProperty(hostMOR.type, hostName, "config.product.version").toString();
+            xtw.writeAttribute("HostVersion", hostVer);
             xtw.writeAttribute("TXT_Support", tpmSupport.toString());
 
             if (tpmSupport == true && serviceContent.getAbout().getVersion().contains("5.1")) {
+                log.debug("Querying TPM attestation report...");
                 HostTpmAttestationReport hostTrustReport = vimPort.queryTpmAttestationReport(hostMOR);
+                log.debug("Query finished.");
 
                 // Process the event log only for the ESXi 5.1 or higher
-                if (hostTrustReport != null && getMEProperty(hostMOR.type, hostName, "config.product.version").toString().contains("5.1")) {
+                if (hostTrustReport != null && hostVer.contains("5.1")) {
+                    log.debug("Retrieving TPM events...");
                     int numOfEvents = hostTrustReport.getTpmEvents().length;
                     for (int k = 0; k < numOfEvents; k++) {
+                        log.debug("");
                         HostTpmEventLogEntry eventInfo = (HostTpmEventLogEntry) hostTrustReport.getTpmEvents()[k];
                         switch (eventInfo.getPcrIndex()) {
                             // We will process only the components that gets extended into PCR 19. We
@@ -929,6 +935,7 @@ public class VMwareClient implements TlsClient {
                             // All the static components hash values are in this index. So, we will process
                             // all the entries and store them into the database.
                             case 19:
+                                log.debug("PCR 19: writing attributes...");
                                 String eventName = eventInfo.getEventDetails().getClass().getSimpleName();
                                 if (eventName.equalsIgnoreCase("HostTpmSoftwareComponentEventDetails")) {
                                     HostTpmSoftwareComponentEventDetails swEventLog = (HostTpmSoftwareComponentEventDetails) eventInfo.getEventDetails();
@@ -996,6 +1003,7 @@ public class VMwareClient implements TlsClient {
 
                 // The TPM values have to be captured for both ESXi 5.0 or 5.1 hosts
                 if (hostTrustReport != null) {
+                    log.debug("Getting TPM PCR values...");
                     List<String> pcrs = Arrays.asList(pcrList.split(","));
                     int numTPMValues = hostTrustReport.getTpmPcrValues().length;
                     for (int j = 0; j < numTPMValues; j++) {
@@ -1041,7 +1049,7 @@ public class VMwareClient implements TlsClient {
         } finally {/*
              if (!doNotDisconnect)
              disconnect();*/
-
+            log.debug("getHostAttestationReport >> FINISH");
         }
     }
 

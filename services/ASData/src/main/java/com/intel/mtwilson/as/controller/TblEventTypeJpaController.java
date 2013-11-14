@@ -213,8 +213,9 @@ public class TblEventTypeJpaController implements Serializable {
             Query query = em.createNamedQuery("TblEventType.findByName");
             query.setParameter("name", eventName);
 
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            // Nov 14, 2013: Commenting out the below setting for better performance and updating the cacheusage to check cache and then DB            
+            //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
 
             TblEventType eventType = (TblEventType) query.getSingleResult();
             return eventType;

@@ -455,10 +455,15 @@ if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
   cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
 fi
 
-if [ -f "/etc/environment" ] && [ -n ${JAVA_HOME} ]; then
-  sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
-  sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
-  echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
+  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
+    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
+  fi
+  if ! grep -q "JAVA_HOME" /etc/environment; then
+    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  fi
+  
   . /etc/environment
 fi
 
@@ -680,7 +685,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/asctl start\"
 	stop program = \"/usr/local/bin/asctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/status\" for 1 cycles
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -691,7 +696,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/msctl start\"
 	stop program = \"/usr/local/bin/msctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/status\" for 1 cycles
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -702,7 +707,7 @@ check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
 	start program = \"/usr/local/bin/wlmctl start\"
 	stop program = \"/usr/local/bin/wlmctl stop\"
 	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/status\" for 1 cycles
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on gf_installed
@@ -742,7 +747,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/asctl start\"
 	stop program = \"/usr/local/bin/asctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/AttestationService/resources/status\" for 1 cycles
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -753,7 +758,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/msctl start\"
 	stop program = \"/usr/local/bin/msctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/ManagementService/resources/status\" for 1 cycles
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed
@@ -764,7 +769,7 @@ check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina
 	start program = \"/usr/local/bin/wlmctl start\"
 	stop program = \"/usr/local/bin/wlmctl stop\"
 	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
-		and request \"/WLMService/resources/status\" for 1 cycles
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
 	then restart
 	if 3 restarts within 10 cycles then timeout
 	depends on tc_installed

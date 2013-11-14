@@ -1393,6 +1393,41 @@ public class HostTrustBO extends BaseBO {
         }
 
     }
+    
+    public HostTrustStatus getTrustStatusWithCache(String host, Boolean forceVerify) throws Exception {
+        log.debug("getTrustStatusWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
+        HostTrustStatus hts = new HostTrustStatus();
+        
+        try {
+            if(forceVerify != true){
+                TblHosts tblHosts = getHostByName(new Hostname(host));
+                if(tblHosts != null){
+                    TblTaLog tblTaLog = new TblTaLogJpaController(getEntityManagerFactory()).getHostTALogEntryBefore(tblHosts.getId() , getCacheStaleAfter() );
+
+                    // Bug 849: We need to ensure that we add the host name to the response as well. Otherwise it will just contain BIOS and VMM status.
+                    if(tblTaLog != null) {
+                        hts = getHostTrustStatusObj(tblTaLog);
+                        return hts;
+                    }
+                }else{
+                    throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, host);
+                }
+            }
+        
+           log.info("Getting trust and saml assertion from host.");
+           HostTrustStatus status = getTrustStatus(new Hostname(host));
+           return status;
+            
+        } catch (ASException ase) {
+            log.error("Error while getting trust for host " + host,ase );
+            throw ase;
+        }catch(Exception e){
+            log.error("Error while getting trust for host " + host,e );
+            throw e;
+        }
+
+    }
+    
     private Date getCacheStaleAfter(){
         return new DateTime().minusSeconds(CACHE_VALIDITY_SECS).toDate();
     }
@@ -1409,9 +1444,23 @@ public class HostTrustBO extends BaseBO {
                 hostTrust.setVmmStatus(Integer.valueOf(subparts[1]));
             }
         }
-        
-        
         return hostTrust;
+    }
+    
+    private HostTrustStatus getHostTrustStatusObj(TblTaLog tblTaLog) {
+        HostTrustStatus hostTrustStatus = new HostTrustStatus();
+        
+        String[] parts = tblTaLog.getError().split(",");
+        
+        for(String part : parts){
+            String[] subparts = part.split(":");
+            if(subparts[0].equalsIgnoreCase("BIOS")){
+                hostTrustStatus.bios = (Integer.valueOf(subparts[1]) != 0);
+            }else{
+                hostTrustStatus.vmm = (Integer.valueOf(subparts[1]) != 0);
+            }
+        }
+        return hostTrustStatus;
     }
 
     public String checkMatchingMLEExists(TxtHostRecord hostObj, String biosPCRs, String vmmPCRs) {

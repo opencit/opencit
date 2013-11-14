@@ -105,7 +105,8 @@ else
 fi
 
 chown -R $MTWILSON_OWNER "${package_var_dir}"
-chmod -R 755 "${package_var_dir}"
+chmod -R 700 "${package_var_dir}"
+chmod -R 600 "${package_var_dir}/data"
 
 if using_glassfish; then
   glassfish_permissions "${intel_conf_dir}"

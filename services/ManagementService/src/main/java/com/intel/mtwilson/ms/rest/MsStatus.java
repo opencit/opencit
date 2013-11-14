@@ -17,7 +17,7 @@ import javax.ws.rs.GET;
  */
 
 @Stateless
-@Path("/status")
+@Path("/msstatus")
 public class MsStatus {
     @GET
     @Produces({MediaType.TEXT_PLAIN})
