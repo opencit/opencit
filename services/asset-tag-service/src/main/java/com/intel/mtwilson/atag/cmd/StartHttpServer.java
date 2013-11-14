@@ -49,7 +49,7 @@ public class StartHttpServer extends AtagCommand {
         parameters.add("sslContextFactory", "org.restlet.ext.ssl.PkixSslContextFactory");
         parameters.add("keystorePath", My.configuration().getAssetTagKeyStorePath());
         parameters.add("keystorePassword", My.configuration().getAssetTagKeyStorePassword());
-        parameters.add("keyPassword", "password");
+        parameters.add("keyPassword", My.configuration().getAssetTagKeyPassword());
         parameters.add("keystoreType", "JKS");
         component.getClients().add(Protocol.FILE); // filesystem resources
         component.getClients().add(Protocol.CLAP); // classpath resources
