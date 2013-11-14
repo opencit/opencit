@@ -45,7 +45,7 @@ public class StartHttpServer extends AtagCommand {
         Series<Parameter> parameters = server.getContext().getParameters();
         // TODO-stdalex these values need to come from a config file
         parameters.add("sslContextFactory", "org.restlet.ext.ssl.PkixSslContextFactory");
-        parameters.add("keystorePath", "serverX.jks");
+        parameters.add("keystorePath", "serverAtag.jks");
         parameters.add("keystorePassword", "password");
         parameters.add("keyPassword", "password");
         parameters.add("keystoreType", "JKS");
@@ -61,9 +61,9 @@ public class StartHttpServer extends AtagCommand {
         mapVerifier.getLocalSecrets().put("admin", "password".toCharArray());
         guard.setVerifier(mapVerifier);
         RestletApplication restlet = new RestletApplication();
+        // this sets the restlet that is called once authentication is passed.
         guard.setNext(restlet);
         component.getDefaultHost().attachDefault(guard);
-        //component.getDefaultHost().attach("", restlet ); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
         component.start();
     }
     
