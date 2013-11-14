@@ -11,6 +11,9 @@ import org.restlet.resource.Directory;
 import org.restlet.routing.Router;
 import com.intel.mtwilson.My;
 import java.io.IOException;
+import org.restlet.data.ChallengeScheme;
+import org.restlet.security.ChallengeAuthenticator;
+import org.restlet.security.MapVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,8 +77,23 @@ getTunnelService().setQueryTunnel(true);
 ...
          * 
          */
-        
+        ChallengeAuthenticator guard = new ChallengeAuthenticator(getContext(), ChallengeScheme.HTTP_BASIC, "AssetTagDemo");
+        // Instantiates a Verifier of identifier/secret couples based on a simple Map.
+        MapVerifier mapVerifier = new MapVerifier();
+        // Load a single static login/secret pair.
+        try {
+        mapVerifier.getLocalSecrets().put(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword().toCharArray());
+        }
+        catch(IOException e) {
+            throw new IllegalStateException("Cannot initialize guard",e);
+        }
+        guard.setVerifier(mapVerifier);
+        // this sets the restlet that is called once authentication is passed.
+        guard.setNext(router);
+/*        
         return router;
+        */
+        return guard;
     }
     
 }

@@ -173,6 +173,7 @@ our customers.
             <plugin>
                 <groupId>org.jvnet.jaxb2.maven2</groupId>
                 <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.8.3</version>
                 <executions>
                     <execution>
                         <goals>
@@ -276,13 +277,14 @@ our customers.
    <groupId>org.restlet.jse</groupId>  
    <artifactId>org.restlet.ext.jetty</artifactId>  
    <version>2.2-M4</version>
-   <scope>test</scope>
 </dependency>
+<!--
  <dependency>  
    <groupId>org.restlet.jse</groupId>  
    <artifactId>org.restlet.ext.simple</artifactId>  
    <version>2.2-M4</version>
  </dependency>
+ -->
    <dependency>  
    <groupId>org.restlet.jse</groupId>  
    <artifactId>org.restlet.ext.ssl</artifactId>  

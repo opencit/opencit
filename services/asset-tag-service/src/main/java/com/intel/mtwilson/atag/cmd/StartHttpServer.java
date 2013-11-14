@@ -55,7 +55,7 @@ public class StartHttpServer extends AtagCommand {
         parameters.add("keyPassword", My.configuration().getAssetTagKeyPassword());
         parameters.add("keystoreType", "JKS");
         
-        
+        /*
         // setup the http-basic stuff
         // Guard the restlet with BASIC authentication.
         ChallengeAuthenticator guard = new ChallengeAuthenticator(null, ChallengeScheme.HTTP_BASIC, "AssetTagDemo");
@@ -68,6 +68,10 @@ public class StartHttpServer extends AtagCommand {
         // this sets the restlet that is called once authentication is passed.
         guard.setNext(restlet);
         component.getDefaultHost().attach("",guard);
+        */
+        RestletApplication restlet = new RestletApplication();
+        component.getDefaultHost().attach("",restlet);
+        
         component.start();
         
     }

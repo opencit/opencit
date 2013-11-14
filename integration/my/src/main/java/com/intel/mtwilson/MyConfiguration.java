@@ -491,11 +491,11 @@ public class MyConfiguration {
     }
     
     public String getAssetTagKeyStorePassword() {
-        return conf.getString("mtwilson.atag.keystore.password", "password");
+        return conf.getString("mtwilson.atag.keystore.password"); // must not have default password; run setup
     }
     
     public String getAssetTagKeyPassword() {
-        return conf.getString("mtwilson.atag.key.password", "password");
+        return conf.getString("mtwilson.atag.key.password");// must not have default password; run setup
     }
     
     public String getAssetTagApiUsername() {
@@ -503,6 +503,6 @@ public class MyConfiguration {
     }
     
     public String getAssetTagApiPassword() {
-        return conf.getString("mtwilson.atag.api.password", "password");
+        return conf.getString("mtwilson.atag.api.password"); // must not have default password; run setup
     }
 }
