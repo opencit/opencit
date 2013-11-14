@@ -65,7 +65,7 @@ public class StartHttpServer extends AtagCommand {
         RestletApplication restlet = new RestletApplication();
         // this sets the restlet that is called once authentication is passed.
         guard.setNext(restlet);
-        component.getDefaultHost().attachDefault(guard);
+        component.getDefaultHost().attach("",guard);
         component.start();
     }
     
