@@ -172,6 +172,40 @@ public class TblPcrManifestJpaController implements Serializable {
         }
     }
 
+    public void edit_v2(TblPcrManifest tblPcrManifest, EntityManager em) throws NonexistentEntityException, ASDataException {
+        try {
+            TblPcrManifest persistentTblPcrManifest = em.find(TblPcrManifest.class, tblPcrManifest.getId());
+
+            TblMle mleIdOld = persistentTblPcrManifest.getMleId();
+            TblMle mleIdNew = tblPcrManifest.getMleId();
+
+            if (mleIdNew != null) {
+                mleIdNew = em.getReference(mleIdNew.getClass(), mleIdNew.getId());
+                tblPcrManifest.setMleId(mleIdNew);
+            }
+            tblPcrManifest = em.merge(tblPcrManifest);
+
+            if (mleIdOld != null && !mleIdOld.equals(mleIdNew)) {
+                mleIdOld.getTblPcrManifestCollection().remove(tblPcrManifest);
+                mleIdOld = em.merge(mleIdOld);
+            }
+            if (mleIdNew != null && !mleIdNew.equals(mleIdOld)) {
+                mleIdNew.getTblPcrManifestCollection().add(tblPcrManifest);
+                em.merge(mleIdNew);
+            }
+        } catch (Exception ex) {
+            String msg = ex.getLocalizedMessage();
+            if (msg == null || msg.length() == 0) {
+                Integer id = tblPcrManifest.getId();
+                if (findTblPcrManifest(id) == null) {
+                    throw new NonexistentEntityException("The tblPcrManifest with id " + id + " no longer exists.");
+                }
+            }
+            throw new ASDataException(ex);
+        } finally {
+        }
+    }
+
     public void destroy(Integer id) throws NonexistentEntityException {
     	EntityManager em = getEntityManager();
     	try {

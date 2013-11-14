@@ -656,6 +656,10 @@ public class MleBO extends BaseBO {
 	}
 
         
+        	public String updatePCRWhiteList(PCRWhiteList pcrData) {
+                    return updatePCRWhiteList(pcrData, null);
+                }
+        
                         /**
                          * Added By: Sudhir on June 20, 2012
                          * 
@@ -664,7 +668,7 @@ public class MleBO extends BaseBO {
                          * @param pcrData: White list data sent by the user
                          * @return : true if the call is successful or else exception.
                          */
-	public String updatePCRWhiteList(PCRWhiteList pcrData) {
+	public String updatePCRWhiteList(PCRWhiteList pcrData, EntityManager em) {
                                 TblMle tblMle;
                                 TblPcrManifest tblPcr; 
 
@@ -695,7 +699,11 @@ public class MleBO extends BaseBO {
                                     tblPcr.setUpdatedBy(getLoggedInUser());
                                     tblPcr.setUpdatedOn(new Date(System.currentTimeMillis()));
                                     */
-                                    pcrManifestJpaController.edit(tblPcr);
+                                    if (em == null) {
+                                        pcrManifestJpaController.edit(tblPcr);
+                                    } else {
+                                        pcrManifestJpaController.edit_v2(tblPcr, em);
+                                    }
 
                                 } catch (ASException ase) {
                                     throw ase;
@@ -890,6 +898,10 @@ public class MleBO extends BaseBO {
 	}
 
         
+        public String updateModuleWhiteList(ModuleWhiteList moduleData) {
+            return updateModuleWhiteList(moduleData, null);
+        }
+        
         /**
          * Added By: Sudhir on June 21, 2012
          * 
@@ -898,7 +910,7 @@ public class MleBO extends BaseBO {
          * @param moduleData: Data of the white list
          * @return : "true" if everything is successful or else exception
          */
-        public String updateModuleWhiteList(ModuleWhiteList moduleData) {
+        public String updateModuleWhiteList(ModuleWhiteList moduleData, EntityManager em) {
             TblMle tblMle;
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
@@ -965,7 +977,11 @@ public class MleBO extends BaseBO {
 		tblModule.setUpdatedOn(new Date(System.currentTimeMillis()));
                 */
                 // Create the new white list record.
-                moduleManifestJpaController.edit(tblModule);
+                if (em == null) {
+                    moduleManifestJpaController.edit(tblModule);
+                } else {
+                    moduleManifestJpaController.edit_v2(tblModule, em);
+                }
 
             } catch (ASException ase) {
                     throw ase;

@@ -2232,7 +2232,7 @@ public class HostBO extends BaseBO {
 
                             } else {
                                 if (isWhiteListServiceLocal())
-                                    mleBO.updateModuleWhiteList(moduleObj);
+                                    mleBO.updateModuleWhiteList(moduleObj, emt);
                                 else
                                     wlsClient.updateModuleWhiteList(moduleObj);
                                 log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
@@ -2271,7 +2271,7 @@ public class HostBO extends BaseBO {
 
                                     } else {
                                         if (isWhiteListServiceLocal())
-                                            mleBO.updatePCRWhiteList(pcrObj);
+                                            mleBO.updatePCRWhiteList(pcrObj, emt);
                                         else
                                             wlsClient.updatePCRWhiteList(pcrObj);
                                         log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2323,7 +2323,7 @@ public class HostBO extends BaseBO {
                                     log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                 } else {
                                     if (isWhiteListServiceLocal())
-                                        mleBO.updatePCRWhiteList(pcrObj);
+                                        mleBO.updatePCRWhiteList(pcrObj, emt);
                                     else
                                         wlsClient.updatePCRWhiteList(pcrObj);
                                     log.debug("Successfully updated the VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2335,10 +2335,14 @@ public class HostBO extends BaseBO {
                 }
                 reader.next();
             }
-            emt.getTransaction().commit();
-            
+            emt.getTransaction().commit();            
             emt.close();
             
+            // Nov 14, 2013: Since we have the new feature where in if the host is untrusted, it will try to go and
+            // map to a different MLE, we will comment out the below functionality since updateWhiteList would take a
+            // huge performance impact if the # of servers associated with the MLE is large.
+            
+            /*
             // Now that we have uploaded all the whitelists, let us check if we updated/modified an existing one. If yes, then we need to retrieve 
             // the list of all the hosts for those MLEs and update their trust status.
             Collection<TblHosts> tblHostsCollection = null;
@@ -2388,7 +2392,7 @@ public class HostBO extends BaseBO {
                 apiClientObj.getSamlForMultipleHosts(hostsToBeAttested, true);
             }
             log.info("Successfully refreshed the status of all the hosts. ");
-
+            */
         } catch (MSException me) {
             log.error("Error during white list upload to database. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
