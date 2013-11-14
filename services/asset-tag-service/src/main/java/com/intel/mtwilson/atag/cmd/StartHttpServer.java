@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.atag.cmd;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.atag.AtagCommand;
 import com.intel.mtwilson.atag.RestletApplication;
 //import com.intel.mtwilson.atag.resource.TagResource;
@@ -43,11 +44,12 @@ public class StartHttpServer extends AtagCommand {
         component = new Component();
         Server server = component.getServers().add(Protocol.HTTPS, port);
         Series<Parameter> parameters = server.getContext().getParameters();
+        
         // TODO-stdalex these values need to come from a config file
         parameters.add("sslContextFactory", "org.restlet.ext.ssl.PkixSslContextFactory");
-        parameters.add("keystorePath", "serverX.jks");
-        parameters.add("keystorePassword", "password");
-        parameters.add("keyPassword", "password");
+        parameters.add("keystorePath", My.configuration().getAssetTagKeyStorePath());
+        parameters.add("keystorePassword", My.configuration().getAssetTagKeyStorePassword());
+        parameters.add("keyPassword", My.configuration().getAssetTagKeyPassword());
         parameters.add("keystoreType", "JKS");
         component.getClients().add(Protocol.FILE); // filesystem resources
         component.getClients().add(Protocol.CLAP); // classpath resources
@@ -58,12 +60,12 @@ public class StartHttpServer extends AtagCommand {
         // Instantiates a Verifier of identifier/secret couples based on a simple Map.
         MapVerifier mapVerifier = new MapVerifier();
         // Load a single static login/secret pair.
-        mapVerifier.getLocalSecrets().put("admin", "password".toCharArray());
+        mapVerifier.getLocalSecrets().put(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword().toCharArray());
         guard.setVerifier(mapVerifier);
         RestletApplication restlet = new RestletApplication();
+        // this sets the restlet that is called once authentication is passed.
         guard.setNext(restlet);
         component.getDefaultHost().attachDefault(guard);
-        //component.getDefaultHost().attach("", restlet ); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
         component.start();
     }
     

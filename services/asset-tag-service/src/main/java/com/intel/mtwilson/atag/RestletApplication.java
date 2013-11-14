@@ -60,7 +60,7 @@ public class RestletApplication extends Application {
         try {
             Directory directory = new Directory(getContext(), My.configuration().getAssetTagHtml5Dir());
             directory.setIndexName("index.html");
-            router.attach("/", directory);
+            router.attach("", directory);
         }
         catch(IOException e) {
             log.error("Cannot load configuration", e);

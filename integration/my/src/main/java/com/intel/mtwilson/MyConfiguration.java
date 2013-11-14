@@ -485,4 +485,24 @@ public class MyConfiguration {
     public String getAssetTagServerString() throws MalformedURLException {
         return conf.getString("mtwilson.atag.url", "http://localhost:1700");
     }
+    
+    public String getAssetTagKeyStorePath() {
+        return conf.getString("mtwilson.atag.keystore", "serverAtag.jks");
+    }
+    
+    public String getAssetTagKeyStorePassword() {
+        return conf.getString("mtwilson.atag.keystore.password", "password");
+    }
+    
+    public String getAssetTagKeyPassword() {
+        return conf.getString("mtwilson.atag.key.password", "password");
+    }
+    
+    public String getAssetTagApiUsername() {
+        return conf.getString("mtwilson.atag.api.username", "admin");
+    }
+    
+    public String getAssetTagApiPassword() {
+        return conf.getString("mtwilson.atag.api.password", "password");
+    }
 }
