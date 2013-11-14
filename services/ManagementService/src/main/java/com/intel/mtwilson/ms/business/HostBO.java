@@ -59,6 +59,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -1390,6 +1391,12 @@ public class HostBO extends BaseBO {
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                     }
                 }
+                
+                //Boolean arValid = validateAttestationReport(attestationReport, reqdManifestList);
+                if (!validateAttestationReport(attestationReport, reqdManifestList)) {
+                    log.error("PCR or Module value is not valid.");
+                    throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
+                }
 
                 System.err.println("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
                 System.err.println("Attestation report is : " + attestationReport);
@@ -1509,6 +1516,80 @@ public class HostBO extends BaseBO {
         }
 
         return configStatus;
+    }
+    
+    /**
+     * Author: Savino 11/13/2013
+     *
+     * Verifies that the attestation report is valid.
+     *
+     * @param attestationReport: String in XML format of the attestation report.
+     * @param reqdPCRs: String of required PCR values separated by commas ",".
+     * @return : True if all required PCRs and modules do not match the regular
+     * expression format [0-9A-Fa-f]{40} or [0]{40}|[Ff]{40}.
+     */
+    private Boolean validateAttestationReport(String attestationReport, String reqdPCRs) throws XMLStreamException {
+        List<String> reqdManifestList = Arrays.asList(reqdPCRs.split(","));
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        StringReader sr = new StringReader(attestationReport);
+        XMLStreamReader reader = xif.createXMLStreamReader(sr);
+
+        // Process all the Event and PCR nodes in the attestation report.
+        while (reader.hasNext()) {
+            if (reader.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                if (reader.getLocalName().equalsIgnoreCase("Host_Attestation_Report")) {
+                } else if (reader.getLocalName().equalsIgnoreCase("EventDetails")) {
+                    // Check if the package is a dynamic package. If it is, then we should not be storing it in the database
+                    if (reader.getAttributeValue("", "PackageName").length() == 0
+                            && reader.getAttributeValue("", "EventName").equalsIgnoreCase("Vim25Api.HostTpmSoftwareComponentEventDetails")) {
+                        reader.next();
+                        continue;
+                    }
+
+                    String compName = reader.getAttributeValue("", "ComponentName");
+                    String pcrNum = reader.getAttributeValue("", "ExtendedToPCR");
+                    String digVal = reader.getAttributeValue("", "DigestValue");
+                    
+                    if (reqdManifestList.contains(pcrNum)) {
+                        if (!isComponentValid(digVal)) {
+                            log.error("Module '{0}' specified for '{1}' is not valid.", digVal, compName);
+                            return false;
+                        }
+                    }
+                } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) {
+                    String pcrNum = reader.getAttributeValue("", "ComponentName");
+                    String digVal = reader.getAttributeValue(null, "DigestValue");
+                    
+                    if (reqdManifestList.contains(pcrNum)) {
+                        if (!isComponentValid(digVal)) {
+                            log.error("PCR '{0}' specified for '{1}' is not valid.", digVal, pcrNum);
+                            return false;
+                        }
+                    }
+                }
+            }
+            reader.next();
+        }
+        
+        return true;
+    }
+    
+    private Boolean isComponentValid(String modValue) {
+        String hexadecimalRegEx = "[0-9A-Fa-f]{40}";
+        String invalidWhiteList = "[0]{40}|[Ff]{40}";
+        
+        if (modValue == null || modValue.trim().isEmpty()) {
+            return true;
+        } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
+        // Bug:775 & 802: If the TPM is reset we have seen that all the PCR values would be set to Fs. So, we need to disallow that since it is invalid. Also, all 0's are also invalid.
+        if (modValue.matches(invalidWhiteList)) {
+            return false;
+        }
+        if (modValue.matches(hexadecimalRegEx)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
