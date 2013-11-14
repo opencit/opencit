@@ -171,7 +171,6 @@ public class TADataContext {
     }
 
     public String getIdentityAuthKey() {
-//        return HisConfig.getConfiguration().getString("HisIdentityAuth");
         try {
             File aikAuthFile = ResourceFinder.getFile("trustagent.properties");
             FileInputStream aikAuthFileInput = new FileInputStream(aikAuthFile);

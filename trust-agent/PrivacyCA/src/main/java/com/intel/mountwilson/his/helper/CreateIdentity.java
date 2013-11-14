@@ -193,6 +193,7 @@ public class CreateIdentity {
                 FileOutputStream tpmOwnerFileOutput = new FileOutputStream(tpmOwnerFile);
                 tpmOwnerProperties.store(tpmOwnerFileOutput, "Generated HisIdentityAuth");
                 tpmOwnerFileOutput.close();
+                log.info("Stored new AIK secret (HisIdentityAuth) in {}", tpmOwnerFile.getAbsolutePath());
             }
             HisIdentityAuth = TpmUtils.hexStringToByteArray(aikAuthHex);
             

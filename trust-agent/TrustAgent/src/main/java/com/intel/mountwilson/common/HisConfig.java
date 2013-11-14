@@ -38,8 +38,9 @@ public class HisConfig {
     private HisConfig() {
         Properties defaults = new Properties();
         defaults.setProperty("TpmEndorsmentP12", "endorsement.p12");
+        /* bug #947 do not set a hard-coded default password
         defaults.setProperty("HisIdentityAuth", "1111111111111111111111111111111111111111");
-
+        */
         config = gatherConfiguration("hisprovisioner.properties", defaults);
     }
     
