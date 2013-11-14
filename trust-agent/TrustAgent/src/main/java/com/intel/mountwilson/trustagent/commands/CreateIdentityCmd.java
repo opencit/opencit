@@ -27,6 +27,8 @@ public class CreateIdentityCmd implements ICommand {
     private TADataContext context;
 
     public static void main(String[] args) throws TAException {
+        //619 allow keystore password to be specificed as a env variable
+        CommandUtil.initJavaSslProperties();
         TADataContext ctx = new TADataContext();
         CreateIdentityCmd cmd = new CreateIdentityCmd(ctx);
         cmd.execute();
