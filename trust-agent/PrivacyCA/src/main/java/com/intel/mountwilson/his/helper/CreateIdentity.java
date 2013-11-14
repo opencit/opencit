@@ -185,7 +185,7 @@ public class CreateIdentity {
                 tpmOwnerAuthHex = "";
             }
             TpmOwnerAuth = TpmUtils.hexStringToByteArray(tpmOwnerAuthHex);
-            String aikAuthHex = tpmOwnerProperties.getProperty(OWNER_AUTH);
+            String aikAuthHex = tpmOwnerProperties.getProperty(HIS_IDENTITY_AUTH);
             if( aikAuthHex == null || aikAuthHex.trim().isEmpty() ) {
                 // aik password is not set, so generate a new one and save it
                 aikAuthHex = generateRandomPasswordHex();
