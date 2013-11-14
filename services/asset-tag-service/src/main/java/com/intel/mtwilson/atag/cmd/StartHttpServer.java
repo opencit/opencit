@@ -56,7 +56,7 @@ public class StartHttpServer extends AtagCommand {
         
         // setup the http-basic stuff
         // Guard the restlet with BASIC authentication.
-        ChallengeAuthenticator guard = new ChallengeAuthenticator(null, ChallengeScheme.HTTP_BASIC, "testRealm");
+        ChallengeAuthenticator guard = new ChallengeAuthenticator(null, ChallengeScheme.HTTP_BASIC, "AssetTagDemo");
         // Instantiates a Verifier of identifier/secret couples based on a simple Map.
         MapVerifier mapVerifier = new MapVerifier();
         // Load a single static login/secret pair.
@@ -65,7 +65,7 @@ public class StartHttpServer extends AtagCommand {
         RestletApplication restlet = new RestletApplication();
         // this sets the restlet that is called once authentication is passed.
         guard.setNext(restlet);
-        component.getDefaultHost().attach("/",guard);
+        component.getDefaultHost().attach("",guard);
         component.start();
     }
     
