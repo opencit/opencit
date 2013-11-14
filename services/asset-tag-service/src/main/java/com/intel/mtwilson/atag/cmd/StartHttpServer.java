@@ -42,6 +42,9 @@ public class StartHttpServer extends AtagCommand {
     
     public void start() throws Exception {
         component = new Component();
+        component.getClients().add(Protocol.FILE); // filesystem resources
+        component.getClients().add(Protocol.CLAP); // classpath resources
+        
         Server server = component.getServers().add(Protocol.HTTPS, port);
         Series<Parameter> parameters = server.getContext().getParameters();
         
@@ -51,8 +54,7 @@ public class StartHttpServer extends AtagCommand {
         parameters.add("keystorePassword", My.configuration().getAssetTagKeyStorePassword());
         parameters.add("keyPassword", My.configuration().getAssetTagKeyPassword());
         parameters.add("keystoreType", "JKS");
-        component.getClients().add(Protocol.FILE); // filesystem resources
-        component.getClients().add(Protocol.CLAP); // classpath resources
+        
         
         // setup the http-basic stuff
         // Guard the restlet with BASIC authentication.
@@ -67,6 +69,7 @@ public class StartHttpServer extends AtagCommand {
         guard.setNext(restlet);
         component.getDefaultHost().attach("",guard);
         component.start();
+        
     }
     
     public void stop() throws Exception {
