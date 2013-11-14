@@ -63,7 +63,7 @@ public class StartHttpServer extends AtagCommand {
         RestletApplication restlet = new RestletApplication();
         guard.setNext(restlet);
         component.getDefaultHost().attachDefault(guard);
-        component.getDefaultHost().attach("", restlet ); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
+        //component.getDefaultHost().attach("", restlet ); // if the restlet attaches to "/fruit", this must be "", not "/";  but if the restlet attaches to "fruit", then this can be "/"
         component.start();
     }
     
