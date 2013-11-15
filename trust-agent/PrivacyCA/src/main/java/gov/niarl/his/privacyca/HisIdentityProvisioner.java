@@ -60,7 +60,7 @@ import gov.niarl.his.webservices.hisPrivacyCAWebService2.client.HisPrivacyCAWebS
  * <p>Once the AIC is received from the Privacy CA, it is placed at <b>c:\his\aik.cer</b>.</p>
  * 
  * @author schawki
- *
+ * @deprecated Bug #947 this class isn't being used
  */
 public class HisIdentityProvisioner {
 

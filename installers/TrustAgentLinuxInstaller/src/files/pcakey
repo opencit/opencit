@@ -87,11 +87,18 @@ chmod 600 /etc/intel/cloudsecurity/hisprovisioner.properties
 #chmod 600 /etc/intel/cloudsecurity/cert/*
 
 keytool=${JAVA_HOME}/bin/keytool
-keystore=${package_dir}/cert/trustagent.jks
-# XXX TODO COMPLIANCE must change this hard coded password to auto-generated; corresponding change in tagent required to read it from configuration file
-# STDALEX-TODO switch this to use $(generate_password) 
-storepass=`< /dev/urandom tr -dc _A-Za-z0-9- | head -c${1:-32};echo;`
-update_property_in_file trustagent.keystore.password "${package_config_filename}" $storepass
+keystore=$intel_conf_dir/trustagent.jks
+storepass=`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
+if [ -z "$storepass" ]; then
+  if [ -f "$keystore" ]; then 
+    backupKeystoreFilename=`backup_file $keystore`
+    echo_warning "Trust Agent keystore exists but password is not configured; saved to $backupKeystoreFilename";
+    # now remove the old keystore so we can create a new one below
+    rm $keystore
+  fi
+  storepass=$(generate_password 32)
+  update_property_in_file trustagent.keystore.password "${package_config_filename}" $storepass
+fi
 
 generate_ta_ssl() {
   # Ensure the Keystore exists and generate Trust Agent's SSL Certificate

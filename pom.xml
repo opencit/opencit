@@ -209,6 +209,7 @@
                     </goals>
                     <inherited>true</inherited>
                     <configuration>
+                        <skipPoms>false</skipPoms>
                         <prefix>git</prefix>
                         <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
                     </configuration>
