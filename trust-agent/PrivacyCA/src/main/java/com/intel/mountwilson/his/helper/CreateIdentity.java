@@ -274,7 +274,7 @@ public class CreateIdentity {
 
         FileOutputStream pcaFileOut = null;
         try {
-            // XXX TODO well-known SRK is a bad assumption, we should at least implement an option to use a configured value instead
+            // XXX TODO well-known SRK is a bad assumption, we should at least implement an option to use a configured value instead;  see issue #1012
             byte[] srkAuth = TpmUtils.hexStringToByteArray("0000000000000000000000000000000000000000");
             boolean requiresAuthSha = false;
             byte[] ownerAuthRaw = TpmOwnerAuth;
