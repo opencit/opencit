@@ -56,8 +56,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import javax.persistence.EntityManager;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.lang.StringUtils;
@@ -1389,6 +1391,12 @@ public class HostBO extends BaseBO {
                         throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                     }
                 }
+                
+                //Boolean arValid = validateAttestationReport(attestationReport, reqdManifestList);
+                if (!validateAttestationReport(attestationReport, reqdManifestList)) {
+                    log.error("PCR or Module value is not valid.");
+                    throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
+                }
 
                 System.err.println("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
                 System.err.println("Attestation report is : " + attestationReport);
@@ -1508,6 +1516,80 @@ public class HostBO extends BaseBO {
         }
 
         return configStatus;
+    }
+    
+    /**
+     * Author: Savino 11/13/2013
+     *
+     * Verifies that the attestation report is valid.
+     *
+     * @param attestationReport: String in XML format of the attestation report.
+     * @param reqdPCRs: String of required PCR values separated by commas ",".
+     * @return : True if all required PCRs and modules do not match the regular
+     * expression format [0-9A-Fa-f]{40} or [0]{40}|[Ff]{40}.
+     */
+    private Boolean validateAttestationReport(String attestationReport, String reqdPCRs) throws XMLStreamException {
+        List<String> reqdManifestList = Arrays.asList(reqdPCRs.split(","));
+        XMLInputFactory xif = XMLInputFactory.newInstance();
+        StringReader sr = new StringReader(attestationReport);
+        XMLStreamReader reader = xif.createXMLStreamReader(sr);
+
+        // Process all the Event and PCR nodes in the attestation report.
+        while (reader.hasNext()) {
+            if (reader.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                if (reader.getLocalName().equalsIgnoreCase("Host_Attestation_Report")) {
+                } else if (reader.getLocalName().equalsIgnoreCase("EventDetails")) {
+                    // Check if the package is a dynamic package. If it is, then we should not be storing it in the database
+                    if (reader.getAttributeValue("", "PackageName").length() == 0
+                            && reader.getAttributeValue("", "EventName").equalsIgnoreCase("Vim25Api.HostTpmSoftwareComponentEventDetails")) {
+                        reader.next();
+                        continue;
+                    }
+
+                    String compName = reader.getAttributeValue("", "ComponentName");
+                    String pcrNum = reader.getAttributeValue("", "ExtendedToPCR");
+                    String digVal = reader.getAttributeValue("", "DigestValue");
+                    
+                    if (reqdManifestList.contains(pcrNum)) {
+                        if (!isComponentValid(digVal)) {
+                            log.error("Module '{0}' specified for '{1}' is not valid.", digVal, compName);
+                            return false;
+                        }
+                    }
+                } else if (reader.getLocalName().equalsIgnoreCase("PCRInfo")) {
+                    String pcrNum = reader.getAttributeValue("", "ComponentName");
+                    String digVal = reader.getAttributeValue(null, "DigestValue");
+                    
+                    if (reqdManifestList.contains(pcrNum)) {
+                        if (!isComponentValid(digVal)) {
+                            log.error("PCR '{0}' specified for '{1}' is not valid.", digVal, pcrNum);
+                            return false;
+                        }
+                    }
+                }
+            }
+            reader.next();
+        }
+        
+        return true;
+    }
+    
+    private Boolean isComponentValid(String modValue) {
+        String hexadecimalRegEx = "[0-9A-Fa-f]{40}";
+        String invalidWhiteList = "[0]{40}|[Ff]{40}";
+        
+        if (modValue == null || modValue.trim().isEmpty()) {
+            return true;
+        } // we allow empty values because in mtwilson 1.2 they are used to indicate dynamic information, for example vmware pcr 19, and the command line event that is extended into vmware pcr 19
+        // Bug:775 & 802: If the TPM is reset we have seen that all the PCR values would be set to Fs. So, we need to disallow that since it is invalid. Also, all 0's are also invalid.
+        if (modValue.matches(invalidWhiteList)) {
+            return false;
+        }
+        if (modValue.matches(hexadecimalRegEx)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -2033,16 +2115,16 @@ public class HostBO extends BaseBO {
         // Bug:817: We need to refresh the trust status of all the hosts after the MLE update. 
         boolean isBiosMLEUpdated = false;
         boolean isVmmMLEUpdated = false;
-
         // NOTE: In order to avoid the look up queries to decide whether to do a add or a update
         // to the white lists, we will use the overwrite flag. If the overwrite flag is set to false
         // then, we will do a "ADD" operation. If the overwrite flag is set to "TRUE", then we do an
         // "UPDATE" operation. We have already modified this flag during the creation of VMM MLE to address
         // the scenario of user's setting the flag to "TRUE" even if the MLE does not exist.
-        
         //TO REVIEW: Should we even move this whitelisting functionality to the HostAgents. Right now we have specific things for
         // each different type of of hosts.
-
+        EntityManager emt = My.jpa().mwModuleManifest().getEntityManager();
+        emt.getTransaction().begin();
+        
         // If in case we need to support additional pcrs for event logs, we need to just update this and add the new PCR
         List<Integer> pcrsSupportedForEventLog = Arrays.asList(19);
         // Since the attestation report has all the PCRs we need to upload only the required PCR values into the white list tables.
@@ -2143,14 +2225,14 @@ public class HostBO extends BaseBO {
                             }*/
                             if (!hostConfigObj.getOverWriteWhiteList()) {
                                 if (isWhiteListServiceLocal())
-                                    mleBO.addModuleWhiteList(moduleObj);
+                                    mleBO.addModuleWhiteList(moduleObj, emt);
                                 else
                                     wlsClient.addModuleWhiteList(moduleObj);
                                 log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
 
                             } else {
                                 if (isWhiteListServiceLocal())
-                                    mleBO.updateModuleWhiteList(moduleObj);
+                                    mleBO.updateModuleWhiteList(moduleObj, emt);
                                 else
                                     wlsClient.updateModuleWhiteList(moduleObj);
                                 log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
@@ -2182,14 +2264,14 @@ public class HostBO extends BaseBO {
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
                                         if (isWhiteListServiceLocal())
-                                            mleBO.addPCRWhiteList(pcrObj);
+                                            mleBO.addPCRWhiteList(pcrObj, emt);
                                         else
                                             wlsClient.addPCRWhiteList(pcrObj);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
 
                                     } else {
                                         if (isWhiteListServiceLocal())
-                                            mleBO.updatePCRWhiteList(pcrObj);
+                                            mleBO.updatePCRWhiteList(pcrObj, emt);
                                         else
                                             wlsClient.updatePCRWhiteList(pcrObj);
                                         log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2235,13 +2317,13 @@ public class HostBO extends BaseBO {
                                 tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                 if (tblPCR == null) {
                                     if (isWhiteListServiceLocal())
-                                        mleBO.addPCRWhiteList(pcrObj);
+                                        mleBO.addPCRWhiteList(pcrObj, emt);
                                     else
                                         wlsClient.addPCRWhiteList(pcrObj);
                                     log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                 } else {
                                     if (isWhiteListServiceLocal())
-                                        mleBO.updatePCRWhiteList(pcrObj);
+                                        mleBO.updatePCRWhiteList(pcrObj, emt);
                                     else
                                         wlsClient.updatePCRWhiteList(pcrObj);
                                     log.debug("Successfully updated the VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2253,7 +2335,14 @@ public class HostBO extends BaseBO {
                 }
                 reader.next();
             }
+            emt.getTransaction().commit();            
+            emt.close();
             
+            // Nov 14, 2013: Since we have the new feature where in if the host is untrusted, it will try to go and
+            // map to a different MLE, we will comment out the below functionality since updateWhiteList would take a
+            // huge performance impact if the # of servers associated with the MLE is large.
+            
+            /*
             // Now that we have uploaded all the whitelists, let us check if we updated/modified an existing one. If yes, then we need to retrieve 
             // the list of all the hosts for those MLEs and update their trust status.
             Collection<TblHosts> tblHostsCollection = null;
@@ -2303,7 +2392,7 @@ public class HostBO extends BaseBO {
                 apiClientObj.getSamlForMultipleHosts(hostsToBeAttested, true);
             }
             log.info("Successfully refreshed the status of all the hosts. ");
-
+            */
         } catch (MSException me) {
             log.error("Error during white list upload to database. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;

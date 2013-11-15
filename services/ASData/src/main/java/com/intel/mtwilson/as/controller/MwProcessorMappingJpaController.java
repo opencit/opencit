@@ -142,8 +142,9 @@ public class MwProcessorMappingJpaController implements Serializable {
             Query query = em.createNamedQuery("MwProcessorMapping.findByProcessorType");
             query.setParameter("processorType", processorType);
 
-            query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+            // Nov 14, 2013: Commenting out the below setting for better performance and updating the cacheusage to check cache and then DB            
+            //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase);
 
             List<MwProcessorMapping> results =query.getResultList();
             if (results != null && results.size() > 0)
