@@ -52,16 +52,23 @@ saveD=`pwd`
 # copy application files to /opt
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
-chmod 600 ${package_name}.properties
-cp ${package_name}.properties "${intel_conf_dir}"
+# bug #947 we do not replace trustagent.properties automatically because it contains important passwords that must not be clobbered.
+# if any release adds new properties to that file, use update_property_in_file to add them safely.
+if [ ! -f "${intel_conf_dir}/${package_name}.properties" ]; then
+  cp ${package_name}.properties "${intel_conf_dir}"
+  chmod 600 ${package_name}.properties
+fi
+
+# bug #947 if we are upgrading a previous install, move the trustagent.jks file from /opt to /etc
+if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
+  if [ -f "${package_dir}" ]; then
+    mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
+  fi
+fi
+
 chmod 600 TPMModule.properties
 cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
-if [ -f "${package_config_filename}" ]; then
-  echo_warning "Copying sample configuration file to ${package_config_filename}.example"
-  cp "${package_name}.properties" "${package_config_filename}.example"
-else
-  cp "${package_name}.properties" "${package_config_filename}"  
-fi
+
 mkdir -p "${package_dir}"
 mkdir -p "${package_dir}"/bin
 mkdir -p "${package_dir}"/cert
@@ -70,13 +77,13 @@ mkdir -p "${package_dir}"/lib
 chmod -R 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
-#cp trustagent.jks "${package_dir}"/cert
 cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
-#cp *.sql "${package_dir}"/database/
 
-# copy default logging settings to /etc
-chmod 700 logback.xml
-cp logback.xml "${intel_conf_dir}"
+# copy default logging settings to /etc, but do not change it if it's already there (someone may have modified it)
+if [ ! -f "${intel_conf_dir}/logback.xml" ]; then
+  chmod 600 logback.xml
+  cp logback.xml "${intel_conf_dir}"
+fi
 
 # copy control scripts to /usr/local/bin
 chmod 700 tagent pcakey
