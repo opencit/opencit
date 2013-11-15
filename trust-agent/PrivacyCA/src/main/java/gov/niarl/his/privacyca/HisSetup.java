@@ -15,10 +15,12 @@ package gov.niarl.his.privacyca;
 
 import java.io.*;
 import java.security.KeyStore;
+import java.security.SecureRandom; // part of fix for bug #947
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * @deprecated
@@ -80,6 +82,7 @@ public class HisSetup {
 			final String FILE_LOCATION = "FileLocation";
 			final String CLIENT_PATH = "ClientPath";
 			final String AIK_AUTH = "AikAuth";
+            final String TPM_OWNER_AUTH = "TpmOwnerAuth"; // part of fix for bug #947
 			
 			FileInputStream PropertyFile = null;
 			String PrivacyCaSubjectName = "null";
@@ -97,6 +100,7 @@ public class HisSetup {
 			int ValidityDays;
 			String ClientPath = "";
 			String AikAuth = "";
+            String TpmOwnerAuth = ""; // part of fix for bug #947
 
 			String tomcatPath = System.getProperty("catalina.base");
 			String tempPath = "";
@@ -120,7 +124,11 @@ public class HisSetup {
 				//PrivacyCaCertFileName = SetupProperties.getProperty(PRIVACY_CA_CERTIFICATE_FILE_NAME, "null");
 				FileLocation = SetupProperties.getProperty(FILE_LOCATION, "null");
 				ClientPath = SetupProperties.getProperty(CLIENT_PATH, "C:/Program Files/NIARL/HIS");
+                /* Bug #947 generate random owner password instead of hard-coded default
 				AikAuth = SetupProperties.getProperty(AIK_AUTH, "1111111111111111111111111111111111111111");
+                */
+                AikAuth = SetupProperties.getProperty(AIK_AUTH, generateRandomPasswordHex());
+                TpmOwnerAuth = SetupProperties.getProperty(TPM_OWNER_AUTH, generateRandomPasswordHex());
 			} catch (FileNotFoundException e) {
 				System.out.println("Error finding setup.properties file. Setup cannot continue without the information in this file.");
 				return;
@@ -378,7 +386,10 @@ public class HisSetup {
 				"TpmEndorsmentP12 = " + EndorsementCaFileName + "\r\n" + 
 				"EndorsementP12Pass = " + EndorsementCaPassword + "\r\n" + 
 				"EcValidityDays = " + CertValidityDays + "\r\n" + 
+                /* Bug #947 we should read TPM Owner Auth from file or generate a new one (above) instead of using hard-coded value
 				"TpmOwnerAuth = 1111111111111111111111111111111111111111\r\n" + 
+                */
+				"TpmOwnerAuth = " + TpmOwnerAuth + "\r\n" + 
 				"#HIS Identity Provisioning Data\r\n" + 
 				"HisIdentityLabel = HIS Identity Key\r\n" + 
 				"HisIdentityIndex = 1\r\n" + 
@@ -466,4 +477,13 @@ public class HisSetup {
 			System.out.println(e.toString());
 		}
 	}
+    
+    // fix for bug #947 generate random owner password instead of hardcoded default
+    public static String generateRandomPasswordHex() {
+        byte[] password = new byte[20];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(password);
+        return Hex.encodeHexString(password);
+    }
+    
 }
