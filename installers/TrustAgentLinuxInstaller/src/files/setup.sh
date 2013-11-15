@@ -36,12 +36,12 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 # bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
 # if there's already a previous version installed, uninstall it
-#tagent=`which tagent 2>/dev/null`
-#if [ -f "$tagent" ]; then
-  #echo "Uninstalling previous version..."
-  #$tagent uninstall
-#fi
-
+# But if trust agent is already installed and running, stop it now (and start the new one later)
+tagent=`which tagent 2>/dev/null`
+if [ -f "$tagent" ]; then
+  echo "Stopping trust agent..."
+  $tagent stop
+fi
 
 # packages to install must be in current directory
 JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
@@ -61,7 +61,7 @@ fi
 
 # bug #947 if we are upgrading a previous install, move the trustagent.jks file from /opt to /etc
 if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
-  if [ -f "${package_dir}" ]; then
+  if [ -f "${package_dir}/cert/trustagent.jks" ]; then
     mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
   fi
 fi
@@ -191,6 +191,7 @@ fix_existing_aikcert
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
 /usr/local/bin/tagent setup
+/usr/local/bin/tagent start
 
 # now install monit
 monit_required_version=5.5
