@@ -3,7 +3,7 @@
 
   <groupId>com.intel.mtwilson</groupId>
   <artifactId>mtwilson</artifactId>
-  <version>1.2.2</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Mt Wilson</name>
