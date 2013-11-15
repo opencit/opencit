@@ -526,8 +526,10 @@ function isNumber(n) {
                                             </tbody>
                                         </table>
                                     </td>
-                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a></td>
-                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a></td>
+                                    <td>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeSelection(this.getAttribute('uuid')); return false;">Delete</a>
+                                        <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.exportXmlSelection(this.getAttribute('uuid')); return false;">Export XML</a>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
