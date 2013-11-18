@@ -44,6 +44,17 @@ public class SelectionResource extends ServerResource {
         super.doRelease();
     }
     
+    @Get("application/xml")
+    public String existingSelectionXml(){
+        String uuid = getAttribute("id");
+        Selection selection = dao.findByUuid(UUID.valueOf(uuid));
+        if( selection == null ) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return null;
+        }
+        return selection.toString();
+    }
+    
     @Get("json")
     public Selection existingSelection() {
         String uuid = getAttribute("id");
