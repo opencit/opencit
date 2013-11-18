@@ -52,7 +52,16 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        return "it works".toString();
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+        "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n" +
+        "    <selection>\n" +
+        "        <attribute oid=\"2.5.4.6\">US</attribute>\n" +
+        "        <attribute oid=\"2.5.4.8\">CA</attribute>\n" +
+        "        <attribute oid=\"2.5.4.8\">TX</attribute>\n" +
+        "        <attribute oid=\"2.5.4.7\">Folsom</attribute>\n" +
+        "        <attribute oid=\"2.5.4.7\">El Paso</attribute>\n" +
+        "    </selection>\n" +
+        "</selections>".toString();
     }
     
     @Get("json")
