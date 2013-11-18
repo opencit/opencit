@@ -298,7 +298,7 @@ public class HostBOTest {
     }
     
     @Test
-    public void SavyTest() throws IOException, CryptographyException, KeyManagementException {
+    public void addHost() throws IOException, CryptographyException, KeyManagementException {
         My.initDataEncryptionKey();
         String hostName = "10.1.71.169";
         String connString = "https://10.1.71.169:9999";
@@ -338,30 +338,13 @@ public class HostBOTest {
         System.err.println("SAVY001 factory tls policy: " + factory.getTlsPolicy(tblHosts).toString());
         System.err.println("SAVY002 tblHosts tls policy: " + tblHosts.getTlsPolicyName());
         System.err.println("SAVY003 tblHosts tls keystore: " + tblHosts.getTlsKeystore());
-        //System.in.read();
+    }
+    @Test
+    public void SavyTest() throws IOException, CryptographyException, KeyManagementException {
+        My.initDataEncryptionKey();
+        String hostName = "10.1.71.169";
+        HostTrustBO hbo = new ASComponentFactory().getHostTrustBO();
+        hbo.getTrustStatus(new Hostname(hostName));
         
-        
-        
-//        
-//        
-//        
-//        
-//        if (!agent.isTpmEnabled() || !agent.isIntelTxtEnabled()) {
-//            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
-//        }
-//
-//        PcrManifest pcrManifest = agent.getPcrManifest();
-//        if (pcrManifest == null) {
-//            throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
-//        }
-//
-//        HostReport hostReport = new HostReport();
-//        hostReport.pcrManifest = pcrManifest;
-//        hostReport.tpmQuote = null; // TODO
-//        hostReport.variables = new HashMap<String, String>(); // TODO
-//
-//        log.debug("getTrustStatusOfHostNotInDB: Successfully retrieved the TPM meausrements from host '{}' for identifying the MLE to be mapped to.", hostObj.HostName);
-//        HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
-
     }
 }
