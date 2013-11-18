@@ -2,9 +2,17 @@
 ALTER TABLE `mw_as`.`mw_module_manifest` 
 ADD INDEX `idx_component_name` (`ComponentName` ASC) ;
 
+-- Adding the index on the component digest field since we do searches on it while generating policies
+ALTER TABLE `mw_as`.`mw_module_manifest` 
+ADD INDEX `idx_component_digest` (`DigestValue` ASC) ;
+
 -- Adding the index on the pcr name field since we do searches on it
 ALTER TABLE `mw_as`.`mw_pcr_manifest` 
 ADD INDEX `idx_pcr_name` (`Name` ASC) ;
+
+-- Adding the index on the pcr value field since we do searches on it while generating policies
+ALTER TABLE `mw_as`.`mw_pcr_manifest` 
+ADD INDEX `idx_pcr_value` (`Value` ASC) ;
 
 -- Dropping the unique index since there is a primary index already and
 -- creating a combined index on Name and Version
