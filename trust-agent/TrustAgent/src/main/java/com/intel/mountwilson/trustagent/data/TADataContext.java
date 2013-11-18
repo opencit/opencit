@@ -9,6 +9,10 @@ import java.io.File;
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.HisConfig;
+import com.intel.mtwilson.util.ResourceFinder;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
@@ -166,9 +170,18 @@ public class TADataContext {
         this.errorCode = errorCode;
     }
 
-    public Object getIdentityAuthKey() {
-
-        return HisConfig.getConfiguration().getString("HisIdentityAuth");
+    public String getIdentityAuthKey() {
+        try {
+            File aikAuthFile = ResourceFinder.getFile("trustagent.properties");
+            FileInputStream aikAuthFileInput = new FileInputStream(aikAuthFile);
+            Properties tpmOwnerProperties = new Properties();
+            tpmOwnerProperties.load(aikAuthFileInput);
+            aikAuthFileInput.close();
+            return tpmOwnerProperties.getProperty("HisIdentityAuth");
+        }
+        catch(IOException e) {
+            throw new IllegalStateException("Cannot read trustagent.properties", e);
+        }
     }
 
     public void setOsName(String osName) {

@@ -414,11 +414,15 @@ public class HisSetup {
                     + "TpmEndorsmentP12 = " + EndorsementCaFileName + "\r\n"
                     + "EndorsementP12Pass = " + EndorsementCaPassword + "\r\n"
                     + "EcValidityDays = " + CertValidityDays + "\r\n"
+                    /* Bug #947 privacy ca web service is not the place to set the remote host's tpm owner password; this has been moved to trust agent module
                     + "TpmOwnerAuth = 1111111111111111111111111111111111111111\r\n"
+                    */
                     + "#HIS Identity Provisioning Data\r\n"
                     + "HisIdentityLabel = HIS Identity Key\r\n"
                     + "HisIdentityIndex = 1\r\n"
+                    /* Bug #947 privacy ca web service is not the place to set the remote host's aik password; this has been moved to trust agent module
                     + "HisIdentityAuth = " + AikAuth + "\r\n"
+                    */
                     + "PrivacyCaCertFile = " + PrivacyCaCertFileName + "\r\n"
                     + "PrivacyCaUrl = " + PrivacyCaUrl + "\r\n"
                     + //				"#HisRegistrationUrl = " + HisRegistrationUrl + "\r\n" +

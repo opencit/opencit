@@ -46,11 +46,11 @@ import gov.niarl.his.privacyca.TpmModule.TpmModuleException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
 import java.util.logging.Level;
 import javax.net.ssl.HttpsURLConnection;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>This is part 2 of 3 for fully provisioning HIS on a Windows client. This
@@ -159,16 +159,45 @@ public class CreateIdentity {
 
             log.debug("Home folder : " + homeFolder);
 
+            /* Bug #947 TpmOwnerAuth should be randomly generated locally and not read from a file we obtained from privacy ca
             TpmOwnerAuth = TpmUtils.hexStringToByteArray(HisProvisionerProperties.getProperty(OWNER_AUTH));
+            */
             HisIdentityLabel = HisProvisionerProperties.getProperty(HIS_IDENTITY_LABEL, "");
             HisIdentityIndex = Integer.parseInt(HisProvisionerProperties.getProperty(HIS_IDENTITY_INDEX, "0"));
+            /* Bug #947 HisIdentityAuth should be randomly generated locally and not read from a file we obtained from privacy ca
             HisIdentityAuth = TpmUtils.hexStringToByteArray(HisProvisionerProperties.getProperty(HIS_IDENTITY_AUTH, ""));
-
+            */
 
             PrivacyCaCertFile = HisProvisionerProperties.getProperty(PRIVACY_CA_CERT, "");
             PrivacyCaUrl = HisProvisionerProperties.getProperty(PRIVACY_CA_URL, "");
 //			TrustStore = HisProvisionerProperties.getProperty(TRUST_STORE, "TrustStore.jks");
             ClientPath = HisProvisionerProperties.getProperty(CLIENT_PATH, "");
+            
+            // fix for bug #947 read TpmOwnerAuth from trustagent.properties (generated locally by ProvisionTPM) and read or generate HisIdentityAuth (aka AikAuth)
+            File tpmOwnerFile = ResourceFinder.getFile("trustagent.properties");
+            FileInputStream tpmOwnerFileInput = new FileInputStream(tpmOwnerFile);
+            Properties tpmOwnerProperties = new Properties();
+            tpmOwnerProperties.load(tpmOwnerFileInput);
+            tpmOwnerFileInput.close();
+            String tpmOwnerAuthHex = tpmOwnerProperties.getProperty(OWNER_AUTH);
+            if( tpmOwnerAuthHex == null || tpmOwnerAuthHex.trim().isEmpty() ) {
+                // tpm owner password is not set, empty string here will result in TpmOwnerAuth==null; ProvisionTPM is responsible for generating it
+                tpmOwnerAuthHex = "";
+            }
+            TpmOwnerAuth = TpmUtils.hexStringToByteArray(tpmOwnerAuthHex);
+            String aikAuthHex = tpmOwnerProperties.getProperty(HIS_IDENTITY_AUTH);
+            if( aikAuthHex == null || aikAuthHex.trim().isEmpty() ) {
+                // aik password is not set, so generate a new one and save it
+                aikAuthHex = generateRandomPasswordHex();
+                tpmOwnerProperties.setProperty(HIS_IDENTITY_AUTH, aikAuthHex);
+                FileOutputStream tpmOwnerFileOutput = new FileOutputStream(tpmOwnerFile);
+                tpmOwnerProperties.store(tpmOwnerFileOutput, "Generated HisIdentityAuth");
+                tpmOwnerFileOutput.close();
+                log.info("Stored new AIK secret (HisIdentityAuth) in {}", tpmOwnerFile.getAbsolutePath());
+            }
+            HisIdentityAuth = TpmUtils.hexStringToByteArray(aikAuthHex);
+            
+            
         } catch (FileNotFoundException e) { // If the properties file is not found, display error
             throw new PrivacyCAException("Error finding HIS Provisioner properties file (HISprovisionier.properties); using defaults.", e);
         } catch (IOException e) { // If propertied file cannot be read, display error
@@ -245,6 +274,7 @@ public class CreateIdentity {
 
         FileOutputStream pcaFileOut = null;
         try {
+            // XXX TODO well-known SRK is a bad assumption, we should at least implement an option to use a configured value instead;  see issue #1012
             byte[] srkAuth = TpmUtils.hexStringToByteArray("0000000000000000000000000000000000000000");
             boolean requiresAuthSha = false;
             byte[] ownerAuthRaw = TpmOwnerAuth;
@@ -310,7 +340,6 @@ public class CreateIdentity {
 
             String aikcertfilepath = configuration.getProperty("aikcert.filename", homeFolder + ClientPath + "/aikcert.pem");
             String aikblobfilepath = configuration.getProperty("aikblob.filename", homeFolder + ClientPath + "/aikblob.dat");
-
             if (os == 1) {//linux
                 HashMap<String, byte[]> results = TpmModule.activateIdentity2(ownerAuthRaw, keyAuthRaw, asym2, sym2, HisIdentityIndex);
                 System.out.println(results);
@@ -384,5 +413,12 @@ public class CreateIdentity {
         FileOutputStream out = new FileOutputStream(file); // throws FileNotFoundException
         IOUtils.write(encryptedBytes, out); // throws IOException
         out.close();
+    }
+    // fix for bug #947 generate random owner password instead of hardcoded default
+    public static String generateRandomPasswordHex() {
+        byte[] password = new byte[20];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(password);
+        return Hex.encodeHexString(password);
     }
 }

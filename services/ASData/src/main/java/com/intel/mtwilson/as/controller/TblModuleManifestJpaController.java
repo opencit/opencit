@@ -127,6 +127,69 @@ public class TblModuleManifestJpaController implements Serializable {
         }
     }
 
+    public void create_v2(TblModuleManifest tblModuleManifest, EntityManager em) {
+        long createV2_1 = System.currentTimeMillis();
+        if (tblModuleManifest.getTblHostSpecificManifestCollection() == null) {
+            tblModuleManifest.setTblHostSpecificManifestCollection(new ArrayList<TblHostSpecificManifest>());
+        }
+        try {
+            TblMle mleId = tblModuleManifest.getMleId();
+            if (mleId != null) {
+                mleId = em.getReference(mleId.getClass(), mleId.getId());
+                tblModuleManifest.setMleId(mleId);
+            }
+            TblEventType eventID = tblModuleManifest.getEventID();
+            if (eventID != null) {
+                eventID = em.getReference(eventID.getClass(), eventID.getId());
+                tblModuleManifest.setEventID(eventID);
+            }
+            TblPackageNamespace nameSpaceID = tblModuleManifest.getNameSpaceID();
+            if (nameSpaceID != null) {
+                nameSpaceID = em.getReference(nameSpaceID.getClass(), nameSpaceID.getId());
+                tblModuleManifest.setNameSpaceID(nameSpaceID);
+            }
+            long createV2_2 = System.currentTimeMillis();
+            log.debug("CREATE_V2 - Time taken to setup IDs :" + (createV2_2 - createV2_1) + "milliseconds.");
+            
+            Collection<TblHostSpecificManifest> attachedTblHostSpecificManifestCollection = new ArrayList<TblHostSpecificManifest>();
+            for (TblHostSpecificManifest tblHostSpecificManifestCollectionTblHostSpecificManifestToAttach : tblModuleManifest.getTblHostSpecificManifestCollection()) {
+                tblHostSpecificManifestCollectionTblHostSpecificManifestToAttach = em.getReference(tblHostSpecificManifestCollectionTblHostSpecificManifestToAttach.getClass(), tblHostSpecificManifestCollectionTblHostSpecificManifestToAttach.getId());
+                attachedTblHostSpecificManifestCollection.add(tblHostSpecificManifestCollectionTblHostSpecificManifestToAttach);
+            }
+            tblModuleManifest.setTblHostSpecificManifestCollection(attachedTblHostSpecificManifestCollection);
+            em.persist(tblModuleManifest);
+
+            long createV2_3 = System.currentTimeMillis();
+            log.debug("CREATE_V2 - Time taken to insert and persist :" + (createV2_3 - createV2_2) + "milliseconds.");
+
+            if (mleId != null) {
+                mleId.getTblModuleManifestCollection().add(tblModuleManifest);
+                em.merge(mleId);
+            }
+            if (eventID != null) {
+                eventID.getTblModuleManifestCollection().add(tblModuleManifest);
+                em.merge(eventID);
+            }
+            if (nameSpaceID != null) {
+                nameSpaceID.getTblModuleManifestCollection().add(tblModuleManifest);
+                em.merge(nameSpaceID);
+            }
+            for (TblHostSpecificManifest tblHostSpecificManifestCollectionTblHostSpecificManifest : tblModuleManifest.getTblHostSpecificManifestCollection()) {
+                TblModuleManifest oldModuleManifestIDOfTblHostSpecificManifestCollectionTblHostSpecificManifest = tblHostSpecificManifestCollectionTblHostSpecificManifest.getModuleManifestID();
+                tblHostSpecificManifestCollectionTblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                tblHostSpecificManifestCollectionTblHostSpecificManifest = em.merge(tblHostSpecificManifestCollectionTblHostSpecificManifest);
+                if (oldModuleManifestIDOfTblHostSpecificManifestCollectionTblHostSpecificManifest != null) {
+                    oldModuleManifestIDOfTblHostSpecificManifestCollectionTblHostSpecificManifest.getTblHostSpecificManifestCollection().remove(tblHostSpecificManifestCollectionTblHostSpecificManifest);
+                    em.merge(oldModuleManifestIDOfTblHostSpecificManifestCollectionTblHostSpecificManifest);
+                }
+            }
+            long createV2_4 = System.currentTimeMillis();
+            log.debug("CREATE_V2 - Time taken for merge operations :" + (createV2_4 - createV2_3) + "milliseconds.");
+
+        } finally {
+        }
+    }
+
     public void edit(TblModuleManifest tblModuleManifest) throws IllegalOrphanException, NonexistentEntityException, ASDataException {
         EntityManager em = getEntityManager();
         try {
@@ -255,6 +318,100 @@ public class TblModuleManifestJpaController implements Serializable {
             throw new ASDataException(ex);
         } finally {
                 em.close();
+        }
+    }
+
+    public void edit_v2(TblModuleManifest tblModuleManifest, EntityManager em) throws IllegalOrphanException, NonexistentEntityException, ASDataException {
+        try {
+            TblModuleManifest persistentTblModuleManifest = em.find(TblModuleManifest.class, tblModuleManifest.getId());
+
+            TblMle mleIdOld = persistentTblModuleManifest.getMleId();
+            TblMle mleIdNew = tblModuleManifest.getMleId();
+            TblEventType eventIDOld = persistentTblModuleManifest.getEventID();
+            TblEventType eventIDNew = tblModuleManifest.getEventID();
+            TblPackageNamespace nameSpaceIDOld = persistentTblModuleManifest.getNameSpaceID();
+            TblPackageNamespace nameSpaceIDNew = tblModuleManifest.getNameSpaceID();
+            Collection<TblHostSpecificManifest> tblHostSpecificManifestCollectionOld = persistentTblModuleManifest.getTblHostSpecificManifestCollection();
+            Collection<TblHostSpecificManifest> tblHostSpecificManifestCollectionNew = tblModuleManifest.getTblHostSpecificManifestCollection();
+            List<String> illegalOrphanMessages = null;
+            for (TblHostSpecificManifest tblHostSpecificManifestCollectionOldTblHostSpecificManifest : tblHostSpecificManifestCollectionOld) {
+                if (!tblHostSpecificManifestCollectionNew.contains(tblHostSpecificManifestCollectionOldTblHostSpecificManifest)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain TblHostSpecificManifest " + tblHostSpecificManifestCollectionOldTblHostSpecificManifest + " since its moduleManifestID field is not nullable.");
+                }
+            }
+            if (illegalOrphanMessages != null) {
+                throw new IllegalOrphanException(illegalOrphanMessages);
+            }
+
+            if (mleIdNew != null) {
+                mleIdNew = em.getReference(mleIdNew.getClass(), mleIdNew.getId());
+                tblModuleManifest.setMleId(mleIdNew);
+            }
+            if (eventIDNew != null) {
+                eventIDNew = em.getReference(eventIDNew.getClass(), eventIDNew.getId());
+                tblModuleManifest.setEventID(eventIDNew);
+            }
+            if (nameSpaceIDNew != null) {
+                nameSpaceIDNew = em.getReference(nameSpaceIDNew.getClass(), nameSpaceIDNew.getId());
+                tblModuleManifest.setNameSpaceID(nameSpaceIDNew);
+            }
+            Collection<TblHostSpecificManifest> attachedTblHostSpecificManifestCollectionNew = new ArrayList<TblHostSpecificManifest>();
+            for (TblHostSpecificManifest tblHostSpecificManifestCollectionNewTblHostSpecificManifestToAttach : tblHostSpecificManifestCollectionNew) {
+                tblHostSpecificManifestCollectionNewTblHostSpecificManifestToAttach = em.getReference(tblHostSpecificManifestCollectionNewTblHostSpecificManifestToAttach.getClass(), tblHostSpecificManifestCollectionNewTblHostSpecificManifestToAttach.getId());
+                attachedTblHostSpecificManifestCollectionNew.add(tblHostSpecificManifestCollectionNewTblHostSpecificManifestToAttach);
+            }
+            tblHostSpecificManifestCollectionNew = attachedTblHostSpecificManifestCollectionNew;
+            tblModuleManifest.setTblHostSpecificManifestCollection(tblHostSpecificManifestCollectionNew);
+            tblModuleManifest = em.merge(tblModuleManifest);
+
+            if (mleIdOld != null && !mleIdOld.equals(mleIdNew)) {
+                mleIdOld.getTblModuleManifestCollection().remove(tblModuleManifest);
+                mleIdOld = em.merge(mleIdOld);
+            }
+            if (mleIdNew != null && !mleIdNew.equals(mleIdOld)) {
+                mleIdNew.getTblModuleManifestCollection().add(tblModuleManifest);
+                em.merge(mleIdNew);
+            }
+            if (eventIDOld != null && !eventIDOld.equals(eventIDNew)) {
+                eventIDOld.getTblModuleManifestCollection().remove(tblModuleManifest);
+                eventIDOld = em.merge(eventIDOld);
+            }
+            if (eventIDNew != null && !eventIDNew.equals(eventIDOld)) {
+                eventIDNew.getTblModuleManifestCollection().add(tblModuleManifest);
+                em.merge(eventIDNew);
+            }
+            if (nameSpaceIDOld != null && !nameSpaceIDOld.equals(nameSpaceIDNew)) {
+                nameSpaceIDOld.getTblModuleManifestCollection().remove(tblModuleManifest);
+                nameSpaceIDOld = em.merge(nameSpaceIDOld);
+            }
+            if (nameSpaceIDNew != null && !nameSpaceIDNew.equals(nameSpaceIDOld)) {
+                nameSpaceIDNew.getTblModuleManifestCollection().add(tblModuleManifest);
+                em.merge(nameSpaceIDNew);
+            }
+            for (TblHostSpecificManifest tblHostSpecificManifestCollectionNewTblHostSpecificManifest : tblHostSpecificManifestCollectionNew) {
+                if (!tblHostSpecificManifestCollectionOld.contains(tblHostSpecificManifestCollectionNewTblHostSpecificManifest)) {
+                    TblModuleManifest oldModuleManifestIDOfTblHostSpecificManifestCollectionNewTblHostSpecificManifest = tblHostSpecificManifestCollectionNewTblHostSpecificManifest.getModuleManifestID();
+                    tblHostSpecificManifestCollectionNewTblHostSpecificManifest.setModuleManifestID(tblModuleManifest);
+                    tblHostSpecificManifestCollectionNewTblHostSpecificManifest = em.merge(tblHostSpecificManifestCollectionNewTblHostSpecificManifest);
+                    if (oldModuleManifestIDOfTblHostSpecificManifestCollectionNewTblHostSpecificManifest != null && !oldModuleManifestIDOfTblHostSpecificManifestCollectionNewTblHostSpecificManifest.equals(tblModuleManifest)) {
+                        oldModuleManifestIDOfTblHostSpecificManifestCollectionNewTblHostSpecificManifest.getTblHostSpecificManifestCollection().remove(tblHostSpecificManifestCollectionNewTblHostSpecificManifest);
+                        em.merge(oldModuleManifestIDOfTblHostSpecificManifestCollectionNewTblHostSpecificManifest);
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            String msg = ex.getLocalizedMessage();
+            if (msg == null || msg.length() == 0) {
+                Integer id = tblModuleManifest.getId();
+                if (findTblModuleManifest(id) == null) {
+                    throw new NonexistentEntityException("The tblModuleManifest with id " + id + " no longer exists.");
+                }
+            }
+            throw new ASDataException(ex);
+        } finally {
         }
     }
 

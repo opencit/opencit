@@ -74,14 +74,14 @@ public class CheckLoginController extends AbstractController {
             MwPortalUserJpaController keystoreJpa = My.jpa().mwPortalUser();
             MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
             if(tblKeystore == null){
-                view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
+                view.addObject("message", "Username or Password does not match or the user is not enabled.");                
                 view.addObject("result", false);
                 return view; 
             }
 
             // Partial fix for Bug 965 to prevent users in rejected/pending status from logging into the portal.
             if (!tblKeystore.getEnabled()) {
-                view.addObject("message", "User access has not been approved. Please contact the administrator.");                
+                view.addObject("message", "Username or Password does not match or the user is not enabled.");                
                 view.addObject("result", false);
                 return view;                 
             }
@@ -99,7 +99,7 @@ public class CheckLoginController extends AbstractController {
 
             } catch (Exception ex) {
                 view.addObject("result", false);
-                view.addObject("message", "Username or Password does not match. Please try again.");
+                view.addObject("message", "Username or Password does not match or the user is not enabled.");
                 return view;                    
             } 
 

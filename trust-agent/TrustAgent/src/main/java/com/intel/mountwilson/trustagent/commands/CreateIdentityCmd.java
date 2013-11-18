@@ -11,6 +11,7 @@ import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.his.helper.CreateIdentity;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.File;
+import java.util.Properties;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +27,8 @@ public class CreateIdentityCmd implements ICommand {
     private TADataContext context;
 
     public static void main(String[] args) throws TAException {
+        //619 allow keystore password to be specificed as a env variable
+        CommandUtil.initJavaSslProperties();
         TADataContext ctx = new TADataContext();
         CreateIdentityCmd cmd = new CreateIdentityCmd(ctx);
         cmd.execute();
@@ -46,7 +49,7 @@ public class CreateIdentityCmd implements ICommand {
                 log.info("New AIK certificate will not be created.");
             } else {
                 // this will create the AIK in the configured folder
-                 Properties configuration = new Properties();
+                Properties configuration = new Properties();
                 configuration.setProperty("aikcert.filename", context.getAikCertFileName());
                 configuration.setProperty("aikblob.filename", context.getAikBlobFileName());
                 CreateIdentity.createIdentity(configuration);
