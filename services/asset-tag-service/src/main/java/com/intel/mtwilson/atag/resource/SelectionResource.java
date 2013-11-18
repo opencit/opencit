@@ -55,16 +55,15 @@ public class SelectionResource extends ServerResource {
             return null;
         }
         
-        
-        String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+        StringBuilder str = new StringBuilder();
+        str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
                      "<selections xmlns=\\\"urn:intel-mtwilson-asset-tag-attribute-selections\\\">\n"+
-                     "<selection>";
-        List<SelectionTagValue> tags = selection.getTags();
-        for(SelectionTagValue tag: tags) {
-           ret = ret +  "<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n";
+                     "<selection>");
+        for(SelectionTagValue tag : selection.getTags()) {
+           str.append("<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n");
         }
-        ret = ret + "</selection>\n</selections>";
-        return ret;
+        str.append("</selection>\n</selections>");
+        return str.toString();
     }
     
     @Get("json")
