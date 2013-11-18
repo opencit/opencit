@@ -345,9 +345,10 @@ case "$1" in
         ;;
   erase-data)
         load_default_env 1>/dev/null
-        call_setupcommand EraseLogs
-        call_setupcommand EraseHostRegistrationData
-        call_setupcommand EraseWhitelistData
+		erase_data
+        #call_setupcommand EraseLogs
+        #call_setupcommand EraseHostRegistrationData
+        #call_setupcommand EraseWhitelistData
         
         ;;
   erase-users)

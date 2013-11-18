@@ -1489,13 +1489,13 @@ public class HostTrustBO extends BaseBO {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
 
-            PcrManifest pcrManifest = agent.getPcrManifest();
-            if( pcrManifest == null ) {
-                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
-            }
+//            PcrManifest pcrManifest = agent.getPcrManifest();
+//            if( pcrManifest == null ) {
+//                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+//            }
 
             HostReport hostReport = new HostReport();
-            hostReport.pcrManifest = pcrManifest;
+            hostReport.pcrManifest = null;
             hostReport.tpmQuote = null; // TODO
             hostReport.variables = new HashMap<String,String>(); // TODO
 
@@ -1525,6 +1525,16 @@ public class HostTrustBO extends BaseBO {
                             continue;
                         }
 
+                        // Now that all the basic validation is done, we can retrieve the attestation report from the host for verfiication against the DB. We were
+                        // earlier retrieving the attestation report to start with. But for better performance, doing it after all the validations.
+                        if (hostReport.pcrManifest == null) {
+                            PcrManifest pcrManifest = agent.getPcrManifest();
+                            if( pcrManifest == null ) {
+                                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+                            }
+                            hostReport.pcrManifest = pcrManifest;
+                        }
+                        
                         tblHosts.setBiosMleId(biosMLE);
 
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
@@ -1572,8 +1582,18 @@ public class HostTrustBO extends BaseBO {
                         // If the list of bios PCRs that need to be configured does not match the list of the MLE in the DB, we have to create a new MLE
                         // So, we can skip the current one and check the remaining if exists.
                         if (!doPcrsListMatch(vmmPCRs, vmmMLE.getRequiredManifestList())) {
-                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as the PCR list does not match.", vmmMLE.getName(), vmmMLE.getVersion());                        
+                            log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as the PCR list does not match.", vmmMLE.getName(), vmmMLE.getVersion());                        
                             continue;
+                        }
+
+                        // Now that all the basic validation is done, we can retrieve the attestation report from the host for verfiication against the DB. We were
+                        // earlier retrieving the attestation report to start with. But for better performance, doing it after all the validations.
+                        if (hostReport.pcrManifest == null) {
+                            PcrManifest pcrManifest = agent.getPcrManifest();
+                            if( pcrManifest == null ) {
+                                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+                            }
+                            hostReport.pcrManifest = pcrManifest;
                         }
 
                         tblHosts.setVmmMleId(vmmMLE);
