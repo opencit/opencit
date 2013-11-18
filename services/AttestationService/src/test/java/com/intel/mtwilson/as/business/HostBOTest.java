@@ -6,19 +6,28 @@ package com.intel.mtwilson.as.business;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.security.KeyManagementException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
@@ -286,5 +295,73 @@ public class HostBOTest {
         TxtHost hostObj = new TxtHost(hostInfo);
         String connStr = hostObj.getAddOn_Connection_String();
         System.out.println(connStr);
+    }
+    
+    @Test
+    public void SavyTest() throws IOException, CryptographyException, KeyManagementException {
+        My.initDataEncryptionKey();
+        String hostName = "10.1.71.169";
+        String connString = "https://10.1.71.169:9999";
+        //SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password);
+        
+        TxtHostRecord hostInfo = new TxtHostRecord();
+        hostInfo.HostName = "10.1.71.169";
+        //hostInfo.IPAddress = "10.1.71.169";
+        hostInfo.Port = 9999;
+        hostInfo.BIOS_Name = "Intel_Corp.";
+        hostInfo.BIOS_Version = "01.00.T060";
+        hostInfo.BIOS_Oem = "Intel Corp.";
+        hostInfo.VMM_Name = "Intel_Thurley_Xen";
+        hostInfo.VMM_Version = "11-4.1.0";
+        hostInfo.VMM_OSName = "SUSE_LINUX";
+        hostInfo.VMM_OSVersion = "11";
+        hostInfo.AddOn_Connection_String = connString;
+        TxtHost hostObj = new TxtHost(hostInfo);
+        
+        TblHosts tblHosts = new TblHosts();
+        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+        tblHosts.setTlsKeystore(null);
+        tblHosts.setName(hostName);
+        tblHosts.setAddOnConnectionInfo(connString);
+        tblHosts.setIPAddress(hostName);
+        tblHosts.setPort(9999);
+
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(tblHosts);
+        HostBO hbo = new ASComponentFactory().getHostBO();
+        PcrManifest pcrManifest = agent.getPcrManifest();
+        HostResponse response = hbo.addHost(hostObj, pcrManifest); //.getTrustStatus(new Hostname(hostName));
+        
+        Resource resource = tblHosts.getTlsKeystoreResource();
+        SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
+        
+        System.err.println("SAVY001 factory tls policy: " + factory.getTlsPolicy(tblHosts).toString());
+        System.err.println("SAVY002 tblHosts tls policy: " + tblHosts.getTlsPolicyName());
+        System.err.println("SAVY003 tblHosts tls keystore: " + tblHosts.getTlsKeystore());
+        //System.in.read();
+        
+        
+        
+//        
+//        
+//        
+//        
+//        if (!agent.isTpmEnabled() || !agent.isIntelTxtEnabled()) {
+//            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
+//        }
+//
+//        PcrManifest pcrManifest = agent.getPcrManifest();
+//        if (pcrManifest == null) {
+//            throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+//        }
+//
+//        HostReport hostReport = new HostReport();
+//        hostReport.pcrManifest = pcrManifest;
+//        hostReport.tpmQuote = null; // TODO
+//        hostReport.variables = new HashMap<String, String>(); // TODO
+//
+//        log.debug("getTrustStatusOfHostNotInDB: Successfully retrieved the TPM meausrements from host '{}' for identifying the MLE to be mapped to.", hostObj.HostName);
+//        HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
+
     }
 }
