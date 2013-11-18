@@ -54,7 +54,10 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        
+        List<SelectionTagValue> list = selection.getTags();
+        if(list == null) {
+            log.debug("existingSelectionXml list == null");
+        }
         StringBuilder str = new StringBuilder();
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
                      "<selections xmlns=\\\"urn:intel-mtwilson-asset-tag-attribute-selections\\\">\n"+
