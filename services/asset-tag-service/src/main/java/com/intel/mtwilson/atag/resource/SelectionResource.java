@@ -52,7 +52,7 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        return selection.toString();
+        return "it works".toString();
     }
     
     @Get("json")
