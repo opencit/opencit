@@ -8,7 +8,9 @@ import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.dao.jdbi.SelectionDAO;
 import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.atag.model.SelectionTagValue;
 import java.sql.SQLException;
+import java.util.List;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -52,16 +54,17 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-        "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n" +
-        "    <selection>\n" +
-        "        <attribute oid=\"2.5.4.6\">US</attribute>\n" +
-        "        <attribute oid=\"2.5.4.8\">CA</attribute>\n" +
-        "        <attribute oid=\"2.5.4.8\">TX</attribute>\n" +
-        "        <attribute oid=\"2.5.4.7\">Folsom</attribute>\n" +
-        "        <attribute oid=\"2.5.4.7\">El Paso</attribute>\n" +
-        "    </selection>\n" +
-        "</selections>".toString();
+        
+        
+        String ret = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                     "<selections xmlns=\\\"urn:intel-mtwilson-asset-tag-attribute-selections\\\">\n"+
+                     "<selection>";
+        List<SelectionTagValue> tags = selection.getTags();
+        for(SelectionTagValue tag: tags) {
+           ret = ret +  "<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n";
+        }
+        ret = ret + "</selection>\n</selections>";
+        return ret;
     }
     
     @Get("json")
