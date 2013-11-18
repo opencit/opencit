@@ -33,7 +33,8 @@ public class Setup extends AtagCommand {
         CreateDatabase createDatabase = new CreateDatabase();
         InitDatabase initDatabase = new InitDatabase();
         CreateCaKey createCaKey = new CreateCaKey();
-        Command[] tasks = new Command[] { createDatabase, initDatabase, createCaKey };
+        CreateTlsKeystore createTlsKeystore = new CreateTlsKeystore(); // XXX TODO  we probably should keep the configuration for this in the property file then it can execute w/o arguments...
+        Command[] tasks = new Command[] { createDatabase, initDatabase, createCaKey, createTlsKeystore };
         for(int i=0; i<tasks.length; i++) {
             tasks[i].setOptions(getOptions());
             tasks[i].execute(new String[0]);
