@@ -8,6 +8,7 @@ import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.dao.jdbi.SelectionDAO;
 import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.atag.dao.jdbi.SelectionTagValueDAO;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
 import java.sql.SQLException;
 import java.util.List;
@@ -28,12 +29,14 @@ import org.slf4j.LoggerFactory;
 public class SelectionResource extends ServerResource {
     private Logger log = LoggerFactory.getLogger(getClass());
     private SelectionDAO dao = null;
+    private SelectionTagValueDAO selectionTagValueDao = null;
 
     @Override
     protected void doInit() throws ResourceException {
         super.doInit();
         try {
             dao = Derby.selectionDao();
+            selectionTagValueDao = Derby.selectionTagValueDao();
         } catch (SQLException e) {
             throw new ResourceException(Status.SERVER_ERROR_INTERNAL, "Cannot open database", e);
         }
@@ -43,6 +46,9 @@ public class SelectionResource extends ServerResource {
     @Override
     protected void doRelease() throws ResourceException {
         if( dao != null ) { dao.close(); }
+        if( selectionTagValueDao != null ) {
+            selectionTagValueDao.close();
+        }
         super.doRelease();
     }
     /*
@@ -77,6 +83,13 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
+        List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
+        if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
+            log.error("No tags in selection");
+            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);  // cannot make a certificate request without a valid selection;  we can't pick one automatically unless the administrator has configured a default selection and in that case we wouldn't even be searching here.
+            return null;            
+        }
+        selection.setTags(selectionTagValues);
         return selection;
     }
 
