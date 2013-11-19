@@ -10,6 +10,7 @@ import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;
+import com.intel.mtwilson.policy.impl.TrustMarker;
 import com.intel.mtwilson.policy.impl.VendorHostTrustPolicyFactory;
 import com.intel.mtwilson.policy.rule.AikCertificateTrusted;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -39,7 +40,9 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
             cacerts = loadTrustedAikCertificateAuthorities();
         }
         HashSet<Rule> rules = new HashSet<Rule>();
-        rules.add(new AikCertificateTrusted(cacerts));
+        AikCertificateTrusted aikcert = new AikCertificateTrusted(cacerts);
+        aikcert.setMarkers(TrustMarker.BIOS.name());
+        rules.add(aikcert);
         Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForBios(bios, host);
         rules.addAll(pcrConstantRules);
         return rules;
@@ -51,7 +54,9 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
             cacerts = loadTrustedAikCertificateAuthorities();
         }
         HashSet<Rule> rules = new HashSet<Rule>();
-        rules.add(new AikCertificateTrusted(cacerts));
+        AikCertificateTrusted aikcert = new AikCertificateTrusted(cacerts);
+        aikcert.setMarkers(TrustMarker.VMM.name());
+        rules.add(aikcert);
         // first, load the list of pcr's marked for this host's vmm mle 
         Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
         rules.addAll(pcrConstantRules);
