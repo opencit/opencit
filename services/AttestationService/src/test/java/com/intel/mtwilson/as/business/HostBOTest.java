@@ -330,7 +330,7 @@ public class HostBOTest {
         HostAgent agent = factory.getHostAgent(tblHosts);
         HostBO hbo = new ASComponentFactory().getHostBO();
         PcrManifest pcrManifest = agent.getPcrManifest();
-        HostResponse response = hbo.addHost(hostObj, pcrManifest); //.getTrustStatus(new Hostname(hostName));
+        HostResponse response = hbo.addHost(hostObj, pcrManifest, null); //.getTrustStatus(new Hostname(hostName));
         
         Resource resource = tblHosts.getTlsKeystoreResource();
         SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
