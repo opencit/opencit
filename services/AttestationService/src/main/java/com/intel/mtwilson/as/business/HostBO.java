@@ -93,7 +93,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -133,8 +133,10 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
+                        if (agent == null) {
+                            HostAgentFactory factory = new HostAgentFactory();
+                            agent = factory.getHostAgent(tblHosts);
+                        }
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                                 // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
@@ -276,7 +278,7 @@ public class HostBO extends BaseBO {
     }
 
 
-        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest) {
+        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -312,8 +314,11 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
+                        if (agent == null) {
+                            HostAgentFactory factory = new HostAgentFactory();
+                            agent = factory.getHostAgent(tblHosts);
+                        }
+                        
                         if( agent.isAikAvailable() ) {
                             log.debug("Getting identity.");
                                 setAikForHost(tblHosts, host, agent);

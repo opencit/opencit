@@ -134,7 +134,7 @@ public class HostTest {
         TxtHost host1 = new TxtHost(hostRecord);
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
-        hostBO.addHost(host2, null);
+        hostBO.addHost(host2, null, null);
     }
     
     @Test
