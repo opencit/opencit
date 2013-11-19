@@ -324,10 +324,10 @@ public class HostTrustBO extends BaseBO {
             // We need to check if the host is already configured in the system. If yes, we need to update the host or else create a new one
             if (hostBO.getHostByName(new Hostname((hostObj.HostName))) != null) {
                 // update the host
-                hostResponse = hostBO.updateHost(new TxtHost(hostObjToRegister), pcrManifest);
+                hostResponse = hostBO.updateHost(new TxtHost(hostObjToRegister), pcrManifest, agent);
             } else {
                 // create the host
-                hostResponse = hostBO.addHost(new TxtHost(hostObjToRegister), pcrManifest);
+                hostResponse = hostBO.addHost(new TxtHost(hostObjToRegister), pcrManifest, agent);
             }
                 
             long getTrustStatusOfHostNotInDBStop = System.currentTimeMillis();
@@ -353,7 +353,7 @@ public class HostTrustBO extends BaseBO {
      * @return
      * @throws IOException 
      */
-    public TrustReport updateHostIfUntrusted(TblHosts tblHosts, HostReport hostReport, TrustReport trustReport) {
+    public TrustReport updateHostIfUntrusted(TblHosts tblHosts, HostReport hostReport, TrustReport trustReport, HostAgent agent) {
         String regExForNumericExtNames = ".*_([^_][0-9]*)$"; // Regular expression to match the host names with numeric extenstions
         boolean updateBIOSMLE = false, updateVMMMLE = false;
         
@@ -555,7 +555,7 @@ public class HostTrustBO extends BaseBO {
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
                 HostBO hostBO = new HostBO();
-                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest);
+                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest, agent);
             }
 
             if (updateBIOSMLE)
@@ -696,7 +696,7 @@ public class HostTrustBO extends BaseBO {
         log.debug("XXX jonathan performance  apply trust policy: {}", applyPolicyStop-applyPolicyStart); // XXX jonathan performance
         
         if (!trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) || !trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
-            trustReport = updateHostIfUntrusted(tblHosts, hostReport, trustReport);
+            trustReport = updateHostIfUntrusted(tblHosts, hostReport, trustReport, agent);
         }
         
         return trustReport;
