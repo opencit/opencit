@@ -211,6 +211,14 @@ public class HostBO extends BaseBO {
 		return new HostResponse(ErrorCode.OK);
 	}
 
+
+    /**
+     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * CHANGE IT IN THE OTHER LOCATION AS WELL.
+     * 
+     * @param hostAikCert
+     * @return 
+     */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
         // XXX code in this first section is duplciated in the IntelHostTrustPolicyFactory ... maybe refactor to put it into a configuration method? it's just loading list of trusted privacy ca's from the configuration.
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
