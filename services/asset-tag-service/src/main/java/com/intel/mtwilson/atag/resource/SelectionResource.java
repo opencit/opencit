@@ -45,7 +45,7 @@ public class SelectionResource extends ServerResource {
         if( dao != null ) { dao.close(); }
         super.doRelease();
     }
-    
+    /*
     @Get("application/xml")
     public String existingSelectionXml(){
         String uuid = getAttribute("id");
@@ -68,7 +68,7 @@ public class SelectionResource extends ServerResource {
         str.append("</selection>\n</selections>");
         return str.toString();
     }
-    
+    */
     @Get("json")
     public Selection existingSelection() {
         String uuid = getAttribute("id");
