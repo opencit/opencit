@@ -516,6 +516,7 @@ public class CitrixClient {
 //        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
 
         //log.debug("CitrixClient: AIKCert: " + AIKCert);
+        long startTime = System.currentTimeMillis();
         
         if (AIKCert != null) {
             log.debug("CitrixClient: AIKCert already generated: " + AIKCert);
@@ -537,12 +538,13 @@ public class CitrixClient {
             if (iter.hasNext()) {
                 h = (Host) iter.next();
             }
-
-            long plugInCallStart = System.currentTimeMillis();
-            String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
-            long plugInCallStop = System.currentTimeMillis();
-            log.debug("Citrix PlugIn call: AIK Certificate retrieval time " + (plugInCallStop - plugInCallStart) + " milliseconds");
             
+            log.debug("TIMETAKEN: get host list: {}", System.currentTimeMillis()-startTime);
+            startTime = System.currentTimeMillis();
+
+            String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
+            log.debug("TIMETAKEN: citrix api: {}", System.currentTimeMillis()-startTime);
+
             int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
             int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
             // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
