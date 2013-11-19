@@ -230,7 +230,11 @@ public class CitrixClient {
 
             myMap = new HashMap<String, String>();
             myMap.put("nonce", nonce);
+
+            long plugInCallStart = System.currentTimeMillis();
             String quote = h.callPlugin(connection, "tpm", "tpm_get_quote", myMap);
+            long plugInCallStop = System.currentTimeMillis();
+            log.debug("Citrix PlugIn call: TPM quote retrieval time " + (plugInCallStop - plugInCallStart) + " milliseconds");
 
             log.debug("extracted quote from response: " + quote);
             //saveFile(getCertFileName(sessionId), Base64.decodeBase64(aikCertificate));
@@ -534,8 +538,11 @@ public class CitrixClient {
                 h = (Host) iter.next();
             }
 
+            long plugInCallStart = System.currentTimeMillis();
             String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
-
+            long plugInCallStop = System.currentTimeMillis();
+            log.debug("Citrix PlugIn call: AIK Certificate retrieval time " + (plugInCallStop - plugInCallStart) + " milliseconds");
+            
             int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
             int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
             // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
