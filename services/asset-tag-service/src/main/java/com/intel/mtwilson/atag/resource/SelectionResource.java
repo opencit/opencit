@@ -52,7 +52,7 @@ public class SelectionResource extends ServerResource {
         super.doRelease();
     }
     
-    @Get("application/xml")
+    @Get("xml")
     public String existingSelectionXml(){
         String uuid = getAttribute("id");
         Selection selection = dao.findByUuid(UUID.valueOf(uuid));
@@ -68,7 +68,7 @@ public class SelectionResource extends ServerResource {
         }
         StringBuilder str = new StringBuilder();
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
-                     "<selections xmlns=\\\"urn:intel-mtwilson-asset-tag-attribute-selections\\\">\n"+
+                     "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n"+
                      "<selection>");
         if(selection.getTags() != null) {
             for(SelectionTagValue tag : selection.getTags()) {
