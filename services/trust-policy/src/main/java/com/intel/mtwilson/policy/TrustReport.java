@@ -71,9 +71,11 @@ public class TrustReport {
         ArrayList<RuleResult> markerReports = new ArrayList<RuleResult>();
         for(RuleResult report : results) {
             String[] markers = report.getRule().getMarkers();
-            List<String> markerList = Arrays.asList(markers);
-            if( markerList.contains(marker) ) {
-                markerReports.add(report);
+            if( markers != null ) {
+                List<String> markerList = Arrays.asList(markers);
+                if( markerList.contains(marker) ) {
+                    markerReports.add(report);
+                }
             }
         }
         return markerReports;
