@@ -54,8 +54,7 @@ public class TrustAgentSecureClient {
     private String serverHostname = null;
     private int serverPort = 0;
     private byte[] data;
-    //private TlsPolicy tlsPolicy;
-    private TlsConnection tlsConnection;
+    private TlsPolicy tlsPolicy;
     
     private static int TIME_OUT = ASConfig.getTrustAgentTimeOutinMilliSecs();
 
@@ -76,8 +75,7 @@ public class TrustAgentSecureClient {
     } */
     
     public TrustAgentSecureClient(TlsConnection tlsConnection) {
-        this.tlsConnection = tlsConnection;
-        //tlsPolicy = tlsConnection.getTlsPolicy();
+        tlsPolicy = tlsConnection.getTlsPolicy();
         parseConnectionString(tlsConnection.getURL().toExternalForm());
         log.debug("TrustAgentSecureClient  hostname({}) port({})", new Object[] {  serverHostname, serverPort }); // removed tlsConnection.getConnectionString(), to prevent leaking secrets
     }
@@ -89,11 +87,9 @@ public class TrustAgentSecureClient {
                 URL url = new URL(connectionString);
                 serverHostname = url.getHost();
                 serverPort = url.getPort();
-                
-                /* Part of Bug-807 fix: it is now an error to pass a URL to the trustagent without a port number */
-//                if( serverPort == -1 ) {
-//                    serverPort = DEFAULT_TRUST_AGENT_PORT;
-//                }
+                if( serverPort == -1 ) {
+                    serverPort = DEFAULT_TRUST_AGENT_PORT;
+                }
                 return;
             }
             catch(MalformedURLException e) {
@@ -137,14 +133,12 @@ public class TrustAgentSecureClient {
         	throw new IllegalArgumentException("Attempted to send request without data");
         }
 
-        //HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
-        //SSLSocketFactory sslsocketfactory = getSSLContext().getSocketFactory();
-        //SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
-        SSLSocket sock = null;
+        HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+        SSLSocketFactory sslsocketfactory = getSSLContext().getSocketFactory();
+        SSLSocket sock = (SSLSocket) sslsocketfactory.createSocket();
         
-        try {
-            sock = tlsConnection.connect(TIME_OUT);
-            //sock.connect(new InetSocketAddress(serverHostname,serverPort), TIME_OUT);
+        try {            
+            sock.connect(new InetSocketAddress(serverHostname,serverPort), TIME_OUT);
             InputStream sockInput = sock.getInputStream();
             OutputStream sockOutput = sock.getOutputStream();
 
@@ -160,9 +154,7 @@ public class TrustAgentSecureClient {
             throw new ASException(e,ErrorCode.AS_TRUST_AGENT_CONNNECT_TIMED_OUT,serverHostname,serverPort,(TIME_OUT/1000));           
         }
         finally {
-            if (sock != null) {
-                sock.close();
-            }
+            sock.close();        
         }
     }
     
@@ -213,6 +205,50 @@ public class TrustAgentSecureClient {
         } finally {
         }
 
+    }
+
+    // XXX TODO  bug #497  currently this is not using the hostname verifier in the tls policy... it should be.
+    private SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
+        /*
+        javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {
+
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
+                log.info("checkClientTrusted. String argument: "+arg1);
+                for(java.security.cert.X509Certificate cert : arg0) {
+                    log.info("Certificate:");
+                    log.info("  Subject: "+cert.getSubjectX500Principal().getName());
+                    log.info("  Issued by: "+cert.getIssuerX500Principal().getName());
+                    cert.checkValidity();
+                }
+                return;
+            }
+
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
+                log.info("checkServerTrusted. String argument: "+arg1);
+                for(java.security.cert.X509Certificate cert : arg0) {
+                    log.info("Certificate:");
+                    log.info("  Subject: "+cert.getSubjectX500Principal().getName());
+                    log.info("  Issued by: "+cert.getIssuerX500Principal().getName());
+                    cert.checkValidity();
+                }
+                return;
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+               log.info("getAcceptedIssuers");
+               return null;
+            }
+        };
+
+    	SSLContext ctx = SSLContext.getInstance("SSL");
+        ctx.init(null, new javax.net.ssl.TrustManager[]{x509}, null);
+        */
+    	SSLContext ctx = SSLContext.getInstance("SSL");
+        ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null);
+        return ctx;
     }
 
     // XXX TODO  we need to return an X509Certificate here;   if the caller wants it in PEM format they can encode it.  returning a String is ambiguous and leaves open possibiility of parsing errors later. we should catch them here.

@@ -81,7 +81,7 @@ public abstract class BaseServer {
 			
 		} catch (Throwable e) { // Make sure all the exceptions are caught here
 								// and return and response to client
-			log.error("Exception reading from/writing to socket, e = {0}", e);
+			log.error("Exception reading from/writing to socket", e);
 			writeResponse(sockOutput, CommandUtil.generateErrorResponse(ErrorCode.FATAL_ERROR));
 			
 		} 

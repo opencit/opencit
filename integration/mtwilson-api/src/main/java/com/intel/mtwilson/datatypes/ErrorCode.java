@@ -126,6 +126,7 @@ public enum ErrorCode {
     MS_INVALID_ATTESTATION_REPORT(3209, "Unable to retrieve the TPM values from the host. Verify the host TXT configuration."),
     MS_HOST_CONFIGURATION_ERROR(3210, "Unable to retrieve the host configuration details. Please verify the host information."),
     MS_MLE_CONFIGURATION_NOT_FOUND(3211, "BIOS or Hypervisor MLE is not configured correctly."),
+    MS_INVALID_AIK_CERTIFICATE(3212, "Cannot validate AIK for '%s' against known Privacy CAs"),
     
     TLS_COMMMUNICATION_ERROR(4001, "Cannot establish secure connection to '%s': %s"),
     ETC_ERROR(9999, "Unknown Error");

@@ -144,16 +144,20 @@ public class CitrixHostAgent implements HostAgent{
         record.VMM_OSVersion = info.getOsVersion();
         record.AddOn_Connection_String = client.connectionString;
         record.Processor_Info = info.getProcessorInfo();
-
+        record.AIK_Certificate = null;
+        
         long getHostInfoStart2 = System.currentTimeMillis();
         log.debug("CitrixClient: Time taken to get host information - " + (getHostInfoStart2 - getHostInfoStart) + " milliseconds");
+        // Nov 19, 1013: Since AIK Cert is not needed by functions that call getHostDetails and also there is a separate function to
+        // retrieve the AIK Cert, we will comment this out.
+        /*
         try {
             record.AIK_Certificate = client.getAIKCertificate();
         }  catch(Exception ex){
             log.error("getHostDetails getAikCert caught: " + ex.getMessage());
        }
         long getHostInfoStart3 = System.currentTimeMillis();
-        log.debug("CitrixClient: Time taken to get AIK Cert - " + (getHostInfoStart3 - getHostInfoStart2) + " milliseconds");
+        log.debug("CitrixClient: Time taken to get AIK Cert - " + (getHostInfoStart3 - getHostInfoStart2) + " milliseconds");*/
         return record;
     }
     

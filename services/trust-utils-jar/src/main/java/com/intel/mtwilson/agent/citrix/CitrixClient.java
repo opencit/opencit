@@ -230,7 +230,11 @@ public class CitrixClient {
 
             myMap = new HashMap<String, String>();
             myMap.put("nonce", nonce);
+
+            long plugInCallStart = System.currentTimeMillis();
             String quote = h.callPlugin(connection, "tpm", "tpm_get_quote", myMap);
+            long plugInCallStop = System.currentTimeMillis();
+            log.debug("Citrix PlugIn call: TPM quote retrieval time " + (plugInCallStop - plugInCallStart) + " milliseconds");
 
             log.debug("extracted quote from response: " + quote);
             //saveFile(getCertFileName(sessionId), Base64.decodeBase64(aikCertificate));
@@ -537,6 +541,7 @@ public class CitrixClient {
             
             log.debug("TIMETAKEN: get host list: {}", System.currentTimeMillis()-startTime);
             startTime = System.currentTimeMillis();
+
             String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
             log.debug("TIMETAKEN: citrix api: {}", System.currentTimeMillis()-startTime);
 

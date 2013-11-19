@@ -112,7 +112,7 @@ public class HostBOTest {
         hostinfo.BIOS_Name = "Unknown BIOS";
         hostinfo.VMM_Name = "Unknown VMM";
         TxtHost host = new TxtHost(hostinfo);
-            hostBO.addHost(host, null);            
+            hostBO.addHost(host, null, null);            
             fail("Should have thrown ASException");
         }
         catch(ValidationException e) {
@@ -179,12 +179,12 @@ public class HostBOTest {
         
         // if the host is not in the database, add it
         if( !isRegistered(host) ) {
-            hostBO.addHost(host, null);                        
+            hostBO.addHost(host, null, null);                        
         }
         
         // now that we know this host is in the database, adding it again should throw an error
         try {
-            hostBO.addHost(host, null);            
+            hostBO.addHost(host, null, null);            
             fail("Should have thrown ASException");
         }
         catch(ValidationException e) {
@@ -207,7 +207,7 @@ public class HostBOTest {
             HostResponse deleteResponse = hostBO.deleteHost(host.getHostName());
             assertEquals(ErrorCode.OK, deleteResponse.getErrorCodeEnum());            
         }
-        HostResponse addResponse = hostBO.addHost(host, null);        	
+        HostResponse addResponse = hostBO.addHost(host, null, null);        	
         assertEquals(ErrorCode.OK, addResponse.getErrorCodeEnum());
     }
     
@@ -242,7 +242,7 @@ public class HostBOTest {
         hostinfo.HostName = "10.1.71.146";
         hostinfo.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
         TxtHost host = new TxtHost(hostinfo);
-        hostBO.addHost(host, null);
+        hostBO.addHost(host, null, null);
     }
     
     @Test
@@ -258,7 +258,7 @@ public class HostBOTest {
         hostinfo.VMM_Version = "5.1.0-7";
         hostinfo.AddOn_Connection_String = "vmware:https://10.1.71.162:443/sdk;administrator;intel123!";
         TxtHost host = new TxtHost(hostinfo);
-        hostBO.addHost(host, null);
+        hostBO.addHost(host, null, null);
     }
 
     
@@ -275,7 +275,7 @@ public class HostBOTest {
         TxtHost host1 = new TxtHost(hostRecord);
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
-        hostBO.addHost(host2, null);
+        hostBO.addHost(host2, null, null);
     }
     
     @Test
@@ -330,7 +330,7 @@ public class HostBOTest {
         HostAgent agent = factory.getHostAgent(tblHosts);
         HostBO hbo = new ASComponentFactory().getHostBO();
         PcrManifest pcrManifest = agent.getPcrManifest();
-        HostResponse response = hbo.addHost(hostObj, pcrManifest); //.getTrustStatus(new Hostname(hostName));
+        HostResponse response = hbo.addHost(hostObj, pcrManifest, null); //.getTrustStatus(new Hostname(hostName));
         
         Resource resource = tblHosts.getTlsKeystoreResource();
         SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
