@@ -62,7 +62,7 @@ public class SelectionResource extends ServerResource {
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
                      "<selections xmlns=\\\"urn:intel-mtwilson-asset-tag-attribute-selections\\\">\n"+
                      "<selection>");
-        for(SelectionTagValue tag : selection.getTags()) {
+        for(SelectionTagValue tag : list) {
            str.append("<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n");
         }
         str.append("</selection>\n</selections>");
