@@ -87,12 +87,12 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
-        if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
-            log.error("No tags in selection");
-        }else {
-            selection.setTags(selectionTagValues);
-        }
+        //List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
+        //if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
+        //    log.error("No tags in selection");
+        //}else {
+        //    selection.setTags(selectionTagValues);
+        //}
         return selection;
     }
 
