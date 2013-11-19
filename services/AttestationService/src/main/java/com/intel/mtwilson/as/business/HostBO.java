@@ -212,6 +212,7 @@ public class HostBO extends BaseBO {
 	}
 
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
+        // XXX code in this first section is duplciated in the IntelHostTrustPolicyFactory ... maybe refactor to put it into a configuration method? it's just loading list of trusted privacy ca's from the configuration.
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
         // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
@@ -226,20 +227,21 @@ public class HostBO extends BaseBO {
         catch(Exception e) {
             // FileNotFoundException: cannot find PrivacyCA.pem
             // CertificateException: error while reading certificates from file
-            log.error("Cannot load PrivacyCA.p12.pem");            
+            log.warn("Cannot load PrivacyCA.p12.pem");            
         }
         try {
             InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain one trusted privacy CA cert from local Privacy CA
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
             IOUtils.closeQuietly(privacyCaIn);
-            log.info("Added certificate from PrivacyCA.cer");
+            log.debug("Added certificate from PrivacyCA.cer");
         }
         catch(Exception e) {
             // FileNotFoundException: cannot find PrivacyCA.cer
             // CertificateException: error while reading certificate from file
-            log.error("Cannot load PrivacyCA.cer", e);            
+            log.warn("Cannot load PrivacyCA.cer", e);            
         }
+        // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
             try {
