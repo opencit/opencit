@@ -51,7 +51,7 @@ public class SelectionResource extends ServerResource {
         }
         super.doRelease();
     }
-    /*
+    
     @Get("application/xml")
     public String existingSelectionXml(){
         String uuid = getAttribute("id");
@@ -60,21 +60,25 @@ public class SelectionResource extends ServerResource {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
-        List<SelectionTagValue> list = selection.getTags();
-        if(list == null) {
-            log.debug("existingSelectionXml list == null");
+        List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
+        if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
+            log.error("No tags in selection");
+        }else {
+            selection.setTags(selectionTagValues);
         }
         StringBuilder str = new StringBuilder();
         str.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
                      "<selections xmlns=\\\"urn:intel-mtwilson-asset-tag-attribute-selections\\\">\n"+
                      "<selection>");
-        for(SelectionTagValue tag : list) {
-           str.append("<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n");
+        if(selection.getTags() != null) {
+            for(SelectionTagValue tag : selection.getTags()) {
+                str.append("<attribute oid=\""+ tag.getTagOid() +"\">" + tag.getTagValue() + "</attribute>\n");
+            }
         }
         str.append("</selection>\n</selections>");
         return str.toString();
     }
-    */
+    
     @Get("json")
     public Selection existingSelection() {
         String uuid = getAttribute("id");
@@ -86,10 +90,9 @@ public class SelectionResource extends ServerResource {
         List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
         if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
             log.error("No tags in selection");
-            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);  // cannot make a certificate request without a valid selection;  we can't pick one automatically unless the administrator has configured a default selection and in that case we wouldn't even be searching here.
-            return null;            
+        }else {
+            selection.setTags(selectionTagValues);
         }
-        selection.setTags(selectionTagValues);
         return selection;
     }
 
