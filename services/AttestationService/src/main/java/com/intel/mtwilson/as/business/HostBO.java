@@ -211,6 +211,14 @@ public class HostBO extends BaseBO {
 		return new HostResponse(ErrorCode.OK);
 	}
 
+
+    /**
+     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * CHANGE IT IN THE OTHER LOCATION AS WELL.
+     * 
+     * @param hostAikCert
+     * @return 
+     */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
         // TODO read privacy ca certs from database and see if any one of them signed it. 
