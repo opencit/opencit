@@ -61,7 +61,7 @@ public class AutoRefreshTrust implements Runnable, Plugin {
     }
     
     public List<String> findHostnamesWithExpiredCache() {
-        log.debug("findHostnamesWithExpiredCache");
+        log.info("findHostnamesWithExpiredCache");
         Query query = samlJpa.getEntityManager().createNativeQuery("SELECT h.Name FROM mw_hosts as h WHERE NOT EXISTS ( SELECT ID FROM mw_saml_assertion as t WHERE h.ID = t.host_id AND t.created_ts > ? )");
         Calendar maxCache = Calendar.getInstance();        
         maxCache.add(Calendar.SECOND, -(int)TimeUnit.SECONDS.convert(maxCacheDuration, maxCacheDurationUnits));
@@ -83,7 +83,7 @@ public class AutoRefreshTrust implements Runnable, Plugin {
     }*/
 
     public List<ExpiredHostStatus> findHostnamesAndLastEntryWithExpiredCache() {
-        log.debug("findHostnamesAndLastEntryWithExpiredCache");
+        log.info("findHostnamesAndLastEntryWithExpiredCache");
         Query query = samlJpa.getEntityManager().createNativeQuery("SELECT h.Name as hostname,max(s.created_ts) as lastcheck FROM mw_hosts as h JOIN mw_saml_assertion as s ON h.id=s.host_id WHERE NOT EXISTS ( SELECT ID FROM mw_saml_assertion as t WHERE h.ID = t.host_id AND t.created_ts > ? ) GROUP BY h.ID");
         Calendar maxCache = Calendar.getInstance();        
         maxCache.add(Calendar.SECOND, -(int)TimeUnit.SECONDS.convert(maxCacheDuration, maxCacheDurationUnits));

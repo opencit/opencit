@@ -43,7 +43,7 @@ namespace WLMLoaderTool.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("17,18,19,20")]
+        [global::System.Configuration.DefaultSettingValueAttribute("18,19,20")]
         public string VMM_MLE_PCR_List {
             get {
                 return ((string)(this["VMM_MLE_PCR_List"]));
@@ -52,7 +52,7 @@ namespace WLMLoaderTool.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("0,17")]
         public string BIOS_MLE_PCR_List {
             get {
                 return ((string)(this["BIOS_MLE_PCR_List"]));

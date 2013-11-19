@@ -44,7 +44,8 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblModuleManifest.findByDescription", query = "SELECT t FROM TblModuleManifest t WHERE t.description = :description"),
 //    @NamedQuery(name = "TblModuleManifest.findByCreatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.createdOn = :createdOn"),
     @NamedQuery(name = "TblModuleManifest.findByMleId", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId"),
-    @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName")
+    @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName"),
+    @NamedQuery(name = "TblModuleManifest.findByMleIDEventID", query = "SELECT t.id FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.eventID.id = :eventId and t.componentName= :name")
     })
 //    @NamedQuery(name = "TblModuleManifest.findByUpdatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.updatedOn = :updatedOn")
 
@@ -218,8 +219,10 @@ public class TblModuleManifest implements Serializable {
 
     public String getComponentName() {
         // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+       
         if( this.componentName != null ) {
-            log.debug("trimming componentName");
+            //log.debug("trimming componentName");
+            log.info("trimming componentName");
             this.componentName = this.componentName.trim(); 
         }
         return componentName;
@@ -229,8 +232,10 @@ public class TblModuleManifest implements Serializable {
         this.componentName = componentName;
         
         // fix for bug 2013-02-04 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+       
         if( this.componentName != null ) {
-            log.debug("trimming componentName");
+            //log.debug("trimming componentName");
+            log.info("trimming componentName");
             this.componentName = this.componentName.trim(); 
         }
     }

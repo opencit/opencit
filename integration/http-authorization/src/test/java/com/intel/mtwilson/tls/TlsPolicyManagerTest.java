@@ -228,13 +228,13 @@ public class TlsPolicyManagerTest {
     private static void printTaskStatus(Task task) {
         log.debug("Task results: {}", task.getId());
         if( task.isCompleted() ) {
-            log.debug("+ completed");
+            log.info("+ completed");
         }
         else if( task.isError() ) {
             log.debug("+ error: {}", task.getCause().toString());
         }
         else {
-            log.debug("+ timeout");
+            log.info("+ timeout");
         }
     }
             

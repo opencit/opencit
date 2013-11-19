@@ -67,15 +67,9 @@ public class My {
         return config; 
     }
     
-    /**
-     * XXX TODO add support for loading username/password and keystore file from database (in the MyConfiguration class)
-     * @return
-     * @throws MalformedURLException
-     * @throws IOException 
-     */
     public static MtWilson client() throws MalformedURLException, IOException {
         if( client == null ) {
-            log.info("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
+            log.debug("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
             client = ClientFactory.clientForUserInResource(
                 new FileResource(configuration().getKeystoreFile()), 
                 configuration().getKeystoreUsername(),

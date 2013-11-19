@@ -36,12 +36,12 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 # bug #288 we do not uninstall previous version because there are files including trustagent.jks  under the /opt tree and we need to keep them during an upgrade
 # if there's already a previous version installed, uninstall it
-#tagent=`which tagent 2>/dev/null`
-#if [ -f "$tagent" ]; then
-  #echo "Uninstalling previous version..."
-  #$tagent uninstall
-#fi
-
+# But if trust agent is already installed and running, stop it now (and start the new one later)
+tagent=`which tagent 2>/dev/null`
+if [ -f "$tagent" ]; then
+  echo "Stopping trust agent..."
+  $tagent stop
+fi
 
 # packages to install must be in current directory
 JAR_PACKAGE=`ls -1 TrustAgent*.jar 2>/dev/null | tail -n 1`
@@ -52,16 +52,23 @@ saveD=`pwd`
 # copy application files to /opt
 mkdir -p "${intel_conf_dir}"
 chmod 700 "${intel_conf_dir}"
-chmod 600 ${package_name}.properties
-cp ${package_name}.properties "${intel_conf_dir}"
+# bug #947 we do not replace trustagent.properties automatically because it contains important passwords that must not be clobbered.
+# if any release adds new properties to that file, use update_property_in_file to add them safely.
+if [ ! -f "${intel_conf_dir}/${package_name}.properties" ]; then
+  cp ${package_name}.properties "${intel_conf_dir}"
+  chmod 600 ${package_name}.properties
+fi
+
+# bug #947 if we are upgrading a previous install, move the trustagent.jks file from /opt to /etc
+if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
+  if [ -f "${package_dir}/cert/trustagent.jks" ]; then
+    mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
+  fi
+fi
+
 chmod 600 TPMModule.properties
 cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
-if [ -f "${package_config_filename}" ]; then
-  echo_warning "Copying sample configuration file to ${package_config_filename}.example"
-  cp "${package_name}.properties" "${package_config_filename}.example"
-else
-  cp "${package_name}.properties" "${package_config_filename}"  
-fi
+
 mkdir -p "${package_dir}"
 mkdir -p "${package_dir}"/bin
 mkdir -p "${package_dir}"/cert
@@ -70,13 +77,13 @@ mkdir -p "${package_dir}"/lib
 chmod -R 700 "${package_dir}"
 cp version "${package_dir}"
 cp functions "${package_dir}"
-#cp trustagent.jks "${package_dir}"/cert
 cp $JAR_PACKAGE "${package_dir}"/lib/TrustAgent.jar
-#cp *.sql "${package_dir}"/database/
 
-# copy default logging settings to /etc
-chmod 700 logback.xml
-cp logback.xml "${intel_conf_dir}"
+# copy default logging settings to /etc, but do not change it if it's already there (someone may have modified it)
+if [ ! -f "${intel_conf_dir}/logback.xml" ]; then
+  chmod 600 logback.xml
+  cp logback.xml "${intel_conf_dir}"
+fi
 
 # copy control scripts to /usr/local/bin
 chmod 700 tagent pcakey
@@ -86,7 +93,7 @@ cp tagent pcakey /usr/local/bin
 #module attestation script
 chmod 755 module_analysis.sh
 cp module_analysis.sh "${package_dir}"/bin
-echo "module_script=${package_dir}/bin/module_analysis.sh" >> "${intel_conf_dir}/${package_name}.properties"
+update_property_in_file module_script "${intel_conf_dir}/${package_name}.properties" "${package_dir}/bin/module_analysis.sh"
 
 java_install $JAVA_PACKAGE
 
@@ -167,9 +174,24 @@ fix_redhat_libcrypto
 echo "Registering tagent in start up"
 register_startup_script /usr/local/bin/tagent tagent
 
+fix_existing_aikcert() {
+  local aikdir=${intel_conf_dir}/cert
+  if [ ! -f $aikdir/aikcert.pem ] && [ -f $aikdir/aikcert.cer ]; then
+    # trust agent aikcert.cer is in broken PEM format... it needs newlines every 76 characters to be correct
+    cat $aikdir/aikcert.cer | sed 's/.\{76\}/&\n/g' > $aikdir/aikcert.pem
+    rm $aikdir/aikcert.cer
+    if [ -f ${package_config_filename} ]; then 
+       # update aikcert.filename=aikcert.cer to aikcert.filename=aikcert.pem
+       update_property_in_file aikcert.filename ${package_config_filename} aikcert.pem
+    fi
+  fi
+}
+
+fix_existing_aikcert
 
 # give tagent a chance to do any other setup (such as the .env file and pcakey) and start tagent when done
 /usr/local/bin/tagent setup
+/usr/local/bin/tagent start
 
 # now install monit
 monit_required_version=5.5
@@ -189,7 +211,7 @@ monit_detect() {
 }
 
 monit_install() {
-  MONIT_YUM_PACKAGES=""
+  MONIT_YUM_PACKAGES="monit"
   MONIT_APT_PACKAGES="monit"
   MONIT_YAST_PACKAGES=""
   MONIT_ZYPPER_PACKAGES="monit"
@@ -264,6 +286,10 @@ if [ -f /etc/monit/monitrc ]; then
     backup_file /etc/monit/monitrc
 else
     cp monitrc /etc/monit/monitrc
+fi
+
+if ! grep -q "include /etc/monit/conf.d/*" /etc/monit/monitrc; then 
+ echo "include /etc/monit/conf.d/*" >> /etc/monit/monitrc
 fi
 
 if [ ! -d /etc/monit/conf.d ]; then

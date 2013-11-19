@@ -4,17 +4,21 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.MyJpa;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;
+import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.controller.exceptions.PreexistingEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509PK;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.ms.helper.BaseBO;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
@@ -59,7 +63,7 @@ public class ApiClientBO extends BaseBO {
             
             // Log the details into the syslog
             Object[] paramArray = {Arrays.toString(getFingerPrint(x509Certificate)), Arrays.toString(apiClientRequest.getRoles())};
-            log.info(sysLogMarker, "Created a request for new API Client: {} with roles: {}", paramArray);
+            log.debug(sysLogMarker, "Created a request for new API Client: {} with roles: {}", paramArray);
 
         } catch (MSException me) {
             log.error("Error during API Client registration. " + me.getErrorMessage());
@@ -232,10 +236,20 @@ public class ApiClientBO extends BaseBO {
 
             clearRolesForApiClient(apiClientX509);
             setRolesForApiClient(apiClientX509, apiClientRequest.roles);
+                        
+            MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser();//new MwPortalUserJpaController(getMSEntityManagerFactory());
+            MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(apiClientX509.getUserNameFromName());
+            if(portalUser != null) {
+                portalUser.setEnabled(apiClientRequest.enabled);
+                portalUser.setStatus(apiClientRequest.status);
+                portalUser.setComment(apiClientRequest.comment);
+                mwPortalUserJpaController.edit(portalUser);
+            }
+            
             
             // Capture the change in the syslog
             Object[] paramArray = {Arrays.toString(apiClientRequest.fingerprint), Arrays.toString(apiClientRequest.roles), apiClientRequest.status};
-            log.info(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
+            log.debug(sysLogMarker, "Updated the status of API Client: {} with roles: {} to {}.", paramArray);
 
         } catch (MSException me) {
             log.error("Error during API Client update. " + me.getErrorMessage());

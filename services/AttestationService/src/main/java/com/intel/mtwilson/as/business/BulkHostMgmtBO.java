@@ -122,12 +122,14 @@ public class BulkHostMgmtBO {
             }
             try {
                 if (!updateHost)
-                    result = dao.addHost(new TxtHost(hostObj));
+                    result = dao.addHostByFindingMLE(hostObj);
                 else
-                    result = dao.updateHost(new TxtHost(hostObj));
+                    result = dao.updateHostByFindingMLE(hostObj);
             } catch (ASException e) {
                 isError = true;
-                result = new HostResponse(e.getErrorCode(), e.getErrorMessage());
+                result = new HostResponse();
+                result.setErrorCode(e.getErrorCode().toString());
+                result.setErrorMessage(e.getErrorMessage());
             } catch (Exception e) {
                 isError = true;
                 result = new HostResponse(ErrorCode.UNKNOWN_ERROR, e.getLocalizedMessage());

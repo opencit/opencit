@@ -30,7 +30,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.xml.transform.OutputKeys;
@@ -113,6 +112,8 @@ public class ConverterUtil {
 				hostVO.setOverAllStatus(TDPConfig.getConfiguration().getString(HelperConstant.IMAGE_TRUSTED_FALSE));
 				hostVO.setOverAllStatusBoolean(false);
 			}
+
+// XXX MERGE WARNING 20131119 TODO make sure this was merged correctly
 
                         if (trustAssertion.getStringAttribute(HelperConstant.ASSET_TAG) != null){
                             if (Boolean.parseBoolean(trustAssertion.getStringAttribute(HelperConstant.ASSET_TAG))) {

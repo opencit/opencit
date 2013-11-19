@@ -36,22 +36,22 @@ public class Aes128Test {
     @Test
     public void testEncryptDecrypt() throws CryptographyException, UnsupportedEncodingException {
         String input = "hello world";
-        log.info("Input: {} (str length: {})", new String[] { input, String.valueOf(input.length()) });
+        log.debug("Input: {} (str length: {})", new String[] { input, String.valueOf(input.length()) });
         
         SecretKey secretKey = Aes128.generateKey(); // NoSuchAlgorithmException
-        log.info("Secret Key: {} (raw length: {})", new String[] { Base64.encodeBase64String(secretKey.getEncoded()), String.valueOf(secretKey.getEncoded().length) });
+        log.debug("Secret Key: {} (raw length: {})", new String[] { Base64.encodeBase64String(secretKey.getEncoded()), String.valueOf(secretKey.getEncoded().length) });
         Aes128 aes = new Aes128(secretKey); // NoSuchPaddingException
         
         byte[] plaintext = input.getBytes("UTF-8"); //UnsupportedEncodingException
         byte[] ciphertext = aes.encrypt(plaintext); // InvalidKeyException, IllegalBlockSizeException, BadPaddingException
         
-        log.info("Plaintext: {} (raw length: {})", new String[] { Base64.encodeBase64String(plaintext), String.valueOf(plaintext.length) });
-        log.info("Ciphertext: {} (raw length: {})", new String[] { Base64.encodeBase64String(ciphertext), String.valueOf(ciphertext.length) });
+        log.debug("Plaintext: {} (raw length: {})", new String[] { Base64.encodeBase64String(plaintext), String.valueOf(plaintext.length) });
+        log.debug("Ciphertext: {} (raw length: {})", new String[] { Base64.encodeBase64String(ciphertext), String.valueOf(ciphertext.length) });
         
         byte[] decrypted = aes.decrypt(ciphertext);
-        log.info("Decrypted Plaintext: {} (raw length: {})", new String[] { Base64.encodeBase64String(decrypted), String.valueOf(decrypted.length) });
+        log.debug("Decrypted Plaintext: {} (raw length: {})", new String[] { Base64.encodeBase64String(decrypted), String.valueOf(decrypted.length) });
         String output = new String(decrypted, "UTF-8");
-        log.info("Output: {} (str length: {})", new String[] { output, String.valueOf(output.length()) });
+        log.debug("Output: {} (str length: {})", new String[] { output, String.valueOf(output.length()) });
         
         assertEquals(input, output);
         

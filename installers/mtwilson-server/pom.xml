@@ -63,6 +63,12 @@
         <version>5.5</version>
         <type>bin</type>
     </dependency>
+	<dependency>
+        <groupId>com.intel.mtwilson.linux</groupId>
+        <artifactId>logrotate</artifactId>
+        <version>1.0</version>
+        <type>bin</type>
+    </dependency>
     
  <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
     <dependency>
@@ -174,6 +180,12 @@
                   <version>${project.version}</version>
                   <type>bin</type>
                 </artifactItem>
+				<artifactItem>
+					<groupId>com.intel.mtwilson.linux</groupId>
+					<artifactId>logrotate</artifactId>
+					<version>1.0</version>
+					<type>bin</type>
+				</artifactItem>
 		<!-- other -->
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
@@ -300,6 +312,13 @@
                   <type>bin</type>
                 </artifactItem>
                 -->
+								<artifactItem>
+					<groupId>com.intel.mtwilson.linux</groupId>
+					<artifactId>logrotate</artifactId>
+					<version>1.0</version>
+					<type>bin</type>
+				</artifactItem>
+
 		<artifactItem>
 			<groupId>com.intel.mtwilson.linux</groupId>
 			<artifactId>mtwilson-portal-installer</artifactId>

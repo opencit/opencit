@@ -181,7 +181,7 @@ public class MyConfiguration {
                             password = env.getString("MTWILSON_PASSWORD");
                         }
                         else {
-                            log.error("Found encrypted configuration file, but no password was found in system properties or environment");
+                            log.warn("Found encrypted configuration file, but no password was found in system properties or environment");
                         }
                         if( password != null ) {
                             ExistingFileResource resource = new ExistingFileResource(f);
@@ -227,14 +227,14 @@ public class MyConfiguration {
                 composite.addConfiguration(classpath);
             }
         } catch (IOException ex) {
-            log.info("Did not find [" + propertiesFilename + "] properties on classpath",
+            log.debug("Did not find [" + propertiesFilename + "] properties on classpath",
                     ex);
         } finally {
             if (in != null) {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    log.warn("Failed to close input stream for "
+                    log.error("Failed to close input stream for "
                             + propertiesFilename);
                 }
             }
@@ -469,19 +469,10 @@ public class MyConfiguration {
         return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
     }
     
-    
-    ///////////////////////// asset tag configuration //////////////////////////////////
-
-    // asset tagging html5 resources (used by the reference implementation)
-    public String getAssetTagHtml5Dir() {
-        return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
+    public boolean getAutoUpdateHosts() {
+        return conf.getBoolean("mtwilson.as.autoUpdateHost", true);
+    }    
     }
-    
-    // asset tag server url
-    public URL getAssetTagServerURL() throws MalformedURLException {
-        return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
-    }
-    
     public String getAssetTagServerString() throws MalformedURLException {
         return conf.getString("mtwilson.atag.url", "http://localhost:1700");
     }

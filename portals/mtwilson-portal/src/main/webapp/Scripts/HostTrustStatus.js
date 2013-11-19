@@ -62,10 +62,9 @@ function populateHostTrustDataIntoTable(hostDetails) {
 				 //according to email on Fri 9/14/2012 10:21 AM
 				  //Item: 5
 				//To remove the location from main page commnet thr below line and un uncommnet the next line 
-                                //value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
+			    value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
 				//value="";
-				//str+='<td class="row5">'+value+'</td>'+
-                                str+='<td align="center" class="row5" title="'+hostDetails[item].assetTagDetails+'"><img border="0" src="'+hostDetails[item].assetTagStatus+'"></td>'+
+				str+='<td class="row5">'+value+'</td>'+
 				'<td align="center" class="row6"><img border="0" src="'+hostDetails[item].biosStatus+'"></td>'+
 				'<td align="center" class="row7"><img border="0" src="'+hostDetails[item].vmmStatus+'"></td>'+
 				'<td align="center" class="row8"><img border="0" src="'+hostDetails[item].overAllStatus+'"></td>';
@@ -517,19 +516,31 @@ function fnUpdateTrustForHost(element) {
 }
 
 function updateTrustStatusSuccess(response,element,host) {
+        
 	$(element).attr('value','Refresh');
 	var row = $(element).parent().parent();
 	if (response.result) {
 		row.find('td:eq(5)').html('<img border="0" src="'+response.hostVo.biosStatus+'">');
 		row.find('td:eq(6)').html('<img border="0" src="'+response.hostVo.vmmStatus+'">');
 		row.find('td:eq(7)').html('<img border="0" src="'+response.hostVo.overAllStatus+'">');
+                //row.find('td:eq(5)').html('<img border="0" src="'+'response.hostVo.biosStatus'+'">');
+		//row.find('td:eq(6)').html('<img border="0" src="'+'response.hostVo.vmmStatus'+'">');
+		//row.find('td:eq(7)').html('<img border="0" src="'+'response.hostVo.overAllStatus'+'">');
 		row.find('td:eq(8)').html(response.hostVo.updatedOn);
-		if (response.hostVo.errorCode != 0) {
-			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.hostVo.errorMessage+'</textarea>');
-		}else{
+                if(response.hostVo.errorCode == 1){
+                    row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'System is unreachable'+'</textarea>');
+                }
+		else if (response.hostVo.errorCode != 0) {
+			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.hostVo.errorMessage+' ErrorCode = '+response.hostVo.errorCode+'</textarea>');
+                        //row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'ERROR!'+'</textarea>');
+                        
+		}
+                else{
 			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">Host Trust status updated successfully.</textarea>');
 		}
 	}else {
-		row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.message+'</textarea>');
+		row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.message+' False result '+'</textarea>');
+                //row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'False Result'+'</textarea>');
 	}
+      // alert(response.toSource());
 }

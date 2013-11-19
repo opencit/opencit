@@ -41,29 +41,29 @@ public class ImportConfig implements Command {
     public void execute(String[] args) throws Exception {
 
         if( args.length < 1) { throw new IllegalArgumentException("Usage: ImportConfig <encrypted-file> [--in=<file>|--stdin] [--env-password=MTWILSON_PASSWORD]"); }   
-        String filename = args[0];
+        for(int i=0;i<args.length;i++) {
+            String filename = args[i];
         
-        String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
+            String password = getNewPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         
-        FileResource resource = new FileResource(new File(filename));
-        PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
+            FileResource resource = new FileResource(new File(filename));
+            PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
         
-        String content ;
-        if( options.containsKey("in") ) {
-            FileInputStream in = new FileInputStream(new File(options.getString("in")));
-            content = IOUtils.toString(in);
-            IOUtils.closeQuietly(in);
+            String content ;
+            if( options.containsKey("in") ) {
+                FileInputStream in = new FileInputStream(new File(options.getString("in")));
+                content = IOUtils.toString(in);
+                IOUtils.closeQuietly(in);
+            }
+            else if( options.getBoolean("stdin", false) ) {
+                content = IOUtils.toString(System.in);
+            }else {
+                FileInputStream in = new FileInputStream(new File(filename));
+                content = IOUtils.toString(in);
+                IOUtils.closeQuietly(in);
+            }
+            encryptedFile.saveString(content);
         }
-        else if( options.getBoolean("stdin", false) ) {
-            content = IOUtils.toString(System.in);
-        }
-        else {
-            FileInputStream in = new FileInputStream(new File(filename));
-            content = IOUtils.toString(in);
-            IOUtils.closeQuietly(in);
-        }
-        encryptedFile.saveString(content);
-        
     }
 
     

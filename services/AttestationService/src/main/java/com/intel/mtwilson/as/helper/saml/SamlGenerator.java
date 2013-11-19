@@ -386,7 +386,6 @@ public class SamlGenerator {
                     attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid()),tagValue));
                 }
             }
-
             if( host.getAikCertificate() != null ) {
                 attrStatement.getAttributes().add(createStringAttribute("AIK_Certificate", host.getAikCertificate()));
                 attrStatement.getAttributes().add(createStringAttribute("AIK_SHA1", host.getAikSha1()));

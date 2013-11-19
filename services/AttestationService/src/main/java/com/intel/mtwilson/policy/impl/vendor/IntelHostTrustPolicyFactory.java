@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
-import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
@@ -51,8 +50,18 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
     }
 
     @Override
-    public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
-        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
+    public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
+        HashSet<Rule> rules = new HashSet<Rule>();
+        // first, load the list of pcr's marked for this host's vmm mle 
+        Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+        rules.addAll(pcrConstantRules);
+
+        // Next we need to add all the modules
+        if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host);
+            rules.addAll(pcrEventLogRules);
+        }
+        return rules;    
     }
 
 }

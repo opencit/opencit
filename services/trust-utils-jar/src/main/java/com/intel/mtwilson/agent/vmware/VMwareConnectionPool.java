@@ -57,8 +57,14 @@ public class VMwareConnectionPool {
      */
     public VMwareClient getClientForConnection(TlsConnection tlsConnection) throws VMwareConnectionException {
         VMwareClient client = reuseClientForConnection(tlsConnection);
-        if( client != null ) { return client; } // already validated
-        return createClientForConnection(tlsConnection);
+        if( client != null ) { // already validated
+            log.debug("Found an already created vcenter connection. Reusing...");
+            return client;
+        }
+        else {
+            log.debug("Could not find vcenter connection. Creating a new vcenter connection...");
+            return createClientForConnection(tlsConnection);
+        }
     }
     
     /**
@@ -86,7 +92,7 @@ public class VMwareConnectionPool {
 //            client.setTlsPolicy(tlsConnection.getTlsPolicy());
             return client;                
         }
-        log.debug("Found stale vCenter connection");
+        log.info("Found stale vCenter connection");
         try {
             factory.destroyObject(tlsConnection, client);
         }
@@ -120,7 +126,7 @@ public class VMwareConnectionPool {
 //                log.debug("VMwareConnectionPool caching new connection {}", tlsConnection.getConnectionString());
                 pool.put(tlsConnection, client);
                 // TODO: check pool size, if greater than maxSize then start removing connections (most idle first) until we get down to maxSize
-                log.debug("Opening new vCenter connection for "+client.getEndpoint());
+//                log.debug("Opening new vCenter connection for "+client.getEndpoint());
                 return client;
             }
             else {
@@ -133,7 +139,7 @@ public class VMwareConnectionPool {
                 javax.net.ssl.SSLHandshakeException e2 = (javax.net.ssl.SSLHandshakeException)e.getCause();
                 if( e2.getCause() != null && e2.getCause() instanceof com.intel.mtwilson.tls.UnknownCertificateException ) {
                     com.intel.mtwilson.tls.UnknownCertificateException e3 = (com.intel.mtwilson.tls.UnknownCertificateException)e2.getCause();
-                    log.debug("Failed to connect to vcenter due to unknown certificate exception: {}", e3.toString());
+                    log.warn("Failed to connect to vcenter due to unknown certificate exception: {}", e3.toString());
                     X509Certificate[] chain = e3.getCertificateChain();
                     if( chain == null || chain.length == 0 ) {
                         log.error("Server certificate is missing");
@@ -144,11 +150,11 @@ public class VMwareConnectionPool {
                                 log.debug("Server certificate fingerprint: {} and subject: {}", new Sha1Digest(X509Util.sha1fingerprint(certificate)), certificate.getSubjectX500Principal().getName());
                             }
                             catch(NoSuchAlgorithmException e4) {
-                                log.debug("Cannot read server certificate: {}", e4.toString(), e4);
+                                log.error("Cannot read server certificate: {}", e4.toString(), e4);
                                 throw new VMwareConnectionException(e4);
                             }
                             catch(CertificateEncodingException e4) {
-                                log.debug("Cannot read server certificate: {}", e4.toString(), e4);
+                                log.error("Cannot read server certificate: {}", e4.toString(), e4);
                                 throw new VMwareConnectionException(e4);
                             }
                         }

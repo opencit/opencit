@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
@@ -32,6 +33,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ws.rs.DefaultValue;
 
 /**
  * REST Web Service *
@@ -58,7 +60,8 @@ public class Host {
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/location")
         public HostLocation getLocation(@QueryParam("hostName") String hostName) {
-                return new ASComponentFactory().getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
+                if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+                else return new ASComponentFactory().getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
         }
 
         @RolesAllowed({"Attestation", "Security"})
@@ -75,6 +78,8 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("/aik-{aik}/trust.json")
     public HostTrustResponse getTrustByAik(@PathParam("aik")String aikFingerprint) {
+        if( aikFingerprint == null || aikFingerprint.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+                else {
         try {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
@@ -88,6 +93,7 @@ public class Host {
             throw e;
         }catch(Exception e) {
             throw new ASException(e);
+        }
         }
     }
     
@@ -107,6 +113,8 @@ public class Host {
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
     @Path("/aik-{aik}/trustcert.x509")
     public byte[] getCurrentTrustCertificateByAik(@PathParam("aik")String aikFingerprint) {
+        if( aikFingerprint == null || aikFingerprint.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+        else{
         try {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
@@ -131,6 +139,7 @@ public class Host {
             throw e;
         }catch(Exception e) {
             throw new ASException(e);
+        }
         }
     }
     
@@ -170,7 +179,8 @@ public class Host {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse post(TxtHostRecord hostRecord) { 
-         return hostBO.addHost(new TxtHost(hostRecord)); 
+        if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+        else return hostBO.addHost(new TxtHost(hostRecord), null); 
     }
     
     
@@ -205,7 +215,8 @@ public class Host {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse put(TxtHostRecord hostRecord) {
-            return hostBO.updateHost(new TxtHost(hostRecord));
+            if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+            else return hostBO.updateHost(new TxtHost(hostRecord),null);
     }
     
         /**
@@ -219,18 +230,25 @@ public class Host {
          * Sample output for trusted host: BIOS:1,VMM:1
          *
          * @param hostName unique name of the host to query
+         * @param forceVerify
          * @return a string like BIOS:0,VMM:0 representing the trust status
          */
         @RolesAllowed({"Attestation", "Report"})
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/trust")
-        public HostTrustResponse get(@QueryParam("hostName") String hostName) {
+        public HostTrustResponse get(
+                @QueryParam("hostName") String hostName,
+                @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify) throws ASException {
                 try {
                         // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
                         Hostname hostname = new Hostname(hostName);
-                        HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatus(hostname);
+                        if(hostname.isValid()){
+                            //HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatus(hostname);
+                            HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatusWithCache(hostName, forceVerify);
                         return new HostTrustResponse(hostname, trust);
+                        }
+                        else throw new ASException(ErrorCode.AS_MISSING_INPUT, "hostName");
                 } catch (ASException e) {
                         throw e;
                 } catch (Exception e) {
@@ -253,7 +271,8 @@ public class Host {
 //    @Consumes({"text/html"})
         @Produces({MediaType.APPLICATION_JSON})
         public HostResponse delete(@QueryParam("hostName") String hostName) {
-                return hostBO.deleteHost(new Hostname(hostName));
+                if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+                else return hostBO.deleteHost(new Hostname(hostName));
         }
 
         /**
@@ -265,6 +284,30 @@ public class Host {
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria) {
-                return hostBO.queryForHosts(searchCriteria);
+                //if( searchCriteria == null || searchCriteria.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
+                //else 
+            return hostBO.queryForHosts(searchCriteria);
         }
+
+        @RolesAllowed({"Attestation"})
+        @POST
+        @Consumes({MediaType.APPLICATION_JSON})
+        @Produces({MediaType.APPLICATION_JSON})
+        @Path("/mle")
+        public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
+        }
+
+        @RolesAllowed({"Attestation"})
+        @POST
+        @Consumes({MediaType.APPLICATION_JSON})
+        @Produces({MediaType.APPLICATION_JSON})
+        @Path("/mle/verify")
+        public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
+                String result = new ASComponentFactory().getHostTrustBO().checkMatchingMLEExists(hostRecord, 
+                        hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
+                System.out.println("checkMatchingMLEExists RESULT:" + result);
+                return result;
+        }
+        
 }

@@ -35,6 +35,5 @@
     <class>com.intel.mtwilson.as.data.TblModuleManifestLog</class>
     <class>com.intel.mtwilson.as.data.MwMleSource</class>
     <class>com.intel.mtwilson.as.data.MwApiClientHttpBasic</class>
-    <class>com.intel.mtwilson.as.data.MwAssetTagCertificate</class>
   </persistence-unit>
 </persistence>

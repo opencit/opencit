@@ -37,25 +37,26 @@ public class ExportConfig implements Command {
     public void execute(String[] args) throws Exception {
 
         if( args.length < 1) { throw new IllegalArgumentException("Usage: ExportConfig <encrypted-file> [--out=<file>|--stdout] [--env-password=MTWILSON_PASSWORD]"); }   
-        String filename = args[0];
+        for(int i=0;i<args.length;i++) {
+            String filename = args[i];
         
-        String password = getExistingPassword("the Mt Wilson Encrypted Configuration File", "env-password");
+            String password = getExistingPassword("the Mt Wilson Encrypted Configuration File", "env-password");
         
-        FileResource resource = new FileResource(new File(filename));
-        PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
-        String content = encryptedFile.loadString();
-        if( options.containsKey("out")) {
-            FileOutputStream out = new FileOutputStream(new File(options.getString("out")));
-            IOUtils.write(content, out);
-            IOUtils.closeQuietly(out);
-        }
-        else if( options.getBoolean("stdout", false)) {
-            IOUtils.write(content, System.out);
-        }
-        else {
-            FileOutputStream out = new FileOutputStream(new File(filename));
-            IOUtils.write(content, out);
-            IOUtils.closeQuietly(out);
+            FileResource resource = new FileResource(new File(filename));
+            PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
+            String content = encryptedFile.loadString();
+            if( options.containsKey("out")) {
+                FileOutputStream out = new FileOutputStream(new File(options.getString("out")));
+                IOUtils.write(content, out);
+                IOUtils.closeQuietly(out);
+            }
+                else if( options.getBoolean("stdout", false)) {
+                IOUtils.write(content, System.out);
+            }else {
+                FileOutputStream out = new FileOutputStream(new File(filename));
+                IOUtils.write(content, out);
+                IOUtils.closeQuietly(out);
+            }
         }
     }
 

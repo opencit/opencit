@@ -12,6 +12,7 @@
     </parent>
 
     <dependencies>
+	   
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -148,6 +149,11 @@
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

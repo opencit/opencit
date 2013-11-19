@@ -34,11 +34,11 @@ public class ReadIdentityCmd implements ICommand {
         File aikCertFile = new File(context.getAikCertFileName());
         
         if(aikCertFile.exists()){
-            log.info( "AIK Certificate To Read - {}", context.getAikCertFileName());
+            log.debug( "AIK Certificate To Read - {}", context.getAikCertFileName());
 
             context.setAIKCertificate(CommandUtil.readCertificate(context.getAikCertFileName())); // this file name is configured ;it is NOT user input
 
-            log.info("AIK Certificate Read to memory - {}", context.getAikCertFileName());
+            log.debug("AIK Certificate Read to memory - {}", context.getAikCertFileName());
         }else{
             throw new TAException(ErrorCode.CERT_MISSING,"Aik Certificate file is missing.");
         } 

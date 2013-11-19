@@ -39,7 +39,7 @@ public class TrustAgent {
 
             if (!file.isDirectory()) {
                 file.mkdir();
-                log.info("Data folder was not there created : " + context.getDataFolder());
+                log.debug("Data folder was not there created : " + context.getDataFolder());
             }
 
 
@@ -172,7 +172,7 @@ public class TrustAgent {
             Matcher m = p.matcher(xmlInput);
             m.find();
             String daaChallengeEncodedBase64 = m.group(1);
-            log.info("DAA Challenge (base64): {0}", daaChallengeEncodedBase64);
+            log.debug("DAA Challenge (base64): {0}", daaChallengeEncodedBase64);
             return Base64.decodeBase64(daaChallengeEncodedBase64);
         } catch (Exception e) {
             throw new TAException(ErrorCode.BAD_REQUEST, "Cannot find DAA Challenge in the input xml: " + e.toString());
@@ -187,7 +187,7 @@ public class TrustAgent {
             Matcher m = p.matcher(xmlInput);
             m.find();
             String nonce = m.group(1);
-            log.info("Nonce {}", nonce);
+            log.debug("Nonce {}", nonce);
             return nonce;
         } catch (Exception e) {
             throw new TAException(ErrorCode.BAD_REQUEST, "Cannot find nonce in the input xml");
@@ -261,7 +261,7 @@ public class TrustAgent {
         } catch (NumberFormatException e) {
             throw new TAException(ErrorCode.BAD_PCR_VALUES, String.format("PCR list [%s] contains a non number.", pcrList));
         }
-        log.info("PCR List {}", pcrInput);
+        log.debug("PCR List {}", pcrInput);
         return pcrInput.toString();
     }
 
@@ -322,7 +322,6 @@ public class TrustAgent {
                 + "<vmmName>" + context.getVmmName() + "</vmmName>"
                 + "<vmmVersion>" + context.getVmmVersion() + "</vmmVersion>"
                 + "<processorInfo>" + context.getProcessorInfo() + "</processorInfo>"
-                + "<hostUUID>" + context.getHostUUID() + "</hostUUID>"
                 + "</host_info>";
         return responseXML;
         
