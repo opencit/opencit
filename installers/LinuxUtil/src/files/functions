@@ -3287,7 +3287,7 @@ change_db_pass() {
     mysql_version
     mysql_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-    $mysqladmin -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" password "$new_db_pass"
+    $mysqladmin -h "$DATABASE_HOSTNAME" -u "$DATABASE_USERNAME" -p"$DATABASE_PASSWORD" password "$new_db_pass"
     if [ $? -ne 0 ]; then echo_failure "Issue building mysql command."; exit; fi
   elif using_postgres; then #POSTGRES
     echo_success "using postgres"
@@ -3295,7 +3295,7 @@ change_db_pass() {
     postgres_version
     postgres_test_connection_report
     if [ $? -ne 0 ]; then exit; fi
-    temp=$(sudo "$psql" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
+    temp=$(sudo "$psql" -h "$DATABASE_HOSTNAME" -d "$DATABASE_SCHEMA" -c "ALTER USER $DATABASE_USERNAME WITH PASSWORD '$new_db_pass';")
     echo ""
     if [ $? -ne 0 ]; then echo_failure "Issue building postgres or expect command."; exit; fi
     # Edit postgres password file if it exists
