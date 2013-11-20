@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;
@@ -70,7 +71,8 @@ public class EraseUserAccounts implements Command {
 
     private void deleteUser(String username) {
         try {
-             MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
+             MwPortalUserJpaController jpa  = My.jpa().mwPortalUser();
+             
              MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
              jpa.destroy(portalUser.getId());
              System.out.println("Deleted " + username);
