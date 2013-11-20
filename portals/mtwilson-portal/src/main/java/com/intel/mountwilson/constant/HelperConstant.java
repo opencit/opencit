@@ -17,9 +17,9 @@ public interface HelperConstant {
 	String VMM_NAME_SEPARATOR_TXTHOSTRECORD = "_";
 	
 	
-	String IMAGE_TRUSTED_TRUE = "trustTure";
+	String IMAGE_TRUSTED_TRUE = "trustTrue";
 	String IMAGE_TRUSTED_FALSE = "trustFalse";
-	String IMAGE_TRUSTED_UNKNOWN = "trustUnknow";
+	String IMAGE_TRUSTED_UNKNOWN = "trustUnknown";
 	
 	String OS_IMAGE_VMWARE = "vmware";
 	String SEPARATOR_VMCLIENT = "::";

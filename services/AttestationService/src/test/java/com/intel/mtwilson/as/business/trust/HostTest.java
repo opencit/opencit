@@ -50,20 +50,20 @@ public class HostTest {
     @Test
     public void checkMatchingMLEExists () throws IOException {
         TxtHostRecord hostObj = new TxtHostRecord();
-        hostObj.HostName = "10.1.71.169";
+        hostObj.HostName = "10.1.71.167";
         hostObj.Port = 9999;
         hostObj.AddOn_Connection_String = ConnectionString.forIntel(hostObj.HostName, hostObj.Port).getConnectionStringWithPrefix();
         hostObj.BIOS_Name = "Intel_Corp.";
         hostObj.BIOS_Version = "01.00.T060";
-        hostObj.VMM_Name = "Intel_Thurley_Xen";
-        hostObj.VMM_Version = "11-4.1.0";
+        hostObj.VMM_Name = "Intel_Thurley_QEMU";
+        hostObj.VMM_Version = "6.4-0.12.1";
 //        hostObj.HostName = "10.1.71.154";
 //        hostObj.AddOn_Connection_String = new ConnectionString("https://10.1.71.87:443/sdk;Administrator;P@ssw0rd").getConnectionStringWithPrefix();        
 //        hostObj.BIOS_Name = "Intel_Corporation";
 //        hostObj.BIOS_Version = "01.00.0060";
 //        hostObj.VMM_Name = "Intel_Thurley_VMware_ESXi";
 //        hostObj.VMM_Version = "5.1.0-799733";
-        String result = hostTrustBO.checkMatchingMLEExists(hostObj, "0,1", "18,19,20");
+        String result = hostTrustBO.checkMatchingMLEExists(hostObj, "0,17", "18");
         System.out.println(result);
     }
 
