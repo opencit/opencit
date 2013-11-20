@@ -487,7 +487,7 @@ mtwilson.atag = mtwilson.atag || {};
      // removes all tags with this oid
     mtwilson.atag.exportXmlSelection = function(uuid) {
         log.debug("exportXmlSelection: " + uuid);
-        
+        alert(document.URL);
 
     };
     
