@@ -87,7 +87,11 @@ mtwilson_localhost_integration() {
 
 setup() {
   java_detect; java_env_report > ${env_dir}/java
-  glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
+  if using_glassfish; then
+    glassfish_detect; glassfish_env_report > ${env_dir}/glassfish
+  elif using_tomcat; then
+    tomcat_detect; tomcat_env_report > ${env_dir}/tomcat
+  fi
   find_ctl_commands
 
   # Set the "setup" flag so that service setup commands to not attempt to re-deploy their application (in order to preserve any customized version of the app that has been deployed to glassfish directly)
@@ -324,6 +328,7 @@ case "$1" in
           shift
           call_setupcommand $@
         else
+          load_default_env
           setup
         fi
         ;;
@@ -361,9 +366,10 @@ case "$1" in
         call_setupcommand EraseUserAccounts $@
         ;;
   change-db-pass)
-        if [ $ -ne 1 ]; then
-          echo_failure "Usage: $0 $1"; exit -1; fi
-        change_db_pass $@
+        if [ $# -ne 1 ]; then
+          echo_failure "Usage: $0 $1"; exit -1;
+        fi
+        change_db_pass
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi

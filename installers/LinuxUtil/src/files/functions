@@ -2864,9 +2864,10 @@ webservice_start() {
     if using_glassfish; then
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
-        rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
-      fi
+      $tomcat start
+      #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
+        #rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
+      #fi
       #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
     fi
   fi
@@ -2878,9 +2879,10 @@ webservice_stop() {
     if using_glassfish; then
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
-        rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
-      fi
+      $tomcat stop
+      #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
+        #rename $TOMCAT_HOME/webapps/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
+      #fi
       #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
     fi
   fi
@@ -3261,10 +3263,8 @@ change_db_pass() {
   load_default_env 1>/dev/null
   
   # Do not allow a blank password to be specified
-  if [ -z $DATABASE_PASSWORD_NEW ]; then
-    echo_failure "The new password could not be determined. Please verify \"DATABASE_PASSWORD_NEW\" variable is set."
-    exit -1
-  fi
+  prompt_with_default_password DATABASE_PASSWORD_NEW "New database password: " "$DATABASE_PASSWORD_NEW"
+  
   
   # Check for encryption, add to array if encrypted
   encrypted_files=()

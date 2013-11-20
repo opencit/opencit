@@ -19,6 +19,7 @@ export LOG_COPYTRUNCATE=copytruncate
 export LOG_SIZE=100M
 export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
+export AUTO_UPDATE_ON_UNTRUST=true
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
@@ -196,6 +197,9 @@ else
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
 fi
+
+update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
+
 
 # copy default logging settings to /etc
 chmod 700 logback.xml
@@ -823,11 +827,6 @@ echo "Done"
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
-
-if [ -n "${AUTO_UPDATE_ON_UNTRUST}" ]; then
-  update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
-fi
-
 
 #Save variables to properties file
 if using_mysql; then   

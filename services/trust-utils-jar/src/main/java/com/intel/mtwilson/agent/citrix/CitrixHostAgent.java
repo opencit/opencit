@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -83,20 +84,19 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public X509Certificate getAikCertificate() {
-        throw new UnsupportedOperationException("Not supported");
-        /*
-        X509Certificate cert = null;
+        X509Certificate aikCert = null;
+        String aikString = null;
+        
         try {
-            String crt = client.getAIKCertificate().replaceAll("\n", "").replaceAll("\r","");
-            System.out.println("decodeding pem == \n"+crt);
-             cert = X509Util.decodePemCertificate(crt);  
-             
-        }  catch(Exception ex){
-            System.out.println("getAikCert caught: " + ex.getMessage());
-            
+            aikString = client.getAIKCertificate();
+            aikCert = X509Util.decodePemCertificate(aikString);
+        } catch(Exception e) {
+            log.error("Cannot decode AIK certificate: {}", e.toString());
+            log.debug(aikString);
+            return null;
         }
-        return cert;
-        */
+        
+        return aikCert;
     }
 
     @Override

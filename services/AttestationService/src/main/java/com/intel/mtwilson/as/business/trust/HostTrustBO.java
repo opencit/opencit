@@ -1535,6 +1535,10 @@ public class HostTrustBO extends BaseBO {
                             hostReport.pcrManifest = pcrManifest;
                         }
                         
+                        // Bug-1014: due to new policy enforcement for AIK validation
+                        if (agent.isAikAvailable())
+                            hostReport.aik = new Aik(agent.getAikCertificate());
+                        
                         tblHosts.setBiosMleId(biosMLE);
 
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
