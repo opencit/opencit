@@ -2462,6 +2462,38 @@ tomcat_sslcert_report() {
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }
 
+tomcat_init_manager() {
+  if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+
+  tomcat_manager_xml=`grep roles=\"manager\" $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
+  TOMCAT_MANAGER_USER=""
+  TOMCAT_MANAGER_PASS=""
+
+  OIFS="$IFS"
+  IFS=' '
+  read -a valueArray <<< "${tomcat_manager_xml}"
+  IFS="$OIFS"
+
+  for i in "${valueArray[@]}"; do
+    if [[ "$i" == *"username"* ]]; then
+      TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+    fi
+
+    if [[ "$i" == *"password"* ]]; then
+      TOMCAT_MANAGER_PASS=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+    fi
+  done
+
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate|grep "OK"`
+
+  if [ -n "$test" ]; then
+    echo_success "Tomcat manger connection success."
+  else
+    echo_failure "Tomcat manager connection failed. Incorrect credentials."
+  fi
+}
+
+
 ### FUNCTION LIBRARY: java
 
 java_clear() {
@@ -2806,40 +2838,11 @@ webservice_running() {
   elif using_tomcat; then
     tomcat_running
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
+    if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      # determine if this app is deployed
-      echo "MTWILSON_SERVER: $MTWILSON_SERVER" >> $INSTALL_LOG_FILE
-      local wars=`ls $TOMCAT_HOME/webapps/*.war`
-      for war in $wars 
-      do
-        echo "war=$war" >> $INSTALL_LOG_FILE
-        w=${war##*/}
-        echo "w=$w" >> $INSTALL_LOG_FILE 
-        result=`basename $w .war`
-        echo "result=$result" >> $INSTALL_LOG_FILE
-        if [ "$result" == "${webservice_application_name}" ]; then
-          WEBSERVICE_DEPLOYED=${webservice_application_name} 
-          echo $WEBSERVICE_DEPLOYED  >> $INSTALL_LOG_FILE 
-        fi 
-      done
-     
-      #WEBSERVICE_DEPLOYED=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "${webservice_application_name}"`
-      echo "WEBSERVICE_DEPLOYED=$WEBSERVICE_DEPLOYED" >> $INSTALL_LOG_FILE
-      
-      #if deployed, make sure it is runnning
+      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}"`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        cd $TOMCAT_HOME/webapps/
-        apps=`ls -d */ | tr -d "/"`
-        for app in $apps 
-        do 
-          echo "app=$app" >> $INSTALL_LOG_FILE
-          if [[ "$app" == "${webservice_application_name}" ]]; then
-            echo "inside webservice running" >> $INSTALL_LOG_FILE
-            WEBSERVICE_RUNNING=running 
-          fi 
-        done
-        #WEBSERVICE_RUNNING=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
-        echo "WEBSERVICE_RUNNING=$WEBSERVICE_RUNNING" >> $INSTALL_LOG_FILE
+        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
       fi
     fi
   fi
@@ -2864,7 +2867,9 @@ webservice_start() {
     if using_glassfish; then
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      $tomcat start
+      if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate
+      #$tomcat start
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
         #rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
       #fi
@@ -2879,7 +2884,9 @@ webservice_stop() {
     if using_glassfish; then
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      $tomcat stop
+      if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate
+      #$tomcat stop
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
         #rename $TOMCAT_HOME/webapps/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
       #fi
