@@ -50,7 +50,7 @@ public class CommandUtil {
         readResults(p, result);
 
 //        if (Config.isDebug()) {
-//            log.log(Level.INFO, "Result Output \n{0}", (result == null ) ? "null":result.toString());
+//            log.log(Level.INFO, "Result Output \n{}", (result == null ) ? "null":result.toString());
 //        }
 
         //do a loop to wait for an exit value
@@ -88,7 +88,7 @@ public class CommandUtil {
     }
 
     private static void checkError(int exitValue, String commandLine) throws TAException {
-        log.debug( "Return code {0}", exitValue);
+        log.debug( "Return code {}", exitValue);
 
         if (exitValue != 0) {
             throw new TAException(ErrorCode.FATAL_ERROR, "Error while running command" + commandLine);

@@ -18,7 +18,8 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadX
  */
 public class Config {
-    
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Config.class);
+
     private static Configuration config = TAConfig.getConfiguration();
     private static Config instance = null;
     //private static String appPath = config.getString("app.path"); // System.getProperty("app.path",".");;
@@ -73,7 +74,7 @@ public class Config {
             return config.getString(property);
         }
         else {
-            LoggerFactory.getLogger(Config.class.getName()).warn("Property {0} missing in config file.", property);
+            log.warn("Property {} missing in config file.", property);
             return null;
         }
     }

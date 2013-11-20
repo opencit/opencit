@@ -180,7 +180,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse post(TxtHostRecord hostRecord) { 
         if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-        else return hostBO.addHost(new TxtHost(hostRecord), null); 
+        else return hostBO.addHost(new TxtHost(hostRecord), null, null); 
     }
     
     
@@ -216,7 +216,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse put(TxtHostRecord hostRecord) {
             if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-            else return hostBO.updateHost(new TxtHost(hostRecord),null);
+            else return hostBO.updateHost(new TxtHost(hostRecord), null, null);
     }
     
         /**

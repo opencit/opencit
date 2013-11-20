@@ -6,19 +6,28 @@ package com.intel.mtwilson.as.business;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
+import com.intel.mtwilson.My;
+import com.intel.mtwilson.agent.HostAgent;
+import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
+import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
+import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.mtwilson.io.Resource;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.security.KeyManagementException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.BeforeClass;
@@ -103,7 +112,7 @@ public class HostBOTest {
         hostinfo.BIOS_Name = "Unknown BIOS";
         hostinfo.VMM_Name = "Unknown VMM";
         TxtHost host = new TxtHost(hostinfo);
-            hostBO.addHost(host, null);            
+            hostBO.addHost(host, null, null);            
             fail("Should have thrown ASException");
         }
         catch(ValidationException e) {
@@ -170,12 +179,12 @@ public class HostBOTest {
         
         // if the host is not in the database, add it
         if( !isRegistered(host) ) {
-            hostBO.addHost(host, null);                        
+            hostBO.addHost(host, null, null);                        
         }
         
         // now that we know this host is in the database, adding it again should throw an error
         try {
-            hostBO.addHost(host, null);            
+            hostBO.addHost(host, null, null);            
             fail("Should have thrown ASException");
         }
         catch(ValidationException e) {
@@ -198,7 +207,7 @@ public class HostBOTest {
             HostResponse deleteResponse = hostBO.deleteHost(host.getHostName());
             assertEquals(ErrorCode.OK, deleteResponse.getErrorCodeEnum());            
         }
-        HostResponse addResponse = hostBO.addHost(host, null);        	
+        HostResponse addResponse = hostBO.addHost(host, null, null);        	
         assertEquals(ErrorCode.OK, addResponse.getErrorCodeEnum());
     }
     
@@ -233,7 +242,7 @@ public class HostBOTest {
         hostinfo.HostName = "10.1.71.146";
         hostinfo.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
         TxtHost host = new TxtHost(hostinfo);
-        hostBO.addHost(host, null);
+        hostBO.addHost(host, null, null);
     }
     
     @Test
@@ -249,7 +258,7 @@ public class HostBOTest {
         hostinfo.VMM_Version = "5.1.0-7";
         hostinfo.AddOn_Connection_String = "vmware:https://10.1.71.162:443/sdk;administrator;intel123!";
         TxtHost host = new TxtHost(hostinfo);
-        hostBO.addHost(host, null);
+        hostBO.addHost(host, null, null);
     }
 
     
@@ -266,7 +275,7 @@ public class HostBOTest {
         TxtHost host1 = new TxtHost(hostRecord);
         // Or you can deserialize a TxtHostRecord directly into TxtHost:
         TxtHost host2 = mapper.readValue(json, TxtHost.class);
-        hostBO.addHost(host2, null);
+        hostBO.addHost(host2, null, null);
     }
     
     @Test
@@ -286,5 +295,56 @@ public class HostBOTest {
         TxtHost hostObj = new TxtHost(hostInfo);
         String connStr = hostObj.getAddOn_Connection_String();
         System.out.println(connStr);
+    }
+    
+    @Test
+    public void addHost() throws IOException, CryptographyException, KeyManagementException {
+        My.initDataEncryptionKey();
+        String hostName = "10.1.71.169";
+        String connString = "https://10.1.71.169:9999";
+        //SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password);
+        
+        TxtHostRecord hostInfo = new TxtHostRecord();
+        hostInfo.HostName = "10.1.71.169";
+        //hostInfo.IPAddress = "10.1.71.169";
+        hostInfo.Port = 9999;
+        hostInfo.BIOS_Name = "Intel_Corp.";
+        hostInfo.BIOS_Version = "01.00.T060";
+        hostInfo.BIOS_Oem = "Intel Corp.";
+        hostInfo.VMM_Name = "Intel_Thurley_Xen";
+        hostInfo.VMM_Version = "11-4.1.0";
+        hostInfo.VMM_OSName = "SUSE_LINUX";
+        hostInfo.VMM_OSVersion = "11";
+        hostInfo.AddOn_Connection_String = connString;
+        TxtHost hostObj = new TxtHost(hostInfo);
+        
+        TblHosts tblHosts = new TblHosts();
+        tblHosts.setTlsPolicyName(My.configuration().getDefaultTlsPolicyName());
+        tblHosts.setTlsKeystore(null);
+        tblHosts.setName(hostName);
+        tblHosts.setAddOnConnectionInfo(connString);
+        tblHosts.setIPAddress(hostName);
+        tblHosts.setPort(9999);
+
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(tblHosts);
+        HostBO hbo = new ASComponentFactory().getHostBO();
+        PcrManifest pcrManifest = agent.getPcrManifest();
+        HostResponse response = hbo.addHost(hostObj, pcrManifest, null); //.getTrustStatus(new Hostname(hostName));
+        
+        Resource resource = tblHosts.getTlsKeystoreResource();
+        SimpleKeystore clientKeystore = new SimpleKeystore(resource, My.configuration().getTlsKeystorePassword());
+        
+        System.err.println("SAVY001 factory tls policy: " + factory.getTlsPolicy(tblHosts).toString());
+        System.err.println("SAVY002 tblHosts tls policy: " + tblHosts.getTlsPolicyName());
+        System.err.println("SAVY003 tblHosts tls keystore: " + tblHosts.getTlsKeystore());
+    }
+    @Test
+    public void SavyTest() throws IOException, CryptographyException, KeyManagementException {
+        My.initDataEncryptionKey();
+        String hostName = "10.1.71.169";
+        HostTrustBO hbo = new ASComponentFactory().getHostTrustBO();
+        hbo.getTrustStatus(new Hostname(hostName));
+        
     }
 }
