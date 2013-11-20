@@ -58,10 +58,27 @@ public class EraseUserAccounts implements Command {
         //Configuration serviceConf = MSConfig.getConfiguration();
         pm = new MSPersistenceManager();
         em = pm.getEntityManagerFactory("MSDataPU");
-        deletePortalUsers();
-        deleteApiClients();
+        if(options.containsKey("user")) {
+            String username = options.getString("user");
+            System.out.println("deleting user " + username);
+            deleteUser(username);
+        }else {
+            deletePortalUsers();
+            deleteApiClients();
+        }
     }
 
+    private void deleteUser(String username) {
+        try {
+             MwPortalUserJpaController jpa = new MwPortalUserJpaController(em);
+             MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
+             jpa.destroy(portalUser.getId());
+             System.out.println("Deleted " + username);
+        }catch (Exception ex) {
+            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
+        }
+    }
+    
     private void deletePortalUsers() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException {
         try {
             boolean deleteAll = options.getBoolean("all", false);
