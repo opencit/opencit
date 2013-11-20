@@ -67,7 +67,8 @@ public class MyJpa {
     TblSamlAssertionJpaController mwSamlAssertion;
     TblTaLogJpaController mwTaLog;
     MwProcessorMappingJpaController mwProcessorMapping;
-
+    MwAssetTagCertificateJpaController mwAssetTagCertificate;
+    
 //    public MyJpa(MyPersistenceManager pm) { this.pm = pm; }
     
     public MyJpa(MyPersistenceManager pm) { 
@@ -208,4 +209,8 @@ public class MyJpa {
 //		return mwProcessorMapping;
 	}
 
+    public MwAssetTagCertificateJpaController mwAssetTagCertificate() throws IOException {
+        return new MwAssetTagCertificateJpaController(pm.getASData());
+    }
+    
 }

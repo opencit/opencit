@@ -849,6 +849,14 @@ public class HostBO extends BaseBO {
 			}
 		}
 
+        public HostResponse updateHostByFindingMLE(TxtHostRecord hostObj) {
+            try {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+            } catch (ASException ae) {
+                throw ae;
+            }
+        }
+        
     /**
      * 
      * @param host 

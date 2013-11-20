@@ -472,7 +472,17 @@ public class MyConfiguration {
     public boolean getAutoUpdateHosts() {
         return conf.getBoolean("mtwilson.as.autoUpdateHost", true);
     }    
+
+    // asset tagging html5 resources (used by the reference implementation)
+    public String getAssetTagHtml5Dir() {
+        return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
     }
+    
+    // asset tag server url
+    public URL getAssetTagServerURL() throws MalformedURLException {
+        return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
+    }
+        
     public String getAssetTagServerString() throws MalformedURLException {
         return conf.getString("mtwilson.atag.url", "http://localhost:1700");
     }

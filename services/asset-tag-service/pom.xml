@@ -249,13 +249,13 @@ our customers.
         <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>my</artifactId>
-		<version>${mtwilson.version}</version>            
+		<version>${project.version}</version>            
         </dependency>
         <!-- webservice-util is required when using "my" because of the reference to ASDataCipher; but it must be a separate package to avoid circular dependencies between attestation service, asdata, and "my" -->
         <dependency>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>webservice-util</artifactId>
-        <version>${mtwilson.version}</version>
+        <version>${project.version}</version>
         </dependency>
         
 <dependency>  
@@ -413,12 +413,6 @@ our customers.
             <type>jar</type>
         </dependency>
         <!-- deps to support ssl -->
-        <dependency>
-            <groupId>simple-framework</groupId>
-            <artifactId>simple-framework</artifactId>
-            <version>5.1</version>
-            <type>jar</type>
-        </dependency>
         <dependency>
             <groupId>simple-framework</groupId>
             <artifactId>simple-framework</artifactId>
