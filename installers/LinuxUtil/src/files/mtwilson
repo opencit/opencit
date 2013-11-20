@@ -324,6 +324,7 @@ case "$1" in
           shift
           call_setupcommand $@
         else
+          load_default_env
           setup
         fi
         ;;
