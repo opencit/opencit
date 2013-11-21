@@ -28,6 +28,7 @@ public interface HelperConstant {
 	String Trusted_BIOS = "Trusted_BIOS";
 	String Trusted_VMM = "Trusted_VMM";
 	String OVER_ALL_TRUSTRED = "Trusted";
+        String ASSET_TAG = "Asset_Tag";
 	
 	//Path for Images
 	String IMAGES_ROOT_PATH = "imagesRootPath";

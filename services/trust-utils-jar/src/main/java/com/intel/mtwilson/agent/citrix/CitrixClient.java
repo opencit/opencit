@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.citrix;
 
+import java.lang.Process;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
@@ -12,7 +13,7 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.tls.TlsConnection;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
@@ -184,6 +185,33 @@ public class CitrixClient {
 //        connection.dispose();
     }
 
+    /**
+     * This is a Citrix-specific API, not implemented by vmware hosts ;  trust agent will implement it
+     * when it's merged with provisioning agent from the asset tag branch
+     * @param tag 
+     */
+    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException, NoSuchAlgorithmException, KeyManagementException  {
+            if( !isConnected()) { connect(); } 
+            Set<Host> hostList = Host.getAll(connection);
+            Iterator iter = hostList.iterator();
+            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+            // to throw an exception if the hasNext is false.
+            Host h = null;
+            if (iter.hasNext()) {
+                h = (Host)iter.next();
+            }
+			
+            Map<String, String> myMap = new HashMap<String, String>();
+            log.debug("sending the following to the xenserver: " + tag.toBase64());
+            myMap.put("tag", Base64.encodeBase64String(tag.toHexString().getBytes()));
+            
+            //toByteArray()
+            String retval = h.callPlugin(connection,  "tpm","tpm_set_asset_tag", myMap);
+            log.debug("xenapi returned: {}", retval);
+            
+    }
+    
+    
     public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
         log.debug("getQuoteInformationForHost pcrList == " + pcrList);
         try {
@@ -511,7 +539,40 @@ public class CitrixClient {
         return response;
     }
 
-    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XmlRpcException {
+    public String getSystemUUID() throws NoSuchAlgorithmException, KeyManagementException, XenAPIException, BadServerResponse, XmlRpcException {
+       String resp = "";
+        
+       if( !isConnected()) { connect(); } 
+
+       log.debug( "CitrixClient getSystemUUID: connected to server ["+hostIpAddress+"]");	
+			 
+       Map<String, String> myMap = new HashMap<String, String>();
+       Set<Host> hostList = Host.getAll(connection);
+       Iterator iter = hostList.iterator();
+        // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+        // to throw an exception if the hasNext is false.
+       Host h = null;
+        if (iter.hasNext()) {       
+          h = (Host)iter.next();
+        }
+        
+       String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
+       
+       int startP = aik.indexOf("<xentxt:System_UUID>");
+       int endP   = aik.indexOf("</xentxt:System_UUID>");
+       // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
+       String systemUUID = aik.substring(startP +"<xentxt:System_UUID>".length(),endP);
+       log.debug("systemUUID == " + systemUUID);
+      
+            
+       
+       resp = systemUUID.toLowerCase();
+       
+        // log.trace("stdalex-error getAIKCert: returning back: " + resp);
+        return resp;
+    }
+    
+    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException,  XmlRpcException {
         String resp = "";
 //        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
 

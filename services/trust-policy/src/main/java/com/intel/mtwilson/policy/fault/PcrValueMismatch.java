@@ -5,8 +5,9 @@
 package com.intel.mtwilson.policy.fault;
 
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.Sha1Digest;
+//import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.policy.Fault;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 
 /**
  *

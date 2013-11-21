@@ -10,6 +10,7 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
@@ -251,4 +252,8 @@ public interface HostAgent {
      * </Host_Attestation_Report>
      */
     Map<String,String> getHostAttributes() throws IOException;
+    
+    
+    void setAssetTag(Sha1Digest tag) throws IOException;
+    
 }

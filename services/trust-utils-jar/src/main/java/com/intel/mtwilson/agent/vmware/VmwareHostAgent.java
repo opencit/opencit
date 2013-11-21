@@ -382,4 +382,10 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     public Map<String, String> getHostAttributes() throws IOException {
          return new HashMap<String,String>();
    }
+    
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        throw new UnsupportedOperationException("Unsupported operation");
+    }
+    
 }
