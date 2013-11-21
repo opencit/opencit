@@ -26,8 +26,8 @@ APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-ce
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-load_conf 2>&1 >/dev/null
-load_defaults 2>&1 >/dev/null
+#load_conf 2>&1 >/dev/null
+#load_defaults 2>&1 >/dev/null
 
 
 # Automatic install in 4 steps:

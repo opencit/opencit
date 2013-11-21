@@ -26,8 +26,8 @@ load_defaults 2>&1 >/dev/null
 if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+#export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
 # XXX TODO can remove this later; converting  all package_required_version variable names to be upper case, which can be defined in mtwilson.env or for which we have a default
 if using_mysql; then
