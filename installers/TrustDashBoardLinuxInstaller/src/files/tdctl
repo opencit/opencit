@@ -23,7 +23,9 @@ webservice_application_name=TrustDashBoard
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
 #configure_api_baseurl() {

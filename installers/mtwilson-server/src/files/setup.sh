@@ -11,7 +11,7 @@ fi
 
 #define defaults so that they can be overwriten 
 #if the value appears in mtwilson.env
-export INSTALLED_MARKER_FILE=/tmp/.mtwilsonInstalled
+export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
 export LOG_ROTATION_PERIOD=daily
 export LOG_COMPRESS=compress
 export LOG_DELAYCOMPRESS=delaycompress
@@ -25,9 +25,20 @@ export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+
+mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+if [[ -f "$mtw_props_path" || -f "$as_props_path" ]]; then
+  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
+    echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
+    exit -1
+  fi
+  load_conf
+fi
+
+load_defaults
 
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
  echo_warnring "Program files are writable by the web service container, this is a possible security issue"

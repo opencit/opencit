@@ -2462,6 +2462,53 @@ tomcat_sslcert_report() {
   java_keystore_cert_report "$keystore" "$keystorePassword" "$alias"
 }
 
+tomcat_init_manager() {
+  TOMCAT_MANAGER_USER=""
+  TOMCAT_MANAGER_PASS=""
+  TOMCAT_MANAGER_PORT=""
+  if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
+
+  tomcat_manager_xml=`grep roles=\"manager\" $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
+  tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
+     awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
+     in_comment{next}
+     {gsub(/<!--+([^-]|-[^-])*--+>/,"");
+     in_comment=sub(/<!--+.*/,"");
+     print}'|
+     grep Connector|grep -v 8443|head -n1`
+
+  OIFS="$IFS"
+  IFS=' '
+  read -a managerPortArray <<< "${tomcat_managerPort_xml}"
+  read -a managerArray <<< "${tomcat_manager_xml}"
+  IFS="$OIFS"
+
+  for i in "${managerPortArray[@]}"; do
+    if [[ "$i" == *"port"* ]]; then
+      TOMCAT_MANAGER_PORT=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+    fi
+  done
+
+  for i in "${managerArray[@]}"; do
+    if [[ "$i" == *"username"* ]]; then
+      TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+    fi
+
+    if [[ "$i" == *"password"* ]]; then
+      TOMCAT_MANAGER_PASS=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+    fi
+  done
+
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
+
+  if [ -n "$test" ]; then
+    echo_success "Tomcat manger connection success."
+  else
+    echo_failure "Tomcat manager connection failed. Incorrect credentials."
+  fi
+}
+
+
 ### FUNCTION LIBRARY: java
 
 java_clear() {
@@ -2806,40 +2853,11 @@ webservice_running() {
   elif using_tomcat; then
     tomcat_running
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
+    if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      # determine if this app is deployed
-      echo "MTWILSON_SERVER: $MTWILSON_SERVER" >> $INSTALL_LOG_FILE
-      local wars=`ls $TOMCAT_HOME/webapps/*.war`
-      for war in $wars 
-      do
-        echo "war=$war" >> $INSTALL_LOG_FILE
-        w=${war##*/}
-        echo "w=$w" >> $INSTALL_LOG_FILE 
-        result=`basename $w .war`
-        echo "result=$result" >> $INSTALL_LOG_FILE
-        if [ "$result" == "${webservice_application_name}" ]; then
-          WEBSERVICE_DEPLOYED=${webservice_application_name} 
-          echo $WEBSERVICE_DEPLOYED  >> $INSTALL_LOG_FILE 
-        fi 
-      done
-     
-      #WEBSERVICE_DEPLOYED=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "${webservice_application_name}"`
-      echo "WEBSERVICE_DEPLOYED=$WEBSERVICE_DEPLOYED" >> $INSTALL_LOG_FILE
-      
-      #if deployed, make sure it is runnning
+      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}"`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        cd $TOMCAT_HOME/webapps/
-        apps=`ls -d */ | tr -d "/"`
-        for app in $apps 
-        do 
-          echo "app=$app" >> $INSTALL_LOG_FILE
-          if [[ "$app" == "${webservice_application_name}" ]]; then
-            echo "inside webservice running" >> $INSTALL_LOG_FILE
-            WEBSERVICE_RUNNING=running 
-          fi 
-        done
-        #WEBSERVICE_RUNNING=`wget https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
-        echo "WEBSERVICE_RUNNING=$WEBSERVICE_RUNNING" >> $INSTALL_LOG_FILE
+        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
       fi
     fi
   fi
@@ -2864,11 +2882,13 @@ webservice_start() {
     if using_glassfish; then
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      $tomcat start
+      if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
+      #$tomcat start
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
         #rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
       #fi
-      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
+      #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
     fi
   fi
 }
@@ -2879,11 +2899,13 @@ webservice_stop() {
     if using_glassfish; then
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
-      $tomcat stop
+      if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
+      #$tomcat stop
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
         #rename $TOMCAT_HOME/webapps/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
       #fi
-      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
+      #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
     fi
   fi
 }
@@ -2953,7 +2975,7 @@ webservice_install() {
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
         rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
         cp $WAR_FILE $TOMCAT_HOME/webapps/
-        #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
+        #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
       fi
     else
       if using_glassfish; then
@@ -2967,7 +2989,7 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp $WAR_FILE $TOMCAT_HOME/webapps/
         
-        #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
+        #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
         webservice_running $webservice_application_name
         while [ -z "$WEBSERVICE_RUNNING" ]; do
@@ -2990,7 +3012,7 @@ webservice_uninstall() {
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
+      #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
       rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
     fi
   else
@@ -3164,88 +3186,121 @@ encrypt_file() {
   fi
 }
 
-load_default_env() {
+load_conf() {
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
   
   # Verify properties files exist
-  if [ ! -f "$mtw_props_path" ]; then
-    echo_failure "File NOT found: $mtw_props_path"
-	exit -1
-  fi
-  if [ ! -f "$as_props_path" ]; then
-    echo_failure "File NOT found: $as_props_path"
-	exit -1
-  fi
+  #if [ ! -f "$mtw_props_path" ]; then
+  #  echo_failure "File NOT found: $mtw_props_path"
+  #  exit -1
+  #fi
+  #if [ ! -f "$as_props_path" ]; then
+  #  echo_failure "File NOT found: $as_props_path"
+  #  exit -1
+  #fi
+  if [[ -f "$mtw_props_path" && -f "$as_props_path" ]]; then
+    if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi    
+    export DEFAULT_ENV_LOADED=true
   
-  # Verify MTWILSON_PASSWORD variable set
-  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
-    if [ -z "$MTWILSON_PASSWORD" ]; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      exit -1
+    # Verify MTWILSON_PASSWORD variable set
+    if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
+      if [ -z "$MTWILSON_PASSWORD" ]; then
+        echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+    fi
+  
+    # mtwilson.properties file
+    echo -n "Reading properties from "
+    if file_encrypted "$mtw_props_path"; then
+      echo -n "encrypted file [$mtw_props_path]....."
+      temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$mtw_props_path]....."
+      export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
+    fi
+    echo_success "Done"
+  
+    # attestation-service.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$as_props_path"; then
+      echo -n "encrypted file [$as_props_path]....."
+      temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$as_props_path]....."
+      export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
+    fi
+    echo_success "Done"
+  
+    # Determine DATABASE_VENDOR
+    if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
+      export CONF_DATABASE_VENDOR="postgres";
+    elif grep -q "mysql" <<< "$CONF_DATABASE_DRIVER"; then
+      export CONF_DATABASE_VENDOR="mysql";
     fi
   fi
+}
   
-  # mtwilson.properties file
-  echo -n "Reading properties from "
-  if file_encrypted "$mtw_props_path"; then
-    echo -n "encrypted file [$mtw_props_path]....."
-    temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
-    if [[ "$temp" == *"Incorrect password"* ]]; then
-      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      exit -1
-    fi
-    export DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
-    export WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
-  else
-    echo -n "file [$mtw_props_path]....."
-    export DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
-    export WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
-  fi
-  echo_success "Done"
+load_defaults() {
+  #PRIVACYCA_SERVER
+  #PRIVACYCA_DOWNLOAD_USERNAME
+  #PRIVACYCA_DOWNLOAD_PASSWORD
+  #input_api_baseurl
+
+  export DEFAULT_MTWILSON_SERVER="localhost"
+  export DEFAULT_DATABASE_HOSTNAME="127.0.0.1"
+  export DEFAULT_DATABASE_SCHEMA="mw_as"
+  export DEFAULT_DATABASE_USERNAME="root"
+  export DEFAULT_DATABASE_PASSWORD="password"
+  export DEFAULT_DATABASE_PORTNUM="5432"
+  export DEFAULT_DATABASE_DRIVER=""
+  export DEFAULT_WEBSERVER_VENDOR="glassfish"
+  export DEFAULT_DATABASE_VENDOR="postgres"
+  export DEFAULT_PRIVACYCA_SERVER="$DEFAULT_MTWILSON_SERVER"
   
-  # attestation-service.properties
-  echo -n "Reading properties from "
-  if file_encrypted "$as_props_path"; then
-    echo -n "encrypted file [$as_props_path]....."
-    temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
-    if [[ "$temp" == *"Incorrect password"* ]]; then
-      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      exit -1
-    fi
-    export PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
-  else
-    echo -n "file [$as_props_path]....."
-	export PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
-  fi
-  echo_success "Done"
-  
-  # Determine DATABASE_VENDOR
-  if grep -q "postgres" <<< "$DATABASE_DRIVER"; then
-    export DATABASE_VENDOR="postgres";
-  elif grep -q "mysql" <<< "$DATABASE_DRIVER"; then
-    export DATABASE_VENDOR="mysql";
-  fi
-  
+  export MTWILSON_SERVER=${MTWILSON_SERVER:-${CONF_MTWILSON_SERVER:-$DEFAULT_MTWILSON_SERVER}}
+  export DATABASE_HOSTNAME=${DATABASE_HOSTNAME:-${CONF_DATABASE_HOSTNAME:-$DEFAULT_DATABASE_HOSTNAME}}
+  export DATABASE_SCHEMA=${DATABASE_SCHEMA:-${CONF_DATABASE_SCHEMA:-$DEFAULT_DATABASE_SCHEMA}}
+  export DATABASE_USERNAME=${DATABASE_USERNAME:-${CONF_DATABASE_USERNAME:-$DEFAULT_DATABASE_USERNAME}}
+  export DATABASE_PASSWORD=${DATABASE_PASSWORD:-${CONF_DATABASE_PASSWORD:-$DEFAULT_DATABASE_PASSWORD}}
+  export DATABASE_PORTNUM=${DATABASE_PORTNUM:-${CONF_DATABASE_PORTNUM:-$DEFAULT_DATABASE_PORTNUM}}
+  export DATABASE_DRIVER=${DATABASE_DRIVER:-${CONF_DATABASE_DRIVER:-$DEFAULT_DATABASE_DRIVER}}
+  export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-${CONF_WEBSERVER_VENDOR:-$DEFAULT_WEBSERVER_VENDOR}}
+  export DATABASE_VENDOR=${DATABASE_VENDOR:-${CONF_DATABASE_VENDOR:-$DEFAULT_DATABASE_VENDOR}}
+  export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
+
   if using_mysql; then
     export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}
-    export MYSQL_PORTNUM=${DATABASE_PORTNUM}
+    export MYSQL_PORTNUM=${MYSQL_PORTNUM:-${CONF_DATABASE_PORTNUM:-$DATABASE_PORTNUM}}
     export MYSQL_DATABASE=${DATABASE_SCHEMA}
     export MYSQL_USERNAME=${DATABASE_USERNAME}
     export MYSQL_PASSWORD=${DATABASE_PASSWORD}
   elif using_postgres; then
     export POSTGRES_HOSTNAME=${DATABASE_HOSTNAME}
-    export POSTGRES_PORTNUM=${DATABASE_PORTNUM}
+    export POSTGRES_PORTNUM=${POSTGRES_PORTNUM:-${CONF_DATABASE_PORTNUM:-$DATABASE_PORTNUM}}
     export POSTGRES_DATABASE=${DATABASE_SCHEMA}
     export POSTGRES_USERNAME=${DATABASE_USERNAME}
     export POSTGRES_PASSWORD=${DATABASE_PASSWORD}
@@ -3260,7 +3315,7 @@ change_db_pass() {
   sed_escaped_value=$(sed_escape $new_db_pass)
   cryptopass="$MTWILSON_PASSWORD"
   
-  load_default_env 1>/dev/null
+  #load_default_env 1>/dev/null
   
   # Do not allow a blank password to be specified
   prompt_with_default_password DATABASE_PASSWORD_NEW "New database password: " "$DATABASE_PASSWORD_NEW"
@@ -3348,7 +3403,7 @@ function erase_data() {
  mysql=`which mysql 2>/dev/null`
  psql=`which psql 2>/dev/null`
 
- load_default_env 1>/dev/null
+ #load_default_env 1>/dev/null
   
    encrypted_files=()
   count=0
