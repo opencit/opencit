@@ -305,7 +305,7 @@ public class CertificateResource extends ServerResource {
         }
         if( actionChoice.deploy != null ) {
          actionChoice.deploy.setUuid(uuid);
-         log.debug("assetTag deploying cert to MTW");
+         //log.debug("assetTag deploying cert to MTW");
          /* this now happens when the cert is created
          if(true){
              AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
