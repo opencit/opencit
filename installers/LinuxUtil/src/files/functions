@@ -3187,9 +3187,6 @@ encrypt_file() {
 }
 
 load_conf() {
-  if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi    
-  export DEFAULT_ENV_LOADED=true
-
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
   
@@ -3202,64 +3199,68 @@ load_conf() {
   #  echo_failure "File NOT found: $as_props_path"
   #  exit -1
   #fi
+  if [[ -f "$mtw_props_path" && -f "$as_props_path" ]]; then
+    if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi    
+    export DEFAULT_ENV_LOADED=true
   
-  # Verify MTWILSON_PASSWORD variable set
-  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
-    if [ -z "$MTWILSON_PASSWORD" ]; then
-      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      exit -1
+    # Verify MTWILSON_PASSWORD variable set
+    if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
+      if [ -z "$MTWILSON_PASSWORD" ]; then
+        echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
     fi
-  fi
   
-  # mtwilson.properties file
-  echo -n "Reading properties from "
-  if file_encrypted "$mtw_props_path"; then
-    echo -n "encrypted file [$mtw_props_path]....."
-    temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
-    if [[ "$temp" == *"Incorrect password"* ]]; then
-      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      exit -1
+    # mtwilson.properties file
+    echo -n "Reading properties from "
+    if file_encrypted "$mtw_props_path"; then
+      echo -n "encrypted file [$mtw_props_path]....."
+      temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$mtw_props_path]....."
+      export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
     fi
-    export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
-    export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
-    export CONF_DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
-    export CONF_DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
-    export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
-    export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
-    export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
-  else
-    echo -n "file [$mtw_props_path]....."
-    export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
-    export CONF_DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
-    export CONF_DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
-    export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
-    export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
-    export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
-    export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
-  fi
-  echo_success "Done"
+    echo_success "Done"
   
-  # attestation-service.properties
-  echo -n "Reading properties from "
-  if file_encrypted "$as_props_path"; then
-    echo -n "encrypted file [$as_props_path]....."
-    temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
-    if [[ "$temp" == *"Incorrect password"* ]]; then
-      echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-      exit -1
+    # attestation-service.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$as_props_path"; then
+      echo -n "encrypted file [$as_props_path]....."
+      temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$as_props_path]....."
+      export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
     fi
-    export CONF_PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
-  else
-    echo -n "file [$as_props_path]....."
-	export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
-  fi
-  echo_success "Done"
+    echo_success "Done"
   
-  # Determine DATABASE_VENDOR
-  if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
-    export CONF_DATABASE_VENDOR="postgres";
-  elif grep -q "mysql" <<< "$CONF_DATABASE_DRIVER"; then
-    export CONF_DATABASE_VENDOR="mysql";
+    # Determine DATABASE_VENDOR
+    if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
+      export CONF_DATABASE_VENDOR="postgres";
+    elif grep -q "mysql" <<< "$CONF_DATABASE_DRIVER"; then
+      export CONF_DATABASE_VENDOR="mysql";
+    fi
   fi
 }
   
