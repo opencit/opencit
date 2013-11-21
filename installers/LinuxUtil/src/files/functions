@@ -2499,7 +2499,7 @@ tomcat_init_manager() {
     fi
   done
 
-  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate|grep "OK"`
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy|grep "OK"`
 
   if [ -n "$test" ]; then
     echo_success "Tomcat manger connection success."
@@ -2855,9 +2855,9 @@ webservice_running() {
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
     if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}"`
+      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}"`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
+        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate --no-proxy | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
       fi
     fi
   fi
@@ -2883,12 +2883,12 @@ webservice_start() {
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
-      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
       #$tomcat start
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
         #rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
       #fi
-      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
+      #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=${WEBSERVICE_DEPLOYED}  
     fi
   fi
 }
@@ -2900,12 +2900,12 @@ webservice_stop() {
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
-      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate --no-proxy
       #$tomcat stop
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
         #rename $TOMCAT_HOME/webapps/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
       #fi
-      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
+      #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=${WEBSERVICE_DEPLOYED}
     fi
   fi
 }
@@ -2975,7 +2975,7 @@ webservice_install() {
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
         rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
         cp $WAR_FILE $TOMCAT_HOME/webapps/
-        #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
+        #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/reload?path=${WEBSERVICE_DEPLOYED}
       fi
     else
       if using_glassfish; then
@@ -2989,7 +2989,7 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Tomcat..."
         cp $WAR_FILE $TOMCAT_HOME/webapps/
         
-        #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
+        #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/deploy?path=${webservice_application_name}&war=file:${webservice_war_file} 
         #wait here until the app finishes deploying
         webservice_running $webservice_application_name
         while [ -z "$WEBSERVICE_RUNNING" ]; do
@@ -3012,7 +3012,7 @@ webservice_uninstall() {
       ${glassfish} undeploy ${WEBSERVICE_DEPLOYED}
     elif using_tomcat; then
       echo "Undeploying ${WEBSERVICE_DEPLOYED} from Tomcat..."
-      #wget -O - -q --no-check-certificate https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
+      #wget -O - -q --no-check-certificate --no-proxy https://tomcat:tomcat@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/undeploy?path=${WEBSERVICE_DEPLOYED}
       rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
     fi
   else
