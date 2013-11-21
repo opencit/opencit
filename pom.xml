@@ -56,7 +56,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <mtwilson.version>1.1-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
+    <mtwilson.version>1.2-SNAPSHOT</mtwilson.version> <!-- mtwilson.version is the internal version number for software components, for convenience in keeping everything in sync when we build -->
     <mtwilson.release>1.0.0-SNAPSHOT</mtwilson.release> <!-- mtwilson.release is the official release number that should be reported by the applications and shown on the installer filename -->
     <jersey-version>1.9-ea04</jersey-version>
     <maven.build.timestamp.format>yyyyMMdd.HHmm</maven.build.timestamp.format>
@@ -166,6 +166,11 @@
     <id>Sonatype-public</id>
     <name>SnakeYAML repository</name>
     <url>http://oss.sonatype.org/content/groups/public/</url>
+  </repository>
+  <repository>
+    <id>Restlet-public</id>
+    <name>Restlet maven repository</name>
+    <url>http://maven.restlet.org/</url>
   </repository>
 
     </repositories>

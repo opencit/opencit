@@ -1,5 +1,7 @@
 package com.intel.mtwilson.as.business;
 
+import java.util.Date;
+import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.as.data.TblModuleManifestLog;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblModuleManifest;
@@ -9,7 +11,8 @@ import com.intel.mtwilson.as.business.trust.Util;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.model.*;
+//import com.intel.mtwilson.model;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
@@ -20,11 +23,15 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.model.Hostname;
+import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrManifest;
 import java.io.StringWriter;
 import java.util.*;
 import java.io.IOException;
@@ -238,7 +245,39 @@ public class ReportsBO extends BaseBO {
                 }
             }
         }
-
+        
+        // temp fix to get pcr showing up in trust report
+        HostAgentFactory factory = new HostAgentFactory();
+        HostAgent agent = factory.getHostAgent(tblHosts);
+        if(agent != null) {
+            String hostUUID;
+            Map<String,String> attrs = agent.getHostAttributes();
+             if (attrs != null && attrs.containsKey("Host_UUID")) {
+                hostUUID = attrs.get("Host_UUID");
+                AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            MwAssetTagCertificate atagCert = atagCertBO.findValidAssetTagCertForHost(hostUUID);
+            if (atagCert != null) {
+                logger.debug("Found a valid asset tag certificate for the host {} with UUID {}.", tblHosts.getName(), hostUUID);        
+                PcrManifest pcrManifest = agent.getPcrManifest();
+                Pcr pcr = pcrManifest.getPcr(22);             
+                PcrLogReport manifest = new PcrLogReport();
+                manifest.setName(22);
+                manifest.setValue(pcr.getValue().toString());
+                //Sha1Digest sha1d = new Sha1Digest(atagCert.getPCREvent());
+                
+                manifest.setWhiteListValue(new  Sha1Digest(atagCert.getPCREvent()).toString());
+                if(manifest.getValue().equals(manifest.getWhiteListValue())) {
+                    manifest.setTrustStatus(1);
+                }else{
+                    manifest.setTrustStatus(0);
+                }
+                manifest.setVerifiedOn(new Date());
+                attestationReport.getPcrLogs().add(manifest);
+            } 
+            } else {
+               logger.debug("assetTag trustVerfication could not find UUID for " + tblHosts.getName());
+            }
+        }
         return attestationReport;
         }
         catch(Exception e) {

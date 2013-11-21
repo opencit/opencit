@@ -5,6 +5,7 @@
 package test.policy;
 
 import com.intel.mtwilson.policy.rule.*;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.intel.mtwilson.model.*;

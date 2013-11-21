@@ -621,7 +621,7 @@ public class VMwareClient implements TlsClient {
      * @return : string list of datacenter names
      * @throws Exception
      */
-    public List<String> getDatacenterNames() throws InvalidProperty, RuntimeFault, RemoteException {
+    public List<String> getDatacenterNames() throws /*InvalidProperty, RuntimeFault, RemoteException */ Exception {
         List<String> ret = new ArrayList<String>();
         log.debug("Acquiring datacenters...");
         ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("Datacenter");
@@ -645,7 +645,7 @@ public class VMwareClient implements TlsClient {
      * @return : string list of cluster names
      * @throws Exception
      */
-    public List<String> getClusterNamesWithDC() throws InvalidProperty, RuntimeFault, RemoteException {
+    public List<String> getClusterNamesWithDC() throws /*InvalidProperty, RuntimeFault, RemoteException*/ Exception {
         List<String> ret = new ArrayList<String>();
         log.debug("Acquiring clusters...");
         ManagedEntity[] mes = new InventoryNavigator(rootFolder).searchManagedEntities("ComputeResource");
@@ -657,7 +657,7 @@ public class VMwareClient implements TlsClient {
         return ret;
     }
     
-    public ArrayList getHostNamesForCluster(String clusterName) throws InvalidProperty, RuntimeFault, RemoteException {
+    public ArrayList getHostNamesForCluster(String clusterName) throws /*InvalidProperty, RuntimeFault, RemoteException*/ Exception {
         ArrayList hostDetailList = new ArrayList<TxtHostRecord>();
         log.debug("Acquiring host systems...");
         

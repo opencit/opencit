@@ -374,7 +374,7 @@ public class MyConfiguration {
     }
 
     public String getMtWilsonRoleString() {
-        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit");
+        return conf.getString("mtwilson.api.roles", "Attestation,Whitelist,Security,Report,Audit,AssetTagManagement");
     }
 
     public String[] getMtWilsonRoleArray() {
@@ -471,5 +471,39 @@ public class MyConfiguration {
     
     public boolean getAutoUpdateHosts() {
         return conf.getBoolean("mtwilson.as.autoUpdateHost", true);
+    }    
+
+    // asset tagging html5 resources (used by the reference implementation)
+    public String getAssetTagHtml5Dir() {
+        return conf.getString("mtwilson.atag.html5.dir", "clap://html5/"); // the clap protocol means classpath for the restlet engine
+    }
+    
+    // asset tag server url
+    public URL getAssetTagServerURL() throws MalformedURLException {
+        return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
+    }
+        
+    public String getAssetTagServerString() throws MalformedURLException {
+        return conf.getString("mtwilson.atag.url", "http://localhost:1700");
+    }
+    
+    public String getAssetTagKeyStorePath() {
+        return conf.getString("mtwilson.atag.keystore", "serverAtag.jks");
+    }
+    
+    public String getAssetTagKeyStorePassword() {
+        return conf.getString("mtwilson.atag.keystore.password"); // must not have default password; run setup
+    }
+    
+    public String getAssetTagKeyPassword() {
+        return conf.getString("mtwilson.atag.key.password");// must not have default password; run setup
+    }
+    
+    public String getAssetTagApiUsername() {
+        return conf.getString("mtwilson.atag.api.username", "admin");
+    }
+    
+    public String getAssetTagApiPassword() {
+        return conf.getString("mtwilson.atag.api.password"); // must not have default password; run setup
     }
 }

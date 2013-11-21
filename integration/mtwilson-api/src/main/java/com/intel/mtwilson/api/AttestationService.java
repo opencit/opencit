@@ -81,6 +81,10 @@ public interface AttestationService {
 
     X509Certificate getTlsCertificateForTrustedHost(Hostname hostname) throws IOException, ApiException, SignatureException;
     
+    boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException;
+    
+    boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException;
+    
     //This method is currently not exposed to the external customers. There is another API, which would call this API.
     // This function has not been added to Mtwilson.java since the javadoc would be created from it
     HostResponse registerHostByFindingMLE(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;

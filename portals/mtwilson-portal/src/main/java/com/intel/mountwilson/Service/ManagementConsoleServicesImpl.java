@@ -17,12 +17,16 @@ import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.x500.DN;
+import com.vmware.vim25.InvalidProperty;
+import com.vmware.vim25.RuntimeFault;
 import java.net.MalformedURLException;
+import java.rmi.RemoteException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -90,6 +94,7 @@ public class ManagementConsoleServicesImpl implements IManagementConsoleServices
         return result;
     }
 
+    // XXX MERGE WARNING 
     /**
      *
      * @param vCenterConnection
