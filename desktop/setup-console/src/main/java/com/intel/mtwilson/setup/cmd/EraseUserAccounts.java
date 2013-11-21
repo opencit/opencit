@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.ApiRoleX509JpaController;
@@ -58,10 +59,26 @@ public class EraseUserAccounts implements Command {
         //Configuration serviceConf = MSConfig.getConfiguration();
         pm = new MSPersistenceManager();
         em = pm.getEntityManagerFactory("MSDataPU");
-        deletePortalUsers();
-        deleteApiClients();
+        if(options.containsKey("user")) {
+            String username = options.getString("user");
+            System.out.println("deleting user " + username);
+            deleteUser(username);
+        }else {
+            deletePortalUsers();
+            deleteApiClients();
+        }
     }
 
+    private void deleteUser(String username) {
+        try {
+             MwPortalUserJpaController jpa  = My.jpa().mwPortalUser();
+             MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
+             jpa.destroy(portalUser.getId());
+        }catch (Exception ex) {
+            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
+        }
+    }
+    
     private void deletePortalUsers() throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException {
         try {
             boolean deleteAll = options.getBoolean("all", false);

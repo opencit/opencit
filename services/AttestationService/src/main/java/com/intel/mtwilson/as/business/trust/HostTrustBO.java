@@ -659,7 +659,7 @@ public class HostTrustBO extends BaseBO {
         long getAgentStop = System.currentTimeMillis();// XXX jonathan performance
         log.debug("XXX jonathan performance  get agent: {}", getAgentStop-getAgentStart); // XXX jonathan performance
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
-            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId.toString());
+            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId);
         }
         
         long getAgentManifestStart = System.currentTimeMillis(); // XXX jonathan performance
@@ -1394,7 +1394,7 @@ public class HostTrustBO extends BaseBO {
 
     }
     
-    public HostTrustStatus getTrustStatusWithCache(String host, Boolean forceVerify) throws Exception {
+    public HostTrustStatus getTrustStatusWithCache(String host, Boolean forceVerify) throws ASException {
         log.debug("getTrustStatusWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         HostTrustStatus hts = new HostTrustStatus();
         
@@ -1423,7 +1423,7 @@ public class HostTrustBO extends BaseBO {
             throw ase;
         }catch(Exception e){
             log.error("Error while getting trust for host " + host,e );
-            throw e;
+            throw new ASException(e);
         }
 
     }

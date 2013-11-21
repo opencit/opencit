@@ -1423,7 +1423,7 @@ public class HostBO extends BaseBO {
                 // Verify the MLE status. If in case the MLE verification status is NULL, we will just create new MLE
                 if (!mleVerifyObj.isError && mleVerifyStatus != null && !mleVerifyStatus.isEmpty()) {
                     // The return format would be BIOS:true|VMM:true
-                    biosMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(new String ("BIOS:").length(), mleVerifyStatus.indexOf("|")));
+                    biosMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring("BIOS:".length(), mleVerifyStatus.indexOf("|")));
                     vmmMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(mleVerifyStatus.lastIndexOf(":")+1));                    
                 } else {
                     log.error("Error during verification of MLE. Details: {}. So, defaulting to creation of new MLEs.", mleVerifyObj.errorMessage);

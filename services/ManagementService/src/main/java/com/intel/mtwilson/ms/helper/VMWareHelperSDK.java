@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory;
 public class VMWareHelperSDK implements HostInfoInterface {
 
     @Override
-    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws Exception {
+    public TxtHostRecord getHostDetails(TxtHostRecord hostObj) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws Exception {
+    public String getHostAttestationReport(TxtHostRecord hostObj, String pcrList) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 //            //static Logger log = Logger.getLogger(VMWareHelper.class.getName());
