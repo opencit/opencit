@@ -3194,14 +3194,14 @@ load_conf() {
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
   
   # Verify properties files exist
-  if [ ! -f "$mtw_props_path" ]; then
-    echo_failure "File NOT found: $mtw_props_path"
-	exit -1
-  fi
-  if [ ! -f "$as_props_path" ]; then
-    echo_failure "File NOT found: $as_props_path"
-	exit -1
-  fi
+  #if [ ! -f "$mtw_props_path" ]; then
+  #  echo_failure "File NOT found: $mtw_props_path"
+  #  exit -1
+  #fi
+  #if [ ! -f "$as_props_path" ]; then
+  #  echo_failure "File NOT found: $as_props_path"
+  #  exit -1
+  #fi
   
   # Verify MTWILSON_PASSWORD variable set
   if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
