@@ -28,8 +28,8 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
-local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
-local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
 if [[ -f "$mtw_props_path" || -f "$as_props_path" ]]; then
   if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
     echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
