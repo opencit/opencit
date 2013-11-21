@@ -479,11 +479,11 @@ public class MyConfiguration {
     
     // asset tag server url
     public URL getAssetTagServerURL() throws MalformedURLException {
-        return new URL(conf.getString("mtwilson.atag.url", "http://localhost:1700"));
+        return new URL(conf.getString("mtwilson.atag.url", "https://localhost:9999"));
     }
     
     public String getAssetTagServerString() throws MalformedURLException {
-        return conf.getString("mtwilson.atag.url", "http://localhost:1700");
+        return conf.getString("mtwilson.atag.url", "https://localhost:9999");
     }
     
     public String getAssetTagKeyStorePath() {
