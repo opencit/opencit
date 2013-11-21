@@ -10,6 +10,7 @@ package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 package_env_filename=${package_dir}/${package_name}.env
 package_install_filename=${package_dir}/${package_name}.install
+INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
 
 #java_required_version=1.6.0_29
 # commented out from yum packages: tpm-tools-devel curl-devel (not required because we're using NIARL Privacy CA and we don't need the identity command which used libcurl
@@ -25,6 +26,7 @@ APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-ce
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
+if [ -f ${INSTALLED_MARKER_FILE} ]; then load_default_env 2>&1 >/dev/null; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
