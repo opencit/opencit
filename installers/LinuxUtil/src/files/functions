@@ -39,6 +39,9 @@ DEFAULT_GLASSFISH_API_PORT="8181"
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 
+INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
+if [ -f ${INSTALLED_MARKER_FILE} ]; then load_default_env 2>&1 >/dev/null; fi
+
 ### FUNCTION LIBRARY: generate random passwords
 
 # generates a random password. default is 32 characters in length.
