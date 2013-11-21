@@ -2855,9 +2855,9 @@ webservice_running() {
     echo "TOMCAT_RUNNING: $TOMCAT_RUNNING" >> $INSTALL_LOG_FILE
     if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
     if [ -n "$TOMCAT_RUNNING" ]; then
-      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}"`
+      WEBSERVICE_DEPLOYED=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}"`
       if [ -n "$WEBSERVICE_DEPLOYED" ]; then
-        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
+        WEBSERVICE_RUNNING=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate | grep "${webservice_application_name}" | head -n 1 | awk '{ print $1 }' | sed -e 's/:/\n/g' | grep "running"`
       fi
     fi
   fi
@@ -2883,7 +2883,7 @@ webservice_start() {
       $glassfish enable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
-      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/start?path=/${webservice_application_name} -O - -q --no-check-certificate
       #$tomcat start
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop ]; then
         #rename $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml
@@ -2900,7 +2900,7 @@ webservice_stop() {
       $glassfish disable $WEBSERVICE_DEPLOYED
     elif using_tomcat; then
       if [ -z "$TOMCAT_MANAGER_USER" ]; then tomcat_init_manager; fi
-      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate
+      wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/stop?path=/${webservice_application_name} -O - -q --no-check-certificate
       #$tomcat stop
       #if [ -f $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml ]; then
         #rename $TOMCAT_HOME/webapps/${webservice_application_name}/WEB-INF/web.xml $TOMCAT_HOME/${webservice_application_name}/WEB-INF/web.xml.stop
