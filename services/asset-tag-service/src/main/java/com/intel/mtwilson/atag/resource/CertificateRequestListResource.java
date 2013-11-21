@@ -229,9 +229,12 @@ public class CertificateRequestListResource extends ServerResource {
                     // import it to mtw
                     // first we need to check if auto import is already enabled
                     if( My.configuration().getAssetTagAutoImport() == true) {
-                        AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
-                        request.setCertificate(certificate.getCertificate());
-                        Global.mtwilson().importAssetTagCertificate(request);
+                        String url = My.configuration().getAssetTagMtwilsonBaseUrl();
+                        if(url != null && !url.isEmpty() ) {
+                            AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
+                            request.setCertificate(certificate.getCertificate());
+                            Global.mtwilson().importAssetTagCertificate(request);
+                        }
                     }
                 }
                 catch(Exception e) {

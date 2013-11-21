@@ -509,4 +509,8 @@ public class MyConfiguration {
     public Boolean getAssetTagAutoImport() {
         return conf.getBoolean("mtwilson.atag.certificate.import.auto",true);
     }
+    
+    public String getAssetTagMtwilsonBaseUrl() {
+        return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
+    }
 }
