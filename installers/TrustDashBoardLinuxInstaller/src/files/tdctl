@@ -25,7 +25,7 @@ if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_w
 shell_include_files "${package_env_filename}" "${package_install_filename}"
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
 #configure_api_baseurl() {
