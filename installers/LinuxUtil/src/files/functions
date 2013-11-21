@@ -3264,6 +3264,11 @@ load_conf() {
 }
   
 load_defaults() {
+  #PRIVACYCA_SERVER
+  #PRIVACYCA_DOWNLOAD_USERNAME
+  #PRIVACYCA_DOWNLOAD_PASSWORD
+  #input_api_baseurl
+
   export DEFAULT_MTWILSON_SERVER="localhost"
   export DEFAULT_DATABASE_HOSTNAME="127.0.0.1"
   export DEFAULT_DATABASE_SCHEMA="mw_as"
