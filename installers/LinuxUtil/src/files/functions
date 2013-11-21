@@ -3272,6 +3272,8 @@ load_default_env() {
     export POSTGRES_USERNAME=${DATABASE_USERNAME}
     export POSTGRES_PASSWORD=${DATABASE_PASSWORD}
   fi
+
+  if [ -z "$MTWILSON_SERVER" ]; then MTWILSON_SERVER=localhost; fi
 }
 
 change_db_pass() {

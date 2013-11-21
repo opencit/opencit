@@ -11,7 +11,7 @@ fi
 
 #define defaults so that they can be overwriten 
 #if the value appears in mtwilson.env
-export INSTALLED_MARKER_FILE=/tmp/.mtwilsonInstalled
+export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
 export LOG_ROTATION_PERIOD=daily
 export LOG_COMPRESS=compress
 export LOG_DELAYCOMPRESS=delaycompress
