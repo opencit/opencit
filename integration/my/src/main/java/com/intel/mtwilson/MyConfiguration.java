@@ -505,4 +505,8 @@ public class MyConfiguration {
     public String getAssetTagApiPassword() {
         return conf.getString("mtwilson.atag.api.password"); // must not have default password; run setup
     }
+    
+    public Boolean getAssetTagAutoImport() {
+        return conf.getBoolean("mtwilson.atag.certificate.import.auto",true);
+    }
 }
