@@ -328,10 +328,10 @@ public class HostTrustBO extends BaseBO {
             // We need to check if the host is already configured in the system. If yes, we need to update the host or else create a new one
             if (hostBO.getHostByName(new Hostname((hostObj.HostName))) != null) {
                 // update the host
-                hostResponse = hostBO.updateHost(new TxtHost(hostObjToRegister), pcrManifest);
+                hostResponse = hostBO.updateHost(new TxtHost(hostObjToRegister), pcrManifest, agent);
             } else {
                 // create the host
-                hostResponse = hostBO.addHost(new TxtHost(hostObjToRegister), pcrManifest);
+                hostResponse = hostBO.addHost(new TxtHost(hostObjToRegister), pcrManifest, agent);
             }
                 
             long getTrustStatusOfHostNotInDBStop = System.currentTimeMillis();
@@ -357,7 +357,7 @@ public class HostTrustBO extends BaseBO {
      * @return
      * @throws IOException 
      */
-    public TrustReport updateHostIfUntrusted(TblHosts tblHosts, HostReport hostReport, TrustReport trustReport) {
+    public TrustReport updateHostIfUntrusted(TblHosts tblHosts, HostReport hostReport, TrustReport trustReport, HostAgent agent) {
         String regExForNumericExtNames = ".*_([^_][0-9]*)$"; // Regular expression to match the host names with numeric extenstions
         boolean updateBIOSMLE = false, updateVMMMLE = false;
         
@@ -559,7 +559,7 @@ public class HostTrustBO extends BaseBO {
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
                 HostBO hostBO = new HostBO();
-                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest);
+                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest, agent);
             }
 
             if (updateBIOSMLE)
@@ -666,7 +666,7 @@ public class HostTrustBO extends BaseBO {
         long getAgentStop = System.currentTimeMillis();// XXX jonathan performance
         log.debug("XXX jonathan performance  get agent: {}", getAgentStop-getAgentStart); // XXX jonathan performance
         if( !agent.isTpmEnabled() || !agent.isIntelTxtEnabled() ) {
-            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId.toString());
+            throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostId);
         }
         
         long getAgentManifestStart = System.currentTimeMillis(); // XXX jonathan performance
@@ -703,7 +703,7 @@ public class HostTrustBO extends BaseBO {
         log.debug("XXX jonathan performance  apply trust policy: {}", applyPolicyStop-applyPolicyStart); // XXX jonathan performance
         
         if (!trustReport.isTrustedForMarker(TrustMarker.BIOS.name()) || !trustReport.isTrustedForMarker(TrustMarker.VMM.name())) {
-            trustReport = updateHostIfUntrusted(tblHosts, hostReport, trustReport);
+            trustReport = updateHostIfUntrusted(tblHosts, hostReport, trustReport, agent);
         }
         
         return trustReport;
@@ -1410,7 +1410,7 @@ public class HostTrustBO extends BaseBO {
 
     }
     
-    public HostTrustStatus getTrustStatusWithCache(String host, Boolean forceVerify) throws Exception {
+    public HostTrustStatus getTrustStatusWithCache(String host, Boolean forceVerify) throws ASException {
         log.debug("getTrustStatusWithCache: Getting trust for host: " + host + " Force verify flag: " + forceVerify);
         HostTrustStatus hts = new HostTrustStatus();
         
@@ -1439,7 +1439,7 @@ public class HostTrustBO extends BaseBO {
             throw ase;
         }catch(Exception e){
             log.error("Error while getting trust for host " + host,e );
-            throw e;
+            throw new ASException(e);
         }
 
     }
@@ -1506,13 +1506,13 @@ public class HostTrustBO extends BaseBO {
                 throw new ASException(ErrorCode.AS_INTEL_TXT_NOT_ENABLED, hostObj.HostName);
             }
 
-            PcrManifest pcrManifest = agent.getPcrManifest();
-            if( pcrManifest == null ) {
-                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
-            }
+//            PcrManifest pcrManifest = agent.getPcrManifest();
+//            if( pcrManifest == null ) {
+//                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+//            }
 
             HostReport hostReport = new HostReport();
-            hostReport.pcrManifest = pcrManifest;
+            hostReport.pcrManifest = null;
             hostReport.tpmQuote = null; // TODO
             hostReport.variables = new HashMap<String,String>(); // TODO
 
@@ -1542,6 +1542,20 @@ public class HostTrustBO extends BaseBO {
                             continue;
                         }
 
+                        // Now that all the basic validation is done, we can retrieve the attestation report from the host for verfiication against the DB. We were
+                        // earlier retrieving the attestation report to start with. But for better performance, doing it after all the validations.
+                        if (hostReport.pcrManifest == null) {
+                            PcrManifest pcrManifest = agent.getPcrManifest();
+                            if( pcrManifest == null ) {
+                                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+                            }
+                            hostReport.pcrManifest = pcrManifest;
+                        }
+                        
+                        // Bug-1014: due to new policy enforcement for AIK validation
+                        if (agent.isAikAvailable())
+                            hostReport.aik = new Aik(agent.getAikCertificate());
+                        
                         tblHosts.setBiosMleId(biosMLE);
 
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
@@ -1589,8 +1603,18 @@ public class HostTrustBO extends BaseBO {
                         // If the list of bios PCRs that need to be configured does not match the list of the MLE in the DB, we have to create a new MLE
                         // So, we can skip the current one and check the remaining if exists.
                         if (!doPcrsListMatch(vmmPCRs, vmmMLE.getRequiredManifestList())) {
-                            log.debug("checkMatchingMLEExists: Skipping BIOS MLE {} with version {} as the PCR list does not match.", vmmMLE.getName(), vmmMLE.getVersion());                        
+                            log.debug("checkMatchingMLEExists: Skipping VMM MLE {} with version {} as the PCR list does not match.", vmmMLE.getName(), vmmMLE.getVersion());                        
                             continue;
+                        }
+
+                        // Now that all the basic validation is done, we can retrieve the attestation report from the host for verfiication against the DB. We were
+                        // earlier retrieving the attestation report to start with. But for better performance, doing it after all the validations.
+                        if (hostReport.pcrManifest == null) {
+                            PcrManifest pcrManifest = agent.getPcrManifest();
+                            if( pcrManifest == null ) {
+                                throw new ASException(ErrorCode.AS_HOST_MANIFEST_MISSING_PCRS);
+                            }
+                            hostReport.pcrManifest = pcrManifest;
                         }
 
                         tblHosts.setVmmMleId(vmmMLE);

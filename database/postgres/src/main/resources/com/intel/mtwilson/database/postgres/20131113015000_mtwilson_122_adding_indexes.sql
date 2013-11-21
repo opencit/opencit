@@ -1,9 +1,15 @@
 -- Adding the index on the componentname field since we do searches on it
 CREATE INDEX idx_component_name on mw_module_manifest (componentname ASC);
 
+-- Adding the index on the component digest field since we do searches on it while generating policies
+CREATE INDEX idx_component_digest on mw_module_manifest (digestvalue ASC) ;
+
 -- Adding the index on the pcr name field since we do searches on it
 CREATE INDEX idx_pcr_name on mw_pcr_manifest (name ASC);
- 
+
+-- Adding the index on the pcr value field since we do searches on it while generating policies
+CREATE INDEX idx_pcr_value on mw_pcr_manifest (value ASC);
+
 -- Creating a combined index on Name and Version
 CREATE INDEX idx_mle_name_version ON mw_mle (name ASC, version ASC);
 

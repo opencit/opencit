@@ -31,9 +31,9 @@ requiredPCRValuesHelp[5] = "PCR[2]- Option ROM Code measures option ROM code for
 requiredPCRValuesHelp[6] = "PCR[3]- Option ROM Configuration and Data - measures configuration data covered by option ROM code for add-in devices not provided by the OEM.";
 requiredPCRValuesHelp[7] = "PCR[4]- IPL code that performs the initial boot, usually the Master Boot Record (MBR).";
 requiredPCRValuesHelp[8] = "PCR[5]- IPL Configuration and Data (i.e., the configuration and data used by the IPL Code).";
-requiredPCRValuesHelp[9] = "PCR[17]- Code and data associated with the secure launch process.";
-requiredPCRValuesHelp[10] = "PCR[18]- Measurement of the MLE [Tboot+ hypervisor]";
-requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the Trusted OS (kernel code, settings, other)";
+requiredPCRValuesHelp[9] = "PCR[17]- Code and data associated with the secure launch process [SINIT, BIOS ACM, & Launch Control Policies.";
+requiredPCRValuesHelp[10] = "PCR[18]- Measurement of the MLE [Tboot + First module in the grub.conf (if applicable)]";
+requiredPCRValuesHelp[11] = "PCR[19-20]- Measurement of the core kernel module(s).";
 
 var applicableWhiteListTargetHelp = [];
 applicableWhiteListTargetHelp[0]="This option allows users to choose how the white list is configured.";

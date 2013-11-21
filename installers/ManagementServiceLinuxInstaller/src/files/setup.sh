@@ -59,7 +59,10 @@ fi
 # Create a random password and update the property file of the management service
 mypassword16=`generate_password 16`
 update_property_in_file mtwilson.api.key.password "${package_config_filename}" "$mypassword16"
-
+username=`read_property_from_file mtwilson.api.key.alias "${package_config_filename}"`
+mtwilson=`which mtwilson 2>/dev/null`
+#redirect the output to dev null since this will fail the first time if mtwilson doesn't already exist
+$mtwilson erase-users --user="$username" > /dev/null 2>&1
 
 # SCRIPT EXECUTION
 #if using_mysql; then

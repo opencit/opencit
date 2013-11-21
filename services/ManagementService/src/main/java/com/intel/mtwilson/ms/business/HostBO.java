@@ -32,6 +32,7 @@ import com.intel.mtwilson.crypto.Aes128;
 import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
@@ -45,9 +46,13 @@ import com.intel.mtwilson.ms.helper.BaseBO;
 import com.intel.mtwilson.ms.helper.MSPersistenceManager;
 //import com.intel.mtwilson.policy.HostReport;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.mtwilson.util.ResourceFinder;
 import com.intel.mtwilson.wlm.business.MleBO;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,6 +67,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1326,6 +1332,17 @@ public class HostBO extends BaseBO {
                 if (gkvHost.BIOS_Oem == null || gkvHost.BIOS_Version == null || gkvHost.VMM_OSName == null || gkvHost.VMM_OSVersion == null || gkvHost.VMM_Version == null) {
                     throw new MSException(ErrorCode.MS_HOST_CONFIGURATION_ERROR);
                 }
+                
+                // We need to validate the AIK Certificate first if the the AIK CA is available. This would be applicable only for Trust Agent hosts. Both
+                // Citrix and VMware do not support this.
+                if (agent.isAikCaAvailable()) {
+                    X509Certificate cert = agent.getAikCertificate();
+                    cert.checkValidity(); // AIK certificate must be valid today
+                    boolean validCaSignature = isAikCertificateTrusted(cert);
+                    if( !validCaSignature ) {
+                        throw new MSException(ErrorCode.MS_INVALID_AIK_CERTIFICATE, gkvHost.HostName);
+                    }                    
+                }
 
                 hostConfigObj.setTxtHostRecord(gkvHost);
                 System.err.println("Successfully retrieved the host information. Details: " + gkvHost.BIOS_Oem + ":"
@@ -1406,7 +1423,7 @@ public class HostBO extends BaseBO {
                 // Verify the MLE status. If in case the MLE verification status is NULL, we will just create new MLE
                 if (!mleVerifyObj.isError && mleVerifyStatus != null && !mleVerifyStatus.isEmpty()) {
                     // The return format would be BIOS:true|VMM:true
-                    biosMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(new String ("BIOS:").length(), mleVerifyStatus.indexOf("|")));
+                    biosMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring("BIOS:".length(), mleVerifyStatus.indexOf("|")));
                     vmmMLEExists = Boolean.parseBoolean(mleVerifyStatus.substring(mleVerifyStatus.lastIndexOf(":")+1));                    
                 } else {
                     log.error("Error during verification of MLE. Details: {}. So, defaulting to creation of new MLEs.", mleVerifyObj.errorMessage);
@@ -2565,5 +2582,59 @@ public class HostBO extends BaseBO {
         }        
         
     }*/
-            
+   
+    /**
+     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN ATTESTATION SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * CHANGE IT IN THE OTHER LOCATION AS WELL.
+     * @param hostAikCert
+     * @return 
+     */
+    private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
+        log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
+        // TODO read privacy ca certs from database and see if any one of them signed it. 
+        // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
+        HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
+        try {
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs
+            List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
+            pcaList.addAll(privacyCaCerts);
+            IOUtils.closeQuietly(privacyCaIn);
+            log.debug("Added {} certificates from PrivacyCA.p12.pem", privacyCaCerts.size());
+        }
+        catch(Exception e) {
+            // FileNotFoundException: cannot find PrivacyCA.pem
+            // CertificateException: error while reading certificates from file
+            log.error("Cannot load PrivacyCA.p12.pem");            
+        }
+        try {
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
+            X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
+            pcaList.add(privacyCaCert);
+            IOUtils.closeQuietly(privacyCaIn);
+            log.info("Added certificate from PrivacyCA.cer");
+        }
+        catch(Exception e) {
+            // FileNotFoundException: cannot find PrivacyCA.cer
+            // CertificateException: error while reading certificate from file
+            log.error("Cannot load PrivacyCA.cer", e);            
+        }
+        boolean validCaSignature = false;
+        for(X509Certificate pca : pcaList) {
+            try {
+                if( Arrays.equals(pca.getSubjectX500Principal().getEncoded(), hostAikCert.getIssuerX500Principal().getEncoded()) ) {
+                    log.debug("Found matching CA: {}", pca.getSubjectX500Principal().getName());
+                    pca.checkValidity(hostAikCert.getNotBefore()); // Privacy CA certificate must have been valid when it signed the AIK certificate
+                    hostAikCert.verify(pca.getPublicKey()); // verify the trusted privacy ca signed this aik cert.  throws NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException
+                    // TODO read the CRL for this privacy ca and ensure this AIK cert has not been revoked
+                    // TODO check if the privacy ca cert is self-signed... if it's not self-signed  we should check for a path leading to a known root ca in the root ca's file
+                    validCaSignature = true;
+                }
+            }
+            catch(Exception e) {
+                log.error("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+            }
+        }
+        return validCaSignature;
+    }
+    
 }

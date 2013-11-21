@@ -172,7 +172,7 @@ public class TrustAgent {
             Matcher m = p.matcher(xmlInput);
             m.find();
             String daaChallengeEncodedBase64 = m.group(1);
-            log.debug("DAA Challenge (base64): {0}", daaChallengeEncodedBase64);
+            log.debug("DAA Challenge (base64): {}", daaChallengeEncodedBase64);
             return Base64.decodeBase64(daaChallengeEncodedBase64);
         } catch (Exception e) {
             throw new TAException(ErrorCode.BAD_REQUEST, "Cannot find DAA Challenge in the input xml: " + e.toString());

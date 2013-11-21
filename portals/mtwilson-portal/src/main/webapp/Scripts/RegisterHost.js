@@ -212,7 +212,7 @@ function fnRetrieveDatacenters() {
             sendJSONAjaxRequest(false, 'getData/retrieveDatacenters.html', data, fnRetrieveDatacentersSuccess, null);
         }
     } else {
-        alert("Please enter a valid ip address and try again.");
+        alert("Please enter a valid hostname or ip address and try again.");
     }
 }
 
@@ -254,7 +254,7 @@ function fnRetrieveClusters() {
             sendJSONAjaxRequest(false, 'getData/retrieveAllClusters.html', data, fnRetrieveClustersSuccess, null);
         }
     } else {
-        alert("Please enter a valid ip address and try again.");
+        alert("Please enter a valid hostname or ip address and try again.");
     }
 }
 
@@ -292,7 +292,7 @@ function fnRetriveHostFromCluster() {
             sendJSONAjaxRequest(false, 'getData/retriveHostFromCluster.html', data, fnRetriveHostSuccess, null);
         }
     } else {
-        alert("Please enter a valid ip address and try again.");
+        alert("Please enter a valid hostname or ip address and try again.");
     }
 }
 

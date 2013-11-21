@@ -95,7 +95,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -135,8 +135,10 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
+                        if (agent == null) {
+                            HostAgentFactory factory = new HostAgentFactory();
+                            agent = factory.getHostAgent(tblHosts);
+                        }
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                                 // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
@@ -215,13 +217,22 @@ public class HostBO extends BaseBO {
 		return new HostResponse(ErrorCode.OK);
 	}
 
+
+    /**
+     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * CHANGE IT IN THE OTHER LOCATION AS WELL.
+     * 
+     * @param hostAikCert
+     * @return 
+     */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
+        // XXX code in this first section is duplciated in the IntelHostTrustPolicyFactory ... maybe refactor to put it into a configuration method? it's just loading list of trusted privacy ca's from the configuration.
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
         // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs from remove Privacy CAs
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
             IOUtils.closeQuietly(privacyCaIn);
@@ -233,7 +244,7 @@ public class HostBO extends BaseBO {
             log.warn("Cannot load PrivacyCA.p12.pem");            
         }
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain one trusted privacy CA cert from local Privacy CA
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
             IOUtils.closeQuietly(privacyCaIn);
@@ -244,6 +255,7 @@ public class HostBO extends BaseBO {
             // CertificateException: error while reading certificate from file
             log.warn("Cannot load PrivacyCA.cer", e);            
         }
+        // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
             try {
@@ -282,7 +294,7 @@ public class HostBO extends BaseBO {
     }
 
 
-        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest) {
+        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -318,8 +330,11 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
+                        if (agent == null) {
+                            HostAgentFactory factory = new HostAgentFactory();
+                            agent = factory.getHostAgent(tblHosts);
+                        }
+                        
                         if( agent.isAikAvailable() ) {
                             log.debug("Getting identity.");
                                 setAikForHost(tblHosts, host, agent);

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -85,20 +86,19 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public X509Certificate getAikCertificate() {
-        throw new UnsupportedOperationException("Not supported");
-        /*
-        X509Certificate cert = null;
+        X509Certificate aikCert = null;
+        String aikString = null;
+        
         try {
-            String crt = client.getAIKCertificate().replaceAll("\n", "").replaceAll("\r","");
-            System.out.println("decodeding pem == \n"+crt);
-             cert = X509Util.decodePemCertificate(crt);  
-             
-        }  catch(Exception ex){
-            System.out.println("getAikCert caught: " + ex.getMessage());
-            
+            aikString = client.getAIKCertificate();
+            aikCert = X509Util.decodePemCertificate(aikString);
+        } catch(Exception e) {
+            log.error("Cannot decode AIK certificate: {}", e.toString());
+            log.debug(aikString);
+            return null;
         }
-        return cert;
-        */
+        
+        return aikCert;
     }
 
     @Override
@@ -123,6 +123,7 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public TxtHostRecord getHostDetails() throws IOException {
+        long getHostInfoStart = System.currentTimeMillis();
         //throw new UnsupportedOperationException("Not supported yet.");
         TxtHostRecord record = new TxtHostRecord();
         HostInfo info = null;
@@ -145,13 +146,20 @@ public class CitrixHostAgent implements HostAgent{
         record.VMM_OSVersion = info.getOsVersion();
         record.AddOn_Connection_String = client.connectionString;
         record.Processor_Info = info.getProcessorInfo();
+        record.AIK_Certificate = null;
         
+        long getHostInfoStart2 = System.currentTimeMillis();
+        log.debug("CitrixClient: Time taken to get host information - " + (getHostInfoStart2 - getHostInfoStart) + " milliseconds");
+        // Nov 19, 1013: Since AIK Cert is not needed by functions that call getHostDetails and also there is a separate function to
+        // retrieve the AIK Cert, we will comment this out.
+        /*
         try {
             record.AIK_Certificate = client.getAIKCertificate();
         }  catch(Exception ex){
             log.error("getHostDetails getAikCert caught: " + ex.getMessage());
        }
-        
+        long getHostInfoStart3 = System.currentTimeMillis();
+        log.debug("CitrixClient: Time taken to get AIK Cert - " + (getHostInfoStart3 - getHostInfoStart2) + " milliseconds");*/
         return record;
     }
     
@@ -166,6 +174,7 @@ public class CitrixHostAgent implements HostAgent{
      */
     @Override
     public String getHostAttestationReport(String pcrList) throws IOException {
+        long getAttReportStart1 = System.currentTimeMillis();
        String attestationReport = "";
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw;
@@ -180,7 +189,11 @@ public class CitrixHostAgent implements HostAgent{
             xtw.writeAttribute("HostVersion", "5.0");
             //xtw.writeAttribute("TXT_Support", tpmSupport.toString());
         
+            long getAttReportStart2 = System.currentTimeMillis();
+            log.debug("CitrixClient: before calling to get quote info - " + (getAttReportStart2 - getAttReportStart1) + " milliseconds");
             HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
+            long getAttReportStart3 = System.currentTimeMillis();
+            log.debug("CitrixClient: Time taken to get quote info - " + (getAttReportStart3 - getAttReportStart2) + " milliseconds");
             
             Iterator it = pcrMap.entrySet().iterator();
             while (it.hasNext()) {
@@ -198,13 +211,15 @@ public class CitrixHostAgent implements HostAgent{
             xtw.flush();
             xtw.close(); 
             attestationReport = sw.toString();
-        
+            long getAttReportStart4 = System.currentTimeMillis();
+            log.debug("CitrixClient: before sending the quote info - " + (getAttReportStart4 - getAttReportStart3) + " milliseconds");
+
         } catch (XMLStreamException ex) {
 //            Logger.getLogger(CitrixHostAgent.class.getName()).log(Level.SEVERE, null, ex);
             log.error("Cannot get host attestation report", ex);
         }
         
-        log.debug("getHostAttestationReport report:" + attestationReport);
+        log.debug("getHostAttestationReport report:" + attestationReport);       
         return attestationReport;
     }
 
