@@ -3186,7 +3186,10 @@ encrypt_file() {
   fi
 }
 
-load_default_env() {
+load_conf() {
+  if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi    
+  export DEFAULT_ENV_LOADED=true
+
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
   
@@ -3217,22 +3220,22 @@ load_default_env() {
       echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       exit -1
     fi
-    export DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
-    export DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
-    export WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_DATABASE_PASSWORD=`echo $temp | awk -F'mtwilson.db.password=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
   else
     echo -n "file [$mtw_props_path]....."
-    export DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
-    export DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
-    export WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
+    export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
   fi
   echo_success "Done"
   
@@ -3245,20 +3248,44 @@ load_default_env() {
       echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       exit -1
     fi
-    export PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+    export CONF_PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
   else
     echo -n "file [$as_props_path]....."
-	export PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
+	export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
   fi
   echo_success "Done"
   
   # Determine DATABASE_VENDOR
-  if grep -q "postgres" <<< "$DATABASE_DRIVER"; then
-    export DATABASE_VENDOR="postgres";
-  elif grep -q "mysql" <<< "$DATABASE_DRIVER"; then
-    export DATABASE_VENDOR="mysql";
+  if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
+    export CONF_DATABASE_VENDOR="postgres";
+  elif grep -q "mysql" <<< "$CONF_DATABASE_DRIVER"; then
+    export CONF_DATABASE_VENDOR="mysql";
   fi
+}
   
+load_defaults() {
+  export DEFAULT_MTWILSON_SERVER="localhost"
+  export DEFAULT_DATABASE_HOSTNAME="127.0.0.1"
+  export DEFAULT_DATABASE_SCHEMA="mw_as"
+  export DEFAULT_DATABASE_USERNAME="root"
+  export DEFAULT_DATABASE_PASSWORD="password"
+  export DEFAULT_DATABASE_PORTNUM="8181"
+  export DEFAULT_DATABASE_DRIVER=""
+  export DEFAULT_WEBSERVER_VENDOR="glassfish"
+  export DEFAULT_DATABASE_VENDOR="postgres"
+  export DEFAULT_PRIVACYCA_SERVER="$DEFAULT_MTWILSON_SERVER"
+  
+  export MTWILSON_SERVER=${MTWILSON_SERVER :- ${CONF_MTWILSON_SERVER :- $DEFAULT_MTWILSON_SERVER}}
+  export DATABASE_HOSTNAME=${DATABASE_HOSTNAME :- ${CONF_DATABASE_HOSTNAME :- $DEFAULT_DATABASE_HOSTNAME}}
+  export DATABASE_SCHEMA=${DATABASE_SCHEMA :- ${CONF_DATABASE_SCHEMA :- $DEFAULT_DATABASE_SCHEMA}}
+  export DATABASE_USERNAME=${DATABASE_USERNAME :- ${CONF_DATABASE_USERNAME :- $DEFAULT_DATABASE_USERNAME}}
+  export DATABASE_PASSWORD=${DATABASE_PASSWORD :- ${CONF_DATABASE_PASSWORD :- $DEFAULT_DATABASE_PASSWORD}}
+  export DATABASE_PORTNUM=${DATABASE_PORTNUM :- ${CONF_DATABASE_PORTNUM :- $DEFAULT_DATABASE_PORTNUM}}
+  export DATABASE_DRIVER=${DATABASE_DRIVER :- ${CONF_DATABASE_DRIVER :- $DEFAULT_DATABASE_DRIVER}}
+  export WEBSERVER_VENDOR=${WEBSERVER_VENDOR :- ${CONF_WEBSERVER_VENDOR :- $DEFAULT_WEBSERVER_VENDOR}}
+  export DATABASE_VENDOR=${DATABASE_VENDOR :- ${CONF_DATABASE_VENDOR :- $DEFAULT_DATABASE_VENDOR}}
+  export PRIVACYCA_SERVER=${PRIVACYCA_SERVER :- ${CONF_PRIVACYCA_SERVER :- $DEFAULT_PRIVACYCA_SERVER}}
+
   if using_mysql; then
     export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}
     export MYSQL_PORTNUM=${DATABASE_PORTNUM}
@@ -3272,8 +3299,6 @@ load_default_env() {
     export POSTGRES_USERNAME=${DATABASE_USERNAME}
     export POSTGRES_PASSWORD=${DATABASE_PASSWORD}
   fi
-
-  if [ -z "$MTWILSON_SERVER" ]; then MTWILSON_SERVER=localhost; fi
 }
 
 change_db_pass() {
@@ -3284,7 +3309,7 @@ change_db_pass() {
   sed_escaped_value=$(sed_escape $new_db_pass)
   cryptopass="$MTWILSON_PASSWORD"
   
-  load_default_env 1>/dev/null
+  #load_default_env 1>/dev/null
   
   # Do not allow a blank password to be specified
   prompt_with_default_password DATABASE_PASSWORD_NEW "New database password: " "$DATABASE_PASSWORD_NEW"
@@ -3372,7 +3397,7 @@ function erase_data() {
  mysql=`which mysql 2>/dev/null`
  psql=`which psql 2>/dev/null`
 
- load_default_env 1>/dev/null
+ #load_default_env 1>/dev/null
   
    encrypted_files=()
   count=0

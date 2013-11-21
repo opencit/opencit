@@ -25,9 +25,10 @@ export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-if [ -f ${INSTALLED_MARKER_FILE} ]; then load_default_env 2>&1 >/dev/null; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
 
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
  echo_warnring "Program files are writable by the web service container, this is a possible security issue"

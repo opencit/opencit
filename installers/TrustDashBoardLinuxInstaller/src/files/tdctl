@@ -18,14 +18,14 @@ package_keystore_users_dir=/var/opt/intel/${package_name}/users
 #glassfish_required_version=3.0
 webservice_application_name=TrustDashBoard
 #java_required_version=1.6.0_29
-INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
-if [ -f ${INSTALLED_MARKER_FILE} ]; then load_default_env 2>&1 >/dev/null; fi
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
 #configure_api_baseurl() {
