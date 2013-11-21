@@ -2463,18 +2463,33 @@ tomcat_sslcert_report() {
 }
 
 tomcat_init_manager() {
+  TOMCAT_MANAGER_USER=""
+  TOMCAT_MANAGER_PASS=""
+  TOMCAT_MANAGER_PORT=""
   if [ -z "$TOMCAT_HOME" ]; then tomcat_detect; fi
 
   tomcat_manager_xml=`grep roles=\"manager\" $TOMCAT_HOME/conf/tomcat-users.xml|head -n1`
-  TOMCAT_MANAGER_USER=""
-  TOMCAT_MANAGER_PASS=""
+  tomcat_managerPort_xml=`cat $TOMCAT_HOME/conf/server.xml|
+     awk 'in_comment&&/-->/{sub(/([^-]|-[^-])*--+>/,"");in_comment=0}
+     in_comment{next}
+     {gsub(/<!--+([^-]|-[^-])*--+>/,"");
+     in_comment=sub(/<!--+.*/,"");
+     print}'|
+     grep Connector|grep -v 8443|head -n1`
 
   OIFS="$IFS"
   IFS=' '
-  read -a valueArray <<< "${tomcat_manager_xml}"
+  read -a managerPortArray <<< "${tomcat_managerPort_xml}"
+  read -a managerArray <<< "${tomcat_manager_xml}"
   IFS="$OIFS"
 
-  for i in "${valueArray[@]}"; do
+  for i in "${managerPortArray[@]}"; do
+    if [[ "$i" == *"port"* ]]; then
+      TOMCAT_MANAGER_PORT=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
+    fi
+  done
+
+  for i in "${managerArray[@]}"; do
     if [[ "$i" == *"username"* ]]; then
       TOMCAT_MANAGER_USER=`echo $i|awk -F'=' '{print $2}'|sed 's/^"\(.*\)"$/\1/'`
     fi
@@ -2484,7 +2499,7 @@ tomcat_init_manager() {
     fi
   done
 
-  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$DEFAULT_API_PORT/manager/list -O - -q --no-check-certificate|grep "OK"`
+  test=`wget http://$TOMCAT_MANAGER_USER:$TOMCAT_MANAGER_PASS@$MTWILSON_SERVER:$TOMCAT_MANAGER_PORT/manager/list -O - -q --no-check-certificate|grep "OK"`
 
   if [ -n "$test" ]; then
     echo_success "Tomcat manger connection success."
