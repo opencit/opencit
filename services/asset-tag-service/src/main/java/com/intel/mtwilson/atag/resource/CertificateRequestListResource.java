@@ -233,6 +233,7 @@ public class CertificateRequestListResource extends ServerResource {
                         if(url != null && !url.isEmpty() ) {
                             AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
                             request.setCertificate(certificate.getCertificate());
+                            log.debug("import cert to MTW ");
                             Global.mtwilson().importAssetTagCertificate(request);
                         }
                     }

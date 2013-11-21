@@ -284,7 +284,8 @@ public class CertificateResource extends ServerResource {
             actionChoice.provision.setUuid(uuid);
             if( true /* actionChoice.provision.isValid()*/ ) {
                 // first post the certificate to mt wilson
-                /* This now done when the cert is created.
+                // This now done when the cert is created.
+                /*
                 AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
                 request.setCertificate(certificate.getCertificate());
                 Global.mtwilson().importAssetTagCertificate(request);
@@ -306,12 +307,12 @@ public class CertificateResource extends ServerResource {
         if( actionChoice.deploy != null ) {
          actionChoice.deploy.setUuid(uuid);
          //log.debug("assetTag deploying cert to MTW");
-         /* this now happens when the cert is created
+         // this now happens when the cert is created
          if(true){
              AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
              request.setCertificate(certificate.getCertificate());
              Global.mtwilson().importAssetTagCertificate(request);
-         }*/
+         }
          CertificateActionChoice result = new CertificateActionChoice();
          result.deploy = actionChoice.deploy;
          return result;
