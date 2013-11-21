@@ -30,6 +30,15 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 load_conf 2>&1 >/dev/null
 load_defaults 2>&1 >/dev/null
 
+local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+if [[ -f "$mtw_props_path" || -f "$as_props_path" ]]; then
+  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
+    echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
+    exit -1
+  fi
+fi
+
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
  echo_warnring "Program files are writable by the web service container, this is a possible security issue"
 else
