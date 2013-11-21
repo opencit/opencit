@@ -5,6 +5,7 @@
 package com.intel.mtwilson.agent.citrix;
 
 
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -15,7 +16,8 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
+//import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
@@ -272,8 +274,32 @@ BwIDAQAB
     }
 
     @Override
-    public Map<String, String> getHostAttributes() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Map<String, String> getHostAttributes()  {
+        HashMap<String,String> hm = new HashMap<String, String>();
+        // Retrieve the data from the host and add it into the hashmap
+        HostInfo hostInfo = null;
+        try {
+            hostInfo = client.getHostInfo();
+        } catch (Exception ex) {
+            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
+        }
+        try {
+            // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+            hm.put("Host_UUID", client.getSystemUUID());
+        } catch(Exception ex){
+            throw new ASException(ex);
+        }
+        return hm;
     }
     
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        try {
+            client.setAssetTag(tag);
+        }
+        catch(Exception e) {
+            log.error("Unexpected error while setting asset tag", e);
+            throw new IOException(e);
+        }
+    }
 }

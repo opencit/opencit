@@ -118,6 +118,16 @@ function getDashBoardPage() {
 	sendHTMLAjaxRequest(false, 'getView/getDashBoardPage.html', null, fnDisplayContent, null,"DashBoardPage");
 }
 
+function getAssetTagPage() {
+    //alert("setting up iframes 2");
+    //setLoadImage('AddHostPage', '40px', '500px');
+    //var serverAddy = <% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString();) %>;
+    $('#mainContainer').html('<div id="AssetTagPage"></div>');
+    $('#AssetTagPage').html('<iframe src="' + assetTagUrl + '" width="900" height="745" > </iframe>');
+            //'<iframe height="410" width="100%" frameBorder="3" src="http://www.google.com.au/webhp?sourceid=navclient&ie=UTF-8/index.php">your browser does not support IFRAMEs</iframe>'    
+    //window.open("https://127.0.0.1:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
+}
+
 function getAddHostPage() {
 	isAddHostPage = true;
 	$('#mainContainer').html('<div id="AddHostPage"></div>');

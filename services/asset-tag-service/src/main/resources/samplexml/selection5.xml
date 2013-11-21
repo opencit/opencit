@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selections xmlns="urn:intel-mtwilson-asset-tag-attribute-selections">
+    <selection>
+        <attribute oid="2.5.4.789.1">Country=US</attribute>
+        <attribute oid="2.5.4.789.1">State=CA</attribute>
+        <attribute oid="2.5.4.789.1">City=Folsom</attribute>
+    </selection>
+    <selection>
+        <attribute oid="2.5.4.789.1">Country=US</attribute>
+        <attribute oid="2.5.4.789.1">State=TX</attribute>
+        <attribute oid="2.5.4.789.1">City=El Paso</attribute>
+    </selection>
+</selections>
+<!--
+This XML file demonstrates two custom selections
+-->

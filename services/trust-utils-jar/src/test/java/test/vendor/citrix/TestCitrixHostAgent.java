@@ -4,6 +4,7 @@
  */
 package test.vendor.citrix;
 
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import test.vendor.intel.*;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
@@ -54,9 +55,9 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  */
 public class TestCitrixHostAgent {
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    private static String hostname = "10.1.70.126";
-    private static String connection = "citrix:https://10.1.70.126:443/;root;P@ssw0rd";
-//    private static String hostname = "10.1.71.201";
+    private static String hostname = "10.1.71.184";
+    private static String connection = "citrix:https://10.1.71.184:443/;root;P@ssw0rd";
+//    private static String connection = "citrix:https://10.1.70.126:443/;root;P@ssw0rd";
 //    private static String connection = "citrix:https://10.1.71.201:443;root;P@ssw0rd";
     private static HostAgent agent;
     
@@ -128,5 +129,11 @@ AIK Certificate: null
         log.debug("OS Name: {}", hostDetails.VMM_OSName);
         log.debug("OS Version: {}", hostDetails.VMM_OSVersion);
         log.debug("AIK Certificate: {}", hostDetails.AIK_Certificate);
+    }
+    
+    @Test
+    public void testDeployAssetTag() throws IOException {
+        Sha1Digest tag = Sha1Digest.valueOfHex("0011223344556677889900112233445566778899"); // 20 bytes
+        agent.setAssetTag(tag);
     }
 }

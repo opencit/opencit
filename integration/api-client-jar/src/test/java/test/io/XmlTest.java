@@ -28,7 +28,7 @@ public class XmlTest {
     private static Logger log = LoggerFactory.getLogger(XmlTest.class);
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    // copy of ApiClient.fromXML
+    // copy of ApiClient.fromXML ... should probably be copied to a utility class XmlUtil in a new module cpg-xml or  JaxbUtil in a new module cpg-jaxb 
     private <T> T fromXML(String document, Class<T> valueType) throws IOException, ApiException, JAXBException {
         JAXBContext jc = JAXBContext.newInstance( valueType );
         Unmarshaller u = jc.createUnmarshaller();

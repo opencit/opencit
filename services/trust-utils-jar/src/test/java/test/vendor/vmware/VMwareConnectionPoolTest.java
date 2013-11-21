@@ -73,7 +73,7 @@ public class VMwareConnectionPoolTest {
     }
 
     @Test
-    public void testConnect() throws KeyManagementException, IOException, VMwareConnectionException {
+    public void testConnect() throws KeyManagementException, IOException, VMwareConnectionException, Exception {
         log.debug("Acquiring vmware connection pool...");
         VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory());
         String vmwareConnString = "https://10.1.71.162:443/sdk;Administrator;intel123!";
