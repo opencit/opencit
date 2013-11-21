@@ -72,10 +72,8 @@ public class EraseUserAccounts implements Command {
     private void deleteUser(String username) {
         try {
              MwPortalUserJpaController jpa  = My.jpa().mwPortalUser();
-             
              MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
              jpa.destroy(portalUser.getId());
-             System.out.println("Deleted " + username);
         }catch (Exception ex) {
             System.err.println("Exception occured: \r\n\r\n" + ex.toString());
         }
