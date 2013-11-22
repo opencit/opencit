@@ -368,6 +368,7 @@ public class SamlGenerator {
                 AssetTagCertBO certBO = new AssetTagCertBO();
                 for (AttributeOidAndValue atagAttr : atags) {
                     String tagValue = atagAttr.getValue();
+                    log.debug("tag atrr OID = " + atagAttr.getOid() + " default OID = " + DEFAULT_OID);
                     if (! atagAttr.getOid().equalsIgnoreCase(DEFAULT_OID)) { 
                         // not the default oid that means value == key/value
                         // so we need to query the service and try and get the mapping from there
@@ -376,11 +377,15 @@ public class SamlGenerator {
                             log.debug("createHostAttributes found tag for oid " + atagAttr.getOid());
                             tagValue = tag.name + "=" + atagAttr.getValue();
                         } catch (IOException ioEx) {
+                          log.debug("error getting tag attributes: " + ioEx.getMessage());
+                          ioEx.printStackTrace();
                           
                         } catch (ApiException apiEx) {
-                           
+                           log.debug("error getting tag attributes: " + apiEx.getMessage());
+                          apiEx.printStackTrace();
                         } catch (Exception ex) {
-                          
+                          log.debug("error getting tag attributes: " + ex.getMessage());
+                          ex.printStackTrace();
                         }
                     }
                     attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid()),tagValue));
