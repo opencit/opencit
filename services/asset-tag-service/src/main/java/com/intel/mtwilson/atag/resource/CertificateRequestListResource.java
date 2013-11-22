@@ -13,12 +13,14 @@ import com.intel.mtwilson.atag.dao.Derby;
 import static com.intel.mtwilson.atag.dao.jooq.generated.Tables.*;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.atag.X509AttrBuilder;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
+import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
@@ -224,6 +226,17 @@ public class CertificateRequestListResource extends ServerResource {
                     certificateRequest.setCertificateId(certificateId); // XXX of no use to client, maybe remove this
                     certificateRequest.setCertificate(certificate.getUuid());
                     certificateRequest.setStatus("Done"); // done automatically in the database record by updateApproved() but we also need it here to send backto the client
+                    // import it to mtw
+                    // first we need to check if auto import is already enabled
+                    if( My.configuration().getAssetTagAutoImport() == true) {
+                        String url = My.configuration().getAssetTagMtwilsonBaseUrl();
+                        if(url != null && !url.isEmpty() ) {
+                            AssetTagCertCreateRequest request = new AssetTagCertCreateRequest();
+                            request.setCertificate(certificate.getCertificate());
+                            log.debug("import cert to MTW ");
+                            Global.mtwilson().importAssetTagCertificate(request);
+                        }
+                    }
                 }
                 catch(Exception e) {
                     log.debug("Cannot create attribute certificate", e);
@@ -240,7 +253,6 @@ public class CertificateRequestListResource extends ServerResource {
         else {
             // automatic approval not enabled... so do nothing. certificate request is already marked as new , hopefully someone is polling the certificate requests and approvign them elsewhere
         }
-
         return certificateRequest;
     }
 
