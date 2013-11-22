@@ -4,54 +4,60 @@
  */
 package com.intel.dcsg.cpg.tls.policy;
 
-/*
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.datatypes.InternetAddress;
-import com.intel.dcg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.net.InternetAddress;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import java.io.IOException;
 import java.security.KeyPair;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.eclipse.jetty.server.Request;
 import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-* */
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.junit.AfterClass;
+import com.intel.dcsg.cpg.crypto.KeyStoreUtil;
+
 /**
  *
  * @author jbuhacoff
  */
-public class TestTlsPolicy {/*
+public class TestTlsPolicy {
     private static Server jetty;
     
     @BeforeClass
-    public static void startJetty() {
+    public static void startJetty() throws Exception {
         int port = 17443;
         jetty = new Server(port);
-        ContextHandlerCollection collection = new ContextHandlerCollection();
-        jetty.setHandler(collection);
-        SslContextFactory sslContextFactory = new SslContextFactory("server_keystore.jks");
-    }*/
-    /*
+        jetty.start();
+        jetty.setHandler(new HelloWorldHandler());
+//        SslContextFactory sslContextFactory = new SslContextFactory("server_keystore.jks");
+    }
+    
+    @AfterClass
+    public static void stopJetty() throws Exception {
+        jetty.stop();
+        jetty.join();
+    }
+
     @Test
     public void testKeystoreCertificateRepositoryLookupByAddress() throws Exception {
         // prepare a keystore with a single certificate
+        String keystorePassword = "password";
         KeyPair rsa = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate x509 = RsaUtil.generateX509Certificate("test1", rsa, 30);
-        ByteArrayResource resource = new ByteArrayResource();
-        SimpleKeystore keystore = new SimpleKeystore(resource, "password");
-        keystore.addTrustedSslCertificate(x509, "test1");
-        for(String alias : keystore.aliases()) { System.out.println("alias: "+alias); }
+        KeyStore keystore = KeyStoreUtil.createWithPassword(keystorePassword);
+        keystore.setCertificateEntry("sslcert", x509);
         // prepare the repository object
-        KeystoreCertificateRepository repo = new KeystoreCertificateRepository(keystore);
-        // lookup by address can return an exact match on alias, but not a partial match
-        assertNotNull(repo.getCertificateForAddress(new InternetAddress("test1")));
-        assertNull(repo.getCertificateForAddress(new InternetAddress("test1-1")));
-        assertNull(repo.getCertificateForAddress(new InternetAddress("test")));
-        assertNull(repo.getCertificateForAddress(new InternetAddress("est1")));
-        // lookup by subject and issuer
-        assertNotNull(repo.getCertificateForSubject("CN=test1,OU=Mt Wilson,O=Trusted Data Center,C=US"));
-        assertEquals(1, repo.getCertificateForSubject("CN=test1,OU=Mt Wilson,O=Trusted Data Center,C=US").size());
-    }*/
+        KeystoreCertificateRepository repo = new KeystoreCertificateRepository(keystore, keystorePassword);
+    }
 }

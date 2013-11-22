@@ -1,5 +1,14 @@
 Changelog
 
+* Version 0.1.2
+
+  Added MultivaluedHashMap
+  Added ByteArray (moved from cpg-io)
+
+* Version 0.1.1
+
+  Parent POM version changed to cpg-0.2-SNAPSHOT
+
 * Version 0.1
 
   First draft, defining Tree, MutableTree, BreadthFirstTreeIterator, BreadthFirstMutableTreeIterator, DepthFirstTreeIterator, DepthFirstMutableTreeIterator, Stack, ArrayStack, and FileTree

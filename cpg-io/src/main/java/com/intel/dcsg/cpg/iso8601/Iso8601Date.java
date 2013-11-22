@@ -121,7 +121,7 @@ public class Iso8601Date {
                 return date;
             }
             catch(ParseException e) {
-                log.trace("Failed to parse date input {} using pattern {}", new String[] { text, f.toPattern() }); // ignore errors because we can try the next format
+                log.trace("Failed to parse date input {} using pattern {}", text, f.toPattern()); // ignore errors because we can try the next format
             }
         }
         throw new IllegalArgumentException("Date is not in recognized ISO8601 format: "+text);        

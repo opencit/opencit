@@ -3,6 +3,7 @@ Changelog
 * Version 0.1.5-SNAPSHOT
 
  Added Aes128CbcPkcs5 class which was Aes128 in Mt Wilson that used CBC/PKCS5 instead of OFB8/NoPadding used in Aes.
+ Added KeyStoreUtil
 
 * Version 0.1.4-SNAPSHOT
 

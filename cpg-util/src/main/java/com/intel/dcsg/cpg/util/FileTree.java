@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *
+ * XXX TODO this should be moved to cpg-io (with a dependency on cpg-util for the Tree interface)
  * @author jbuhacoff
  */
 public class FileTree implements Tree<File> {
@@ -37,11 +37,13 @@ public class FileTree implements Tree<File> {
      * @param node
      * @return 
      */
+    @Override
     public File parent(File node) {
         if( root != null && root.equals(node) ) { return null; }
         return node.getParentFile();
     }
 
+    @Override
     public List<File> children(File node) {
         if( node.isDirectory() ) {
             File[] children = node.listFiles();

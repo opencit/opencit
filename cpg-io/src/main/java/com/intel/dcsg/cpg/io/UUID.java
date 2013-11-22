@@ -4,6 +4,7 @@
  */
 package com.intel.dcsg.cpg.io;
 
+import com.intel.dcsg.cpg.util.ByteArray;
 import java.math.BigInteger;
 //import org.codehaus.jackson.annotate.JsonCreator;
 //import org.codehaus.jackson.annotate.JsonValue;

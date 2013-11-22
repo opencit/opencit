@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.1.4-SNAPSHOT</version>
+            <version>0.1.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
@@ -77,9 +77,8 @@
         <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
-		<version>1.7.5</version>
     </dependency>
-        <!--
+    <!--
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -90,16 +89,15 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.13</version>
             <scope>test</scope>
         </dependency>        
     <!-- end logging support -->
     
-    <!-- begin jetty embedded web server for use with junit -->
+    <!-- begin jetty embedded web server for use with junit ; jetty 9 requires java 1.7 so we continue to use jetty 8 until more downstream projects upgrade to java 1.7 -->
     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty-embedded</artifactId>
-      <version>6.1.26</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <version>8.1.13.v20130916</version>
       <type>jar</type>
       <scope>test</scope>
     </dependency>

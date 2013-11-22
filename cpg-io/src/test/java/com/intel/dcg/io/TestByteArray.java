@@ -4,7 +4,7 @@
  */
 package com.intel.dcg.io;
 
-import com.intel.dcsg.cpg.io.ByteArray;
+import com.intel.dcsg.cpg.util.ByteArray;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -71,6 +71,16 @@ public class AbstractDigest {
         return value.hashCode();
     }
     
+    /**
+     * Performs a value-comparison on the two digests; two digests are equal if
+     * they are instances of the same class and their values (byte arrays sized
+     * for the digest length) are equal. 
+     * The Java built-in Arrays.equals() method is used to compare the contents
+     * and it enforces the byte arrays are the same length and have the same
+     * elements in the same order.
+     * @param obj
+     * @return 
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

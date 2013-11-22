@@ -22,6 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * XXX TODO  this class was the prototype of AesMessageReader/AesMessageWriter;  key management was not implemented
+ * here so it's impossible to read the file back in because there is no mechanism to look up the key ; also the
+ * new classes put the message digest at the end so that it works better with streaming 
+ * 
  * Convenience class to using PasswordCipher, PasswordHash, DataEnvelope, and Sha256Digest to 
  * read/write an encrypted file with integrity checking.
  * 
@@ -86,6 +90,7 @@ ZxcjQ9OMUFqGmgcJ88HK8j7spnFKD0sZxMpZZfNbg9DmLgYW23DUgPsCl7HEppqohg8GFqeI7qo=
  * RFC 3230, Instance Digests in HTTP 
  * RFC 1864, The Content-MD5 Header Field
  * 
+ * @deprecated
  * @since 0.1.1
  * @author jbuhacoff
  */

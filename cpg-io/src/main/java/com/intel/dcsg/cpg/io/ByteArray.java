@@ -10,6 +10,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
+ * TODO remove this class in cpg-io-0.2
+ * @deprecated use com.intel.dcsg.cpg.util.ByteArray instead ; will be removed from cpg-io in next minor version
  * @since 0.1
  * @author jbuhacoff
  */

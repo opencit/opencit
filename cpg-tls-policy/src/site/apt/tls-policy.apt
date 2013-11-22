@@ -69,7 +69,7 @@ Requirement Specification
 
 Design
 
-	There are two entry points into the API. The first one is called TlsPolicyCommon. It is a class containing static
+	There are two entry points into the API. The first one is called TlsPolicyFactory. It is a class containing static
 methods called insecure, consoleBrowser, and consoleBrowserWithRepository. The second one is called TlsPolicyBuilder.
 It is a class designed using the Builder pattern in which an instance of the class is comprised of many methods, each
 of which returns the instance itself, in order to facilitate method chaining. Method chaining is a style of
@@ -105,7 +105,7 @@ and HostnameVerifier interfaces.
 
 	The TlsConnection object is a convenience that is comprised of a URL and a TlsPolicy. Applications should pass
 around TlsConnection objects instead of just URLs whenever there is an existing TLS policy associated with a
-specific site. 
+specific site. TlsConnection objects can be used for HTTPS connections and non-HTTP TLS connections.
 
 	The TlsClient interface is a convenience interface that is comprised of a single method named setTlsPolicy.
 Applications can use it to mark objects that use this API when they make TLS connections.
@@ -215,7 +215,7 @@ public class Example {
 			if( args.length > 0 ) {
 				url = new URL(args[0]);
 			}
-			TlsPolicy tlsPolicy = TlsPolicyCommon.insecure();
+			TlsPolicy tlsPolicy = TlsPolicyFactory.insecure();
 			SSLContext sc = SSLContext.getInstance("SSL");
 			sc.init(null, new TrustManager[]{tlsPolicy.getTrustManager()}, new java.security.SecureRandom());
 			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
@@ -234,16 +234,16 @@ public class Example {
 only needs to change one line:
 
 +---	
-TlsPolicy tlsPolicy = TlsPolicyCommon.insecure();
+TlsPolicy tlsPolicy = TlsPolicyFactory.insecure();
 +---	
 
 	To this:
 +---	
-TlsPolicy tlsPolicy = TlsPolicyCommon.consoleBrowser();
+TlsPolicy tlsPolicy = TlsPolicyFactory.consoleBrowser();
 +---	
 
 	Because the TlsPolicy class is really an interface, the rest of the program stays the same. The specific
-implementation instantiated by the convenience functions in TlsPolicyCommon provides an appropriate TrustManager
+implementation instantiated by the convenience functions in TlsPolicyFactory provides an appropriate TrustManager
 and HostnameVerifier for the Java SSL API to use.
 
 	The implementation returned by consoleBrowser() automatically uses a file in the current directory named
@@ -270,15 +270,20 @@ when the user chooses to save a certificate.
 the TrustDelegate interface. If such an implementation is created, then a convenience method should also be created
 in order to instantiate it as easily as the ConsoleTrustDelegate.
 
+TLS Policy Factory
+
+	Check the Javadoc for TlsPolicyFactory to see all the available factory methods.
+
+
 TLS Policy Builder
 
-	The convenience functions provided by TlsPolicyCommon are simply wrappers for options provided by the
+	The convenience functions provided by TlsPolicyFactory are simply wrappers for options provided by the
 TlsPolicyBuilder class. Application developers that need to use a more customized TLS policy should use the
 TlsPolicyBuilder class directly.
 
 	The following examples of using the TlsPolicyBuilder class create insecure and browser-like TLS policies that
 are equivalent to the ones illustrated in the introduction. In fact, the following is simply extracted from the
-source code of TlsPolicyCommon:
+source code of TlsPolicyFactory:
 		
 +---	
 TlsPolicy insecure = TlsPolicyBuilder.factory().insecure().build();
@@ -486,7 +491,6 @@ ANq98ZvVfpg=
 
 	With the server certificate saved, subsequent executions of the same command will validate its certificate
 against the keystore and will not prompt the user.
-
 
 Password Protection
 

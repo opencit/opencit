@@ -45,12 +45,14 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ssl.SslSocketConnector;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.security.SslSocketConnector;
+//import org.mortbay.jetty.Server;
+//import org.mortbay.jetty.handler.ContextHandlerCollection;
+//import org.mortbay.jetty.security.SslSocketConnector;
 
 /**
  * Sample http output from Jetty configured with no content handlers:
@@ -74,11 +76,11 @@ public class TestTlsPolicyWithServerCaSigned {
     private static String serverAddress = "localhost";
     private static String keystorePassword = "password";
     private static String caKeystorePath;
-    private static int serverPort = 17443;
+    public static int serverPort = 17443;
     private static Server jetty;
     private static URL httpsURL;
-    private static X509Certificate caCert;  // the CA cert that signs the test server's TLS cert
-    private static X509Certificate tlsCert; // the test server's TLS cert
+    public static X509Certificate caCert;  // the CA cert that signs the test server's TLS cert
+    public static X509Certificate tlsCert; // the test server's TLS cert
     
     public static KeyPair generateRsaKeyPair(int keySizeInBits) throws NoSuchAlgorithmException {
         KeyPairGenerator r = KeyPairGenerator.getInstance("RSA");
@@ -155,9 +157,8 @@ public class TestTlsPolicyWithServerCaSigned {
         System.out.println("Server keystore: "+caKeystorePath);
         
         
-        jetty = new Server(serverPort-10000);  // jetty will listen for http on serverPort-10000
-        ContextHandlerCollection collection = new ContextHandlerCollection();
-        jetty.setHandler(collection);
+        jetty = new Server(serverPort-1);   // jetty will listen for http on serverPort-1, and https on serverPort
+        jetty.setHandler(new HelloWorldHandler());
         SslSocketConnector sslConnector = new SslSocketConnector();
         sslConnector.setKeystore(caKeystorePath);
         sslConnector.setKeyPassword("password");
