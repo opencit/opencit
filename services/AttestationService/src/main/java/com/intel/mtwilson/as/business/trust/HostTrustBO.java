@@ -1298,8 +1298,8 @@ public class HostTrustBO extends BaseBO {
         // make sure the DEK is set for this thread
         
 	// XXX MERGE WARNING
-        My.initDataEncryptionKey();
-        TblHosts tblHosts = getHostByName(new Hostname((host)));
+//        My.initDataEncryptionKey();
+//        TblHosts tblHosts = getHostByName(new Hostname((host)));
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
        // log.info("Value of the TPM flag is : " +  Boolean.toString(agent.isTpmEnabled()));
