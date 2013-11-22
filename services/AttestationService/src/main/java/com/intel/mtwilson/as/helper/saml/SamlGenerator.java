@@ -368,27 +368,28 @@ public class SamlGenerator {
                 AssetTagCertBO certBO = new AssetTagCertBO();
                 for (AttributeOidAndValue atagAttr : atags) {
                     String tagValue = atagAttr.getValue();
+                    String tagName = "N/A";
                     log.debug("tag atrr OID = " + atagAttr.getOid() + " default OID = " + DEFAULT_OID);
                     if (! atagAttr.getOid().equalsIgnoreCase(DEFAULT_OID)) { 
                         // not the default oid that means value == key/value
                         // so we need to query the service and try and get the mapping from there
                         try {
                             TagDataType tag = certBO.getTagInfoByOID(atagAttr.getOid());
-                            log.debug("createHostAttributes found tag for oid " + atagAttr.getOid());
-                            tagValue = tag.name + "=" + atagAttr.getValue();
+                            log.error("createHostAttributes found tag for oid " + atagAttr.getOid());
+                            tagName = tag.name;
                         } catch (IOException ioEx) {
-                          log.debug("error getting tag attributes: " + ioEx.getMessage());
+                          log.error("error getting tag attributes: " + ioEx.getMessage());
                           ioEx.printStackTrace();
                           
                         } catch (ApiException apiEx) {
-                           log.debug("error getting tag attributes: " + apiEx.getMessage());
+                           log.error("error getting tag attributes: " + apiEx.getMessage());
                           apiEx.printStackTrace();
                         } catch (Exception ex) {
-                          log.debug("error getting tag attributes: " + ex.getMessage());
+                          log.error("error getting tag attributes: " + ex.getMessage());
                           ex.printStackTrace();
                         }
                     }
-                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid()),tagValue));
+                    attrStatement.getAttributes().add(createStringAttribute(String.format("ATAG :"+atagAttr.getOid() + "[" + tagName + "]"),tagValue));
                 }
             }
 
