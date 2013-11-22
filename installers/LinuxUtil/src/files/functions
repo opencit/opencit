@@ -517,7 +517,7 @@ configure_api_baseurl() {
   local input_api_baseurl
   if [ -n "${MTWILSON_API_BASEURL}" ]; then
     mtwilson_api_baseurl="${MTWILSON_API_BASEURL}"
-  elif [ -n "${MTWILSON_SERVER}" ]; then
+  elif [[ -n "${MTWILSON_SERVER}" && -n "${DEFAULT_API_PORT}" ]]; then
     mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl "${config_file}"`
@@ -526,7 +526,7 @@ configure_api_baseurl() {
     if [[ "$input_api_baseurl" == http* ]]; then
       mtwilson_api_baseurl="$input_api_baseurl"
     else
-      mtwilson_api_baseurl="https://${input_api_baseurl}:$DEFAULT_API_PORT"
+      mtwilson_api_baseurl="https://${input_api_baseurl}"
     fi
   fi
   export MTWILSON_API_BASEURL=$mtwilson_api_baseurl
