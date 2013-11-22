@@ -512,7 +512,7 @@ update_property_in_file() {
 
 configure_api_baseurl() {
   # setup mtwilson.api.baseurl
-  local config_file="${1:-/etc/intel/cloudsecurity/my.properties}" 
+  local config_file="${1:-/etc/intel/cloudsecurity/management-service.properties}" 
   
   local input_api_baseurl
   if [ -n "${MTWILSON_API_BASEURL}" ]; then
@@ -521,7 +521,7 @@ configure_api_baseurl() {
     mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
   else
     local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl "${config_file}"`
-    prompt_with_default input_api_baseurl "Mt Wilson Server (IP, Hostname, or URL):" "${configured_server_url}"
+    prompt_with_default input_api_baseurl "Mt Wilson Server (https://[IP]:[PORT]):" "${configured_api_baseurl}"
     
     if [[ "$input_api_baseurl" == http* ]]; then
       mtwilson_api_baseurl="$input_api_baseurl"
