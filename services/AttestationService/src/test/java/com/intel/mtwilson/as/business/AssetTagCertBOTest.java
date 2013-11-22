@@ -47,7 +47,7 @@ public class AssetTagCertBOTest {
     @Test
     public void testAtagConfigValues() throws IOException, ApiException, NoSuchAlgorithmException, KeyManagementException, SignatureException {
         AssetTagCertBO certBO = new AssetTagCertBO();
-        String oid = "1.3.6.1.4.1.99999.3";
+        String oid = "1.3.6.1.4.1.99999.1";
         TagDataType tag = certBO.getTagInfoByOID(oid);
         System.out.println(tag.name);
     }

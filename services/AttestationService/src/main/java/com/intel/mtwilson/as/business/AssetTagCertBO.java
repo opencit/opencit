@@ -25,6 +25,7 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.security.http.ApacheBasicHttpAuthorization;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.util.ResourceFinder;
@@ -424,11 +425,12 @@ public class AssetTagCertBO extends BaseBO{
         String requestURL = My.configuration().getAssetTagServerURL() + "/tags?oidEqualTo="+oid;
         
         //1.3.6.1.4.1.99999.3"; 
-        ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword()), null, new InsecureTlsPolicy());
+        ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
+
         //ApiRequest request = new ApiRequest(MediaType., "");
         ApiResponse response = client.get(requestURL);    
 
-        String str = response.content.toString();
+        String str = new String(response.content);
         System.out.println("getTagInfoByOID response = " + str);        
         TagDataType[] tag = fromJSON(str, TagDataType[].class);       
   
