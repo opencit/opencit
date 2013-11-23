@@ -41,10 +41,10 @@ replace_hostname_in_etc_hosts_NOT_COMPLETE__NOT_IN_USE_YET() {
 }
 
 # Check if there is a username and password already configured 
-server_pca_username=`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`
-server_pca_password=`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`
-client_pca_username=${server_pca_username:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
-client_pca_password=${server_pca_password:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
+server_pca_username="$PRIVACYCA_DOWNLOAD_USERNAME"   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`
+server_pca_password="$PRIVACYCA_DOWNLOAD_PASSWORD"   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`
+client_pca_username=${server_pca_username:-"$PRIVACYCA_DOWNLOAD_USERNAME"}   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
+client_pca_password=${server_pca_password:-"$PRIVACYCA_DOWNLOAD_PASSWORD"}   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
 
 prompt_with_default PRIVACYCA_SERVER "Privacy CA Server IP Address:"  "https://mtwilsonIP:port#"
 echo "Login to download the Privacy CA client files"
@@ -90,7 +90,7 @@ chmod 600 /etc/intel/cloudsecurity/hisprovisioner.properties
 
 keytool=${JAVA_HOME}/bin/keytool
 keystore=$intel_conf_dir/trustagent.jks
-storepass=`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
+storepass="$TRUSTAGENT_KEYSTORE_PASS"   #`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
 if [ -z "$storepass" ]; then
   if [ -f "$keystore" ]; then 
     backupKeystoreFilename=`backup_file $keystore`

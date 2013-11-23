@@ -476,9 +476,17 @@ update_property_in_file() {
   local property="${1}"
   local filename="${2}"
   local value="${3}"
+  local encrypted="false"
+
   if [ -f "$filename" ]; then
-  local ispresent=`grep "^${property}" "$filename"`
-  if [ -n "$ispresent" ]; then
+    # Decrypt if needed
+    if file_encrypted "$filename"; then
+      encrypted="true"
+      decrypt_file "$filename" "$MTWILSON_PASSWORD"
+    fi
+
+    local ispresent=`grep "^${property}" "$filename"`
+    if [ -n "$ispresent" ]; then
       # first escape the pipes new value so we can use it with replacement command, which uses pipe | as the separator
       local escaped_value=`echo "${value}" | sed 's/|/\\|/g'`
       local sed_escaped_value=$(sed_escape $escaped_value)
@@ -498,10 +506,15 @@ update_property_in_file() {
         echo -n '"'
         echo
       fi
-  else
+    else
       # property is not already in file so add it. extra newline in case the last line in the file does not have a newline
       echo "" >> "${filename}"
       echo "${property}=${value}" >> "${filename}"
+    fi
+
+  # Return the file to encrypted state, if it was before
+  if [ encrypted == "true" ]; then
+    encrypt_file "$filename" "$MTWILSON_PASSWORD"
   fi
   # test
   else
@@ -520,7 +533,7 @@ configure_api_baseurl() {
   elif [[ -n "${MTWILSON_SERVER}" && -n "${DEFAULT_API_PORT}" ]]; then
     mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
   else
-    local configured_api_baseurl=`read_property_from_file mtwilson.api.baseurl "${config_file}"`
+    local configured_api_baseurl=$CONFIGURED_API_BASEURL   #`read_property_from_file mtwilson.api.baseurl "${config_file}"`
     prompt_with_default input_api_baseurl "Mt Wilson Server (https://[IP]:[PORT]):" "${configured_api_baseurl}"
     
     if [[ "$input_api_baseurl" == http* ]]; then
@@ -723,6 +736,7 @@ ssh_fingerprints() {
 # 2. properties prefix (for mountwilson.as.db.user etc. the prefix is mountwilson.as.db)
 # the default prefix is "mysql" for properties like "mysql.user", etc. The
 # prefix must not have any spaces or special shell characters
+# ONLY USE IF FILES ARE UNENCRYPTED!!!
 mysql_read_connection_properties() {
     local config_file="$1"
     local prefix="${2:-mysql}"
@@ -732,6 +746,8 @@ mysql_read_connection_properties() {
     MYSQL_PASSWORD=`read_property_from_file ${prefix}.password "${config_file}"`
     MYSQL_DATABASE=`read_property_from_file ${prefix}.schema "${config_file}"`
 }
+
+# ONLY USE IF FILES ARE UNENCRYPTED!!!
 mysql_write_connection_properties() {
     local config_file="$1"
     local prefix="${2:-mysql}"
@@ -956,7 +972,7 @@ mysql_configure_connection() {
     local prefix="${2:-mysql}"
     mysql_test_connection
     if [ -z "$is_mysql_available" ]; then
-      mysql_read_connection_properties "${config_file}" "${prefix}"
+      #mysql_read_connection_properties "${config_file}" "${prefix}"
       mysql_test_connection
     fi
     while [ -n "$mysql_connection_error" ]
@@ -975,7 +991,7 @@ mysql_configure_connection() {
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
-        mysql_write_connection_properties "${config_file}" "${prefix}"
+#      mysql_write_connection_properties "${config_file}" "${prefix}"
 #      fi
 }
 
@@ -1393,7 +1409,7 @@ postgres_configure_connection() {
     local prefix="${2:-postgres}"
     postgres_test_connection
     if [ -z "$is_postgres_available" ]; then
-      postgres_read_connection_properties "${config_file}" "${prefix}"
+      #postgres_read_connection_properties "${config_file}" "${prefix}"
       postgres_test_connection
     fi
     while [ -n "$postgres_connection_error" ]
@@ -1412,7 +1428,7 @@ postgres_configure_connection() {
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
-        postgres_write_connection_properties "${config_file}" "${prefix}"
+#      postgres_write_connection_properties "${config_file}" "${prefix}"
 #      fi
 }
 
@@ -3096,6 +3112,7 @@ The supported servers are g=Glassfish | t=Tomcat"
 # 2. properties prefix (for mountwilson.as.db.user etc. the prefix is mountwilson.as.db)
 # the default prefix is "postgres" for properties like "postgres.user", etc. The
 # prefix must not have any spaces or special shell characters
+# ONLY USE IF FILES ARE UNENCRYPTED!!!
 postgres_read_connection_properties() {
     local config_file="$1"
     local prefix="${2:-postgres}"
@@ -3105,6 +3122,8 @@ postgres_read_connection_properties() {
     POSTGRES_PASSWORD=`read_property_from_file ${prefix}.password "${config_file}"`
     POSTGRES_DATABASE=`read_property_from_file ${prefix}.schema "${config_file}"`
 }
+
+# ONLY USE IF FILES ARE UNENCRYPTED!!!
 postgres_write_connection_properties() {
     local config_file="$1"
     local prefix="${2:-postgres}"
@@ -3162,11 +3181,11 @@ decrypt_file() {
   local filename="${1}"
   export PASSWORD="${2}"
   if [ -f "$filename" ]; then
-    echo -n "Decrypting file [$filename]....."
+    #echo -n "Decrypting file [$filename]....."
     call_setupcommand ExportConfig "$filename" --env-password="PASSWORD"
     if file_encrypted $filename; then
       echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; exit -1; fi
-    echo_success " Done"
+    #echo_success " Done"
   else
     echo_warning "File NOT found: $filename"
   fi
@@ -3176,11 +3195,11 @@ encrypt_file() {
   local filename="${1}"
   export PASSWORD="${2}"
   if [ -f "$filename" ]; then
-    echo -n "Encrypting file [$filename]....."
+    #echo -n "Encrypting file [$filename]....."
     call_setupcommand ImportConfig "$filename" --env-password="PASSWORD"
     if ! file_encrypted $filename; then
-      echo_failure "Password failure. Please check password for illegal characters."; exit -1; fi
-    echo_success " Done"
+      echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; exit -1; fi
+    #echo_success " Done"
   else
     echo_warning "File NOT found: $filename"
   fi
@@ -3189,16 +3208,12 @@ encrypt_file() {
 load_conf() {
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+  local pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+  local ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
+  local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
+  local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
+  local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
   
-  # Verify properties files exist
-  #if [ ! -f "$mtw_props_path" ]; then
-  #  echo_failure "File NOT found: $mtw_props_path"
-  #  exit -1
-  #fi
-  #if [ ! -f "$as_props_path" ]; then
-  #  echo_failure "File NOT found: $as_props_path"
-  #  exit -1
-  #fi
   if [[ -f "$mtw_props_path" && -f "$as_props_path" ]]; then
     if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi    
     export DEFAULT_ENV_LOADED=true
@@ -3217,7 +3232,7 @@ load_conf() {
       echo -n "encrypted file [$mtw_props_path]....."
       temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
-        echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         exit -1
       fi
       export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3227,15 +3242,19 @@ load_conf() {
       export CONF_DATABASE_PORTNUM=`echo $temp | awk -F'mtwilson.db.port=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_DRIVER=`echo $temp | awk -F'mtwilson.db.driver=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_WEBSERVER_VENDOR=`echo $temp | awk -F'mtwilson.webserver.vendor=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTW_DEFAULT_TLS_POLICY_NAME=`echo $temp | awk -F'mtwilson.default.tls.policy.name=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_MTW_TLS_KEYSTORE_PASS=`echo $temp | awk -F'mtwilson.tls.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$mtw_props_path]....."
-      export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host /etc/intel/cloudsecurity/mtwilson.properties`
-      export CONF_DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema /etc/intel/cloudsecurity/mtwilson.properties`
-      export CONF_DATABASE_USERNAME=`read_property_from_file mtwilson.db.user /etc/intel/cloudsecurity/mtwilson.properties`
-      export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password /etc/intel/cloudsecurity/mtwilson.properties`
-      export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port /etc/intel/cloudsecurity/mtwilson.properties`
-      export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver /etc/intel/cloudsecurity/mtwilson.properties`
-      export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor /etc/intel/cloudsecurity/mtwilson.properties`
+      export CONF_DATABASE_HOSTNAME=`read_property_from_file mtwilson.db.host "$mtw_props_path"`
+      export CONF_DATABASE_SCHEMA=`read_property_from_file mtwilson.db.schema "$mtw_props_path"`
+      export CONF_DATABASE_USERNAME=`read_property_from_file mtwilson.db.user "$mtw_props_path"`
+      export CONF_DATABASE_PASSWORD=`read_property_from_file mtwilson.db.password "$mtw_props_path"`
+      export CONF_DATABASE_PORTNUM=`read_property_from_file mtwilson.db.port "$mtw_props_path"`
+      export CONF_DATABASE_DRIVER=`read_property_from_file mtwilson.db.driver "$mtw_props_path"`
+      export CONF_WEBSERVER_VENDOR=`read_property_from_file mtwilson.webserver.vendor "$mtw_props_path"`
+      export CONF_MTW_DEFAULT_TLS_POLICY_NAME=`read_property_from_file mtwilson.default.tls.policy.name "$mtw_props_path"`
+      export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
   
@@ -3245,16 +3264,114 @@ load_conf() {
       echo -n "encrypted file [$as_props_path]....."
       temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
-        echoerr -e "FAIL\nIncorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
         exit -1
       fi
-      export CONF_PRIVACYCA_SERVER=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_SAML_KEYSTORE_FILE=`echo $temp | awk -F'saml.keystore.file=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_SAML_KEYSTORE_PASSWORD=`echo $temp | awk -F'saml.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_SAML_KEY_ALIAS=`echo $temp | awk -F'saml.key.alias=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_SAML_KEY_PASSWORD=`echo $temp | awk -F'saml.key.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_SAML_ISSUER=`echo $temp | awk -F'saml.issuer=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_PRIVACYCA_SERVER=`echo $temp | awk -F'privacyca.server=' '{print $2}' | awk -F' ' '{print $1}'`
     else
       echo -n "file [$as_props_path]....."
-      export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server /etc/intel/cloudsecurity/attestation-service.properties`
+      export CONF_SAML_KEYSTORE_FILE=`read_property_from_file saml.keystore.file "$as_props_path"`
+      export CONF_SAML_KEYSTORE_PASSWORD=`read_property_from_file saml.keystore.password "$as_props_path"`
+      export CONF_SAML_KEY_ALIAS=`read_property_from_file saml.key.alias "$as_props_path"`
+      export CONF_SAML_KEY_PASSWORD=`read_property_from_file saml.key.password "$as_props_path"`
+      export CONF_SAML_ISSUER=`read_property_from_file saml.issuer "$as_props_path"`
+      export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server "$as_props_path"`
     fi
     echo_success "Done"
-  
+
+    # management-service.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$ms_props_path"; then
+      echo -n "encrypted file [$ms_props_path]....."
+      temp=`call_setupcommand ExportConfig "$ms_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_MS_KEYSTORE_DIR=`echo $temp | awk -F'mtwilson.ms.keystore.dir=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_API_KEY_ALIAS=`echo $temp | awk -F'mtwilson.api.key.alias=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_API_KEY_PASS=`echo $temp | awk -F'mtwilson.api.key.password=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_CONFIGURED_API_BASEURL=`echo $temp | awk -F'mtwilson.api.baseurl=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$ms_props_path]....."
+      export CONF_MS_KEYSTORE_DIR=`read_property_from_file mtwilson.ms.keystore.dir "$ms_props_path"`
+      export CONF_API_KEY_ALIAS=`read_property_from_file mtwilson.api.key.alias "$ms_props_path"`
+      export CONF_API_KEY_PASS=`read_property_from_file mtwilson.api.key.password "$ms_props_path"`
+      export CONF_CONFIGURED_API_BASEURL=`read_property_from_file mtwilson.api.baseurl "$ms_props_path"`
+    fi
+    echo_success "Done"
+
+    # PrivacyCA.properties.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$pca_props_path"; then
+      echo -n "encrypted file [$pca_props_path]....."
+      temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
+      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$pca_props_path]....."
+      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`read_property_from_file ClientFilesDownloadUsername "$pca_props_path"`
+      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`read_property_from_file ClientFilesDownloadPassword "$pca_props_path"`
+    fi
+    echo_success "Done"
+
+    # mtwilson-portal.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$mp_props_path"; then
+      echo -n "encrypted file [$mp_props_path]....."
+      temp=`call_setupcommand ExportConfig "$mp_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_TDBP_KEYSTORE_DIR=`echo $temp | awk -F'mtwilson.tdbp.keystore.dir=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$mp_props_path]....."
+      export CONF_TDBP_KEYSTORE_DIR=`read_property_from_file mtwilson.tdbp.keystore.dir "$mp_props_path"`
+    fi
+    echo_success "Done"
+    
+    # hisprovisioner.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$hp_props_path"; then
+      echo -n "encrypted file [$hp_props_path]....."
+      temp=`call_setupcommand ExportConfig "$hp_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_ENDORSEMENT_P12_PASS=`echo $temp | awk -F'EndorsementP12Pass = ' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$hp_props_path]....."
+      export CONF_ENDORSEMENT_P12_PASS=`read_property_from_file EndorsementP12Pass "$hp_props_path"`
+    fi
+    echo_success "Done"
+
+    # trustagent.properties
+    echo -n "Reading properties from "
+    if file_encrypted "$ta_props_path"; then
+      echo -n "encrypted file [$ta_props_path]....."
+      temp=`call_setupcommand ExportConfig "$ta_props_path" --stdout 2>&1`
+      if [[ "$temp" == *"Incorrect password"* ]]; then
+        echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        exit -1
+      fi
+      export CONF_TRUSTAGENT_KEYSTORE_PASS=`echo $temp | awk -F'trustagent.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
+    else
+      echo -n "file [$ta_props_path]....."
+      export CONF_TRUSTAGENT_KEYSTORE_PASS=`read_property_from_file trustagent.keystore.password "$ta_props_path"`
+    fi
+    echo_success "Done"
+
     # Determine DATABASE_VENDOR
     if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
       export CONF_DATABASE_VENDOR="postgres";
@@ -3280,6 +3397,23 @@ load_defaults() {
   export DEFAULT_WEBSERVER_VENDOR="glassfish"
   export DEFAULT_DATABASE_VENDOR="postgres"
   export DEFAULT_PRIVACYCA_SERVER=""
+  export DEFAULT_SAML_KEYSTORE_FILE=""
+  export DEFAULT_SAML_KEYSTORE_PASSWORD=""
+  export DEFAULT_SAML_KEY_ALIAS=""
+  export DEFAULT_SAML_KEY_PASSWORD=""
+  export DEFAULT_SAML_ISSUER=""
+  export DEFAULT_PRIVACYCA_SERVER=""
+  export DEFAULT_PRIVACYCA_DOWNLOAD_USERNAME=""
+  export DEFAULT_PRIVACYCA_DOWNLOAD_PASSWORD=""
+  export DEFAULT_MS_KEYSTORE_DIR="/var/opt/intel/management-service/users"
+  export DEFAULT_API_KEY_ALIAS=""
+  export DEFAULT_API_KEY_PASS=""
+  export DEFAULT_CONFIGURED_API_BASEURL=""
+  export DEFAULT_MTW_DEFAULT_TLS_POLICY_NAME=""
+  export DEFAULT_MTW_TLS_KEYSTORE_PASS=""
+  export DEFAULT_TDBP_KEYSTORE_DIR=""
+  export DEFAULT_ENDORSEMENT_P12_PASS=""
+  export DEFAULT_TRUSTAGENT_KEYSTORE_PASS=""
   
   export MTWILSON_SERVER=${MTWILSON_SERVER:-${CONF_MTWILSON_SERVER:-$DEFAULT_MTWILSON_SERVER}}
   export DATABASE_HOSTNAME=${DATABASE_HOSTNAME:-${CONF_DATABASE_HOSTNAME:-$DEFAULT_DATABASE_HOSTNAME}}
@@ -3291,6 +3425,23 @@ load_defaults() {
   export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-${CONF_WEBSERVER_VENDOR:-$DEFAULT_WEBSERVER_VENDOR}}
   export DATABASE_VENDOR=${DATABASE_VENDOR:-${CONF_DATABASE_VENDOR:-$DEFAULT_DATABASE_VENDOR}}
   export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
+  export SAML_KEYSTORE_FILE=${SAML_KEYSTORE_FILE:-${CONF_SAML_KEYSTORE_FILE:-$DEFAULT_SAML_KEYSTORE_FILE}}
+  export SAML_KEYSTORE_PASSWORD=${SAML_KEYSTORE_PASSWORD:-${CONF_SAML_KEYSTORE_PASSWORD:-$DEFAULT_SAML_KEYSTORE_PASSWORD}}
+  export SAML_KEY_ALIAS=${SAML_KEY_ALIAS:-${CONF_SAML_KEY_ALIAS:-$DEFAULT_SAML_KEY_ALIAS}}
+  export SAML_KEY_PASSWORD=${SAML_KEY_PASSWORD:-${CONF_SAML_KEY_PASSWORD:-$DEFAULT_SAML_KEY_PASSWORD}}
+  export SAML_ISSUER=${SAML_ISSUER:-${CONF_SAML_ISSUER:-$DEFAULT_SAML_ISSUER}}
+  export PRIVACYCA_SERVER=${PRIVACYCA_SERVER:-${CONF_PRIVACYCA_SERVER:-$DEFAULT_PRIVACYCA_SERVER}}
+  export PRIVACYCA_DOWNLOAD_USERNAME=${PRIVACYCA_DOWNLOAD_USERNAME:-${CONF_PRIVACYCA_DOWNLOAD_USERNAME:-$DEFAULT_PRIVACYCA_DOWNLOAD_USERNAME}}
+  export PRIVACYCA_DOWNLOAD_PASSWORD=${PRIVACYCA_DOWNLOAD_PASSWORD:-${CONF_PRIVACYCA_DOWNLOAD_PASSWORD:-$DEFAULT_PRIVACYCA_DOWNLOAD_PASSWORD}}
+  export MS_KEYSTORE_DIR=${MS_KEYSTORE_DIR:-${CONF_MS_KEYSTORE_DIR:-$DEFAULT_MS_KEYSTORE_DIR}}
+  export API_KEY_ALIAS=${API_KEY_ALIAS:-${CONF_API_KEY_ALIAS:-$DEFAULT_API_KEY_ALIAS}}
+  export API_KEY_PASS=${API_KEY_PASS:-${CONF_API_KEY_PASS:-$DEFAULT_API_KEY_PASS}}
+  export CONFIGURED_API_BASEURL=${CONFIGURED_API_BASEURL:-${CONF_CONFIGURED_API_BASEURL:-$DEFAULT_CONFIGURED_API_BASEURL}}
+  export MTW_DEFAULT_TLS_POLICY_NAME=${MTW_DEFAULT_TLS_POLICY_NAME:-${CONF_MTW_DEFAULT_TLS_POLICY_NAME:-$DEFAULT_MTW_DEFAULT_TLS_POLICY_NAME}}
+  export MTW_TLS_KEYSTORE_PASS=${MTW_TLS_KEYSTORE_PASS:-${CONF_MTW_TLS_KEYSTORE_PASS:-$DEFAULT_MTW_TLS_KEYSTORE_PASS}}
+  export TDBP_KEYSTORE_DIR=${TDBP_KEYSTORE_DIR:-${CONF_TDBP_KEYSTORE_DIR:-$DEFAULT_TDBP_KEYSTORE_DIR}}
+  export ENDORSEMENT_P12_PASS=${ENDORSEMENT_P12_PASS:-${CONF_ENDORSEMENT_P12_PASS:-$DEFAULT_ENDORSEMENT_P12_PASS}}
+  export TRUSTAGENT_KEYSTORE_PASS=${TRUSTAGENT_KEYSTORE_PASS:-${CONF_TRUSTAGENT_KEYSTORE_PASS:-$DEFAULT_TRUSTAGENT_KEYSTORE_PASS}}
 
   if using_mysql; then
     export MYSQL_HOSTNAME=${DATABASE_HOSTNAME}

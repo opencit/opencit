@@ -66,17 +66,17 @@ load_defaults 2>&1 >/dev/null
 download_privacyca_certs() {
   local privacyca_server_config
   if [ -z "${PRIVACYCA_SERVER}" ]; then
-    privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
-    PRIVACYCA_SERVER=${privacyca_server_config}
+    #privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
+    #PRIVACYCA_SERVER=${privacyca_server_config}
     prompt_with_default PRIVACYCA_SERVER "Privacy CA Server:"
   fi
 
   if [ -n "${PRIVACYCA_SERVER}" ]; then
     # check if the privacy ca password is saved in a properties file
-    local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
+    #local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
     echo "Login to download the Privacy CA client files"
     if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME}" ]; then
-      prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
+      prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${PRIVACYCA_DOWNLOAD_USERNAME}
     fi
     if [ -z "${PRIVACYCA_DOWNLOAD_PASSWORD}" ]; then
       prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
@@ -137,7 +137,7 @@ download_privacyca_certs() {
       fi
       # use the password in hisprovisioner.propeties to extract the Endorsement certificate from endorsement.p12, then delete the password
       if [ -f "${intel_conf_dir}/endorsement.p12" ]; then
-        export endorsement_password=`read_property_from_file EndorsementP12Pass ${intel_conf_dir}/hisprovisioner.properties`
+        export endorsement_password="$ENDORSEMENT_P12_PASS"   #`read_property_from_file EndorsementP12Pass ${intel_conf_dir}/hisprovisioner.properties`
         openssl pkcs12 -in ${intel_conf_dir}/endorsement.p12 -out ${intel_conf_dir}/privacyca-endorsement.pem -nokeys -passin env:endorsement_password
         export endorsement_password=
         rm ${intel_conf_dir}/hisprovisioner.properties
@@ -166,10 +166,10 @@ create_saml_key() {
   # the saml.keystore.file property is just a file name and not an absolute path
   # TODO XXX: use convention over configuration... document that the SAML keystore file is a file called SAML.jks inside the
   # configuration directory, and use that fact everywhere instead of reading a configuration.
-  saml_keystore_file=`read_property_from_file saml.keystore.file ${package_config_filename}`
-  saml_keystore_password=`read_property_from_file saml.keystore.password ${package_config_filename}`
-  saml_key_alias=`read_property_from_file saml.key.alias ${package_config_filename}`
-  saml_key_password=`read_property_from_file saml.key.password ${package_config_filename}`
+  saml_keystore_file="$SAML_KEYSTORE_FILE"          #`read_property_from_file saml.keystore.file ${package_config_filename}`
+  saml_keystore_password="$SAML_KEYSTORE_PASSWORD"  #`read_property_from_file saml.keystore.password ${package_config_filename}`
+  saml_key_alias="$SAML_KEY_ALIAS"                  #`read_property_from_file saml.key.alias ${package_config_filename}`
+  saml_key_password="$SAML_KEY_PASSWORD"            #`read_property_from_file saml.key.password ${package_config_filename}`
   # prepend the configuration directory to the keystore filename
   saml_keystore_file=${intel_conf_dir}/${saml_keystore_file:-"SAML.jks"}
   saml_keystore_password=${saml_keystore_password:-"changeit"}
@@ -189,7 +189,7 @@ create_saml_key() {
   openssl x509 -in ${intel_conf_dir}/saml.crt -inform der -out ${intel_conf_dir}/saml.crt.pem -outform pem
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
 
-  #saml.issuer=https://localhost:8181
+  saml.issuer=https://localhost:8181
   local saml_issuer=""
   if using_glassfish; then
     saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
@@ -318,12 +318,12 @@ case "$1" in
   # for sysadmin convenience
         mtwilson setup-env > "${package_env_filename}"
         ;;
-  edit)
-        update_property_in_file "${2}" "${package_config_filename}" "${3}"
-        ;;
-  show)
-        read_property_from_file "${2}" "${package_config_filename}"
-        ;;
+#  edit)
+#        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+#        ;;
+#  show)
+#        read_property_from_file "${2}" "${package_config_filename}"
+#        ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
         webservice_uninstall "${webservice_application_name}"

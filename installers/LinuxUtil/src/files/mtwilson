@@ -62,9 +62,9 @@ find_ctl_commands() {
 }
 
 mtwilson_saml_cert_report() {
-  local keystore=`read_property_from_file saml.keystore.file ${conf_dir}/attestation-service.properties`
-  local keystorePassword=`read_property_from_file saml.keystore.password ${conf_dir}/attestation-service.properties`
-  local keyalias=`read_property_from_file saml.key.alias ${conf_dir}/attestation-service.properties`
+  local keystore="$SAML_KEYSTORE_FILE"   #`read_property_from_file saml.keystore.file ${conf_dir}/attestation-service.properties`
+  local keystorePassword=$SAML_KEYSTORE_PASSWORD   #`read_property_from_file saml.keystore.password ${conf_dir}/attestation-service.properties`
+  local keyalias=$SAML_KEY_ALIAS   #`read_property_from_file saml.key.alias ${conf_dir}/attestation-service.properties`
   java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
 }
 
