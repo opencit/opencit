@@ -133,8 +133,8 @@ elif [ ! -z "$opt_mysql" ]; then
   DATABASE_VENDOR=mysql
 fi
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
+#export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
@@ -160,6 +160,12 @@ if using_mysql ; then
   fi
 fi
 
+#Save variables to properties file
+if using_mysql; then   
+  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+elif using_postgres; then
+  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+fi
 
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
@@ -850,11 +856,11 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
 fi
 
 #Save variables to properties file
-if using_mysql; then   
-  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-elif using_postgres; then
-  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-fi
+#if using_mysql; then   
+#  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+#elif using_postgres; then
+#  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+#fi
   
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
