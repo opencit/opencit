@@ -35,16 +35,19 @@ local ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
 local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
 local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
 local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+file_paths=("$mtw_props_path" "$as_props_path" "$pca_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
 
 # disable upgrade if properties files are encrypted from a previous installation
-if [[ -f "$mtw_props_path" || -f "$as_props_path" || -f "$pca_props_path" || -f "$ms_props_path" || -f "$mp_props_path" || -f "$hp_props_path" || -f "$ta_props_path" ]]; then
-  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" || file_encrypted "$as_props_path" || file_encrypted "$pca_props_path" || file_encrypted "$ms_props_path" || file_encrypted "$mp_props_path" || file_encrypted "$hp_props_path" || file_encrypted "$ta_props_path" ; then
-    echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
-    exit -1
+for file in ${file_paths[*]}; do
+  if [ -f $file ]; then
+    if file_encrypted $file; then
+      echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
+      exit -1
+    fi
   fi
-  load_conf
-fi
+done
 
+load_conf
 load_defaults
 
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then

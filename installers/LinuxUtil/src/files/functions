@@ -3213,27 +3213,18 @@ load_conf() {
   local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
   local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
   local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+  file_paths=("$mtw_props_path" "$as_props_path" "$pca_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path")
   
-  if [[ -f "$mtw_props_path" && -f "$as_props_path" ]]; then
-    if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi    
-    export DEFAULT_ENV_LOADED=true
+  if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi
   
-    # Verify MTWILSON_PASSWORD variable set
-    if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
-      if [ -z "$MTWILSON_PASSWORD" ]; then
-        echo_failure "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
-      fi
-    fi
-  
-    # mtwilson.properties file
+  # mtwilson.properties file
+  if [ -f "$mtw_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$mtw_props_path"; then
       echo -n "encrypted file [$mtw_props_path]....."
       temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3257,15 +3248,16 @@ load_conf() {
       export CONF_MTW_TLS_KEYSTORE_PASS=`read_property_from_file mtwilson.tls.keystore.password "$mtw_props_path"`
     fi
     echo_success "Done"
+  fi
   
-    # attestation-service.properties
+  # attestation-service.properties
+  if [ -f "$as_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$as_props_path"; then
       echo -n "encrypted file [$as_props_path]....."
       temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_SAML_KEYSTORE_FILE=`echo $temp | awk -F'saml.keystore.file=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_SAML_KEYSTORE_PASSWORD=`echo $temp | awk -F'saml.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3283,15 +3275,16 @@ load_conf() {
       export CONF_PRIVACYCA_SERVER=`read_property_from_file privacyca.server "$as_props_path"`
     fi
     echo_success "Done"
+  fi
 
-    # management-service.properties
+  # management-service.properties
+  if [ -f "$ms_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$ms_props_path"; then
       echo -n "encrypted file [$ms_props_path]....."
       temp=`call_setupcommand ExportConfig "$ms_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_MS_KEYSTORE_DIR=`echo $temp | awk -F'mtwilson.ms.keystore.dir=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_API_KEY_ALIAS=`echo $temp | awk -F'mtwilson.api.key.alias=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3305,15 +3298,16 @@ load_conf() {
       export CONF_CONFIGURED_API_BASEURL=`read_property_from_file mtwilson.api.baseurl "$ms_props_path"`
     fi
     echo_success "Done"
+  fi
 
-    # PrivacyCA.properties.properties
+  # PrivacyCA.properties.properties
+  if [ -f "$pca_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$pca_props_path"; then
       echo -n "encrypted file [$pca_props_path]....."
       temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3323,15 +3317,16 @@ load_conf() {
       export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`read_property_from_file ClientFilesDownloadPassword "$pca_props_path"`
     fi
     echo_success "Done"
+  fi
 
-    # mtwilson-portal.properties
+  # mtwilson-portal.properties
+  if [ -f "$mp_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$mp_props_path"; then
       echo -n "encrypted file [$mp_props_path]....."
       temp=`call_setupcommand ExportConfig "$mp_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_TDBP_KEYSTORE_DIR=`echo $temp | awk -F'mtwilson.tdbp.keystore.dir=' '{print $2}' | awk -F' ' '{print $1}'`
     else
@@ -3339,15 +3334,16 @@ load_conf() {
       export CONF_TDBP_KEYSTORE_DIR=`read_property_from_file mtwilson.tdbp.keystore.dir "$mp_props_path"`
     fi
     echo_success "Done"
+  fi
     
-    # hisprovisioner.properties
+  # hisprovisioner.properties
+  if [ -f "$hp_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$hp_props_path"; then
       echo -n "encrypted file [$hp_props_path]....."
       temp=`call_setupcommand ExportConfig "$hp_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_ENDORSEMENT_P12_PASS=`echo $temp | awk -F'EndorsementP12Pass = ' '{print $2}' | awk -F' ' '{print $1}'`
     else
@@ -3355,15 +3351,16 @@ load_conf() {
       export CONF_ENDORSEMENT_P12_PASS=`read_property_from_file EndorsementP12Pass "$hp_props_path"`
     fi
     echo_success "Done"
+  fi
 
-    # trustagent.properties
+  # trustagent.properties
+  if [ -f "$ta_props_path" ]; then
     echo -n "Reading properties from "
     if file_encrypted "$ta_props_path"; then
       echo -n "encrypted file [$ta_props_path]....."
       temp=`call_setupcommand ExportConfig "$ta_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echoerr -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        exit -1
       fi
       export CONF_TRUSTAGENT_KEYSTORE_PASS=`echo $temp | awk -F'trustagent.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
@@ -3371,14 +3368,16 @@ load_conf() {
       export CONF_TRUSTAGENT_KEYSTORE_PASS=`read_property_from_file trustagent.keystore.password "$ta_props_path"`
     fi
     echo_success "Done"
-
-    # Determine DATABASE_VENDOR
-    if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
-      export CONF_DATABASE_VENDOR="postgres";
-    elif grep -q "mysql" <<< "$CONF_DATABASE_DRIVER"; then
-      export CONF_DATABASE_VENDOR="mysql";
-    fi
   fi
+
+  # Determine DATABASE_VENDOR
+  if grep -q "postgres" <<< "$CONF_DATABASE_DRIVER"; then
+    export CONF_DATABASE_VENDOR="postgres";
+  elif grep -q "mysql" <<< "$CONF_DATABASE_DRIVER"; then
+    export CONF_DATABASE_VENDOR="mysql";
+  fi
+
+  export DEFAULT_ENV_LOADED=true
 }
   
 load_defaults() {
