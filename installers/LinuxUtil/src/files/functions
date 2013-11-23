@@ -3213,19 +3213,24 @@ load_conf() {
   local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
   local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
   local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
-  file_paths=("$mtw_props_path" "$as_props_path" "$pca_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path")
   
   if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi
-  
+  echo "savy_001"
+
   # mtwilson.properties file
   if [ -f "$mtw_props_path" ]; then
     echo -n "Reading properties from "
+    echo "savy_001a"
     if file_encrypted "$mtw_props_path"; then
       echo -n "encrypted file [$mtw_props_path]....."
+      echo "savy_001b"
       temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
+      echo "savy_001c"
       if [[ "$temp" == *"Incorrect password"* ]]; then
+        echo "savy_001d"
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
       fi
+      echo "savy_001e"
       export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
