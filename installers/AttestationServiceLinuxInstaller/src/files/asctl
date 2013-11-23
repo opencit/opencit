@@ -189,7 +189,7 @@ create_saml_key() {
   openssl x509 -in ${intel_conf_dir}/saml.crt -inform der -out ${intel_conf_dir}/saml.crt.pem -outform pem
   chmod 600 ${intel_conf_dir}/saml.crt ${intel_conf_dir}/saml.crt.pem
 
-  saml.issuer=https://localhost:8181
+  #saml.issuer=https://localhost:8181
   local saml_issuer=""
   if using_glassfish; then
     saml_issuer="https://${MTWILSON_SERVER:-127.0.0.1}:8181"
