@@ -3215,22 +3215,17 @@ load_conf() {
   local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
   
   if [ -n "$DEFALT_ENV_LOADED" ]; then return; fi
-  echo "savy_001"
 
   # mtwilson.properties file
   if [ -f "$mtw_props_path" ]; then
     echo -n "Reading properties from "
-    echo "savy_001a"
     if file_encrypted "$mtw_props_path"; then
       echo -n "encrypted file [$mtw_props_path]....."
-      echo "savy_001b"
       temp=`call_setupcommand ExportConfig "$mtw_props_path" --stdout 2>&1`
-      echo "savy_001c"
       if [[ "$temp" == *"Incorrect password"* ]]; then
-        echo "savy_001d"
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
-      echo "savy_001e"
       export CONF_DATABASE_HOSTNAME=`echo $temp | awk -F'mtwilson.db.host=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_SCHEMA=`echo $temp | awk -F'mtwilson.db.schema=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_DATABASE_USERNAME=`echo $temp | awk -F'mtwilson.db.user=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3263,6 +3258,7 @@ load_conf() {
       temp=`call_setupcommand ExportConfig "$as_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
       export CONF_SAML_KEYSTORE_FILE=`echo $temp | awk -F'saml.keystore.file=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_SAML_KEYSTORE_PASSWORD=`echo $temp | awk -F'saml.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3290,6 +3286,7 @@ load_conf() {
       temp=`call_setupcommand ExportConfig "$ms_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
       export CONF_MS_KEYSTORE_DIR=`echo $temp | awk -F'mtwilson.ms.keystore.dir=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_API_KEY_ALIAS=`echo $temp | awk -F'mtwilson.api.key.alias=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3313,6 +3310,7 @@ load_conf() {
       temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
       export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
       export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
@@ -3332,6 +3330,7 @@ load_conf() {
       temp=`call_setupcommand ExportConfig "$mp_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
       export CONF_TDBP_KEYSTORE_DIR=`echo $temp | awk -F'mtwilson.tdbp.keystore.dir=' '{print $2}' | awk -F' ' '{print $1}'`
     else
@@ -3349,6 +3348,7 @@ load_conf() {
       temp=`call_setupcommand ExportConfig "$hp_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
       export CONF_ENDORSEMENT_P12_PASS=`echo $temp | awk -F'EndorsementP12Pass = ' '{print $2}' | awk -F' ' '{print $1}'`
     else
@@ -3366,6 +3366,7 @@ load_conf() {
       temp=`call_setupcommand ExportConfig "$ta_props_path" --stdout 2>&1`
       if [[ "$temp" == *"Incorrect password"* ]]; then
         echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+        return 2
       fi
       export CONF_TRUSTAGENT_KEYSTORE_PASS=`echo $temp | awk -F'trustagent.keystore.password=' '{print $2}' | awk -F' ' '{print $1}'`
     else
@@ -3383,6 +3384,7 @@ load_conf() {
   fi
 
   export DEFAULT_ENV_LOADED=true
+  return 0
 }
   
 load_defaults() {

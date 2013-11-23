@@ -76,18 +76,28 @@ public class ExportConfig implements Command {
      */
     public String getExistingPassword(String label, String optName) throws IOException {
         String password;
+        System.err.println("SAVY_001");
         if( options != null && options.containsKey(optName) ) {
+            System.err.println("SAVY_002");
             String passwordVar = options.getString(optName);
+            System.err.println("SAVY_003");
             password = System.getenv(passwordVar);
+            System.err.println("SAVY_004");
             if( password == null ) {
+                System.err.println("SAVY_005");
                 System.err.println(String.format("Cannot get password from environment variable '%s' specified by option '%s'", passwordVar, optName));
+                System.err.println("SAVY_006");
             }
         }
         else {
+            System.err.println("SAVY_007");
             password = System.getenv("MTWILSON_PASSWORD");
+            System.err.println("SAVY_008");
         }
         if( password == null ) {
+            System.err.println("SAVY_009");
             password = Input.getRequiredPasswordWithPrompt(String.format("A password is required to unlock %s.", label)); // throws IOException, or always returns value or expression
+            System.err.println("SAVY_010");
         }
         return password;        
     }    
