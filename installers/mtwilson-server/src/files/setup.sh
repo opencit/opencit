@@ -28,10 +28,17 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
-mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
-as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
-if [[ -f "$mtw_props_path" || -f "$as_props_path" ]]; then
-  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
+local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+local pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+local ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
+local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
+local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
+local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+
+# disable upgrade if properties files are encrypted from a previous installation
+if [[ -f "$mtw_props_path" || -f "$as_props_path" || -f "$pca_props_path" || -f "$ms_props_path" || -f "$mp_props_path" || -f "$hp_props_path" || -f "$ta_props_path" ]]; then
+  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" || file_encrypted "$as_props_path" || file_encrypted "$pca_props_path" || file_encrypted "$ms_props_path" || file_encrypted "$mp_props_path" || file_encrypted "$hp_props_path" || file_encrypted "$ta_props_path" ; then
     echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
     exit -1
   fi
