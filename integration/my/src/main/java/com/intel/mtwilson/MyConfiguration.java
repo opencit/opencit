@@ -171,19 +171,26 @@ public class MyConfiguration {
                     FileInputStream in = new FileInputStream(f);
                     String content = IOUtils.toString(in);
                     in.close();
+                    log.error("meow_001: {}", content);
                     if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
                         // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
                         String password = null;
+                        log.error("meow_002: {}", password);
                         if( system.containsKey("mtwilson.password") ) {
+                            log.error("meow_003: {}", password);
                             password = system.getString("mtwilson.password");
+                            log.error("meow_004: {}", password);
                         }
                         else if( env.containsKey("MTWILSON_PASSWORD") ) {
+                            log.error("meow_005: {}", password);
                             password = env.getString("MTWILSON_PASSWORD");
+                            log.error("meow_006: {}", password);
                         }
                         else {
                             log.warn("Found encrypted configuration file, but no password was found in system properties or environment");
                         }
                         if( password != null ) {
+                            log.error("meow_007: {}", password);
                             ExistingFileResource resource = new ExistingFileResource(f);
                             PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
                             String decryptedContent = encryptedFile.loadString();
@@ -192,9 +199,11 @@ public class MyConfiguration {
                             MapConfiguration encrypted = new MapConfiguration(p);
                             logConfiguration("encrypted-file:"+f.getAbsolutePath(), encrypted);
                             composite.addConfiguration(encrypted);
+                            log.error("meow_008: {}", password);
                         }
                     }
                     else {
+                        log.error("meow_009");
                         log.debug("FILE {} IS IN REGULAR PROPERTIES FORMAT", f.getAbsolutePath());
                         PropertiesConfiguration standard = new PropertiesConfiguration(f);
                         logConfiguration("file:"+f.getAbsolutePath(), standard);
