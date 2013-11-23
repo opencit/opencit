@@ -162,17 +162,14 @@ public class MyConfiguration {
         
         
         List<File> files = listConfigurationFiles();
-        System.out.println("MEOW_001: " + files.size());
         // add all the files we found so far, in the priority order
         for (File f : files) {
-            System.out.println("MEOW_001a: " + f.getName());
 //            System.out.println("Looking for "+f.getAbsolutePath());
             try {
                 if (f.exists() && f.canRead()) {
                     // first check if the file is encrypted... if it is, we need to decrypt it before loading!
                     FileInputStream in = new FileInputStream(f);
                     String content = IOUtils.toString(in);
-                    System.out.println("MEOW_001b: " + content);
                     in.close();
                     if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
                         // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
@@ -199,9 +196,7 @@ public class MyConfiguration {
                     }
                     else {
                         log.debug("FILE {} IS IN REGULAR PROPERTIES FORMAT", f.getAbsolutePath());
-                        System.out.println("MEOW_002: " + f.getAbsolutePath());
                         PropertiesConfiguration standard = new PropertiesConfiguration(f);
-                        System.out.println("MEOW_001a: " + standard.getKeys().toString());
                         logConfiguration("file:"+f.getAbsolutePath(), standard);
                         composite.addConfiguration(standard);
                     }
@@ -423,22 +418,16 @@ public class MyConfiguration {
     }
 
     public String getDatabasePort() {
-        String meow = "snood";
-        if( conf.containsKey("mtwilson.db.port") ) { meow = conf.getString("mtwilson.db.port", "5432"); }
-        System.out.println("SAVY_001: " + meow);
-        if( conf.containsKey("mountwilson.as.db.port") ) { meow = conf.getString("mountwilson.as.db.port", "5432"); } // XXX deprecate old properties in a future release
-        System.out.println("SAVY_002: " + meow);
-        if( conf.containsKey("mountwilson.ms.db.port") ) { meow = conf.getString("mountwilson.ms.db.port", "5432"); } // XXX deprecate old properties in a future release
-        System.out.println("SAVY_003: " + meow);
+        if( conf.containsKey("mtwilson.db.port") ) { conf.getString("mtwilson.db.port", "5432"); }
+        if( conf.containsKey("mountwilson.as.db.port") ) { conf.getString("mountwilson.as.db.port", "5432"); } // XXX deprecate old properties in a future release
+        if( conf.containsKey("mountwilson.ms.db.port") ) { conf.getString("mountwilson.ms.db.port", "5432"); } // XXX deprecate old properties in a future release
         if( conf.containsKey("mtwilson.db.protocol") ) {
             String protocol = conf.getString("mtwilson.db.protocol", "");
-            System.out.println("SAVY_004: " + protocol);
             if( protocol.equals("postgresql") ) { return "5432"; }
             if( protocol.equals("mysql") ) { return "3306"; }
         }
         if( conf.containsKey("mtwilson.db.driver") ) {
             String port = conf.getString("mtwilson.db.driver", "");
-            System.out.println("SAVY_005: " + port);
             if( port.equals("org.postgresql.Driver") ) { return "5432"; }
             if( port.equals("com.mysql.jdbc.Driver") ) { return "3306"; }
         }
