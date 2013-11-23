@@ -21,9 +21,9 @@ if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
 echo "test1"
-load_conf 2>&1 >/dev/null
+load_conf
 echo "test2"
-load_defaults 2>&1 >/dev/null
+load_defaults #2>&1 >/dev/null
 echo "test3"
 #if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
