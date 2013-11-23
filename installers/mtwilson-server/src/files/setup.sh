@@ -28,13 +28,13 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
-local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
-local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
-local pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
-local ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
-local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
-local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
-local ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
+mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
+hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
+ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
 file_paths=("$mtw_props_path" "$as_props_path" "$pca_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
 
 # disable upgrade if properties files are encrypted from a previous installation
