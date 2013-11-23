@@ -160,13 +160,6 @@ if using_mysql ; then
   fi
 fi
 
-#Save variables to properties file
-if using_mysql; then   
-  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-elif using_postgres; then
-  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-fi
-
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
 elif using_postgres; then
@@ -227,6 +220,12 @@ fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
 
+#Save variables to properties file
+if using_mysql; then   
+  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+elif using_postgres; then
+  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+fi
 
 # copy default logging settings to /etc
 chmod 700 logback.xml
