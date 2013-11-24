@@ -73,12 +73,15 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
         EntityManager em = getEntityManager();
         try {
             em.getTransaction().begin();
-            MwPortalUser mwPortalUser;
+            MwPortalUser mwPortalUser = null;
             try {
                 mwPortalUser = em.getReference(MwPortalUser.class, id);
+                System.out.println("SAVY_002: Deleting " + mwPortalUser.getUsername());
                 mwPortalUser.getId();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The mwPortalUser with id " + id + " no longer exists.", enfe);
+            } catch (Exception ex) {
+                throw new NonexistentEntityException("does " + id + " equal " + mwPortalUser.getId() + "?\r\n\r\n" + ex.getMessage() + "\r\n\r\n" + ex.getStackTrace().toString(), ex);
             }
             em.remove(mwPortalUser);
             em.getTransaction().commit();
