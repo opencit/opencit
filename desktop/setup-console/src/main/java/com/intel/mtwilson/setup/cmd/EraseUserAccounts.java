@@ -71,11 +71,12 @@ public class EraseUserAccounts implements Command {
 
     private void deleteUser(String username) {
         try {
-             MwPortalUserJpaController jpa  = My.jpa().mwPortalUser();
+             MwPortalUserJpaController jpa  = new MwPortalUserJpaController(em); //My.jpa().mwPortalUser();
              MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
              jpa.destroy(portalUser.getId());
+             System.out.println("Deleted " + username);
         }catch (Exception ex) {
-            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
+            System.err.println("Exception occured: \r\n\r\n" + ex.getMessage() +"\r\n\r\n" + ex.getStackTrace().toString());
         }
     }
     
