@@ -223,8 +223,16 @@ update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mt
 #Save variables to properties file
 if using_mysql; then   
   mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+  mysql_write_connection_properties /etc/intel/cloudsecurity/attestation-service.properties mountwilson.as.db
+  mysql_write_connection_properties /etc/intel/cloudsecurity/audit-handler.properties mountwilson.audit.db
+  mysql_write_connection_properties /etc/intel/cloudsecurity/management-service.properties mountwilson.ms.db
+  mysql_write_connection_properties /etc/intel/cloudsecurity/wlm-service.properties mountwilson.as.db
 elif using_postgres; then
   postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+  postgres_write_connection_properties /etc/intel/cloudsecurity/attestation-service.properties mountwilson.as.db
+  postgres_write_connection_properties /etc/intel/cloudsecurity/audit-handler.properties mountwilson.audit.db
+  postgres_write_connection_properties /etc/intel/cloudsecurity/management-service.properties mountwilson.ms.db
+  postgres_write_connection_properties /etc/intel/cloudsecurity/wlm-service.properties mountwilson.as.db
 fi
 
 # copy default logging settings to /etc
