@@ -751,6 +751,13 @@ mysql_read_connection_properties() {
 mysql_write_connection_properties() {
     local config_file="$1"
     local prefix="${2:-mysql}"
+    local encrypted="false"
+
+    # Decrypt if needed
+    if file_encrypted "$config_file"; then
+      encrypted="true"
+      decrypt_file "$config_file" "$MTWILSON_PASSWORD"
+    fi
     update_property_in_file ${prefix}.host "${config_file}" "${MYSQL_HOSTNAME}"
     update_property_in_file ${prefix}.port "${config_file}" "${MYSQL_PORTNUM}"
     update_property_in_file ${prefix}.user "${config_file}" "${MYSQL_USERNAME}"
@@ -758,6 +765,11 @@ mysql_write_connection_properties() {
     update_property_in_file ${prefix}.schema "${config_file}" "${MYSQL_DATABASE}"
     update_property_in_file ${prefix}.driver "${config_file}" "com.mysql.jdbc.Driver"
     # if you create a .url property then it takes precedence over the .host, .port, and .schema - so let user do that
+    
+    # Return the file to encrypted state, if it was before
+    if [ encrypted == "true" ]; then
+      encrypt_file "$config_file" "$MTWILSON_PASSWORD"
+    fi
 }
 
 # parameters:
@@ -991,7 +1003,7 @@ mysql_configure_connection() {
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
-#      mysql_write_connection_properties "${config_file}" "${prefix}"
+      mysql_write_connection_properties "${config_file}" "${prefix}"
 #      fi
 }
 
@@ -1428,7 +1440,7 @@ postgres_configure_connection() {
 #      local should_save
 #      prompt_yes_no should_save "Save in ${package_config_filename}?"
 #      if [[ "yes" == "${should_save}" ]]; then
-#      postgres_write_connection_properties "${config_file}" "${prefix}"
+      postgres_write_connection_properties "${config_file}" "${prefix}"
 #      fi
 }
 
@@ -3127,13 +3139,25 @@ postgres_read_connection_properties() {
 postgres_write_connection_properties() {
     local config_file="$1"
     local prefix="${2:-postgres}"
+    local encrypted="false"
+
+    # Decrypt if needed
+    if file_encrypted "$config_file"; then
+      encrypted="true"
+      decrypt_file "$config_file" "$MTWILSON_PASSWORD"
+    fi
+
     update_property_in_file ${prefix}.host "${config_file}" "${POSTGRES_HOSTNAME}"
     update_property_in_file ${prefix}.port "${config_file}" "${POSTGRES_PORTNUM}"
     update_property_in_file ${prefix}.user "${config_file}" "${POSTGRES_USERNAME}"
     update_property_in_file ${prefix}.password "${config_file}" "${POSTGRES_PASSWORD}"
     update_property_in_file ${prefix}.schema "${config_file}" "${POSTGRES_DATABASE}"
     update_property_in_file ${prefix}.driver "${config_file}" "org.postgresql.Driver"
-
+    
+    # Return the file to encrypted state, if it was before
+    if [ encrypted == "true" ]; then
+      encrypt_file "$config_file" "$MTWILSON_PASSWORD"
+    fi
 }
 
 # parameters:
