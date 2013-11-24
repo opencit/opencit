@@ -49,9 +49,9 @@ public class SetupWizard {
             String user =  p.getProperty("javax.persistence.jdbc.user");
             String pass =  p.getProperty("javax.persistence.jdbc.password");
             
-            System.out.println(String.format("SetupWizard.java db url: %s", url));
-            System.out.println(String.format("SetupWizard.java db user: %s", user));
-            System.out.println(String.format("SetupWizard.java db pass: %s", pass));
+//            System.out.println(String.format("SetupWizard.java db url: %s", url));
+//            System.out.println(String.format("SetupWizard.java db user: %s", user));
+//            System.out.println(String.format("SetupWizard.java db pass: %s", pass));
             
             Connection conn = DriverManager.getConnection(url, user, pass);
             

@@ -60,8 +60,7 @@ fi
 # Create a random password and update the property file of the management service
 mypassword16=`generate_password 16`
 update_property_in_file mtwilson.api.key.password "${package_config_filename}" "$mypassword16"
-load_conf 2>&1 >/dev/null
-load_defaults 2>&1 >/dev/null
+export API_KEY_PASS="$mypassword16"
 username="$API_KEY_ALIAS"   #`read_property_from_file mtwilson.api.key.alias "${package_config_filename}"`
 mtwilson=`which mtwilson 2>/dev/null`
 #redirect the output to dev null since this will fail the first time if mtwilson doesn't already exist

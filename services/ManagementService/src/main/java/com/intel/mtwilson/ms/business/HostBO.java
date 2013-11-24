@@ -257,36 +257,24 @@ public class HostBO extends BaseBO {
         try {
             // Retrieve the required values from the configuration
             String keyAliasName = MSConfig.getConfiguration().getString("mtwilson.api.key.alias");
-            log.error("MEOW_001: " + keyAliasName);
             String keyPassword = MSConfig.getConfiguration().getString("mtwilson.api.key.password");
-            log.error("MEOW_002: " + keyPassword);
             URL baseURL = new URL(MSConfig.getConfiguration().getString("mtwilson.api.baseurl"));
-            log.error("MEOW_003: " + baseURL.toString());
 
             // stdalex 1/15 jks2db!disk
             MwPortalUser keyTable = My.jpa().mwPortalUser().findMwPortalUserByUserName(keyAliasName);
-            log.error("MEOW_004: " + keyTable.getUsername());
             ByteArrayResource keyResource = new ByteArrayResource(keyTable.getKeystore());
-            log.error("MEOW_005: " + keyResource.toString());
             SimpleKeystore keystore = new SimpleKeystore(keyResource, keyPassword);
-            log.error("MEOW_006: " + keystore.toString());
             RsaCredential credential = keystore.getRsaCredentialX509(keyAliasName, keyPassword);
-            log.error("MEOW_007: " + credential.toString());
 
             Properties prop = new Properties();
-            log.error("MEOW_008: ");
             // prop.setProperty("mtwilson.api.ssl.policy", MSConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
             // prop.setProperty("mtwilson.api.ssl.requireTrustedCertificate", MSConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
             // prop.setProperty("mtwilson.api.ssl.verifyHostname", MSConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
             prop.setProperty("mtwilson.api.ssl.policy", My.configuration().getDefaultTlsPolicyName());
-            log.error("MEOW_009: " + My.configuration().getDefaultTlsPolicyName());
             prop.setProperty("mtwilson.api.ssl.requireTrustedCertificate", My.configuration().getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate","true"));
-            log.error("MEOW_010: " + My.configuration().getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate","true"));
             prop.setProperty("mtwilson.api.ssl.verifyHostname", My.configuration().getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true"));
-            log.error("MEOW_011: " + My.configuration().getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true"));
 
             rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(prop));
-            log.error("MEOW_012: " + rsaApiClient.toString());
             log.info("Successfully created the API object for Management Service");
 
         } catch (MSException me) {
