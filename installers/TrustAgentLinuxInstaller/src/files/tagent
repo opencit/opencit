@@ -254,12 +254,12 @@ function main {
       setup)                                               # completes service setup
          setup
          ;;
-#  edit)
-#        update_property_in_file "${2}" "${package_config_filename}" "${3}"
-#       ;;
-#  show)
-#        read_property_from_file "${2}" "${package_config_filename}"
-#        ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+       ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
   fixek)
         java_detect > /dev/null
         if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi

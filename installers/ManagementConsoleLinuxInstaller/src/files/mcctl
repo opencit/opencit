@@ -275,12 +275,12 @@ case "$1" in
         mtwilson setup-env > "${package_env_filename}"
   #echo "Saved environment in ${myenvdir}/${package_env_filename}"
         ;;
-  #edit)
-  #      update_property_in_file "${2}" "${package_config_filename}" "${3}"
-  #      ;;
-  #show)
-  #      read_property_from_file "${2}" "${package_config_filename}"
-  #      ;;
+  edit)
+        update_property_in_file "${2}" "${package_config_filename}" "${3}"
+        ;;
+  show)
+        read_property_from_file "${2}" "${package_config_filename}"
+        ;;
   uninstall)
         datestr=`date +%Y-%m-%d.%H%M`
         webservice_uninstall "${webservice_application_name}"
