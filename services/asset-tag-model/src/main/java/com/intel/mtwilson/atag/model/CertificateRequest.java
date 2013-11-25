@@ -21,6 +21,7 @@ public class CertificateRequest {
     private long certificateId;
     private long selectionId; // set by DAO when loading
     private UUID certificate;
+    private String xml;
 
     public CertificateRequest() {
     }
@@ -42,6 +43,14 @@ public class CertificateRequest {
         this.subject = subject;
         this.selection = selection;
     }
+    
+    public CertificateRequest(String subject, String selection, String xml) {
+//        this.id = id;
+//        this.uuid = uuid;
+        this.subject = subject;
+        this.selection = selection;
+        this.xml = xml;
+    }  
     
     public CertificateRequest(long id, UUID uuid, String subject, String selection) {
         this.id = id;
@@ -120,12 +129,16 @@ public class CertificateRequest {
         this.certificate = certificate;
     }
     
-    
-
     public void setSelectionId(long selectionId) {
         this.selectionId = selectionId;
     }
 
-
+    public String getXml() {
+        return this.xml;
+    }
+    
+    public void setXml(String xml) {
+        this.xml = xml;
+    }
     
 }
