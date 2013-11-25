@@ -17,7 +17,26 @@ import org.junit.Test;
 import com.intel.mtwilson.atag.xml.attrselect.*;
 import org.apache.commons.io.IOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 /**
+ * 
  *
  * @author jbuhacoff
  */
@@ -92,4 +111,76 @@ public class ReadXmlTest {
         ObjectMapper mapper = new ObjectMapper();
         log.debug("selection1: {}", mapper.writeValueAsString(selections));
     }
+    
+    public class TagSelection {
+        public List<tag> tagList;
+        public String    name;
+        public String    id;
+    }
+    
+    public class tag {
+        private String name;
+        private String value;
+        private String oid;
+        
+        tag(String name, String value, String oid){
+            this.name =name;
+            this.value=value;
+            this.oid=oid;                
+        }
+        
+        String getName() { return this.name;}
+        String getValue() {return this.value;}
+        String getOid() { return this.oid;}
+    };
+    
+    public TagSelection getTagSelectionFromXml(String xml) throws ParserConfigurationException, SAXException, IOException {
+        TagSelection ret = new TagSelection();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(xml));
+        Document doc = builder.parse(is);
+        ArrayList<tag> tagList = new ArrayList<tag>();
+        int cnt=0;
+        NodeList nodeList = doc.getElementsByTagName("attribute");
+        for (int s = 0; s < nodeList.getLength(); s++) {
+            Node fstNode = nodeList.item(s);
+            if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element fstElmnt = (Element) fstNode;
+                String idValue = fstElmnt.getAttribute("oid");                
+                Element lstNmElmnt = (Element) nodeList.item(cnt++);
+                NodeList lstNm = lstNmElmnt.getChildNodes();
+                String currentAction = ((Node) lstNm.item(0)).getNodeValue();
+                if (currentAction != null) {
+                    tagList.add(new tag("",idValue,currentAction));
+                }
+
+            }
+        }
+       
+        nodeList = doc.getElementsByTagName("selection");
+        Node fstNode = nodeList.item(0);
+        Element e = (Element) fstNode;
+        ret.id = e.getAttribute("id"); 
+        ret.name= e.getAttribute("name"); 
+        ret.tagList = tagList;
+        
+        return ret;
+    }
+    
+    @Test
+    public void testParseXmlSelection() throws ParserConfigurationException, SAXException, IOException {
+        String xml = "<selections xmlns=\"urn:intel-mtwilson-asset-tag-attribute-selections\">\n"
+                + "<selection id=\"1\" name=\"default\">\n"
+                + "<attribute oid=\"1.3.6.1.4.1.99999.1\">US</attribute>\n"
+                + "<attribute oid=\"1.3.6.1.4.1.99999.2\">CA</attribute>\n"
+                + "<attribute oid=\"1.3.6.1.4.1.99999.3\">Folsom</attribute>\n"
+                + "<attribute oid=\"1.3.6.1.4.1.99999.3\">Santa Clara</attribute>\n"
+                + "</selection>\n"
+                + "</selections>";
+       
+        TagSelection selection = getTagSelectionFromXml(xml);
+        System.out.println("got selection with name "+ selection.name + " and id of " + selection.id);
+    }
+    
 }
