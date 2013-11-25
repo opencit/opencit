@@ -185,8 +185,10 @@ public class CertificateRequestListResource extends ServerResource {
            List myList = new ArrayList();
            // now we need to create a selection based on the values we just got
            ArrayList<Tag> tagList = new ArrayList<Tag>();
+           System.out.println("adding tag name " + xmlSelection.name);
            Selection mySelection = new Selection(xmlSelection.name);
            for(MyTag t: xmlSelection.tagList) {
+               System.out.println("adding tag " + t.name + "["+t.oid+"] " + t.value);
                String[] l = new String[1];
                l[0] = t.getValue();
                Tag tag = new Tag("", t.getOid(),l);
@@ -199,11 +201,13 @@ public class CertificateRequestListResource extends ServerResource {
                myList.add(selectionTagValue);
            }
            mySelection.setTags(myList);
+           // add the selection so that the next code can use it
            Selection completeSelection = selectionListResource.insertSelection(mySelection);
            certificateRequest.setSelection(completeSelection.getUuid().toString());
            return null;
         }
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
+            log.error("insertCertificateRequest processing request");
             if( UUID.isValid(certificateRequest.getSelection() )) {
                 selection = selectionDao.findByUuid(UUID.valueOf(certificateRequest.getSelection()));
                 if( selection == null ) {
