@@ -180,7 +180,7 @@ function checkServiceStatus {
    fi
    return 0; }
    
-getNewid {
+getNewid() {
   java_detect > /dev/null
   if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
   stopService
