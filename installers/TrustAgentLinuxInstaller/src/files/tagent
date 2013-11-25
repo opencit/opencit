@@ -180,7 +180,7 @@ function checkServiceStatus {
    fi
    return 0; }
    
-getNewid() {
+get_newid() {
   java_detect > /dev/null
   if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
   stopService
@@ -237,7 +237,7 @@ setup_interactive_install() {
         fi
         # This is the place to do any setup while trust agent is not running
         #/usr/local/bin/pcakey
-        getNewid
+        get_newid
 		if [ $? == 1 ]; then
 			exit 1
 		fi
@@ -287,7 +287,7 @@ function main {
         startService
         ;;
   newid)
-        #getNewid
+        #get_newid
         java_detect > /dev/null
         if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
         stopService
