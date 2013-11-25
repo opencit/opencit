@@ -306,4 +306,3 @@ chmod 700 /etc/monit/monitrc
 service monit restart
 
 echo "monit installed and monitoring tagent"
-$tagent newid
