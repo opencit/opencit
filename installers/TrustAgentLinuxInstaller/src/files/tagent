@@ -233,8 +233,7 @@ setup_interactive_install() {
     if [ -n "$JAVA_HOME" ]; then
 	checkServiceStatus
 	if [ -z "$TRUST_AGENT_RUNNING" ]; then
-	    startService   # Need to call this so that tpm takeOwnership() command is called prior to CreateIdentity (get_newid)
-            stopService
+	    stopService
         fi
         # This is the place to do any setup while trust agent is not running
         #/usr/local/bin/pcakey
