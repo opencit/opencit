@@ -20,8 +20,10 @@ import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
+import com.intel.mtwilson.atag.model.Tag;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import java.io.IOException;
+import java.io.StringReader;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
@@ -40,6 +42,16 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * References: http://restlet.org/learn/guide/2.2/core/resource/
@@ -92,6 +104,62 @@ public class CertificateRequestListResource extends ServerResource {
 //        if( certificateRequestTagValueDao != null ) { certificateRequestTagValueDao.close(); }
         super.doRelease();
     }
+    
+    private class TagSelection {
+        public List<MyTag> tagList;
+        public String    name;
+        public String    id;
+    }
+    
+    private class MyTag {
+        private String name;
+        private String value;
+        private String oid;
+        
+        MyTag(String name, String value, String oid){
+            this.name =name;
+            this.value=value;
+            this.oid=oid;                
+        }
+        
+        String getName() { return this.name;}
+        String getValue() {return this.value;}
+        String getOid() { return this.oid;}
+    }
+    
+    private TagSelection getTagSelectionFromXml(String xml) throws ParserConfigurationException, SAXException, IOException {
+        TagSelection ret = new TagSelection();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(xml));
+        Document doc = builder.parse(is);
+        ArrayList<MyTag> tagList = new ArrayList<MyTag>();
+        int cnt=0;
+        NodeList nodeList = doc.getElementsByTagName("attribute");
+        for (int s = 0; s < nodeList.getLength(); s++) {
+            Node fstNode = nodeList.item(s);
+            if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element fstElmnt = (Element) fstNode;
+                String idValue = fstElmnt.getAttribute("oid");                
+                Element lstNmElmnt = (Element) nodeList.item(cnt++);
+                NodeList lstNm = lstNmElmnt.getChildNodes();
+                String currentAction = ((Node) lstNm.item(0)).getNodeValue();
+                if (currentAction != null) {
+                    tagList.add(new MyTag("",idValue,currentAction));
+                }
+
+            }
+        }
+       
+        nodeList = doc.getElementsByTagName("selection");
+        Node fstNode = nodeList.item(0);
+        Element e = (Element) fstNode;
+        ret.id = e.getAttribute("id"); 
+        ret.name= e.getAttribute("name"); 
+        ret.tagList = tagList;
+        
+        return ret;
+    }
 
     /**
      * Input certificate requests provide a certificate subject and one or more tags where each tag
@@ -100,17 +168,42 @@ public class CertificateRequestListResource extends ServerResource {
      * object. Then we can insert it to the database.
      */
 //    @Post("json:json")
-    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException {
+    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
         // IMPORTANT: provisioning policy choices:
         // Automatic Server-Based: always use the same pre-configured selection; find it in static config, ignore the requestor's selection
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
         Selection selection = null;
-        if(Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty()){
+        // if submitting xml, instead of selection having your UUID, it needs to be set to xml
+        if(Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty() && certificateRequest.getSelection() != null && certificateRequest.getSelection().equalsIgnoreCase("xml")){
            log.error("insertCertificateRequest got xml request");
+           String xml = certificateRequest.getXml();
+           TagSelection xmlSelection = getTagSelectionFromXml(xml);
+           TagListResource tagListResource = new TagListResource();
+           SelectionListResource selectionListResource = new SelectionListResource();
+           List myList = new ArrayList();
+           // now we need to create a selection based on the values we just got
+           ArrayList<Tag> tagList = new ArrayList<Tag>();
+           Selection mySelection = new Selection(xmlSelection.name);
+           for(MyTag t: xmlSelection.tagList) {
+               String[] l = new String[1];
+               l[0] = t.getValue();
+               Tag tag = new Tag("", t.getOid(),l);
+               tagList.add(tag);
+               // now create the tag
+               tagListResource.insertTag(tag);
+               
+               SelectionTagValue selectionTagValue = new SelectionTagValue("",t.getOid(),t.getValue());
+               // now add it to the selection for when we create the selection
+               myList.add(selectionTagValue);
+           }
+           mySelection.setTags(myList);
+           Selection completeSelection = selectionListResource.insertSelection(mySelection);
+           certificateRequest.setSelection(completeSelection.getUuid().toString());
            return null;
-        }else if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
+        }
+        if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
             if( UUID.isValid(certificateRequest.getSelection() )) {
                 selection = selectionDao.findByUuid(UUID.valueOf(certificateRequest.getSelection()));
                 if( selection == null ) {
@@ -271,7 +364,7 @@ public class CertificateRequestListResource extends ServerResource {
      * @throws SQLException
      */
     @Post("json:json")
-    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException {
+    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
             results[i] = insertCertificateRequest(certificateRequests[i]);
