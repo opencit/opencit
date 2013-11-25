@@ -13,9 +13,9 @@ package_env_filename=${package_dir}/${package_name}.env
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 if [ -f "${package_env_filename}" ]; then . "${package_env_filename}"; else echo_warning "Missing file: ${package_env_filename}"; fi
-load_conf 2>&1 >/dev/null
-load_defaults 2>&1 >/dev/null
-#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+#load_conf 2>&1 >/dev/null
+#load_defaults 2>&1 >/dev/null
+if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 # TODO: move this function to mtwilson-util. it's not the same as update_property_in_file because it's specific to the /etc/hosts format
 # update the fqdn for an ip address in the /etc/hosts file, replacing the previous value and all its aliases
@@ -43,8 +43,8 @@ replace_hostname_in_etc_hosts_NOT_COMPLETE__NOT_IN_USE_YET() {
 # Check if there is a username and password already configured 
 server_pca_username="$PRIVACYCA_DOWNLOAD_USERNAME"   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`
 server_pca_password="$PRIVACYCA_DOWNLOAD_PASSWORD"   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`
-client_pca_username=${server_pca_username:-"$PRIVACYCA_DOWNLOAD_USERNAME"}   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
-client_pca_password=${server_pca_password:-"$PRIVACYCA_DOWNLOAD_PASSWORD"}   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
+client_pca_username="${server_pca_username}" #:-"$PRIVACYCA_DOWNLOAD_USERNAME"}   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
+client_pca_password="${server_pca_password}" #:-"$PRIVACYCA_DOWNLOAD_PASSWORD"}   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
 
 prompt_with_default PRIVACYCA_SERVER "Privacy CA Server IP Address:"  "https://mtwilsonIP:port#"
 echo "Login to download the Privacy CA client files"

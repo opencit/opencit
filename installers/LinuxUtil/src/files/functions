@@ -3232,7 +3232,7 @@ encrypt_file() {
 load_conf() {
   local mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
   local as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
-  local pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+  #local pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
   local ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
   local mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
   local hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
@@ -3326,25 +3326,25 @@ load_conf() {
     echo_success "Done"
   fi
 
-  # PrivacyCA.properties.properties
-  if [ -f "$pca_props_path" ]; then
-    echo -n "Reading properties from "
-    if file_encrypted "$pca_props_path"; then
-      echo -n "encrypted file [$pca_props_path]....."
-      temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
-      if [[ "$temp" == *"Incorrect password"* ]]; then
-        echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
-        return 2
-      fi
-      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
-      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
-    else
-      echo -n "file [$pca_props_path]....."
-      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`read_property_from_file ClientFilesDownloadUsername "$pca_props_path"`
-      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`read_property_from_file ClientFilesDownloadPassword "$pca_props_path"`
-    fi
-    echo_success "Done"
-  fi
+#  # PrivacyCA.properties.properties
+#  if [ -f "$pca_props_path" ]; then
+#    echo -n "Reading properties from "
+#    if file_encrypted "$pca_props_path"; then
+#      echo -n "encrypted file [$pca_props_path]....."
+#      temp=`call_setupcommand ExportConfig "$pca_props_path" --stdout 2>&1`
+#      if [[ "$temp" == *"Incorrect password"* ]]; then
+#        echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."
+#        return 2
+#      fi
+#      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`echo $temp | awk -F'ClientFilesDownloadUsername=' '{print $2}' | awk -F' ' '{print $1}'`
+#      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`echo $temp | awk -F'ClientFilesDownloadPassword=' '{print $2}' | awk -F' ' '{print $1}'`
+#    else
+#      echo -n "file [$pca_props_path]....."
+#      export CONF_PRIVACYCA_DOWNLOAD_USERNAME=`read_property_from_file ClientFilesDownloadUsername "$pca_props_path"`
+#      export CONF_PRIVACYCA_DOWNLOAD_PASSWORD=`read_property_from_file ClientFilesDownloadPassword "$pca_props_path"`
+#    fi
+#    echo_success "Done"
+#  fi
 
   # mtwilson-portal.properties
   if [ -f "$mp_props_path" ]; then

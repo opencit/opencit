@@ -30,12 +30,12 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
 as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
-pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+#pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
 ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
 mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
 hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
 ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
-file_paths=("$mtw_props_path" "$as_props_path" "$pca_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
+file_paths=("$mtw_props_path" "$as_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
 
 # disable upgrade if properties files are encrypted from a previous installation
 for file in ${file_paths[*]}; do
