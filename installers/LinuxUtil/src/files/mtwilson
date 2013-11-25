@@ -333,6 +333,7 @@ case "$1" in
           shift
           call_setupcommand $@
         else
+          if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup
         fi
         ;;
