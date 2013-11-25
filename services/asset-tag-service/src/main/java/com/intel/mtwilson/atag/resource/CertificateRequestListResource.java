@@ -107,7 +107,10 @@ public class CertificateRequestListResource extends ServerResource {
         // Automatic Server-Based: always use the same pre-configured selection; find it in static config, ignore the requestor's selection
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
         Selection selection = null;
-        if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
+        if(Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty()){
+           log.error("insertCertificateRequest got xml request");
+           return null;
+        }else if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
             if( UUID.isValid(certificateRequest.getSelection() )) {
                 selection = selectionDao.findByUuid(UUID.valueOf(certificateRequest.getSelection()));
                 if( selection == null ) {
