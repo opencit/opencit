@@ -109,6 +109,7 @@ public class CertificateRequestListResource extends ServerResource {
         public List<MyTag> tagList;
         public String    name;
         public String    id;
+        public String    uuid;
     }
     
     private class MyTag {
@@ -134,8 +135,20 @@ public class CertificateRequestListResource extends ServerResource {
         InputSource is = new InputSource(new StringReader(xml));
         Document doc = builder.parse(is);
         ArrayList<MyTag> tagList = new ArrayList<MyTag>();
+        
+        NodeList nodeList = doc.getElementsByTagName("selection");
+        Node selectionNode = nodeList.item(0);
+        Element e = (Element) selectionNode;
+        ret.id = e.getAttribute("id"); 
+        ret.name= e.getAttribute("name"); 
+        if(UUID.isValid(ret.id)){
+            ret.uuid = ret.id;
+            return ret;
+        }else
+            ret.uuid = null;
+        
         int cnt=0;
-        NodeList nodeList = doc.getElementsByTagName("attribute");
+        nodeList = doc.getElementsByTagName("attribute");
         for (int s = 0; s < nodeList.getLength(); s++) {
             Node fstNode = nodeList.item(s);
             if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -152,13 +165,7 @@ public class CertificateRequestListResource extends ServerResource {
             }
         }
        
-        nodeList = doc.getElementsByTagName("selection");
-        Node fstNode = nodeList.item(0);
-        Element e = (Element) fstNode;
-        ret.id = e.getAttribute("id"); 
-        ret.name= e.getAttribute("name"); 
         ret.tagList = tagList;
-        
         return ret;
     }
 
@@ -177,34 +184,38 @@ public class CertificateRequestListResource extends ServerResource {
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
         Selection selection = null;
         // if submitting xml, instead of selection having your UUID, it needs to be set to xml
-        if(Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty() && certificateRequest.getSelection() != null && certificateRequest.getSelection().equalsIgnoreCase("xml")){
-           log.error("insertCertificateRequest got xml request");
-           String xml = certificateRequest.getXml();
-           TagSelection xmlSelection = getTagSelectionFromXml(xml);
-           TagListResource tagListResource = new TagListResource();
-           SelectionListResource selectionListResource = new SelectionListResource();
-           List myList = new ArrayList();
-           // now we need to create a selection based on the values we just got
-           ArrayList<Tag> tagList = new ArrayList<Tag>();
-           System.out.println("adding tag name " + xmlSelection.name);
-           Selection mySelection = new Selection(xmlSelection.name);
-           for(MyTag t: xmlSelection.tagList) {
-               System.out.println("adding tag " + t.name + "["+t.oid+"] " + t.value);
-               List l = new ArrayList();
-               l.add(t.getValue());
-               Tag tag = new Tag(t.getName(), t.getOid(),l);
-               tagList.add(tag);
-               // now create the tag
-               tagListResource.insertTag(tag);
-               
-               SelectionTagValue selectionTagValue = new SelectionTagValue(t.getName(),t.getOid(),t.getValue());
-               // now add it to the selection for when we create the selection
-               myList.add(selectionTagValue);
-           }
-           mySelection.setTags(myList);
-           // add the selection so that the next code can use it
-           Selection completeSelection = selectionListResource.insertSelection(mySelection);
-           certificateRequest.setSelection(completeSelection.getUuid().toString());
+        if (Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty() && certificateRequest.getSelection() != null && certificateRequest.getSelection().equalsIgnoreCase("xml")) {
+            log.error("insertCertificateRequest got xml request");
+            String xml = certificateRequest.getXml();
+            TagSelection xmlSelection = getTagSelectionFromXml(xml);
+            if (xmlSelection.uuid != null) {
+                certificateRequest.setSelection(xmlSelection.uuid);
+            } else {
+                TagListResource tagListResource = new TagListResource();
+                SelectionListResource selectionListResource = new SelectionListResource();
+                List myList = new ArrayList();
+                // now we need to create a selection based on the values we just got
+                ArrayList<Tag> tagList = new ArrayList<Tag>();
+                System.out.println("adding tag name " + xmlSelection.name);
+                Selection mySelection = new Selection(xmlSelection.name);
+                for (MyTag t : xmlSelection.tagList) {
+                    System.out.println("adding tag " + t.name + "[" + t.oid + "] " + t.value);
+                    List l = new ArrayList();
+                    l.add(t.getValue());
+                    Tag tag = new Tag(t.getName(), t.getOid(), l);
+                    tagList.add(tag);
+                    // now create the tag
+                    tagListResource.insertTag(tag);
+
+                    SelectionTagValue selectionTagValue = new SelectionTagValue(t.getName(), t.getOid(), t.getValue());
+                    // now add it to the selection for when we create the selection
+                    myList.add(selectionTagValue);
+                }
+                mySelection.setTags(myList);
+                // add the selection so that the next code can use it
+                Selection completeSelection = selectionListResource.insertSelection(mySelection);
+                certificateRequest.setSelection(completeSelection.getUuid().toString());
+            }
         }
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
             log.error("insertCertificateRequest processing request");
