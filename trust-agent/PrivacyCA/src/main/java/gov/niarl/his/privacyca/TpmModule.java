@@ -190,7 +190,7 @@ public class TpmModule {
 		//do a loop to wait for an exit value
 		
 		boolean isRunning;
-		int timeout = 25000; //300000; //any need to add this to the properties file?
+		int timeout = 10000; //300000; //any need to add this to the properties file?
 		int countToTimeout = 0;
 		do {
 			countToTimeout++;

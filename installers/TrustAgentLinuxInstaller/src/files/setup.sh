@@ -306,3 +306,6 @@ chmod 700 /etc/monit/monitrc
 service monit restart
 
 echo "monit installed and monitoring tagent"
+
+temp=`$tagent status`
+if [ temp == *"Stopped"* ]; $tagent start; fi
