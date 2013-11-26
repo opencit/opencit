@@ -190,8 +190,8 @@ public class CertificateRequestListResource extends ServerResource {
            Selection mySelection = new Selection(xmlSelection.name);
            for(MyTag t: xmlSelection.tagList) {
                System.out.println("adding tag " + t.name + "["+t.oid+"] " + t.value);
-               String[] l = new String[1];
-               l[0] = t.getValue();
+               List l = new ArrayList();
+               l.add(t.getValue());
                Tag tag = new Tag(t.getName(), t.getOid(),l);
                tagList.add(tag);
                // now create the tag
