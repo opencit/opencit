@@ -161,6 +161,9 @@ public class CertificateRequestListResource extends ServerResource {
                 Element fstElmnt = (Element) fstNode;
                 String idValue = fstElmnt.getAttribute("oid");           
                 String nameValue = fstElmnt.getAttribute("name");
+                if(nameValue == null) {
+                    nameValue = new String("");
+                }
                 Element lstNmElmnt = (Element) nodeList.item(cnt++);
                 NodeList lstNm = lstNmElmnt.getChildNodes();
                 String currentAction = ((Node) lstNm.item(0)).getNodeValue();
