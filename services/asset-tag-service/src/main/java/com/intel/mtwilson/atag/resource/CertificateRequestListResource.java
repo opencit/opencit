@@ -192,7 +192,7 @@ public class CertificateRequestListResource extends ServerResource {
                System.out.println("adding tag " + t.name + "["+t.oid+"] " + t.value);
                String[] l = new String[1];
                l[0] = t.getValue();
-               Tag tag = new Tag("", t.getOid(),l);
+               Tag tag = new Tag(t.getName(), t.getOid(),l);
                tagList.add(tag);
                // now create the tag
                tagListResource.insertTag(tag);
