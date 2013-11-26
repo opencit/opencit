@@ -178,23 +178,7 @@ function checkServiceStatus {
     echo "Stopped"
     RETVAL=3
    fi
-   return 0; }
-   
-get_newid() {
-  java_detect > /dev/null
-  if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
-  stopService
-  if [ -f "$intel_conf_dir/cert/aikblob.dat" ]; then
-    backup_file "$intel_conf_dir/cert/aikblob.dat"
-    rm "$intel_conf_dir/cert/aikblob.dat"
-  fi
-  if [ -f "$intel_conf_dir/cert/aikcert.pem" ]; then
-    backup_file "$intel_conf_dir/cert/aikcert.pem"
-    rm "$intel_conf_dir/cert/aikcert.pem"
-  fi
-  pcakey
-  $java -cp $CLASSPATH $javaVMArgs -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.CreateIdentityCmd
-  startService
+   return 0;
 }
 
 setup_env() {
@@ -236,8 +220,8 @@ setup_interactive_install() {
 	    stopService
         fi
         # This is the place to do any setup while trust agent is not running
-        #/usr/local/bin/pcakey
-        get_newid
+        /usr/local/bin/pcakey
+        $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd
 		if [ $? == 1 ]; then
 			exit 1
 		fi
@@ -287,7 +271,6 @@ function main {
         startService
         ;;
   newid)
-        #get_newid
         java_detect > /dev/null
         if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
         stopService
