@@ -146,7 +146,13 @@ public class CertificateRequestListResource extends ServerResource {
         Node selectionNode = nodeList.item(0);
         Element e = (Element) selectionNode;
         ret.id = e.getAttribute("id"); 
+        if(ret.id == null) {
+            ret.id ="";
+        }
         ret.name= e.getAttribute("name"); 
+        if(ret.name == null) {
+            ret.name = "";
+        }
         if(UUID.isValid(ret.id)){
             ret.uuid = ret.id;
             return ret;
