@@ -66,6 +66,16 @@ if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
   if [ -f "${package_dir}/cert/trustagent.jks" ]; then
     mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
   fi
+  TpmOwnerAuth=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/hisprovisioner.properties`
+  HisIdentityAuth=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/hisprovisioner.properties`
+  if [ -n "$TpmOwnerAuth" ]; then
+    update_property_in_file TpmOwnerAuth "${intel_conf_dir}/${package_name}.properties" $TpmOwnerAuth
+    update_property_in_file TpmOwnerAuth "${intel_conf_dir}/hisprovisioner.properties"
+  fi
+  if [ -n "$HisIdentityAuth" ]; then
+    update_property_in_file HisIdentityAuth "${intel_conf_dir}/${package_name}.properties" $HisIdentityAuth
+    update_property_in_file HisIdentityAuth "${intel_conf_dir}/hisprovisioner.properties"
+  fi
 fi
 
 chmod 600 TPMModule.properties
