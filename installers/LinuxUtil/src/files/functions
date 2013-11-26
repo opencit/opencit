@@ -5,6 +5,9 @@
 
 # CONFIGURATION:
 
+setupconsole_dir=/opt/intel/cloudsecurity/setup-console
+conf_dir=/etc/intel/cloudsecurity
+
 # TERM_DISPLAY_MODE can be "plain" or "color"
 TERM_DISPLAY_MODE=color
 TERM_STATUS_COLUMN=60
@@ -533,8 +536,12 @@ configure_api_baseurl() {
   elif [[ -n "${MTWILSON_SERVER}" && -n "${DEFAULT_API_PORT}" ]]; then
     mtwilson_api_baseurl="https://${MTWILSON_SERVER}:$DEFAULT_API_PORT"
   else
-    local configured_api_baseurl=$CONFIGURED_API_BASEURL   #`read_property_from_file mtwilson.api.baseurl "${config_file}"`
-    prompt_with_default input_api_baseurl "Mt Wilson Server (https://[IP]:[PORT]):" "${configured_api_baseurl}"
+    local configured_api_baseurl="$CONFIGURED_API_BASEURL"   #`read_property_from_file mtwilson.api.baseurl "${config_file}"`
+    if [ -z "${configured_api_baseurl}" ]; then
+      prompt_with_default input_api_baseurl "Mt Wilson Server (https://[IP]:[PORT]):" "${configured_api_baseurl}"
+    else
+      input_api_baseurl="$configured_api_baseurl"
+    fi
     
     if [[ "$input_api_baseurl" == http* ]]; then
       mtwilson_api_baseurl="$input_api_baseurl"
