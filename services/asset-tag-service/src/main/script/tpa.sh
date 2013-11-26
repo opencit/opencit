@@ -9,12 +9,13 @@ username=""
 password=""
 config="/tmp/config"
 CERT_FILE_LOCATION=/tmp/cacert
+XML_FILE_LOCATION=/tmp/xml
 values=`cat /proc/cmdline`
 OIFS="$IFS"
 IFS=' '
 read -a valueArray <<< "${values}"
 IFS="$OIFS"
-
+cmdFile=/tmp/command
 #read the variables from /proc/cmdline
 #to support automation ussuage with the script
 #to pass data it uses this form
@@ -44,7 +45,12 @@ done
 
 #download the certificate of the asset tag server 
 #so we know who we are connecting to
-wget --no-proxy $cert -O $CERT_FILE_LOCATION
+if [ -n "$cert" ]; then
+    wget --no-proxy $cert -O $CERT_FILE_LOCATION
+fi
+if [ -n "$xml" ]; then 
+    wget --no-proxy $xml -O $XML_FILE_LOCATION
+fi
 
 WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username"
 UUID=`dmidecode |grep UUID | awk '{print $2}'`
@@ -117,7 +123,7 @@ function provisionCert() {
  server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
  if [ $isUsingXml == 0 ]; then
-   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" > /tmp/wget.log
+   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" > $cmdFile
    $WGET --header="Content-Type: application/json" --post-data="[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}]" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
    clear
  else
@@ -128,7 +134,7 @@ function provisionCert() {
 	$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
  fi
  certUUID=`cat $certInfoFile | jshon -e 0 -e certificate | sed -e 's/\"//g'`
- echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" > /tmp/wget.log
+ echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" > $cmdFile
  $WGET  --header="Accept: application/xml" $server/certificates/$certUUID -O $certFile  2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading Asset Tag certificate from $server" 10 60 0
  clear
  acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
@@ -142,7 +148,7 @@ function provisionCert() {
   sha1=`echo "${sha1#*sha1=}"`
   createIndex4
   echo "$sha1" | hex2bin > $certSha1
-  echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite"  > /tmp/nvwrite
+  echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite"  > $cmdFile
   tpm_nvwrite -i $INDEX -d $sha1 > /tmp/certWrite  2>&1
   result=$?
   sleep 5;
