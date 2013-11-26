@@ -149,7 +149,7 @@ function provisionCert() {
   createIndex4
   echo "$sha1" | hex2bin > $certSha1
   echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite"  > $cmdFile
-  tpm_nvwrite -i $INDEX -d $sha1 > /tmp/certWrite  2>&1
+  tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite  2>&1
   result=$?
   sleep 5;
   if [ $result -eq 0 ]; then 
