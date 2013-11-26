@@ -140,12 +140,13 @@ public class CertificateRequestListResource extends ServerResource {
             Node fstNode = nodeList.item(s);
             if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element fstElmnt = (Element) fstNode;
-                String idValue = fstElmnt.getAttribute("oid");                
+                String idValue = fstElmnt.getAttribute("oid");           
+                String nameValue = fstElmnt.getAttribute("name");
                 Element lstNmElmnt = (Element) nodeList.item(cnt++);
                 NodeList lstNm = lstNmElmnt.getChildNodes();
                 String currentAction = ((Node) lstNm.item(0)).getNodeValue();
                 if (currentAction != null) {
-                    tagList.add(new MyTag("",idValue,currentAction));
+                    tagList.add(new MyTag(nameValue,idValue,currentAction));
                 }
 
             }
