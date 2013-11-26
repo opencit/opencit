@@ -63,8 +63,8 @@ public class CertificateRequestListResource extends ServerResource {
     private Logger log = LoggerFactory.getLogger(getClass());
     private CertificateRequestDAO certificateRequestDao = null;
 //    private CertificateRequestTagValueDAO certificateRequestTagValueDao = null;
-//    private TagDAO tagDao = null;
-//    private TagValueDAO tagValueDao = null;
+    private TagDAO tagDao = null;
+    private TagValueDAO tagValueDao = null;
     private SelectionDAO selectionDao = null;
     private SelectionTagValueDAO selectionTagValueDao = null;
     private CertificateDAO certificateDao = null;
@@ -76,8 +76,8 @@ public class CertificateRequestListResource extends ServerResource {
         try {
             certificateRequestDao = Derby.certificateRequestDao();
 //            certificateRequestTagValueDao = Derby.certificateRequestTagValueDao();
-//            tagDao = Derby.tagDao();
-//            tagValueDao = Derby.tagValueDao();
+            tagDao = Derby.tagDao();
+           tagValueDao = Derby.tagValueDao();
             selectionDao = Derby.selectionDao();
             selectionTagValueDao = Derby.selectionTagValueDao();
             certificateDao = Derby.certificateDao();
@@ -89,6 +89,12 @@ public class CertificateRequestListResource extends ServerResource {
 
     @Override
     protected void doRelease() throws ResourceException {
+        if (tagDao != null) {
+            tagDao.close();
+        }
+        if(tagValueDao != null) {
+            tagValueDao.close();
+        }
         if (certificateRequestDao != null) {
             certificateRequestDao.close();
         }
@@ -191,22 +197,25 @@ public class CertificateRequestListResource extends ServerResource {
             if (xmlSelection.uuid != null) {
                 certificateRequest.setSelection(xmlSelection.uuid);
             } else {
-                TagListResource tagListResource = new TagListResource();
                 SelectionListResource selectionListResource = new SelectionListResource();
                 List myList = new ArrayList();
                 // now we need to create a selection based on the values we just got
-                ArrayList<Tag> tagList = new ArrayList<Tag>();
+                
                 System.out.println("adding tag name " + xmlSelection.name);
                 Selection mySelection = new Selection(xmlSelection.name);
                 for (MyTag t : xmlSelection.tagList) {
                     System.out.println("adding tag " + t.name + "[" + t.oid + "] " + t.value);
                     List l = new ArrayList();
                     l.add(t.getValue());
-                    Tag tag = new Tag(t.getName(), t.getOid(), l);
-                    tagList.add(tag);
                     // now create the tag
-                    tagListResource.insertTag(tag);
-
+                    Tag tag = new Tag(t.getName(), t.getOid(), l);
+                    tag.setUuid(new UUID());
+                    log.debug("insertTag  uuid: {}", tag.getUuid());
+                    long tagId = tagDao.insert(tag.getUuid(), tag.getName(), tag.getOid());
+                    log.debug("insertTag  success, tagId: {}", tagId);
+                    if(tag.getValues() != null && !tag.getValues().isEmpty()) {
+                        tagValueDao.insert(tagId, tag.getValues());
+                    }
                     SelectionTagValue selectionTagValue = new SelectionTagValue(t.getName(), t.getOid(), t.getValue());
                     // now add it to the selection for when we create the selection
                     myList.add(selectionTagValue);
