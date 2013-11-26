@@ -222,7 +222,7 @@ setup_interactive_install() {
         # This is the place to do any setup while trust agent is not running
         /usr/local/bin/pcakey
         if [ $? == 1 ]; then exit 1; fi
-        $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd > /dev/null
+        $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd 2>&1 >/dev/null
         # After setup is done, start the trust agent:
 	checkServiceStatus
 	if [ -z "$TRUST_AGENT_RUNNING" ]; then
