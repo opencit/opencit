@@ -111,6 +111,7 @@ generate_ta_ssl() {
   if [ -z "$has_ssl" ]; then
     $keytool -genkey -alias "TrustAgentSSL" -keyalg RSA  -keysize 2048 -keystore "${keystore}" -storepass "${storepass}" -dname "CN=TrustAgent, OU=Mt Wilson, O=Customer, C=US" -validity 3650  -keypass "${storepass}"
   fi
+  chmod 600 "$keystore"
 }
 
 get_privacyca_ssl() {
