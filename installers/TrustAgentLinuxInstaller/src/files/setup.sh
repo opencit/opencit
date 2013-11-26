@@ -308,4 +308,4 @@ service monit restart
 echo "monit installed and monitoring tagent"
 
 temp=`$tagent status`
-if [ "$temp" == *"Stopped"* ]; then $tagent start; fi
+if [[ "$temp" == *"Stopped"* ]]; then $tagent start; fi
