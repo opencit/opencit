@@ -66,6 +66,7 @@ rm $certFileValues
 rm $certSha1
 
 functionReturn=0
+isUsingXml=0
 
 function createIndex4() {
  functionReturn=0
@@ -82,6 +83,7 @@ function getLocalTag() {
   functionReturn=1
   return
  fi
+ isUsingXml=1
 }
 
 function getRemoteTag() {
@@ -92,8 +94,8 @@ function getRemoteTag() {
   return
  fi
  #wget "$URL" 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --gauge "Download Test" 10 100
+ echo "$WGET $tagServer -O $selectionFile" > /tmp/wget.log
  $WGET "$tagServer" -O $selectionFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading the Asset Tag selection from $tagServer" 10 60 0
- echo "getRemoteTag 1 !!" >> /tmp/wget.log
  clear
  if [ ! -s $selectionFile ]; then
   dialog --stdout --backtitle "$TITLE" --msgbox 'Unable to download tag selection!' 6 20
@@ -114,12 +116,20 @@ function provisionCert() {
  functionReturn=0
  server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
- $WGET --header="Content-Type: application/json" --post-data="[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}]" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
- echo "provisionCert 1 !!" >> /tmp/wget.log
- clear
+ if [ $isUsingXml == 0 ]; then
+   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" > /tmp/wget.log
+   $WGET --header="Content-Type: application/json" --post-data="[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}]" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
+   clear
+ else
+	#here we need to read the xml from the file, escape the " with \ then build our string to send via wget
+	xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
+	json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
+	echo "$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile" > /tmp/wget.log
+	$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
+ fi
  certUUID=`cat $certInfoFile | jshon -e 0 -e certificate | sed -e 's/\"//g'`
+ echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" > /tmp/wget.log
  $WGET  --header="Accept: application/xml" $server/certificates/$certUUID -O $certFile  2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading Asset Tag certificate from $server" 10 60 0
- echo "getRemoteTag 2 !!" >> /tmp/wget.log
  clear
  acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
  if [ $? -eq 0 ]; then

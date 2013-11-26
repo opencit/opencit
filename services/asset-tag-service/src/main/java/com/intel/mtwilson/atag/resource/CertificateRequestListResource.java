@@ -21,6 +21,7 @@ import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
 import com.intel.mtwilson.atag.model.Tag;
+import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import java.io.IOException;
 import java.io.StringReader;
@@ -206,10 +207,8 @@ public class CertificateRequestListResource extends ServerResource {
             if (xmlSelection.uuid != null) {
                 certificateRequest.setSelection(xmlSelection.uuid);
             } else {
-                SelectionListResource selectionListResource = new SelectionListResource();
                 List myList = new ArrayList();
                 // now we need to create a selection based on the values we just got
-                
                 System.out.println("adding tag name " + xmlSelection.name);
                 Selection mySelection = new Selection(xmlSelection.name);
                 for (MyTag t : xmlSelection.tagList) {
@@ -222,7 +221,7 @@ public class CertificateRequestListResource extends ServerResource {
                     log.debug("insertTag  uuid: {}", tag.getUuid());
                     long tagId = tagDao.insert(tag.getUuid(), tag.getName(), tag.getOid());
                     log.debug("insertTag  success, tagId: {}", tagId);
-                    if(tag.getValues() != null && !tag.getValues().isEmpty()) {
+                    if (tag.getValues() != null && !tag.getValues().isEmpty()) {
                         tagValueDao.insert(tagId, tag.getValues());
                     }
                     SelectionTagValue selectionTagValue = new SelectionTagValue(t.getName(), t.getOid(), t.getValue());
@@ -235,10 +234,45 @@ public class CertificateRequestListResource extends ServerResource {
                 long selectionId = selectionDao.insert(mySelection.getUuid(), mySelection.getName());
                 mySelection.setId(selectionId);
                 log.debug("inserted selection has id {}", selectionId);
-                log.debug("inserted selection has uuid {}", selection.getUuid());
+                log.debug("inserted selection has uuid {}", mySelection.getUuid());
+                log.debug("insertSelection has {} tags", mySelection.getTags().size());
+                for (SelectionTagValue crtv : mySelection.getTags()) {
+                    // look up tagId and tagValueId for (uuid,value) or (name,value) or (oid,value) pairs
+                    if (crtv.getUuid() != null) {
+                        log.debug("tag uuid: {}", crtv.getUuid());
+                        Tag byUuid = tagDao.findByUuid(crtv.getUuid());
+                        if (byUuid != null) {
+                            crtv.setTagId(byUuid.getId());
+                        }
+                    }
+                    if (crtv.getTagName() != null) {
+                        log.debug("tag name: {}", crtv.getTagName());
+                        Tag byName = tagDao.findByName(crtv.getTagName());
+                        if (byName != null) {
+                            crtv.setTagId(byName.getId());
+                        }
+                    } else if (crtv.getTagOid() != null) {
+                        log.debug("tag oid: {}", crtv.getTagOid());
+                        Tag byOid = tagDao.findByOid(crtv.getTagOid());
+                        if (byOid != null) {
+                            crtv.setTagId(byOid.getId());
+                        }
+                    }
+                    log.debug("tag value (required): {}", crtv.getTagValue());
+                    TagValue byValue = tagValueDao.findByTagIdAndValueEquals(crtv.getTagId(), crtv.getTagValue());
+                    if (byValue != null) {
+                        crtv.setTagValueId(byValue.getId());
+                    }
+                    // set the tagId and tagValueId we found in the SelectionTagValue record
+                    //                  tags.add(crtv.getTagId());
+                    //            tagValues.add(crtv.getTagValueId());
+                    log.debug("Inserting certificate request tag value: {}", String.format("req id: %d   tag id: %d   tag value id: %d", selectionId, crtv.getTagId(), crtv.getTagValueId()));
+                    selectionTagValueDao.insert(selectionId, crtv.getTagId(), crtv.getTagValueId());
+                }
                 //Selection completeSelection = selectionListResource.insertSelection(mySelection);
                 //certificateRequest.setSelection(completeSelection.getUuid().toString());
                 // at the end, set certificateRequest.setSelction == to the UUID of the selection being created
+                certificateRequest.setSelection(mySelection.getUuid().toString());
             }
         }
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
