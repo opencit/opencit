@@ -182,7 +182,9 @@ public class CertificateRequestListResource extends ServerResource {
            String xml = certificateRequest.getXml();
            TagSelection xmlSelection = getTagSelectionFromXml(xml);
            TagListResource tagListResource = new TagListResource();
+           tagListResource.doInit();
            SelectionListResource selectionListResource = new SelectionListResource();
+           selectionListResource.doInit();
            List myList = new ArrayList();
            // now we need to create a selection based on the values we just got
            ArrayList<Tag> tagList = new ArrayList<Tag>();
@@ -205,7 +207,8 @@ public class CertificateRequestListResource extends ServerResource {
            // add the selection so that the next code can use it
            Selection completeSelection = selectionListResource.insertSelection(mySelection);
            certificateRequest.setSelection(completeSelection.getUuid().toString());
-           return null;
+           tagListResource.doRelease();
+           selectionListResource.doRelease();
         }
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
             log.error("insertCertificateRequest processing request");
