@@ -231,8 +231,14 @@ public class CertificateRequestListResource extends ServerResource {
                 }
                 mySelection.setTags(myList);
                 // add the selection so that the next code can use it
-                Selection completeSelection = selectionListResource.insertSelection(mySelection);
-                certificateRequest.setSelection(completeSelection.getUuid().toString());
+                mySelection.setUuid(new UUID());
+                long selectionId = selectionDao.insert(mySelection.getUuid(), mySelection.getName());
+                mySelection.setId(selectionId);
+                log.debug("inserted selection has id {}", selectionId);
+                log.debug("inserted selection has uuid {}", selection.getUuid());
+                //Selection completeSelection = selectionListResource.insertSelection(mySelection);
+                //certificateRequest.setSelection(completeSelection.getUuid().toString());
+                // at the end, set certificateRequest.setSelction == to the UUID of the selection being created
             }
         }
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
