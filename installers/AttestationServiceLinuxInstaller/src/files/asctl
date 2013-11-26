@@ -77,9 +77,11 @@ download_privacyca_certs() {
     echo "Login to download the Privacy CA client files"
     if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME}" ]; then
       prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${PRIVACYCA_DOWNLOAD_USERNAME}
+      export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
     fi
     if [ -z "${PRIVACYCA_DOWNLOAD_PASSWORD}" ]; then
       prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
+      export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
     fi
     
     echo "Connecting to Privacy CA..."
