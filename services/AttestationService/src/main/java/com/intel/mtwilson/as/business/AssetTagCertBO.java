@@ -9,8 +9,11 @@ import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.api.ApiRequest;
+import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.BaseBO;
@@ -22,15 +25,33 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.mtwilson.security.http.ApacheBasicHttpAuthorization;
+import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
+import com.intel.mtwilson.tls.InsecureTlsPolicy;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import javax.ws.rs.core.MediaType;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -399,18 +420,20 @@ public class AssetTagCertBO extends BaseBO{
         }
     }
     
-    public TagDataType getTagInfoByOID(String oid) throws IOException, ApiException {
-        TagDataType ret = null;
-        
+    public TagDataType getTagInfoByOID(String oid) throws IOException, ApiException, NoSuchAlgorithmException, KeyManagementException, SignatureException {
+        log.error("attempting to connect to asset tag host");
         String requestURL = My.configuration().getAssetTagServerURL() + "/tags?oidEqualTo="+oid;
-                //1.3.6.1.4.1.99999.3";
-        HttpGet request = new HttpGet(requestURL);
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpResponse response = httpClient.execute(request);      
-        String str = IOUtils.toString(response.getEntity().getContent());
+        
+        //1.3.6.1.4.1.99999.3"; 
+        ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
+
+        //ApiRequest request = new ApiRequest(MediaType., "");
+        ApiResponse response = client.get(requestURL);    
+
+        String str = new String(response.content);
         System.out.println("getTagInfoByOID response = " + str);        
         TagDataType[] tag = fromJSON(str, TagDataType[].class);       
-        httpClient.getConnectionManager().shutdown();
+  
         if(tag == null || tag[0] == null)
             throw new ApiException("Error while getting tag from server");
         return tag[0];

@@ -20,8 +20,11 @@ import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.model.Certificate;
 import com.intel.mtwilson.atag.model.Selection;
 import com.intel.mtwilson.atag.model.SelectionTagValue;
+import com.intel.mtwilson.atag.model.Tag;
+import com.intel.mtwilson.atag.model.TagValue;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import java.io.IOException;
+import java.io.StringReader;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.sql.SQLException;
@@ -41,6 +44,16 @@ import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 /**
  * References: http://restlet.org/learn/guide/2.2/core/resource/
  *
@@ -51,8 +64,8 @@ public class CertificateRequestListResource extends ServerResource {
     private Logger log = LoggerFactory.getLogger(getClass());
     private CertificateRequestDAO certificateRequestDao = null;
 //    private CertificateRequestTagValueDAO certificateRequestTagValueDao = null;
-//    private TagDAO tagDao = null;
-//    private TagValueDAO tagValueDao = null;
+    private TagDAO tagDao = null;
+    private TagValueDAO tagValueDao = null;
     private SelectionDAO selectionDao = null;
     private SelectionTagValueDAO selectionTagValueDao = null;
     private CertificateDAO certificateDao = null;
@@ -64,8 +77,8 @@ public class CertificateRequestListResource extends ServerResource {
         try {
             certificateRequestDao = Derby.certificateRequestDao();
 //            certificateRequestTagValueDao = Derby.certificateRequestTagValueDao();
-//            tagDao = Derby.tagDao();
-//            tagValueDao = Derby.tagValueDao();
+            tagDao = Derby.tagDao();
+           tagValueDao = Derby.tagValueDao();
             selectionDao = Derby.selectionDao();
             selectionTagValueDao = Derby.selectionTagValueDao();
             certificateDao = Derby.certificateDao();
@@ -77,6 +90,12 @@ public class CertificateRequestListResource extends ServerResource {
 
     @Override
     protected void doRelease() throws ResourceException {
+        if (tagDao != null) {
+            tagDao.close();
+        }
+        if(tagValueDao != null) {
+            tagValueDao.close();
+        }
         if (certificateRequestDao != null) {
             certificateRequestDao.close();
         }
@@ -92,6 +111,79 @@ public class CertificateRequestListResource extends ServerResource {
 //        if( certificateRequestTagValueDao != null ) { certificateRequestTagValueDao.close(); }
         super.doRelease();
     }
+    
+    private class TagSelection {
+        public List<MyTag> tagList;
+        public String    name;
+        public String    id;
+        public String    uuid;
+    }
+    
+    private class MyTag {
+        private String name;
+        private String value;
+        private String oid;
+        
+        MyTag(String name, String value, String oid){
+            this.name =name;
+            this.value=value;
+            this.oid=oid;                
+        }
+        
+        String getName() { return this.name;}
+        String getValue() {return this.value;}
+        String getOid() { return this.oid;}
+    }
+    
+    private TagSelection getTagSelectionFromXml(String xml) throws ParserConfigurationException, SAXException, IOException {
+        TagSelection ret = new TagSelection();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        InputSource is = new InputSource(new StringReader(xml));
+        Document doc = builder.parse(is);
+        ArrayList<MyTag> tagList = new ArrayList<MyTag>();
+        
+        NodeList nodeList = doc.getElementsByTagName("selection");
+        Node selectionNode = nodeList.item(0);
+        Element e = (Element) selectionNode;
+        ret.id = e.getAttribute("id"); 
+        if(ret.id == null) {
+            ret.id ="";
+        }
+        ret.name= e.getAttribute("name"); 
+        if(ret.name == null) {
+            ret.name = "";
+        }
+        if(UUID.isValid(ret.id)){
+            ret.uuid = ret.id;
+            return ret;
+        }else
+            ret.uuid = null;
+        
+        int cnt=0;
+        nodeList = doc.getElementsByTagName("attribute");
+        for (int s = 0; s < nodeList.getLength(); s++) {
+            Node fstNode = nodeList.item(s);
+            if (fstNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element fstElmnt = (Element) fstNode;
+                String idValue = fstElmnt.getAttribute("oid");           
+                String nameValue = fstElmnt.getAttribute("name");
+                if(nameValue == null) {
+                    nameValue = new String("");
+                }
+                Element lstNmElmnt = (Element) nodeList.item(cnt++);
+                NodeList lstNm = lstNmElmnt.getChildNodes();
+                String currentAction = ((Node) lstNm.item(0)).getNodeValue();
+                if (currentAction != null) {
+                    tagList.add(new MyTag(nameValue,idValue,currentAction));
+                }
+
+            }
+        }
+       
+        ret.tagList = tagList;
+        return ret;
+    }
 
     /**
      * Input certificate requests provide a certificate subject and one or more tags where each tag
@@ -100,14 +192,90 @@ public class CertificateRequestListResource extends ServerResource {
      * object. Then we can insert it to the database.
      */
 //    @Post("json:json")
-    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException {
+    public CertificateRequest insertCertificateRequest(CertificateRequest certificateRequest) throws SQLException, IOException, ParserConfigurationException, SAXException {
         log.debug("insertCertificateRequest for subject: {}", certificateRequest.getSubject());
         certificateRequest.setUuid(new UUID());
         // IMPORTANT: provisioning policy choices:
         // Automatic Server-Based: always use the same pre-configured selection; find it in static config, ignore the requestor's selection
         // Manual and Automatic Host-Based: allow the requestor to specify a selection and look it up
         Selection selection = null;
+        // if submitting xml, instead of selection having your UUID, it needs to be set to xml
+        if (Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getXml() != null && !certificateRequest.getXml().isEmpty() && certificateRequest.getSelection() != null && certificateRequest.getSelection().equalsIgnoreCase("xml")) {
+            log.error("insertCertificateRequest got xml request");
+            String xml = certificateRequest.getXml();
+            TagSelection xmlSelection = getTagSelectionFromXml(xml);
+            if (xmlSelection.uuid != null) {
+                certificateRequest.setSelection(xmlSelection.uuid);
+            } else {
+                List myList = new ArrayList();
+                // now we need to create a selection based on the values we just got
+                System.out.println("adding tag name " + xmlSelection.name);
+                Selection mySelection = new Selection(xmlSelection.name);
+                for (MyTag t : xmlSelection.tagList) {
+                    System.out.println("adding tag " + t.name + "[" + t.oid + "] " + t.value);
+                    List l = new ArrayList();
+                    l.add(t.getValue());
+                    // now create the tag
+                    Tag tag = new Tag(t.getName(), t.getOid(), l);
+                    tag.setUuid(new UUID());
+                    log.debug("insertTag  uuid: {}", tag.getUuid());
+                    long tagId = tagDao.insert(tag.getUuid(), tag.getName(), tag.getOid());
+                    log.debug("insertTag  success, tagId: {}", tagId);
+                    if (tag.getValues() != null && !tag.getValues().isEmpty()) {
+                        tagValueDao.insert(tagId, tag.getValues());
+                    }
+                    SelectionTagValue selectionTagValue = new SelectionTagValue(t.getName(), t.getOid(), t.getValue());
+                    // now add it to the selection for when we create the selection
+                    myList.add(selectionTagValue);
+                }
+                mySelection.setTags(myList);
+                // add the selection so that the next code can use it
+                mySelection.setUuid(new UUID());
+                long selectionId = selectionDao.insert(mySelection.getUuid(), mySelection.getName());
+                mySelection.setId(selectionId);
+                log.debug("inserted selection has id {}", selectionId);
+                log.debug("inserted selection has uuid {}", mySelection.getUuid());               
+                for (SelectionTagValue crtv : mySelection.getTags()) {
+                    // look up tagId and tagValueId for (uuid,value) or (name,value) or (oid,value) pairs
+                    if (crtv.getUuid() != null) {
+                        log.debug("tag uuid: {}", crtv.getUuid());
+                        Tag byUuid = tagDao.findByUuid(crtv.getUuid());
+                        if (byUuid != null) {
+                            crtv.setTagId(byUuid.getId());
+                        }
+                    }
+                    if (crtv.getTagName() != null) {
+                        log.debug("tag name: {}", crtv.getTagName());
+                        Tag byName = tagDao.findByName(crtv.getTagName());
+                        if (byName != null) {
+                            crtv.setTagId(byName.getId());
+                        }
+                    } else if (crtv.getTagOid() != null) {
+                        log.debug("tag oid: {}", crtv.getTagOid());
+                        Tag byOid = tagDao.findByOid(crtv.getTagOid());
+                        if (byOid != null) {
+                            crtv.setTagId(byOid.getId());
+                        }
+                    }
+                    log.debug("tag value (required): {}", crtv.getTagValue());
+                    TagValue byValue = tagValueDao.findByTagIdAndValueEquals(crtv.getTagId(), crtv.getTagValue());
+                    if (byValue != null) {
+                        crtv.setTagValueId(byValue.getId());
+                    }
+                    // set the tagId and tagValueId we found in the SelectionTagValue record
+                    //                  tags.add(crtv.getTagId());
+                    //            tagValues.add(crtv.getTagValueId());
+                    log.debug("Inserting certificate request tag value: {}", String.format("req id: %d   tag id: %d   tag value id: %d", selectionId, crtv.getTagId(), crtv.getTagValueId()));
+                    selectionTagValueDao.insert(selectionId, crtv.getTagId(), crtv.getTagValueId());
+                }
+                //Selection completeSelection = selectionListResource.insertSelection(mySelection);
+                //certificateRequest.setSelection(completeSelection.getUuid().toString());
+                // at the end, set certificateRequest.setSelction == to the UUID of the selection being created
+                certificateRequest.setSelection(mySelection.getUuid().toString());
+            }
+        }
         if( Global.configuration().isAllowTagsInCertificateRequests() && certificateRequest.getSelection() != null && !certificateRequest.getSelection().isEmpty() ) {
+            log.error("insertCertificateRequest processing request");
             if( UUID.isValid(certificateRequest.getSelection() )) {
                 selection = selectionDao.findByUuid(UUID.valueOf(certificateRequest.getSelection()));
                 if( selection == null ) {
@@ -268,7 +436,7 @@ public class CertificateRequestListResource extends ServerResource {
      * @throws SQLException
      */
     @Post("json:json")
-    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException {
+    public CertificateRequest[] insertCertificateRequests(CertificateRequest[] certificateRequests) throws SQLException, IOException, ParserConfigurationException, SAXException {
         CertificateRequest[] results = new CertificateRequest[certificateRequests.length];
         for (int i = 0; i < certificateRequests.length; i++) {
             results[i] = insertCertificateRequest(certificateRequests[i]);

@@ -16,6 +16,9 @@ import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.TagDataType;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
@@ -42,9 +45,9 @@ public class AssetTagCertBOTest {
     }
     
     @Test
-    public void testAtagConfigValues() throws IOException, ApiException {
+    public void testAtagConfigValues() throws IOException, ApiException, NoSuchAlgorithmException, KeyManagementException, SignatureException {
         AssetTagCertBO certBO = new AssetTagCertBO();
-        String oid = "1.3.6.1.4.1.99999.3";
+        String oid = "1.3.6.1.4.1.99999.1";
         TagDataType tag = certBO.getTagInfoByOID(oid);
         System.out.println(tag.name);
     }
