@@ -234,8 +234,7 @@ public class CertificateRequestListResource extends ServerResource {
                 long selectionId = selectionDao.insert(mySelection.getUuid(), mySelection.getName());
                 mySelection.setId(selectionId);
                 log.debug("inserted selection has id {}", selectionId);
-                log.debug("inserted selection has uuid {}", mySelection.getUuid());
-                log.debug("insertSelection has {} tags", mySelection.getTags().size());
+                log.debug("inserted selection has uuid {}", mySelection.getUuid());               
                 for (SelectionTagValue crtv : mySelection.getTags()) {
                     // look up tagId and tagValueId for (uuid,value) or (name,value) or (oid,value) pairs
                     if (crtv.getUuid() != null) {
