@@ -100,7 +100,7 @@ function getRemoteTag() {
   return
  fi
  #wget "$URL" 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --gauge "Download Test" 10 100
- echo "$WGET $tagServer -O $selectionFile" > /tmp/wget.log
+ echo "$WGET $tagServer -O $selectionFile" >> $cmdFile
  $WGET "$tagServer" -O $selectionFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading the Asset Tag selection from $tagServer" 10 60 0
  clear
  if [ ! -s $selectionFile ]; then
@@ -123,18 +123,18 @@ function provisionCert() {
  server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
  selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
  if [ $isUsingXml == 0 ]; then
-   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" > $cmdFile
+   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" >> $cmdFile
    $WGET --header="Content-Type: application/json" --post-data="[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}]" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
    clear
  else
 	#here we need to read the xml from the file, escape the " with \ then build our string to send via wget
 	xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
 	json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-	echo "$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile" > /tmp/wget.log
+	echo "$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile" >> $cmdFile
 	$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
  fi
  certUUID=`cat $certInfoFile | jshon -e 0 -e certificate | sed -e 's/\"//g'`
- echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" > $cmdFile
+ echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" >> $cmdFile
  $WGET  --header="Accept: application/xml" $server/certificates/$certUUID -O $certFile  2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading Asset Tag certificate from $server" 10 60 0
  clear
  acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
@@ -148,7 +148,7 @@ function provisionCert() {
   sha1=`echo "${sha1#*sha1=}"`
   createIndex4
   echo "$sha1" | hex2bin > $certSha1
-  echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite"  > $cmdFile
+  echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite" >> $cmdFile
   tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite  2>&1
   result=$?
   sleep 5;
