@@ -100,6 +100,7 @@ if [ -z "$storepass" ]; then
   fi
   storepass=$(generate_password 32)
   update_property_in_file trustagent.keystore.password "${package_config_filename}" $storepass
+  export TRUSTAGENT_KEYSTORE_PASS="$storepass"
 fi
 
 generate_ta_ssl() {
