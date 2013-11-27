@@ -179,10 +179,19 @@ public class CreateIdentity {
             Properties tpmOwnerProperties = new Properties();
             tpmOwnerProperties.load(tpmOwnerFileInput);
             tpmOwnerFileInput.close();
+            
             String tpmOwnerAuthHex = tpmOwnerProperties.getProperty(OWNER_AUTH);
             if( tpmOwnerAuthHex == null || tpmOwnerAuthHex.trim().isEmpty() ) {
-                // tpm owner password is not set, empty string here will result in TpmOwnerAuth==null; ProvisionTPM is responsible for generating it
-                tpmOwnerAuthHex = "";
+//                ProvisionTPM.takeOwnership();
+//                tpmOwnerFileInput = new FileInputStream(tpmOwnerFile);
+//                tpmOwnerProperties = new Properties();
+//                tpmOwnerProperties.load(tpmOwnerFileInput);
+//                tpmOwnerFileInput.close();
+//                tpmOwnerAuthHex = tpmOwnerProperties.getProperty(OWNER_AUTH);
+//                if( tpmOwnerAuthHex == null || tpmOwnerAuthHex.trim().isEmpty()) {
+                    // tpm owner password is not set, empty string here will result in TpmOwnerAuth==null; ProvisionTPM is responsible for generating it
+                    tpmOwnerAuthHex = "";
+//                }
             }
             TpmOwnerAuth = TpmUtils.hexStringToByteArray(tpmOwnerAuthHex);
             String aikAuthHex = tpmOwnerProperties.getProperty(HIS_IDENTITY_AUTH);

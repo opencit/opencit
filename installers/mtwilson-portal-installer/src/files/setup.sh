@@ -85,3 +85,7 @@ elif using_tomcat; then
   tomcat_permissions "${package_dir}"
   tomcat_permissions "${package_var_dir}"
 fi
+
+# Need to update property name (as it has changed) if doing an upgrade
+update_property_in_file trustTrue "${package_config_filename}" "images/Trusted.png"
+update_property_in_file trustUnknown "${package_config_filename}" "images/Unknown.png"

@@ -46,7 +46,7 @@ load_defaults 2>&1 >/dev/null
 
 configure_keystore_dir() {
   # setup mtwilson.mc.keystore.dir
-  local configured_keystore_dir=`read_property_from_file mtwilson.tdbp.keystore.dir ${package_config_filename}`
+  local configured_keystore_dir="$TDBP_KEYSTORE_DIR"   #`read_property_from_file mtwilson.tdbp.keystore.dir ${package_config_filename}`
   package_keystore_users_dir=${configured_keystore_dir:-"${package_keystore_users_dir}"}
   if [[ "$configured_keystore_dir" != "$package_keystore_users_dir" ]]; then
     update_property_in_file mtwilson.tdbp.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"

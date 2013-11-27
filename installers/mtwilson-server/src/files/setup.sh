@@ -30,18 +30,28 @@ if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
 mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
 as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
-if [[ -f "$mtw_props_path" || -f "$as_props_path" ]]; then
-  if file_encrypted "$mtw_props_path" || file_encrypted "$as_props_path" ; then
-    echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
-    exit -1
-  fi
-  load_conf
-fi
+#pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
+mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
+hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
+ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+file_paths=("$mtw_props_path" "$as_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
 
+# disable upgrade if properties files are encrypted from a previous installation
+for file in ${file_paths[*]}; do
+  if [ -f $file ]; then
+    if file_encrypted $file; then
+      echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
+      exit -1
+    fi
+  fi
+done
+
+load_conf
 load_defaults
 
 if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
- echo_warnring "Program files are writable by the web service container, this is a possible security issue"
+ echo_warning "Program files are writable by the web service container, this is a possible security issue"
 else
  ret=false
  getent passwd $MTWILSON_OWNER >/dev/null && ret=true
@@ -123,8 +133,8 @@ elif [ ! -z "$opt_mysql" ]; then
   DATABASE_VENDOR=mysql
 fi
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
+#export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
@@ -149,7 +159,6 @@ if using_mysql ; then
     exit 1
   fi
 fi
-
 
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
@@ -187,18 +196,18 @@ cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
-  default_mtwilson_tls_policy_name=`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
+  default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ -z "$default_mtwilson_tls_policy_name" ]; then
-    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
+    #update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
   fi
-  mtwilson_tls_keystore_password=`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ -z "$mtwilson_tls_keystore_password" ]; then
+  mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
+  #if [ -z "$mtwilson_tls_keystore_password" ]; then
     # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
+    #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
-  fi
+  #fi
 else
     update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
@@ -211,6 +220,12 @@ fi
 
 update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
 
+#Save variables to properties file
+if using_mysql; then   
+  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+elif using_postgres; then
+  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+fi
 
 # copy default logging settings to /etc
 chmod 700 logback.xml
@@ -840,11 +855,11 @@ if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
 fi
 
 #Save variables to properties file
-if using_mysql; then   
-  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-elif using_postgres; then
-  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
-fi
+#if using_mysql; then   
+#  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+#elif using_postgres; then
+#  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+#fi
   
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver

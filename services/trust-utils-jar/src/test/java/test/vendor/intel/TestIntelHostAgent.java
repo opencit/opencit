@@ -59,8 +59,8 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
  */
 public class TestIntelHostAgent {
     private static transient Logger log = LoggerFactory.getLogger(TestIntelHostAgent.class);
-    private static String hostname = "10.1.71.167";
-    private static String connection = "intel:https://10.1.71.167:9999";
+    private static String hostname = "10.1.71.112";
+    private static String connection = "intel:https://10.1.71.112:9999";
     private static HostAgent agent;
     
     @BeforeClass

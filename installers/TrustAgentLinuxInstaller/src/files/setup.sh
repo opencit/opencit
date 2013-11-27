@@ -26,8 +26,8 @@ APPLICATION_ZYPPER_PACKAGES="openssl libopenssl-devel libopenssl1_0_0 openssl-ce
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
-#load_conf 2>&1 >/dev/null
-#load_defaults 2>&1 >/dev/null
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
 
 
 # Automatic install in 4 steps:
@@ -67,6 +67,19 @@ if [ ! -f "${intel_conf_dir}/trustagent.jks" ]; then
     mv "${package_dir}/cert/trustagent.jks" "${intel_conf_dir}/trustagent.jks"
   fi
 fi
+TpmOwnerAuth_121=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/hisprovisioner.properties`
+HisIdentityAuth_121=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/hisprovisioner.properties`
+TpmOwnerAuth_122=`read_property_from_file TpmOwnerAuth ${intel_conf_dir}/${package_name}.properties`
+HisIdentityAuth_122=`read_property_from_file HisIdentityAuth ${intel_conf_dir}/${package_name}.properties`
+if [ -z "$TpmOwnerAuth_122" ] && [ -n "$TpmOwnerAuth_121" ]; then
+  update_property_in_file TpmOwnerAuth "${intel_conf_dir}/${package_name}.properties" $TpmOwnerAuth_121
+  update_property_in_file TpmOwnerAuth "${intel_conf_dir}/hisprovisioner.properties"
+fi
+if [ -z "$HisIdentityAuth_122" ] && [ -n "$HisIdentityAuth_121" ]; then
+  update_property_in_file HisIdentityAuth "${intel_conf_dir}/${package_name}.properties" $HisIdentityAuth_121
+  update_property_in_file HisIdentityAuth "${intel_conf_dir}/hisprovisioner.properties"
+fi
+
 
 chmod 600 TPMModule.properties
 cp TPMModule.properties "${intel_conf_dir}"/TPMModule.properties
@@ -178,7 +191,7 @@ register_startup_script /usr/local/bin/tagent tagent
 
 fix_existing_aikcert() {
   local aikdir=${intel_conf_dir}/cert
-  if [ ! -f $aikdir/aikcert.pem ] && [ -f $aikdir/aikcert.cer ]; then
+  if [ -f $aikdir/aikcert.cer ]; then
     # trust agent aikcert.cer is in broken PEM format... it needs newlines every 76 characters to be correct
     cat $aikdir/aikcert.cer | sed 's/.\{76\}/&\n/g' > $aikdir/aikcert.pem
     rm $aikdir/aikcert.cer
@@ -306,3 +319,6 @@ chmod 700 /etc/monit/monitrc
 service monit restart
 
 echo "monit installed and monitoring tagent"
+
+sleep 2
+/usr/local/bin/tagent start
