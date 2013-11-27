@@ -175,7 +175,7 @@ public class CertificateRequestListResource extends ServerResource {
                 NodeList lstNm = lstNmElmnt.getChildNodes();
                 String currentAction = ((Node) lstNm.item(0)).getNodeValue();
                 if (currentAction != null) {
-                    tagList.add(new MyTag(nameValue,idValue,currentAction));
+                    tagList.add(new MyTag(nameValue,currentAction,idValue));
                 }
 
             }
