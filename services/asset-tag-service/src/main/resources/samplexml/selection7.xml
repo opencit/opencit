@@ -26,5 +26,4 @@ When importing, the client must choose how to resolve conflicts  - if a selectio
 with the same name or UUID already exists should it be replaced automatically with
 the provided selection or should the operation fail and show the user the existing
 selection for review?
-
 -->

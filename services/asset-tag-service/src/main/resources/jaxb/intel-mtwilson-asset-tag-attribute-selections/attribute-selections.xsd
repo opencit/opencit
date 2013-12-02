@@ -19,6 +19,8 @@
         </xs:choice>	 
         <xs:attribute name="id" type="xs:string"/>
         <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="notBefore" type="xs:dateTime"/>
+        <xs:attribute name="notAfter" type="xs:dateTime"/>
     </xs:complexType>
 
     <xs:complexType name="attributeType">
