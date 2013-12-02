@@ -57,7 +57,6 @@ public class TrustReport {
         Iterator<RuleResult> it = list.iterator();
         while(it.hasNext()) {
             RuleResult result = it.next();
-            log.debug("SAVY 001: " + result.getFaults().toString());
             trusted = trusted && result.isTrusted();
         }
         return trusted;        

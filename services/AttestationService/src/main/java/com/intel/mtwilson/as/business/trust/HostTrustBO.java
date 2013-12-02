@@ -196,6 +196,13 @@ public class HostTrustBO extends BaseBO {
             hostReport.pcrManifest = pcrManifest;
             hostReport.tpmQuote = null; // TODO
             hostReport.variables = new HashMap<String,String>(); // TODO
+            
+            // Bug-1037: aik cert is empty for hostReport
+            if (agent.isAikCaAvailable()) {
+                hostReport.aik = new Aik(agent.getAikCertificate());
+            } else if (agent.isAikAvailable()) {
+                hostReport.aik = new Aik(agent.getAik());
+            }
 
             log.debug("getTrustStatusOfHostNotInDB: Successfully retrieved the TPM meausrements from host '{}' for identifying the MLE to be mapped to.", hostObj.HostName);
             HostTrustPolicyManager hostTrustPolicyFactory = new HostTrustPolicyManager(getEntityManagerFactory());
@@ -218,10 +225,6 @@ public class HostTrustBO extends BaseBO {
                         Policy trustPolicy = hostTrustPolicyFactory.loadTrustPolicyForHost(tblHosts, tblHosts.getName()); 
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
-
-                        log.debug("MEOW 001: " + biosMLE.getName());
-                        log.debug("MEOW 002: " + biosMLE.getVersion());
-                        log.debug("MEOW 003: " + biosMLE.getOemId().getName());
                         
                         // Let us update the TxtHostRecord object with the details. We will use that object for host registration later                        
                         hostObjToRegister.BIOS_Name = biosMLE.getName();
