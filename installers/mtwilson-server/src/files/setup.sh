@@ -19,7 +19,7 @@ export LOG_COPYTRUNCATE=copytruncate
 export LOG_SIZE=100M
 export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
-export AUTO_UPDATE_ON_UNTRUST=true
+export AUTO_UPDATE_ON_UNTRUST=false
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
