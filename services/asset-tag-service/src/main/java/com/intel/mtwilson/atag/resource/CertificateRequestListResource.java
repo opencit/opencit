@@ -175,7 +175,7 @@ public class CertificateRequestListResource extends ServerResource {
                 NodeList lstNm = lstNmElmnt.getChildNodes();
                 String currentAction = ((Node) lstNm.item(0)).getNodeValue();
                 if (currentAction != null) {
-                    tagList.add(new MyTag(nameValue,idValue,currentAction));
+                    tagList.add(new MyTag(nameValue,currentAction,idValue));
                 }
 
             }
@@ -337,6 +337,7 @@ public class CertificateRequestListResource extends ServerResource {
         // we have a selection object but we need to look up the associated tags before we continue
         certificateRequest.setSelectionId(selection.getId()); // XXX of no use to the client, maybe remove this
         certificateRequest.setSelection(selection.getUuid().toString());
+        log.error("get tags for selection with id of " + selection.getId());
         List<SelectionTagValue> selectionTagValues = selectionTagValueDao.findBySelectionIdWithValues(selection.getId());
         if( selectionTagValues == null || selectionTagValues.isEmpty() ) {
             log.error("No tags in selection");
