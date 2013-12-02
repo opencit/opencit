@@ -219,6 +219,10 @@ public class HostTrustBO extends BaseBO {
                         PolicyEngine policyEngine = new PolicyEngine();
                         TrustReport trustReport = policyEngine.apply(hostReport, trustPolicy);
 
+                        log.debug("MEOW 001: " + biosMLE.getName());
+                        log.debug("MEOW 002: " + biosMLE.getVersion());
+                        log.debug("MEOW 003: " + biosMLE.getOemId().getName());
+                        
                         // Let us update the TxtHostRecord object with the details. We will use that object for host registration later                        
                         hostObjToRegister.BIOS_Name = biosMLE.getName();
                         hostObjToRegister.BIOS_Version = biosMLE.getVersion();
