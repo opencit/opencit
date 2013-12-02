@@ -13,6 +13,8 @@ package_env_filename=${package_dir}/${package_name}.env
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 if [ -f "${package_env_filename}" ]; then . "${package_env_filename}"; else echo_warning "Missing file: ${package_env_filename}"; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 # TODO: move this function to mtwilson-util. it's not the same as update_property_in_file because it's specific to the /etc/hosts format
@@ -39,10 +41,10 @@ replace_hostname_in_etc_hosts_NOT_COMPLETE__NOT_IN_USE_YET() {
 }
 
 # Check if there is a username and password already configured 
-server_pca_username=`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`
-server_pca_password=`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`
-client_pca_username=${server_pca_username:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
-client_pca_password=${server_pca_password:-`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
+server_pca_username="$PRIVACYCA_DOWNLOAD_USERNAME"   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`
+server_pca_password="$PRIVACYCA_DOWNLOAD_PASSWORD"   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/PrivacyCA.properties`
+client_pca_username="${server_pca_username}" #:-"$PRIVACYCA_DOWNLOAD_USERNAME"}   #`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/privacyca-client.properties`}
+client_pca_password="${server_pca_password}" #:-"$PRIVACYCA_DOWNLOAD_PASSWORD"}   #`read_property_from_file ClientFilesDownloadPassword ${intel_conf_dir}/privacyca-client.properties`}
 
 prompt_with_default PRIVACYCA_SERVER "Privacy CA Server IP Address:"  "https://mtwilsonIP:port#"
 echo "Login to download the Privacy CA client files"
@@ -88,7 +90,7 @@ chmod 600 /etc/intel/cloudsecurity/hisprovisioner.properties
 
 keytool=${JAVA_HOME}/bin/keytool
 keystore=$intel_conf_dir/trustagent.jks
-storepass=`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
+storepass="$TRUSTAGENT_KEYSTORE_PASS"   #`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
 if [ -z "$storepass" ]; then
   if [ -f "$keystore" ]; then 
     backupKeystoreFilename=`backup_file $keystore`
@@ -98,6 +100,7 @@ if [ -z "$storepass" ]; then
   fi
   storepass=$(generate_password 32)
   update_property_in_file trustagent.keystore.password "${package_config_filename}" $storepass
+  export TRUSTAGENT_KEYSTORE_PASS="$storepass"
 fi
 
 generate_ta_ssl() {
@@ -109,6 +112,7 @@ generate_ta_ssl() {
   if [ -z "$has_ssl" ]; then
     $keytool -genkey -alias "TrustAgentSSL" -keyalg RSA  -keysize 2048 -keystore "${keystore}" -storepass "${storepass}" -dname "CN=TrustAgent, OU=Mt Wilson, O=Customer, C=US" -validity 3650  -keypass "${storepass}"
   fi
+  chmod 600 "$keystore"
 }
 
 get_privacyca_ssl() {

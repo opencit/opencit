@@ -1467,7 +1467,6 @@ public class HostTrustBO extends BaseBO {
         boolean biosMLEFound = false, VMMMLEFound = false;
         
         try {
-            
             long getTrustStatusOfHostNotInDBStart = System.currentTimeMillis();
             
             log.debug("checkMatchingMLEExists: Starting to find the matching MLEs for host {}.", hostObj.HostName);
@@ -1536,8 +1535,12 @@ public class HostTrustBO extends BaseBO {
                         }
                         
                         // Bug-1014: due to new policy enforcement for AIK validation
-                        if (agent.isAikAvailable())
+                        if (agent.isAikCaAvailable()) {
                             hostReport.aik = new Aik(agent.getAikCertificate());
+                        }
+                        else if (agent.isAikAvailable()) {
+                            hostReport.aik = new Aik(agent.getAik());
+                        }
                         
                         tblHosts.setBiosMleId(biosMLE);
 

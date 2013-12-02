@@ -23,11 +23,13 @@ webservice_application_name=ManagementConsole
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 configure_keystore_dir() {
   # setup mtwilson.mc.keystore.dir
-  local configured_keystore_dir=`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
+  local configured_keystore_dir="$MC_KEYSTORE_DIR"   #`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
   package_keystore_users_dir=${configured_keystore_dir:-"${package_keystore_users_dir}"}
   if [[ "$configured_keystore_dir" != "$package_keystore_users_dir" ]]; then
     update_property_in_file mtwilson.mc.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
@@ -85,7 +87,7 @@ bootstrap_first_user__Not_Used() {
     echo "You will be prompted to provide a username and password."
     echo "After this is done, you can login to Management Console with this user to approve all other registration requests."
 
-  local configured_keystore_dir=`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
+  local configured_keystore_dir="$MC_KEYSTORE_DIR"   #`read_property_from_file mtwilson.mc.keystore.dir ${package_config_filename}`
   package_keystore_users_dir=${configured_keystore_dir:-"${package_keystore_users_dir}"}
   if [[ "$configured_keystore_dir" != "$package_keystore_users_dir" ]]; then
     update_property_in_file mtwilson.mc.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"
@@ -101,7 +103,7 @@ bootstrap_first_user__Not_Used() {
   # the $(...) surrounding the backticks is to remove leading and trailing spaces
   keystoreFilename=$(echo `cat /tmp/${datestr} | grep "^Created keystore" | awk -F ':' '{ print $2 }'`)
   echo "Keystore filename: '${keystoreFilename}'"
-  local default_server_url=`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
+  local default_server_url="$CONFIGURED_API_BASEURL"   #`read_property_from_file mtwilson.api.baseurl ${package_config_filename}`
   local server_url_in
   echo -n "Server URL [${default_server_url}]: "
   IFS= read server_url_in

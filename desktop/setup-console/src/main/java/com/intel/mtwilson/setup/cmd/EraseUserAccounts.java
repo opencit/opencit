@@ -63,6 +63,7 @@ public class EraseUserAccounts implements Command {
             String username = options.getString("user");
             System.out.println("deleting user " + username);
             deleteUser(username);
+            deleteApiClient(username);
         }else {
             deletePortalUsers();
             deleteApiClients();
@@ -71,11 +72,12 @@ public class EraseUserAccounts implements Command {
 
     private void deleteUser(String username) {
         try {
-             MwPortalUserJpaController jpa  = My.jpa().mwPortalUser();
+             MwPortalUserJpaController jpa  = new MwPortalUserJpaController(em); //My.jpa().mwPortalUser();
              MwPortalUser portalUser = jpa.findMwPortalUserByUserName(username);
              jpa.destroy(portalUser.getId());
+//             System.out.println("Deleted " + portalUser.getUsername());
         }catch (Exception ex) {
-            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
+            System.err.println("Exception occured: \r\n\r\n" + ex.getMessage());
         }
     }
     
@@ -134,6 +136,34 @@ public class EraseUserAccounts implements Command {
             System.out.println(count + " API clients deleted.");
         } catch (Exception ex) {
             System.err.println("Exception occured: \r\n\r\n" + ex.toString());  
+        }
+    }
+    
+    private void deleteApiClient(String username) throws com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException, com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException {
+        try {
+            //boolean deleteAll = options.getBoolean("all", false);
+            boolean verbose = options.getBoolean("verbose", false);
+            ApiClientX509JpaController jpa = new ApiClientX509JpaController(em);
+            ApiRoleX509JpaController rolejpa = new ApiRoleX509JpaController(em);
+            List<ApiClientX509> list = jpa.findApiClientX509Entities();
+
+            int count = 0;
+            for (ApiClientX509 record : list) {
+                if (record.getName().contains("CN=" + username + ",")) {
+                    Collection<ApiRoleX509> roles = record.getApiRoleX509Collection();
+                    for (ApiRoleX509 role : roles) {
+                        rolejpa.destroy(role.getApiRoleX509PK());
+                    }
+                    jpa.destroy(record.getId());
+                    count++;
+                    String apiName = record.getName().substring(3, record.getName().indexOf(","));
+                    if (verbose) {
+                        System.out.println("Deleting API client " + apiName + "..... Done");
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.err.println("Exception occured: \r\n\r\n" + ex.toString());
         }
     }
 }

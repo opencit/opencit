@@ -20,15 +20,20 @@ if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Mis
 if [ -f ${share_dir}/version ]; then  . ${share_dir}/version; else  echo_warning "Missing file: ${share_dir}/version"; fi
 if [ ! -d ${env_dir} ]; then mkdir -p ${env_dir}; fi
 shell_include_files ${env_dir}/*
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+if [[ "$@" != *"ExportConfig"* ]]; then   # NEED TO DEBUG FURTHER. load_conf runs ExportConfig and if that same command is passed in from 'mtwilson setup', it won't work
+  load_conf 2>&1 >/dev/null
+  if [ $? -ne 0 ]; then
+    if [ $? -eq 2 ]; then echo_failure -e "Incorrect encryption password. Please verify \"MTWILSON_PASSWORD\" variable is set correctly."; fi
+    exit -1
+  fi
+fi
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f ${apiclient_dir}/apiclient.env ]; then  . ${apiclient_dir}/apiclient.env; fi
 
-# load default environment variables
-#load_default_env 1>/dev/null
-
 # ensure we have some global settings available before we continue so the rest of the code doesn't have to provide a default
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+#export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
 
 # XXX TODO can remove this later; converting  all package_required_version variable names to be upper case, which can be defined in mtwilson.env or for which we have a default
 if using_mysql; then
@@ -63,9 +68,9 @@ find_ctl_commands() {
 }
 
 mtwilson_saml_cert_report() {
-  local keystore=`read_property_from_file saml.keystore.file ${conf_dir}/attestation-service.properties`
-  local keystorePassword=`read_property_from_file saml.keystore.password ${conf_dir}/attestation-service.properties`
-  local keyalias=`read_property_from_file saml.key.alias ${conf_dir}/attestation-service.properties`
+  local keystore="$SAML_KEYSTORE_FILE"   #`read_property_from_file saml.keystore.file ${conf_dir}/attestation-service.properties`
+  local keystorePassword=$SAML_KEYSTORE_PASSWORD   #`read_property_from_file saml.keystore.password ${conf_dir}/attestation-service.properties`
+  local keyalias=$SAML_KEY_ALIAS   #`read_property_from_file saml.key.alias ${conf_dir}/attestation-service.properties`
   java_keystore_cert_report "${conf_dir}/$keystore" "$keystorePassword" "$keyalias"
 }
 
@@ -328,7 +333,7 @@ case "$1" in
           shift
           call_setupcommand $@
         else
-          load_default_env
+          if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
           setup
         fi
         ;;
@@ -349,7 +354,7 @@ case "$1" in
         all_status
         ;;
   erase-data)
-        load_default_env 1>/dev/null
+        #load_default_env 1>/dev/null
 		erase_data
         #call_setupcommand EraseLogs
         #call_setupcommand EraseHostRegistrationData
@@ -357,8 +362,8 @@ case "$1" in
         
         ;;
   erase-users)
-		load_default_env 1>/dev/null
-		if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* ]]; then
+		#load_default_env 1>/dev/null
+		if [[ -z "$MC_FIRST_USERNAME" && "$@" != *"--all"* && "$@" != *"--user"* ]]; then
 			echo_warning "Unable to detect mtwilson portal admin username. Please specify the admin username."
 			prompt_with_default MC_FIRST_USERNAME "Mtwilson Portal Admin Username:" "admin"
 		fi
@@ -373,7 +378,7 @@ case "$1" in
         ;;
   uninstall)
         if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
-        load_default_env 1>/dev/null
+        #load_default_env 1>/dev/null
         if using_glassfish; then
           glassfish_require
           echo "Stopping Glassfish..."

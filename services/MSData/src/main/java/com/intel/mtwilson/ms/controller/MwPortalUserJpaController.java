@@ -147,20 +147,23 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
         return searchByNamedQuery("findByUsernameEnabled", parameters);
     }
     
-     public MwPortalUser findMwPortalUserByUserName(String name) {
+    public MwPortalUser findMwPortalUserByUserName(String name) {
         MwPortalUser mwKeystoreObj;
         EntityManager em = getEntityManager();
-        Query query = em.createNamedQuery("MwPortalUser.findByUsername");
-        query.setParameter("username", name);
 
-        query.setHint(QueryHints.REFRESH, HintValues.TRUE);
-        query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
         try {
-          mwKeystoreObj = (MwPortalUser) query.getSingleResult();
+            Query query = em.createNamedQuery("MwPortalUser.findByUsername");
+            query.setParameter("username", name);
+
+            //query.setHint(QueryHints.REFRESH, HintValues.TRUE);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
+
+            mwKeystoreObj = (MwPortalUser) query.getSingleResult();
+        } catch (javax.persistence.NoResultException e) {
+            mwKeystoreObj = null;
+        } finally {
+            em.close();
         }
-        catch(javax.persistence.NoResultException e) {
-          mwKeystoreObj = null;           
-        }       
         return mwKeystoreObj;
     }
     

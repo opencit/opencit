@@ -22,7 +22,9 @@ webservice_application_name=AttestationService
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 # bug #509 the sql script setup is moved to a java program, this function is not needed anymore
 #list_mysql_install_scripts() {
@@ -64,20 +66,22 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 download_privacyca_certs() {
   local privacyca_server_config
   if [ -z "${PRIVACYCA_SERVER}" ]; then
-    privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
-    PRIVACYCA_SERVER=${privacyca_server_config}
+    #privacyca_server_config=`read_property_from_file privacyca.server "${package_config_filename}"`
+    #PRIVACYCA_SERVER=${privacyca_server_config}
     prompt_with_default PRIVACYCA_SERVER "Privacy CA Server:"
   fi
 
   if [ -n "${PRIVACYCA_SERVER}" ]; then
     # check if the privacy ca password is saved in a properties file
-    local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
+    #local default_privacyca_username=${PRIVACYCA_DOWNLOAD_USERNAME:-`read_property_from_file ClientFilesDownloadUsername ${intel_conf_dir}/PrivacyCA.properties`}
     echo "Login to download the Privacy CA client files"
     if [ -z "${PRIVACYCA_DOWNLOAD_USERNAME}" ]; then
-      prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${default_privacyca_username}
+      prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "Username:" ${PRIVACYCA_DOWNLOAD_USERNAME}
+      export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
     fi
     if [ -z "${PRIVACYCA_DOWNLOAD_PASSWORD}" ]; then
       prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "Password:" ${default_privacyca_password}
+      export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
     fi
     
     echo "Connecting to Privacy CA..."
@@ -135,7 +139,7 @@ download_privacyca_certs() {
       fi
       # use the password in hisprovisioner.propeties to extract the Endorsement certificate from endorsement.p12, then delete the password
       if [ -f "${intel_conf_dir}/endorsement.p12" ]; then
-        export endorsement_password=`read_property_from_file EndorsementP12Pass ${intel_conf_dir}/hisprovisioner.properties`
+        export endorsement_password="$ENDORSEMENT_P12_PASS"   #`read_property_from_file EndorsementP12Pass ${intel_conf_dir}/hisprovisioner.properties`
         openssl pkcs12 -in ${intel_conf_dir}/endorsement.p12 -out ${intel_conf_dir}/privacyca-endorsement.pem -nokeys -passin env:endorsement_password
         export endorsement_password=
         rm ${intel_conf_dir}/hisprovisioner.properties
@@ -164,10 +168,10 @@ create_saml_key() {
   # the saml.keystore.file property is just a file name and not an absolute path
   # TODO XXX: use convention over configuration... document that the SAML keystore file is a file called SAML.jks inside the
   # configuration directory, and use that fact everywhere instead of reading a configuration.
-  saml_keystore_file=`read_property_from_file saml.keystore.file ${package_config_filename}`
-  saml_keystore_password=`read_property_from_file saml.keystore.password ${package_config_filename}`
-  saml_key_alias=`read_property_from_file saml.key.alias ${package_config_filename}`
-  saml_key_password=`read_property_from_file saml.key.password ${package_config_filename}`
+  saml_keystore_file="$SAML_KEYSTORE_FILE"          #`read_property_from_file saml.keystore.file ${package_config_filename}`
+  saml_keystore_password="$SAML_KEYSTORE_PASSWORD"  #`read_property_from_file saml.keystore.password ${package_config_filename}`
+  saml_key_alias="$SAML_KEY_ALIAS"                  #`read_property_from_file saml.key.alias ${package_config_filename}`
+  saml_key_password="$SAML_KEY_PASSWORD"            #`read_property_from_file saml.key.password ${package_config_filename}`
   # prepend the configuration directory to the keystore filename
   saml_keystore_file=${intel_conf_dir}/${saml_keystore_file:-"SAML.jks"}
   saml_keystore_password=${saml_keystore_password:-"changeit"}

@@ -84,19 +84,7 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public X509Certificate getAikCertificate() {
-        X509Certificate aikCert = null;
-        String aikString = null;
-        
-        try {
-            aikString = client.getAIKCertificate();
-            aikCert = X509Util.decodePemCertificate(aikString);
-        } catch(Exception e) {
-            log.error("Cannot decode AIK certificate: {}", e.toString());
-            log.debug(aikString);
-            return null;
-        }
-        
-        return aikCert;
+        throw new UnsupportedOperationException("Not supported");
     }
 
     @Override
