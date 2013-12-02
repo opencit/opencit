@@ -470,7 +470,7 @@ public class MyConfiguration {
     }
     
     public boolean getAutoUpdateHosts() {
-        return conf.getBoolean("mtwilson.as.autoUpdateHost", true);
+        return conf.getBoolean("mtwilson.as.autoUpdateHost", false);
     }    
 
     // asset tagging html5 resources (used by the reference implementation)
