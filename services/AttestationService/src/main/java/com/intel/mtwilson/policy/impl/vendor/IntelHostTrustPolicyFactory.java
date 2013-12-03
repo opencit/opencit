@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.X509Util;
@@ -119,4 +120,10 @@ public class IntelHostTrustPolicyFactory implements VendorHostTrustPolicyFactory
         X509Certificate[] cas = pcaList.toArray(new X509Certificate[0]);
         return cas;
     }
+    
+    @Override
+    public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
+        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
+    }
+
 }

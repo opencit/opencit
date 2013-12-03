@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
@@ -140,6 +141,10 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
             rules.addAll(pcrEventLogRules);
         }
         return rules;
+    }
+    @Override
+    public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
+        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
     }
     
 }

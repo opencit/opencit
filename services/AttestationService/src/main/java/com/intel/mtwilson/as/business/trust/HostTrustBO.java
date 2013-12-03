@@ -641,8 +641,8 @@ public class HostTrustBO extends BaseBO {
         
 
         String userName = new AuditLogger().getAuditUserName();
-        Object[] paramArray = {userName, hostId, trust.bios, trust.vmm};
-        log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {}.", paramArray);
+        Object[] paramArray = {userName, hostId, trust.bios, trust.vmm, trust.asset_tag};
+        log.info(sysLogMarker, "User_Name: {} Host_Name: {} BIOS_Trust: {} VMM_Trust: {} AT_Trust: {}.", paramArray);
         
         log.debug( "Verfication Time {}", (System.currentTimeMillis() - start));
 

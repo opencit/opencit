@@ -8,6 +8,7 @@ import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblLocationPcr;
@@ -144,10 +146,26 @@ public class HostTrustPolicyManager {
             Vmm vmm = new Vmm(host.getVmmMleId().getName(), host.getVmmMleId().getVersion(), host.getVmmMleId().getOsId().getName(), host.getVmmMleId().getOsId().getVersion());
             rules.addAll(factory.loadTrustRulesForVmm(vmm,host));
         }
-        // only add location policy if the host is expected to be somewhere specific... otherwise, an empty location will result in a policy that can't be met
-        if( host.getLocation() != null && !host.getLocation().trim().isEmpty() ) {
-            rules.addAll(factory.loadTrustRulesForLocation(host.getLocation(), host));
+         // only add location policy if the host is expected to be somewhere specific... otherwise, an empty location will result in a policy that can't be met
+        //if( host.getLocation() != null && !host.getLocation().trim().isEmpty() ) {
+        //    rules.addAll(factory.loadTrustRulesForLocation(host.getLocation(), host));
+        //}
+        
+        // Add the rules for the asset tag verification
+        try {
+            List<MwAssetTagCertificate> atagCertsForHost = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostID(host.getId());
+            // There should be only one valid asset tag certificate for the host.
+            if (atagCertsForHost != null && atagCertsForHost.size() == 1) {
+                rules.addAll(factory.loadTrustRulesForAssetTag(atagCertsForHost.get(0), host));
+            }
+            else {
+                log.info("Asset tag certificate not present for host {}.", host.getName());
+            }
+        } catch (Exception ex) {
+            // We cannot do anything ... just log the error and proceed
+            log.info("Error during look up of asset tag certificates for the host {}", host.getName());
         }
+        
         Policy policy = new Policy(String.format("Host trust policy for host with AIK %s", hostId), rules);
         return policy;
     }

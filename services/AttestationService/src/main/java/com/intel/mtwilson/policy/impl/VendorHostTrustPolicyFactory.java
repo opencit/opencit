@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl;
 
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Vmm;
@@ -33,4 +34,5 @@ public interface VendorHostTrustPolicyFactory {
     Set<Rule> loadTrustRulesForVmm(Vmm vmm, TblHosts host);
     Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host); // similar to loadTrustRulesForVmm  but excluding the dynamic modules and excluding the host specific modules
     Set<Rule> loadTrustRulesForLocation(String location, TblHosts host);
+     Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCerts, TblHosts host);
 }
