@@ -5,6 +5,7 @@
 package test.reflection;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
@@ -32,6 +33,18 @@ public class StringCleaningTest {
     
     // entry point:   call validate(TxtHost), validate(MLE), etc. 
     public static void validate(Object object) {
+        validate(object, new ArrayList<Object>());
+    }
+    
+    public static void validate(Object object, ArrayList<Object> stack) {
+        // first check if the object being requested is already in the stack... if so we skip it to avoid infinite recursion
+        for(Object item : stack) {
+            if( object == item ) { return; }
+        }
+        // add the object to the stack so we don't try to validate it again if it has a self-referential property ...   unlike normal stacks we never really need to "pop" this one because it's just a record of where we've been,  and we don't use it to navigate.
+        stack.add(object);
+        
+        // now validate the object
         Set<Method> stringMethods = getStringMethods(object.getClass());
         for(Method method : stringMethods) {
             try {
@@ -48,6 +61,7 @@ public class StringCleaningTest {
         // for the object methods need to recurse into validate(object) for each one and each item in the collections and arrays
         
         // if we get to the end with no exceptions the object is validated.
+        
     }
     
 
