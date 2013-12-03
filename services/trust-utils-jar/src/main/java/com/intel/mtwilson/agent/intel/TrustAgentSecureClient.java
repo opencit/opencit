@@ -185,7 +185,6 @@ public class TrustAgentSecureClient {
     public ClientRequestType sendQuoteRequest() throws UnknownHostException, IOException, JAXBException, KeyManagementException, NoSuchAlgorithmException, XMLStreamException  {
 
 
-        try {
             byte buf[] = sendRequestWithSSLSocket();
 
             log.info("Unmarshalling to Jaxb object.");
@@ -199,8 +198,6 @@ public class TrustAgentSecureClient {
 
             log.info("Done reading/writing to/from socket, closing socket.");
             return response;
-        } finally {
-        }
 
     }
 
@@ -337,7 +334,7 @@ public class TrustAgentSecureClient {
      * 
      * @return 
      */
-    public HostInfo getHostInfo() throws XMLStreamException  {
+    public HostInfo getHostInfo() {
         this.data = "<host_info></host_info>".getBytes();
         HostInfo response;
 		try {
@@ -357,7 +354,11 @@ public class TrustAgentSecureClient {
             throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
         } catch(JAXBException e) {
             throw new ASException(e,ErrorCode.AS_TRUST_AGENT_INVALID_RESPONSE, e.toString());
-        }/*catch(Exception e) {
+        }
+        catch(XMLStreamException e) {
+            throw new ASException(e,ErrorCode.AS_TRUST_AGENT_INVALID_RESPONSE, e.toString());            
+        }
+        /*catch(Exception e) {
             throw new ASException(e);
         }*/
        

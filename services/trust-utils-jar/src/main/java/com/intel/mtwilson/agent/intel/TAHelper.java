@@ -120,7 +120,7 @@ public class TAHelper {
 
     // DAA challenge
     //    public void verifyAikWithDaa(String hostIpAddress, int port) {
-    public void verifyAikWithDaa(TblHosts tblHosts) {
+    public void verifyAikWithDaa(TblHosts tblHosts) throws XMLStreamException {
         try {
             //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 TODO need to replace with use of HostAgentFactory
             HostAgentFactory factory = new HostAgentFactory();
@@ -234,7 +234,7 @@ public class TAHelper {
     }
 
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException, 
-            UnknownHostException, IOException, KeyManagementException, CertificateException  {
+            UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException  {
         //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
         File q = null;
         File n = null;
