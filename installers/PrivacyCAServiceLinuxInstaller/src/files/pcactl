@@ -24,12 +24,13 @@ glassfish_parent_dir=/usr/share
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev"
 webservice_application_name=HisPrivacyCAWebServices2
 
-
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 configure_privacyca_url() {
 
@@ -49,7 +50,8 @@ configure_privacyca_url() {
   echo "You need to set a username and password for Trust Agents to download the Privacy CA client files."
   prompt_with_default PRIVACYCA_DOWNLOAD_USERNAME "PrivacyCA Administrator Username:" admin
   prompt_with_default_password PRIVACYCA_DOWNLOAD_PASSWORD "PrivacyCA Administrator Password:"
-  export PRIVACYCA_DOWNLOAD_PASSWORD
+  export PRIVACYCA_DOWNLOAD_USERNAME="$PRIVACYCA_DOWNLOAD_USERNAME"
+  export PRIVACYCA_DOWNLOAD_PASSWORD="$PRIVACYCA_DOWNLOAD_PASSWORD"
   PRIVACYCA_DOWNLOAD_PASSWORD_HASH=`mtwilson setup HashPassword --env-password=PRIVACYCA_DOWNLOAD_PASSWORD`
   update_property_in_file ClientFilesDownloadUsername "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_USERNAME}"
   update_property_in_file ClientFilesDownloadPassword "${intel_conf_dir}/PrivacyCA.properties" "${PRIVACYCA_DOWNLOAD_PASSWORD_HASH}"
@@ -81,6 +83,7 @@ setup_print_summary() {
 }
 
 setup_interactive_install() {
+  java_detect
   configure_privacyca_url
   create_privacyca_keys
   protect_privacyca_files

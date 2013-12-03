@@ -5,7 +5,8 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
+//import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.vmware.vim25.DynamicProperty;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmBootSecurityOptionEventDetails;
@@ -16,6 +17,7 @@ import com.vmware.vim25.HostTpmEventLogEntry;
 import com.vmware.vim25.HostTpmOptionEventDetails;
 import com.vmware.vim25.HostTpmSoftwareComponentEventDetails;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -125,7 +127,7 @@ public class VMWare51Esxi51   {
 					log.warn("Unrecognized event in module event log "
 							+ logEventDetails.getClass().getName());
                     
-                    List<DynamicProperty> ps = logEventDetails.getDynamicProperty();
+                    List<DynamicProperty> ps = Arrays.asList(logEventDetails.getDynamicProperty());
                     for(DynamicProperty p : ps) {
                         info.put(p.getName(), p.getVal().toString());
                     }

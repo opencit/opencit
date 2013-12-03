@@ -100,7 +100,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      */
     public ApiClient(File configurationFile) throws ClientException, IOException {
         this(ConfigurationUtil.fromPropertiesFile(configurationFile));
-        log.info("Initialized with configuration file: "+configurationFile.getAbsolutePath());
+        log.debug("Initialized with configuration file: "+configurationFile.getAbsolutePath());
     }
     
     /**
@@ -281,7 +281,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             // no authentication
             setKeystore(config);
             httpClient = new ApacheHttpClient(baseURL, null, keystore, config);
-            log.debug("No identity configured");
+            log.info("No identity configured");
         }        
     }
     
@@ -380,11 +380,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             // a json error response from the web application. we need to provide the error message to the user.
             ErrorResponse errorResponse;
             try {
+                //log.debug("Parsing JSON error response: "+new String(response.content, "UTF-8"));
                 log.debug("Parsing JSON error response: "+new String(response.content, "UTF-8"));
                 errorResponse = json(new String(response.content, "UTF-8"), ErrorResponse.class);
             }
             catch(Exception e) {
                 // cannot parse the json response, so include the entire response for the user. we ignore the exception "e" because it just means we couldn't parse the response.
+                //e.printstacktrace()
+                // Daniel, do something to print the stack trace so you can follow it.
+                //
                 return new ApiException(response, "Cannot parse response: "+e.getMessage(), ErrorCode.UNKNOWN_ERROR);
             }
             return new ApiException(response, errorResponse.getErrorMessage(), ErrorCode.valueOf(errorResponse.getErrorCode()));
@@ -827,6 +831,18 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return trust;
     }
 
+    @Override
+    public HostResponse registerHostByFindingMLE(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException {
+        HostResponse result = fromJSON(httpPost(asurl("/hosts/mle"), toJSON(hostObj)), HostResponse.class);
+        return result;
+    }
+
+    @Override
+    public String checkMatchingMLEExists(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException {
+        return text(httpPost(asurl("/hosts/mle/verify"), toJSON(hostObj)));
+        //return result;
+    }
+
    /* @Override
     public X509Certificate getCurrentTrustCertificateByAik(Sha1Digest aikSha1) throws IOException, ApiException, SignatureException {
         byte[] trust = binary(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trustcert.x509")));
@@ -905,6 +921,15 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return saml;
     }
     
+    @Override
+    public String getSamlForHostByAik(Sha1Digest aikSha1, boolean forceVerify) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("force_verify", Boolean.toString(forceVerify));
+        String saml = text(httpGet(asurl("/hosts/aik-"+aikSha1.toString()+"/trust.saml", query))); // NOTE: we are returning the raw XML document, we don't try to instantiate any Java object via the xml() funciton. The client can create a TrustAssertion object using this XML string in order to parse it.
+        return saml;
+    }
+    
+    
     public TrustAssertion verifyTrustAssertion(String saml) throws IOException, ApiException, SignatureException {
         X509Certificate[] trustedSamlCertificates;
         try {
@@ -968,6 +993,18 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return attReport;
     }*/
 
+    @Override
+    public boolean importAssetTagCertificate(AssetTagCertCreateRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPost(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
+
+    @Override
+    public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest aTagObj) throws IOException, ApiException, SignatureException {
+        String result = text(httpPut(asurl("/assetTagCert"), toJSON(aTagObj)));
+        return "true".equals(result);
+    }
+    
     // Whitelist Management API
     @Override
     public boolean addMLE(MleData mle) throws IOException, ApiException, SignatureException {

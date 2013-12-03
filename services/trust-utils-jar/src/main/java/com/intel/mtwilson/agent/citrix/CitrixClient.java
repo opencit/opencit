@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.agent.citrix;
 
+import java.lang.Process;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.helper.CommandUtil;
@@ -12,7 +13,7 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.tls.TlsConnection;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
@@ -47,20 +48,18 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  *
  * @author stdalex
  */
 public class CitrixClient {
+
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    
     String hostIpAddress;
     int port;
     String userName;
     String password;
     String connectionString;
-    
     private String aikverifyhome;
     private String aikverifyhomeData;
     private String aikverifyhomeBin;
@@ -71,10 +70,10 @@ public class CitrixClient {
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";
-    
+    private String AIKCert = null;
     protected Connection connection;
-	
-    public CitrixClient(TlsConnection tlsConnection){
+
+    public CitrixClient(TlsConnection tlsConnection) {
         this.tlsConnection = tlsConnection;
         this.connectionString = tlsConnection.getURL().toExternalForm();
 //        log.info("CitrixClient connectionString == " + connectionString);
@@ -85,123 +84,114 @@ public class CitrixClient {
             port = citrixConnection.getPort();
             userName = citrixConnection.getUsername();
             password = citrixConnection.getPassword();
-        }
-        catch(MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid Citrix Host URL", e); // NOTE: we are NOT providing the connection string in the error message because, since we can't parse it, we dn't know if there's a password in there. 
         }
         //log.info("stdalex-error citrixInit IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
-               
+
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
-        aikverifyhomeData = aikverifyhome+File.separator+"data";
-        aikverifyhomeBin = aikverifyhome+File.separator+"bin";
+        aikverifyhomeData = aikverifyhome + File.separator + "data";
+        aikverifyhomeBin = aikverifyhome + File.separator + "bin";
         opensslCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.openssl.cmd", "openssl.bat");
         aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
-        
+
     }
-    
+
     public void init() {
         boolean foundAllRequiredFiles = true;
-        String required[] = new String[] { aikverifyhome, opensslCmd, aikverifyCmd, aikverifyhomeData };
-        for(String filename : required) {
+        String required[] = new String[]{aikverifyhome, opensslCmd, aikverifyCmd, aikverifyhomeData};
+        for (String filename : required) {
             File file = new File(filename);
-            if( !file.exists() ) {
-                log.info( String.format("Invalid service configuration: Cannot find %s", filename ));
+            if (!file.exists()) {
+                log.debug(String.format("Invalid service configuration: Cannot find %s", filename));
                 foundAllRequiredFiles = false;
             }
         }
-        if( !foundAllRequiredFiles ) {
+        if (!foundAllRequiredFiles) {
             throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, "Cannot find aikverify files");
         }
-        
+
         // we must be able to write to the data folder in order to save certificates, nones, public keys, etc.
         //log.info("stdalex-error checking to see if we can write to " + aikverifyhomeData);
         File datafolder = new File(aikverifyhomeData);
-        if( !datafolder.canWrite() ) {
-            throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));            
-        }    
-        
+        if (!datafolder.canWrite()) {
+            throw new ASException(ErrorCode.AS_CONFIGURATION_ERROR, String.format(" Cannot write to %s", aikverifyhomeData));
+        }
+
     }
-	
-	
+
     // Commenting the below function since it is not being used and klocwork is throwing a warning    
     /*private String removeTags(String xml) {
 	
-      String resp = "";  
-      int i = 0;
-      for(; i < xml.length(); i++) {
-       if(xml.charAt(i) == '>') {
-        i++;
-        break;
-       }
-      }
-      for(;i < xml.length(); i++) {
-       if(xml.charAt(i) == '<'){
-        break;
-       }
-       resp += xml.charAt(i);
-      }
-      return resp;
-    }*/
-    
+     String resp = "";  
+     int i = 0;
+     for(; i < xml.length(); i++) {
+     if(xml.charAt(i) == '>') {
+     i++;
+     break;
+     }
+     }
+     for(;i < xml.length(); i++) {
+     if(xml.charAt(i) == '<'){
+     break;
+     }
+     resp += xml.charAt(i);
+     }
+     return resp;
+     }*/
     public class keys {
-     public String tpmEndCert;
-     public String tpmEndKeyPEM;
-     public String tpmAttKeyPEM;
-     public String tpmAttKeyTCPA;
-     
-     public keys() {}
+
+        public String tpmEndCert;
+        public String tpmEndKeyPEM;
+        public String tpmAttKeyPEM;
+        public String tpmAttKeyTCPA;
+
+        public keys() {
+        }
     }
-    
+
     public void connect() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException, XmlRpcException, XmlRpcException {
-            URL url = null; 
-            try { 
-               url = new URL("https://" + hostIpAddress + ":" + port); 
-            }catch (MalformedURLException e) { 
-               throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
-            } 
-            
-            TrustManager[] trustAllCerts = new TrustManager[] { tlsConnection.getTlsPolicy().getTrustManager() };
-            
-            // Install the all-trusting trust manager  
-            SSLContext sc = SSLContext.getInstance("SSL");  
-            // Create empty HostnameVerifier  
-            HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();  
- 
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());  
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());  
-            HttpsURLConnection.setDefaultHostnameVerifier(hv); 
-			
-            connection = new Connection(url);
-        
-         Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
-            
+        URL url = null;
+        try {
+            url = new URL("https://" + hostIpAddress + ":" + port);
+        } catch (MalformedURLException e) {
+            throw new ASException(e, ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
+        }
+
+        TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
+
+        // Install the all-trusting trust manager  
+        SSLContext sc = SSLContext.getInstance("SSL");
+        // Create empty HostnameVerifier  
+        HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();
+
+        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        HttpsURLConnection.setDefaultHostnameVerifier(hv);
+
+        connection = new Connection(url);
+
+        Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+
     }
-	
-    public boolean isConnected() { return connection != null; }
-    
+
+    public boolean isConnected() {
+        return connection != null;
+    }
+
     public void disconnect() throws BadServerResponse, XenAPIException, XmlRpcException {
         Session.logout(connection);
 //        connection.dispose();
     }
-    
-    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
-          log.debug("getQuoteInformationForHost pcrList == " + pcrList);
-          try {
-            
-              // We cannot reuse the connections across different calls since they are tied to a particular host.
-              if( !isConnected()) { connect(); } 
-              
-            String nonce = generateNonce();
-            String sessionId = generateSessionId();
 
-			// We do not need to connect again. So, commenting it out.
-            // System.err.println("stdalex-error connecting with " + userName + " " + password);
-            // Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
-			
-            // System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
-			 
-            Map<String, String> myMap = new HashMap<String, String>();
+    /**
+     * This is a Citrix-specific API, not implemented by vmware hosts ;  trust agent will implement it
+     * when it's merged with provisioning agent from the asset tag branch
+     * @param tag 
+     */
+    public void setAssetTag(Sha1Digest tag) throws BadServerResponse, XenAPIException, XmlRpcException, NoSuchAlgorithmException, KeyManagementException  {
+            if( !isConnected()) { connect(); } 
             Set<Host> hostList = Host.getAll(connection);
             Iterator iter = hostList.iterator();
             // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
@@ -209,58 +199,103 @@ public class CitrixClient {
             Host h = null;
             if (iter.hasNext()) {
                 h = (Host)iter.next();
-            } 
+            }
 			
-            String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
-           
+            Map<String, String> myMap = new HashMap<String, String>();
+            log.debug("sending the following to the xenserver: " + tag.toBase64());
+            myMap.put("tag", Base64.encodeBase64String(tag.toHexString().getBytes()));
+            
+            //toByteArray()
+            String retval = h.callPlugin(connection,  "tpm","tpm_set_asset_tag", myMap);
+            log.debug("xenapi returned: {}", retval);
+            
+    }
+    
+    
+    public HashMap<String, Pcr> getQuoteInformationForHost(String pcrList) {
+        log.debug("getQuoteInformationForHost pcrList == " + pcrList);
+        try {
+
+            // We cannot reuse the connections across different calls since they are tied to a particular host.
+            if (!isConnected()) {
+                connect();
+            }
+
+            String nonce = generateNonce();
+            String sessionId = generateSessionId();
+            String aikCertificate = getAIKCertificate();
+
+            // We do not need to connect again. So, commenting it out.
+            // System.err.println("stdalex-error connecting with " + userName + " " + password);
+            // Session.loginWithPassword(connection, userName, password, APIVersion.latest().toString());
+
+            // System.err.println( "CitrixClient: connected to server ["+hostIpAddress+"]");	
+
+            Map<String, String> myMap = new HashMap<String, String>();
+            Set<Host> hostList = Host.getAll(connection);
+            Iterator iter = hostList.iterator();
+            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+            // to throw an exception if the hasNext is false.
+            File f, q, n;
+            Host h = null;
+            if (iter.hasNext()) {
+                h = (Host) iter.next();
+            }
+
+            /*
+            String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
             int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
-            int endP   = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
+            int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
             // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
-            String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(),endP);
+            String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(), endP);
             log.debug("aikCert == " + cert);
-            
             keys key = new keys();
-            
             key.tpmAttKeyPEM = cert;  // This is the actual value for AIK!!!!!
+            aikCertificate = key.tpmAttKeyPEM;
+            */
+            
+            log.debug("extracted aik cert from response: " + aikCertificate);
 
-			
-            String aikCertificate = key.tpmAttKeyPEM;
-            
-            log.debug( "extracted aik cert from response: " + aikCertificate);
-            
             myMap = new HashMap<String, String>();
-            myMap.put("nonce",nonce);
+            myMap.put("nonce", nonce);
+
+            long plugInCallStart = System.currentTimeMillis();
             String quote = h.callPlugin(connection, "tpm", "tpm_get_quote", myMap);
+            long plugInCallStop = System.currentTimeMillis();
+            log.debug("Citrix PlugIn call: TPM quote retrieval time " + (plugInCallStop - plugInCallStart) + " milliseconds");
 
-            log.debug("extracted quote from response: "+ quote);
+            log.debug("extracted quote from response: " + quote);
             //saveFile(getCertFileName(sessionId), Base64.decodeBase64(aikCertificate));
-            saveFile(getCertFileName(sessionId),aikCertificate.getBytes());
-            log.debug( "saved certificate with session id: "+sessionId);
-            
-            saveQuote(quote, sessionId);
+            f = saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
+            log.debug("saved certificate with session id: " + sessionId);
 
-            log.debug( "saved quote with session id: "+sessionId);
-            
-            saveNonce(nonce,sessionId);
-            
-            log.debug( "saved nonce with session id: "+sessionId);
-            
+            q = saveQuote(quote, sessionId);
+
+            log.debug("saved quote with session id: " + sessionId);
+
+            n = saveNonce(nonce, sessionId);
+
+            log.debug("saved nonce with session id: " + sessionId);
+
             //createRSAKeyFile(sessionId);
 
-           log.debug( "created RSA key file for session id: "+sessionId);
-            
+            log.debug("created RSA key file for session id: " + sessionId);
+
             HashMap<String, Pcr> pcrMap = verifyQuoteAndGetPcr(sessionId, pcrList);
-            
-            log.debug( "Got PCR map");
+
+            log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-            
+
+            f.delete();
+            q.delete();
+            n.delete();
             return pcrMap;
-            
+
         } catch (ASException e) {
             throw e;
 //        } catch(UnknownHostException e) {
 //            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR, hostIpAddress);
-        }  catch (Exception e) {
+        } catch (Exception e) {
             log.debug("caught exception during login: " + e.toString() + " class: " + e.getClass());
             throw new ASException(e, ErrorCode.AS_CITRIX_ERROR, e.toString());
         }
@@ -277,78 +312,78 @@ public class CitrixClient {
 //            nonce = new BASE64Encoder().encode( bytes);
             String nonce = Base64.encodeBase64String(bytes);
 
-            log.info( "Nonce Generated " + nonce);
+            log.debug("Nonce Generated " + nonce);
             return nonce;
         } catch (NoSuchAlgorithmException e) {
             throw new ASException(e);
         }
     }
 
-    private String generateSessionId() throws NoSuchAlgorithmException  {
-        
+    private String generateSessionId() throws NoSuchAlgorithmException {
+
         // Create a secure random number generator
-            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-            // Get 1024 random bits
-            byte[] seed = new byte[1];
-            sr.nextBytes(seed);
+        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+        // Get 1024 random bits
+        byte[] seed = new byte[1];
+        sr.nextBytes(seed);
 
-            sr = SecureRandom.getInstance("SHA1PRNG");
-            sr.setSeed(seed);
-            
-            
-
-            int nextInt = sr.nextInt();
-            String sessionId = "" + ((nextInt < 0)?nextInt *-1 :nextInt); 
+        sr = SecureRandom.getInstance("SHA1PRNG");
+        sr.setSeed(seed);
 
 
-            log.info( "Session Id Generated [" + sessionId + "]");
 
-        
+        int nextInt = sr.nextInt();
+        String sessionId = "" + ((nextInt < 0) ? nextInt * -1 : nextInt);
+
+
+        log.debug("Session Id Generated [" + sessionId + "]");
+
+
 
         return sessionId;
 
     }
-    
+
     private String getNonceFileName(String sessionId) {
-        return "nonce_" + sessionId +".data";
+        return "nonce_" + sessionId + ".data";
     }
 
     private String getQuoteFileName(String sessionId) {
-        return "quote_" + sessionId +".data";
+        return "quote_" + sessionId + ".data";
     }
 
     // Commenting the below function since it is not being used and klocwork is throwing a warning
     /*private void saveCertificate(String aikCertificate, String sessionId) throws IOException  {
-        if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
-            log.debug( "adding newlines to certificate BEGIN tag");            
-            aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
-        }
-        if( aikCertificate.indexOf("\n-----END CERTIFICATE-----") < 0 && aikCertificate.indexOf("-----END CERTIFICATE-----") >= 0 ) {
-            log.debug( "adding newlines to certificate END tag");            
-            aikCertificate = aikCertificate.replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----");
-        }
+     if( aikCertificate.indexOf("-----BEGIN CERTIFICATE-----\n") < 0 && aikCertificate.indexOf("-----BEGIN CERTIFICATE-----") >= 0 ) {
+     log.debug( "adding newlines to certificate BEGIN tag");            
+     aikCertificate = aikCertificate.replace("-----BEGIN CERTIFICATE-----", "-----BEGIN CERTIFICATE-----\n");
+     }
+     if( aikCertificate.indexOf("\n-----END CERTIFICATE-----") < 0 && aikCertificate.indexOf("-----END CERTIFICATE-----") >= 0 ) {
+     log.debug( "adding newlines to certificate END tag");            
+     aikCertificate = aikCertificate.replace("-----END CERTIFICATE-----", "\n-----END CERTIFICATE-----");
+     }
 
-        saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
-    }*/
-
+     saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
+     }*/
     private String getCertFileName(String sessionId) {
         return "aikcert_" + sessionId + ".cer";
     }
 
-    private void saveFile(String fileName, byte[] contents) throws IOException  {
+    private File saveFile(String fileName, byte[] contents) throws IOException {
+        File file = null;
         FileOutputStream fileOutputStream = null;
 
         try {
             assert aikverifyhome != null;
-            log.debug( String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
-            fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator +fileName);
+            log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
+            file = new File(aikverifyhomeData + File.separator + fileName);
+            fileOutputStream = new FileOutputStream(file);
             assert fileOutputStream != null;
             assert contents != null;
             fileOutputStream.write(contents);
             fileOutputStream.flush();
-        }
-        catch(FileNotFoundException e) {
-            log.warn( String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
+        } catch (FileNotFoundException e) {
+            log.warn(String.format("cannot save to file %s in [%s]: %s", fileName, aikverifyhomeData, e.getMessage()));
             throw e;
         } finally {
             if (fileOutputStream != null) {
@@ -359,156 +394,157 @@ public class CitrixClient {
                 }
             }
         }
-
-
+        return file;
     }
 
-    private void saveQuote(String quote, String sessionId) throws IOException  {
+    private File saveQuote(String quote, String sessionId) throws IOException {
 //          byte[] quoteBytes = new BASE64Decoder().decodeBuffer(quote);
+        File q;
         byte[] quoteBytes = Base64.decodeBase64(quote);
-          saveFile(getQuoteFileName(sessionId), quoteBytes);
+        q = saveFile(getQuoteFileName(sessionId), quoteBytes);
+        return q;
     }
 
-    private void saveNonce(String nonce, String sessionId) throws IOException  {
+    private File saveNonce(String nonce, String sessionId) throws IOException {
 //          byte[] nonceBytes = new BASE64Decoder().decodeBuffer(nonce);
+        File n;
         byte[] nonceBytes = Base64.decodeBase64(nonce);
-          saveFile(getNonceFileName(sessionId), nonceBytes);
+        n = saveFile(getNonceFileName(sessionId), nonceBytes);
+        return n;
     }
 
     // Commenting the below function since it is not being used and klocwork is throwing a warning
     /*private void createRSAKeyFile(String sessionId)  {
         
-        String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
-        log.debug( "RSA Key Command " + command);
-        CommandUtil.runCommand(command, false, "CreateRsaKey" );
-        //log.log(Level.INFO, "Result - {0} ", result);
-    } */
+     String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
+     log.debug( "RSA Key Command " + command);
+     CommandUtil.runCommand(command, false, "CreateRsaKey" );
+     //log.log(Level.INFO, "Result - {0} ", result);
+     } */
 
     /*private String getRSAPubkeyFileName(String sessionId) {
-        return "rsapubkey_" + sessionId + ".key";
-    }*/ 
+     return "rsapubkey_" + sessionId + ".key";
+     }*/
+    private HashMap<String, Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
+        HashMap<String, Pcr> pcrMp = new HashMap<String, Pcr>();
+        log.debug("verifyQuoteAndGetPcr for session " + sessionId);
+        String command = String.format("%s -c %s %s %s", aikverifyCmd, aikverifyhomeData + File.separator + getNonceFileName(sessionId),
+                aikverifyhomeData + File.separator + getCertFileName(sessionId),
+                aikverifyhomeData + File.separator + getQuoteFileName(sessionId));
 
-    private HashMap<String,Pcr> verifyQuoteAndGetPcr(String sessionId, String pcrList) {
-        HashMap<String,Pcr> pcrMp = new HashMap<String,Pcr>();
-        log.debug( "verifyQuoteAndGetPcr for session " + sessionId);
-        String command = String.format("%s -c %s %s %s",aikverifyCmd, aikverifyhomeData + File.separator+getNonceFileName( sessionId),
-                aikverifyhomeData + File.separator+getCertFileName(sessionId),
-                aikverifyhomeData + File.separator+getQuoteFileName(sessionId)); 
-        
-        log.debug( "Command: " + command);
-        List<String> result = CommandUtil.runCommand(command,true,"VerifyQuote");
-        
+        log.debug("Command: " + command);
+        List<String> result = CommandUtil.runCommand(command, true, "VerifyQuote");
+
         // Sample output from command:
         //  1 3a3f780f11a4b49969fcaa80cd6e3957c33b2275
         //  17 bfc3ffd7940e9281a3ebfdfa4e0412869a3f55d8
         //log.log(Level.INFO, "Result - {0} ", result); // need to untaint this first
-        
+
         // String pcrList = "0,1,2,3,17,18,19";
         List<String> pcrs = Arrays.asList(pcrList.split(","));
         //for(int i = 0; i < 25; i++) {
         //     if(pcrs.contains(String.valueOf(i)))
         //         System.out.println(i);
         //}
-        for(String pcrString: result){
+        for (String pcrString : result) {
             String[] parts = pcrString.trim().split(" ");
-            if( parts.length == 2 ) {
+            if (parts.length == 2) {
                 String pcrNumber = parts[0].trim().replaceAll(pcrNumberUntaint, "").replaceAll("\n", "");
                 String pcrValue = parts[1].trim().replaceAll(pcrValueUntaint, "").replaceAll("\n", "");
                 boolean validPcrNumber = pcrNumberPattern.matcher(pcrNumber).matches();
                 boolean validPcrValue = pcrValuePattern.matcher(pcrValue).matches();
-                if( validPcrNumber && validPcrValue ) {
-                	log.debug("Result PCR "+pcrNumber+": "+pcrValue);
-                        if(pcrs.contains(pcrNumber)) 
-                            pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
-                                    //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
-                }            	
-            }
-            else {
-            	log.debug( "Result PCR invalid");
+                if (validPcrNumber && validPcrValue) {
+                    log.debug("Result PCR " + pcrNumber + ": " + pcrValue);
+                    if (pcrs.contains(pcrNumber)) {
+                        pcrMp.put(pcrNumber, new Pcr(new PcrIndex(Integer.parseInt(pcrNumber)), new Sha1Digest(pcrValue)));
+                    }
+                    //PcrManifest(Integer.parseInt(pcrNumber),pcrValue));            	
+                }
+            } else {
+                log.info("Result PCR invalid");
             }
             /*
-            if(pcrs.contains(parts[0].trim()))
-            	pcrMp.put(parts[0].trim(), new PcrManifest(Integer.parseInt(parts[0]),parts[1]));
-            */
+             if(pcrs.contains(parts[0].trim()))
+             pcrMp.put(parts[0].trim(), new PcrManifest(Integer.parseInt(parts[0]),parts[1]));
+             */
         }
-        
+
         return pcrMp;
-        
+
     }
-    
-    
-    public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException,  XmlRpcException  {
+
+    public HostInfo getHostInfo() throws NoSuchAlgorithmException, KeyManagementException, MalformedURLException, BadServerResponse, XenAPIException, XmlRpcException {
         //log.info("stdalex-error getHostInfo IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password);
-         HostInfo response = new HostInfo();
-         
-         if( !isConnected()) { connect(); } 
-             
-       log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
-			
-			 
-      // Map<String, String> myMap = new HashMap<String, String>();
-       Set<Host> hostList = Host.getAll(connection);
-       Iterator iter = hostList.iterator();
+        HostInfo response = new HostInfo();
+
+        if (!isConnected()) {
+            connect();
+        }
+
+        log.debug("CitrixClient: connected to server [" + hostIpAddress + "]");
+
+
+        // Map<String, String> myMap = new HashMap<String, String>();
+        Set<Host> hostList = Host.getAll(connection);
+        Iterator iter = hostList.iterator();
         // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
         // to throw an exception if the hasNext is false.
-       Host h = null;
-        if (iter.hasNext()) {       
-            h = (Host)iter.next();
+        Host h = null;
+        if (iter.hasNext()) {
+            h = (Host) iter.next();
         }
-       
-       response.setClientIp(hostIpAddress);
 
-       Map<String, String> map = h.getSoftwareVersion(connection);
-       response.setOsName(map.get("product_brand"));
-       response.setOsVersion(map.get("product_version"));
-       response.setVmmName("xen");
-       response.setVmmVersion(map.get("xen"));
-       
-       map = h.getBiosStrings(connection);
-       response.setBiosOem(map.get("bios-vendor"));
-       response.setBiosVersion(map.get("bios-version"));
-       
-       map = h.getCpuInfo(connection);
-       int stepping = Integer.parseInt(map.get("stepping"));
-       int model = Integer.parseInt(map.get("model"));
-       int family = Integer.parseInt(map.get("family"));
-       // EAX register contents is used for defining CPU ID and as well as family/model/stepping
-       // 0-3 bits : Stepping
-       // 4-7 bits: Model #
-       // 8-11 bits: Family code
-       // 12 & 13: Processor type, which will always be zero
-       // 14 & 15: Reserved
-       // 16 to 19: Extended model
-       // Below is the sample of the data got from the Citrix API
-       // Model: 45, Stepping:7 and Family: 6
-       // Mapping it to the EAX register we would get
-       // 0-3 bits: 7
-       // 4-7 bits: D (Actually 45 would be 2D. So, we would put D in 4-7 bits and 2 in 16-19 bits
-       // 8-11 bits: 6
-       //12-15 bits: 0
-       // 16-19 bits: 2
-       // 20-31 bits: Extended family and reserved, which will be 0
-       // So, the final content would be : 000206D7
-       // On reversing individual bytes, we would get D7 06 02 00
-       String modelInfo = Integer.toHexString(model);
-       String processorInfo = modelInfo.charAt(1) + Integer.toHexString(stepping) + " " + "0" + Integer.toHexString(family) + " " + "0" + modelInfo.charAt(0);
-       processorInfo = processorInfo.trim().toUpperCase();
-       response.setProcessorInfo(processorInfo);
-       java.util.Date date= new java.util.Date();
-       response.setTimeStamp( new Timestamp(date.getTime()).toString());
+        response.setClientIp(hostIpAddress);
+
+        Map<String, String> map = h.getSoftwareVersion(connection);
+        response.setOsName(map.get("product_brand"));
+        response.setOsVersion(map.get("product_version"));
+        response.setVmmName("xen");
+        response.setVmmVersion(map.get("xen"));
+
+        map = h.getBiosStrings(connection);
+        response.setBiosOem(map.get("bios-vendor"));
+        response.setBiosVersion(map.get("bios-version"));
+
+        map = h.getCpuInfo(connection);
+        int stepping = Integer.parseInt(map.get("stepping"));
+        int model = Integer.parseInt(map.get("model"));
+        int family = Integer.parseInt(map.get("family"));
+        // EAX register contents is used for defining CPU ID and as well as family/model/stepping
+        // 0-3 bits : Stepping
+        // 4-7 bits: Model #
+        // 8-11 bits: Family code
+        // 12 & 13: Processor type, which will always be zero
+        // 14 & 15: Reserved
+        // 16 to 19: Extended model
+        // Below is the sample of the data got from the Citrix API
+        // Model: 45, Stepping:7 and Family: 6
+        // Mapping it to the EAX register we would get
+        // 0-3 bits: 7
+        // 4-7 bits: D (Actually 45 would be 2D. So, we would put D in 4-7 bits and 2 in 16-19 bits
+        // 8-11 bits: 6
+        //12-15 bits: 0
+        // 16-19 bits: 2
+        // 20-31 bits: Extended family and reserved, which will be 0
+        // So, the final content would be : 000206D7
+        // On reversing individual bytes, we would get D7 06 02 00
+        String modelInfo = Integer.toHexString(model);
+        String processorInfo = modelInfo.charAt(1) + Integer.toHexString(stepping) + " " + "0" + Integer.toHexString(family) + " " + "0" + modelInfo.charAt(0);
+        processorInfo = processorInfo.trim().toUpperCase();
+        response.setProcessorInfo(processorInfo);
+        java.util.Date date = new java.util.Date();
+        response.setTimeStamp(new Timestamp(date.getTime()).toString());
 //       log.trace("stdalex-error leaving getHostInfo");
-              
-       return response;
+
+        return response;
     }
 
-    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException,  XmlRpcException {
-        String resp = "";
-//        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
-               
-        if( !isConnected()) { connect(); } 
+    public String getSystemUUID() throws NoSuchAlgorithmException, KeyManagementException, XenAPIException, BadServerResponse, XmlRpcException {
+       String resp = "";
+        
+       if( !isConnected()) { connect(); } 
 
-       log.debug( "CitrixClient: connected to server ["+hostIpAddress+"]");
-			
+       log.debug( "CitrixClient getSystemUUID: connected to server ["+hostIpAddress+"]");	
 			 
        Map<String, String> myMap = new HashMap<String, String>();
        Set<Host> hostList = Host.getAll(connection);
@@ -522,22 +558,70 @@ public class CitrixClient {
         
        String aik = h.callPlugin(connection,  "tpm","tpm_get_attestation_identity", myMap);
        
-       int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
-       int endP   = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
+       int startP = aik.indexOf("<xentxt:System_UUID>");
+       int endP   = aik.indexOf("</xentxt:System_UUID>");
        // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
-       String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(),endP);
-       log.debug("aikCert == " + cert);
+       String systemUUID = aik.substring(startP +"<xentxt:System_UUID>".length(),endP);
+       log.debug("systemUUID == " + systemUUID);
       
             
-       keys key = new keys();
-           
-       key.tpmAttKeyPEM = cert;  // This is the actual value for AIK!!!!!
+       
+       resp = systemUUID.toLowerCase();
+       
+        // log.trace("stdalex-error getAIKCert: returning back: " + resp);
+        return resp;
+    }
+    
+    public String getAIKCertificate() throws NoSuchAlgorithmException, KeyManagementException, BadServerResponse, XenAPIException,  XmlRpcException {
+        String resp = "";
+//        log.info("stdalex-error getAIKCert IP:" + hostIpAddress + " port:" + port + " user: " + userName + " pw:" + password); // removed to prevent leaking secrets
 
-       
-       //resp = new String( Base64.decodeBase64(key.tpmAttKeyPEM));
-       resp = key.tpmAttKeyPEM;//new String(key.tpmAttKeyPEM);
-       
+        //log.debug("CitrixClient: AIKCert: " + AIKCert);
+        long startTime = System.currentTimeMillis();
+        
+        if (AIKCert != null) {
+            log.debug("CitrixClient: AIKCert already generated: " + AIKCert);
+            return AIKCert;
+        }
+        else {
+            if (!isConnected()) {
+                connect();
+            }
+            log.debug("CitrixClient: generating AIKCert");
+
+
+            Map<String, String> myMap = new HashMap<String, String>();
+            Set<Host> hostList = Host.getAll(connection);
+            Iterator iter = hostList.iterator();
+            // hasNext() will always be valid otherwise we will get an exception from the getAll method. So, we not need
+            // to throw an exception if the hasNext is false.
+            Host h = null;
+            if (iter.hasNext()) {
+                h = (Host) iter.next();
+            }
+            
+            log.debug("TIMETAKEN: get host list: {}", System.currentTimeMillis()-startTime);
+            startTime = System.currentTimeMillis();
+
+            String aik = h.callPlugin(connection, "tpm", "tpm_get_attestation_identity", myMap);
+            log.debug("TIMETAKEN: citrix api: {}", System.currentTimeMillis()-startTime);
+
+            int startP = aik.indexOf("<xentxt:TPM_Attestation_KEY_PEM>");
+            int endP = aik.indexOf("</xentxt:TPM_Attestation_KEY_PEM>");
+            // 32 is the size of the opening tag  <xentxt:TPM_Attestation_KEY_PEM>
+            String cert = aik.substring(startP + "<xentxt:TPM_Attestation_KEY_PEM>".length(), endP);
+            log.debug("aikCert == " + cert);
+
+            keys key = new keys();
+
+            key.tpmAttKeyPEM = cert;  // This is the actual value for AIK!!!!!
+
+            //resp = new String( Base64.decodeBase64(key.tpmAttKeyPEM));
+            resp = key.tpmAttKeyPEM;//new String(key.tpmAttKeyPEM);
+
 //       log.trace("stdalex-error getAIKCert: returning back: " + resp);
-       return resp;
+            AIKCert = resp;
+            return AIKCert;
+        }
     }
 }

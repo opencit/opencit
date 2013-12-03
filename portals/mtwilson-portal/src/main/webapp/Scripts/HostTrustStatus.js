@@ -516,19 +516,31 @@ function fnUpdateTrustForHost(element) {
 }
 
 function updateTrustStatusSuccess(response,element,host) {
+        
 	$(element).attr('value','Refresh');
 	var row = $(element).parent().parent();
 	if (response.result) {
 		row.find('td:eq(5)').html('<img border="0" src="'+response.hostVo.biosStatus+'">');
 		row.find('td:eq(6)').html('<img border="0" src="'+response.hostVo.vmmStatus+'">');
 		row.find('td:eq(7)').html('<img border="0" src="'+response.hostVo.overAllStatus+'">');
+                //row.find('td:eq(5)').html('<img border="0" src="'+'response.hostVo.biosStatus'+'">');
+		//row.find('td:eq(6)').html('<img border="0" src="'+'response.hostVo.vmmStatus'+'">');
+		//row.find('td:eq(7)').html('<img border="0" src="'+'response.hostVo.overAllStatus'+'">');
 		row.find('td:eq(8)').html(response.hostVo.updatedOn);
-		if (response.hostVo.errorCode != 0) {
-			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.hostVo.errorMessage+'</textarea>');
-		}else{
+                if(response.hostVo.errorCode == 1){
+                    row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'System is unreachable'+'</textarea>');
+                }
+		else if (response.hostVo.errorCode != 0) {
+			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.hostVo.errorMessage+' ErrorCode = '+response.hostVo.errorCode+'</textarea>');
+                        //row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'ERROR!'+'</textarea>');
+                        
+		}
+                else{
 			row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">Host Trust status updated successfully.</textarea>');
 		}
 	}else {
-		row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.message+'</textarea>');
+		row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+response.message+' False result '+'</textarea>');
+                //row.find('td:eq(12)').html('<textarea class="textAreaBoxClass" cols="20" rows="2" readonly="readonly">'+'False Result'+'</textarea>');
 	}
+      // alert(response.toSource());
 }

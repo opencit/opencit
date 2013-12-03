@@ -86,6 +86,20 @@
             <type>pom</type>
         </dependency>
         -->
+                <dependency>
+                    <groupId>com.intel.mtwilson.services</groupId>
+                    <artifactId>WLMService</artifactId>
+                    <classifier>classes</classifier> 
+                    <version>${project.version}</version>
+                    <type>jar</type>                     
+                </dependency>
+               <!-- <dependency>
+                    <groupId>com.intel.mtwilson.services</groupId>
+                    <artifactId>AttestationService</artifactId>
+                    <classifier>classes</classifier> 
+                    <version>${project.version}</version>
+                    <type>jar</type>                     
+                </dependency>         -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -273,12 +287,6 @@
                 <artifactId>logback-core</artifactId>
                 <version>1.0.9</version>
         </dependency>
-				
-		<dependency>
-			<groupId>com.vmware</groupId>
-			<artifactId>VSphere5.1</artifactId>
-			<version>2.5-774886</version>
-		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>trust-util-jar</artifactId>

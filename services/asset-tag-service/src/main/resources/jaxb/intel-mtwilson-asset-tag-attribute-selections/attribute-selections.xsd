@@ -1,0 +1,34 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           targetNamespace="urn:intel-mtwilson-asset-tag-attribute-selections"
+           xmlns="urn:intel-mtwilson-asset-tag-attribute-selections"
+           elementFormDefault="qualified">
+
+    <xs:element name="selections" type="selectionsType" />
+
+    <xs:complexType name="selectionsType">
+        <xs:sequence>
+            <xs:element name="selection" type="selectionType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="selectionType">
+        <xs:choice minOccurs="1">
+            <xs:sequence>
+                <xs:element name="attribute" type="attributeType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:choice>	 
+        <xs:attribute name="id" type="xs:string"/>
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="notBefore" type="xs:dateTime"/>
+        <xs:attribute name="notAfter" type="xs:dateTime"/>
+    </xs:complexType>
+
+    <xs:complexType name="attributeType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="oid" type="xs:string" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+</xs:schema>

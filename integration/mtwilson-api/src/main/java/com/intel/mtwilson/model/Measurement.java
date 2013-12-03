@@ -7,6 +7,7 @@ package com.intel.mtwilson.model;
 import com.intel.mtwilson.validation.ObjectModel;
 import java.util.HashMap;
 import java.util.Map;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 
 /**
  *
@@ -69,7 +70,8 @@ public class Measurement extends ObjectModel {
     @Override
     protected void validate() {
         if( digest == null ) { fault("SHA1 Digest is null"); }
-        else if (!digest.isValid()) { fault(digest, "Invalid measurement value"); }
+        //else if (!digest.isValid()) { fault(digest, "Invalid measurement value"); }
+        else if (!Sha1Digest.isValid(digest.toByteArray())) { fault("Invalid measurement value"); }
         if( label == null ) { fault("Measurement label is null"); }
     }
     

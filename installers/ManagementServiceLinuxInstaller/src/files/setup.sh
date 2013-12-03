@@ -21,7 +21,8 @@ package_env_filename=${package_name}.env
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f version ]; then . version; else echo_warning "Missing file: version"; fi
-
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
 
 # if there's already a previous version installed, uninstall it
 msctl=`which msctl 2>/dev/null`
@@ -59,6 +60,11 @@ fi
 # Create a random password and update the property file of the management service
 mypassword16=`generate_password 16`
 update_property_in_file mtwilson.api.key.password "${package_config_filename}" "$mypassword16"
+export API_KEY_PASS="$mypassword16"
+username="$API_KEY_ALIAS"   #`read_property_from_file mtwilson.api.key.alias "${package_config_filename}"`
+mtwilson=`which mtwilson 2>/dev/null`
+#redirect the output to dev null since this will fail the first time if mtwilson doesn't already exist
+$mtwilson erase-users --user="$username" > /dev/null 2>&1
 
 # SCRIPT EXECUTION
 #if using_mysql; then

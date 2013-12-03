@@ -47,7 +47,7 @@ import java.util.zip.CRC32;
  * <p>Registration can be performed by running the LPSprovisioner class.</p>
  * 
  * @author schawki
- *
+ * @deprecated Bug #947 this class isn't being used
  */
 public class LPSliveCdPrep {
 	/**

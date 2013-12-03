@@ -98,8 +98,12 @@ public class HostAgentFactory {
 //            System.out.println("host cs = " + host.getAddOnConnectionInfo());
             String connectionString = getConnectionString(host);
             //System.out.println("stdalex getHostAgent cs =" + connectionString);
+            log.debug("Retrieving TLS policy...");
             TlsPolicy tlsPolicy = getTlsPolicy(host);
-            return getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
+            log.debug("Creating Host Agent for host: " + host.getName());
+            HostAgent ha = getHostAgent(hostAddress, connectionString, tlsPolicy); // XXX TODO need to have a way for the agent using trust-first-certificate to save a new certificate to the TblHosts record... right now it is lost.
+            log.debug("Host Agent created.");
+            return ha;
         }
         catch(Exception e) {
             throw new IllegalArgumentException("Cannot create Host Agent for "+host.getName()+": "+e.toString(), e);

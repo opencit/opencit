@@ -53,7 +53,7 @@ public class TestConnectionPool {
 
     @Test
     public void testEclipseLinkWithCommonsPool() throws ClassNotFoundException, IOException {
-        log.debug("Loading database driver with commons pool");
+        log.info("Loading database driver with commons pool");
         Properties jpaProperties = new Properties(); //getJpaProperties();
 //        log.debug("Loading database driver {} for persistence unit {}", new String[] { jpaProperties.getProperty("javax.persistence.jdbc.driver"), persistenceUnitName });
 //        Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));

@@ -1,0 +1,194 @@
+#!/bin/bash
+
+TITLE="Asset tag provisioning Agent"
+
+certSha1=/tmp/certSha1
+server=""
+cert=""
+username=""
+password=""
+config="/tmp/config"
+CERT_FILE_LOCATION=/tmp/cacert
+XML_FILE_LOCATION=/tmp/xml
+values=`cat /proc/cmdline`
+OIFS="$IFS"
+IFS=' '
+read -a valueArray <<< "${values}"
+IFS="$OIFS"
+cmdFile=/tmp/command
+#read the variables from /proc/cmdline
+#to support automation ussuage with the script
+#to pass data it uses this form
+#atag_KEY=VALUE
+#where key is the variable name
+#and value is the value you want want KEY set to
+#current values are
+#cert
+#username
+#password
+#config
+for i in "${valueArray[@]}"
+do
+  prefix=${i:0:5}
+  if [ "$prefix" == "atag_" ]; then
+   keyPair=`echo $i| awk -F'=' '{print $1}'`
+   key=`echo $keyPair| awk -F'_' '{print $2}'`
+   #echo "key = $key"
+   value=`echo $i| awk -F'=' '{print $2}'`
+   #echo "value = $value"
+   eval $key=$value
+  fi
+done
+
+#now allow config file to overwrite
+. $config
+
+#download the certificate of the asset tag server 
+#so we know who we are connecting to
+if [ -n "$cert" ]; then
+    wget --no-proxy $cert -O $CERT_FILE_LOCATION
+fi
+if [ -n "$xml" ]; then 
+    wget --no-proxy $xml -O $XML_FILE_LOCATION
+fi
+
+WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username"
+UUID=`dmidecode |grep UUID | awk '{print $2}'`
+INDEX=0x40000010
+tagChoice=""
+tagFile=""
+tagServer=""
+certAuthority=""
+certFile=""
+selectionFile=/tmp/selection
+certFile=/tmp/cert
+certInfoFile=/tmp/certInfo
+certFileValues=/tmp/certValues
+
+rm $selectionFile
+rm $certFile
+rm $certInfoFile
+rm $certFileValues
+rm $certSha1
+
+functionReturn=0
+isUsingXml=0
+
+function createIndex4() {
+ functionReturn=0
+ output=`tpm_nvinfo -i $INDEX`
+ if [ -z "$output" ]; then
+  tpm_nvdefine -i $INDEX -s 0x14 --permissions="OWNERWRITE"
+ fi
+}
+
+function getLocalTag() {
+ functionReturn=0
+ tagFile=$(dialog --stdout --backtitle "$TITLE" --stdout --title "Please choose a file" --fselect ~ 14 48)
+ if [ $? -eq 1 ]; then 
+  functionReturn=1
+  return
+ fi
+ isUsingXml=1
+}
+
+function getRemoteTag() {
+ functionReturn=0
+ tagServer=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to download Asset tag Selection:" 8 50)
+ if [ $? -eq 1 ]; then 
+  functionReturn=1
+  return
+ fi
+ #wget "$URL" 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --gauge "Download Test" 10 100
+ echo "$WGET $tagServer -O $selectionFile" >> $cmdFile
+ $WGET "$tagServer" -O $selectionFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading the Asset Tag selection from $tagServer" 10 60 0
+ clear
+ if [ ! -s $selectionFile ]; then
+  dialog --stdout --backtitle "$TITLE" --msgbox 'Unable to download tag selection!' 6 20
+  exit -1;
+ fi
+ dialog --stdout --backtitle "$TITLE" --msgbox 'Tag selection downloaded successfully!' 6 20
+}
+
+function getTagOption() {
+ functionReturn=0
+ tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
+ if [ $? -eq 1 ]; then
+      exit 0;
+ fi
+}
+
+function provisionCert() {
+ functionReturn=0
+ server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
+ selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
+ if [ $isUsingXml == 0 ]; then
+   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" >> $cmdFile
+   $WGET --header="Content-Type: application/json" --post-data="[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}]" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
+   clear
+ else
+	#here we need to read the xml from the file, escape the " with \ then build our string to send via wget
+	xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
+	json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
+	echo "$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile" >> $cmdFile
+	$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
+ fi
+ certUUID=`cat $certInfoFile | jshon -e 0 -e certificate | sed -e 's/\"//g'`
+ echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" >> $cmdFile
+ $WGET  --header="Accept: application/xml" $server/certificates/$certUUID -O $certFile  2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading Asset Tag certificate from $server" 10 60 0
+ clear
+ acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
+ if [ $? -eq 0 ]; then
+   xml2 < $certFile > $certFileValues
+   dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
+ fi
+ writeCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to deploy downloaded certificate to host TPM?" 10 60)
+ if [ $? -eq 0 ]; then
+  sha1=`xml2 < $certFile  | grep sha1`
+  sha1=`echo "${sha1#*sha1=}"`
+  createIndex4
+  echo "$sha1" | hex2bin > $certSha1
+  echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite" >> $cmdFile
+  tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite  2>&1
+  result=$?
+  sleep 5;
+  if [ $result -eq 0 ]; then 
+   dialog --backtitle "$TITLE" --msgbox "Certificate deployed.\nThank you for using the Asset Tag Provisioning Tool" 10 34
+  else
+   dialog --backtitle "$TITLE" --msgbox "Certificate not deployed.\nPlease check /tmp/certWrite for error messages" 10 34
+  fi
+ fi
+}
+
+function _main() {
+ getTagOption
+ mybreak=0
+ while [ $mybreak -ne 1 ]; do
+  case "$tagChoice" in 
+   1)
+    getRemoteTag
+    if [ $functionReturn -eq 0 ]; then
+     mybreak=1
+    else
+      tagChoice=3
+    fi
+    ;;
+   2)
+    getLocalTag
+    if [ $functionReturn -eq 0 ]; then
+     mybreak=1
+    else
+      tagChoice=3
+    fi
+    ;;
+   *)
+    getTagOption
+    ;;
+  esac
+ done
+
+ provisionCert
+
+}
+
+_main

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
@@ -118,15 +119,32 @@ public class VmwareHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
         // third, if the list included pcr 19, at this point the pcr matches constant was rmoved and
         // we will replace it with module/eventlog checks. 
         if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
-            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host);
+            //Set<Rule> pcrEventLogRules = reader.loadPcrEventLogIncludesRuleForVmm(vmm, host  /*  NEW FLAG to exclude dynamic and host specific modules , default false here  and true in the new function getComparisonRulesForVmm */);
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogEqualExcludingVmm(vmm, host, false  /*  NEW FLAG to exclude dynamic and host specific modules , default false here  and true in the new function getComparisonRulesForVmm */);            rules.addAll(pcrEventLogRules);
             rules.addAll(pcrEventLogRules);
         }
         return rules;
     }
-
     @Override
     public Set<Rule> loadTrustRulesForLocation(String location, TblHosts host) {
         return reader.loadPcrMatchesConstantRulesForLocation(location, host);
+    }
+
+    @Override
+    public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
+        HashSet<Rule> rules = new HashSet<Rule>();
+        // first, load the list of pcr's marked for this host's vmm mle 
+        Set<Rule> pcrConstantRules = reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+        rules.addAll(pcrConstantRules);
+        if( host.getVmmMleId().getRequiredManifestList().contains("19") ) {
+            Set<Rule> pcrEventLogRules = reader.loadPcrEventLogEqualExcludingVmm(vmm, host, true);
+            rules.addAll(pcrEventLogRules);
+        }
+        return rules;
+    }
+    @Override
+    public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
+        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
     }
     
 }

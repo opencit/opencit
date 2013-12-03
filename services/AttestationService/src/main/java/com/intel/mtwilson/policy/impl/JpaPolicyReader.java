@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
@@ -19,10 +20,12 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
+import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;
+import com.intel.mtwilson.policy.rule.PcrEventLogEqualsExcluding;
 import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
 import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
 import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
@@ -109,7 +112,7 @@ public class JpaPolicyReader {
             return rule;
         }
         catch(IllegalArgumentException e) {
-            log.warn("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
+            log.error("Invalid PCR {} value {}, skipped", pcrInfo.getName(), pcrInfo.getValue());
             return null;
         }
     }
@@ -158,23 +161,41 @@ public class JpaPolicyReader {
         throw new UnsupportedOperationException("TODO: add support for checking pcr 22");
     }
 
+    public Set<Rule> loadPcrMatchesConstantRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts tblHosts) {
+        HashSet<Rule> rules = new HashSet<Rule>();
+        log.debug("Adding the asset tag rule for host {} with asset tag ID {}", tblHosts.getName(), atagCert.getId());
+        log.debug("Creating PcrMatchesConstantRule from PCR 22 value {}", Sha1Digest.valueOf(atagCert.getPCREvent()).toString());
+        // Since we are storing the actual expected value in PCREvent field, we do not need to do a SHA1 of it again.
+        // Sha1Digest pcrValue = new Sha1Digest(atagCert.getPCREvent());
+        //PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22, Sha1Digest.valueOf(atagCert.getPCREvent())));
+        PcrMatchesConstant rule = new PcrMatchesConstant(new Pcr(PcrIndex.PCR22.toInteger(), Sha1Digest.valueOf(atagCert.getPCREvent()).toString()));
+        rule.setMarkers(TrustMarker.ASSET_TAG.name());
+        rules.add(rule);
+        return rules;
+    }
+
     public Measurement createMeasurementFromTblModuleManifest(TblModuleManifest moduleInfo, TblHosts host) {
         HashMap<String,String> info = new HashMap<String,String>();
         // info.put("EventType", manifest.getEventType()); // XXX  we don't have an "EventType" field defined in the "mw_module_manifest" table ... should add it 
         info.put("EventName", moduleInfo.getEventID().getName());
         info.put("ComponentName", moduleInfo.getComponentName());
+        info.put("HostSpecificModule", moduleInfo.getUseHostSpecificDigestValue().toString());
 
-        if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue() ) {
-            TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
-            if( hostSpecificModule == null ) {
-                log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
-                Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
-                return m;
-            }
-            else {
-                Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
-                return m;
-            }
+        // Since we can call this function even without registering the host, the hostID will not be present. So, we need to skip adding this host specific module
+        if( moduleInfo.getUseHostSpecificDigestValue() != null && moduleInfo.getUseHostSpecificDigestValue().booleanValue()) {
+            if (host.getId() != null && host.getId() != 0) {
+                TblHostSpecificManifest hostSpecificModule = pcrHostSpecificManifestJpaController.findByModuleAndHostID(host.getId(), moduleInfo.getId()); // returns null if not found;  XXX TODO this API only allows ONE host specific module per host... that only happens to be true today for vmware but soon we will need a more normalized database schema for this
+                if( hostSpecificModule == null ) {
+                    log.error(String.format("Missing host-specific module %s for host %s", moduleInfo.getComponentName(), host.getName()));
+                    Measurement m = new Measurement(Sha1Digest.ZERO, "Missing host-specific module: "+moduleInfo.getComponentName(), info);
+                    return m;
+                }
+                else {
+                    Measurement m = new Measurement(new Sha1Digest(hostSpecificModule.getDigestValue()), moduleInfo.getComponentName(), info);
+                    return m;
+                }
+            } else
+                return null;
         }
         else {
             // XXX making assumptions about the nature of the module... due to what we store in the database when adding whitelist and host.  
@@ -192,7 +213,9 @@ public class JpaPolicyReader {
         PcrIndex pcrIndex = new PcrIndex(Integer.valueOf(moduleInfo.getExtendedToPCR()));
         log.debug("... MODULE for PCR {}", pcrIndex.toString());
         Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
-        PcrEventLogIncludes rule = new PcrEventLogIncludes(pcrIndex, m);
+        PcrEventLogIncludes rule = null;
+        if (m != null)
+            rule = new PcrEventLogIncludes(pcrIndex, m);
         rule.setMarkers(markers);
         return rule;
     }
@@ -212,7 +235,8 @@ public class JpaPolicyReader {
             }
             
             Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
-            measurements.get(pcrIndex).add(m);
+            if (m != null)
+                measurements.get(pcrIndex).add(m);
         }
         // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
         for(PcrIndex pcrIndex : measurements.keySet()) {
@@ -246,5 +270,51 @@ public class JpaPolicyReader {
         return createPcrEventLogIncludesRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, TrustMarker.VMM.name());
     }
     
-    
+    public Set<Rule> loadPcrEventLogEqualExcludingVmm(Vmm vmm, TblHosts tblHosts, boolean verifyMLE) {
+        TblMle vmmMle = mleJpaController.findVmmMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion());
+        Collection<TblModuleManifest> pcrModuleInfoList = vmmMle.getTblModuleManifestCollection();       // XXX event logs shouldn't be associated directly to a vmm, they should be associated to a specific pcr digest ...  
+        return createPcrEventLogEqualExcludingRuleFromTblModuleManifest(pcrModuleInfoList, tblHosts, verifyMLE, TrustMarker.VMM.name());
+    }
+
+    // creates a rule for checking that ONE OR MORE modules are included in a pcr event log
+    public Set<Rule> createPcrEventLogEqualExcludingRuleFromTblModuleManifest(Collection<TblModuleManifest> pcrModuleInfoList, TblHosts host, boolean verifyMLE, String... markers) {
+        HashSet<Rule> list = new HashSet<Rule>();
+        // XXX unfortunately because of our database design, we don't know in advance which  pcr's these modules belong to.
+        // so we need to collect the set of measurements for each pcr, and then for every pcr that has modules/events, we need to add the rules (second section below)
+        HashMap<PcrIndex,ArrayList<Measurement>> measurements = new HashMap<PcrIndex,ArrayList<Measurement>>();
+        for(TblModuleManifest moduleInfo : pcrModuleInfoList) {
+            PcrIndex pcrIndex = PcrIndex.valueOf(Integer.valueOf(moduleInfo.getExtendedToPCR()));
+            
+            if( !measurements.containsKey(pcrIndex) ) {
+                measurements.put(pcrIndex, new ArrayList<Measurement>());
+            }
+            
+            Measurement m = createMeasurementFromTblModuleManifest(moduleInfo, host);
+            if (m != null)
+                measurements.get(pcrIndex).add(m);
+        }
+        // for every pcr that has events, we add a "pcr event log includes..." rule for those events, and also an integrity rule.
+        for(PcrIndex pcrIndex : measurements.keySet()) {
+            // XXX TODO for first phase of this implementation in mt wilson 1.2,  we only support pcr 19 ...  in next phase, need to rewrite the way data is stored and also the UI so we can remove this "pcr 19" check and just do it generally for any pcr with modules
+            if( pcrIndex.toInteger() == 19 ) {
+                // event log rule
+                log.debug("Adding PcrEventLogEqualsExcluding rule for PCR {} with {} events", pcrIndex.toString(), measurements.get(pcrIndex).size());
+                
+                PcrEventLogEqualsExcluding eventLogEqualsExcludingRule = new PcrEventLogEqualsExcluding(new PcrEventLog(pcrIndex, measurements.get(pcrIndex)));
+                if (verifyMLE)
+                    eventLogEqualsExcludingRule.setExcludeHostSpecificModules(verifyMLE);
+                eventLogEqualsExcludingRule.setMarkers(markers);
+                list.add(eventLogEqualsExcludingRule);
+                // We need to add the integrity only only for attestation and not for verification of MLE
+                if (!verifyMLE) {
+                    log.debug("Adding PcrEventLogIntegrity rule for PCR {}", pcrIndex.toString());
+                    PcrEventLogIntegrity integrityRule = new PcrEventLogIntegrity(pcrIndex);
+                    integrityRule.setMarkers(markers);
+                    list.add(integrityRule); // if we're going to look for things in the host's event log, it needs to have integrity            
+                }
+            }
+        }
+        
+        return list;
+    }    
 }

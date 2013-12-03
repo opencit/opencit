@@ -68,7 +68,7 @@ public abstract class BaseServer {
 
 			}
 			
-			log.info("Received data from socket: {}", new String(buf));
+			log.debug("Received data from socket: {}", new String(buf));
 
 			
 			TrustAgent agent = new TrustAgent();
@@ -81,7 +81,7 @@ public abstract class BaseServer {
 			
 		} catch (Throwable e) { // Make sure all the exceptions are caught here
 								// and return and response to client
-			log.error("Exception reading from/writing to socket, e = {0}", e);
+			log.error("Exception reading from/writing to socket", e);
 			writeResponse(sockOutput, CommandUtil.generateErrorResponse(ErrorCode.FATAL_ERROR));
 			
 		} 

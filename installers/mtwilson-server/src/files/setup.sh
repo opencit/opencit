@@ -3,13 +3,68 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
+currentUser=`whoami`
+if [ ! $currentUser == "root" ]; then
+ echo_failure "You must be root user to install Mt Wilson."
+ exit -1
+fi
+
+#define defaults so that they can be overwriten 
+#if the value appears in mtwilson.env
+export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
+export LOG_ROTATION_PERIOD=daily
+export LOG_COMPRESS=compress
+export LOG_DELAYCOMPRESS=delaycompress
+export LOG_COPYTRUNCATE=copytruncate
+export LOG_SIZE=100M
+export LOG_OLD=7
+export MTWILSON_OWNER=$currentUser
+export AUTO_UPDATE_ON_UNTRUST=false
+
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
-
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
+
+mtw_props_path="/etc/intel/cloudsecurity/mtwilson.properties"
+as_props_path="/etc/intel/cloudsecurity/attestation-service.properties"
+#pca_props_path="/etc/intel/cloudsecurity/PrivacyCA.properties"
+ms_props_path="/etc/intel/cloudsecurity/management-service.properties"
+mp_props_path="/etc/intel/cloudsecurity/mtwilson-portal.properties"
+hp_props_path="/etc/intel/cloudsecurity/clientfiles/hisprovisioner.properties"
+ta_props_path="/etc/intel/cloudsecurity/trustagent.properties"
+file_paths=("$mtw_props_path" "$as_props_path" "$ms_props_path" "$mp_props_path" "$hp_props_path" "$ta_props_path")
+
+# disable upgrade if properties files are encrypted from a previous installation
+for file in ${file_paths[*]}; do
+  if [ -f $file ]; then
+    if file_encrypted $file; then
+      echo_failure "Please decrypt property files before proceeding with mtwilson installation or upgrade."
+      exit -1
+    fi
+  fi
+done
+
+load_conf
+load_defaults
+
+if [[ $MTWILSON_OWNER == "glassfish" || $MTWILSON_OWNER == "tomcat" ]]; then
+ echo_warning "Program files are writable by the web service container, this is a possible security issue"
+else
+ ret=false
+ getent passwd $MTWILSON_OWNER >/dev/null && ret=true
+ if $ret; then
+  echo "Mt Wilson owner account already created, moving on"
+ else
+  echo "Creating Mt Wilson owner account [$MTWILSON_OWNER]"
+  prompt_with_default_password MTWILSON_OWNER_PASSWORD "Password:" ${MTWILSON_OWNER_PASSWORD}
+  pass=$(perl -e 'print crypt($ARGV[0], "password")' $MTWILSON_OWNER_PASSWORD)
+  useradd -m -p $pass $MTWILSON_OWNER
+  echo "Account Created!"
+ fi
+fi
 
 if [ -z "$INSTALL_PKGS" ]; then
               #opt_postgres|opt_mysql opt_java opt_tomcat|opt_glassfish opt_privacyca [opt_SERVICES| opt_attservice opt_mangservice opt_wlmservice] [opt_PORTALS | opt_mangportal opt_trustportal opt_wlmportal opt_mtwportal ] opt_monit
@@ -78,8 +133,8 @@ elif [ ! -z "$opt_mysql" ]; then
   DATABASE_VENDOR=mysql
 fi
 
-export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
-export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-glassfish}
+#export DATABASE_VENDOR=${DATABASE_VENDOR:-postgres}
+#export WEBSERVER_VENDOR=${WEBSERVER_VENDOR:-tomcat}
 
 if using_glassfish; then
   export DEFAULT_API_PORT=$DEFAULT_GLASSFISH_API_PORT; 
@@ -104,7 +159,6 @@ if using_mysql ; then
     exit 1
   fi
 fi
-
 
 if using_mysql; then
     export mysql_required_version=${MYSQL_REQUIRED_VERSION:-5.0}
@@ -142,18 +196,18 @@ cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
 if [ -f /etc/intel/cloudsecurity/mtwilson.properties ]; then
-  default_mtwilson_tls_policy_name=`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
+  default_mtwilson_tls_policy_name="$MTW_DEFAULT_TLS_POLICY_NAME"   #`read_property_from_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties`
   if [ -z "$default_mtwilson_tls_policy_name" ]; then
-    update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
+    #update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
   fi
-  mtwilson_tls_keystore_password=`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
-  if [ -z "$mtwilson_tls_keystore_password" ]; then
+  mtwilson_tls_keystore_password="$MTW_TLS_KEYSTORE_PASS"   #`read_property_from_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties`
+  #if [ -z "$mtwilson_tls_keystore_password" ]; then
     # if the configuration file already exists, it means we are doing an upgrade and we need to maintain backwards compatibility with the previous default password "password"
-    update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
+    #update_property_in_file "mtwilson.tls.keystore.password" /etc/intel/cloudsecurity/mtwilson.properties "password"
     # NOTE: do not change this property once it exists!  it would lock out all hosts that are already added and prevent mt wilson from getting trust status
     # in a future release we will have a UI mechanism to manage this.
-  fi
+  #fi
 else
     update_property_in_file "mtwilson.default.tls.policy.name" /etc/intel/cloudsecurity/mtwilson.properties "TRUST_FIRST_CERTIFICATE"
     echo_warning "Default per-host TLS policy is to trust the first certificate. You can change it in /etc/intel/cloudsecurity/mtwilson.properties"
@@ -164,9 +218,20 @@ else
     # in a future release we will have a UI mechanism to manage this.
 fi
 
+update_property_in_file "mtwilson.as.autoUpdateHost" /etc/intel/cloudsecurity/mtwilson.properties "$AUTO_UPDATE_ON_UNTRUST"
+
+#Save variables to properties file
+if using_mysql; then   
+  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+elif using_postgres; then
+  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+fi
+
 # copy default logging settings to /etc
 chmod 700 logback.xml
 cp logback.xml /etc/intel/cloudsecurity
+chmod 700 logback-stderr.xml
+cp logback-stderr.xml /etc/intel/cloudsecurity
 
 
 
@@ -178,6 +243,7 @@ find_installer() {
 
 java_installer=`find_installer java`
 monit_installer=`find_installer monit`
+logrotate_installer=`find_installer logrotate`
 mtwilson_util=`find_installer MtWilsonLinuxUtil`
 privacyca_service=`find_installer PrivacyCAService`
 management_service=`find_installer ManagementService`
@@ -395,6 +461,9 @@ elif using_postgres; then
  
 fi
 
+
+
+
 # Attestation service auto-configuration
 export PRIVACYCA_SERVER=$MTWILSON_SERVER
 
@@ -409,6 +478,25 @@ fi
 
 java_detect
 
+# Post java install setup and configuration
+if [ -f "${JAVA_HOME}/jre/lib/security/java.security" ]; then
+  echo "Replacing java.security file, existing file will be backed up"
+  backup_file "${JAVA_HOME}/jre/lib/security/java.security"
+  cp java.security "${JAVA_HOME}/jre/lib/security/java.security"
+fi
+
+if [ -f "/etc/environment" ] && [ -n "${JAVA_HOME}" ]; then
+  if ! grep "PATH" /etc/environment | grep -q "${JAVA_HOME}/bin"; then
+    sed -i '/PATH/s/\(.*\)\"$/\1/g' /etc/environment
+    sed -i '/PATH/s,$,:'"$JAVA_HOME"'/\bin\",' /etc/environment
+  fi
+  if ! grep -q "JAVA_HOME" /etc/environment; then
+    echo "JAVA_HOME=${JAVA_HOME}" >> /etc/environment
+  fi
+  
+  . /etc/environment
+fi
+
 echo "Installing Mt Wilson Utils..." | tee -a  $INSTALL_LOG_FILE
 ./$mtwilson_util  >> $INSTALL_LOG_FILE
 echo "Mt Wilson Utils installation done..." | tee -a  $INSTALL_LOG_FILE
@@ -419,7 +507,7 @@ fi
 
 if using_glassfish; then
   if [ ! -z "$opt_glassfish" ] && [ -n "$glassfish_installer" ]; then
-    if ! glassfish_detect; then
+    if [ ! glassfish_detect >/dev/null ]; then
       portInUse=`netstat -lnput | grep -E "8080|8181"`
       if [ -n "$portInUse" ]; then 
         #glassfish ports in use. exit install
@@ -427,30 +515,45 @@ if using_glassfish; then
         exit 1
       fi
     fi
-  
-  echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
-  # glassfish install here
-  ./$glassfish_installer  >> $INSTALL_LOG_FILE
-  echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
-  # end glassfish installer
+	
+    echo "Installing Glassfish..." | tee -a  $INSTALL_LOG_FILE
+    # glassfish install here
+    ./$glassfish_installer  >> $INSTALL_LOG_FILE
+    echo "Glassfish installation complete..." | tee -a  $INSTALL_LOG_FILE
+    # end glassfish installer
   else
     echo_warning "Relying on an existing glassfish installation" 
   fi
 
   glassfish_detect
+
+  if [ -e $glassfish_bin ]; then
+    echo "Disabling glassfish log rotation in place of system wide log rotation"
+	$glassfish_bin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0
+  else
+	echo_warning "Unable to locate asadmin, please run the following command on your system to disable glassfish log rotation: "
+	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
+  fi
+
+  if [ -e $glassfish_bin ]; then
+    echo "Increasing glassfish max thread pool size to 200..."
+      $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+  else
+    echo_warning "Unable to locate asadmin, please run the following command on your system to increase HTTP-max-thread-size: "
+    echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
+  fi
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
     mtwilson glassfish-sslcert
-  # glassfish init end
+    # glassfish init end
   else
     echo_warning "Skipping webservice init"
   fi
   # end glassfish setup
 elif using_tomcat; then
   if [ ! -z "$opt_tomcat" ] && [ -n "$tomcat_installer" ]; then
-    
-    if ! tomcat_detect; then
+    if [ ! tomcat_detect >/dev/null ]; then
       portInUse=`netstat -lnput | grep -E "8080|8443"`
       if [ -n "$portInUse" ]; then 
         #tomcat ports in use. exit install
@@ -496,18 +599,6 @@ if [ ! -z "$opt_privacyca" ]; then
   #echo "Restarting Privacy CA..." | tee -a  $INSTALL_LOG_FILE
   #/usr/local/bin/pcactl restart >> $INSTALL_LOG_FILE
   #echo "Privacy CA restarted..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 
@@ -515,54 +606,18 @@ if [ ! -z "opt_attservice" ]; then
   echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
   echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 if [ ! -z "$opt_mangservice" ]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
   ./$management_service
   echo "Management Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 if [ ! -z "$opt_wlmservice" ]; then
   echo "Installing Whitelist Service..." | tee -a  $INSTALL_LOG_FILE
   ./$whitelist_service >> $INSTALL_LOG_FILE
   echo "Whitelist Service installed..." | tee -a  $INSTALL_LOG_FILE
-
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
 fi
 
 #if [ ! -z "$mangportal" ]; then
@@ -587,18 +642,38 @@ if [ ! -z "$opt_mtwportal" ]; then
   echo "Installing Mtw Combined Portal .." | tee -a  $INSTALL_LOG_FILE
   ./$mtw_portal 
   echo "Mtw Combined Portal installed..." | tee -a  $INSTALL_LOG_FILE
+fi
 
-  if using_tomcat; then
-    if [ ! -z "$opt_tomcat" ]; then
-      if tomcat_running; then 
-        echo "Restarting Tomcat ..."
-        tomcat_restart >> $INSTALL_LOG_FILE 2>&1
-      else
-        echo "Starting Tomcat ..."
-        tomcat_start >> $INSTALL_LOG_FILE 2>&1
-      fi
-    fi
-  fi
+if [ ! -z "$opt_logrotate" ]; then
+  echo "Installing Log Rotate .." | tee -a  $INSTALL_LOG_FILE
+  ./$logrotate_installer
+  echo "Log Rotate installed..." | tee -a  $INSTALL_LOG_FILE
+fi
+
+mkdir -p /etc/logrotate.d
+
+if [ ! -a /etc/logrotate.d/mtwilson ]; then
+ echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
+	missingok
+	notifempty
+	rotate $LOG_OLD
+	size $LOG_SIZE
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
+}
+
+/usr/share/apache-tomcat-6.0.29/logs/catalina.out {
+    missingok
+	notifempty
+	rotate $LOG_OLD
+	size $LOG_SIZE
+	$LOG_ROTATION_PERIOD
+	$LOG_COMPRESS
+	$LOG_DELAYCOMPRESS
+	$LOG_COPYTRUNCATE
+}" > /etc/logrotate.d/mtwilson.logrotate
 fi
 
 #TODO-stdale monitrc needs to be customized depending on what is installed
@@ -608,14 +683,198 @@ if [ ! -z "$opt_monit" ] && [ -n "$monit_installer" ]; then
   echo "Monit installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
+mkdir -p /etc/monit/conf.d
+
+# create the monit rc files
+if [ -z "$NO_GLASSFISH_MONIT" ]; then 
+if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
+ echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
+check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
+	group gf_server
+	if does not exist then unmonitor
+# Monitoring the glassfish java service
+	group gf_server
+	check process glassfish matching \"glassfish.jar\"
+	start program = \"/usr/local/bin/mtwilson glassfish-start\"
+	stop program = \"/usr/local/bin/mtwilson glassfish-stop\"
+	depends on gf_installed
+# Glassfish portal
+	check host mtwilson-portal-glassfish with address 127.0.0.1
+	group gf_server
+	start program = \"/usr/local/bin/mtwilson-portal start\"
+	stop program = \"/usr/local/bin/mtwilson-portal stop\"
+	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/mtwilson-portal/home.html\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on gf_installed
+	depends on glassfish
+# Attestation Service
+	check host mtwilson-AS-glassfish with address 127.0.0.1
+	group gf_server
+	start program = \"/usr/local/bin/asctl start\"
+	stop program = \"/usr/local/bin/asctl stop\"
+	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on gf_installed
+	depends on glassfish
+# Management Service
+	check host mtwilson-MS-glassfish with address 127.0.0.1
+	group gf_server
+	start program = \"/usr/local/bin/msctl start\"
+	stop program = \"/usr/local/bin/msctl stop\"
+	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on gf_installed
+	depends on glassfish
+# Whitelist Service
+	check host mtwilson-WLM-glassfish with address 127.0.0.1
+	group gf_server
+	start program = \"/usr/local/bin/wlmctl start\"
+	stop program = \"/usr/local/bin/wlmctl stop\"
+	if failed port 8181 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on gf_installed
+	depends on glassfish" > /etc/monit/conf.d/glassfish.mtwilson
+fi
+fi
+
+if [ -z "$NO_TOMCAT_MONIT" ]; then 
+if [ ! -a /etc/monit/conf.d/tomcat.mtwilson ]; then
+ echo "# Verify tomcat is installed (change path if Tomcat is installed to a different directory)
+check file tc_installed with path \"/usr/share/apache-tomcat-6.0.29/bin/catalina.sh\"
+	group tc_server
+	if does not exist then unmonitor
+#tomcat monitor
+	check host tomcat with address 127.0.0.1
+	group tc_server
+	start program = \"/usr/local/bin/mtwilson tomcat-start\"
+	stop program = \"/usr/local/bin/mtwilson tomcat-stop\"
+	if failed port 8443 TYPE TCP PROTOCOL HTTP
+		and request \"/\" for 3 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on tc_installed
+# tomcat portal
+	check host mtwilson-portal-tomcat with address 127.0.0.1
+	start program = \"/usr/local/bin/mtwilson-portal start\"
+	stop program = \"/usr/local/bin/mtwilson-portal stop\"
+	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/mtwilson-portal/home.html\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on tc_installed
+	depends on tomcat
+# Attestation Service
+	check host mtwilson-AS-tomcat with address 127.0.0.1
+	group tc_server
+	start program = \"/usr/local/bin/asctl start\"
+	stop program = \"/usr/local/bin/asctl stop\"
+	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/AttestationService/resources/asstatus\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on tc_installed
+	depends on tomcat
+# Management Service
+	check host mtwilson-MS-tomcat with address 127.0.0.1
+	group tc_server
+	start program = \"/usr/local/bin/msctl start\"
+	stop program = \"/usr/local/bin/msctl stop\"
+	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/ManagementService/resources/msstatus\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on tc_installed
+	depends on tomcat
+# Whitelist Service
+	check host mtwilson-WLM-tomcat with address 127.0.0.1
+	group tc_server
+	start program = \"/usr/local/bin/wlmctl start\"
+	stop program = \"/usr/local/bin/wlmctl stop\"
+	if failed port 8443 TYPE TCPSSL PROTOCOL HTTP
+		and request \"/WLMService/resources/wlmstatus\" for 1 cycles
+	then restart
+	if 3 restarts within 10 cycles then timeout
+	depends on tc_installed
+	depends on tomcat" > /etc/monit/conf.d/tomcat.mtwilson
+fi
+fi
+
+if [ -z "$NO_POSTGRES_MONIT" ]; then 
+if [ ! -a /etc/monit/conf.d/postgres.mtwilson ]; then 
+      echo "check process postgres matching \"postgresql\"
+   group pg-db
+   start program = \"/usr/sbin/service postgresql start\"
+   stop program = \"/usr/sbin/service postgresql stop\"
+   if failed unixsocket /var/run/postgresql/.s.PGSQL.${POSTGRES_PORTNUM:-5432} protocol pgsql 
+      then restart
+   if failed host 127.0.0.1 port ${POSTGRES_PORTNUM:-5432} protocol pgsql then restart
+   if 5 restarts within 5 cycles then timeout
+	depends on pg_bin
+
+check file pg_bin with path \"/usr/bin/psql\"
+	group pg-db
+	if does not exist then unmonitor" > /etc/monit/conf.d/postgres.mtwilson
+fi
+fi
+
+if [ -z "$NO_MYSQL_MONIT" ]; then 
+if [ ! -a /etc/monit/conf.d/mysql.mtwilson ]; then 
+      echo "check process mysql matching \"mysql\"
+   group mysql_db
+   start program = \"/usr/sbin/service mysql start\"
+   stop program = \"/usr/sbin/service mysql stop\"
+   if failed host 127.0.0.1 port ${MYSQL_PORTNUM:-3306} protocol mysql then restart
+   if 5 restarts within 5 cycles then timeout
+   depends on mysql_bin
+   depends on mysql_rc
+
+   check file mysql_bin with path /usr/sbin/mysqld
+   group mysql_db
+   if does not exist then unmonitor
+
+   check file mysql_rc with path /etc/init.d/mysql
+   group mysql_db
+   if does not exist then unmonitor" > /etc/monit/conf.d/mysql.mtwilson
+fi
+fi
+
+echo  -n "Restarting monit service so new configs take effect... "
+service monit restart > /dev/null 2>&1
+echo "Done"
+
 if [ "${LOCALHOST_INTEGRATION}" == "yes" ]; then
   mtwilson localhost-integration 127.0.0.1 "$MTWILSON_SERVER_IP_ADDRESS"
 fi
 
+#Save variables to properties file
+#if using_mysql; then   
+#  mysql_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+#elif using_postgres; then
+#  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
+#fi
+  
+echo "Restarting webservice for all changes to take effect"
+#Restart webserver
 if using_glassfish; then
-  mtwilson glassfish-restart
+  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
+  glassfish_restart
 elif using_tomcat; then
-  mtwilson tomcat-restart
+  update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
+  tomcat_restart
 fi
 
 echo "Log file for install is located at $INSTALL_LOG_FILE"
+if [ -n "$INSTALLED_MARKER_FILE" ]; then
+ touch $INSTALLED_MARKER_FILE
+fi
+
+
+

@@ -4,6 +4,7 @@
  */
 package com.intel.mountwilson.common;
 
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mountwilson.trustagent.datatype.IPAddress;
 import java.io.*;
 import java.net.InetAddress;
@@ -13,10 +14,12 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.io.IOUtils;
 /**
  *
  * @author dsmagadX
@@ -38,7 +41,7 @@ public class CommandUtil {
         if(new File(Config.getBinPath() + File.separator + commandLine).exists())
             commandLine = Config.getBinPath() + File.separator + commandLine;
         
-        log.info("Command to be executed is :" + commandLine);
+        log.debug("Command to be executed is :" + commandLine);
 
         Process p = Runtime.getRuntime().exec(commandLine);
 
@@ -47,7 +50,7 @@ public class CommandUtil {
         readResults(p, result);
 
 //        if (Config.isDebug()) {
-//            log.log(Level.INFO, "Result Output \n{0}", (result == null ) ? "null":result.toString());
+//            log.log(Level.INFO, "Result Output \n{}", (result == null ) ? "null":result.toString());
 //        }
 
         //do a loop to wait for an exit value
@@ -85,7 +88,7 @@ public class CommandUtil {
     }
 
     private static void checkError(int exitValue, String commandLine) throws TAException {
-        log.info( "Return code {0}", exitValue);
+        log.debug( "Return code {}", exitValue);
 
         if (exitValue != 0) {
             throw new TAException(ErrorCode.FATAL_ERROR, "Error while running command" + commandLine);
@@ -120,7 +123,7 @@ public class CommandUtil {
             byte[] fileContents = new byte[fileLength];
             int read = fStream.read(fileContents);
             if (read != fileLength) {
-                log.warn("Lenght of file read is not same as file length");
+                log.warn("Length of file read is not same as file length");
             }
             return fileContents;
         } catch (Exception ex) {
@@ -141,18 +144,11 @@ public class CommandUtil {
 
     public static String readCertificate(String fileName) throws TAException {
         try {
-            javax.security.cert.X509Certificate cert = javax.security.cert.X509Certificate.getInstance(readfile(fileName));
-            //        return "-----BEGIN CERTIFICATE-----" + new String(Base64.encodeBase64(cert.getEncoded())) + "-----END CERTIFICATE-----";
-            // Important: the certificate data MUST be chunked to 76 character blocks for proper interpretation by openssl on the client.
-            // TODO:removed this till we fix AS
-            return "-----BEGIN CERTIFICATE-----"
-                    + new String(Base64.encodeBase64(cert.getEncoded(), true))
-                    + "-----END CERTIFICATE-----";
-
-
-//			return "-----BEGIN CERTIFICATE-----\n"
-//					+ new String(Base64.encodeBase64Chunked(cert.getEncoded()))
-//					+ "-----END CERTIFICATE-----";
+            FileInputStream in = new FileInputStream(new File(fileName));
+            String pem = IOUtils.toString(in);
+            in.close();
+//            X509Certificate certificate = X509Util.decodePemCertificate(pem);
+            return pem;
         } catch (Exception e) {
             throw new TAException(ErrorCode.ERROR, "Error while reading AIK Cert", e);
         }
@@ -166,7 +162,7 @@ public class CommandUtil {
             networkInterface = NetworkInterface.getNetworkInterfaces();
             for (; networkInterface.hasMoreElements();) {
                 NetworkInterface e = networkInterface.nextElement();
-                log.info( "Interface: {}", new Object[]{e.getName()});
+                log.debug( "Interface: {}", new Object[]{e.getName()});
                 Enumeration<InetAddress> ad = e.getInetAddresses();
                 for (; ad.hasMoreElements();) {
                     InetAddress addr = ad.nextElement();
@@ -174,7 +170,7 @@ public class CommandUtil {
                     if (!returnIpAddress.equals(localIpAddress) && IPAddress.isValid(returnIpAddress)) {
                         return returnIpAddress;
                     } else {
-                        log.info("{} == {} or ip validation failed.", new Object[]{returnIpAddress, localIpAddress});
+                        log.debug("{} == {} or ip validation failed.", new Object[]{returnIpAddress, localIpAddress});
                     }
                 }
             }
@@ -203,5 +199,43 @@ public class CommandUtil {
                 + "</client_request>";
         return responseXML;
     }
+    
+    public static void initJavaSslProperties() {
+            String keyPass = System.getProperty("javax.net.ssl.keyStorePassword");
+            if(keyPass == null) {
+                System.err.println("Tagent keystore pw was null, reading it from config file");
+                // keystore pass not defined, read it from props and define it
+                String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                //System.err.println("Tagent keystore from config was " + propKeyPass);
+                System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+                System.setProperty("javax.net.ssl.trustStorePassword",propKeyPass);
+            }else if(keyPass.startsWith("env:")) {
+                String[] envVar = keyPass.split(":");
+                if(envVar.length != 2) {
+                    // no env variable name provided, read it from the props file
+                    System.err.println("Tagent couldn't figure out env variable, setting from config");
+                    String propKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                    //System.err.println("Tagent keystore from config was " + propKeyPass);
+                    System.setProperty("javax.net.ssl.keyStorePassword",propKeyPass);
+                    System.setProperty("javax.net.ssl.trustStorePassword",propKeyPass);
+                }else {
+                    String newKeyPass = System.getenv(envVar[1]);
+                    if(newKeyPass == null){ 
+                      // env variable provided was not defined, read it from the props file
+                      System.err.println("Tagent couldn't read keystore pw from env, setting from config");
+                      newKeyPass = TAConfig.getConfiguration().getString("trustagent.keystore.password");
+                      //System.err.println("Tagent keystore from config was " + newKeyPass);
+                      System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass);
+                      System.setProperty("javax.net.ssl.trustStorePassword",newKeyPass);
+                    }else{
+                     //System.err.println("Tagent read pw from env, setting it to " + newKeyPass);
+                     System.setProperty("javax.net.ssl.keyStorePassword",newKeyPass); 
+                     System.setProperty("javax.net.ssl.trustStorePassword",newKeyPass);
+                    }                
+                }
+            }
+        
+    }
+    
     
 }

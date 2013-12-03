@@ -74,8 +74,8 @@ public class ASHostTest {
         gkvHost.HostName = "10.1.71.154";
         gkvHost.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
         wlObj.setTxtHostRecord(gkvHost);
-        wlObj.setBiosPCRs("0");
-        wlObj.setVmmPCRs("17,18,19,20");
+        wlObj.setBiosPCRs("0,17");
+        wlObj.setVmmPCRs("18,19,20");
         wlObj.setBiosWhiteList(true);
         wlObj.setVmmWhiteList(true);
         wlObj.setBiosWLTarget(HostWhiteListTarget.BIOS_HOST);

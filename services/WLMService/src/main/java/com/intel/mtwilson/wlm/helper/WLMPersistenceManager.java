@@ -37,7 +37,7 @@ public class WLMPersistenceManager extends com.intel.mtwilson.jpa.PersistenceMan
 
     @Override
     public void configure() {
-        log.trace("WLMPersistenceManager configure() adding persistence units ASDataPU, MSDataPU and AuditDataPU");
+        log.info("WLMPersistenceManager configure() adding persistence units ASDataPU, MSDataPU and AuditDataPU");
         try {
         addPersistenceUnit("ASDataPU", MyPersistenceManager.getASDataJpaProperties(My.configuration())); // ASConfig.getJpaProperties());
         addPersistenceUnit("MSDataPU", MyPersistenceManager.getMSDataJpaProperties(My.configuration())); // MSConfig.getJpaProperties());

@@ -27,7 +27,7 @@ public class ASConfiguration implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        log.debug("ASConfiguration: context initialized");
+        log.info("ASConfiguration: context initialized");
         /*
         PluginRegistry.loadAvailablePlugins();
         List<Plugin> plugins = PluginRegistry.getAvailablePlugins();
@@ -40,7 +40,7 @@ public class ASConfiguration implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        log.debug("ASConfiguration: context destroyed");
+        log.info("ASConfiguration: context destroyed");
     }
     
 }

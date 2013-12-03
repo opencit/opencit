@@ -10,7 +10,6 @@
 
 
 java_required_version=1.6.0_20
-#export http_proxy=http://proxy-us.intel.com:911
 
 ###################################################################################################
 
@@ -25,6 +24,8 @@ package_install_filename=${package_dir}/${package_name}.install
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
 
 
 # the install file should define TRUST_AGENT_HOME
@@ -41,10 +42,9 @@ function read_local_config() {
     serviceLogFile="/var/log/$serviceNameLo.log"               # log file for StdOut/StdErr
     maxShutdownTime=15                                         # maximum number of seconds to wait for the daemon to terminate normally
     pidFile="/var/run/$serviceNameLo.pid"                      # name of PID file (PID = process ID number)
-	storePass=`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
-	#-Djavax.net.ssl.keyStorePassword=$storePass
-	export TaKeyStorePassword=$storePass
-    javaVMArgs="-Djavax.net.ssl.trustStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStore=$package_dir/cert/trustagent.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
+    storePass="$TRUSTAGENT_KEYSTORE_PASS"   #`read_property_from_file trustagent.keystore.password "${package_config_filename}"`
+    export TaKeyStorePassword=$storePass
+    javaVMArgs="-Djavax.net.ssl.trustStore=$intel_conf_dir/trustagent.jks -Djavax.net.ssl.keyStore=$intel_conf_dir/trustagent.jks -Djavax.net.ssl.keyStorePassword=env:TaKeyStorePassword -Dapp.path=$package_dir -Ddebug=true"  # arguments for Java launcher
     javaArgs="-classpath $CLASSPATH com.intel.mountwilson.trustagent.TASecureServer"  # arguments for Java launcher
     javaCommandLine="$java $javaVMArgs  $javaArgs"                       # command line to start the Java service application
     javaCommandLineKeyword="TrustAgent.jar"                   # a keyword that occurs on the commandline, used to detect an already running service process and to distinguish it from others
@@ -178,8 +178,9 @@ function checkServiceStatus {
     echo "Stopped"
     RETVAL=3
    fi
-   return 0; }
-   
+   return 0;
+}
+
 setup_env() {
   yum_detect > /dev/null
   java_detect > /dev/null
@@ -220,9 +221,8 @@ setup_interactive_install() {
         fi
         # This is the place to do any setup while trust agent is not running
         /usr/local/bin/pcakey
-		if [ $? == 1 ]; then
-			exit 1
-		fi
+        if [ $? == 1 ]; then exit 1; fi
+        $java -cp $CLASSPATH -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.TakeOwnershipCmd 2>&1 >/dev/null
         # After setup is done, start the trust agent:
 	checkServiceStatus
 	if [ -z "$TRUST_AGENT_RUNNING" ]; then
@@ -256,7 +256,7 @@ function main {
          ;;
   edit)
         update_property_in_file "${2}" "${package_config_filename}" "${3}"
-        ;;
+       ;;
   show)
         read_property_from_file "${2}" "${package_config_filename}"
         ;;
@@ -272,6 +272,14 @@ function main {
         java_detect > /dev/null
         if no_java $java_required_version; then echo "Cannot find Java $java_required_version or later"; exit 1; fi
         stopService
+        if [ -f "$intel_conf_dir/cert/aikblob.dat" ]; then
+          backup_file "$intel_conf_dir/cert/aikblob.dat"
+          rm "$intel_conf_dir/cert/aikblob.dat"
+        fi
+        if [ -f "$intel_conf_dir/cert/aikcert.pem" ]; then
+          backup_file "$intel_conf_dir/cert/aikcert.pem"
+          rm "$intel_conf_dir/cert/aikcert.pem"
+        fi
         pcakey
         $java -cp $CLASSPATH $javaVMArgs -DforceCreateEk=true com.intel.mountwilson.trustagent.commands.CreateIdentityCmd
         startService
