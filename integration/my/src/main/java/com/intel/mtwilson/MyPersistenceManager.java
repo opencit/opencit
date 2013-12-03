@@ -7,6 +7,7 @@ package com.intel.mtwilson;
 //import com.intel.mountwilson.as.common.ASConfig;
 //import com.intel.mtwilson.audit.helper.AuditConfig;
 import com.intel.mtwilson.jpa.PersistenceManager;
+import java.io.IOException;
 //import com.intel.mtwilson.ms.common.MSConfig;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
@@ -213,4 +214,46 @@ public class MyPersistenceManager extends PersistenceManager {
         
     }    
     
+    public static Properties getEnvDataJpaProperties(MyConfiguration config) {
+        Properties prop = getASDataJpaProperties(config);
+        
+        if (!System.getenv("MTWILSON_DB_DRIVER").isEmpty()) {
+            prop.put("javax.persistence.jdbc.driver", System.getenv("MTWILSON_DB_DRIVER"));
+        }
+        if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
+            prop.put("javax.persistence.jdbc.scheme", "mysql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
+        }
+        else if( prop.get("javax.persistence.jdbc.driver").equals("org.postgresql.Driver") ) {
+            prop.put("javax.persistence.jdbc.scheme", "postgresql"); // NOTE: this is NOT a standard javax.persistence property, we are setting it for our own use
+        }
+        else {
+            prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
+        }
+        
+        if (!System.getenv("MTWILSON_DB_HOST").isEmpty()
+                && !System.getenv("MTWILSON_DB_PORT").isEmpty()
+                && !System.getenv("MTWILSON_DB_SCHEMA").isEmpty()) {
+            
+            prop.put("javax.persistence.jdbc.url" ,
+                    String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
+                    prop.get("javax.persistence.jdbc.scheme"),
+                    System.getenv("MTWILSON_DB_HOST"),
+                    System.getenv("MTWILSON_DB_PORT"),
+                    System.getenv("MTWILSON_DB_SCHEMA")));
+        }
+        
+        if (!System.getenv("MTWILSON_DB_USER").isEmpty()) {
+            prop.put("javax.persistence.jdbc.user",
+                    System.getenv("MTWILSON_DB_USER"));
+        }
+        
+        if (!System.getenv("MTWILSON_DB_PASSWORD").isEmpty()) {
+            prop.put("javax.persistence.jdbc.password",
+                    System.getenv("MTWILSON_DB_PASSWORD"));
+        }
+        
+        prop.put("eclipselink.jdbc.batch-writing", "JDBC");
+        
+        return prop;
+    }
 }
