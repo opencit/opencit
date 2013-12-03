@@ -217,7 +217,7 @@ public class MyPersistenceManager extends PersistenceManager {
     public static Properties getEnvDataJpaProperties(MyConfiguration config) {
         Properties prop = getASDataJpaProperties(config);
         
-        if (!System.getenv("MTWILSON_DB_DRIVER").isEmpty()) {
+        if (System.getenv("MTWILSON_DB_DRIVER") != null ) {
             prop.put("javax.persistence.jdbc.driver", System.getenv("MTWILSON_DB_DRIVER"));
         }
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
@@ -230,9 +230,9 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }
         
-        if (!System.getenv("MTWILSON_DB_HOST").isEmpty()
-                && !System.getenv("MTWILSON_DB_PORT").isEmpty()
-                && !System.getenv("MTWILSON_DB_SCHEMA").isEmpty()) {
+        if (System.getenv("MTWILSON_DB_HOST") != null
+                && System.getenv("MTWILSON_DB_PORT") != null
+                && System.getenv("MTWILSON_DB_SCHEMA") != null) {
             
             prop.put("javax.persistence.jdbc.url" ,
                     String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
@@ -242,12 +242,12 @@ public class MyPersistenceManager extends PersistenceManager {
                     System.getenv("MTWILSON_DB_SCHEMA")));
         }
         
-        if (!System.getenv("MTWILSON_DB_USER").isEmpty()) {
+        if (System.getenv("MTWILSON_DB_USER") != null) {
             prop.put("javax.persistence.jdbc.user",
                     System.getenv("MTWILSON_DB_USER"));
         }
         
-        if (!System.getenv("MTWILSON_DB_PASSWORD").isEmpty()) {
+        if (System.getenv("MTWILSON_DB_PASSWORD") != null) {
             prop.put("javax.persistence.jdbc.password",
                     System.getenv("MTWILSON_DB_PASSWORD"));
         }
