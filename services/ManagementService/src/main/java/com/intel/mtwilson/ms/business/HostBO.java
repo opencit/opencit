@@ -157,12 +157,13 @@ public class HostBO extends BaseBO {
             try {
                 long threadStart = System.currentTimeMillis();
                  attestationReport = agent.getHostAttestationReport(requiredPCRs);
-                 log.debug("TIMETAKEN: by the attestation report thread:" + (System.currentTimeMillis() - threadStart));
+                 log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
             } catch (Throwable te) {
                 isError = true;
                 attestationReport = null;
-                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
-                errorMessage = te.getMessage();
+                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData" , te);
+//                errorMessage = te.getMessage();
+                errorMessage = te.getClass().getSimpleName();
             }
         }
 
@@ -225,13 +226,17 @@ public class HostBO extends BaseBO {
                 }
 
             } catch (MSException e) {
+                log.error("Failed to verify MLE", e);
                 isError = true;
                 result = null;
-                errorMessage = e.getErrorMessage();
+//                errorMessage = e.getErrorMessage();
+                errorMessage = e.getClass().getSimpleName();
             } catch (Exception e) {
+                log.error("Failed to verify MLE", e);
                 isError = true;
                 result = null;
-                errorMessage = e.getMessage();
+//                errorMessage = e.getMessage();
+                errorMessage = e.getClass().getSimpleName();
             }
         }
 
@@ -484,10 +489,12 @@ public class HostBO extends BaseBO {
             log.error("API Client error during host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
         } catch (Exception ex) {
-            log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
+            // bug #1038 prevent leaks in error messages to client
+            log.error("Unexpected errror during retrieval of host MLE information. ", ex);
             // ex.printStackTrace(System.err);
             // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
-            throw new MSException(ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information . ({}). Please look in the server log for more details.", ex.getClass().getSimpleName());
+            //throw new MSException(ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information . ({}). Please look in the server log for more details.", ex.getClass().getSimpleName());
+            throw new MSException(ErrorCode.MS_MLE_ERROR, ex.getClass().getSimpleName());
         }
     }
 

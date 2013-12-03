@@ -36,15 +36,15 @@ public class AuthResponse {
     public AuthResponse(ErrorCode errorCode, String errorMessage, Throwable rootCause) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
-        //this.extraInfo = rootCause.getMessage();
+        //this.extraInfo = rootCause.getMessage(); // bug #1038 if we do provide any info from rootCause it must only be rootCause.getClass().getSimpleName() -  the Message can only go in the error log
     }
     public AuthResponse(ErrorCode errorCode, Object... extraInfo) {
         this.errorCode = errorCode;
         try{
             this.errorMessage = String.format(errorCode.getMessage(), extraInfo); 
         }catch(Throwable e){
-            this.errorMessage = errorCode.getMessage();
-            LoggerFactory.getLogger(getClass().getName()).error("Error while formatting error message for " + errorCode.toString() ,e );
+            this.errorMessage = errorCode.name(); // bug #1038 if we have an error formatting the message then only print the error code enum name like SYSTEM_ERROR  errorCode.getMessage();
+            LoggerFactory.getLogger(getClass().getName()).error("Error while formatting error message for " + errorCode.name() ,e );
         }   
     }
     

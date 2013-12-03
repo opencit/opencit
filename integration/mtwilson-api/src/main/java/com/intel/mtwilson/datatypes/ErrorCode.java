@@ -14,10 +14,10 @@ import java.util.Map;
 public enum ErrorCode {
 
     OK(0, "OK"), 
-    SYSTEM_ERROR(1,"System error: %s"), 
+    SYSTEM_ERROR(1,"System error: %s. More information is available in the server log."), 
 //    AUTH_FAILED(1000,"Authentication Failed"), 
 //    SQL_ERROR(1001, "SQL Error"), 
-    UNKNOWN_ERROR(2,"Error"),  // Used in APIClient
+    UNKNOWN_ERROR(2,"Unknown error. More information is available in the server log."),  // Used in APIClient
 //    GENERAL_ERROR(1003,"Error in attestation service"), 
 //    DUPLICATE_HOST_NAME(1004,"Duplicate Host Name"), 
 //    TA_ERROR (1005, "TrustAgent Error"), 
@@ -98,6 +98,7 @@ public enum ErrorCode {
     
     // Below are error codes for the Management service
     // 3000 to 3100 General Management Service errors
+    MS_MLE_ERROR(3001, "Error during retrieval of host MLE information: %s"),  // argument should be  e.getClass().getSimpleName()
     // 3100 to 3200 APIClient
     MS_EXPIRED_CERTIFICATE(3101, "Client certificate has already expired. %s"),
     MS_CERTIFICATE_NOT_YET_VALID(3102, "Client certificate is not yet valid. Validity date is in the future. %s"),
