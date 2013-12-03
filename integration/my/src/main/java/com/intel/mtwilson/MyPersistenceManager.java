@@ -84,14 +84,18 @@ public class MyPersistenceManager extends PersistenceManager {
         else {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }
+        
+        prop.put("javax.persistence.jdbc.host", myConfig.getString("mountwilson.as.db.host", config.getDatabaseHost()));
+        prop.put("javax.persistence.jdbc.port", myConfig.getString("mountwilson.as.db.port", config.getDatabasePort()));
+        prop.put("javax.persistence.jdbc.schema", myConfig.getString("mountwilson.as.db.schema", config.getDatabaseSchema()));
         prop.put("javax.persistence.jdbc.url" , 
                 myConfig.getString("mountwilson.as.db.url",
                 myConfig.getString("mtwilson.db.url",
                 String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
-                    prop.get("javax.persistence.jdbc.scheme"),
-                    myConfig.getString("mountwilson.as.db.host", config.getDatabaseHost()),
-                    myConfig.getString("mountwilson.as.db.port", config.getDatabasePort()),
-                    myConfig.getString("mountwilson.as.db.schema", config.getDatabaseSchema())))));
+                prop.get("javax.persistence.jdbc.scheme"),
+                prop.get("javax.persistence.jdbc.host"),
+                prop.get("javax.persistence.jdbc.port"),
+                prop.get("javax.persistence.jdbc.schema")))));
         prop.put("javax.persistence.jdbc.user",
                 myConfig.getString("mountwilson.as.db.user",
                 myConfig.getString("mtwilson.db.user",
@@ -217,7 +221,7 @@ public class MyPersistenceManager extends PersistenceManager {
     public static Properties getEnvDataJpaProperties(MyConfiguration config) {
         Properties prop = getASDataJpaProperties(config);
         
-        if (System.getenv("MTWILSON_DB_DRIVER") != null ) {
+        if (System.getenv("MTWILSON_DB_DRIVER") != null && !System.getenv("MTWILSON_DB_DRIVER").isEmpty()) {
             prop.put("javax.persistence.jdbc.driver", System.getenv("MTWILSON_DB_DRIVER"));
         }
         if( prop.get("javax.persistence.jdbc.driver").equals("com.mysql.jdbc.Driver") ) {
@@ -230,24 +234,29 @@ public class MyPersistenceManager extends PersistenceManager {
             prop.put("javax.persistence.jdbc.scheme", "unknown-scheme");
         }
         
-        if (System.getenv("MTWILSON_DB_HOST") != null
-                && System.getenv("MTWILSON_DB_PORT") != null
-                && System.getenv("MTWILSON_DB_SCHEMA") != null) {
-            
-            prop.put("javax.persistence.jdbc.url" ,
-                    String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
-                    prop.get("javax.persistence.jdbc.scheme"),
-                    System.getenv("MTWILSON_DB_HOST"),
-                    System.getenv("MTWILSON_DB_PORT"),
-                    System.getenv("MTWILSON_DB_SCHEMA")));
+        if (System.getenv("MTWILSON_DB_HOST") != null && !System.getenv("MTWILSON_DB_HOST").isEmpty()) {
+            prop.put("javax.persistence.jdbc.host", System.getenv("MTWILSON_DB_HOST"));
+        }
+        if (System.getenv("MTWILSON_DB_PORT") != null && !System.getenv("MTWILSON_DB_PORT").isEmpty()) {
+            prop.put("javax.persistence.jdbc.port", System.getenv("MTWILSON_DB_PORT"));
+        }
+        if (System.getenv("MTWILSON_DB_SCHEMA") != null && !System.getenv("MTWILSON_DB_SCHEMA").isEmpty()) {
+            prop.put("javax.persistence.jdbc.schema", System.getenv("MTWILSON_DB_SCHEMA"));
         }
         
-        if (System.getenv("MTWILSON_DB_USER") != null) {
+        prop.put("javax.persistence.jdbc.url",
+                String.format("jdbc:%s://%s:%s/%s?autoReconnect=true",
+                prop.get("javax.persistence.jdbc.scheme"),
+                prop.get("javax.persistence.jdbc.host"),
+                prop.get("javax.persistence.jdbc.port"),
+                prop.get("javax.persistence.jdbc.schema")));
+        
+        if (System.getenv("MTWILSON_DB_USER") != null && !System.getenv("MTWILSON_DB_USER").isEmpty()) {
             prop.put("javax.persistence.jdbc.user",
                     System.getenv("MTWILSON_DB_USER"));
         }
         
-        if (System.getenv("MTWILSON_DB_PASSWORD") != null) {
+        if (System.getenv("MTWILSON_DB_PASSWORD") != null && !System.getenv("MTWILSON_DB_PASSWORD").isEmpty()) {
             prop.put("javax.persistence.jdbc.password",
                     System.getenv("MTWILSON_DB_PASSWORD"));
         }
