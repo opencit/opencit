@@ -35,7 +35,6 @@
     <module>WLMService</module>
     <module>ManagementService</module>
     <module>MSCmdUtility</module>
-	
   </modules>
 
 </project>
