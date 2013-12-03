@@ -68,18 +68,20 @@ The Cloud Platform Group (CPG) artifact names will remain.
   
     <modules>
         <module>cpg-configuration</module>
-        <module>cpg-util</module>
-        <module>cpg-i18n</module>
-        <module>cpg-performance</module>
-        <module>cpg-validation</module>
-        <module>cpg-io</module>
-        <module>cpg-crypto</module>
-        <module>cpg-net</module>
-        <module>cpg-tls-policy</module>
-        <module>cpg-jpa</module>
         <module>cpg-console</module>
-<!--		<module>cpg-module</module>
-		<module>cpg-module-annotations</module> -->
+        <module>cpg-crypto</module>
+        <module>cpg-i18n</module>
+        <module>cpg-io</module>
+        <module>cpg-jpa</module>
+		<module>cpg-module</module>
+		<module>cpg-module-annotations</module>
+        <module>cpg-net</module>
+        <module>cpg-performance</module>
+        <module>cpg-rfc822</module>
+        <module>cpg-tls-policy</module>
+        <module>cpg-util</module>
+        <module>cpg-validation</module>
+        <module>cpg-xml</module>
     </modules>
     <!--
     <url>http://cloudsecurityportal.intel.com/redmine/projects/myh</url>
