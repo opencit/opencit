@@ -64,7 +64,8 @@ function populateHostTrustDataIntoTable(hostDetails) {
 				//To remove the location from main page commnet thr below line and un uncommnet the next line 
 			    value = hostDetails[item].location != undefined ? hostDetails[item].location : "";
 				//value="";
-				str+='<td class="row5">'+value+'</td>'+
+				
+                        str+='<td align="center" class="row5" title="'+hostDetails[item].assetTagDetails+'"><img border="0" src="'+hostDetails[item].assetTagStatus+'"></td>'+
 				'<td align="center" class="row6"><img border="0" src="'+hostDetails[item].biosStatus+'"></td>'+
 				'<td align="center" class="row7"><img border="0" src="'+hostDetails[item].vmmStatus+'"></td>'+
 				'<td align="center" class="row8"><img border="0" src="'+hostDetails[item].overAllStatus+'"></td>';
