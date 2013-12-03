@@ -10,6 +10,7 @@ package com.intel.mtwilson.agent.intel;
  */
 
 //import com.intel.mountwilson.as.common.*;
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.ClientRequestType;
@@ -42,6 +43,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.PropertyException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,7 @@ public class TrustAgentSecureClient {
     private int serverPort = 0;
     private byte[] data;
     private TlsPolicy tlsPolicy;
+    JAXB jaxb = new JAXB();
     
     private static int TIME_OUT = ASConfig.getTrustAgentTimeOutinMilliSecs();
 
@@ -158,13 +161,15 @@ public class TrustAgentSecureClient {
         }
     }
     
-    public DaaResponse sendDaaChallenge(String challenge) throws NoSuchAlgorithmException, KeyManagementException, UnknownHostException, JAXBException, IOException {
+    public DaaResponse sendDaaChallenge(String challenge) throws NoSuchAlgorithmException, KeyManagementException, UnknownHostException, JAXBException, IOException, XMLStreamException {
         this.data = challenge.getBytes();
         byte buf[] = sendRequestWithSSLSocket();
-        JAXBContext jc = JAXBContext.newInstance("com.intel.mountwilson.ta.data.daa.response");
-        Unmarshaller u = jc.createUnmarshaller();
-        JAXBElement po =  (JAXBElement) u.unmarshal(new StringReader(new String(buf).trim()));
-        DaaResponse response = (DaaResponse)po.getValue();
+        // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
+        DaaResponse response = jaxb.read(new String(buf).trim(), DaaResponse.class);
+//        JAXBContext jc = JAXBContext.newInstance("com.intel.mountwilson.ta.data.daa.response");
+//        Unmarshaller u = jc.createUnmarshaller();
+//        JAXBElement po =  (JAXBElement) u.unmarshal(new StringReader(new String(buf).trim()));
+//        DaaResponse response = (DaaResponse)po.getValue();
         return response;
     }
     
@@ -177,7 +182,7 @@ public class TrustAgentSecureClient {
      * @throws NoSuchAlgorithmException 
      * @throws KeyManagementException 
      */
-    public ClientRequestType sendQuoteRequest() throws UnknownHostException, IOException, JAXBException, KeyManagementException, NoSuchAlgorithmException  {
+    public ClientRequestType sendQuoteRequest() throws UnknownHostException, IOException, JAXBException, KeyManagementException, NoSuchAlgorithmException, XMLStreamException  {
 
 
         try {
@@ -185,16 +190,8 @@ public class TrustAgentSecureClient {
 
             log.info("Unmarshalling to Jaxb object.");
             
-            JAXBContext jc = JAXBContext.newInstance("com.intel.mountwilson.ta.data");
-            assert jc != null;
-            Unmarshaller u = jc.createUnmarshaller();
-            assert u != null;
-            assert new String(buf) != null;
-            JAXBElement po =  (JAXBElement) u.unmarshal(new StringReader(new String(buf).trim()));
-            
-            assert po != null;
-            
-            ClientRequestType response = (ClientRequestType)po.getValue();
+        // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
+            ClientRequestType response = jaxb.read(new String(buf).trim(), ClientRequestType.class);
             
             assert response != null;
             
@@ -295,7 +292,7 @@ public class TrustAgentSecureClient {
         }
     }
     
-    public ClientRequestType getQuote(String nonce, String pcrList) throws PropertyException, JAXBException, UnknownHostException, IOException, KeyManagementException, NoSuchAlgorithmException {
+    public ClientRequestType getQuote(String nonce, String pcrList) throws PropertyException, JAXBException, UnknownHostException, IOException, KeyManagementException, NoSuchAlgorithmException, XMLStreamException {
         QuoteRequest quoteRequest = new QuoteRequest();
         quoteRequest.setPcrList(pcrList);
         quoteRequest.setNonce(nonce);
@@ -340,19 +337,14 @@ public class TrustAgentSecureClient {
      * 
      * @return 
      */
-    public HostInfo getHostInfo()  {
+    public HostInfo getHostInfo() throws XMLStreamException  {
         this.data = "<host_info></host_info>".getBytes();
         HostInfo response;
 		try {
 			byte buf[] = sendRequestWithSSLSocket();
             log.debug("TrustAgent response: {}", new String(buf));
-			JAXBContext jc = JAXBContext
-					.newInstance("com.intel.mountwilson.ta.data.hostinfo");
-			Unmarshaller u = jc.createUnmarshaller();
-//			JAXBElement<HostInfo> po = (JAXBElement<HostInfo>) u.unmarshal(new StringReader(
-//					new String(buf).trim()));
-			response = (HostInfo)  u.unmarshal(new StringReader(
-					new String(buf).trim()));
+        // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
+			response = jaxb.read(new String(buf).trim(), HostInfo.class);
         }catch(UnknownHostException e) {
             throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
         }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer

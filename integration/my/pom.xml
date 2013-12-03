@@ -103,14 +103,8 @@
                 <scope>test</scope>
         </dependency>
         <!--
-       API-CLIENT SHOULD STAY IN TEST SCOPE 
+       API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-autotest module
     -->
-    <dependency>
-		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>api-client</artifactId>
-		<version>${project.version}</version>
-        <scope>test</scope>
-    </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-api</artifactId>

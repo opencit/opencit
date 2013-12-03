@@ -5,6 +5,7 @@
 package test.io;
 
 import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.mtwilson.crypto.SimpleKeystore;
@@ -15,6 +16,7 @@ import com.intel.mtwilson.model.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,6 +52,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
+import static org.junit.Assert.*;
+import org.opensaml.saml2.core.Attribute;
+import org.opensaml.saml2.core.AttributeStatement;
+import org.opensaml.saml2.core.Statement;
+import org.opensaml.xml.schema.XSAny;
+import org.opensaml.xml.schema.XSString;
 
 /**
  *
@@ -106,10 +114,18 @@ public class SamlTest {
     }
     
     @Test
+    public void testResourceExists() throws IOException {
+        InputStream in = getClass().getResourceAsStream("/host-149.saml.xml");
+        assertNotNull(in);
+        String xml = IOUtils.toString(in);
+        log.debug("SAML: {}", xml);
+    }
+    
+    @Test
     public void testSamlVerifierSamlForHost() throws IOException, NoSuchAlgorithmException, KeyManagementException, MalformedURLException, KeyStoreException, CertificateException, UnrecoverableEntryException, ApiException, SignatureException, ParserConfigurationException, SAXException, UnmarshallingException, ClassNotFoundException, InstantiationException, IllegalAccessException, MarshalException, XMLSignatureException, ConfigurationException {
         String xml = IOUtils.toString(getClass().getResourceAsStream("/host-149.saml.xml")); // or get via apiclient like in testGetSamlForHost()
-        Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
-        SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
+//        Configuration config = My.configuration().getConfiguration(); //ConfigurationUtil.fromResource("/localhost-0.5.2.properties");        
+        SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword()); // used to be mtwilson.api.keystore and mtwilson.api.keystore.password properties from configuration
         X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
         TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, xml);
         if( trustAssertion.isValid() ) {
@@ -128,7 +144,105 @@ public class SamlTest {
         }
     }
     
-    
+    /**
+     * bug #1038 
+     * opensaml xml parser is vulnerable to xml external entity injection ... look at the BIOS_Name  value in output, which you can get by commentnig out the two lines in the method marked with "bug #1038" :
+     * 
+2013-12-03 14:44:14,564 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: Trusted = true
+2013-12-03 14:44:14,565 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: Trusted_BIOS = true
+2013-12-03 14:44:14,565 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: BIOS_Name = [ProductNames]
+ProductName.1033=Microsoft Visual C++ 2008 Redistributable
+ProductName.1041=Microsoft Visual C++ 2008 Redistributable
+ProductName.1042=Microsoft Visual C++ 2008 Redistributable
+ProductName.1028=Microsoft Visual C++ 2008 Redistributable
+ProductName.2052=Microsoft Visual C++ 2008 Redistributable
+ProductName.1036=Microsoft Visual C++ 2008 Redistributable
+ProductName.1040=Microsoft Visual C++ 2008 Redistributable
+ProductName.1031=Microsoft Visual C++ 2008 Redistributable
+ProductName.3082=Microsoft Visual C++ 2008 Redistributable
+2013-12-03 14:44:14,566 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: BIOS_Version = v60
+2013-12-03 14:44:14,566 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: BIOS_OEM = EPSD
+2013-12-03 14:44:14,566 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: Trusted_VMM = true
+2013-12-03 14:44:14,567 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: VMM_Name = Xen
+2013-12-03 14:44:14,567 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: VMM_Version = 4.1.0
+2013-12-03 14:44:14,567 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: VMM_OSName = SUSE
+2013-12-03 14:44:14,568 DEBUG [main] t.i.SamlTest [SamlTest.java:196] Attribute: VMM_OSVersion = 11 P2
+     * 
+     * 
+     * With the bug #1038 fix,  the XXE is prevented and BIOS_Name appears as null:
+     * 
+2013-12-03 14:54:50,992 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: Trusted = true
+2013-12-03 14:54:50,993 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: Trusted_BIOS = true
+2013-12-03 14:54:50,993 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: BIOS_Name = null
+2013-12-03 14:54:50,993 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: BIOS_Version = v60
+2013-12-03 14:54:50,994 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: BIOS_OEM = EPSD
+2013-12-03 14:54:50,994 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: Trusted_VMM = true
+2013-12-03 14:54:50,995 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: VMM_Name = Xen
+2013-12-03 14:54:50,996 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: VMM_Version = 4.1.0
+2013-12-03 14:54:50,996 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: VMM_OSName = SUSE
+2013-12-03 14:54:50,996 DEBUG [main] t.i.SamlTest [SamlTest.java:230] Attribute: VMM_OSVersion = 11 P2
+     * 
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testSamlVerifierSamlForHostWithXXE() throws Exception {
+        String xmlstr = IOUtils.toString(getClass().getResourceAsStream("/host-149.saml_xxe.xml")); // or get via apiclient like in testGetSamlForHost()
+//        Configuration config = My.configuration().getConfiguration(); //ConfigurationUtil.fromResource("/localhost-0.5.2.properties");        
+        SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword()); // used to be mtwilson.api.keystore and mtwilson.api.keystore.password properties from configuration
+        X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
+        TrustAssertion trustAssertion = new TrustAssertion(trustedCertificates, xmlstr);
+        if( trustAssertion.isValid() ) {
+            System.out.println("Assertion is valid");
+            log.info("Assertion is valid");
+            log.debug("Subject: {}", trustAssertion.getSubject());
+            log.debug("Issuer: {}", trustAssertion.getIssuer());
+            Set<String> attributes = trustAssertion.getAttributeNames();
+            for(String attribute : attributes) {
+                log.debug("Attribute: {} = {}", new String[] { attribute, trustAssertion.getStringAttribute(attribute) });
+            }
+        }
+        else {
+            // above code validates signature but for bug #1038 we want to see if the opensaml xml parser is vulnerable to XXE regardless of the signature - so below we copy code from TrustAssertion to parse the xml anyway and retrieve the attribute values.  BIOS_Name is replaced with XXE and you can see sample output in comment above.
+            log.debug("Assertion is NOT valid", trustAssertion.error());
+            System.out.println("Assertion is NOT valid");
+            // simulate here what the TrustAssertion object does -- because it will not make anything available if the signature can't be verified 
+                DefaultBootstrap.bootstrap(); // required to load default configs that ship with opensaml that specify how to build and parse the xml (if you don't do this you will get a null unmarshaller when you try to parse xml)
+        // simulate readXml
+        DocumentBuilderFactory factory1 =  DocumentBuilderFactory.newInstance ();
+        factory1.setNamespaceAware (true);
+        factory1.setExpandEntityReferences(false); // bug #1038    need to prevent XXE
+        factory1.setXIncludeAware(false); // bug #1038
+        DocumentBuilder builder = factory1.newDocumentBuilder(); // ParserConfigurationException
+        ByteArrayInputStream in = new ByteArrayInputStream(xmlstr.getBytes());
+        Element document = builder.parse(in).getDocumentElement (); // SAXException, IOException
+        in.close(); // IOExeception
+                // simulate readAssertion
+                UnmarshallerFactory factory2 = org.opensaml.xml.Configuration.getUnmarshallerFactory();
+        Unmarshaller unmarshaller = factory2.getUnmarshaller(document);
+        XMLObject xml = unmarshaller.unmarshall(document); // UnmarshallingException
+        Assertion samlAssertion = (Assertion) xml;
+        for (Statement statement : samlAssertion.getStatements ()) {
+            if (statement instanceof AttributeStatement) {
+                for (Attribute attribute : 
+                        ((AttributeStatement) statement).getAttributes ())
+                {
+                    String attributeValue = null;
+                    // XXX TODO currently this only grabs the last value if there was more than one value in the attribute... full implementation should handle all possibilities but we do provide a getAssertion() function so the client can navigate the assertion tree directly in case they need something not covered here
+                    for (XMLObject value : attribute.getAttributeValues ()) {
+                        if (value instanceof XSAny) {
+                            attributeValue = (((XSAny) value).getTextContent()); // boolean attributes are the text "true" or "false"
+                        }
+                        if( value instanceof XSString ) {
+                            attributeValue = (((XSString) value).getValue()); 
+                        }
+                    }
+                log.debug("Attribute: {} = {}", new String[] { attribute.getName(), attributeValue });
+                }
+            }
+        }
+        }
+    }    
     
     @Test
     public void testAvailableUnmarshallers() throws ParserConfigurationException, IOException, SAXException, UnmarshallingException, ConfigurationException {
