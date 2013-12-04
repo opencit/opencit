@@ -98,7 +98,39 @@ public enum ErrorCode {
     
     // Below are error codes for the Management service
     // 3000 to 3100 General Management Service errors
-    MS_MLE_ERROR(3001, "Error during retrieval of host MLE information: %s"),  // argument should be  e.getClass().getSimpleName()
+    MS_MLE_ERROR(3001, "Error during retrieval of host MLE information: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_API_CLIENT_ERROR(3002, "Error while creating the Api Client object: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_PLATFORM_RETRIEVAL_ERROR(3003, "Error during retrieval of platform name details: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_BULK_REGISTRATION_ERROR(3004, "Error during bulk host registration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_HOST_REGISTRATION_ERROR(3005, "Error during host registration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_HOST_UPDATE_ERROR(3006, "Error during host update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_WHITELIST_CONFIG_ERROR(3007, "Error during white list configuration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_MLE_VERIFICATION_ERROR(3008, "Errror during MLE verification for host: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_BIOS_MLE_ERROR(3009, "Error during OEM - BIOS MLE configuration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_VMM_MLE_ERROR(3010, "Error during OS - VMM MLE configuration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_MLE_WHITELIST_HOST_MAPPING_ERROR(3011, "Error during MLE white list host mapping: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_MLE_DELETION_ERROR(3012, "Error during MLE deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_WHITELIST_UPLOAD_ERROR(3013, "Error during white list upload to database: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_BIOS_MLE_NAME_ERROR(3014, "Error during BIOS MLE name generation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_VMM_MLE_NAME_ERROR(3015, "Error during VMM MLE name generation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_API_USER_REGISTRATION_ERROR(3016, "Error during API Client registration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_API_USER_UPDATE_ERROR(3017, "Error during API user update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_API_USER_SEARCH_ERROR(3018, "Error during search for API user: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_CA_ENABLE_ERROR(3019, "Error enabling CA: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_CA_DISABLE_ERROR(3020, "Error disabling CA: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_ROOT_CA_CERT_NOT_FOUND_ERROR(3021, "Mt Wilson Root CA certificate file is not found: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_ROOT_CA_CERT_READ_ERROR(3022, "Failed to read Mt Wilson Root CA certificate file: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_ROOT_CA_CERT_ERROR(3023, "Error during retrieval of root certificate CA chain: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_SAML_CERT_NOT_FOUND_ERROR(3024, "SAML certificate file is not found: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_SAML_CERT_READ_ERROR(3025, "Failed to read SAML certificate file: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_SAML_CERT_ERROR(3026, "Error during retrieval of SAML certificate chain: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_PRIVACYCA_CERT_NOT_FOUND_ERROR(3027, "Privacy CA certificate file is not found: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_PRIVACYCA_CERT_READ_ERROR(3028, "Failed to read Privacy CA certificate file: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_PRIVACYCA_CERT_ERROR(3029, "Error during retrieval of Privacy CA certificate chain: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_SSL_CERT_NOT_FOUND_ERROR(3030, "Server SSL certificate file is not found: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_SSL_CERT_READ_ERROR(3031, "Failed to read server SSL certificate file: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    MS_SSL_CERT_ERROR(3032, "Error during retrieval of SSL CA chain: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()    
+    
     // 3100 to 3200 APIClient
     MS_EXPIRED_CERTIFICATE(3101, "Client certificate has already expired. %s"),
     MS_CERTIFICATE_NOT_YET_VALID(3102, "Client certificate is not yet valid. Validity date is in the future. %s"),

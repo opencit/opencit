@@ -151,10 +151,12 @@ public class APIClient {
             }
         }
         catch(ParseException e) {
-            throw new MSException(e,ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse date: "+e.getMessage()+" (should be yyyy-MM-dd)");
+            log.error("Error parsing input.", e);
+            throw new MSException(ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse date: "+e.getMessage()+" (should be yyyy-MM-dd)");
         }
         catch(DecoderException e) {
-            throw new MSException(e,ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse fingerprint: "+e.getMessage()+" (should be hex)");
+            log.error("Error parsing input.", e);
+            throw new MSException(ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse fingerprint: "+e.getMessage()+" (should be hex)");
         }
         return new ApiClientBO().search(criteria);
     }
@@ -212,7 +214,8 @@ public class APIClient {
         try {
             return Hex.decodeHex(hex.toCharArray());
         } catch (DecoderException ex) {
-            throw new MSException(ex,ErrorCode.MS_ERROR_PARSING_INPUT, "Invalid fingerprint");
+            log.error("Error parsing input.", ex);
+            throw new MSException(ErrorCode.MS_ERROR_PARSING_INPUT, "Invalid fingerprint");
         }        
     }
 }
