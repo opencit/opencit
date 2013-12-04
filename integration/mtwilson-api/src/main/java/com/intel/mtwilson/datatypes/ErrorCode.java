@@ -95,6 +95,31 @@ public enum ErrorCode {
     WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST(2020, "White list host mapping does not exist for the MLE '%s'."),
     WS_INVALID_WHITE_LIST_VALUE(2021, "White list value '%s' specified for '%s' is invalid. Only hexadecimal SHA1 values are allowed."),
     
+    // Below error codes are for general white list service errors
+    WS_OEM_RETRIEVAL_ERROR(2201, "Error during retrieval of OEM information: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OEM_UPDATE_ERROR(2202, "Error during OEM update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OEM_CREATE_ERROR(2203, "Error during OEM creation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OEM_DELETE_ERROR(2204, "Error during OEM deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OS_RETRIEVAL_ERROR(2205, "Error during retrieval of OS information: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OS_UPDATE_ERROR(2206, "Error during OS update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OS_CREATE_ERROR(2207, "Error during OS creation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_OS_DELETE_ERROR(2208, "Error during OS deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_CREATE_ERROR(2209, "Error during MLE creation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_UPDATE_ERROR(2210, "Error during MLE update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_DELETE_ERROR(2211, "Error during MLE deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_RETRIEVAL_ERROR(2212, "Error during retrieval of MLE information: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_PCR_WHITELIST_CREATE_ERROR(2213, "Error during PCR whitelist creation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_PCR_WHITELIST_UPDATE_ERROR(2214, "Error during PCR whitelist update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_PCR_WHITELIST_DELETE_ERROR(2215, "Error during PCR whitelist deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_PCR_WHITELIST_RETRIEVAL_ERROR(2216, "Error during retrieval of PCR whitelists for MLE: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MODULE_WHITELIST_CREATE_ERROR(2217, "Error during Module whitelist creation: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MODULE_WHITELIST_UPDATE_ERROR(2218, "Error during Module whitelist update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MODULE_WHITELIST_DELETE_ERROR(2219, "Error during Module whitelist deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MODULE_WHITELIST_RETRIEVAL_ERROR(2220, "Error during retrieval of Module whitelists for MLE: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_HOST_MAP_CREATE_ERROR(2221, "Error during configuration of host used for creating white lists: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_HOST_MAP_UPDATE_ERROR(2222, "Error during update of the configuration of host used for creating white lists: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_HOST_MAP_DELETE_ERROR(2223, "Error during deletion of the configuration of host used for creating white lists: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    WS_MLE_HOST_MAP_RETRIEVAL_ERROR(2224, "Error during retrieval of host information used for creating white lists: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     
     // Below are error codes for the Management service
     // 3000 to 3100 General Management Service errors

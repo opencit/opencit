@@ -46,8 +46,10 @@ public class OemBO extends BaseBO {
         }catch(ASException ase){
             throw ase;
         } catch (Exception e) {
+            log.error("Error during retrieval of OEM details.", e);
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, "Error while fetching OEM data." + e.getMessage(), e);
-            throw new ASException(e);
+            // throw new ASException(e);
+            throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, e.getClass().getSimpleName());
         }
 
 
@@ -76,8 +78,9 @@ public class OemBO extends BaseBO {
         } catch (Exception e) {
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while updating OEM '%s'. %s", 
 //                    oemData.getName(), e.getMessage()), e);
-            
-            throw new ASException(e);
+            log.error("Error during OEM update.", e);
+            // throw new ASException(e);
+            throw new ASException(ErrorCode.WS_OEM_UPDATE_ERROR, e.getClass().getSimpleName());
         }
         return "true";
     }
@@ -105,7 +108,9 @@ public class OemBO extends BaseBO {
         } catch (Exception e) {
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while creating OEM '%s'. %s ", 
 //                    oemData.getName(), e.getMessage()), e);
-            throw new ASException(e);
+            log.error("Error during OEM creation.", e);
+            // throw new ASException(e);
+            throw new ASException(ErrorCode.WS_OEM_CREATE_ERROR, e.getClass().getSimpleName());
         }
         return "true";
     }
@@ -139,7 +144,9 @@ public class OemBO extends BaseBO {
             } catch (Exception e) {
 //                 throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while deleting OEM '%s'. %s ", 
 //                         osName, e.getMessage()), e);
-                throw new ASException(e);
+            log.error("Error during OEM deletion.", e);
+            // throw new ASException(e);
+            throw new ASException(ErrorCode.WS_OEM_CREATE_ERROR, e.getClass().getSimpleName());
             }
         return "true";
     }
