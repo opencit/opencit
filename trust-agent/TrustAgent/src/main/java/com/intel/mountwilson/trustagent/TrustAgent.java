@@ -18,6 +18,7 @@ import com.intel.mountwilson.trustagent.commands.daa.ChallengeResponseDaaCmd;
 import com.intel.mountwilson.trustagent.commands.daa.CreateIdentityDaaCmd;
 import com.intel.mountwilson.trustagent.commands.hostinfo.HostInfoCmd;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import java.net.InetAddress;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -30,7 +31,8 @@ import org.slf4j.LoggerFactory;
 public class TrustAgent {
 
     static Logger log = LoggerFactory.getLogger(TrustAgent.class.getName());
-
+    private InetAddress localhost; // issue #1038 prevent trust agent relay
+    
     public TrustAgent() {
         TADataContext context = new TADataContext();
         try {
@@ -47,6 +49,11 @@ public class TrustAgent {
             log.error( "Error while creating data folder ", e);
         }
 
+    }
+    
+    // issue #1038 prevent trust agent relay
+    public void setLocalAddress(InetAddress localaddress) {
+        localhost = localaddress;
     }
 
     public boolean takeOwnerShip() {
@@ -81,7 +88,8 @@ public class TrustAgent {
 
             context.setNonce(getNonce(xmlInput));
             context.setSelectedPCRs(getSelectedPCRs(xmlInput));
-
+            context.setIPAddress(localhost.getHostAddress()); // issue #1038 prevent trust agent relay
+            
             validateCertFile();
 
             new CreateNonceFileCmd(context).execute();
@@ -180,6 +188,12 @@ public class TrustAgent {
 
     }
 
+    /**
+     * XML fragment is  <nonce>base64-encoded-nonce</nonce> 
+     * @param xmlInput
+     * @return
+     * @throws TAException 
+     */
     private String getNonce(String xmlInput) throws TAException {
 
         try {
