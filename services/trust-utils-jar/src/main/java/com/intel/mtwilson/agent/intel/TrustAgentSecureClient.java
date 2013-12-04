@@ -300,12 +300,7 @@ public class TrustAgentSecureClient {
     }
 
     private String getXml(QuoteRequest quoteRequest) throws PropertyException, JAXBException {
-        JAXBContext jc = JAXBContext.newInstance("com.intel.mountwilson.ta.data.quoterequest");
-        Marshaller marshaller = jc.createMarshaller();
-        java.io.StringWriter sw = new StringWriter();
-         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-        marshaller.marshal(quoteRequest, sw);
-        String quoteRequestXml =  sw.toString();
+        String quoteRequestXml = jaxb.write(quoteRequest);
         log.debug("Quote request XML {}", quoteRequestXml);
         return quoteRequestXml;
     }

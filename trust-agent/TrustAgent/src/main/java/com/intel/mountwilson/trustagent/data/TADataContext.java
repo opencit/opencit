@@ -102,9 +102,9 @@ public class TADataContext {
         this.nonceBase64 = nonce;
     }
 
-    // issue #1038 prevent trust agent relay by default; customer can turn this off in configuration file by setting  mtwilson.tpm.quote.ipaddress=false
+    // issue #1038 prevent trust agent relay by default; customer can turn this off in configuration file by setting  mtwilson.tpm.quote.ipv4=false
     public boolean isQuoteWithIPAddress() {
-        String enabled = Config.getInstance().getProperty("mtwilson.tpm.quote.ipaddress");
+        String enabled = Config.getInstance().getProperty("mtwilson.tpm.quote.ipv4");
         if( enabled == null || "true".equalsIgnoreCase(enabled) || "enabled".equalsIgnoreCase(enabled) ) {
             return true;
         }

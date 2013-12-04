@@ -67,14 +67,14 @@ public class CreateNonceFileCmd implements ICommand {
                         ipaddress = ByteArray.subarray(inetAddress.getAddress(), 12, 4); // the last 4 bytes of of an ipv4-compatible ipv6 address are the ipv4 address (first 12 bytes are zero)
                     }
                     else {
-                        log.error("mtwilson.tpm.quote.ipaddress is enabled and requires an IPv4-compatible address but host address is IPv6: "+context.getIPAddress());                        
+                        log.error("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is IPv6: "+context.getIPAddress());                        
                     }
                 }
                 else {
-                    log.error("mtwilson.tpm.quote.ipaddress is enabled but localhost address is not IPv4 compatible: {}", context.getIPAddress());
+                    log.error("mtwilson.tpm.quote.ipv4 is enabled but localhost address is not IPv4 compatible: {}", context.getIPAddress());
                 }
                 if( ipaddress == null ) {
-                    throw new IllegalArgumentException("mtwilson.tpm.quote.ipaddress is enabled but localhost address cannot be resolved: "+context.getIPAddress());
+                    throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled but localhost address cannot be resolved: "+context.getIPAddress());
                 }
                 verifyNonce = ByteArray.concat(ByteArray.subarray(nonce,0,16),ipaddress);
             }

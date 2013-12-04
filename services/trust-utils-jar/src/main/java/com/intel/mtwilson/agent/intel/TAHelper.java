@@ -90,14 +90,15 @@ public class TAHelper {
     private boolean quoteWithIPAddress = true; // to fix issue #1038 we use this secure default
 //	private EntityManagerFactory entityManagerFactory;
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
-
+    private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
+    
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
         aikverifyhomeData = aikverifyhome + File.separator + "data";
         aikverifyhomeBin = aikverifyhome + File.separator + "bin";
         aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
-        quoteWithIPAddress = config.getBoolean("mtwilson.tpm.quote.ipaddress", true); // issue #1038
+        quoteWithIPAddress = config.getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
         boolean foundAllRequiredFiles = true;
         String required[] = new String[]{aikverifyhome, aikverifyCmd, aikverifyhomeData};
         for (String filename : required) {
@@ -124,6 +125,14 @@ public class TAHelper {
         trustedAik = pem;
     }
 
+    /**
+     * The default value of deleteTemporaryFiles is true.
+     * @param deleteTemporaryFiles true to delete them, false to keep them after processing
+     */
+    public void setDeleteTemporaryFiles(boolean deleteTemporaryFiles) {
+        this.deleteTemporaryFiles = deleteTemporaryFiles;
+    }
+    
     // DAA challenge
     //    public void verifyAikWithDaa(String hostIpAddress, int port) {
     public void verifyAikWithDaa(TblHosts tblHosts) throws XMLStreamException {
@@ -263,15 +272,15 @@ public class TAHelper {
                         ipaddress = ByteArray.subarray(inetAddress.getAddress(), 12, 4); // the last 4 bytes of of an ipv4-compatible ipv6 address are the ipv4 address (first 12 bytes are zero)
                     }
                     else {
-                        throw new IllegalArgumentException("mtwilson.tpm.quote.ipaddress is enabled and requires an IPv4-compatible address but host address is IPv6: "+hostname);                        
+                        throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is IPv6: "+hostname);                        
                     }
                 }
                 else {
-                    throw new IllegalArgumentException("mtwilson.tpm.quote.ipaddress is enabled and requires an IPv4-compatible address but host address is unknown type: "+hostname);                                            
+                    throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is unknown type: "+hostname);                                            
                 }
             }
             else {
-                throw new IllegalArgumentException("mtwilson.tpm.quote.ipaddress is enabled and requires an IPv4-compatible address but host address is unknown type: "+hostname);                                                            
+                throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is unknown type: "+hostname);                                                            
             }
             return ipaddress;
     }
@@ -292,7 +301,7 @@ public class TAHelper {
             // see also corresponding code in TrustAgent CreateNonceFileCmd
             byte[] ipaddress = getIPAddress(hostname);
             if( ipaddress == null ) {
-                throw new IllegalArgumentException("mtwilson.tpm.quote.ipaddress is enabled but host address cannot be resolved: "+hostname);
+                throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled but host address cannot be resolved: "+hostname);
             }
             verifyNonce = ByteArray.concat(ByteArray.subarray(nonce,0,16),ipaddress);
         }
@@ -346,20 +355,24 @@ public class TAHelper {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
             log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-            q.delete();
-            n.delete();
-            c.delete();
-            r.delete();
+            if( deleteTemporaryFiles ) {
+                q.delete();
+                n.delete();
+                c.delete();
+                r.delete();
+            }
             return pcrManifest;
         }
         else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
             log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-            q.delete();
-            n.delete();
-            c.delete();
-            r.delete();
+            if( deleteTemporaryFiles ) {
+                q.delete();
+                n.delete();
+                c.delete();
+                r.delete();
+            }
             return pcrManifest;
         }
 
@@ -605,7 +618,6 @@ public class TAHelper {
         return "rsapubkey_" + sessionId + ".key";
     }
 
-    // BUG #497 need to rewrite this to return List<Pcr> ... the Pcr.equals()  does same as (actually more than) IManifest.verify() because Pcr ensures the index is the same and IManifest does not!  and also it is less redundant, because this method returns Map< pcr index as string, manifest object containing pcr index and value >  
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
 //        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         PcrManifest pcrManifest = new PcrManifest();
