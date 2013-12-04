@@ -60,8 +60,11 @@ public class CA {
             Password newPassword = Password.valueOf(newSaltedPasswordString);
             dao.enableCaWithPassword(newPassword);
             return Boolean.TRUE.toString();
+        } catch (MSException ex) {
+            throw ex;
         } catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during enabling CA. ", e);
+            throw new MSException(ErrorCode.MS_CA_ENABLE_ERROR, e.getClass().getSimpleName());
         }
         
     }
@@ -73,8 +76,12 @@ public class CA {
         try {
             dao.disableCa();
             return Boolean.TRUE.toString();
+        } catch (MSException ex) {
+            throw ex;
         } catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during disabling CA. ", e);
+            throw new MSException(ErrorCode.MS_CA_DISABLE_ERROR, e.getClass().getSimpleName());
         }
         
     }
@@ -127,13 +134,16 @@ public class CA {
                 
         } 
         catch (FileNotFoundException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Mt Wilson Root CA certificate file is not found");
+            log.error("Mt Wilson Root CA certificate file is not found. ", e);
+            throw new MSException(ErrorCode.MS_ROOT_CA_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
         }
         catch (IOException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read Mt Wilson Root CA certificate file");
+            log.error("Failed to read Mt Wilson Root CA certificate file. ", e);
+            throw new MSException(ErrorCode.MS_ROOT_CA_CERT_READ_ERROR, e.getClass().getSimpleName());
         }
         catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during retrieval of root certificate CA chain. ", e);            
+            throw new MSException(ErrorCode.MS_ROOT_CA_CERT_ERROR, e.getClass().getSimpleName());
         }
         
     }
@@ -167,13 +177,19 @@ public class CA {
             }else throw new FileNotFoundException("Could not load Saml Cert location from config");
         }
         catch (FileNotFoundException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "SAML certificate file is not found");
+            log.error("SAML certificate file is not found.", e);
+            //throw new MSException(e, ErrorCode.SYSTEM_ERROR, "SAML certificate file is not found");
+            throw new MSException(ErrorCode.MS_SAML_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
         }
         catch (IOException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read SAML certificate file");
+            log.error("Failed to read SAML certificate file.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read SAML certificate file");
+            throw new MSException(ErrorCode.MS_SAML_CERT_READ_ERROR, e.getClass().getSimpleName());
         }
         catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during retrieval of SAML certificate chain.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            throw new MSException(ErrorCode.MS_SAML_CERT_ERROR, e.getClass().getSimpleName());
         }
         
     }
@@ -206,13 +222,19 @@ public class CA {
             }else throw new FileNotFoundException("Could not read Privacy CA cert file location from config");
         }
         catch (FileNotFoundException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Privacy CA certificate file is not found");
+            log.error("Privacy CA certificate file is not found.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Privacy CA certificate file is not found");
+            throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
         }
         catch (IOException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read Privacy CA certificate file");
+            log.error("Failed to read Privacy CA certificate file.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read Privacy CA certificate file");
+            throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_READ_ERROR, e.getClass().getSimpleName());
         }
         catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during retrieval of Privacy CA certificate chain.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
         }
         
     }
@@ -252,13 +274,19 @@ public class CA {
             
         }
         catch (FileNotFoundException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Server SSL certificate file is not found");
+            log.error("Server SSL certificate file is not found.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Server SSL certificate file is not found");
+            throw new MSException(ErrorCode.MS_SSL_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
         }
         catch (IOException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read server SSL certificate file");
+            log.error("Failed to read server SSL certificate file.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read server SSL certificate file");
+            throw new MSException(ErrorCode.MS_SSL_CERT_READ_ERROR, e.getClass().getSimpleName());
         }
         catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during retrieval of SSL certificate.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            throw new MSException(ErrorCode.MS_SSL_CERT_ERROR, e.getClass().getSimpleName());
         }   
     }
 
@@ -302,13 +330,19 @@ public class CA {
             
         }
         catch (FileNotFoundException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Server SSL certificate file is not found");
+            log.error("Server SSL certificate file is not found.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Server SSL certificate file is not found");
+            throw new MSException(ErrorCode.MS_SSL_CERT_NOT_FOUND_ERROR, e.getClass().getSimpleName());
         }
         catch (IOException e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read server SSL certificate file");
+            log.error("Failed to read server SSL certificate file.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, "Failed to read server SSL certificate file");
+            throw new MSException(ErrorCode.MS_SSL_CERT_READ_ERROR, e.getClass().getSimpleName());
         }
         catch (Exception e) {
-            throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            log.error("Error during retrieval of SSL CA chain.", e);
+            // throw new MSException(e, ErrorCode.SYSTEM_ERROR, e.toString());
+            throw new MSException(ErrorCode.MS_SSL_CERT_ERROR, e.getClass().getSimpleName());
         }   
     }
 }
