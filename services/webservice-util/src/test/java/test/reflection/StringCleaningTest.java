@@ -4,7 +4,9 @@
  */
 package test.reflection;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +22,8 @@ public class StringCleaningTest {
         public String getName() { return "sparky"; } 
     }
     public static class Person {
+        public String description = "Test";
+        private String desc2 = "Decription";
         public String getName() { return "bob"; }
         public int getAge() { return 40; }
         public Pet getPet() { return new Pet(); }
@@ -54,6 +58,19 @@ public class StringCleaningTest {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
         }
+        
+        // Now validate the fields
+        Set<Field> stringFields = getStringFields(object.getClass());
+        for(Field field : stringFields) {
+            try {
+                field.setAccessible(true);
+                String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                validateInput(value);
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+        
         // TODO  getStringCollectionMethods,  getStringArrayMethods
         // for the collection methods,  you would do  Collection<String> inputCollection = (Collection<String>)method.invoke(object) and then loop on the collection and validateInput on each item.   similar pattern for the arrays.
         
@@ -102,6 +119,18 @@ public class StringCleaningTest {
         return stringMethods;
     }
     
+    public static Set<Field> getStringFields(Class<?> clazz) {
+        HashSet<Field> stringFields = new HashSet<Field>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        if (declaredFields != null && declaredFields.length > 0)
+        for(Field field : declaredFields ) {
+            int modifiers = field.getModifiers();
+            if( (field.getModifiers() == Modifier.PUBLIC) && (field.getGenericType().toString().equalsIgnoreCase("class java.lang.String")) ) {
+                stringFields.add(field);
+            }
+        }
+        return stringFields;
+    }
     // TODO  getStringCollectionMethods,  getStringArrayMethods,  getCustomObjectMethods , getCustomObjectCollectionMethods, getCustomObjectArrayMethods
     
 }
