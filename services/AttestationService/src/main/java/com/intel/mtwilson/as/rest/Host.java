@@ -34,6 +34,8 @@ import com.intel.mtwilson.security.annotations.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Web Service *
@@ -43,6 +45,7 @@ import javax.ws.rs.DefaultValue;
 public class Host {
 
         private HostBO hostBO = new ASComponentFactory().getHostBO();
+        private Logger log = LoggerFactory.getLogger(getClass());
 
         /**
          * Returns the location of a host.
@@ -91,8 +94,10 @@ public class Host {
         }
         catch(ASException e) {
             throw e;
-        }catch(Exception e) {
-            throw new ASException(e);
+        }catch(Exception ex) {
+            // throw new ASException(e);
+            log.error("Error during retrieval of host trust status.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
         }
     }
@@ -137,8 +142,10 @@ public class Host {
         }
         catch(ASException e) {
             throw e;
-        }catch(Exception e) {
-            throw new ASException(e);
+        }catch(Exception ex) {
+            // throw new ASException(e);
+            log.error("Error during retrieval of host trust certificate.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_CERT_ERROR, ex.getClass().getSimpleName());
         }
         }
     }
@@ -251,8 +258,10 @@ public class Host {
                         else throw new ASException(ErrorCode.AS_MISSING_INPUT, "hostName");
                 } catch (ASException e) {
                         throw e;
-                } catch (Exception e) {
-                        throw new ASException(e);
+                } catch (Exception ex) {
+                        // throw new ASException(e);
+                        log.error("Error during retrieval of host trust status.", ex);
+                        throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
                 }
         }
 

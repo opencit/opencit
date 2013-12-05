@@ -89,7 +89,10 @@ public class BulkHostTrustBO {
 
             return report;
         } catch (Exception ex) {
-            throw new ASException(ex);
+            // throw new ASException(ex);
+            // Bug: 1038 - prevent leaks in error messages to client
+            log.error("Error during bulk host trust retrieval.", ex);
+            throw new ASException(ErrorCode.AS_BULK_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
     
@@ -147,7 +150,10 @@ public class BulkHostTrustBO {
 
             return report;
         } catch (Exception ex) {
-            throw new ASException(ex);
+            // throw new ASException(ex);
+            // Bug: 1038 - prevent leaks in error messages to client
+            log.error("Error during bulk host trust retrieval.", ex);
+            throw new ASException(ErrorCode.AS_BULK_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
     
@@ -177,7 +183,9 @@ public class BulkHostTrustBO {
             }
             catch(Exception e) {
                 isError = true;
-                result = String.format("<Host><Name>%s</Name><ErrorCode>%s</ErrorCode><ErrorMessage>%s</ErrorMessage></Host>", hostname, ErrorCode.UNKNOWN_ERROR.toString(), e.getLocalizedMessage());
+                // result = String.format("<Host><Name>%s</Name><ErrorCode>%s</ErrorCode><ErrorMessage>%s</ErrorMessage></Host>", hostname, ErrorCode.UNKNOWN_ERROR.toString(), e.getLocalizedMessage());
+                result = String.format("<Host><Name>%s</Name><ErrorCode>%s</ErrorCode><ErrorMessage>%s</ErrorMessage></Host>", 
+                        hostname, ErrorCode.AS_HOST_TRUST_ERROR.toString(), String.format(ErrorCode.AS_HOST_TRUST_ERROR.getMessage(), e.getClass().getSimpleName()));
             }
         }
         
@@ -213,7 +221,7 @@ public class BulkHostTrustBO {
             }
             catch(Exception e) {
                 isError = true;
-                result = new HostTrust(ErrorCode.UNKNOWN_ERROR,e.getLocalizedMessage(),hostname, null, null); 
+                result = new HostTrust(ErrorCode.AS_HOST_TRUST_ERROR, String.format(ErrorCode.AS_HOST_TRUST_ERROR.getMessage(), e.getClass().getSimpleName()),hostname, null, null); 
             }
         }
         

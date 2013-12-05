@@ -340,8 +340,8 @@ public class HostTrustBO extends BaseBO {
                         
         } catch (Exception ex) {
             // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
-            log.error("Error during host registration/update. {}.", ex.getMessage());
-            throw new ASException(ErrorCode.SYSTEM_ERROR, ex);
+            log.error("Error during host registration/update.", ex);
+            throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, ex.getClass().getSimpleName());
         }        
     }
     
@@ -1155,8 +1155,10 @@ public class HostTrustBO extends BaseBO {
             return location;
         } catch (ASException e) {
             throw e;
-        } catch (Exception e) {
-            throw new ASException(e);
+        } catch (Exception ex) {
+            // throw new ASException(e);
+            log.error("Error during retrieval of host location.", ex);
+            throw new ASException(ErrorCode.AS_HOST_LOCATION_ERROR, ex.getClass().getSimpleName());
         }
     }
     
@@ -1198,8 +1200,10 @@ public class HostTrustBO extends BaseBO {
             }
         } catch (ASException e) {
             throw e;
-        } catch (Exception e) {
-            throw new ASException( e);
+        } catch (Exception ex) {
+            // throw new ASException( e);
+            log.error("Error during configuration of host location.", ex);
+            throw new ASException(ErrorCode.AS_HOST_LOCATION_CONFIG_ERROR, ex.getClass().getSimpleName());
         }
 
         return true;
@@ -1247,8 +1251,10 @@ public class HostTrustBO extends BaseBO {
              *
              */
             throw e;
-        } catch (Exception e) {
-            throw new ASException( e);
+        } catch (Exception ex) {
+            // throw new ASException( e);
+            log.error("Error during retrieval of host trust status.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -1325,22 +1331,28 @@ public class HostTrustBO extends BaseBO {
                     log.debug("e is an instance of ASExpection: " +String.valueOf(ase.getErrorCode()));
                     tblSamlAssertion.setErrorCode(String.valueOf(ase.getErrorCode()));
                 }else{
-                    log.debug("e is NOT an instance of ASExpection: " +String.valueOf(ErrorCode.SYSTEM_ERROR.getErrorCode()));
-                    tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.SYSTEM_ERROR.getErrorCode()));
+                    log.debug("e is NOT an instance of ASExpection: " +String.valueOf(ErrorCode.AS_HOST_TRUST_ERROR.getErrorCode()));
+                    tblSamlAssertion.setErrorCode(String.valueOf(ErrorCode.AS_HOST_TRUST_ERROR.getErrorCode()));
                 }
-                tblSamlAssertion.setErrorMessage(e.getMessage());
+                // tblSamlAssertion.setErrorMessage(e.getMessage());
+                // Bug fix for 1038
+                tblSamlAssertion.setErrorMessage(e.getClass().getSimpleName());
                 new TblSamlAssertionJpaController(getEntityManagerFactory()).create(tblSamlAssertion);
             }catch(Exception ex){
                 //log.debug("getTrustwithSaml caugh exception while generating error saml assertion");
-                log.error("getTrustwithSaml caugh exception while generating error saml assertion");
-                String msg = ex.getMessage();
-                log.debug(msg);
-                throw new ASException(new Exception("getTrustWithSaml " + msg));
+                log.error("getTrustwithSaml caugh exception while generating error saml assertion", ex);
+                // String msg = ex.getMessage();
+                String msg = ex.getClass().getSimpleName();
+                // log.debug(msg);
+                // throw new ASException(new Exception("getTrustWithSaml " + msg));
+                throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, msg);
                 //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
             } 
             //Daniel, change the messages into meaningful thiings here
-            log.debug("e.getMessage = "+e.getMessage());
-            throw new ASException(new Exception(e.getMessage()));
+            //log.debug("e.getMessage = "+e.getMessage());
+            //throw new ASException(new Exception(e.getMessage()));
+            log.error("Error during retrieval of host trust status.", e);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
             //throw new ASException(new Exception("Host Manifest is missing required PCRs."));
         }
     }
@@ -1388,8 +1400,8 @@ public class HostTrustBO extends BaseBO {
             log.error("Error while getting trust for host " + host,e );
             //System.err.println("JIM DEBUG"); 
             //e.printStackTrace(System.err);
-            return new HostTrust(ErrorCode.SYSTEM_ERROR,
-                    new AuthResponse(ErrorCode.SYSTEM_ERROR,e.getMessage()).getErrorMessage(),host,null,null);
+            // return new HostTrust(ErrorCode.SYSTEM_ERROR, new AuthResponse(ErrorCode.SYSTEM_ERROR,e.getMessage()).getErrorMessage(),host,null,null);
+            return new HostTrust(ErrorCode.AS_HOST_TRUST_ERROR, new AuthResponse(ErrorCode.AS_HOST_TRUST_ERROR,e.getClass().getSimpleName()).getErrorMessage(),host,null,null);
         }
 
     }
@@ -1423,7 +1435,8 @@ public class HostTrustBO extends BaseBO {
             throw ase;
         }catch(Exception e){
             log.error("Error while getting trust for host " + host,e );
-            throw new ASException(e);
+            // throw new ASException(e);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, e.getClass().getSimpleName());
         }
 
     }
@@ -1642,8 +1655,8 @@ public class HostTrustBO extends BaseBO {
                         
         } catch (Exception ex) {
             // If in case we get any exception, we just return back the default names so that we don't end up with aborting the complete operation.            
-            log.error("Error during host registration/update. {}.", ex.getMessage());
-            throw new ASException(ErrorCode.SYSTEM_ERROR, ex);
+            log.error("Error during host registration/update. ", ex);
+            throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, ex.getClass().getSimpleName());
         }        
     }
     
