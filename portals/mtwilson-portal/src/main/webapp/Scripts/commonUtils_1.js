@@ -64,6 +64,9 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		url:url,
 		data: requestData,
 		dataType: "json",
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
 		success: function (responseJSON,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
@@ -120,6 +123,9 @@ function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		url:url,
 		data: requestData,
 		dataType: "html",
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
 		success: function (response,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {

@@ -1759,7 +1759,7 @@ public class ManagementConsoleDataController extends MultiActionController {
 
         //Get List of all host available. 
         List<HostDetailsEntityVO> listOfVos = demoPortalServices.getHostListFromDB(getAttestationService(req, AttestationService.class));
-        int no_row_per_page = Integer.parseInt(TDPConfig.getConfiguration().getString("mtwilson.tdbp.paginationRowCount"));
+        int no_row_per_page = Integer.parseInt(TDPConfig.getConfiguration().getString("mtwilson.tdbp.paginationRowCount", "10")); // providing default value because it's not a critical configuration setting
 
         //Divide List of all host into a subList based on the value of host per page. 
         List<List<HostDetailsEntityVO>> list = Lists.partition(listOfVos, no_row_per_page);
