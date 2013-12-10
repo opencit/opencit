@@ -71,6 +71,21 @@ public enum ErrorCode {
     AS_CITRIX_ERROR(1029, "Citrix error"),
     AS_MLE_DOES_NOT_EXIST(1030, "MLE '%s' of version '%s' is not configured in the system."),
 
+    // Below error codes are for general white list service errors
+    AS_REGISTER_HOST_ERROR(1200, "Error during host registration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_UPDATE_HOST_ERROR(1201, "Error during host update: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_DELETE_HOST_ERROR(1202, "Error during host deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_VERIFY_HOST_ERROR(1203, "Error during verification of registered host: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_QUERY_HOST_ERROR(1204, "Error during querying for registered hosts: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_BULK_REGISTER_HOST_ERROR(1205, "Error during bulk host registration: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_HOST_REPORT_ERROR(1206, "Error during retrieval of host trust report: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_HOST_ATTESTATION_REPORT_ERROR(1207, "Error during retrieval of host attestation report: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_BULK_HOST_TRUST_ERROR(1208, "Error during bulk host trust retrieval: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_HOST_TRUST_ERROR(1209, "Error during retrieval of host trust status: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_HOST_LOCATION_ERROR(1210, "Error during retrieval of host location information: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_HOST_LOCATION_CONFIG_ERROR(1211, "Error during configuration of host location: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_HOST_TRUST_CERT_ERROR(1212, "Error during retrieval of host trust certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),

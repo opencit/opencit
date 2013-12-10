@@ -206,7 +206,11 @@ public class HostBO extends BaseBO {
         catch (Exception e) {
             //System.err.println("JIM DEBUG");
             //e.printStackTrace(System.err);
-			throw new ASException(e);
+			// throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during registration of host.", e);
+                        throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, e.getClass().getSimpleName());
+
 		}
 		return new HostResponse(ErrorCode.OK);
 	}
@@ -393,7 +397,10 @@ public class HostBO extends BaseBO {
                 } catch (CryptographyException e) {
                         throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during host update.", e);
+                        throw new ASException(ErrorCode.AS_UPDATE_HOST_ERROR, e.getClass().getSimpleName());                        
                 }
 
                 return new HostResponse(ErrorCode.OK);
@@ -428,7 +435,10 @@ public class HostBO extends BaseBO {
                 } catch (Exception e) {
                         //System.err.println("JIM DEBUG"); 
                         //e.printStackTrace(System.err);
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during host deletion.", e);
+                        throw new ASException(ErrorCode.AS_DELETE_HOST_ERROR, e.getClass().getSimpleName());                        
                 }
                 return new HostResponse(ErrorCode.OK);
         }
@@ -639,7 +649,10 @@ public class HostBO extends BaseBO {
                     log.info("SaveHostInDatabase caught ex!");
                     e.printStackTrace();
                     log.info("end print stack trace");
-                    throw new ASException(e);
+                    // throw new ASException(e);
+                    // Bug: 1038 - prevent leaks in error messages to client
+                    log.error("Error during saving the host to DB.", e);
+                    throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, e.getClass().getSimpleName());
                 }
                 log.info("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
@@ -727,7 +740,10 @@ public class HostBO extends BaseBO {
                 } catch (ASException e) {
                         throw e;
                 } catch (Exception e) {
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during verification of registered host.", e);
+                        throw new ASException(ErrorCode.AS_VERIFY_HOST_ERROR, e.getClass().getSimpleName());
                 }
         }
 
@@ -812,7 +828,10 @@ public class HostBO extends BaseBO {
                 } catch (ASException e) {
                         throw e;
                 } catch (Exception e) {
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during querying for registered hosts.", e);
+                        throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, e.getClass().getSimpleName());
                 }
 
         }

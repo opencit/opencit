@@ -3,6 +3,7 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.security.annotations.*;
@@ -73,8 +74,10 @@ public class PollHosts {
         catch(ASException e) {
             throw e;
         }
-        catch(Exception e) {
-            throw new ASException(e);
+        catch(Exception ex) {
+            // throw new ASException(e);
+            log.error("Error during retrieval of host trust status.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
 
