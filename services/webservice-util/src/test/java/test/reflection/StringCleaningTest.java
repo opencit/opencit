@@ -4,6 +4,7 @@
  */
 package test.reflection;
 
+import com.intel.dcsg.cpg.validation.Validate;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -12,6 +13,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,7 +70,15 @@ public class StringCleaningTest {
             try {
                 String input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 System.out.println("Verifying value : " + input);
-                validateInput(input);
+                Pattern pattern;
+                if( method.isAnnotationPresent(Validate.class) ) {
+                    String regex = method.getAnnotation(Validate.class).value();
+                    pattern = getPattern(regex);
+                }
+                else {
+                    pattern = getPattern(DEFAULT_PATTERN);
+                }
+                validateInput(input, pattern);
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
@@ -82,7 +92,15 @@ public class StringCleaningTest {
                 field.setAccessible(true);
                 String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 System.out.println("Verifying value : " + value);
-                validateInput(value);
+                Pattern pattern;
+                if( field.isAnnotationPresent(Validate.class) ) {
+                    String regex = field.getAnnotation(Validate.class).value();
+                    pattern = getPattern(regex);
+                }
+                else {
+                    pattern = getPattern(DEFAULT_PATTERN);
+                }
+                validateInput(value, pattern);
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
@@ -163,17 +181,30 @@ public class StringCleaningTest {
         
     }
     
+    public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
+    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]$";
+    
+    public static Pattern getPattern(String regex) {
+        Pattern pattern = patternMap.get(regex);
+        if( pattern == null ) {
+            pattern = Pattern.compile(regex);
+            patternMap.put(regex, pattern);
+        }
+        return pattern;
+    }
 
     public static void validateInput(String input) {
-        Pattern regex = Pattern.compile("[^a-zA-Z0-9]");
-        Matcher matcher = regex.matcher(input);
-        if (matcher.find()) {
+        validateInput(input, getPattern(DEFAULT_PATTERN));
+    }
+
+    public static void validateInput(String input, Pattern pattern) {
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.matches()) {
             System.out.println("Illegal characters found in : " + input);
             throw new IllegalArgumentException();
         }
-        // TODO check for illegal characters,  if present throw an IllegalArgumentException
     }
-   
+    
     /**
      * This function verifies if the class is one of the built in datatypes or a custom class. This will also verify the arrays for
      * built-in data types.
@@ -335,5 +366,6 @@ public class StringCleaningTest {
         return customObjectArrayMethods;        
     }    
     // TODO  getStringCollectionMethods,  getStringArrayMethods,  getCustomObjectMethods , getCustomObjectCollectionMethods, getCustomObjectArrayMethods
+    
     
 }
