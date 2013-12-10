@@ -4,7 +4,7 @@
  */
 package test.reflection;
 
-import com.intel.dcsg.cpg.validation.Validate;
+import com.intel.dcsg.cpg.validation.Regex; // 20131012
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,6 +26,7 @@ import org.junit.Test;
  * @author jbuhacoff
  */
 public class StringCleaningTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringCleaningTest.class);
     
     public static class Pet {
         public String getName() { return "sparky@"; } 
@@ -34,6 +35,8 @@ public class StringCleaningTest {
         public String description = "Test";
         private String desc2 = "Decription";
         public String getName() { return "bob"; }
+        @Regex("^[a-zA-z0-9_-]+@[a-zA-z0-9-]+\\.(?:com|org|net)$") // not a real email regex,  just for quick testing      // 20131012
+        public String getEmail() { return "bob^@example.com"; }    // 20131012
         public int getAge() { return 40; }
         public Pet getPet() { return new Pet(); }
         public String[] getPetNames() { return new String[] {"doga","dogb","dogc"}; }
@@ -55,6 +58,35 @@ public class StringCleaningTest {
         validate(object, new ArrayList<Object>());
     }
     
+    // 20131012
+    // this is used for String getName(),  String[] getNames(), and Collection<String> getNames()  but caller is responsible for iterating over the values
+    public static void validateStringMethod(Object object, Method method, String input) {
+        Pattern pattern;
+        if( method.isAnnotationPresent(Regex.class) ) {
+            String regex = method.getAnnotation(Regex.class).value();
+            log.debug("Regex annotation: {}", regex);
+            pattern = getPattern(regex);
+        }
+        else {
+            pattern = getPattern(DEFAULT_PATTERN);
+        }
+        validateInput(input, pattern);        
+    }
+    // 20131012
+    // this is used for String name,  String[] names(), and Collection<String> names()  but caller is responsible for iterating over the values
+    public static void validateStringField(Object object, Field field, String input) {
+        Pattern pattern;
+        if( field.isAnnotationPresent(Regex.class) ) {
+            String regex = field.getAnnotation(Regex.class).value();
+            pattern = getPattern(regex);
+        }
+        else {
+            pattern = getPattern(DEFAULT_PATTERN);
+        }
+        validateInput(input, pattern);        
+    }
+    
+    
     public static void validate(Object object, ArrayList<Object> stack) {
         // first check if the object being requested is already in the stack... if so we skip it to avoid infinite recursion
         for(Object item : stack) {
@@ -66,19 +98,11 @@ public class StringCleaningTest {
         // now validate the object
         Set<Method> stringMethods = getStringMethods(object.getClass());
         for(Method method : stringMethods) {
-            System.out.println("Verifying method : " + method.getName());
+            log.debug("Verifying method : " + method.getName());
             try {
                 String input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                System.out.println("Verifying value : " + input);
-                Pattern pattern;
-                if( method.isAnnotationPresent(Validate.class) ) {
-                    String regex = method.getAnnotation(Validate.class).value();
-                    pattern = getPattern(regex);
-                }
-                else {
-                    pattern = getPattern(DEFAULT_PATTERN);
-                }
-                validateInput(input, pattern);
+                log.debug("Verifying value : " + input);
+                validateStringMethod(object, method, input); // 20131012
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
@@ -87,20 +111,12 @@ public class StringCleaningTest {
         // Now validate the fields
         Set<Field> stringFields = getStringFields(object.getClass());
         for(Field field : stringFields) {
-            System.out.println("Verifying field : " + field.getName());
+            log.debug("Verifying field : " + field.getName());
             try {
                 field.setAccessible(true);
                 String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                System.out.println("Verifying value : " + value);
-                Pattern pattern;
-                if( field.isAnnotationPresent(Validate.class) ) {
-                    String regex = field.getAnnotation(Validate.class).value();
-                    pattern = getPattern(regex);
-                }
-                else {
-                    pattern = getPattern(DEFAULT_PATTERN);
-                }
-                validateInput(value, pattern);
+                log.debug("Verifying value : " + value);
+                validateStringField(object, field, value); // 20131012
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
@@ -108,12 +124,12 @@ public class StringCleaningTest {
         
         Set<Method> stringArrayMethods = getStringArrayMethods(object.getClass());
         for(Method method : stringArrayMethods) {
-            System.out.println("Verifying method : " + method.getName());
+            log.debug("Verifying method : " + method.getName());
             try {
                 String[] collection = (String[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for (String input : collection) {
-                    System.out.println("Verifying value : " + input);
-                    validateInput(input);
+                    log.debug("Verifying value : " + input);
+                    validateStringMethod(object, method, input); // 20131012
                 }
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
@@ -122,12 +138,12 @@ public class StringCleaningTest {
 
         Set<Method> stringCollectionMethods = getStringCollectionMethods(object.getClass());
         for(Method method : stringCollectionMethods) {
-            System.out.println("Verifying method : " + method.getName());
+            log.debug("Verifying method : " + method.getName());
             try {
                 List<String> collection = (List<String>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for(String input : collection) {
-                    System.out.println("Verifying value : " + input);
-                    validateInput(input);
+                    log.debug("Verifying value : " + input);
+                    validateStringMethod(object, method, input); // 20131012
                 }
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
@@ -136,7 +152,7 @@ public class StringCleaningTest {
         
         Set<Method> customMethods = getCustomObjectMethods(object.getClass());
         for(Method method : customMethods) {
-            System.out.println("Verifying method : " + method.getName());
+            log.debug("Verifying method : " + method.getName());
             try {
                 Object customObject = method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 validate(customObject, stack);
@@ -147,7 +163,7 @@ public class StringCleaningTest {
         
         Set<Method> customObjectCollectionMethods = getCustomObjectCollectionMethods(object.getClass());
         for(Method method : customObjectCollectionMethods) {
-            System.out.println("Verifying method : " + method.getName());
+            log.debug("Verifying method : " + method.getName());
             try {
                 List<Object> customObjectCollection = (List<Object>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for (Object customObject : customObjectCollection) {
@@ -160,7 +176,7 @@ public class StringCleaningTest {
         
         Set<Method> customObjectArrayMethods = getCustomObjectArrayMethods(object.getClass());
         for(Method method : customObjectArrayMethods) {
-            System.out.println("Verifying method : " + method.getName());
+            log.debug("Verifying method : " + method.getName());
             try {
                 Object[] customObjectCollection = (Object[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for (Object customObject : customObjectCollection) {                
@@ -181,9 +197,11 @@ public class StringCleaningTest {
         
     }
     
+    // 20131012
     public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
-    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]$";
+    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
     
+    // 20131012
     public static Pattern getPattern(String regex) {
         Pattern pattern = patternMap.get(regex);
         if( pattern == null ) {
@@ -194,13 +212,14 @@ public class StringCleaningTest {
     }
 
     public static void validateInput(String input) {
-        validateInput(input, getPattern(DEFAULT_PATTERN));
+        validateInput(input, getPattern(DEFAULT_PATTERN));    // 20131012
     }
 
+    // 20131012
     public static void validateInput(String input, Pattern pattern) {
         Matcher matcher = pattern.matcher(input);
-        if (matcher.matches()) {
-            System.out.println("Illegal characters found in : " + input);
+        if (!matcher.matches()) {
+            log.debug("Illegal characters found in : " + input);
             throw new IllegalArgumentException();
         }
     }
