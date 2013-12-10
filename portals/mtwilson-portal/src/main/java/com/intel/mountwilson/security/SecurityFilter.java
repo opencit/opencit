@@ -7,6 +7,7 @@ import com.intel.dcsg.cpg.authz.token.TokenValidator;
 import com.intel.dcsg.cpg.authz.token.UnsupportedTokenVersionException;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.key.KeyNotFoundException;
+import com.intel.mountwilson.as.common.ASConfig;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -26,10 +27,10 @@ public class SecurityFilter implements Filter {
 
     @Override
     public void init(FilterConfig arg0) throws ServletException {
-
+        int duration = ASConfig.getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800); // use same duration as the session timeout
         factory = new TokenFactory();
         validator = new TokenValidator(factory);
-        validator.setExpiresAfter(60); // tokens expire after 60 seconds for testing,  XXX TODO for production probably set it higher to an hour (make it configurable) because when user submits an expired token the server has to return a new one and then they have to resubmit the request so we'll want javascript to preiodically refresh it if it's a short time like a minute, and that's not implemented yet.
+        validator.setExpiresAfter(duration); 
     }
 
     private boolean isRequestMatchingReferer(HttpServletRequest request) {
