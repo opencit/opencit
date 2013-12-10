@@ -7,9 +7,16 @@ package test.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
@@ -19,7 +26,7 @@ import org.junit.Test;
 public class StringCleaningTest {
     
     public static class Pet {
-        public String getName() { return "sparky"; } 
+        public String getName() { return "sparky@"; } 
     }
     public static class Person {
         public String description = "Test";
@@ -27,6 +34,12 @@ public class StringCleaningTest {
         public String getName() { return "bob"; }
         public int getAge() { return 40; }
         public Pet getPet() { return new Pet(); }
+        public String[] getPetNames() { return new String[] {"doga","dogb","dogc"}; }
+        public Integer[] getPetIDs() { return new Integer[] {1,2,3};}
+        public List<Integer> getPetIDList() { return new ArrayList<Integer>(Arrays.asList(new Integer[] {1,2,3}));} 
+        public List<String> getPetList() { return new ArrayList<String>(Arrays.asList(new String[] {"dogA","dogB","dogC"}));} //{{ add("dogA");  add("dogB");  add("dogC");}};}
+        public List<Pet> getPetList2() {return new ArrayList<Pet>();}     
+        public Pet[] getPetList3() {return new Pet[4];}
         // TODO  methods that return arraylist<string>  and string[] 
     }
     
@@ -51,8 +64,10 @@ public class StringCleaningTest {
         // now validate the object
         Set<Method> stringMethods = getStringMethods(object.getClass());
         for(Method method : stringMethods) {
+            System.out.println("Verifying method : " + method.getName());
             try {
                 String input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                System.out.println("Verifying value : " + input);
                 validateInput(input);
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
@@ -62,15 +77,82 @@ public class StringCleaningTest {
         // Now validate the fields
         Set<Field> stringFields = getStringFields(object.getClass());
         for(Field field : stringFields) {
+            System.out.println("Verifying field : " + field.getName());
             try {
                 field.setAccessible(true);
                 String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                System.out.println("Verifying value : " + value);
                 validateInput(value);
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
         }
         
+        Set<Method> stringArrayMethods = getStringArrayMethods(object.getClass());
+        for(Method method : stringArrayMethods) {
+            System.out.println("Verifying method : " + method.getName());
+            try {
+                String[] collection = (String[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (String input : collection) {
+                    System.out.println("Verifying value : " + input);
+                    validateInput(input);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }                
+
+        Set<Method> stringCollectionMethods = getStringCollectionMethods(object.getClass());
+        for(Method method : stringCollectionMethods) {
+            System.out.println("Verifying method : " + method.getName());
+            try {
+                List<String> collection = (List<String>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for(String input : collection) {
+                    System.out.println("Verifying value : " + input);
+                    validateInput(input);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        } 
+        
+        Set<Method> customMethods = getCustomObjectMethods(object.getClass());
+        for(Method method : customMethods) {
+            System.out.println("Verifying method : " + method.getName());
+            try {
+                Object customObject = method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                validate(customObject, stack);
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        } 
+        
+        Set<Method> customObjectCollectionMethods = getCustomObjectCollectionMethods(object.getClass());
+        for(Method method : customObjectCollectionMethods) {
+            System.out.println("Verifying method : " + method.getName());
+            try {
+                List<Object> customObjectCollection = (List<Object>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (Object customObject : customObjectCollection) {
+                    validate(customObject, stack);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+        
+        Set<Method> customObjectArrayMethods = getCustomObjectArrayMethods(object.getClass());
+        for(Method method : customObjectArrayMethods) {
+            System.out.println("Verifying method : " + method.getName());
+            try {
+                Object[] customObjectCollection = (Object[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (Object customObject : customObjectCollection) {                
+                    validate(customObject, stack);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        } 
+
         // TODO  getStringCollectionMethods,  getStringArrayMethods
         // for the collection methods,  you would do  Collection<String> inputCollection = (Collection<String>)method.invoke(object) and then loop on the collection and validateInput on each item.   similar pattern for the arrays.
         
@@ -83,11 +165,31 @@ public class StringCleaningTest {
     
 
     public static void validateInput(String input) {
+        Pattern regex = Pattern.compile("[^a-zA-Z0-9]");
+        Matcher matcher = regex.matcher(input);
+        if (matcher.find()) {
+            System.out.println("Illegal characters found in : " + input);
+            throw new IllegalArgumentException();
+        }
         // TODO check for illegal characters,  if present throw an IllegalArgumentException
     }
+   
+    /**
+     * This function verifies if the class is one of the built in datatypes or a custom class. This will also verify the arrays for
+     * built-in data types.
+     * @param clazz
+     * @return 
+     */
+    public static boolean isBuiltInType(Class<?> clazz) {
+        boolean isBuiltInType = clazz.isPrimitive() || 
+                clazz.equals(Boolean.class) || clazz.equals(Boolean[].class) || clazz.equals(Number.class) || clazz.equals(Number[].class) ||
+                clazz.equals(Float.class) || clazz.equals(Float[].class)|| clazz.equals(Integer.class) || clazz.equals(Integer[].class) ||
+                clazz.equals(Byte.class) || clazz.equals(Byte[].class) || clazz.equals(Double.class) || clazz.equals(Double[].class) ||
+                clazz.equals(Short.class) || clazz.equals(Short[].class) || clazz.equals(Long.class) || clazz.equals(Long[].class) || 
+                clazz.equals(Character.class) || clazz.equals(Character[].class) || clazz.equals(String.class) || clazz.equals(String[].class);
+        return isBuiltInType;
+    }
 
-    // these are the reflection methods:
-    
     public static boolean isStringMethod(Method method) {
         boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
         boolean noArgs = method.getParameterTypes().length == 0;
@@ -95,17 +197,63 @@ public class StringCleaningTest {
         return conventional && noArgs && stringReturn;
     }
     
+    public static boolean isStringArrayMethod(Method method) {
+        boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
+        boolean noArgs = method.getParameterTypes().length == 0;
+        boolean isArray = method.getReturnType().isArray();
+        boolean stringReturn = String[].class.isAssignableFrom(method.getReturnType());
+        return conventional && noArgs && stringReturn && isArray;
+    }    
+
+    public static boolean isStringCollectionMethod(Method method) {
+        boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
+        boolean noArgs = method.getParameterTypes().length == 0;        
+        boolean isList = java.util.List.class.isAssignableFrom(method.getReturnType());
+        boolean stringReturn = method.toGenericString().contains("java.util.List<java.lang.String>");
+        return conventional && noArgs && isList && stringReturn;
+    }
     // TODO   isStringCollectionMethod and isStringArrayMethod ... because those strings need to be checked too .... should be similar to isStringMethod but check  Collection.class.isAssignableFrom(returnType) and isArray
 
     public static boolean isCustomObjectMethod(Method method) {
         boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
         boolean noArgs = method.getParameterTypes().length == 0;
         Class<?> returnType = method.getReturnType();
-        boolean builtInObjectReturn = returnType.isPrimitive() || Number.class.isAssignableFrom(returnType) || Float.class.isAssignableFrom(returnType); // TODO  add Decimal, BigDecimal, Date, etc...  all the java built-ins that are safe.  
+        // Since we will process the Array and Collection return types separately, we need to first check for that
+        boolean isArrayOrCollection = returnType.isArray() || Collection.class.isAssignableFrom(returnType);
+        boolean builtInObjectReturn = isBuiltInType(returnType);
         boolean customObjectReturn = !builtInObjectReturn;
-        return conventional && noArgs && customObjectReturn;
+        return conventional && noArgs && !isArrayOrCollection && customObjectReturn;
     }
     
+    public static boolean isCustomObjectCollectionMethod(Method method) {
+        boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
+        boolean noArgs = method.getParameterTypes().length == 0;
+        Class<?> returnType = method.getReturnType();
+        boolean isCollection = Collection.class.isAssignableFrom(returnType);
+        // We need to check if it is a collection of built in data types or a custom object.
+        boolean builtInObjectReturn = false;
+        if (isCollection) {
+            ParameterizedType stringListType = (ParameterizedType) method.getGenericReturnType();
+            Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+            builtInObjectReturn = isBuiltInType(stringListClass);
+        }        
+        boolean customObjectReturn = !builtInObjectReturn;
+        return conventional && noArgs && isCollection && customObjectReturn;
+    }
+
+    public static boolean isCustomObjectArrayMethod(Method method) {
+        boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
+        boolean noArgs = method.getParameterTypes().length == 0;
+        Class<?> returnType = method.getReturnType();
+        boolean isArray = returnType.isArray();
+        // We need to check if the array is of built in data types or a custom object.
+        boolean builtInObjectReturn = false;
+        if (isArray) {
+            builtInObjectReturn = isBuiltInType(returnType);
+        }        
+        boolean customObjectReturn = !builtInObjectReturn;
+        return conventional && noArgs && isArray && customObjectReturn;
+    }
     // TODO is isCustomObjectCollectionMethod  and isCustomObjectArrayMethod ...  because the contents of those would need to be checked too
     
     public static Set<Method> getStringMethods(Class<?> clazz) {
@@ -125,12 +273,67 @@ public class StringCleaningTest {
         if (declaredFields != null && declaredFields.length > 0)
         for(Field field : declaredFields ) {
             int modifiers = field.getModifiers();
-            if( (field.getModifiers() == Modifier.PUBLIC) && (field.getGenericType().toString().equalsIgnoreCase("class java.lang.String")) ) {
+            if( (field.getModifiers() == Modifier.PUBLIC) &&  (String.class.isAssignableFrom(field.getGenericType().getClass()))) {  //(field.getGenericType().toString().equalsIgnoreCase("class java.lang.String")) ) {
                 stringFields.add(field);
             }
         }
         return stringFields;
     }
+    
+    public static Set<Method> getStringArrayMethods(Class<?> clazz) {
+        HashSet<Method> stringMethods = new HashSet<Method>();
+        Method[] methods =  clazz.getDeclaredMethods();                
+        for(Method method : methods ) {
+            if( isStringArrayMethod(method) ) {
+                stringMethods.add(method);
+            }
+        }
+        return stringMethods;        
+    }    
+
+    public static Set<Method> getStringCollectionMethods(Class<?> clazz) {
+        HashSet<Method> stringMethods = new HashSet<Method>();
+        Method[] methods =  clazz.getDeclaredMethods();                
+        for(Method method : methods ) {
+            if( isStringCollectionMethod(method) ) {
+                stringMethods.add(method);
+            }
+        }
+        return stringMethods;        
+    }    
+    
+    public static Set<Method> getCustomObjectMethods(Class<?> clazz) {
+        HashSet<Method> customMethods = new HashSet<Method>();
+        Method[] methods =  clazz.getDeclaredMethods();                
+        for(Method method : methods ) {
+            if( isCustomObjectMethod(method) ) {
+                customMethods.add(method);
+            }
+        }
+        return customMethods;        
+    }    
+
+    public static Set<Method> getCustomObjectCollectionMethods(Class<?> clazz) {
+        HashSet<Method> customObjectCollectionMethods = new HashSet<Method>();
+        Method[] methods =  clazz.getDeclaredMethods();                
+        for(Method method : methods ) {
+            if( isCustomObjectCollectionMethod(method)) {
+                customObjectCollectionMethods.add(method);
+            }
+        }
+        return customObjectCollectionMethods;        
+    }    
+    
+    public static Set<Method> getCustomObjectArrayMethods(Class<?> clazz) {
+        HashSet<Method> customObjectArrayMethods = new HashSet<Method>();
+        Method[] methods =  clazz.getDeclaredMethods();                
+        for(Method method : methods ) {
+            if( isCustomObjectArrayMethod(method)) {
+                customObjectArrayMethods.add(method);
+            }
+        }
+        return customObjectArrayMethods;        
+    }    
     // TODO  getStringCollectionMethods,  getStringArrayMethods,  getCustomObjectMethods , getCustomObjectCollectionMethods, getCustomObjectArrayMethods
     
 }
