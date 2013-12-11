@@ -27,25 +27,47 @@ import org.junit.Test;
  */
 public class StringCleaningTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(StringCleaningTest.class);
+
+    public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
+    
+    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
+    public static final String IPADDRESS_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+    public static final String FQDN_PATTERN = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$";
+    public static final String IPADDR_FQDN_PATTERN = "(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$)";
+    public static final String EMAIL_PATTERN = "^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$";
+    // This might need to be modified to allow more special characters. The rule currently says 1or more lower and upper case, one digit and one of the special characters and atleast 8 characters in length
+    public static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";  
     
     public static class Pet {
         public String getName() { return "sparky@"; } 
     }
     public static class Person {
+        public String[] names = new String[] {"sdf", "asdf", "2347"};
+        public Integer[] tes = new Integer[] {1,2,3};
         public String description = "Test";
         private String desc2 = "Decription";
+        public Integer testing =  90;
+        public List<String> namesList = new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"}));
+        public Pet newPet = new Pet();
+        public Pet[] newPets = new Pet[] {new Pet(), new Pet()};
+        public List<Pet> newPetList = new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));
+        
         public String getName() { return "bob"; }
-        @Regex("^[a-zA-z0-9_-]+@[a-zA-z0-9-]+\\.(?:com|org|net)$") // not a real email regex,  just for quick testing      // 20131012
+        @Regex(IPADDR_FQDN_PATTERN)
+        public String getHostName() { return "10.1.71.81";}
+        @Regex(IPADDR_FQDN_PATTERN)
+        public String getHostName2() { return "323.1.71.81";}
+        @Regex(EMAIL_PATTERN) // not a real email regex,  just for quick testing      // 20131012
         public String getEmail() { return "bob^@example.com"; }    // 20131012
         public int getAge() { return 40; }
         public Pet getPet() { return new Pet(); }
-        public String[] getPetNames() { return new String[] {"doga","dogb","dogc"}; }
+        public String[] getPetNames() { return new String[] {"doga$%","dogb","dogc"}; }
         public Integer[] getPetIDs() { return new Integer[] {1,2,3};}
         public List<Integer> getPetIDList() { return new ArrayList<Integer>(Arrays.asList(new Integer[] {1,2,3}));} 
-        public List<String> getPetList() { return new ArrayList<String>(Arrays.asList(new String[] {"dogA","dogB","dogC"}));} //{{ add("dogA");  add("dogB");  add("dogC");}};}
-        public List<Pet> getPetList2() {return new ArrayList<Pet>();}     
-        public Pet[] getPetList3() {return new Pet[4];}
-        // TODO  methods that return arraylist<string>  and string[] 
+        public List<String> getPetList() { return new ArrayList<String>(Arrays.asList(new String[] {"dogA","dogB&*","dogC"}));} //{{ add("dogA");  add("dogB");  add("dogC");}};}
+        public List<Pet> getPetList2() {return new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));}     
+        public Pet[] getPetList3() {return new Pet[] {new Pet()};}
+        // TODO  methods that return arraylist<string>  and string[] */
     }
     
     @Test
@@ -94,29 +116,99 @@ public class StringCleaningTest {
         }
         // add the object to the stack so we don't try to validate it again if it has a self-referential property ...   unlike normal stacks we never really need to "pop" this one because it's just a record of where we've been,  and we don't use it to navigate.
         stack.add(object);
-        
-        // now validate the object
-        Set<Method> stringMethods = getStringMethods(object.getClass());
-        for(Method method : stringMethods) {
-            log.debug("Verifying method : " + method.getName());
+                
+        // Now validate the fields
+        Set<Field> stringFields = getStringFields(object.getClass());
+        for(Field field : stringFields) {
+            log.debug("Verifying string field : " + field.getName());
             try {
-                String input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                log.debug("Verifying value : " + input);
-                validateStringMethod(object, method, input); // 20131012
+                field.setAccessible(true);
+                String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                log.debug("Verifying string value : " + value);
+                validateStringField(object, field, value); // 20131012
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
         }
         
-        // Now validate the fields
-        Set<Field> stringFields = getStringFields(object.getClass());
-        for(Field field : stringFields) {
-            log.debug("Verifying field : " + field.getName());
+        Set<Field> stringArrayFields = getStringArrayFields(object.getClass());
+        for(Field field : stringArrayFields) {
+            log.debug("Verifying string array field : " + field.getName());
             try {
                 field.setAccessible(true);
-                String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                log.debug("Verifying value : " + value);
-                validateStringField(object, field, value); // 20131012
+                String[] collection = (String[])field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (String input : collection) {
+                    log.debug("Verifying string array value : " + input);
+                    validateStringField(object, field, input); // 20131012
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+
+        Set<Field> stringCollectionFields = getStringCollectionFields(object.getClass());
+        for(Field field : stringCollectionFields) {
+            log.debug("Verifying string collection field : " + field.getName());
+            try {
+                field.setAccessible(true);
+                List<String> collection = (List<String>) field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (String input : collection) {
+                    log.debug("Verifying string collection value : " + input);
+                    validateStringField(object, field, input); // 20131012
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+
+        Set<Field> customObjectFields = getCustomObjectFields(object.getClass());
+        for(Field field : customObjectFields) {
+            log.debug("Verifying custom object field : " + field.getName());
+            try {
+                field.setAccessible(true);
+                Object customObject = (Object)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                validate(customObject, stack);
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+        
+        Set<Field> customObjectArrayFields = getCustomObjectArrayFields(object.getClass());
+        for(Field field : customObjectArrayFields) {
+            log.debug("Verifying custom object array field : " + field.getName());
+            try {
+                field.setAccessible(true);
+                Object[] collection = (Object[])field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (Object customObject : collection) {
+                    validate(customObject, stack);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+
+        Set<Field> customObjectCollectionFields = getCustomObjectCollectionFields(object.getClass());
+        for(Field field : customObjectCollectionFields) {
+            log.debug("Verifying custom object collection field : " + field.getName());
+            try {
+                field.setAccessible(true);
+                List<Object> collection = (List<Object>) field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (Object customObject : collection) {
+                    validate(customObject, stack);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        }
+        
+        // now validate the object
+        Set<Method> stringMethods = getStringMethods(object.getClass());
+        for(Method method : stringMethods) {
+            log.debug("Verifying string method : " + method.getName());
+            try {
+                String input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                log.debug("Verifying method return value : " + input);
+                validateStringMethod(object, method, input); // 20131012
             } catch (Exception e) {
                 // throw new ASException( ... failed to validate object so don't let it continue ...);
             }
@@ -124,11 +216,11 @@ public class StringCleaningTest {
         
         Set<Method> stringArrayMethods = getStringArrayMethods(object.getClass());
         for(Method method : stringArrayMethods) {
-            log.debug("Verifying method : " + method.getName());
+            log.debug("Verifying string array method : " + method.getName());
             try {
                 String[] collection = (String[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for (String input : collection) {
-                    log.debug("Verifying value : " + input);
+                    log.debug("Verifying string array method return value : " + input);
                     validateStringMethod(object, method, input); // 20131012
                 }
             } catch (Exception e) {
@@ -138,11 +230,11 @@ public class StringCleaningTest {
 
         Set<Method> stringCollectionMethods = getStringCollectionMethods(object.getClass());
         for(Method method : stringCollectionMethods) {
-            log.debug("Verifying method : " + method.getName());
+            log.debug("Verifying string collection method : " + method.getName());
             try {
                 List<String> collection = (List<String>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for(String input : collection) {
-                    log.debug("Verifying value : " + input);
+                    log.debug("Verifying string collection method return value : " + input);
                     validateStringMethod(object, method, input); // 20131012
                 }
             } catch (Exception e) {
@@ -152,7 +244,7 @@ public class StringCleaningTest {
         
         Set<Method> customMethods = getCustomObjectMethods(object.getClass());
         for(Method method : customMethods) {
-            log.debug("Verifying method : " + method.getName());
+            log.debug("Verifying custom object method : " + method.getName());
             try {
                 Object customObject = method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 validate(customObject, stack);
@@ -161,9 +253,22 @@ public class StringCleaningTest {
             }
         } 
         
+        Set<Method> customObjectArrayMethods = getCustomObjectArrayMethods(object.getClass());
+        for(Method method : customObjectArrayMethods) {
+            log.debug("Verifying custom object array method : " + method.getName());
+            try {
+                Object[] customObjectCollection = (Object[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                for (Object customObject : customObjectCollection) {                
+                    validate(customObject, stack);
+                }
+            } catch (Exception e) {
+                // throw new ASException( ... failed to validate object so don't let it continue ...);
+            }
+        } 
+        
         Set<Method> customObjectCollectionMethods = getCustomObjectCollectionMethods(object.getClass());
         for(Method method : customObjectCollectionMethods) {
-            log.debug("Verifying method : " + method.getName());
+            log.debug("Verifying custom object collection method : " + method.getName());
             try {
                 List<Object> customObjectCollection = (List<Object>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 for (Object customObject : customObjectCollection) {
@@ -174,19 +279,6 @@ public class StringCleaningTest {
             }
         }
         
-        Set<Method> customObjectArrayMethods = getCustomObjectArrayMethods(object.getClass());
-        for(Method method : customObjectArrayMethods) {
-            log.debug("Verifying method : " + method.getName());
-            try {
-                Object[] customObjectCollection = (Object[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (Object customObject : customObjectCollection) {                
-                    validate(customObject, stack);
-                }
-            } catch (Exception e) {
-                // throw new ASException( ... failed to validate object so don't let it continue ...);
-            }
-        } 
-
         // TODO  getStringCollectionMethods,  getStringArrayMethods
         // for the collection methods,  you would do  Collection<String> inputCollection = (Collection<String>)method.invoke(object) and then loop on the collection and validateInput on each item.   similar pattern for the arrays.
         
@@ -196,11 +288,7 @@ public class StringCleaningTest {
         // if we get to the end with no exceptions the object is validated.
         
     }
-    
-    // 20131012
-    public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
-    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
-    
+        
     // 20131012
     public static Pattern getPattern(String regex) {
         Pattern pattern = patternMap.get(regex);
@@ -247,6 +335,26 @@ public class StringCleaningTest {
         return conventional && noArgs && stringReturn;
     }
     
+    public static boolean isStringField(Field field) {
+        boolean isPublic = field.getModifiers() == Modifier.PUBLIC;
+        boolean stringReturn =  field.getType().isAssignableFrom(String.class);// String.class.isAssignableFrom((Class<?>)field.getGenericType());            
+        return isPublic && stringReturn;
+    }
+    
+    public static boolean isStringArrayField(Field field) {
+        boolean isPublic = field.getModifiers() == Modifier.PUBLIC;
+        boolean isArray = field.getType().isArray();
+        boolean stringReturn = field.getType().isAssignableFrom(String[].class); //String[].class.isAssignableFrom((Class<?>)field.getGenericType());            
+        return isPublic && isArray && stringReturn;
+    }
+
+    public static boolean isStringCollectionField(Field field) {
+        boolean isPublic = field.getModifiers() == Modifier.PUBLIC;
+        boolean isList = Collection.class.isAssignableFrom(field.getType()); // java.util.List.class.isAssignableFrom(field.getType());
+        boolean stringReturn = field.toGenericString().contains("java.util.List<java.lang.String>");            
+        return isPublic && isList && stringReturn;
+    }
+
     public static boolean isStringArrayMethod(Method method) {
         boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
         boolean noArgs = method.getParameterTypes().length == 0;
@@ -262,6 +370,39 @@ public class StringCleaningTest {
         boolean stringReturn = method.toGenericString().contains("java.util.List<java.lang.String>");
         return conventional && noArgs && isList && stringReturn;
     }
+    
+    public static boolean isCustomObjectField(Field field) {
+        boolean isPublic = field.getModifiers() == Modifier.PUBLIC;
+        boolean isArrayOrCollection = field.getType().isArray() || Collection.class.isAssignableFrom(field.getType());
+        boolean builtInObjectReturn = isBuiltInType(field.getType());
+        boolean customObjectReturn = !builtInObjectReturn;
+        return isPublic && !isArrayOrCollection && customObjectReturn;
+    }
+
+    public static boolean isCustomObjectCollectionField(Field field) {
+        boolean isPublic = field.getModifiers() == Modifier.PUBLIC; 
+        boolean isCollection = Collection.class.isAssignableFrom(field.getType());
+        boolean builtInObjectReturn = false;
+        if (isCollection) {
+            ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+            Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+            builtInObjectReturn = isBuiltInType(stringListClass);            
+        }
+        boolean customObjectReturn = !builtInObjectReturn;
+        return isPublic && isCollection && customObjectReturn;
+    }
+
+    public static boolean isCustomObjectArrayField(Field field) {
+        boolean isPublic = field.getModifiers() == Modifier.PUBLIC; 
+        boolean isArray = field.getType().isArray();
+        boolean builtInObjectReturn = false;
+        if (isArray) {
+            builtInObjectReturn = isBuiltInType(field.getType());            
+        }
+        boolean customObjectReturn = !builtInObjectReturn;
+        return isPublic && isArray && customObjectReturn;
+    }
+
     // TODO   isStringCollectionMethod and isStringArrayMethod ... because those strings need to be checked too .... should be similar to isStringMethod but check  Collection.class.isAssignableFrom(returnType) and isArray
 
     public static boolean isCustomObjectMethod(Method method) {
@@ -320,15 +461,62 @@ public class StringCleaningTest {
     public static Set<Field> getStringFields(Class<?> clazz) {
         HashSet<Field> stringFields = new HashSet<Field>();
         Field[] declaredFields = clazz.getDeclaredFields();
-        if (declaredFields != null && declaredFields.length > 0)
         for(Field field : declaredFields ) {
-            int modifiers = field.getModifiers();
-            if( (field.getModifiers() == Modifier.PUBLIC) &&  (String.class.isAssignableFrom(field.getGenericType().getClass()))) {  //(field.getGenericType().toString().equalsIgnoreCase("class java.lang.String")) ) {
+            if (isStringField(field))
                 stringFields.add(field);
-            }
         }
         return stringFields;
     }
+    
+    public static Set<Field> getStringArrayFields(Class<?> clazz) {
+        HashSet<Field> stringArrayFields = new HashSet<Field>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field field : declaredFields ) {
+            if (isStringArrayField(field))
+                stringArrayFields.add(field);
+        }
+        return stringArrayFields;
+    }
+
+    public static Set<Field> getStringCollectionFields(Class<?> clazz) {
+        HashSet<Field> stringCollectionFields = new HashSet<Field>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field field : declaredFields ) {
+            if (isStringCollectionField(field))
+                stringCollectionFields.add(field);
+        }
+        return stringCollectionFields;
+    }
+
+    public static Set<Field> getCustomObjectFields(Class<?> clazz) {
+        HashSet<Field> customObjectFields = new HashSet<Field>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field field : declaredFields ) {
+            if (isCustomObjectField(field))
+                customObjectFields.add(field);
+        }
+        return customObjectFields;
+    }
+
+    public static Set<Field> getCustomObjectArrayFields(Class<?> clazz) {
+        HashSet<Field> customObjectArrayFields = new HashSet<Field>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field field : declaredFields ) {
+            if (isCustomObjectArrayField(field))
+                customObjectArrayFields.add(field);
+        }
+        return customObjectArrayFields;
+    }
+    
+    public static Set<Field> getCustomObjectCollectionFields(Class<?> clazz) {
+        HashSet<Field> customObjectCollectionFields = new HashSet<Field>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field field : declaredFields ) {
+            if (isCustomObjectCollectionField(field))
+                customObjectCollectionFields.add(field);
+        }
+        return customObjectCollectionFields;
+    }    
     
     public static Set<Method> getStringArrayMethods(Class<?> clazz) {
         HashSet<Method> stringMethods = new HashSet<Method>();
