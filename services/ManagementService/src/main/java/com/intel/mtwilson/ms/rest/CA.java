@@ -302,6 +302,7 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String getTlsCertificateChain() {
         try {
+            // XXX TODO this code block is repeated in HostAgentFactory
             String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
             if( certFile != null && !certFile.startsWith(File.separator) ) {
                 certFile = "/etc/intel/cloudsecurity/" + certFile; // XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
