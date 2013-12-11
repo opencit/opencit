@@ -98,10 +98,17 @@ They will be created in target/site/apidocs
 
         <dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-module-annotations</artifactId>
+		<artifactId>cpg-classpath</artifactId>
 		<version>0.1-SNAPSHOT</version>            
         </dependency>
         
+        <dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-module-annotations</artifactId>
+		<version>0.2-SNAPSHOT</version>            
+        </dependency>
+
+                
         <!-- the reflections library is small and has utilities for finding annotated classes -->
     <dependency>
          <groupId>org.reflections</groupId>

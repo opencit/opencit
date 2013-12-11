@@ -18,6 +18,7 @@ import org.codehaus.jackson.annotate.JsonValue;
  * 
  * TODO relate the Hostname and IPAddress models in some way, possibly with
  * an aggregated type or union, something that can be a HostnameOrIpAddress.
+ * See InternetAddress
  * 
  * XXX TODO need to rewrite as extension to ObjectModel
  * 

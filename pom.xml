@@ -67,6 +67,8 @@ The Cloud Platform Group (CPG) artifact names will remain.
     -->
   
     <modules>
+        <module>cpg-authz-token</module>
+        <module>cpg-classpath</module>
         <module>cpg-configuration</module>
         <module>cpg-console</module>
         <module>cpg-crypto</module>

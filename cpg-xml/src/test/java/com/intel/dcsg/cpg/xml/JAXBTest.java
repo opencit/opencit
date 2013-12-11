@@ -142,7 +142,7 @@ ProductName.3082=Microsoft Visual C++ 2008 Redistributable
                      "<hosts_trust_report><Host Host_Name=\"host123\" Trust_Status=\"1\"><mleInfo>&inc;</mleInfo></Host></hosts_trust_report>";
         HostsTrustReportType report = readSecure(xml, HostsTrustReportType.class);
         assertEquals("host123", report.getHost().get(0).getHostName());
-        //assertEquals("", report.getHost().get(0).getMLEInfo()); // shouldn't get here, exception will be thrown while unmarshalling
+        assertEquals("", report.getHost().get(0).getMLEInfo()); // shouldn't get here, exception will be thrown while unmarshalling
     }
     
     public <T> T readSecureWithDtd(String document, Class<T> valueType) throws IOException, JAXBException, XMLStreamException {
@@ -162,7 +162,7 @@ ProductName.3082=Microsoft Visual C++ 2008 Redistributable
         XMLInputFactory xif = XMLInputFactory.newFactory();        
         xif.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
         xif.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-        xif.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+        xif.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
         XMLStreamReader xsr = xif.createXMLStreamReader(new StreamSource( new StringReader( document ) ));
         Unmarshaller u = jc.createUnmarshaller();
         JAXBElement<T> doc = (JAXBElement<T>)u.unmarshal( xsr );

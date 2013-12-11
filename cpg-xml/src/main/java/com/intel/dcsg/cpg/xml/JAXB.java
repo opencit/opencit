@@ -79,8 +79,9 @@ public class JAXB {
         } else {
             jc = JAXBContext.newInstance(value.getClass().getPackage().getName());
         }
-        Marshaller m = jc.createMarshaller();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Marshaller m = jc.createMarshaller();
+        m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         m.marshal(value, out);
         byte[] xml = out.toByteArray();
         return new String(xml, Charset.forName("UTF-8"));
