@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>cpg-console</artifactId>
-  <version>0.1.2-SNAPSHOT</version>
+  <version>0.1.2</version>
   <packaging>jar</packaging>
   <name>cpg-console</name>
   <description>Console related objects</description>
     <parent>
 	  <groupId>com.intel.dcsg.cpg</groupId>
 	  <artifactId>cpg</artifactId>
-	  <version>0.2-SNAPSHOT</version>
+	  <version>0.2</version>
     </parent>
 
 

@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>cpg-xml</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <packaging>jar</packaging>
   <name>cpg-xml</name>
   <description>XML utilities including JAXB convenience functions secured against XML entity injection</description>
     <parent>
 	  <groupId>com.intel.dcsg.cpg</groupId>
 	  <artifactId>cpg</artifactId>
-	  <version>0.2-SNAPSHOT</version>
+	  <version>0.2</version>
     </parent>
 
 <dependencies>

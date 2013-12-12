@@ -3,7 +3,7 @@
 
   <groupId>com.intel.dcsg.cpg</groupId>
   <artifactId>cpg</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <packaging>pom</packaging>
 
   <name>cpg</name>

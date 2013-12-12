@@ -2,26 +2,26 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cpg-authz-token</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
     <packaging>jar</packaging>
     <name>cpg-authz-token</name>
     <description>Helpful for web applications to prevent cross-site request forgery (CSRF) attacks</description>
     <parent>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.1.5-SNAPSHOT</version>
+            <version>0.1.5</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-performance</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
+            <version>0.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

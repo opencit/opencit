@@ -2,14 +2,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cpg-validation</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
     <packaging>jar</packaging>
     <name>cpg-validation</name>
     <description>Annotations and Aspects for validating model objects</description>
     <parent>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
 
     <build>

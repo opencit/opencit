@@ -4,12 +4,12 @@
     <artifactId>cpg-classpath</artifactId>
     <packaging>jar</packaging>
     <name>cpg-classpath</name>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.1</version>
     <description>Classloading utilities</description>
     <parent>
 	  <groupId>com.intel.dcsg.cpg</groupId>
 	  <artifactId>cpg</artifactId>
-	  <version>0.2-SNAPSHOT</version>
+	  <version>0.2</version>
     </parent>
 
 <!--

@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>cpg-performance</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
+  <version>0.1.1</version>
   <packaging>jar</packaging>
   <name>cpg-performance</name>
 
     <parent>
 	  <groupId>com.intel.dcsg.cpg</groupId>
 	  <artifactId>cpg</artifactId>
-	  <version>0.2-SNAPSHOT</version>
+	  <version>0.2</version>
     </parent>
   
  

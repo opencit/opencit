@@ -5,11 +5,11 @@
     <packaging>jar</packaging>
     <name>cpg-module-annotations</name>
     <description>Annotations for use with Java module-based classloader</description>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
     <parent>
 	  <groupId>com.intel.dcsg.cpg</groupId>
 	  <artifactId>cpg</artifactId>
-	  <version>0.2-SNAPSHOT</version>
+	  <version>0.2</version>
     </parent>
 
 <!--
