@@ -1,0 +1,563 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.dcsg.cpg</groupId>
+  <artifactId>cpg</artifactId>
+  <version>0.2</version>
+  <packaging>pom</packaging>
+
+  <name>cpg</name>
+  
+  <description>
+  Cloud Platform Group (CPG) Java Library is a collection of Java components that may be useful in applications.
+      Each component, or module, has its own version number assigned. It is not related to the version number
+      of this top-level module "parent". 
+	  
+Intel Datacenter and Connected Systems Group (DCSG) was renamed to Data Center Group (DCG) on 7 Nov 2013. 
+Accordingly, the groupId and Java package namespace of this library of modules will be renamed from com.intel.dcsg.cpg to com.intel.dcg.
+The Cloud Platform Group (CPG) artifact names will remain.	  
+  </description>
+  
+  <!--
+      Version number of this "parent" module should only change when this POM is changed, for example with 
+      new settings that will apply to all components.
+      
+      If you have updated this POM and need to update its version number, use the command below to automatically
+      update the corresponding parent version number in all components (otherwise they will continue to use
+      rules from the previous version):
+
+      mvn release:update-versions
+      
+      Do NOT use -DautoVersionSubmodules=true  as in the following command, unless you want to set the version of all
+      submodules/components to the same version you specify for this POM, for example if you are releasing a 2.0 or 2.1
+      release and want all components to match, for the sake of making it easy to identify components that "go together".
+      
+      mvn release:update-versions -DautoVersionSubmodules=true
+      
+      This re-version command will NOT modify the version number of any components that specify their own version
+      explicitly.  It would only modify the version number of components that inherit the parent's version by
+      omitting their own version tag.
+      
+      How to build javadocs:
+      
+      Builds code, tests, and sources jars (the source jars for all modules are required when generating aggregate
+      javadocs for dependents):
+      mvn -DskipTests=true -Drelease install
+      
+      In target folders for local browsing (does NOT include javadocs from dependencies):
+      mvn -DskipTests=true -Drelease javadoc:javadoc
+      
+      In jar files for distribution (includes javadocs from dependencies):
+      mvn -DskipTests=true -Drelease javadoc:jar
+      
+      How to build the website (if it looks like changes aren't effective, try mvn clean and then site:site or site:jar again):
+      
+      Local files which can be deployed to web server:
+      mvn -DskipTests=true -Drelease site:site
+      
+      Jar file for distribution:
+      mvn -DskipTests=true -Drelease site:jar
+      
+      
+      Other useful information:
+      
+      The maven-aggregator-plugin can help to execute multiple plugins in a specific order 
+      https://code.google.com/p/maven-aggregate-plugin/wiki/Usage
+      
+    -->
+  
+    <modules>
+        <module>cpg-authz-token</module>
+        <module>cpg-classpath</module>
+        <module>cpg-configuration</module>
+        <module>cpg-console</module>
+        <module>cpg-crypto</module>
+        <module>cpg-i18n</module>
+        <module>cpg-io</module>
+        <module>cpg-jpa</module>
+		<module>cpg-module</module>
+		<module>cpg-module-annotations</module>
+        <module>cpg-net</module>
+        <module>cpg-performance</module>
+        <module>cpg-rfc822</module>
+        <module>cpg-tls-policy</module>
+        <module>cpg-util</module>
+        <module>cpg-validation</module>
+        <module>cpg-xml</module>
+    </modules>
+    <!--
+    <url>http://cloudsecurityportal.intel.com/redmine/projects/myh</url>
+    -->
+    <organization>
+        <name>Cloud Platform Group</name>
+        <url>http://10.1.71.63/drupal</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:ssh://git@10.1.71.63/var/git/cpg</connection>
+        <developerConnection>scm:git:ssh://git@10.1.71.63/var/git/cpg</developerConnection>
+        <!-- <url>http://cloudsecurityportal.intel.com/redmine/projects/myh/files</url> -->
+    </scm>
+  
+    <licenses>
+        <license>
+            <name>Copyright 2013 Intel Corporation. All rights reserved.</name>
+            <!-- fill this in when we have a URL for the project license <url>http://intel.com</url> -->
+            <distribution>manual</distribution>
+            <comments>Currently available only by agreement.</comments>
+        </license>
+    </licenses>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jersey-version>1.9-ea04</jersey-version>
+        <maven.build.timestamp.format>yyyyMMdd.HHmm</maven.build.timestamp.format>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>cpg-maven-repository</id>
+            <url>dav://10.1.71.63/maven/repository</url>
+            <name>Cloud Platform Group's Maven Repository</name>
+        </repository>
+        <site>
+            <id>cpg-website</id>
+            <url>dav://10.1.71.63/maven/site/cpg</url>
+            <name>Cloud Platform Group Documentation Site</name>
+        </site>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>cpg-x</id>
+            <name>Cloud Platform Group</name>
+            <url>http://10.1.71.63/maven/repository</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>cloudsecurityportal.intel.com</id>
+            <name>Cloud Security - Intel Architecture Systems Integration</name>
+            <url>http://cloudsecurityportal.intel.com/maven</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>glassfish.java.net</id>
+            <name>GlassFish Maven Repository</name>
+            <url>http://download.java.net/maven/glassfish</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>m2.java.net</id>
+            <name>Java.net Maven 2 Repository</name>
+            <url>http://download.java.net/maven/2</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>        
+        <repository>
+            <id>java.net</id>
+            <name>java.net Maven Repository</name>
+            <url>https://maven-repository.dev.java.net/nonav/repository</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>apache</id>
+            <name>apache repository</name>
+            <url>http://repository.apache.org/snapshots</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>EclipseLink Repo</id>
+            <name>EclipseLink Repository</name>
+            <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>Sonatype-public</id>
+            <name>SnakeYAML repository</name>
+            <url>http://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>m2.java.net</id>
+            <name>Java.net Maven 2 Repository</name>
+            <url>http://download.java.net/maven/2</url>
+            <layout>default</layout>
+        </pluginRepository>  
+    </pluginRepositories>
+    
+    <build>
+        <plugins>
+		<!-- git commit info -->
+		<plugin>
+		<groupId>org.codehaus.groovy.maven</groupId>
+		<artifactId>gmaven-plugin</artifactId>
+        <version>1.0</version>
+		</plugin>
+    
+            <!-- git commit info -->
+            <!--
+            <plugin>
+            <groupId>org.codehaus.groovy.maven</groupId>
+            <artifactId>gmaven-plugin</artifactId>
+            <executions>
+                <execution><phase>initialize</phase></execution>
+            </executions>
+            </plugin>
+            -->
+		
+
+            <!-- the git commit plugin makes available the following properties:
+         branch
+         commit.id
+         commit.id.abbrev
+         commit.id.describe
+         build.user.name
+         build.user.email
+         build.time
+         commit.user.name
+         commit.user.email
+         commit.message.full
+         commit.message.short
+         commit.time
+         remote.origin.url
+            -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.5</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <inherited>true</inherited>
+                        <configuration>
+                            <prefix>git</prefix>                        
+                            <dateFormat>EEE, d MMM yyyy HH:mm:ss z</dateFormat>
+                            <!-- <verbose>false</verbose> -->
+                            <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                            <!--                        <generateGitPropertiesFilename>target/classes/git.properties</generateGitPropertiesFilename> -->
+                            <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>              
+    
+    
+            <!-- begin website plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <reportPlugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>2.5.1</version>
+                            <configuration>
+                                <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                                <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                            </configuration>
+                            <reports>
+                                <report>dependencies</report>
+                                <report>dependency-info</report>
+                                <report>help</report>
+                                <report>index</report>
+                                <report>license</report>
+                                <report>issue-tracking</report>
+                                <report>summary</report>
+                            </reports>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <version>2.9.1</version>
+                            <configuration>
+                                <show>public</show>
+                                <!--<stylesheetfile>src/main/resources/css/javadoc.css</stylesheetfile>-->
+                                <includeDependencySources>true</includeDependencySources>
+                                <dependencySourceIncludes>
+                                    <dependencySourceInclude>com.intel.dcsg.cpg:*</dependencySourceInclude>
+                                </dependencySourceIncludes>
+                            </configuration>
+                            <!--
+                            <dependencies>
+                                <dependency>
+                                    <groupId>com.intel</groupId>
+                                    <artifactId>maven-intel-skin</artifactId>
+                                    <version>0.1-SNAPSHOT</version>
+                                </dependency>
+                            </dependencies>
+                            -->
+                        </plugin>                
+                    </reportPlugins>
+                </configuration>  
+            </plugin>
+            <!-- end website plugin -->
+				
+            <!-- osgi bundle -->
+
+            <plugin>   
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.4.0</version>
+                <executions>
+                    <execution>
+                        <id>bundle-manifest</id>
+                        <phase>process-classes</phase>
+                        <goals>    
+                            <goal>manifest</goal>
+                        </goals>   
+                        <configuration>
+                            <instructions>
+                                <!-- if the Git-Branch and Git-Revision headers are included in the maven-jar-plugin, the variables
+                                are not resolved when maven-jar-plugin is used in conjunction with maven-bundle-plugin ; however
+                                they are resolved ok if maven-bundle-plugin is not used.  so when using maven-bundle-plugin they
+                                must be defined here and NOT in maven-jar-plugin -->
+                                <Git-Branch>${git.branch}</Git-Branch>
+                                <Git-Revision>${git.commit.id}</Git-Revision>
+                                <Build-Number>${git.commit.id.abbrev}</Build-Number>
+                              <Release>${project.version}</Release>
+                                <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
+                                
+                                
+                                <!-- we either embed dependencies in every component  or we need to have one component per
+                                dependency but that means ALL dependencies including transitive etc. so need to convert our
+                                entire ~/.m2/repository to osgi artifacts... started a program to do this but not complete
+                                yet so trying with embed dependencies for now
+                                <Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
+                                -->
+                                <Embed-Dependency>*;scope=runtime</Embed-Dependency>
+                            </instructions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav-jackrabbit</artifactId>
+                <version>2.2</version>
+            </extension>
+        </extensions>
+        
+        <pluginManagement>
+             
+
+            <plugins>  
+                <!-- specify version of maven-compiler-plugin, do not skip tests (use -DskipTests=true on command line to skip tests) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                        <skip>false</skip>
+                        <showDeprecation>true</showDeprecation>
+                    </configuration>
+                </plugin>
+                
+                <!-- Specify version of maven-jar-plugin and default MANIFEST.MF entries. The variables are evaluated by the project that is being built, not by this parent pom. Also they are automatically picked up by the maven-shade-plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <archive>
+                                <!-- manifest entries are defined in maven-bundle-plugin when it's being used -->
+                                <!--
+                            <manifestEntries>
+                                <Git-Branch>${git.branch}</Git-Branch>
+                                <Git-Revision>${git.commit.id}</Git-Revision>
+                                <Build-Number>${git.commit.id.abbrev}</Build-Number>
+                                <Release>${project.version}</Release>
+                                <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
+                            </manifestEntries>
+                                -->
+                            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                        </archive>
+                    </configuration>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>aspectj-maven-plugin</artifactId>
+                    <version>1.4</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.2</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.14.1</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>2.0</version>
+                </plugin>
+      
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.7</version>
+                </plugin>
+              
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.7</version>
+                </plugin>
+    
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.8</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+                                                                      
+            </plugins>     
+        </pluginManagement>
+
+        
+    </build>
+  
+  
+  
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>1.9</version>
+            </dependency>    
+            
+    <dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.7.5</version>
+    </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
+        </dependency>        
+              
+                  
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.22</version>
+            </dependency>
+            <dependency>
+                <groupId>postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>9.1-901.jdbc4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
+                <scope>test</scope>
+            </dependency>        
+        </dependencies>
+    </dependencyManagement>  
+  
+  
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <configuration>
+                            <show>public</show>
+                            <includeDependencySources>true</includeDependencySources>
+                            <dependencySourceIncludes>
+                                <dependencySourceInclude>com.intel.dcsg.cpg:*</dependencySourceInclude>
+                            </dependencySourceIncludes>
+                            <!--
+                                <stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+                            -->
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <phase>site</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>			
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        
+    </profiles>
+      
+</project>
+

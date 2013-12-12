@@ -1,0 +1,534 @@
+                        ---------------------------
+                        TLS Policy High-Level API
+                        ---------------------------
+						Jonathan Buhacoff
+                        ---------------------------
+                        2013-04-25
+                        ---------------------------
+
+%{toc}
+ 
+Introduction
+
+	This project was inspired by a recent academic paper titled, "The Most Dangerous Code in the World: Validating
+SSL Certificates in Non-Browser Software" [1]. The paper presents an in-depth study of SSL implementations in
+non-browser software and asserts the following conclusions: many SSL libraries are unsafe by default, requiring
+higher-level software to correctly set their options, provide hostname verification options, and interpret return
+values; even safe-by-default libraries are misused by application developers who misinterpret their various options;
+SSL bugs are often hidden in middleware, above the actual SSL implementation but below the application layer, making
+the problem hard to locate and repair; some developers deliberately disable certificate validation, probably due to
+the hassle of setting up a working environment and unit tests, assuring their customers that the application supports
+SSL but not informing them that protection against active attacks has been turned off; and finally, that developers
+do not perform adversarial testing on their software, even for critical applications such as banking applications and
+e-commerce SDKs. 
+	
+	The authors of {{#ar1}} recommend for SSL library developers to make the libraries more explicit about their
+semantics, in order to make it easier for application developers to choose settings correctly. The authors also
+recommend for SSL library developers to rephrase questions to users and application developers to be more relevant -
+for example, instead of "verify hostname?" the SSL libraries should ask "Anyone can impersonate the server. Ok or not?" 
+	
+Project Goals
+
+	The goal of cpg-tls-policy is to provide a high-level SSL API in Java to wrap the existing Java SSL APIs and
+incorporate the recommendations presented in [1]. The result should make it very easy for an application developer
+to accurately configure the underlying SSL library in order to secure the application's network traffic, preventing
+misuse arising out of complicated or inconsistent interfaces for low-level options and error handling.
+	
+	Sample code is available in com.intel.dcsg.cpg:tls-policy-example
+	
+Design Objectives
+
+	The cpg-tls-policy module adopts the design objectives recommended in [1]. These are:
+	
+	* Provide an easy way to test the TLS policy against a specific website. This objective facilitates application
+developer unit-testing their TLS policy. For example, after configuring their policy, a test against
+AllYourSSLAreBelongTo.us should reject the server certificate.
+	* Provide an easy way to switch between development, testing, and production policies. This objective facilitates
+application developers testing their code in a development environment that may require a different TLS policy than
+their production environment.  Specifically, this objective intends to deter developers from disabling security checks
+(and forgetting to re-enable them later) when they test their code during development.
+	* Provide secure defaults and make everything else optional. This is to prevent insecure usage by developers who
+don't know how to configure the library.
+	* Design a very clear configuration API. This objective is to prevent ambiguity when configuring the TLS policy.
+Options should be self-explanatory to developers who are not security experts. 
+	* Provide an interface and default implementation to handle all TLS-related functionality. The application
+developer should be able to use it out-of-the-box. 
+	* Design a clear and consistent error reporting interface. It should be easy for developers to check if the
+connection succeeded or failed, examine the reasons for failure, and react appropriately. Specifically, the library
+should be explicit about the security consequences of any application-controlled option.
+
+Requirement Specification
+
+	The requirements for the TLS Policy High-Level API are:
+	* Written in the Java language.
+	* Compatible with existing usage of the Java built-in SSL API.
+	* Satisfy the design objectives in the previous section.
+	* Allow user input for accepting new certificates when appropriate.
+	* Testable with JUnit.
+	* Provide an example console application.
+
+Design
+
+	There are two entry points into the API. The first one is called TlsPolicyFactory. It is a class containing static
+methods called insecure, consoleBrowser, and consoleBrowserWithRepository. The second one is called TlsPolicyBuilder.
+It is a class designed using the Builder pattern in which an instance of the class is comprised of many methods, each
+of which returns the instance itself, in order to facilitate method chaining. Method chaining is a style of
+programming whereby an object's state is modified by successive method calls. Whereas the methods could change the
+state and have no return value, they instead return an instance of the object so that the calls can be chained
+together. A TlsPolicyBuilder can be instantiated via the new keyword, or via its static factory method. The
+TlsPolicyBuilder enables attribute-based selection of a TLS Policy with the methods providesConfidentiality,
+providesAuthentication, providesIntegrity, noConfidentiality, noAuthentication, noIntegrity, trustDelegate,
+certificateRepository. After calling these methods to configure the policy, the build method is called to instantiate
+an appropriate policy based on the selections.
+
+	Both entry points return an object implementing the TlsPolicy interface. The TlsPolicy interface is comprised of
+two methods: getTrustManager and getHostnameVerifier. These methods can be used in code that configures a TLS
+connection using the Java built-in libraries.
+
+	There are two implementations of the TlsPolicy interface. The first is InsecureTlsPolicy. This implementation is
+equivalent to boilerplate code found on the Internet [2] which disables certificate validation and hostname
+verification. The second is TrustKnownCertificateTlsPolicy. This implementation provides certificate validation and
+hostname verification, refers to a trusted certificates list, and accepts an optional trust delegate for handling
+unknown certificates. If a trust delegate is not provided, unknown certificates are rejected. If a trust delegate
+is provided, the unknown certificate is passed to the delegate. A delegate is expected to display the details of the
+unknown certificate and prompt the user for a decision, but can be implemented in any way.
+
+	The TrustDelegate interface is comprised of one method named acceptUnknownCertificate. The method takes one
+parameter which is the unknown X509 certificate. The method must return true if the certificate should be accepted
+or false if the certificate should be rejected. Accepting a certificate applies only to the current connection and
+is not permanent. TrustDelegate implementations that need to provide permanent acceptance are responsible for adding
+the accepted certificate to the trusted certificates list.
+
+	I have also provided support for integrating with the popular Apache HttpClient library, which uses an SSL API
+slightly different than the Java built-in SSL API. The Apache HttpClient API adds a few methods to the TrustManager
+and HostnameVerifier interfaces. 
+
+	The TlsConnection object is a convenience that is comprised of a URL and a TlsPolicy. Applications should pass
+around TlsConnection objects instead of just URLs whenever there is an existing TLS policy associated with a
+specific site. TlsConnection objects can be used for HTTPS connections and non-HTTP TLS connections.
+
+	The TlsClient interface is a convenience interface that is comprised of a single method named setTlsPolicy.
+Applications can use it to mark objects that use this API when they make TLS connections.
+
+	The CertificateRepository interface models a finite list of trusted certificates. It is comprised of just one
+method named getCertificates which returns the entire list.
+
+	The MutableCertificateRepository interface extends the CertificateRepository interface by adding a single method
+named addCertificate. TrustDelegate implementations can call this method to permanently store a new certificate.
+
+	The ArrayCertificateRepository object implements the CertificateRepository interface using a Java array to store
+the certificates. It provides a convenient read-only in-memory repository of certificates. It also provides
+additional methods to search for certificates beyond the CertificateRepository interface.
+
+	The HashSetMutableCertificateRepository object implements the MutableCertificateRepository interface using a
+Java HashSet to store the certificates. Applications should use this object when they want to ensure that there
+are no duplicate certificates in the repository.
+
+	The KeystoreCertificateRepository object implements the MutableCertificateRepository interface using a standard
+Java Keystore (JKS) format. Applications should use this object when they need to interoperate with other components
+that store certificates in the JKS format.
+
+	The PemCertificateRepository object implements the CertificateRepository interface and provides a read-only
+trusted certificates list from a file in PEM format. The PEM format originated in an email environment and is
+comprised of a list of certificates, where each one is base64-encoded and surrounded by BEGIN and END tags.
+
+	The PemMutableCertificateRepository implements the MutableCertificateRepository interface and provides a
+read-write trusted certificates list in a PEM-formatted file. 
+
+	The Resource interface is comprised of two methods, getInputStream and getOuputStream. This interface allows
+CertificateRepository instances to abstract the source of their data so that it can be created in-memory, loaded
+from disk, or from a network or database.
+
+	The ByteArrayResource object implements an in-memory Resource.
+
+	The FileResource object implements a Resource that is referenced by a Java File object. Attempting to read
+from a non-existent File should not be an error. Writing to a non-existent File should cause it to be created.
+
+	The ExistingFileResource object implements a Resource that is referenced by a Java File object with the
+additional restriction that it should already exist. Attempting to read from a non-existent File should cause
+an error. Writing to a non-existent file should also cause an error.
+
+Java Built-In SSL API
+
+	The SSL API that is built-in to the Java Runtime Environment (JRE) is complicated to use. 
+
+	Typically, application developers have a requirement to use SSL but are not SSL experts and they just want
+to get something working. So they search the Internet and find an example program with boilerplate code like in [2]:
+
++---
+public class Example {
+	public static void main(String[] args) throws Exception {
+		// Create a trust manager that does not validate certificate chains
+		TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+				public void checkClientTrusted(X509Certificate[] certs, String authType) {
+				}
+				public void checkServerTrusted(X509Certificate[] certs, String authType) {
+				}
+			}
+		};
+
+		// Install the all-trusting trust manager
+		SSLContext sc = SSLContext.getInstance("SSL");
+		sc.init(null, trustAllCerts, new java.security.SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+		// Create all-trusting host name verifier
+		HostnameVerifier allHostsValid = new HostnameVerifier() {
+			public boolean verify(String hostname, SSLSession session) {
+				return true;
+			}
+		};
+
+		// Install the all-trusting host verifier
+		HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+
+		URL url = new URL("https://www.nakov.com:2083/");
+		URLConnection con = url.openConnection();
+		Reader reader = new InputStreamReader(con.getInputStream());
+		while (true) {
+			int ch = reader.read();
+			if (ch==-1) {
+				break;
+			}
+			System.out.print((char)ch);
+		}
+	}
+}
++---
+
+	Then, since it is "working" to connect with SSL to their server, they may never go back and figure out how
+to enable the security checks that make SSL secure. 
+
+Introduction to TLS Policy API
+
+	Removing the Java SSL API boilerplate code from and replacing it with an equivalent insecure policy from this
+project yields the following base program. Usage of the TLS Policy API is underlined:
+
++---	
+public class Example {
+	public static void main(String[] args) {
+		try {
+			URL url = new URL("https://www.google.com");
+			if( args.length > 0 ) {
+				url = new URL(args[0]);
+			}
+			TlsPolicy tlsPolicy = TlsPolicyFactory.insecure();
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, new TrustManager[]{tlsPolicy.getTrustManager()}, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+			HttpsURLConnection.setDefaultHostnameVerifier(tlsPolicy.getHostnameVerifier());
+			URLConnection con = url.openConnection();
+			String content = IOUtils.toString(con.getInputStream());
+			System.out.println(content);
+		} catch (Exception e) {
+			System.err.println("ERROR: " + e.toString());
+		}
+	}
+}
++---	
+
+	To switch from an insecure TLS policy to a browser-like TLS policy in a console application, the developer
+only needs to change one line:
+
++---	
+TlsPolicy tlsPolicy = TlsPolicyFactory.insecure();
++---	
+
+	To this:
++---	
+TlsPolicy tlsPolicy = TlsPolicyFactory.consoleBrowser();
++---	
+
+	Because the TlsPolicy class is really an interface, the rest of the program stays the same. The specific
+implementation instantiated by the convenience functions in TlsPolicyFactory provides an appropriate TrustManager
+and HostnameVerifier for the Java SSL API to use.
+
+	The implementation returned by consoleBrowser() automatically uses a file in the current directory named
+"trusted-certs.pem"  to store the trusted certificates. If the file does not exist it will be created automatically
+when the first certificate is saved to it.
+
+	Developers who need to store the trusted certificates in a custom location can use the function
+consoleBrowserWithRepository(File trustedCertificates) to specify the location of their preferred trusted
+certificates file.
+
+	The trusted certificates file is in PEM format. PEM is an acronym for Privacy Enhanced Mail. An example of
+this format is provided in the Demonstration section of this report.
+
+	For additional security, the trusted certificates file should be password-protected. That was not implemented
+in this project because I focused on the API design, but please see Appendix B for details.
+
+	The trusted certificates file is managed by a class named PemMutableCertificateRepository. It is so named because
+the file format is PEM, and because the file is mutable - its contents may be changed by the instance, for example
+when the user chooses to save a certificate.
+
+	The console user is prompted to accept and/or save certificates by the class named ConsoleTrustDelegate. 
+
+	Modern applications typically have a Graphical User Interface (GUI) and would need a graphical implementation of
+the TrustDelegate interface. If such an implementation is created, then a convenience method should also be created
+in order to instantiate it as easily as the ConsoleTrustDelegate.
+
+TLS Policy Factory
+
+	Check the Javadoc for TlsPolicyFactory to see all the available factory methods.
+
+
+TLS Policy Builder
+
+	The convenience functions provided by TlsPolicyFactory are simply wrappers for options provided by the
+TlsPolicyBuilder class. Application developers that need to use a more customized TLS policy should use the
+TlsPolicyBuilder class directly.
+
+	The following examples of using the TlsPolicyBuilder class create insecure and browser-like TLS policies that
+are equivalent to the ones illustrated in the introduction. In fact, the following is simply extracted from the
+source code of TlsPolicyFactory:
+		
++---	
+TlsPolicy insecure = TlsPolicyBuilder.factory().insecure().build();
++---	
+
++---	
+MutableCertificateRepository repository = new PemMutableCertificateRepository(new FileResource(new File("trusted-certs.pem")));
+TrustDelegate delegate = new ConsoleTrustDelegate(repository);
+TlsPolicy browser = TlsPolicyBuilder.factory().browser(repository, delegate).build();		
++---	
+
+	The following code snippet creates a TLS policy that relies on a list of trusted certificates but does not
+allow any additions to it - if the server certificate cannot be validated by the list then it is rejected. Notice
+that the repository type is a CertificateRepository, and its implementation is an immutable PemCertificateRepository.
+Therefore the certificate-adding functionality is not even exposed to the application.
+
++---	
+CertificateRepository repository = new PemCertificateRepository(new FileResource(new File("trusted-certs.pem")));
+TlsPolicy strict = TlsPolicyBuilder.factory().strict(repository).build();
++---	
+
+	The TlsPolicyBuilder has a very simple, semantic style used to choose create TLS policy. The following code
+example creates a strict TLS policy exactly equivalent to the one created by the strict function above:
+
++---	
+CertificateRepository repository = new PemCertificateRepository(new FileResource(new File("trusted-certs.pem")));
+TlsPolicy tlsPolicy = TlsPolicyBuilder.factory()
+	.providesAuthentication()
+	.providesConfidentiality()
+	.providesIntegrity()
+	.certificateRepository(repository)
+	.build();
++---	
+
+	When reading code like this, the TLS policy returned is clearly expected to provide authentication,
+confidentiality, and integrity, and use the immutable trusted certificates file specified by the repository variable.
+
+	The following code example creates a browser-like TLS policy exactly equivalent to the one created by the browser function above:
+
++---	
+MutableCertificateRepository repository = new PemMutableCertificateRepository(new FileResource(new File("trusted-certs.pem")));
+TrustDelegate delegate = new ConsoleTrustDelegate(repository);
+TlsPolicy tlsPolicy = TlsPolicyBuilder.factory()
+	.providesAuthentication()
+	.providesConfidentiality()
+	.providesIntegrity()
+	.trustDelegate(delegate)
+	.certificateRepository(repository)
+	.build();
++---	
+
+	The certificateRepository function identifies a repository from which trusted certificates should be read. The
+trustDelegate function identifies the mechanism by which the user will be prompted to accept server certificates -
+or it can even be automated using application-specific logic or infrastructure. Notice that the trustDelegate
+itself needs to have a certificate repository into which to save certificates - the two repositories need not be
+the same. It is possible to write new certificates into a separate repository, which might be useful in some
+applications in which new certificates need to be reviewed before they are added to the trusted list. That is, a
+user can accept them for the current session but to be accepted permanently someone, like an administrator, would
+need to copy them to the read-only repository.
+
+	Of course, the TlsPolicyBuilder also allows construction of insecure policies, but this is clearly identified
+using the insecure() function or code like the following, which is exactly equivalent to using the insecure() function:
++---	
+TlsPolicy tlsPolicy = TlsPolicyBuilder.factory()
+	.noAuthentication()
+	.noConfidentiality()
+	.noIntegrity()
+	.build();
++---	
+
+	When using a policy that doesn't provide authentication, confidentiality, or integrity, it is not necessary to
+specify a trusted certificates file since it would not be used.
+
+Supported Policies
+
+	The following is a list of typical policies:
+
+	1.	insecure: no authentication, no confidentiality, no integrity
+
+	2.	strict: provides authentication, provides confidentiality, provides integrity, immutable trusted certs list
+
+	3.	browser: provides authentication, provides confidentiality, provides integrity, mutable trusted certs list
+	
+	It is also possible to construct a strict policy with an immutable trusted certs list that is empty. In that
+case, the policy would reject all connections because when it attempts to validate any server certificate, it will
+never find it nor its issuer in an empty list.
+
+Unsupported Policies
+
+	The ability to specify authentication, confidentiality, and integrity separately leads to the following
+possibilities that are not yet supported.
+
+	1.	authenticated http: provides authentication, no confidentiality, provides integrity, mutable trusted
+certs list
+
+	2.	strict authenticated http: provides authentication, no confidentiality, provides integrity, immutable
+trusted certs list
+
+	3.	checksum http: no authentication, no confidentiality, provides integrity
+
+	4.	loose cannon http: provides authentication, no confidentiality, no integrity
+
+	The reason that authenticated http is not yet supported is that, as far as I am currently aware, there is no
+standard protocol for signing unencrypted http messages. But a custom protocol could be created, wherein standard
+http is used and an additional X-Authentication header is included with every request, and contains authentication
+information that covers the request. Absent such a protocol, it is still possible to provide authenticated http by
+simply upgrading to https. That is, the policy implementation could try using the same settings with confidentiality
+provided, and if SSL is supported by the server then it would succeed. But if the server does not support SSL, then
+the policy would have to reject the connection because there is no compliant implementation available.
+
+	The reason that checksum http is not supported is that, as far as I am currently aware, there is no standard
+protocol for using a shared secret to provide message integrity to plaintext http messages. Such a standard would
+probably require clients to include an HMAC of their request in an http header, using a secret key that is shared
+with the server and with other clients. This way it would provide integrity against attackers but it would not
+uniquely identify the client since multiple clients use the same key. The checksum http policy could not be
+implemented without a secret key, because using a checksum or hash without a secret key is completely insecure
+against attackers and provides no more security than TCP/IP by itself. TCP/IP already provides a checksum of packets
+which is easily attacked. Allowing a user to select a checksum policy without a secret key would be against the
+design goals of the library. 
+
+	The reason that loose cannon http is not supported is because it has no value. If a client takes the trouble to
+authenticate to a server, yet explicitly does not protect its messages, it assumes a huge liability. Therefore, the
+library does not allow this combination. If a developer attempts to enable this policy using the TlsPolicyBuilder,
+the following exception will be thrown: "Unsupported combination of options to create TlsPolicy."
+
+Example Code
+
+	The tls-policy-example module is a stand-alone Java application that uses the tls-policy module. 
+
+	To run tls-policy-example from the command-line, use the following command template:
+	
++---	
+java -cp tls-policy-example.jar example.MainWithBrowserTlsPolicy <URL>
++---	
+
+	The token <URL> should be replaced with the URL to access. If the connection is successful, the contents of the
+URL will be written to stdout. The word "MainWithBrowserTlsPolicy" can be replaced with any of the following:
+	-	"MainWithInsecureTlsPolicy"  in order to connect insecurely
+	-	"MainWithStrictTlsPolicy" to connect with a read-only trusted certificates list
+	-	"MainWithInsecureBoilerplate" to connect insecurely.
+
+	Running the example program using the insecure TLS policy will not prompt to accept the remote server certificate
+since the program disables certificate validation and hostname verification:
+
++---	
+C:\> java -cp tls-policy-example.jar example.MainWithInsecureTlsPolicy https://www.google.com
++---	
+
+	Running the example program using the browser-like TLS policy will prompt to accept the remote server certificate
+since the program does not have the common Internet CA's built in. If the user rejects the certificate, the session
+looks like this:
+
++---	
+C:\> java -cp tls-policy-example.jar example.MainWithBrowserTlsPolicy https://www.google.com
+The server certificate could not be validated
+Issuer: OU=Equifax Secure Certificate Authority,O=Equifax,C=US
+Subject: CN=Google Internet Authority,O=Google Inc,C=US
+Type:X.509
+Not valid before: Wed Dec 12 07:58:50 PST 2012
+Not valid after: Tue Dec 31 07:58:50 PST 2013
+Serial number: 1406945
+SHA1 Fingerprint: 59676e6bdd9f4d9ddae6a15d9dbcdf24357cf776
+Accept this certificate? [Y/N] n
+ERROR: javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: Server certificate is not trusted
++---	
+
+	If the user accepts the certificate, the session looks like this:
+
++---	
+C:\> java -cp tls-policy-example.jar example.MainWithBrowserTlsPolicy https://www.google.com
+The server certificate could not be validated
+Issuer: OU=Equifax Secure Certificate Authority,O=Equifax,C=US
+Subject: CN=Google Internet Authority,O=Google Inc,C=US
+Type:X.509
+Not valid before: Wed Dec 12 07:58:50 PST 2012
+Not valid after: Tue Dec 31 07:58:50 PST 2013
+Serial number: 1406945
+SHA1 Fingerprint: 59676e6bdd9f4d9ddae6a15d9dbcdf24357cf776
+Accept this certificate? [Y/N] y
+Save this certificate permanently? [Y/N] y
++---	
+
+	If the user opts not to save the certificate permanently, the user will be prompted about the same certificate on
+each visit. If the user opts to save the certificate permanently, it will be saved into a file called
+trusted-certs.pem in the current directory.
+
++---	
+C:\> type trusted-certs.pem
+-----BEGIN CERTIFICATE-----
+MIICsDCCAhmgAwIBAgIDFXfhMA0GCSqGSIb3DQEBBQUAME4xCzAJBgNVBAYTAlVTMRAwDgYDVQQK
+EwdFcXVpZmF4MS0wKwYDVQQLEyRFcXVpZmF4IFNlY3VyZSBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkw
+HhcNMTIxMjEyMTU1ODUwWhcNMTMxMjMxMTU1ODUwWjBGMQswCQYDVQQGEwJVUzETMBEGA1UEChMK
+R29vZ2xlIEluYzEiMCAGA1UEAxMZR29vZ2xlIEludGVybmV0IEF1dGhvcml0eTCBnzANBgkqhkiG
+9w0BAQEFAAOBjQAwgYkCgYEAye23pIucV+eEPkB9hPSP0XFjU5nneXQUr0SZMyCSjXvlKAy6rWxJ
+foNfNFlOCnowzdDXxFdF7dWq1nMmzq0yE7jXDx07393cCDaob1FEm8rWIFJztyaHNWrbqeXUWaUr
+/GcZOfqTGBhs3t0lig4zFEfC7wFQeeT9adGnwKziV28CAwEAAaOBozCBoDAfBgNVHSMEGDAWgBRI
+5mj5K9KylddH2CMgEE8zmJCf1DAdBgNVHQ4EFgQUv8Aw6/VDET5nup6R+/xq2uNrEiQwEgYDVR0T
+AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAQYwOgYDVR0fBDMwMTAvoC2gK4YpaHR0cDovL2Ny
+bC5nZW90cnVzdC5jb20vY3Jscy9zZWN1cmVjYS5jcmwwDQYJKoZIhvcNAQEFBQADgYEAvprjecFG
++iJsxzEFZUNgujFQodUovxOWZshcnDW7fZ7mTlk3zpeVJrGPZzhaDhvuJjIfKqHweFB7gwB+ARlI
+jNvrPq86fpVg0NOTawALkSqOUMl3MynBQO+spR7EHcRbADQ/JemfTEh2YcflvZqhEFBfurZkX0eT
+ANq98ZvVfpg=
+-----END CERTIFICATE-----
++---	
+
+	With the server certificate saved, subsequent executions of the same command will validate its certificate
+against the keystore and will not prompt the user.
+
+Password Protection
+
+	Password protection is necessary to prevent malicious users or programs from adding certificates to the trusted
+certificates list without the user's knowledge. If the password-protection feature were to be implemented, the
+TrustDelegate would prompt the user for the password whenever it needs to save a certificate to the trusted repository.
+
+	There are two obvious ways to implement password protection: 1) encrypt the trusted certificates file; and 2)
+sign the trusted certificate file.
+
+	Using either method, the user must be prompted for a password at least once by the application. Ideally a
+program would retain the trusted certificates list in memory after loading it so it does not prompt the user
+for a password every time it makes an SSL connection.
+
+	Encrypting the trusted certificates file means that the user must be prompted for a password at least once
+in order to decrypt the file and load the list of trusted certificates. 
+
+	Signing the trusted certificates file means that the application can read the trusted certificates without a
+password, but it must still prompt for a password in order to verify the integrity of the trusted certificates.
+That is, because the trusted certificates are stored in plain text with an attached signature, the application must
+verify the signature to prevent an attacker simply adding a certificate to the list as if it weren't protected at all.
+
+	The only difference between the two methods is whether the trusted certificates list is readable to others.
+
+	In my opinion it makes sense in most applications to use the signature method because storing the certificates
+in plaintext allows for monitoring agents to check the contents of the trusted certificates list and alert the
+administrator if there are any suspicious certificates in it. If the file were encrypted this would not be
+possible without interaction with the user. 
+
+	Only applications in which everything is secret should need to encrypt the trusted certificates file - and in
+that case they may already have a mechanism for encrypting all their data and simply apply it to that file as well.
+
+References
+
+	{r1}[1] M. Georgiev et al. "The Most Dangerous Code in the World: Validating SSL Certificates in Non-Browser
+Software". ACM Conference on Computer and Communications Security, 2012.
+Available: http://www.cs.utexas.edu/~shmat/shmat_ccs12.pdf
+
+	[2] http://www.nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
+
+

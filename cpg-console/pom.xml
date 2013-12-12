@@ -1,0 +1,75 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>cpg-console</artifactId>
+  <version>0.1.2</version>
+  <packaging>jar</packaging>
+  <name>cpg-console</name>
+  <description>Console related objects</description>
+    <parent>
+	  <groupId>com.intel.dcsg.cpg</groupId>
+	  <artifactId>cpg</artifactId>
+	  <version>0.2</version>
+    </parent>
+
+
+  <dependencies>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+            <version>0.1.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-performance</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <optional>true</optional>
+        </dependency>
+    <dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<scope>test</scope>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.6.4</version>
+    </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.10</version>
+            <scope>test</scope>
+        </dependency>        
+    <dependency>
+		<groupId>commons-beanutils</groupId>
+		<artifactId>commons-beanutils</artifactId>
+		<version>1.8.0</version>
+		<scope>compile</scope>
+    </dependency>
+    <dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-lang3</artifactId>
+		<version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <type>jar</type>
+    </dependency>
+    
+        <!-- for com.intel.mtwilson.as.helper.JacksonMappingProvider to allow OpenStack JSON output where single-element array is serialized as a string value instead of a single-element array -->
+    <dependency>
+    	<groupId>org.codehaus.jackson</groupId>
+    	<artifactId>jackson-jaxrs</artifactId>
+    	<version>1.9.11</version>
+    </dependency>
+
+  </dependencies>  
+</project>

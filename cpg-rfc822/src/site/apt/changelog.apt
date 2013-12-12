@@ -1,0 +1,20 @@
+Changelog
+
+* Version 0.1
+
+  First draft includes Rfc822Date (formerly in cpg-io) and the following new classes:
+
+  Base64Decoder (uses commons-codec)
+  Base64Encoder (uses commons-codec)
+  Decoder
+  Encoder
+  GzipDecoder (uses java.util.zip)
+  GzipEncoder (uses java.util.zip)
+  HexDecoder (uses commons-codec)
+  HexEncoder (uses commons-codec)
+  IdentityDecoder (no-op)
+  IdentityEncoder (no-op)
+  Message
+  MessageReader
+  MessageWriter
+
