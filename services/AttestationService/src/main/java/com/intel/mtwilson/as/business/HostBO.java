@@ -194,11 +194,13 @@ public class HostBO extends BaseBO {
                         log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
+                        Map<String,String> attributes = agent.getHostAttributes();
+                        tblHosts.setUUID(attributes.get("Host_UUID"));
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
                         // to which the host has to be associated
-                        associateAssetTagCertForHost(host, agent.getHostAttributes());
+                        associateAssetTagCertForHost(host, attributes);
 
 		} catch (ASException ase) {
             //System.err.println("JIM DEBUG"); 

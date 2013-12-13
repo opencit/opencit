@@ -126,6 +126,9 @@ public class TblHosts implements Serializable {
     @ManyToOne(optional = false)
     private TblMle biosMleId;
 
+    @Column(name = "UUID")
+    private String uuid;
+    
     public TblHosts() {
     }
 
@@ -398,6 +401,11 @@ public class TblHosts implements Serializable {
         this.tblSamlAssertionCollection = tblSamlAssertionCollection;
     }
 
- 
+    public String getUUID() {
+        return uuid;
+    }
     
+    public void setUUID(String uuid){
+        this.uuid = uuid;
+    }
 }
