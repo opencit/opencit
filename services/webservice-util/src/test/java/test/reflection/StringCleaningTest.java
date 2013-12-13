@@ -5,13 +5,13 @@
 package test.reflection;
 
 import com.intel.dcsg.cpg.validation.Regex; // 20131012
+import com.intel.mtwilson.datatypes.ConnectionString;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.TypeVariable;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,18 +30,23 @@ public class StringCleaningTest {
 
     public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
     
-    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
+    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-.]*$";
     public static final String IPADDRESS_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
     public static final String FQDN_PATTERN = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$";
     public static final String IPADDR_FQDN_PATTERN = "(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$)";
     public static final String EMAIL_PATTERN = "^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$";
     // This might need to be modified to allow more special characters. The rule currently says 1or more lower and upper case, one digit and one of the special characters and atleast 8 characters in length
     public static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";  
+    public static final String PORT = "^[0-9]{1,5}";
+    public static final String ADDON_CONNECTION_STRING = "ADDON_CONNECTION_STRING"; // We will internally use the other regular expressions to validate fields having this annotation
     
     public static class Pet {
         public String getName() { return "sparky@"; } 
     }
     public static class Person {
+        @Regex (DEFAULT_PATTERN)
+        public String test = "sud.-_1234";
+        /*public String cs = "vmware:https://server1.corp.intel.com:123/sdk;Admi@nistrator;intel123!;10.1.71.176";
         public String[] names = new String[] {"sdf", "asdf", "2347"};
         public Integer[] tes = new Integer[] {1,2,3};
         public String description = "Test";
@@ -66,13 +71,13 @@ public class StringCleaningTest {
         public List<Integer> getPetIDList() { return new ArrayList<Integer>(Arrays.asList(new Integer[] {1,2,3}));} 
         public List<String> getPetList() { return new ArrayList<String>(Arrays.asList(new String[] {"dogA","dogB&*","dogC"}));} //{{ add("dogA");  add("dogB");  add("dogC");}};}
         public List<Pet> getPetList2() {return new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));}     
-        public Pet[] getPetList3() {return new Pet[] {new Pet()};}
+        public Pet[] getPetList3() {return new Pet[] {new Pet()};}*/
         // TODO  methods that return arraylist<string>  and string[] */
     }
-    
+        
     @Test
     public void testValidatePojo() {
-        validate(new Person()); // throws an exception if person has invalid strings
+        validate(new String("Test*$")); // throws an exception if person has invalid strings
     }
     
     // entry point:   call validate(TxtHost), validate(MLE), etc. 
@@ -108,7 +113,26 @@ public class StringCleaningTest {
         validateInput(input, pattern);        
     }
     
-    
+    public static void validateConnectionString(String input) {
+        ConnectionString.VendorConnection cs = null;
+        if (input != null && ! input.isEmpty()) {
+            try {
+                // Construct the connection string object so that we can extract the individual elements and validate them
+                cs = ConnectionString.parseConnectionString(input);
+            } catch (MalformedURLException ex) {
+                log.error("Connection string specified is invalid. {}", ex.getMessage());
+                throw new IllegalArgumentException();
+            }
+            // validate the management server name, port, host name
+            validateInput(cs.url.getHost(), getPattern(IPADDR_FQDN_PATTERN));
+            validateInput(Integer.toString(cs.url.getPort()), getPattern(PORT));
+            if (!cs.options.isEmpty()) {
+                validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(IPADDR_FQDN_PATTERN));
+                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(DEFAULT_PATTERN));
+                validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(PASSWORD_PATTERN));
+            }
+        }
+    }
     public static void validate(Object object, ArrayList<Object> stack) {
         // first check if the object being requested is already in the stack... if so we skip it to avoid infinite recursion
         for(Object item : stack) {
@@ -116,7 +140,7 @@ public class StringCleaningTest {
         }
         // add the object to the stack so we don't try to validate it again if it has a self-referential property ...   unlike normal stacks we never really need to "pop" this one because it's just a record of where we've been,  and we don't use it to navigate.
         stack.add(object);
-                
+        
         // Now validate the fields
         Set<Field> stringFields = getStringFields(object.getClass());
         for(Field field : stringFields) {
@@ -305,10 +329,14 @@ public class StringCleaningTest {
 
     // 20131012
     public static void validateInput(String input, Pattern pattern) {
-        Matcher matcher = pattern.matcher(input);
-        if (!matcher.matches()) {
-            log.debug("Illegal characters found in : " + input);
-            throw new IllegalArgumentException();
+        if (pattern.pattern().equalsIgnoreCase("ADDON_CONNECTION_STRING")) {
+            validateConnectionString(input);
+        } else {
+            Matcher matcher = pattern.matcher(input);
+            if (!matcher.matches()) {
+                log.debug("Illegal characters found in : " + input);
+                throw new IllegalArgumentException();
+            }
         }
     }
     
@@ -351,7 +379,13 @@ public class StringCleaningTest {
     public static boolean isStringCollectionField(Field field) {
         boolean isPublic = field.getModifiers() == Modifier.PUBLIC;
         boolean isList = Collection.class.isAssignableFrom(field.getType()); // java.util.List.class.isAssignableFrom(field.getType());
-        boolean stringReturn = field.toGenericString().contains("java.util.List<java.lang.String>");            
+        // boolean stringReturn = field.toGenericString().contains("java.util.List<java.lang.String>");            
+        boolean stringReturn = false;
+        if (isList) {
+            ParameterizedType stringListType = (ParameterizedType) field.getGenericType();
+            Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+            stringReturn = stringListClass.isAssignableFrom(String.class);
+        }
         return isPublic && isList && stringReturn;
     }
 
@@ -366,8 +400,14 @@ public class StringCleaningTest {
     public static boolean isStringCollectionMethod(Method method) {
         boolean conventional = method.getName().startsWith("get") || method.getName().startsWith("to");
         boolean noArgs = method.getParameterTypes().length == 0;        
-        boolean isList = java.util.List.class.isAssignableFrom(method.getReturnType());
-        boolean stringReturn = method.toGenericString().contains("java.util.List<java.lang.String>");
+        //boolean isList = java.util.List.class.isAssignableFrom(method.getReturnType());
+        boolean isList = Collection.class.isAssignableFrom(method.getReturnType());
+        boolean stringReturn = false;
+        if (isList) {
+            ParameterizedType stringListType = (ParameterizedType) method.getGenericReturnType();
+            Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];
+            stringReturn = stringListClass.isAssignableFrom(String.class);
+        }
         return conventional && noArgs && isList && stringReturn;
     }
     
