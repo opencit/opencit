@@ -12,11 +12,14 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.Test;
@@ -30,7 +33,7 @@ public class StringCleaningTest {
 
     public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
     
-    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-.]*$";
+    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
     public static final String IPADDRESS_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
     public static final String FQDN_PATTERN = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$";
     public static final String IPADDR_FQDN_PATTERN = "(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$)";
@@ -46,7 +49,8 @@ public class StringCleaningTest {
     public static class Person {
         @Regex (DEFAULT_PATTERN)
         public String test = "sud.-_1234";
-        /*public String cs = "vmware:https://server1.corp.intel.com:123/sdk;Admi@nistrator;intel123!;10.1.71.176";
+        @Regex (ADDON_CONNECTION_STRING)
+        public String cs = "vmware:https://server1.corp.intel.com:123/sdk;Admi@nistrator;intel123!;10.1.71.176";
         public String[] names = new String[] {"sdf", "asdf", "2347"};
         public Integer[] tes = new Integer[] {1,2,3};
         public String description = "Test";
@@ -71,13 +75,13 @@ public class StringCleaningTest {
         public List<Integer> getPetIDList() { return new ArrayList<Integer>(Arrays.asList(new Integer[] {1,2,3}));} 
         public List<String> getPetList() { return new ArrayList<String>(Arrays.asList(new String[] {"dogA","dogB&*","dogC"}));} //{{ add("dogA");  add("dogB");  add("dogC");}};}
         public List<Pet> getPetList2() {return new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));}     
-        public Pet[] getPetList3() {return new Pet[] {new Pet()};}*/
+        public Pet[] getPetList3() {return new Pet[] {new Pet()};}
         // TODO  methods that return arraylist<string>  and string[] */
     }
         
     @Test
     public void testValidatePojo() {
-        validate(new String("Test*$")); // throws an exception if person has invalid strings
+        validate(new Person()); //new String[] {"one", "two"}); //new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()})));//new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"})));//new String[] {"one", "two"}); // throws an exception if person has invalid strings
     }
     
     // entry point:   call validate(TxtHost), validate(MLE), etc. 
@@ -133,6 +137,37 @@ public class StringCleaningTest {
             }
         }
     }
+    
+    private static boolean validateBasicDataType(Object object) {
+        boolean continueValidation = true;
+        boolean isBasic = isBuiltInType(object.getClass());
+        if (isBasic) {
+            if (object.getClass().equals(String.class)){
+                validateInput((String)object);
+                continueValidation = false;
+            } else if (object.getClass().isArray() && object.getClass().equals(String[].class)) {
+                continueValidation = false;
+                Object[] objArray = (Object[]) object;
+                for (Object obj : objArray){
+                    validateInput((String)obj);
+                }                
+            } else {
+                continueValidation = false; // since it is one of the basic types and is not a String[], we don't need to continue anyway
+            }
+        } else if (Collection.class.isAssignableFrom(object.getClass())) {
+            List<Object> objList = (List<Object>) object;
+            for (Object obj : objList){
+                if (obj.getClass().equals(String.class)){
+                    validateInput((String)obj);
+                } else {
+                    continueValidation = true;// This might be one of the custom objects
+                    return continueValidation;
+                }                    
+            }
+        }
+        return continueValidation;
+    }
+    
     public static void validate(Object object, ArrayList<Object> stack) {
         // first check if the object being requested is already in the stack... if so we skip it to avoid infinite recursion
         for(Object item : stack) {
@@ -141,6 +176,9 @@ public class StringCleaningTest {
         // add the object to the stack so we don't try to validate it again if it has a self-referential property ...   unlike normal stacks we never really need to "pop" this one because it's just a record of where we've been,  and we don't use it to navigate.
         stack.add(object);
         
+        boolean continueValidation = validateBasicDataType(object);
+        if (!continueValidation)
+            return;
         // Now validate the fields
         Set<Field> stringFields = getStringFields(object.getClass());
         for(Field field : stringFields) {
@@ -369,6 +407,13 @@ public class StringCleaningTest {
         return isPublic && stringReturn;
     }
     
+    public static boolean isStringFieldBasic(Class<?> clazz, Field field) {
+        boolean isBuiltInType = isBuiltInType(clazz);
+        boolean stringReturn =  clazz.isAssignableFrom(String.class);
+        boolean isValueField = field.getName().equalsIgnoreCase("value");
+        return isBuiltInType && stringReturn && isValueField;
+    }
+
     public static boolean isStringArrayField(Field field) {
         boolean isPublic = field.getModifiers() == Modifier.PUBLIC;
         boolean isArray = field.getType().isArray();

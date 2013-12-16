@@ -83,7 +83,12 @@ public class ValidationUtil {
         }
         // add the object to the stack so we don't try to validate it again if it has a self-referential property ...   unlike normal stacks we never really need to "pop" this one because it's just a record of where we've been,  and we don't use it to navigate.
         stack.add(object);
-                
+
+        // Validate the basic data types. This function validates the input such as Validate("Test") or Validate(new String{}..) or Validate(new ArrayList<String>....)
+        boolean continueValidation = validateBasicDataType(object);
+        if (!continueValidation)
+            return;
+        
         // Now validate the fields
         Set<Field> stringFields = getStringFields(object.getClass());
         for(Field field : stringFields) {
@@ -288,6 +293,42 @@ public class ValidationUtil {
                 validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(ValidationRegEx.PASSWORD_PATTERN.getRegEx()));
             }
         }
+    }
+
+    /**
+     * This function would be used to validate the basic data types. Ex: Validate("Test") or Validate(new String{}..) or Validate(new ArrayList<String>....)
+     * 
+     * @param object
+     * @return 
+     */
+    private static boolean validateBasicDataType(Object object) {
+        boolean continueValidation = true;
+        boolean isBasic = isBuiltInType(object.getClass());
+        if (isBasic) {
+            if (object.getClass().equals(String.class)){
+                validateInput((String)object);
+                continueValidation = false;
+            } else if (object.getClass().isArray() && object.getClass().equals(String[].class)) {
+                continueValidation = false;
+                Object[] objArray = (Object[]) object;
+                for (Object obj : objArray){
+                    validateInput((String)obj);
+                }                
+            } else {
+                continueValidation = false; // since it is one of the basic types and is not a String[], we don't need to continue anyway
+            }
+        } else if (Collection.class.isAssignableFrom(object.getClass())) {
+            List<Object> objList = (List<Object>) object;
+            for (Object obj : objList){
+                if (obj.getClass().equals(String.class)){
+                    validateInput((String)obj);
+                } else {
+                    continueValidation = true;// This might be one of the custom objects
+                    return continueValidation;
+                }                    
+            }
+        }
+        return continueValidation;
     }
     
     /**
