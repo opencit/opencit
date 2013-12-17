@@ -13,6 +13,7 @@ import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,6 +58,7 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     public String enableCa(String newSaltedPasswordString) {
         try {
+            ValidationUtil.validate(newSaltedPasswordString);
             Password newPassword = Password.valueOf(newSaltedPasswordString);
             dao.enableCaWithPassword(newPassword);
             return Boolean.TRUE.toString();
