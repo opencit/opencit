@@ -193,7 +193,14 @@ public class IntelHostAgent implements HostAgent {
 
     @Override
     public Map<String, String> getHostAttributes() throws IOException {
-        return new HashMap<String,String>();
+       HashMap<String,String> hm = new HashMap<String, String>();
+        // Retrieve the data from the host and add it into the hashmap
+        HostInfo hostInfo = trustAgentClient.getHostInfo();
+        // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+        if (hostInfo != null)
+            hm.put("Host_UUID", hostInfo.getHostUUID().trim());
+        
+        return hm;
     }
     
     @Override
