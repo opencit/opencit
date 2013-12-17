@@ -364,14 +364,6 @@ public class VMwareClient implements TlsClient {
     }
     
     /**
-     * XXX temporary public access until the code is refactored
-     */
-    public Object getMORProperty(ManagedObjectReference moRef,
-            String propertyName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
-        return getMORProperties(moRef, new String[]{propertyName})[0];
-    }
-
-    /**
      * performance of this method is very bad, it has been observed at 1 second
      * per iteration of the comparison loop. see getHostReference for obtaining
      * a managed object reference for a specific host (instead of for all hosts

@@ -382,19 +382,11 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     public Map<String, String> getHostAttributes() throws IOException {
         HashMap<String,String> hm = new HashMap<String, String>();
         String hostUUID = "";
-        try {
+
             // Retrieve the data from the host and add it into the hashmap
             // Currently we are just adding the UUID of th host. Going ahead we can add additional details
-            hostUUID = vmware.getMORProperty(hostMOR, "hardware.systemInfo.uuid").toString();
-        } catch (InvalidPropertyFaultMsg ex) {
-            // since we got an exception, let us make sure it is empty.
-            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
-            hostUUID = "";
-        } catch (RuntimeFaultFaultMsg ex) {
-            // since we got an exception, let us make sure it is empty.
-            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
-            hostUUID = "";
-        }
+            hostUUID = vmware.getMEProperty("HostSystem", hostname,"hardware.systemInfo.uuid").toString();
+
         hm.put("Host_UUID", hostUUID);
         return hm;
    }
