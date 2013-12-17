@@ -31,6 +31,7 @@ import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
@@ -63,6 +64,7 @@ public class Host {
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/location")
         public HostLocation getLocation(@QueryParam("hostName") String hostName) {
+                ValidationUtil.validate(hostName);
                 if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
                 else return new ASComponentFactory().getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
         }
@@ -72,6 +74,7 @@ public class Host {
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/location")
         public String addLocation(HostLocation hlObj) {
+                ValidationUtil.validate(hlObj);
                 Boolean result = new ASComponentFactory().getHostTrustBO().addHostLocation(hlObj);
                 return Boolean.toString(result);
         }
@@ -81,6 +84,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_JSON})
     @Path("/aik-{aik}/trust.json")
     public HostTrustResponse getTrustByAik(@PathParam("aik")String aikFingerprint) {
+        ValidationUtil.validate(aikFingerprint);
         if( aikFingerprint == null || aikFingerprint.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
                 else {
         try {
@@ -118,6 +122,7 @@ public class Host {
     @Produces({MediaType.APPLICATION_OCTET_STREAM})
     @Path("/aik-{aik}/trustcert.x509")
     public byte[] getCurrentTrustCertificateByAik(@PathParam("aik")String aikFingerprint) {
+        ValidationUtil.validate(aikFingerprint);
         if( aikFingerprint == null || aikFingerprint.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
         else{
         try {
@@ -186,6 +191,7 @@ public class Host {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse post(TxtHostRecord hostRecord) { 
+        ValidationUtil.validate(hostRecord);
         if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
         else return hostBO.addHost(new TxtHost(hostRecord), null, null); 
     }
@@ -222,6 +228,9 @@ public class Host {
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
     public HostResponse put(TxtHostRecord hostRecord) {
+            
+            ValidationUtil.validate(hostRecord);
+            
             if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
             else return hostBO.updateHost(new TxtHost(hostRecord), null, null);
     }
@@ -247,6 +256,9 @@ public class Host {
         public HostTrustResponse get(
                 @QueryParam("hostName") String hostName,
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify) throws ASException {
+                
+                ValidationUtil.validate(hostName);
+                
                 try {
                         // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
                         Hostname hostname = new Hostname(hostName);
@@ -280,6 +292,7 @@ public class Host {
 //    @Consumes({"text/html"})
         @Produces({MediaType.APPLICATION_JSON})
         public HostResponse delete(@QueryParam("hostName") String hostName) {
+                ValidationUtil.validate(hostName);
                 if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
                 else return hostBO.deleteHost(new Hostname(hostName));
         }
@@ -293,6 +306,7 @@ public class Host {
         @GET
         @Produces({MediaType.APPLICATION_JSON})
         public List<TxtHostRecord> queryForHosts(@QueryParam("searchCriteria") String searchCriteria) {
+            ValidationUtil.validate(searchCriteria);
                 //if( searchCriteria == null || searchCriteria.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
                 //else 
             return hostBO.queryForHosts(searchCriteria);
@@ -304,6 +318,7 @@ public class Host {
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/mle")
         public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
+                ValidationUtil.validate(hostRecord);
                 return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
         }
 
@@ -313,6 +328,7 @@ public class Host {
         @Produces({MediaType.APPLICATION_JSON})
         @Path("/mle/verify")
         public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
+                ValidationUtil.validate(hostRecord);
                 String result = new ASComponentFactory().getHostTrustBO().checkMatchingMLEExists(hostRecord, 
                         hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
                 System.out.println("checkMatchingMLEExists RESULT:" + result);
