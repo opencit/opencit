@@ -7,7 +7,8 @@ package com.intel.mtwilson.util;
 import com.intel.dcsg.cpg.validation.Regex;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.ValidationRegEx;
+import com.intel.mtwilson.datatypes.RegExAnnotation;
+//import com.intel.mtwilson.datatypes.ValidationRegEx;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,19 +34,7 @@ public class ValidationUtil {
     private static Logger log = LoggerFactory.getLogger(ValidationUtil.class);
     
     private static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
-    
-    // Regular expressions for certain standard fields
-    /*public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
-    public static final String IPADDRESS_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
-    public static final String FQDN_PATTERN = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$";
-    public static final String IPADDR_FQDN_PATTERN = "(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$)";
-    public static final String EMAIL_PATTERN = "^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$";
-    // This might need to be modified to allow more special characters. The rule currently says 1or more lower and upper case, one digit and one of the special characters and atleast 8 characters in length
-    public static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";  
-    public static final String PORT = "^[0-9]{1,5}";
-    public static final String ADDON_CONNECTION_STRING = "ADDON_CONNECTION_STRING"; // We will internally use the other regular expressions to validate fields having this annotation
-    */
-    
+        
     public static void validate(Object object) {
         validate(object, new ArrayList<Object>());
     }
@@ -55,10 +44,10 @@ public class ValidationUtil {
         if( method.isAnnotationPresent(Regex.class) ) {
             String regex = method.getAnnotation(Regex.class).value();
             log.debug("Regex annotation: {}", regex);
-            pattern = getPattern(ValidationRegEx.getValidationRegEx(regex).getRegEx());
+            pattern = getPattern(regex);
         }
         else {
-            pattern = getPattern(ValidationRegEx.DEFAULT_PATTERN.getRegEx());
+            pattern = getPattern(RegExAnnotation.DEFAULT_PATTERN);
         }
         validateInput(input, pattern);        
     }
@@ -67,16 +56,17 @@ public class ValidationUtil {
         Pattern pattern;
         if( field.isAnnotationPresent(Regex.class) ) {
             String regex = field.getAnnotation(Regex.class).value();
-            pattern = getPattern(ValidationRegEx.getValidationRegEx(regex).getRegEx());
+            pattern = getPattern(regex);
         }
         else {
-            pattern = getPattern(ValidationRegEx.DEFAULT_PATTERN.getRegEx());
+            pattern = getPattern(RegExAnnotation.DEFAULT_PATTERN);
         }
         validateInput(input, pattern);        
     }
     
     
     private static void validate(Object object, ArrayList<Object> stack) {
+        log.debug("Starting to validate {}", object.getClass().toString());
         // first check if the object being requested is already in the stack... if so we skip it to avoid infinite recursion
         for(Object item : stack) {
             if( object == item ) { return; }
@@ -84,7 +74,7 @@ public class ValidationUtil {
         // add the object to the stack so we don't try to validate it again if it has a self-referential property ...   unlike normal stacks we never really need to "pop" this one because it's just a record of where we've been,  and we don't use it to navigate.
         stack.add(object);
 
-        // Validate the basic data types. This function validates the input such as Validate("Test") or Validate(new String{}..) or Validate(new ArrayList<String>....)
+        // Validate the basic data types. This function validates the input such 
         boolean continueValidation = validateBasicDataType(object);
         if (!continueValidation)
             return;
@@ -93,44 +83,56 @@ public class ValidationUtil {
         Set<Field> stringFields = getStringFields(object.getClass());
         for(Field field : stringFields) {
             log.debug("Verifying string field : " + field.getName());
+            String value = null;
             try {
                 field.setAccessible(true);
-                String value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                value = (String)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 log.debug("Verifying string value : " + value);
-                validateStringField(object, field, value); // 20131012
+                if (value != null)
+                    validateStringField(object, field, value); // 20131012
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
             }
         }
         
         Set<Field> stringArrayFields = getStringArrayFields(object.getClass());
         for(Field field : stringArrayFields) {
             log.debug("Verifying string array field : " + field.getName());
+            String value = null;
             try {
                 field.setAccessible(true);
                 String[] collection = (String[])field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (String input : collection) {
-                    log.debug("Verifying string array value : " + input);
-                    validateStringField(object, field, input); // 20131012
+                if (collection != null) {
+                    for (String input : collection) {
+                        value = input; // for throwing exception
+                        log.debug("Verifying string array value : " + input);
+                        validateStringField(object, field, input); // 20131012
+                    }
                 }
             } catch (Exception e) {
-                // throw new MWException( ... failed to validate object so don't let it continue ...);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
             }
         }
 
         Set<Field> stringCollectionFields = getStringCollectionFields(object.getClass());
         for(Field field : stringCollectionFields) {
             log.debug("Verifying string collection field : " + field.getName());
+            String value = null;
             try {
                 field.setAccessible(true);
                 List<String> collection = (List<String>) field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (String input : collection) {
-                    log.debug("Verifying string collection value : " + input);
-                    validateStringField(object, field, input); // 20131012
+                if (collection != null) {
+                    for (String input : collection) {
+                        value = input;
+                        log.debug("Verifying string collection value : " + input);
+                        validateStringField(object, field, input); // 20131012
+                    }
                 }
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
             }
         }
 
@@ -140,9 +142,14 @@ public class ValidationUtil {
             try {
                 field.setAccessible(true);
                 Object customObject = (Object)field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                validate(customObject, stack);
+                if (customObject != null)
+                    validate(customObject, stack);
+            } catch(MWException mwe) {
+                log.error("Error during validation.", mwe);
+                throw mwe;
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
             }
         }
         
@@ -152,11 +159,17 @@ public class ValidationUtil {
             try {
                 field.setAccessible(true);
                 Object[] collection = (Object[])field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (Object customObject : collection) {
-                    validate(customObject, stack);
+                if (collection != null) {
+                    for (Object customObject : collection) {
+                        validate(customObject, stack);
+                    }
                 }
+            } catch(MWException mwe) {
+                log.error("Error during validation.", mwe);
+                throw mwe;
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
             }
         }
 
@@ -166,11 +179,17 @@ public class ValidationUtil {
             try {
                 field.setAccessible(true);
                 List<Object> collection = (List<Object>) field.get(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (Object customObject : collection) {
-                    validate(customObject, stack);
+                if (collection != null) {
+                    for (Object customObject : collection) {
+                        validate(customObject, stack);
+                    }
                 }
+            } catch(MWException mwe) {
+                log.error("Error during validation.", mwe);
+                throw mwe;
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
             }
         }
         
@@ -178,40 +197,53 @@ public class ValidationUtil {
         Set<Method> stringMethods = getStringMethods(object.getClass());
         for(Method method : stringMethods) {
             log.debug("Verifying string method : " + method.getName());
+            String input = null;
             try {
-                String input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+                input = (String)method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
                 log.debug("Verifying method return value : " + input);
-                validateStringMethod(object, method, input); // 20131012
+                if (input != null)
+                    validateStringMethod(object, method, input); // 20131012
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
             }
         }
         
         Set<Method> stringArrayMethods = getStringArrayMethods(object.getClass());
         for(Method method : stringArrayMethods) {
             log.debug("Verifying string array method : " + method.getName());
+            String value = null;
             try {
                 String[] collection = (String[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (String input : collection) {
-                    log.debug("Verifying string array method return value : " + input);
-                    validateStringMethod(object, method, input); // 20131012
+                if (collection != null) {
+                    for (String input : collection) {
+                        value = input; // for throwing exceptions
+                        log.debug("Verifying string array method return value : " + input);
+                        validateStringMethod(object, method, input); // 20131012
+                    }
                 }
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, method.getName());
             }
         }                
 
         Set<Method> stringCollectionMethods = getStringCollectionMethods(object.getClass());
         for(Method method : stringCollectionMethods) {
             log.debug("Verifying string collection method : " + method.getName());
+            String value = null;
             try {
                 List<String> collection = (List<String>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for(String input : collection) {
-                    log.debug("Verifying string collection method return value : " + input);
-                    validateStringMethod(object, method, input); // 20131012
+                if (collection != null) {
+                    for(String input : collection) {
+                        value = input;
+                        log.debug("Verifying string collection method return value : " + input);
+                        validateStringMethod(object, method, input); // 20131012
+                    }
                 }
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, method.getName());
             }
         } 
         
@@ -220,9 +252,14 @@ public class ValidationUtil {
             log.debug("Verifying custom object method : " + method.getName());
             try {
                 Object customObject = method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                validate(customObject, stack);
+                if (customObject != null)
+                    validate(customObject, stack);
+            } catch(MWException mwe) {
+                log.error("Error during validation.", mwe);
+                throw mwe;
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
             }
         } 
         
@@ -231,11 +268,17 @@ public class ValidationUtil {
             log.debug("Verifying custom object array method : " + method.getName());
             try {
                 Object[] customObjectCollection = (Object[])method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (Object customObject : customObjectCollection) {                
-                    validate(customObject, stack);
+                if (customObjectCollection != null) {
+                    for (Object customObject : customObjectCollection) {                
+                        validate(customObject, stack);
+                    }
                 }
+            } catch(MWException mwe) {
+                log.error("Error during validation.", mwe);
+                throw mwe;
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
             }
         } 
         
@@ -244,11 +287,17 @@ public class ValidationUtil {
             log.debug("Verifying custom object collection method : " + method.getName());
             try {
                 List<Object> customObjectCollection = (List<Object>) method.invoke(object); // throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
-                for (Object customObject : customObjectCollection) {
-                    validate(customObject, stack);
+                if (customObjectCollection != null) {
+                    for (Object customObject : customObjectCollection) {
+                        validate(customObject, stack);
+                    }
                 }
+            } catch(MWException mwe) {
+                log.error("Error during validation.", mwe);
+                throw mwe;
             } catch (Exception e) {
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR);
+                log.error("Error during validation.", e);
+                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
             }
         }                
     }
@@ -263,14 +312,23 @@ public class ValidationUtil {
     }
 
     private static void validateInput(String input) {
-        validateInput(input, getPattern(ValidationRegEx.DEFAULT_PATTERN.getRegEx()));    // 20131012
+        validateInput(input, getPattern(RegExAnnotation.DEFAULT_PATTERN));    // 20131012
     }
 
     private static void validateInput(String input, Pattern pattern) {
-        Matcher matcher = pattern.matcher(input);
-        if (!matcher.matches()) {
-            log.debug("Illegal characters found in : " + input);
-            throw new IllegalArgumentException();
+        if (pattern.pattern().equalsIgnoreCase("ADDON_CONNECTION_STRING")) {
+            validateConnectionString(input);
+        } else {        
+            if (input != null && !input.isEmpty()) {
+                log.debug("Validating {} against regex {}",input,pattern.pattern());
+                Matcher matcher = pattern.matcher(input);
+                if (!matcher.matches()) {
+                    log.debug("Illegal characters found in : " + input);
+                    throw new IllegalArgumentException();
+                }
+            } else {
+                log.debug("Skipping validating {} against {}", input, pattern.pattern());
+            }
         }
     }
 
@@ -285,12 +343,12 @@ public class ValidationUtil {
                 throw new IllegalArgumentException();
             }
             // validate the management server name, port, host name
-            validateInput(cs.url.getHost(), getPattern(ValidationRegEx.IPADDR_FQDN_PATTERN.getRegEx()));
-            validateInput(Integer.toString(cs.url.getPort()), getPattern(ValidationRegEx.PORT.getRegEx()));
-            if (!cs.options.isEmpty()) {
-                validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(ValidationRegEx.IPADDR_FQDN_PATTERN.getRegEx()));
-                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(ValidationRegEx.DEFAULT_PATTERN.getRegEx()));
-                validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(ValidationRegEx.PASSWORD_PATTERN.getRegEx()));
+            validateInput(cs.url.getHost(), getPattern(RegExAnnotation.IPADDR_FQDN_PATTERN));
+            validateInput(Integer.toString(cs.url.getPort()), getPattern(RegExAnnotation.PORT));
+            if (cs.options != null && !cs.options.isEmpty()) {
+                validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(RegExAnnotation.IPADDR_FQDN_PATTERN));
+                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(RegExAnnotation.DEFAULT_PATTERN));
+                validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(RegExAnnotation.PASSWORD_PATTERN));
             }
         }
     }
@@ -338,12 +396,15 @@ public class ValidationUtil {
      * @return 
      */
     private static boolean isBuiltInType(Class<?> clazz) {
-        boolean isBuiltInType = clazz.isPrimitive() || 
-                clazz.equals(Boolean.class) || clazz.equals(Boolean[].class) || clazz.equals(Number.class) || clazz.equals(Number[].class) ||
-                clazz.equals(Float.class) || clazz.equals(Float[].class)|| clazz.equals(Integer.class) || clazz.equals(Integer[].class) ||
-                clazz.equals(Byte.class) || clazz.equals(Byte[].class) || clazz.equals(Double.class) || clazz.equals(Double[].class) ||
-                clazz.equals(Short.class) || clazz.equals(Short[].class) || clazz.equals(Long.class) || clazz.equals(Long[].class) || 
-                clazz.equals(Character.class) || clazz.equals(Character[].class) || clazz.equals(String.class) || clazz.equals(String[].class);
+        boolean isBuiltInType = false;
+        if (clazz != null) {
+            isBuiltInType = clazz.isPrimitive() || 
+                    clazz.equals(Boolean.class) || clazz.equals(Boolean[].class) || clazz.equals(Number.class) || clazz.equals(Number[].class) ||
+                    clazz.equals(Float.class) || clazz.equals(Float[].class)|| clazz.equals(Integer.class) || clazz.equals(Integer[].class) ||
+                    clazz.equals(Byte.class) || clazz.equals(Byte[].class) || clazz.equals(Double.class) || clazz.equals(Double[].class) ||
+                    clazz.equals(Short.class) || clazz.equals(Short[].class) || clazz.equals(Long.class) || clazz.equals(Long[].class) || 
+                    clazz.equals(Character.class) || clazz.equals(Character[].class) || clazz.equals(String.class) || clazz.equals(String[].class);
+        }
         return isBuiltInType;
     }
 
@@ -546,7 +607,7 @@ public class ValidationUtil {
         HashSet<Method> stringMethods = new HashSet<Method>();
         Method[] methods =  clazz.getDeclaredMethods();                
         for(Method method : methods ) {
-            if( isStringMethod(method) ) {
+            if( isStringMethod(method) && !method.getName().equalsIgnoreCase("toString")) {
                 stringMethods.add(method);
             }
         }
