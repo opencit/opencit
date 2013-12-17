@@ -362,6 +362,14 @@ public class VMwareClient implements TlsClient {
         return vimPort.queryTpmAttestationReport(hostObj);
 
     }
+    
+    /**
+     * XXX temporary public access until the code is refactored
+     */
+    public Object getMORProperty(ManagedObjectReference moRef,
+            String propertyName) throws InvalidPropertyFaultMsg, RuntimeFaultFaultMsg {
+        return getMORProperties(moRef, new String[]{propertyName})[0];
+    }
 
     /**
      * performance of this method is very bad, it has been observed at 1 second
