@@ -380,7 +380,15 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 
     @Override
     public Map<String, String> getHostAttributes() throws IOException {
-         return new HashMap<String,String>();
+        HashMap<String,String> hm = new HashMap<String, String>();
+        String hostUUID = "";
+
+            // Retrieve the data from the host and add it into the hashmap
+            // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+            hostUUID = vmware.getMEProperty("HostSystem", hostname,"hardware.systemInfo.uuid").toString();
+
+        hm.put("Host_UUID", hostUUID);
+        return hm;
    }
     
     @Override

@@ -362,7 +362,7 @@ public class VMwareClient implements TlsClient {
         return vimPort.queryTpmAttestationReport(hostObj);
 
     }
-
+    
     /**
      * performance of this method is very bad, it has been observed at 1 second
      * per iteration of the comparison loop. see getHostReference for obtaining
