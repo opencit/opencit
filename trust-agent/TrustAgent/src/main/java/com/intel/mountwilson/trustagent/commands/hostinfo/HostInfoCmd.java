@@ -184,17 +184,11 @@ public class HostInfoCmd implements ICommand {
      * @throws IOException
      */
       public void getHostUUID() throws TAException, IOException {
-          List<String> result = CommandUtil.runCommand("dmidecode|grep UUID");
+          List<String> result = CommandUtil.runCommand("dmidecode -s system-uuid");
           String hostUUID = "";
           // sample output would look like UUID: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
           for(String entry: result) {
-              if(entry != null && !entry.isEmpty() && entry.trim().startsWith("UUID:")) {
-                  String[] parts = entry.trim().split(":");
-                  if (parts != null && parts.length > 1) {
-                      hostUUID = parts[1].trim();
-                      break;
-                  }
-              }
+              hostUUID = entry;
           }
           
           context.setHostUUID(hostUUID);
