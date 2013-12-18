@@ -46,7 +46,7 @@ public class HostInfoCmd implements ICommand {
             }
             // Retrieve the processor information as well.
             getProcessorInfo();
-
+            getHostUUID();
         } catch (Exception ex) {
             throw new TAException(ErrorCode.ERROR, "Error while getting OS details.", ex);
         }
@@ -177,5 +177,22 @@ public class HostInfoCmd implements ICommand {
             context.setProcessorInfo(processorInfo);
             log.debug("Context is being set with processor info: " + context.getProcessorInfo());
     }
-       
-    }
+    
+    /**
+     * Retrieves the host UUId information
+     * @throws TAexception
+     * @throws IOException
+     */
+      public void getHostUUID() throws TAException, IOException {
+          List<String> result = CommandUtil.runCommand("dmidecode -s system-uuid");
+          String hostUUID = "";
+          // sample output would look like UUID: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
+          for(String entry: result) {
+              hostUUID = entry;
+          }
+          
+          context.setHostUUID(hostUUID);
+          log.info("Context set with host UUID info: " + context.getHostUUID());
+          
+      }
+}
