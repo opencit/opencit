@@ -901,7 +901,8 @@ public class HostTrustBO extends BaseBO {
             pcr.setManifestValue(report.getHostReport().pcrManifest.getPcr(Integer.valueOf(vmmPcrIndex)).getValue().toString());
             taLogMap.put(PcrIndex.valueOf(Integer.valueOf(vmmPcrIndex)), pcr);
         }
-        
+        // Here duplicate the for loop and add in pcr 22 from trustReport
+        // check if host has asset tag, then add 
         for(RuleResult result : results) {
             log.debug("Looking at policy {}", result.getRuleName());
             Rule rule = result.getRule();
