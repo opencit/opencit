@@ -126,8 +126,8 @@ public class TblHosts implements Serializable {
     @ManyToOne(optional = false)
     private TblMle biosMleId;
 
-    @Column(name = "UUID")
-    private String uuid;
+    @Column(name = "hardware_uuid")
+    private String hardware_uuid;
     
     public TblHosts() {
     }
@@ -401,11 +401,11 @@ public class TblHosts implements Serializable {
         this.tblSamlAssertionCollection = tblSamlAssertionCollection;
     }
 
-    public String getUUID() {
-        return uuid;
+    public String getHardwareUuid() {
+        return hardware_uuid;
     }
     
-    public void setUUID(String uuid){
-        this.uuid = uuid;
+    public void setHardwareUuid(String uuid){
+        this.hardware_uuid = uuid;
     }
 }
