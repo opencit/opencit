@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Note: passing policy name instead of policy itself because do not want to just "return policy", 
@@ -31,6 +33,7 @@ public class TrustReport {
     private HostReport hostReport;
     private String policyName;
     private ArrayList<RuleResult> results = new ArrayList<RuleResult>();
+    private Logger log = LoggerFactory.getLogger(getClass());
     
     public TrustReport(HostReport hostReport, String policyName) {
         this.hostReport = hostReport;
