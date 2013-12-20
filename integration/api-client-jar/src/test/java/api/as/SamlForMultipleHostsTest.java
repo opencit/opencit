@@ -4,6 +4,7 @@
  */
 package api.as;
 
+import com.intel.dcsg.cpg.xml.JAXB;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
@@ -18,6 +19,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.httpclient.HttpStatus;
 import org.slf4j.Logger;
@@ -31,7 +33,7 @@ public class SamlForMultipleHostsTest {
     private Logger log = LoggerFactory.getLogger(getClass());
     
     @Test
-    public void testSamlForMultipleHosts() throws IOException, ApiException {
+    public void testSamlForMultipleHosts() throws IOException, ApiException, JAXBException, XMLStreamException {
         InputStream in = getClass().getResourceAsStream("/InvalidSamlForMultipleHostResponse.txt");
         String responseText = IOUtils.toString(in, "UTF-8");
         IOUtils.closeQuietly(in);
@@ -56,17 +58,9 @@ public class SamlForMultipleHostsTest {
     }
     
     
-    private <T> T xml(String document, Class<T> valueType) throws IOException, ApiException {
-        try {
-            JAXBContext jc;
-            jc = JAXBContext.newInstance( valueType.getPackage().getName() );
-            Unmarshaller u = jc.createUnmarshaller();
-            JAXBElement<T> doc = (JAXBElement<T>)u.unmarshal( new StreamSource( new StringReader( document ) ) );
-            return doc.getValue();
-        }
-        catch(JAXBException e) {
-            throw new ApiException("Cannot parse response: "+document, e);
-        }
+    private <T> T xml(String document, Class<T> valueType) throws IOException, ApiException, JAXBException, XMLStreamException {
+        JAXB jaxb = new JAXB(); // fix for bug #1038 xml external entity injection (XXE) vulnerability
+        return jaxb.read(document,valueType);
     }
     
 }

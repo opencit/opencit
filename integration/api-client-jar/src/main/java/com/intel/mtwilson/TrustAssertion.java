@@ -242,6 +242,8 @@ public class TrustAssertion {
     private Element readXml(String xml) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory factory =  DocumentBuilderFactory.newInstance ();
         factory.setNamespaceAware (true);
+        factory.setExpandEntityReferences(false); // bug #1038 prevent XXE
+        factory.setXIncludeAware(false); // bug #1038 prevent XXE
         DocumentBuilder builder = factory.newDocumentBuilder(); // ParserConfigurationException
         ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes());
         Element document = builder.parse(in).getDocumentElement (); // SAXException, IOException

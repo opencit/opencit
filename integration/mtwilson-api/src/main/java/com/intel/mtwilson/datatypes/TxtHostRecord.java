@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.dcsg.cpg.validation.Regex;
 import java.net.MalformedURLException;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -16,11 +17,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
  */
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class TxtHostRecord {
-    @JsonProperty
+    @JsonProperty    
+    @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
     public String HostName;
     @JsonProperty
+    @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
     public String IPAddress;
     @JsonProperty
+    @Regex(RegExAnnotation.PORT)
     public Integer Port;
     @JsonProperty
     public String BIOS_Name;
@@ -37,10 +41,12 @@ public class TxtHostRecord {
     @JsonProperty
     public String VMM_OSVersion;
     @JsonProperty
+    @Regex(RegExAnnotation.ADDON_CONNECTION_STRING)
     public String AddOn_Connection_String;
     @JsonProperty
     public String Description;
     @JsonProperty
+    @Regex(RegExAnnotation.EMAIL_PATTERN)
     public String Email;
     @JsonProperty
     public String Location;

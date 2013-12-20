@@ -35,6 +35,9 @@ function fnUploadFlatFile() {
         secureuri: false,
         fileElementId: 'fileToUpload',
         dataType: 'jsonp',
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
         success: function(data, status) {
             fnuploadSuccess(data);
         },

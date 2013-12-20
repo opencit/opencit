@@ -87,7 +87,6 @@ public class CheckLoginController extends AbstractController {
             }
             
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
-            URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
             RsaCredential credential = null;
             SimpleKeystore keystore = null;
             try {
@@ -116,6 +115,8 @@ public class CheckLoginController extends AbstractController {
                 // Instantiate the API Client object and store it in the session. Otherwise either we need
                 // to store the password in the session or the decrypted RSA key
                 try {
+                    // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
+                    URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);

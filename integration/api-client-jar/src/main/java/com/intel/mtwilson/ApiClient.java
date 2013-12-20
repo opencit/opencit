@@ -56,7 +56,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.intel.dcsg.cpg.xml.JAXB;
 /**
  * This class has many constructors to provide convenience for developers. 
  * However, too many options may be confusing.
@@ -84,7 +84,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
 //    private RsaCredential rsaCredential;
     protected static final ObjectMapper mapper = new ObjectMapper();
     private static final String defaultConfigurationFilename = "mtwilson.properties";
-    private ClassLoader jaxbClassLoader = null;
+//    private ClassLoader jaxbClassLoader = null;
+    private JAXB jaxb = new JAXB();
     
     private SimpleKeystore keystore;
         
@@ -306,7 +307,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @param classLoader to use with JAXB, or null to use the default class loader
      */
     public void setJaxbClassLoader(ClassLoader classLoader) {
-        jaxbClassLoader = classLoader;
+//        jaxbClassLoader = classLoader;
+        jaxb.setJaxbClassLoader(classLoader);
     }
         
     /**
@@ -507,18 +509,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     private <T> T xml(String document, Class<T> valueType) throws IOException, ApiException {
         try {
-            JAXBContext jc;
-            if( jaxbClassLoader != null ) {
-                jc = JAXBContext.newInstance( valueType.getPackage().getName(), jaxbClassLoader );
-            }
-            else {
-                jc = JAXBContext.newInstance( valueType.getPackage().getName() );
-            }
-            Unmarshaller u = jc.createUnmarshaller();
-            JAXBElement<T> doc = (JAXBElement<T>)u.unmarshal( new StreamSource( new StringReader( document ) ) );
-            return doc.getValue();
+            // bug #1038 use secure xml parsing settings
+            return jaxb.read(document, valueType);
         }
-        catch(JAXBException e) {
+        catch(Exception e) {
             throw new ApiException("Cannot parse response: "+document, e);
         }
     }

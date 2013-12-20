@@ -10,6 +10,7 @@ import com.intel.mtwilson.datatypes.OsData;
 import java.util.List;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -68,6 +69,7 @@ public class Oem {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateOem(OemData oemData) {
+        ValidationUtil.validate(oemData);
         return oemBo.updateOem(oemData);
     }
     /**
@@ -89,6 +91,7 @@ public class Oem {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addOem(OemData oemData) {
+        ValidationUtil.validate(oemData);
         return oemBo.createOem(oemData);
     }
     
@@ -111,6 +114,7 @@ public class Oem {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteOem(@QueryParam("Name")String oemName ) {
+        ValidationUtil.validate(oemName);
         return oemBo.deleteOem(oemName);
     }
     

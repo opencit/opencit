@@ -14,6 +14,7 @@ import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,6 +64,8 @@ public class BulkHostTrust {
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
                 //                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                 @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
+            
+                ValidationUtil.validate(hosts);
                 Integer myTimeOut = timeout;
                 // if no timeout value is passed to function, check config for default, 
                 // if not in config, go with default value
@@ -110,6 +113,7 @@ public class BulkHostTrust {
                 //                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                 @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
 
+                ValidationUtil.validate(hosts);
                 if (hosts == null || hosts.length() == 0) {
                         throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
                                 "hosts");
@@ -132,6 +136,9 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) {
+            
+            ValidationUtil.validate(hostRecords);
+            
             TxtHostRecordList newHostRecords = new TxtHostRecordList();
             for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
             if(host.HostName.isEmpty() || host.HostName == null)
@@ -159,6 +166,9 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) {
+            
+            ValidationUtil.validate(hostRecords);
+
               TxtHostRecordList newHostRecords = new TxtHostRecordList();
             for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
             if(host.HostName.isEmpty() || host.HostName == null)
