@@ -46,6 +46,7 @@ public class TxtHostRecord {
     @JsonProperty
     public String Description;
     @JsonProperty
+    @Regex(RegExAnnotation.EMAIL_PATTERN)
     public String Email;
     @JsonProperty
     public String Location;
