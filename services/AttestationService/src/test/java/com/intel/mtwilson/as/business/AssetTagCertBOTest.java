@@ -107,7 +107,7 @@ public class AssetTagCertBOTest {
         AssetTagCertAssociateRequest mapReq = new AssetTagCertAssociateRequest(Sha256Digest.digestOf(Base64.decodeBase64(attrCert.getBytes())).toByteArray(), 10);
         AssetTagCertBO atagBO = new AssetTagCertBO();
         
-        boolean mapAssetTagCertToHost = atagBO.mapAssetTagCertToHost(mapReq);
+        boolean mapAssetTagCertToHost = atagBO.mapAssetTagCertToHostById(mapReq);
         System.out.println(mapAssetTagCertToHost);
     }
 
