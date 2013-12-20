@@ -70,7 +70,8 @@ public class ApiClientBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during API Client registration. " + ex.getMessage());
+            log.error("Error during API Client registration. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -154,7 +155,9 @@ public class ApiClientBO extends BaseBO {
             setRolesForApiClient(apiClientX509, apiClientRequest.getRoles());
             
         } catch (Exception ex) {
-            throw new MSException(ex,ErrorCode.MS_API_CLIENT_CREATE_ERROR);
+            log.error("Error during API Client registration. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            // throw new MSException(ex,ErrorCode.MS_API_CLIENT_CREATE_ERROR);
         }
     }
     
@@ -256,7 +259,9 @@ public class ApiClientBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex);
+            // throw new MSException(ex);
+            log.error("Error during API user update. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -306,7 +311,9 @@ public class ApiClientBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex);
+            // throw new MSException(ex);
+            log.error("Error during search for API user. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -375,7 +382,9 @@ public class ApiClientBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            throw new MSException(ex);
+            // throw new MSException(ex);
+            log.error("Error during search for API user. ", ex);
+            throw new MSException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());            
         }
     }    
 }

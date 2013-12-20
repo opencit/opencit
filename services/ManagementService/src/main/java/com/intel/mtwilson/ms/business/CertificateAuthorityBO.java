@@ -38,9 +38,12 @@ public class CertificateAuthorityBO extends BaseBO {
             mwConfigurationJPA.setMwConfiguration(CA_PASSWORD_CONF_KEY, newPassword.toString());
             mwConfigurationJPA.setMwConfiguration(CA_ENABLED_CONF_KEY, Boolean.TRUE.toString());
         } catch (NonexistentEntityException ex) {
+            log.error("Error enabling CA. ", ex);
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Cannot enable CA: " + ex.getMessage());
         } catch (Exception ex) {
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Cannot enable CA: " + ex.getMessage());
+            log.error("Error enabling CA. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Cannot enable CA: " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_CA_ENABLE_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -49,9 +52,12 @@ public class CertificateAuthorityBO extends BaseBO {
             mwConfigurationJPA.setMwConfiguration(CA_PASSWORD_CONF_KEY, "");
             mwConfigurationJPA.setMwConfiguration(CA_ENABLED_CONF_KEY, Boolean.FALSE.toString());
         } catch (NonexistentEntityException ex) {
+            log.error("Error disabling CA. ", ex);
             throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Cannot disable CA: " + ex.getMessage());
         } catch (Exception ex) {
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Cannot disable CA: " + ex.getMessage());
+            log.error("Error disabling CA. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Cannot disable CA: " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_CA_DISABLE_ERROR, ex.getClass().getSimpleName());
         }
     }
     

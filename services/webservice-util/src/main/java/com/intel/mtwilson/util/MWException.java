@@ -28,7 +28,9 @@ public class MWException extends WebApplicationException {
     }
 
     public MWException(Throwable e,ErrorCode code, Object... params) {
-        super(e,Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
+        // bug #1038 suppressing passing the throwable to WebApplicationException because we don't want to print the entire message and possibly stack trace to the UI - those should only go to the log (and whateer has created this exception instance has probably done that already)
+        //super(e,Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
+        super(Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(code, params);
     }
 

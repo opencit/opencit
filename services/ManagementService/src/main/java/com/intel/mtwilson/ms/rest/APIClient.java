@@ -10,6 +10,7 @@ import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -48,6 +49,7 @@ public class APIClient {
     @GET
     @Produces("application/json")
     public ApiClientInfo getApiClientInfo(@QueryParam("fingerprint") String fingerprintHex) {
+        ValidationUtil.validate(fingerprintHex);
         byte[] fingerprint = fromHex(fingerprintHex);
         return new ApiClientBO().find(fingerprint);
     }
@@ -62,6 +64,7 @@ public class APIClient {
     @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     public String updateApiClient(ApiClientUpdateRequest apiClientRequest) {
+        ValidationUtil.validate(apiClientRequest);
         new ApiClientBO().update(apiClientRequest);
         return "OK";
     }
@@ -80,6 +83,7 @@ public class APIClient {
     @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     public String addApiClient(ApiClientCreateRequest apiClientRequest) {
+        ValidationUtil.validate(apiClientRequest);
         new ApiClientBO().create(apiClientRequest);
         return "OK";
     }
@@ -123,38 +127,49 @@ public class APIClient {
         ApiClientSearchCriteria criteria = new ApiClientSearchCriteria();
         try {
             if( enabledEqualTo != null ) {
+                ValidationUtil.validate(enabledEqualTo);
                 criteria.enabledEqualTo = Boolean.valueOf(enabledEqualTo); // deserialize from "true" or "false"
             }
             if( expiresAfter != null ) {
+                ValidationUtil.validate(expiresAfter);
                 criteria.expiresAfter = dateFormat.parse(expiresAfter);
             }
             if( expiresBefore != null ) {
+                ValidationUtil.validate(expiresBefore);
                 criteria.expiresBefore = dateFormat.parse(expiresBefore);
             }
             if( fingerprintEqualTo != null ) {
+                ValidationUtil.validate(fingerprintEqualTo);
                 criteria.fingerprintEqualTo = Hex.decodeHex(fingerprintEqualTo.toCharArray());
             }
             if( issuerEqualTo != null ) {
+                ValidationUtil.validate(issuerEqualTo);
                 criteria.issuerEqualTo = issuerEqualTo;
             }
             if( nameContains != null ) {
+                ValidationUtil.validate(nameContains);
                 criteria.nameContains = nameContains;
             }
             if( nameEqualTo != null ) {
+                ValidationUtil.validate(nameEqualTo);
                 criteria.nameEqualTo = nameEqualTo;
             }
             if( serialNumberEqualTo != null ) {
+                ValidationUtil.validate(serialNumberEqualTo);
                 criteria.serialNumberEqualTo = Integer.valueOf(serialNumberEqualTo);
             }
             if( statusEqualTo != null ) {
+                ValidationUtil.validate(statusEqualTo);
                 criteria.statusEqualTo = statusEqualTo;
             }
         }
         catch(ParseException e) {
-            throw new MSException(e,ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse date: "+e.getMessage()+" (should be yyyy-MM-dd)");
+            log.error("Error parsing input.", e);
+            throw new MSException(ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse date: "+e.getMessage()+" (should be yyyy-MM-dd)");
         }
         catch(DecoderException e) {
-            throw new MSException(e,ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse fingerprint: "+e.getMessage()+" (should be hex)");
+            log.error("Error parsing input.", e);
+            throw new MSException(ErrorCode.MS_ERROR_PARSING_INPUT, "Cannot parse fingerprint: "+e.getMessage()+" (should be hex)");
         }
         return new ApiClientBO().search(criteria);
     }
@@ -177,6 +192,7 @@ public class APIClient {
     @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
+        ValidationUtil.validate(apiClientRequest);
         log.debug("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
         new ApiClientBO().create(apiClientRequest);
         return "OK";
@@ -190,6 +206,7 @@ public class APIClient {
     @RolesAllowed({"Security"})
     @DELETE
     public void delete(@QueryParam("fingerprint") String fingerprintHex) {
+        ValidationUtil.validate(fingerprintHex);
         byte[] fingerprint = fromHex(fingerprintHex);
         ApiClientBO bo = new ApiClientBO();
         ApiClientInfo info = bo.find(fingerprint);
@@ -212,7 +229,8 @@ public class APIClient {
         try {
             return Hex.decodeHex(hex.toCharArray());
         } catch (DecoderException ex) {
-            throw new MSException(ex,ErrorCode.MS_ERROR_PARSING_INPUT, "Invalid fingerprint");
+            log.error("Error parsing input.", ex);
+            throw new MSException(ErrorCode.MS_ERROR_PARSING_INPUT, "Invalid fingerprint");
         }        
     }
 }
