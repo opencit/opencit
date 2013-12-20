@@ -22,7 +22,7 @@ public class TADataContext {
 
     private ErrorCode errorCode = ErrorCode.OK;
     private String selectedPCRs = null;
-    private String nonce;
+    private String nonceBase64;
     private String AIKCertificate = null;
     private byte[] tpmQuote = null;
     private String responseXML = null;
@@ -36,8 +36,8 @@ public class TADataContext {
     private String vmmVersion;
     private String modulesStr;
     private String processorInfo;
+    private String ipaddress;  // localhost ip address
     
-
     public String getBiosOem() {
         return biosOem;
     }
@@ -95,13 +95,32 @@ public class TADataContext {
     }
 
     public String getNonce() {
-        return nonce;
+        return nonceBase64;
     }
 
     public void setNonce(String nonce) {
-        this.nonce = nonce;
+        this.nonceBase64 = nonce;
     }
 
+    // issue #1038 prevent trust agent relay by default; customer can turn this off in configuration file by setting  mtwilson.tpm.quote.ipv4=false
+    public boolean isQuoteWithIPAddress() {
+        String enabled = Config.getInstance().getProperty("mtwilson.tpm.quote.ipv4");
+        if( enabled == null || "true".equalsIgnoreCase(enabled) || "enabled".equalsIgnoreCase(enabled) ) {
+            return true;
+        }
+        return false;
+    }
+
+    public String getIPAddress() {
+        return ipaddress;
+    }
+
+    // set by TrustAgent when it initializes the context for this request
+    public void setIPAddress(String ipaddress) {
+        this.ipaddress = ipaddress;
+    }
+
+    
     public String getQuoteFileName() {
         return getDataFolder() + Config.getInstance().getProperty("aikquote.filename");
     }

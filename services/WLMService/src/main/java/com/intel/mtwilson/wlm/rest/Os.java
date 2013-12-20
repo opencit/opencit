@@ -9,6 +9,7 @@ import com.intel.mtwilson.datatypes.OsData;
 import java.util.List;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -67,6 +68,7 @@ public class Os {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateOs(OsData osData) {
+        ValidationUtil.validate(osData);
         return osBO.updateOs(osData);
     }
     /**
@@ -88,6 +90,7 @@ public class Os {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addOs(OsData osData) {
+        ValidationUtil.validate(osData);
         return osBO.createOs(osData);
     }
     
@@ -97,6 +100,8 @@ public class Os {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteOs(@QueryParam("Name")String osName, @QueryParam("Version")String osVersion ) {
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
         return osBO.deleteOs(osName,osVersion);
     }
     

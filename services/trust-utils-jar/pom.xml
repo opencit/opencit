@@ -99,6 +99,11 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-xml</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>

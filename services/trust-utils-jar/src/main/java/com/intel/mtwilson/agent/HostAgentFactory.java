@@ -26,7 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
+import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Use this class to instantiate the appropriate agent or client for a given
@@ -37,6 +45,10 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<Vendor,VendorHostAgentFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostAgentFactory>(Vendor.class);
+    private long tlsPemLastModified = 0;
+    private long tlsCrtLastModified = 0;
+    private ArrayList<X509Certificate> tlsAuthorities = new ArrayList<X509Certificate>();
+    
     //private Logger log = LoggerFactory.getLogger(getClass());
     public HostAgentFactory() {
         // we initialize the map with the known vendors; but this could also be done through IoC
@@ -148,11 +160,65 @@ public class HostAgentFactory {
         return tlsPolicy;
     }
     
+    private void initTlsTrustedCertificateAuthorities() throws IOException {
+            // read the trusted CA's
+            String tlsCaFilename = My.configuration().getConfiguration().getString("mtwilson.tls.certificate.file", "mtwilson-tls.pem");
+            if( tlsCaFilename != null ) {
+                if( !tlsCaFilename.startsWith("/") ) { 
+                    tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);// XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
+                }
+                if( tlsCaFilename.endsWith(".pem") ) {
+                    File tlsPemFile = new File(tlsCaFilename);
+                    if( tlsPemFile.lastModified() > tlsPemLastModified ) {
+                        tlsPemLastModified = tlsPemFile.lastModified();
+                        tlsAuthorities.clear();
+                        FileInputStream in = new FileInputStream(tlsPemFile);
+                        String content = IOUtils.toString(in);
+                        IOUtils.closeQuietly(in);
+                        try {
+                            List<X509Certificate> cacerts = X509Util.decodePemCertificates(content);
+                            tlsAuthorities.addAll(cacerts);
+                        }
+                        catch(CertificateException e) {
+                            log.error("Cannot read trusted TLS CA certificates", e);
+                        }
+                    }
+                }
+                if( tlsCaFilename.endsWith(".crt") ) {
+                    File tlsCrtFile = new File(tlsCaFilename);
+                    if( tlsCrtFile.lastModified() > tlsCrtLastModified ) {
+                        tlsCrtLastModified = tlsCrtFile.lastModified();
+                        tlsAuthorities.clear();
+                        FileInputStream in = new FileInputStream(tlsCrtFile);
+                        byte[] content = IOUtils.toByteArray(in);
+                        IOUtils.closeQuietly(in);
+                        try {
+                            X509Certificate cert = X509Util.decodeDerCertificate(content);
+                            tlsAuthorities.add(cert);
+                        }
+                        catch(CertificateException e) {
+                            log.error("Cannot read trusted TLS CA certificates", e);
+                        }
+                    }
+                }
+            } 
+    }
     
     private TlsPolicy getTlsPolicy(String tlsPolicyName, SimpleKeystore tlsKeystore) throws IOException {
         if( tlsPolicyName == null ) { tlsPolicyName = My.configuration().getDefaultTlsPolicyName(); } // XXX for backwards compatibility with records that don't have a policy set, but maybe this isn't the place to put it - maybe it should be in the DAO that provides us the txthost object.
         String ucName = tlsPolicyName.toUpperCase();
         if( ucName.equals("TRUST_CA_VERIFY_HOSTNAME") ) {
+            initTlsTrustedCertificateAuthorities();
+            for(X509Certificate cacert : tlsAuthorities) {
+                log.debug("Adding trusted TLS CA certificate {}", cacert.getSubjectX500Principal().getName());
+                try {
+                    tlsKeystore.addTrustedSslCertificate(cacert, cacert.getSubjectX500Principal().getName());
+                }
+                catch(KeyManagementException e) {
+                    log.error("Cannot add TLS certificate authority to host keystore {}", cacert.getSubjectX500Principal().getName());
+                }
+            }
+//            My.configuration().get tls keystore trusted cas; add them to tlsKeystore  beforee making the policy  so that a global keystore can be used;  or just use the global kesytore...
             return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
         }
         if( ucName.equals("TRUST_FIRST_CERTIFICATE") ) {

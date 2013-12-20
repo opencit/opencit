@@ -157,12 +157,13 @@ public class HostBO extends BaseBO {
             try {
                 long threadStart = System.currentTimeMillis();
                  attestationReport = agent.getHostAttestationReport(requiredPCRs);
-                 log.debug("TIMETAKEN: by the attestation report thread:" + (System.currentTimeMillis() - threadStart));
+                 log.debug("TIMETAKEN: by the attestation report thread: {}",  (System.currentTimeMillis() - threadStart));
             } catch (Throwable te) {
                 isError = true;
                 attestationReport = null;
-                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData: " + te.toString());
-                errorMessage = te.getMessage();
+                log.debug("Unexpected error from getHostAttestationReport in registerHostFromCustomData" , te);
+//                errorMessage = te.getMessage();
+                errorMessage = te.getClass().getSimpleName();
             }
         }
 
@@ -225,13 +226,17 @@ public class HostBO extends BaseBO {
                 }
 
             } catch (MSException e) {
+                log.error("Failed to verify MLE", e);
                 isError = true;
                 result = null;
-                errorMessage = e.getErrorMessage();
+//                errorMessage = e.getErrorMessage();
+                errorMessage = e.getClass().getSimpleName();
             } catch (Exception e) {
+                log.error("Failed to verify MLE", e);
                 isError = true;
                 result = null;
-                errorMessage = e.getMessage();
+//                errorMessage = e.getMessage();
+                errorMessage = e.getClass().getSimpleName();
             }
         }
 
@@ -282,10 +287,10 @@ public class HostBO extends BaseBO {
             throw me;
 
         } catch (Exception ex) {
-            log.error("Error while creating the Api Client object. " + ex.getMessage());
-            ex.printStackTrace(System.err);
-            throw new MSException(ErrorCode.SYSTEM_ERROR, "Error while creating the Api Client object. " + ex.getMessage(), ex);
-
+            log.error("Error while creating the Api Client object. ", ex);
+            // ex.printStackTrace(System.err);
+            // throw new MSException(ErrorCode.SYSTEM_ERROR, "Error while creating the Api Client object. " + ex.getMessage(), ex);
+            throw new MSException(ErrorCode.MS_API_CLIENT_ERROR, ex.getClass().getSimpleName());
         }
 
         return rsaApiClient;
@@ -317,8 +322,9 @@ public class HostBO extends BaseBO {
             log.error("Error during retrieval of platform name details. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
         } catch (Exception ex) {
-            log.error("Unexpected errror during retrieval of platform name details. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of platform name details." + ex.getMessage());
+            log.error("Unexpected errror during retrieval of platform name details. ",  ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of platform name details." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_PLATFORM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
         
         return platformName;
@@ -439,8 +445,8 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_OSVersion = hostDetails.VMM_OSVersion;
                 hostObj.Processor_Info = hostDetails.Processor_Info;
             } catch (Throwable te) {
-                log.error("Unexpected error in registerHostFromCustomData: {}", te.toString());
-                throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                log.error("Unexpected error in registerHostFromCustomData: {}", te);
+                throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
             }
             
             // Let us verify if we got all the data back correctly or not 
@@ -483,9 +489,12 @@ public class HostBO extends BaseBO {
             log.error("API Client error during host registration. " + ae.getErrorCode() + " :" + ae.getMessage());
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
         } catch (Exception ex) {
-            log.error("Unexpected errror during retrieval of host MLE information. " + ex.getMessage());
-            ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
+            // bug #1038 prevent leaks in error messages to client
+            log.error("Unexpected errror during retrieval of host MLE information. ", ex);
+            // ex.printStackTrace(System.err);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information." + ex.getMessage());
+            //throw new MSException(ErrorCode.SYSTEM_ERROR, "Error during retrieval of host MLE information . ({}). Please look in the server log for more details.", ex.getClass().getSimpleName());
+            throw new MSException(ErrorCode.MS_MLE_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -521,10 +530,11 @@ public class HostBO extends BaseBO {
             log.error("Error during bulk host registration. " + me.getErrorCode() + " :" + me.getErrorMessage());
             throw me;
         } catch (Exception ex) {
-            log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
-            ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
-        }
+            log.error("Unexpected errror during bulk host registration. ", ex);
+            // ex.printStackTrace(System.err);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_BULK_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+          }
     }
 
     /**
@@ -585,9 +595,10 @@ public class HostBO extends BaseBO {
 
         } catch (Exception ex) {
 
-            log.error("Unexpected errror during host registration. " + ex.getMessage());
-            ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            log.error("Unexpected errror during host registration. ", ex);
+            // ex.printStackTrace(System.err);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
         return registerStatus;
     }
@@ -662,9 +673,10 @@ public class HostBO extends BaseBO {
 
         } catch (Exception ex) {
 
-            log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
-            ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            log.error("Unexpected errror during bulk host registration. ", ex);
+            // ex.printStackTrace(System.err);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_BULK_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -770,9 +782,10 @@ public class HostBO extends BaseBO {
 
         } catch (Exception ex) {
 
-            log.error("Unexpected errror during bulk host registration. " + ex.getMessage());
-            ex.printStackTrace(System.err);
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            log.error("Unexpected errror during bulk host registration. ", ex);
+            // ex.printStackTrace(System.err);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during bulk host registration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_BULK_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -882,9 +895,10 @@ public class HostBO extends BaseBO {
 
         } catch (Exception ex) {
 
-            ex.printStackTrace(System.err);
-            log.error("Unexpected errror during host registration. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            // ex.printStackTrace(System.err);
+            log.error("Unexpected errror during host registration. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host registration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_HOST_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
         return registerStatus;
     }
@@ -1162,9 +1176,10 @@ public class HostBO extends BaseBO {
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString() + ":" + ae.getMessage());
 
         } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-            log.error("Unexpected errror during host update. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host update." + ex.getMessage());
+            // ex.printStackTrace(System.err);
+            log.error("Unexpected errror during host update. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during host update." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_HOST_UPDATE_ERROR, ex.getClass().getSimpleName());
         }
 
         return updateStatus;
@@ -1229,10 +1244,11 @@ public class HostBO extends BaseBO {
             throw me;
 
         } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-            log.error("Unexpected errror during white list configuration. " + ex.toString());
-            ex.printStackTrace();
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            // ex.printStackTrace(System.err);
+            log.error("Unexpected errror during white list configuration. ",  ex);
+            // ex.printStackTrace();
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_WHITELIST_CONFIG_ERROR, ex.getClass().getSimpleName());
         }
 
         return configStatus;
@@ -1319,12 +1335,13 @@ public class HostBO extends BaseBO {
                     gkvHost.VMM_OSVersion = gkvHostDetails.VMM_OSVersion;
                     gkvHost.Processor_Info = gkvHostDetails.Processor_Info;
                 } catch (Throwable te) {
-                    log.error("Unexpected error in configureWhiteListFromCustomData: {}", te.toString());
-                    te.printStackTrace();
-                    throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                    log.error("Unexpected error in configureWhiteListFromCustomData: {}", te);
+                    //te.printStackTrace();
+                    // throw new MSException(te, ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getMessage());
+                    throw new MSException(ErrorCode.MS_HOST_COMMUNICATION_ERROR, te.getClass().getSimpleName());
                 }
 
-                log.debug("TIMETAKEN: for getting host information is: " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for getting host information is: {}",  (System.currentTimeMillis() - configWLStart));
                 
                 System.err.println("Starting to process the white list configuration from host: " + gkvHost.HostName);
 
@@ -1354,7 +1371,7 @@ public class HostBO extends BaseBO {
                 TblHostsJpaController hostsJpaController =  My.jpa().mwHosts();//new TblHostsJpaController(getASEntityManagerFactory());
                 ApiClient apiClient = createAPIObject();
 
-                log.debug("TIMETAKEN: for getting API Client object is: " + (System.currentTimeMillis() - configWLStart));                
+                log.debug("TIMETAKEN: for getting API Client object is: {}", (System.currentTimeMillis() - configWLStart));                
                 
                 // Similar to VMware even TA supports retrieval of Host information and attestation report without needing the host to be registered. So,
                 // we don't need to handle these host types differently.
@@ -1376,7 +1393,7 @@ public class HostBO extends BaseBO {
                     }
                 }
 
-                log.debug("TIMETAKEN: for calibrating MLE names: " + (System.currentTimeMillis() - configWLStart));                
+                log.debug("TIMETAKEN: for calibrating MLE names: {} " , (System.currentTimeMillis() - configWLStart));                
                 
                 // Now we need to spawn 2 threads. One for retriving the attestation report from the host and another one for checking whether MLE with
                 // matching whitelists exists or not.
@@ -1388,10 +1405,10 @@ public class HostBO extends BaseBO {
                 mleVerifyObj.start();
                 
                 hostAttReportObj.join();
-                log.debug("TIMETAKEN: for generating host report: " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for generating host report: {}", (System.currentTimeMillis() - configWLStart));
                 
                 mleVerifyObj.join();
-                log.debug("TIMETAKEN: for checking MLE names: " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for checking MLE names: {}", (System.currentTimeMillis() - configWLStart));
                 
                 attestationReport = hostAttReportObj.getResult();
                 String mleVerifyStatus = mleVerifyObj.getResult();
@@ -1415,8 +1432,8 @@ public class HostBO extends BaseBO {
                     throw new MSException(ErrorCode.MS_INVALID_ATTESTATION_REPORT);
                 }
 
-                System.err.println("Successfully retrieved the attestation report from host: " + gkvHost.HostName);
-                System.err.println("Attestation report is : " + attestationReport);
+                log.debug("Successfully retrieved the attestation report from host: {}", gkvHost.HostName);
+                log.debug("Attestation report is : {}", attestationReport);
                 
                 boolean biosMLEExists = false;
                 boolean vmmMLEExists = false;
@@ -1450,7 +1467,7 @@ public class HostBO extends BaseBO {
                     configureVMMMLE(apiClient, hostConfigObj);
                 }
 
-                log.debug("TIMETAKEN: for configuring MLES : " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for configuring MLES : {}", (System.currentTimeMillis() - configWLStart));
                 
                 // Commenting out the below code as we are retrieving the attestation report in a separate thread above.
                 /*try {
@@ -1465,9 +1482,9 @@ public class HostBO extends BaseBO {
 
                 // Finally store the attestation report by calling into the WhiteList REST APIs
                 uploadToDB(hostConfigObj, attestationReport, apiClient);
-                System.err.println("Successfully updated the white list database with the good known white list from host: " + gkvHost.HostName);
+                log.debug("Successfully updated the white list database with the good known white list from host: {}", gkvHost.HostName);
 
-                log.debug("TIMETAKEN: for uploading to DB: " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for uploading to DB: {}", (System.currentTimeMillis() - configWLStart));
                 
                 // Register host only if required.
                 if (hostConfigObj.isRegisterHost() == true) {
@@ -1479,39 +1496,39 @@ public class HostBO extends BaseBO {
                     //}
 
                     if (hostSearchObj == null) {
-                        System.err.println("Could not find the host using host IP address: " + gkvHost.HostName);
-                        System.err.println("Creating a new host.");
+                        log.debug("Could not find the host using host IP address: {}", gkvHost.HostName);
+                        log.debug("Creating a new host.");
 
                         TxtHost hostObj = new TxtHost(gkvHost);
                         apiClient.addHost(hostObj);
-                        System.err.println("Successfully registered the host : " + hostObj.getHostName());
+                        log.info("Successfully registered the host : {}", hostObj.getHostName());
 
                     } else {
-                        System.err.println("Database already has the configuration details for host : " + hostSearchObj.getName());
+                        log.debug("Database already has the configuration details for host : {}", hostSearchObj.getName());
                         // Since we might have changed the MLE configuration on the host, let us update the host
                         if (gkvHost.Port == null) {
                             gkvHost.Port = 0;
                         }
                         TxtHost newHostObj = new TxtHost(gkvHost);
                         apiClient.updateHost(newHostObj);
-                        System.err.println(String.format("Successfully updated the host %s with the new MLE information.", gkvHost.HostName));
+                        log.info("Successfully updated the host {} with the new MLE information.", gkvHost.HostName);
                     }
                 }
 
-                log.debug("TIMETAKEN: for registering host: " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for registering host: {} ", (System.currentTimeMillis() - configWLStart));
                 
                 // Now we need to configure the MleSource table with the details of the host that was used for white listing the MLE.
                 if (hostConfigObj.addBiosWhiteList()) {
                     configureMleSource(apiClient, gkvHost, true);
-                    System.err.println("Successfully configured the details of the host that was used to white list the BIOS MLE - " + gkvHost.BIOS_Name);
+                    log.debug("Successfully configured the details of the host that was used to white list the BIOS MLE - {}.", gkvHost.BIOS_Name);
                 }
 
                 if (hostConfigObj.addVmmWhiteList()) {
                     configureMleSource(apiClient, gkvHost, false);
-                    System.err.println("Successfully configured the details of the host that was used to white list the VMM MLE - " + gkvHost.VMM_Name);
+                    log.debug("Successfully configured the details of the host that was used to white list the VMM MLE - {}.", gkvHost.VMM_Name);
                 }
                 
-                log.debug("TIMETAKEN: for configuring MLE source: " + (System.currentTimeMillis() - configWLStart));
+                log.debug("TIMETAKEN: for configuring MLE source: {}", (System.currentTimeMillis() - configWLStart));
                 
                 configStatus = true;
             }
@@ -1526,10 +1543,11 @@ public class HostBO extends BaseBO {
                     + ": " + ae.getMessage());
 
         } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-            log.error("Unexpected errror during white list configuration. " + ex.toString());
-            ex.printStackTrace();
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            // ex.printStackTrace(System.err);
+            log.error("Unexpected errror during white list configuration. ", ex);
+            // ex.printStackTrace();
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list configuration." + ex.getMessage());
+            throw new MSException(ErrorCode.MS_WHITELIST_CONFIG_ERROR, ex.getClass().getSimpleName());
         }
 
         return configStatus;
@@ -1697,10 +1715,10 @@ public class HostBO extends BaseBO {
             throw me;
 
         } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-            log.error("Unexpected errror during MLE verification of host " + hostConfigObj.getTxtHostRecord().HostName + ". " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Errror during MLE verification for host "
-                    + hostConfigObj.getTxtHostRecord().HostName + ". " + ex.getMessage());
+            // ex.printStackTrace(System.err);
+            log.error("Unexpected errror during MLE verification of host " + hostConfigObj.getTxtHostRecord().HostName + ". ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Errror during MLE verification for host " + hostConfigObj.getTxtHostRecord().HostName + ". " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_MLE_VERIFICATION_ERROR, ex.getClass().getSimpleName());
         }
 
         return verifyStatus;
@@ -1824,8 +1842,9 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             //System.err.println("JIM DEBUG"); 
             //ex.printStackTrace(System.err);
-            log.error("Unexpected errror during OEM - BIOS MLE configuration. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OEM - BIOS MLE configuration. " + ex.getMessage());
+            log.error("Unexpected errror during OEM - BIOS MLE configuration. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OEM - BIOS MLE configuration. " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_BIOS_MLE_ERROR, ex.getClass().getSimpleName());
         }
 
         return biosMLEAlreadyExists;
@@ -1987,8 +2006,9 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             //System.err.println("JIM DEBUG"); 
             //ex.printStackTrace(System.err);
-            log.error("Error during OS - VMM MLE configuration. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OS - VMM MLE configuration. " + ex.getMessage());
+            log.error("Error during OS - VMM MLE configuration. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during OS - VMM MLE configuration. " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_VMM_MLE_ERROR, ex.getClass().getSimpleName());
         }
 
         return vmmMLEAlreadyExists;
@@ -2054,9 +2074,9 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             //System.err.println("JIM DEBUG"); 
             //ex.printStackTrace(System.err);
-            log.error("Error during MLE white list host mapping. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE white list host mapping. " + ex.getMessage());
-
+            log.error("Error during MLE white list host mapping. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE white list host mapping. " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_MLE_WHITELIST_HOST_MAPPING_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -2100,9 +2120,9 @@ public class HostBO extends BaseBO {
         } catch (Exception ex) {
             //System.err.println("JIM DEBUG"); 
             //ex.printStackTrace(System.err);
-            log.error("Error during MLE deletion. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE configuration. " + ex.getMessage());
-
+            log.error("Error during MLE deletion. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during MLE configuration. " + ex.getMessage());
+             throw new MSException(ErrorCode.MS_MLE_DELETION_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -2418,9 +2438,10 @@ public class HostBO extends BaseBO {
             throw new MSException(ae, ErrorCode.MS_API_EXCEPTION, ErrorCode.getErrorCode(ae.getErrorCode()).toString()
                     + ": Error during White List upload to DB. " + ae.getMessage());
         } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-            log.error("Error during white list upload to database. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list upload to database. " + ex.getMessage());
+            // ex.printStackTrace(System.err);
+            log.error("Error during white list upload to database. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during white list upload to database. " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_WHITELIST_UPLOAD_ERROR, ex.getClass().getSimpleName());
         }
     }
     
@@ -2458,8 +2479,9 @@ public class HostBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            log.error("Unexpected errror during BIOS MLE name generation. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during BIOS MLE name generation. " + ex.getMessage());
+            log.error("Unexpected errror during BIOS MLE name generation. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during BIOS MLE name generation. " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_BIOS_MLE_NAME_ERROR, ex.getClass().getSimpleName());
         }        
     }
 
@@ -2498,8 +2520,9 @@ public class HostBO extends BaseBO {
             throw me;
             
         } catch (Exception ex) {
-            log.error("Unexpected errror during VMM MLE name generation. " + ex.getMessage());
-            throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during VMM MLE name generation. " + ex.getMessage());
+            log.error("Unexpected errror during VMM MLE name generation. ", ex);
+            // throw new MSException(ex, ErrorCode.SYSTEM_ERROR, "Error during VMM MLE name generation. " + ex.getMessage());
+            throw new MSException(ErrorCode.MS_VMM_MLE_NAME_ERROR, ex.getClass().getSimpleName());
         }   
     }
 

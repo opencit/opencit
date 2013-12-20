@@ -12,6 +12,7 @@ import com.intel.mtwilson.ms.business.BulkHostRegBO;
 import com.intel.mtwilson.ms.common.MSException;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -72,6 +73,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(TxtHostRecord hostObj) throws ApiException {
+        ValidationUtil.validate(hostObj);
         long regHostStart = System.currentTimeMillis(); // XXX savy performance
         boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
         long regHostStop = System.currentTimeMillis();// XXX savy performance
@@ -85,6 +87,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String registerHost(HostConfigData hostConfigObj) throws ApiException {
+        ValidationUtil.validate(hostConfigObj);
         long regHostStart = System.currentTimeMillis(); // XXX savy performance
         boolean result = new MSComponentFactory().getHostBO().registerHostFromCustomData(hostConfigObj);
         long regHostStop = System.currentTimeMillis();// XXX savy performance
@@ -98,6 +101,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(TxtHostRecord hostObj) throws ApiException {
+        ValidationUtil.validate(hostObj);
         boolean result = new MSComponentFactory().getHostBO().configureWhiteListFromHost(hostObj);
         return Boolean.toString(result);
     }
@@ -108,6 +112,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(HostConfigData hostConfigObj) throws ApiException {
+        ValidationUtil.validate(hostConfigObj);
         boolean result = new MSComponentFactory().getHostBO().configureWhiteListFromCustomData(hostConfigObj);
         return Boolean.toString(result);
     }
@@ -128,6 +133,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws ApiException {
+        ValidationUtil.validate(hostRecords);
         TxtHostRecordList newHostRecords = new TxtHostRecordList();
         
         for (HostConfigData host : hostRecords.getHostRecords().toArray(new HostConfigData[0])) {
@@ -190,6 +196,7 @@ public class Host {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws ApiException {
+        ValidationUtil.validate(hostRecords);
         log.warn("About to execute the registerhosts function");
         HostConfigResponseList results = new MSComponentFactory().getHostBO().registerHosts(hostRecords);
         return results;
