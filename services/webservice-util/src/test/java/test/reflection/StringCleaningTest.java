@@ -6,6 +6,12 @@ package test.reflection;
 
 import com.intel.dcsg.cpg.validation.Regex; // 20131012
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.HostConfigData;
+import com.intel.mtwilson.datatypes.HostVMMType;
+import com.intel.mtwilson.datatypes.HostWhiteListTarget;
+import com.intel.mtwilson.datatypes.RegExAnnotation;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -33,24 +39,28 @@ public class StringCleaningTest {
 
     public static final HashMap<String,Pattern> patternMap = new HashMap<String,Pattern>();
     
-    public static final String DEFAULT_PATTERN = "^[a-zA-Z0-9_-]*$";
-    public static final String IPADDRESS_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
-    public static final String FQDN_PATTERN = "^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$";
-    public static final String IPADDR_FQDN_PATTERN = "(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])$)";
-    public static final String EMAIL_PATTERN = "^([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6})$";
-    // This might need to be modified to allow more special characters. The rule currently says 1or more lower and upper case, one digit and one of the special characters and atleast 8 characters in length
-    public static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";  
-    public static final String PORT = "^[0-9]{1,5}";
-    public static final String ADDON_CONNECTION_STRING = "ADDON_CONNECTION_STRING"; // We will internally use the other regular expressions to validate fields having this annotation
+    public static final String DEFAULT_PATTERN = "(?:[a-zA-Z0-9_\\.\\, |-]+)"; // should not include quotes, blackslashes
+    public static final String IPADDRESS_PATTERN = "(?:(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))";
+    public static final String FQDN_PATTERN = "(?:(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9]))";
+    public static final String IPADDR_FQDN_PATTERN = "(?:" + IPADDRESS_PATTERN + "|" + FQDN_PATTERN + ")";
+    public static final String EMAIL_PATTERN = "(?:([a-z0-9_\\.-]+)@([\\da-z\\.-]+)\\.([a-z\\.]{2,6}))";
+    public static final String PASSWORD_PATTERN = "(?:([a-zA-Z0-9_\\.\\, @!#$%^&+=()\\[\\]\"'*-]+))"; //()\\[\\]\"'*
+    public static final String PORT = "(?:([0-9]{1,5}))";
+    // TODO: Should be replaced with a RegEx for a URL
+    // CONNECTION_STRING_PREFIX = "(?:[a-zA-Z0-9]+)", 
+    // ADDON_CONNECTION_STRING = "(?:" + CONNECTION_STRING_PREFIX + ":" + URL + ")|(?:" + URL +")"
+    public static final String ADDON_CONNECTION_STRING = "ADDON_CONNECTION_STRING"; 
+    public static final String ANY_VALUE = "(.*)";
     
     public static class Pet {
         public String getName() { return "sparky@"; } 
     }
     public static class Person {
-        @Regex (DEFAULT_PATTERN)
-        public String test = "sud.-_1234";
-        @Regex (ADDON_CONNECTION_STRING)
-        public String cs = "vmware:https://server1.corp.intel.com:123/sdk;Admi@nistrator;intel123!;10.1.71.176";
+        @Regex (ANY_VALUE)
+        public String cs = "intel:https://10.1.71.169:9999"; //"vmware:https://server1.corp.intel.com:123/sdk;Admi@nistrator;intel123!;10.1.71.176"; //        
+        //public HostVMMType getHostVMMType2() { return HostVMMType.CITRIX_XENSERVER;};
+        //public String test = "sud.-_1234";
+        /*
         public String[] names = new String[] {"sdf", "asdf", "2347"};
         public Integer[] tes = new Integer[] {1,2,3};
         public String description = "Test";
@@ -62,11 +72,11 @@ public class StringCleaningTest {
         public List<Pet> newPetList = new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));
         
         public String getName() { return "bob"; }
-        @Regex(IPADDR_FQDN_PATTERN)
-        public String getHostName() { return "10.1.71.81";}
-        @Regex(IPADDR_FQDN_PATTERN)
-        public String getHostName2() { return "323.1.71.81";}
-        @Regex(EMAIL_PATTERN) // not a real email regex,  just for quick testing      // 20131012
+        @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
+        public String getHostName() { return "10.1.71.81";}*/
+        // @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
+        // public String getHostName2() { return "18,19,20";}
+        /*@Regex(RegExAnnotation.EMAIL_PATTERN) // not a real email regex,  just for quick testing      // 20131012
         public String getEmail() { return "bob^@example.com"; }    // 20131012
         public int getAge() { return 40; }
         public Pet getPet() { return new Pet(); }
@@ -75,13 +85,25 @@ public class StringCleaningTest {
         public List<Integer> getPetIDList() { return new ArrayList<Integer>(Arrays.asList(new Integer[] {1,2,3}));} 
         public List<String> getPetList() { return new ArrayList<String>(Arrays.asList(new String[] {"dogA","dogB&*","dogC"}));} //{{ add("dogA");  add("dogB");  add("dogC");}};}
         public List<Pet> getPetList2() {return new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));}     
-        public Pet[] getPetList3() {return new Pet[] {new Pet()};}
+        public Pet[] getPetList3() {return new Pet[] {new Pet()};}*/
         // TODO  methods that return arraylist<string>  and string[] */
     }
         
     @Test
     public void testValidatePojo() {
-        validate(new Person()); //new String[] {"one", "two"}); //new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()})));//new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"})));//new String[] {"one", "two"}); // throws an exception if person has invalid strings
+        HostConfigData hostObj = new HostConfigData();
+        hostObj.setBiosWhiteList(true);
+        hostObj.setVmmWhiteList(true);
+        hostObj.setBiosPCRs("0");
+        hostObj.setVmmPCRs("17,18");
+        hostObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
+        hostObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
+        TxtHostRecord host = new TxtHostRecord();
+        host.HostName = "ssbangal.corp.intel.com";
+        host.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
+        host.Email = "sudhir@intel.com";
+        hostObj.setTxtHostRecord(host);
+        validate(hostObj); //new String[] {"one", "two"}); //new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()})));//new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"})));//new String[] {"one", "two"}); // throws an exception if person has invalid strings
     }
     
     // entry point:   call validate(TxtHost), validate(MLE), etc. 
@@ -95,7 +117,6 @@ public class StringCleaningTest {
         Pattern pattern;
         if( method.isAnnotationPresent(Regex.class) ) {
             String regex = method.getAnnotation(Regex.class).value();
-            log.debug("Regex annotation: {}", regex);
             pattern = getPattern(regex);
         }
         else {
@@ -130,9 +151,11 @@ public class StringCleaningTest {
             // validate the management server name, port, host name
             validateInput(cs.url.getHost(), getPattern(IPADDR_FQDN_PATTERN));
             validateInput(Integer.toString(cs.url.getPort()), getPattern(PORT));
-            if (!cs.options.isEmpty()) {
+            if (cs.options != null && !cs.options.isEmpty()) {
                 validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(IPADDR_FQDN_PATTERN));
                 validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(DEFAULT_PATTERN));
+                Pattern pat = getPattern(PASSWORD_PATTERN);
+                String pwd = cs.options.getString(ConnectionString.OPT_PASSWORD);
                 validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(PASSWORD_PATTERN));
             }
         }
@@ -355,7 +378,7 @@ public class StringCleaningTest {
     public static Pattern getPattern(String regex) {
         Pattern pattern = patternMap.get(regex);
         if( pattern == null ) {
-            pattern = Pattern.compile(regex);
+            pattern = Pattern.compile("^" + regex + "$");
             patternMap.put(regex, pattern);
         }
         return pattern;
@@ -367,13 +390,17 @@ public class StringCleaningTest {
 
     // 20131012
     public static void validateInput(String input, Pattern pattern) {
-        if (pattern.pattern().equalsIgnoreCase("ADDON_CONNECTION_STRING")) {
+        if (pattern.pattern().contains("ADDON_CONNECTION_STRING")) {
             validateConnectionString(input);
         } else {
-            Matcher matcher = pattern.matcher(input);
-            if (!matcher.matches()) {
-                log.debug("Illegal characters found in : " + input);
-                throw new IllegalArgumentException();
+            if (input != null && !input.isEmpty()) {        
+                log.debug("Using regex {} for validating {}.", pattern.pattern(), input);
+
+                Matcher matcher = pattern.matcher(input);
+                if (!matcher.matches()) {
+                    log.debug("Illegal characters found in : " + input);
+                    throw new IllegalArgumentException();
+                }
             }
         }
     }
