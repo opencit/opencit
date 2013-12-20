@@ -82,7 +82,10 @@ public class BulkHostRegBO {
 
             return hostResponses;
         } catch (Exception ex) {
-            throw new MSException(ex);
+            // throw new MSException(ex);
+            log.error("Error during bulk host registration. ", ex);
+            throw new MSException(ErrorCode.MS_BULK_REGISTRATION_ERROR, ex.getClass().getSimpleName());
+            
         }
     }
 
@@ -119,7 +122,8 @@ public class BulkHostRegBO {
                 result.setErrorMessage(e.getErrorMessage());
             } catch (Exception e) {
                 isError = true;
-                result = new HostResponse(ErrorCode.UNKNOWN_ERROR, e.getLocalizedMessage());
+                log.error("Error during bulk host registration. ", e);
+                result = new HostResponse(ErrorCode.MS_BULK_REGISTRATION_ERROR, e.getClass().getSimpleName());
             }
         }
 

@@ -14,6 +14,7 @@ import com.intel.mtwilson.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.X509Util;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -66,6 +67,9 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     @Path("/signTrustAgentSsl")
     public String signTrustAgentSsl(String csrBase64, @QueryParam("password") String caPassword) {
+        ValidationUtil.validate(csrBase64);
+        ValidationUtil.validate(caPassword);
+
         try {
             X509Certificate csr = X509Util.decodePemCertificate(csrBase64);
             X509Certificate caSignedCertificate = ca.signSslCertificate(csr, caPassword);
