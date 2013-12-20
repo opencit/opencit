@@ -305,7 +305,7 @@ public class ValidationUtil {
     private static Pattern getPattern(String regex) {
         Pattern pattern = patternMap.get(regex);
         if( pattern == null ) {
-            pattern = Pattern.compile(regex);
+            pattern = Pattern.compile("^" + regex + "$");
             patternMap.put(regex, pattern);
         }
         return pattern;
@@ -316,7 +316,7 @@ public class ValidationUtil {
     }
 
     private static void validateInput(String input, Pattern pattern) {
-        if (pattern.pattern().equalsIgnoreCase("ADDON_CONNECTION_STRING")) {
+        if (pattern.pattern().contains("ADDON_CONNECTION_STRING")) {
             validateConnectionString(input);
         } else {        
             if (input != null && !input.isEmpty()) {
@@ -607,7 +607,7 @@ public class ValidationUtil {
         HashSet<Method> stringMethods = new HashSet<Method>();
         Method[] methods =  clazz.getDeclaredMethods();                
         for(Method method : methods ) {
-            if( isStringMethod(method) && !method.getName().equalsIgnoreCase("toString")) {
+            if( isStringMethod(method)) {
                 stringMethods.add(method);
             }
         }
