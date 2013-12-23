@@ -5,7 +5,7 @@
 package com.intel.mtwilson.datatypes;
 
 /**
- *
+ * XXX TODO move to validation library
  * @author ssbangal
  */
 public class RegExAnnotation {
@@ -20,5 +20,5 @@ public class RegExAnnotation {
     // CONNECTION_STRING_PREFIX = "(?:[a-zA-Z0-9]+)", 
     // ADDON_CONNECTION_STRING = "(?:" + CONNECTION_STRING_PREFIX + ":" + URL + ")|(?:" + URL +")"
     public static final String ADDON_CONNECTION_STRING = "ADDON_CONNECTION_STRING"; 
-    public static final String ANY_VALUE = "(.*)";
+    public static final String ANY_VALUE = "(?:.*)";
 }
