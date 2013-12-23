@@ -92,7 +92,7 @@ public class ValidationUtil {
                     validateStringField(object, field, value); // 20131012
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
             }
         }
         
@@ -112,7 +112,7 @@ public class ValidationUtil {
                 }
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
             }
         }
 
@@ -132,7 +132,7 @@ public class ValidationUtil {
                 }
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, value, field.getName());
             }
         }
 
@@ -149,7 +149,7 @@ public class ValidationUtil {
                 throw mwe;
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
             }
         }
         
@@ -169,7 +169,7 @@ public class ValidationUtil {
                 throw mwe;
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
             }
         }
 
@@ -189,7 +189,7 @@ public class ValidationUtil {
                 throw mwe;
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, "", field.getName());
             }
         }
         
@@ -205,7 +205,7 @@ public class ValidationUtil {
                     validateStringMethod(object, method, input); // 20131012
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
             }
         }
         
@@ -224,7 +224,7 @@ public class ValidationUtil {
                 }
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, method.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, value, method.getName());
             }
         }                
 
@@ -243,7 +243,7 @@ public class ValidationUtil {
                 }
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, value, method.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, value, method.getName());
             }
         } 
         
@@ -259,7 +259,7 @@ public class ValidationUtil {
                 throw mwe;
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
             }
         } 
         
@@ -278,7 +278,7 @@ public class ValidationUtil {
                 throw mwe;
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
             }
         } 
         
@@ -297,7 +297,7 @@ public class ValidationUtil {
                 throw mwe;
             } catch (Exception e) {
                 log.error("Error during validation.", e);
-                throw new MWException(ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
+                throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, "", method.getName());
             }
         }                
     }
@@ -399,12 +399,18 @@ public class ValidationUtil {
         boolean isBuiltInType = false;
         if (clazz != null) {
             isBuiltInType = clazz.isPrimitive() || 
+                    clazz.equals(boolean.class) || clazz.equals(boolean[].class) ||
                     clazz.equals(Boolean.class) || clazz.equals(Boolean[].class) || clazz.equals(Number.class) || clazz.equals(Number[].class) ||
+                    clazz.equals(float.class) || clazz.equals(float[].class) || clazz.equals(int.class) || clazz.equals(int[].class) ||
                     clazz.equals(Float.class) || clazz.equals(Float[].class)|| clazz.equals(Integer.class) || clazz.equals(Integer[].class) ||
+                    clazz.equals(byte.class) || clazz.equals(byte[].class) || clazz.equals(double.class) || clazz.equals(double[].class) ||
                     clazz.equals(Byte.class) || clazz.equals(Byte[].class) || clazz.equals(Double.class) || clazz.equals(Double[].class) ||
+                    clazz.equals(short.class) || clazz.equals(short[].class) || clazz.equals(long.class) || clazz.equals(long[].class) ||
                     clazz.equals(Short.class) || clazz.equals(Short[].class) || clazz.equals(Long.class) || clazz.equals(Long[].class) || 
+                    clazz.equals(char.class) || clazz.equals(char[].class) ||
                     clazz.equals(Character.class) || clazz.equals(Character[].class) || clazz.equals(String.class) || clazz.equals(String[].class);
         }
+        log.debug("isBuiltInType {} ? {}", clazz.getName(), isBuiltInType);
         return isBuiltInType;
     }
 
