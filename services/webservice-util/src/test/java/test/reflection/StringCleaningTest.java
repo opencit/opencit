@@ -73,7 +73,7 @@ public class StringCleaningTest {
         public List<Pet> newPetList = new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));
         
         public String getName() { return "bob"; }
-        @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
+        @Regex(RegExAnnotation.IPADDR_FQDN)
         public String getHostName() { return "10.1.71.81";}
         
         public byte[] getBinaryData() { return new byte[] { 0, 0, 0, 0 }; }
