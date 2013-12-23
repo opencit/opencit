@@ -9,6 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
 	
 	<script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
+        <script type="text/javascript" src="Scripts/token.js"></script>
 	<script type="text/javascript" src="Scripts/commonUtils.js"></script>
 	<script type="text/javascript" src="Scripts/login.js"></script>
 

@@ -9,6 +9,7 @@
     <script type="text/javascript" src="/mtwilson-portal/Scripts/JQuery/jquery-1.7.2.js"></script>
     <script type="text/javascript" src="/mtwilson-portal/Scripts/JQuery/prettify.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
 <c:set var="hostName" scope="session" value="${hostName}"/>
 <title>Trust Details <c:out value="${hostName}"></c:out></title>
 </head>
