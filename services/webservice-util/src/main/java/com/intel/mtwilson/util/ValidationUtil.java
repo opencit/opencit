@@ -47,7 +47,7 @@ public class ValidationUtil {
             pattern = getPattern(regex);
         }
         else {
-            pattern = getPattern(RegExAnnotation.DEFAULT_PATTERN);
+            pattern = getPattern(RegExAnnotation.DEFAULT);
         }
         validateInput(input, pattern);        
     }
@@ -59,7 +59,7 @@ public class ValidationUtil {
             pattern = getPattern(regex);
         }
         else {
-            pattern = getPattern(RegExAnnotation.DEFAULT_PATTERN);
+            pattern = getPattern(RegExAnnotation.DEFAULT);
         }
         validateInput(input, pattern);        
     }
@@ -312,7 +312,7 @@ public class ValidationUtil {
     }
 
     private static void validateInput(String input) {
-        validateInput(input, getPattern(RegExAnnotation.DEFAULT_PATTERN));    // 20131012
+        validateInput(input, getPattern(RegExAnnotation.DEFAULT));    // 20131012
     }
 
     private static void validateInput(String input, Pattern pattern) {
@@ -343,12 +343,12 @@ public class ValidationUtil {
                 throw new IllegalArgumentException();
             }
             // validate the management server name, port, host name
-            validateInput(cs.url.getHost(), getPattern(RegExAnnotation.IPADDR_FQDN_PATTERN));
+            validateInput(cs.url.getHost(), getPattern(RegExAnnotation.IPADDR_FQDN));
             validateInput(Integer.toString(cs.url.getPort()), getPattern(RegExAnnotation.PORT));
             if (cs.options != null && !cs.options.isEmpty()) {
-                validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(RegExAnnotation.IPADDR_FQDN_PATTERN));
-                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(RegExAnnotation.DEFAULT_PATTERN));
-                validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(RegExAnnotation.PASSWORD_PATTERN));
+                validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(RegExAnnotation.IPADDR_FQDN));
+                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(RegExAnnotation.DEFAULT));
+                validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(RegExAnnotation.PASSWORD));
             }
         }
     }
