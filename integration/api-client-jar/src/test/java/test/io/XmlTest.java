@@ -4,6 +4,7 @@
  */
 package test.io;
 
+import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.api.*;
@@ -13,6 +14,7 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -28,16 +30,14 @@ public class XmlTest {
     private static Logger log = LoggerFactory.getLogger(XmlTest.class);
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    // copy of ApiClient.fromXML ... should probably be copied to a utility class XmlUtil in a new module cpg-xml or  JaxbUtil in a new module cpg-jaxb 
-    private <T> T fromXML(String document, Class<T> valueType) throws IOException, ApiException, JAXBException {
-        JAXBContext jc = JAXBContext.newInstance( valueType );
-        Unmarshaller u = jc.createUnmarshaller();
-        Object o = u.unmarshal( new StreamSource( new StringReader( document ) ) );
-        return (T)o;
+    // copy of ApiClient.fromXML
+    private <T> T fromXML(String document, Class<T> valueType) throws IOException, ApiException, JAXBException, XMLStreamException {
+        JAXB jaxb = new JAXB(); // fix for bug #1038 xml external entity injection (XXE) vulnerability
+        return jaxb.read(document,valueType);
     }
     
 //    @Test
-    public void testDeserializeXmlToHostTrustReport() throws IOException, ApiException, JAXBException {
+    public void testDeserializeXmlToHostTrustReport() throws IOException, ApiException, JAXBException, XMLStreamException {
         String xml = IOUtils.toString(getClass().getResourceAsStream("/HostTrustReportSample.xml"));
         HostsTrustReportType a = fromXML(xml, HostsTrustReportType.class);
         List<com.intel.mountwilson.as.hosttrustreport.data.HostType> list = a.getHost();
@@ -47,7 +47,7 @@ public class XmlTest {
     }
     
 //    @Test
-    public void testDeserializeXmlToHostManifestReport() throws IOException, ApiException, JAXBException {
+    public void testDeserializeXmlToHostManifestReport() throws IOException, ApiException, JAXBException, XMLStreamException {
         String xml = IOUtils.toString(getClass().getResourceAsStream("/HostManifestReportSample.xml"));
         HostManifestReportType a = fromXML(xml, HostManifestReportType.class);
         com.intel.mountwilson.as.hostmanifestreport.data.HostType h = a.getHost();

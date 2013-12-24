@@ -1,30 +1,34 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>Welcome</title>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
+<title>Welcome</title>
+	
+	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
+	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
+	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
+	
+	<script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.dialog.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.effects.core.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.position.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menu.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
+	<script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
+        <script type="text/javascript" src="Scripts/token.js"></script>
+	<script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
+    <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
+    
+    <script type="text/javascript" src="Scripts/commonUtils.js"></script>
+	<script type="text/javascript" src="Scripts/CommonMessage.js"></script>
+	<script type="text/javascript" src="Scripts/home.js"></script>
+	
 
-        <link rel="stylesheet" type="text/css" href="CSS/home.css" />
-        <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
-        <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
-
-        <script type="text/javascript" src="Scripts/JQuery/jquery-1.7.2.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.json-1.3.min.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.ui.core.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.ui.dialog.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.effects.core.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.ui.widget.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.ui.position.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.ui.menu.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
-        <script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
-        <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
-
-        <script type="text/javascript" src="Scripts/commonUtils.js"></script>
-        <script type="text/javascript" src="Scripts/CommonMessage.js"></script>
-        <script type="text/javascript" src="Scripts/home.js"></script>
         <script> var assetTagUrl = "<% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString()); %>"; </script>
 
 
