@@ -4,6 +4,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
 <title>Welcome to Mt.Wilson</title>
 	
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
