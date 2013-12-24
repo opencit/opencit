@@ -3,6 +3,7 @@
 TITLE="Asset tag provisioning Agent"
 
 certSha1=/tmp/certSha1
+nvramPass=ffffffffffffffffffffffffffffffffffffffff
 server=""
 cert=""
 username=""
@@ -16,6 +17,8 @@ IFS=' '
 read -a valueArray <<< "${values}"
 IFS="$OIFS"
 cmdFile=/tmp/command
+tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
+tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
 #read the variables from /proc/cmdline
 #to support automation ussuage with the script
 #to pass data it uses this form
@@ -78,7 +81,7 @@ function createIndex4() {
  functionReturn=0
  output=`tpm_nvinfo -i $INDEX`
  if [ -z "$output" ]; then
-  tpm_nvdefine -i $INDEX -s 0x14 --permissions="OWNERWRITE"
+  $tpmnvdefine -i $INDEX -s 0x14 -a"$nvramPass" --permissions="AUTHWRITE"
  fi
 }
 
@@ -148,8 +151,8 @@ function provisionCert() {
   sha1=`echo "${sha1#*sha1=}"`
   createIndex4
   echo "$sha1" | hex2bin > $certSha1
-  echo "tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite" >> $cmdFile
-  tpm_nvwrite -i $INDEX -f $certSha1 > /tmp/certWrite  2>&1
+  echo "$tpmnvwrite -i $INDEX -p$nvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
+  $tpmnvwrite -i $INDEX -p"$nvramPass" -f $certSha1 > /tmp/certWrite  2>&1
   result=$?
   sleep 5;
   if [ $result -eq 0 ]; then 
