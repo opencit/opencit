@@ -25,7 +25,7 @@ import org.apache.commons.io.IOUtils;
  * @author dsmagadX
  */
 public class CommandUtil {
-
+    
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
 
     public static List<String> runCommand(String commandLine) throws TAException, IOException {
@@ -86,7 +86,64 @@ public class CommandUtil {
 
         return result;
     }
+    
+    public static CommandResponse runCommandWithExitCode(String commandLine) throws TAException, IOException {
+        CommandResponse response = new CommandResponse();
+        if(StringUtils.isBlank(commandLine))
+            throw new TAException(ErrorCode.ERROR,"Command cannot be empty.");
+        
+        String[] command = commandLine.split(" ");
+        
+        if(new File(Config.getBinPath() + File.separator + command[0]).exists())
+            commandLine = Config.getBinPath() + File.separator + commandLine;
 
+        if(new File(Config.getBinPath() + File.separator + commandLine).exists())
+            commandLine = Config.getBinPath() + File.separator + commandLine;
+        
+        log.debug("Command to be executed is :" + commandLine);
+
+        Process p = Runtime.getRuntime().exec(commandLine);
+
+        List<String> result = new ArrayList<String>();
+
+        readResults(p, result);
+
+//        if (Config.isDebug()) {
+//            log.log(Level.INFO, "Result Output \n{}", (result == null ) ? "null":result.toString());
+//        }
+
+        //do a loop to wait for an exit value
+        boolean isRunning;
+        int timeout = 500000;
+        int countToTimeout = 0;
+        do {
+            countToTimeout++;
+            isRunning = false;
+            try {
+                p.exitValue();
+
+            } catch (IllegalThreadStateException e1) {
+                isRunning = true;
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e2) {
+                    isRunning = false;
+                }
+            }
+        } while (isRunning
+                && (countToTimeout < timeout));
+
+        if (countToTimeout  == timeout) {
+            log.info("Command is not responding.");
+            p.destroy();
+            response.setExistValue(p.exitValue());
+        }
+        
+        response.setOutput(result);
+
+        return response;
+    }
+    
     private static void checkError(int exitValue, String commandLine) throws TAException {
         log.debug( "Return code {}", exitValue);
 

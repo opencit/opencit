@@ -38,6 +38,8 @@ public class TADataContext {
     private String processorInfo;
     private String hostUUID;
     private String ipaddress;  // localhost ip address
+    private String assetTagHash;
+    private String nvRamPassword;
     
     public String getBiosOem() {
         return biosOem;
@@ -255,4 +257,19 @@ public class TADataContext {
         this.hostUUID = hostUUID;
     }
     
+    public String getAssetTagHash() {
+        return assetTagHash;
+    }
+    
+    public void setAssetTagHash(String assetTagHash) {
+        this.assetTagHash = assetTagHash;
+    }
+    
+    public String getNvRamPassword(){
+        return this.nvRamPassword;
+    }
+    
+    public void setNvRamPasword(String nvRamPassword){
+        this.nvRamPassword = nvRamPassword;
+    }
 }
