@@ -6,7 +6,7 @@ package com.intel.mtwilson.datatypes;
 
 import java.util.List;
 import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.intel.dcsg.cpg.validation.Regex;
 /**
  *
  * @author jbuhacoff

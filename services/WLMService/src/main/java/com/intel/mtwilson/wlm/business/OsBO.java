@@ -49,7 +49,9 @@ public class OsBO extends BaseBO {
             throw ase;
         } catch (Exception e) {
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, "Error while fetching OS data. " + e.getMessage(), e);
-            throw new ASException(e);
+            // throw new ASException(e);
+            log.error("Error during retrieval of OS details.", e);
+            throw new ASException(ErrorCode.WS_OS_RETRIEVAL_ERROR, e.getClass().getSimpleName());
         }
 
 
@@ -79,7 +81,9 @@ public class OsBO extends BaseBO {
         } catch (Exception e) {
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while updating OS '%s' of version %s. %s",
 //                    osData.getName(), osData.getVersion(), e.getMessage()), e);
-            throw new ASException(e);
+            // throw new ASException(e);
+            log.error("Error during OS update.", e);
+            throw new ASException(ErrorCode.WS_OS_UPDATE_ERROR, e.getClass().getSimpleName());            
         }
         return "true";
     }
@@ -109,7 +113,9 @@ public class OsBO extends BaseBO {
         } catch (Exception e) {
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while creating OS '%s' of version '%s'. %s",
 //                    osData.getName(), osData.getVersion(), e.getMessage()), e);
-            throw new ASException(e);
+            //  throw new ASException(e);
+            log.error("Error during OS creation.", e);
+            throw new ASException(ErrorCode.WS_OS_CREATE_ERROR, e.getClass().getSimpleName());            
         }
         return "true";
     }
@@ -143,7 +149,9 @@ public class OsBO extends BaseBO {
         } catch (Exception e) {
 //            throw new ASException(ErrorCode.SYSTEM_ERROR, String.format("Error while deleting OS '%s' of version '%s'. %s",
 //                    osName, osVersion, e.getMessage()), e);
-            throw new ASException(e);
+            // throw new ASException(e);
+            log.error("Error during OS deletion.", e);
+            throw new ASException(ErrorCode.WS_OS_DELETE_ERROR, e.getClass().getSimpleName());            
         }
         return "true";
     }

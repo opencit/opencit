@@ -80,6 +80,34 @@ public class AssetTagCertBOTest {
     }
     
     @Test
+    public void testNewAssetTagCert() throws IOException{
+        
+        List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("B21FD91B-EF72-E111-BD1D-001E67388954");
+         if (atagCerts.isEmpty()) {
+                    System.out.println("Asset tag certificate has not been provisioned for the host with UUID");
+         } else {
+                  //For each of the asset tag certs that are returned back, we need to validate the certificate first.
+                  for (MwAssetTagCertificate atagTempCert : atagCerts){
+                      //This is what is stored in NVRAM
+                     Sha1Digest certSha1 = Sha1Digest.digestOf(atagTempCert.getCertificate());
+                     System.out.println("sha1 of cert == " + certSha1.toString());
+                     
+                     // When Citrix code reads NVRAM, it reads it as string
+                     byte[] certBytes = certSha1.toString().getBytes("UTF-8");
+                     System.out.println("sha1 of sha1 of cert == " + certSha1.toString());                   
+                    byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + certBytes.length];                   
+                    System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
+                    System.arraycopy(certBytes, 0, destination, Sha1Digest.ZERO.toByteArray().length, certBytes.length);  
+
+                    // Final sha1 from citrix
+                     Sha1Digest finalDigest = Sha1Digest.digestOf(destination);
+                     System.out.println("Final SHA1 :" + finalDigest.toString());
+                 }
+          }
+    }
+    
+    
+    @Test
     public void insertAssetTagCert() {
         String attrCert = "MIICGzCCAQMCAQEwH6EdpBswGTEXMBUGAWkEEK3AjNJLBUBSvVDG4bbdZsmgXzBdpFswWTEQMA4GA1UEAwwHQXR0ciBDQTEMMAoGA1UECwwDQ1BHMQ0wCwYDVQQLDAREQ1NHMQ4wDAYDVQQKDAVJbnRlbDELMAkGA1UECAwCQ0ExCzAJBgNVBAYTAlVTMA0GCSqGSIb3DQEBCwUAAgEBMCIYDzIwMTMwODI4MDMwODU2WhgPMjAxMzA5MjgwMzA4NTZaMEYwFAYMKwYBBAGGjR8BAQEBMQQMAlVTMBQGDCsGAQQBho0fAgICAjEEDAJDQTAYBgwrBgEEAYaNHwMDAwMxCAwGRm9sc29tMA0GCSqGSIb3DQEBCwUAA4IBAQA6EpPzMArxcoqy+oReAEAgr9fKi9pLt45eQd4svGnu0qfKnPrUiEJxedOULUd+O8aPs7sBYE3yS1lAHzAhS0BuTPvYLh4kYl5xftjl0KzCqgXJSHbCe/FcZmjj0CYt/avzxXslYguJicUqDnn7/I8Mr00qOx4AahJd8dbsTT0LGnX4vgD5d7AP9B27Ul5BqIdm1r3sg87adgltsHjz7GCgOIfNoCUYWGc11ERPlhTZq+qoRpGyxXi0LgbvQeMBX36V446WUrt3fG5ezlN4vOduOjEkWqGnjf32VYEdP34TsOCmD3bYzBB5HC1fDn7PLiuupkVPrWQ1stm+OD0cu0ii";
         AssetTagCertBO atagBO = new AssetTagCertBO();

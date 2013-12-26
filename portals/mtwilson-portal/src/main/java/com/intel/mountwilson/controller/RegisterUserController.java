@@ -59,9 +59,10 @@ public class RegisterUserController extends AbstractController {
                 //Checking for duplicate user registration by seeing if there is already a cert in table for user
                 MwPortalUser keyTest = keystoreJpa.findMwPortalUserByUserName(username);
                 if(keyTest != null) {
-                  log.debug("An user already exists with the specified User Name: {}", username);
-		  view.addObject("result",false);
-		  view.addObject("message","An user already exists with the specified User Name. Please select different User Name.");
+                    // Bug: 1038: Hiding the error message so that existing user names cannot be found.
+                  log.error("An user already exists with the specified User Name: {}. Different user name needs to be choosen.", username);
+		  view.addObject("result",true);
+		  //view.addObject("message","An user already exists with the specified User Name. Please select different User Name.");
 		  return view;      
                 }
                 /*

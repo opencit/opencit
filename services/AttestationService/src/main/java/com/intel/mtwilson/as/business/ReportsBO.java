@@ -93,7 +93,10 @@ public class ReportsBO extends BaseBO {
             }
             return hostsTrustReportType;
         } catch (Exception e) {
-            throw new ASException(e);
+            // throw new ASException(e);
+            // Bug: 1038 - prevent leaks in error messages to client
+            logger.error("Error during retrieval of host trust report.", e);
+            throw new ASException(ErrorCode.AS_HOST_REPORT_ERROR, e.getClass().getSimpleName());
         }
 
     }
@@ -139,7 +142,10 @@ public class ReportsBO extends BaseBO {
         return hostManifestReportType;
         }
         catch(Exception e) {
-            throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
+            // throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
+            // Bug: 1038 - prevent leaks in error messages to client
+            logger.error("Error during retrieval of host trust report.", e);
+            throw new ASException(ErrorCode.AS_HOST_REPORT_ERROR, e.getClass().getSimpleName());
         }
     }
 
@@ -206,7 +212,10 @@ public class ReportsBO extends BaseBO {
 
         }  catch (Exception ex) {
 
-            throw new ASException(ex);
+            // throw new ASException(ex);
+            // Bug: 1038 - prevent leaks in error messages to client
+            logger.error("Error during retrieval of host attestation report.", ex);
+            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -280,8 +289,11 @@ public class ReportsBO extends BaseBO {
         }
         return attestationReport;
         }
-        catch(Exception e) {
-            throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
+        catch(Exception ex) {
+            // throw new ASException(ErrorCode.HTTP_INTERNAL_SERVER_ERROR, e.toString());
+            // Bug: 1038 - prevent leaks in error messages to client
+            logger.error("Error during retrieval of host attestation report.", ex);
+            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
         }
     }
     

@@ -3,9 +3,11 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -67,14 +69,17 @@ public class PollHosts {
     @Produces({MediaType.APPLICATION_JSON})
     public OpenStackHostTrustLevelReport pollMultipleHosts(OpenStackHostTrustLevelQuery input) {
         try {
+            ValidationUtil.validate(input);
             log.debug("PCR Mask {}", input.pcrMask);
             return new ASComponentFactory().getHostTrustBO().getPollHosts(input);
         }
         catch(ASException e) {
             throw e;
         }
-        catch(Exception e) {
-            throw new ASException(e);
+        catch(Exception ex) {
+            // throw new ASException(e);
+            log.error("Error during retrieval of host trust status.", ex);
+            throw new ASException(ErrorCode.AS_HOST_TRUST_ERROR, ex.getClass().getSimpleName());
         }
     }
 

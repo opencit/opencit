@@ -17,6 +17,7 @@ import javax.net.ssl.SSLSocket;
 
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.TAConfig;
+import java.net.InetAddress;
 import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
@@ -58,6 +59,9 @@ public class TASecureServer extends BaseServer {
                 sock = (SSLSocket) serverSock.accept();
                 log.info("Have accepted new socket.");
                 
+                // issue #1038 when mtwilson.tpm.quote.ipaddress we automatically  use our own address in the quote by overwriting the last 4 bytes of the nonce with it;
+                InetAddress inetAddress = sock.getLocalAddress();
+                log.debug("Trust Agent accepted connection with local address {}", inetAddress.getHostAddress());
 
                 /*
                  Take ownership of the TPM. This time if already ownership is done 
@@ -67,7 +71,7 @@ public class TASecureServer extends BaseServer {
                 takeOwnerShip();
 
                 
-                handleConnection(sock.getInputStream(), sock.getOutputStream());
+                handleConnection(inetAddress, sock.getInputStream(), sock.getOutputStream());
 
             } catch (Exception e) {
                 log.error( null, e);

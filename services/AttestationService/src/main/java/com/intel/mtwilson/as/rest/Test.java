@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import java.util.ArrayList;
@@ -111,7 +112,9 @@ public class Test {
 
             return report;
         } catch (Exception ex) {
-            throw new ASException(ex);
+            // throw new ASException(ex);
+            log.error("Error during testing.", ex);
+            throw new ASException(ErrorCode.SYSTEM_ERROR, ex.getClass().getSimpleName());
         }
         
     }
@@ -162,7 +165,9 @@ public class Test {
 	                result = hostAgent.getVendorHostReport(); //getHostAttestationReport(host, "0,17,18,20");
 	                log.debug("Got response for "+hostname);
             } catch (Exception ex) {
-                error = ex.toString();
+                // error = ex.toString();
+                log.error("Error during testing", ex);
+                error = ex.getClass().getSimpleName();
             }
         }
         

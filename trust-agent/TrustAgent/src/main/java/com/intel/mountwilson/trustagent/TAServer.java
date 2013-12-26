@@ -9,9 +9,11 @@ package com.intel.mountwilson.trustagent;
  * @author dsmagadX
  */
 import com.intel.mountwilson.common.Config;
+import static com.intel.mountwilson.trustagent.TASecureServer.log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import org.slf4j.Logger;
@@ -45,6 +47,11 @@ public class TAServer extends BaseServer {
             try {
                 sock = serverSock.accept();
                 log.info("Have accepted new socket.");
+
+                // issue #1038 when mtwilson.tpm.quote.ipaddress we automatically  use our own address in the quote by overwriting the last 4 bytes of the nonce with it;
+                InetAddress inetAddress = sock.getLocalAddress();
+                log.debug("Trust Agent accepted connection with local address {}", inetAddress.getHostAddress());
+
                 /*
                  Take ownership of the TPM. This time if already ownership is done 
                  * then this method will return. This is fix the bug where sometimes 
@@ -56,7 +63,7 @@ public class TAServer extends BaseServer {
                 sockOutput = sock.getOutputStream();
 
 
-                handleConnection(sockInput, sockOutput);
+                handleConnection(inetAddress, sockInput, sockOutput);
 
             } catch (Exception e) {
                 log.error( null, e);

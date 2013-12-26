@@ -147,6 +147,9 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		url:url,
 		data: requestData,
 		dataType: "json",
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
 		success: function (responseJSON,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
@@ -197,11 +200,15 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 function sendHTMLAjaxRequest(isGet, url, requestData, callbackSuccessFunction, callbackErrorFunction){
 	var argLength = arguments.length;
 	var requestArgumets = arguments;
+    //alert("html ajax request, token = "+authorizationToken);
 	$.ajax({
 		type:isGet ? "GET" : "POST",
 		url:url,
 		data: requestData,
 		dataType: "html",
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
 		success: function (response,code,jqXHR) {
 			//check for page type, if page is login page then show a pop-up for session expire.
 			if (jqXHR.getResponseHeader("loginPage") != null && jqXHR.getResponseHeader("loginPage") == "true") {
@@ -442,6 +449,9 @@ function sendSynchronousAjaxRequest(isGet, url, requestData, callbackSuccessFunc
                 async:false,
 		data: requestData,
 		dataType: "json",
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
 		success: function (responseJSON) {
 			if(responseJSON == null){
 				fnSessionExpireLoginAgain(); // XXX TODO no response from server is an ERROR not an indicator of expired session.  we should display an appropriate message, NOT kick out the user.    this needs to be fixed also in other uses of fnSessionExpireLoginAgain that do not involve the session actually expiring.
