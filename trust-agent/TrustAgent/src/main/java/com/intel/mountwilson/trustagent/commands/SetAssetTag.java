@@ -60,6 +60,8 @@ public class SetAssetTag implements ICommand{
                 registerPassword(password);
             }
             
+            context.setResponseXML("<response>true</response>");
+            
         } catch (IOException ex) {
             log.error(ex.getMessage());
             throw new TAException(ErrorCode.ERROR,"error while trying to set asset tag",ex);
