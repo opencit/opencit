@@ -369,7 +369,7 @@ public class TrustAgentSecureClient {
      * How to test this:  
      * 
      * openssl s_client -connect 10.1.71.169:9999
-     * <set_asset_tag><asset_tag_hash>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</asset_tag_hash><nvram_password>aaaaaaaaaaaaaaaa</nvram_password><asset_tag_uuid>aaaa-aaa-aaa-aaa</asset_tag_uuid></set_asset_tag>
+     * <set_asset_tag><asset_tag_hash>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</asset_tag_hash><asset_tag_uuid>aaaa-aaa-aaa-aaa</asset_tag_uuid></set_asset_tag>
      * 
      * Example response:
      * <response>true</response>

@@ -30,4 +30,18 @@ public class TrustAgentClientTest {
         ObjectMapper mapper = new ObjectMapper();
         log.debug(mapper.writeValueAsString(hostInfo));
     }
+    
+    @Test
+    public void testSetAssetTagCommand() throws IOException {
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://x.x.x.x:9999"), new InsecureTlsPolicy());
+        TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection);
+        String hash = "";
+        String uuid = "";
+        boolean response = client.setAssetTag(hash, uuid);
+        if(response)
+            System.out.println("asset tag set!");
+        else
+            System.out.println("asset tag  not set!");
+    }
+    
 }
