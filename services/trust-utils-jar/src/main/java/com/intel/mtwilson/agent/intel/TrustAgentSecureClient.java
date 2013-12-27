@@ -377,15 +377,15 @@ public class TrustAgentSecureClient {
      * 
      * @return 
      */
-    public HostInfo setAssetTag(String assetTagHash, String nvramPassword, String uuid) {
+    public boolean setAssetTag(String assetTagHash, String nvramPassword, String uuid) {
         String xml = "<set_asset_tag><asset_tag_hash>" + assetTagHash + "</asset_tag_hash><nvram_password>" + nvramPassword + "</nvram_password><asset_tag_uuid>" + uuid +"</asset_tag_uuid></set_asset_tag>";
         this.data = xml.getBytes();
-        HostInfo response;
+        
 	try {
 	    byte buf[] = sendRequestWithSSLSocket();
             log.debug("TrustAgent response: {}", new String(buf));
         // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
-	    response = jaxb.read(new String(buf).trim(), HostInfo.class);
+	    // response = jaxb.read(new String(buf).trim(), HostInfo.class);
         }catch(UnknownHostException e) {
             throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
         }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer
@@ -396,22 +396,9 @@ public class TrustAgentSecureClient {
             throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
         }catch(KeyManagementException e) {
             throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
-        } catch(JAXBException e) {
-            throw new ASException(e,ErrorCode.AS_TRUST_AGENT_INVALID_RESPONSE, e.toString());
         }
-        catch(XMLStreamException e) {
-            throw new ASException(e,ErrorCode.AS_TRUST_AGENT_INVALID_RESPONSE, e.toString());            
-        }
-        /*catch(Exception e) {
-            throw new ASException(e);
-        }*/
-       
-        int errorCode = response.getErrorCode();
-        log.error(String.format("Trust Agent Error %d [%s]: %s", response.getErrorCode(), response.getClientIp(), response.getErrorMessage()));
-        if (errorCode != 0) {
-            throw new ASException(ErrorCode.AS_TRUST_AGENT_ERROR, errorCode,response.getErrorMessage());
-        }
-       return response;
+     
+        return true;
     }
     
     
