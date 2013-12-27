@@ -16,8 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.codec.binary.Hex;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mountwilson.common.CommandResponse;
 
