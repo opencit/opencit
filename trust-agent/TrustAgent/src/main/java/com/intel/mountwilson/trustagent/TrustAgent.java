@@ -91,10 +91,6 @@ public class TrustAgent {
             Matcher m = p.matcher(xmlInput);
             m.find();
             String assetTagHash = m.group(1);
-            p = Pattern.compile("<nvram_password>([^\"><]*?)</nvram_password>"); // constrained regex from .* to [^\"><]
-            m = p.matcher(xmlInput);
-            m.find();
-            String nvramPassword = m.group(1);
             p = Pattern.compile("<asset_tag_uuid>([^\"><]*?)</asset_tag_uuid>"); // constrained regex from .* to [^\"><]
             m = p.matcher(xmlInput);
             m.find();
@@ -103,7 +99,7 @@ public class TrustAgent {
             TADataContext context = new TADataContext();
             
             context.setAssetTagHash(assetTagHash);
-            context.setNvRamPasword(nvramPassword);
+           
             context.setHostUUID(uuid);
             
             new SetAssetTag(context).execute();

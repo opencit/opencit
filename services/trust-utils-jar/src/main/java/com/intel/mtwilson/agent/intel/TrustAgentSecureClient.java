@@ -377,8 +377,8 @@ public class TrustAgentSecureClient {
      * 
      * @return 
      */
-    public boolean setAssetTag(String assetTagHash, String nvramPassword, String uuid) {
-        String xml = "<set_asset_tag><asset_tag_hash>" + assetTagHash + "</asset_tag_hash><nvram_password>" + nvramPassword + "</nvram_password><asset_tag_uuid>" + uuid +"</asset_tag_uuid></set_asset_tag>";
+    public boolean setAssetTag(String assetTagHash, String uuid) {
+        String xml = "<set_asset_tag><asset_tag_hash>" + assetTagHash + "</asset_tag_hash><asset_tag_uuid>" + uuid +"</asset_tag_uuid></set_asset_tag>";
         this.data = xml.getBytes();
         
 	try {
