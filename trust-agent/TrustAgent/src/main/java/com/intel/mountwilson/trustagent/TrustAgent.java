@@ -127,7 +127,7 @@ public class TrustAgent {
             new GenerateModulesCmd(context).execute();
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
-
+            
             return context.getResponseXML();
 
         } catch (TAException ex) {
