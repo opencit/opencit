@@ -48,7 +48,7 @@ public class SetAssetTag implements ICommand{
                 password = generateRandomPass();
                 createIndex(password);
             }
-            
+            log.debug("using password " + password + " for index");
             //now index is created, write value to it
             writeHashToFile();  // store the hash as a binary file
             
@@ -61,11 +61,11 @@ public class SetAssetTag implements ICommand{
                 registerPassword(password);
             }
             
-            context.setResponseXML("<response>true</response>");
+            context.setResponseXML("<set_asset_tag><response>true</response></set_asset_tag>");
             
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             log.error(ex.getMessage());
-            throw new TAException(ErrorCode.ERROR,"error while trying to set asset tag",ex);
+            context.setResponseXML("<set_asset_tag><response>false</response><error>"+ex.getMessage() + "</error></set_asset_tag>");
         }
     }
     
@@ -81,6 +81,7 @@ public class SetAssetTag implements ICommand{
             String response = StringUtils.join(result,"\n");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
+                throw ex;
         }
         return true;
     }
@@ -91,6 +92,7 @@ public class SetAssetTag implements ICommand{
             String response = StringUtils.join(result,"\n");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
+                throw ex;
         }        
     }
     
@@ -101,6 +103,7 @@ public class SetAssetTag implements ICommand{
             String response = StringUtils.join(result,"\n");
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
+                throw ex;
         }
         return true;
     }
@@ -118,6 +121,7 @@ public class SetAssetTag implements ICommand{
                 return true;
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
+                throw ex;
         }
         return false;
     }
