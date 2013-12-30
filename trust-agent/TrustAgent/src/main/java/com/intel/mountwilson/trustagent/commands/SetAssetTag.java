@@ -79,6 +79,7 @@ public class SetAssetTag implements ICommand{
         try {
             result = CommandUtil.runCommand("tpm_nvwrite -i " + index + " -p" + password + " -f /tmp/hash");
             String response = StringUtils.join(result,"\n");
+            log.debug("writeHashToNvram output: " + response);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -90,6 +91,7 @@ public class SetAssetTag implements ICommand{
         try {
             List<String> result = CommandUtil.runCommand("echo " + context.getAssetTagHash() + " | hex2bin > /tmp/hash");
             String response = StringUtils.join(result,"\n");
+            log.debug("writeHashToFile output: " + response);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -101,6 +103,7 @@ public class SetAssetTag implements ICommand{
         try {
             result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -a" + password + " --permissions=\"AUTHWRITE\"");
             String response = StringUtils.join(result,"\n");
+            log.debug("createIndex output: " + response);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
                 throw ex;
@@ -117,6 +120,7 @@ public class SetAssetTag implements ICommand{
         try {
             result = CommandUtil.runCommand("tpm_nvinfo -i " + index);  
             String response = StringUtils.join(result,"\n");
+            log.debug("indexExists output: " + response);
             if(response.contains("NVRAM index")) 
                 return true;
         }catch(TAException ex) {
