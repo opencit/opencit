@@ -61,27 +61,29 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "host_info")
 public class HostInfo {
 
-    @XmlElement(required = true)
+    @XmlElement(name = "timeStamp",required = true)
     protected String timeStamp;
-    @XmlElement(required = true)
+    @XmlElement(name = "clientIp", required = true)
     protected String clientIp;
+    @XmlElement(name = "errorCode", required = true)
     protected byte errorCode;
-    @XmlElement(required = true)
+    @XmlElement(name = "clientIp",required = true)
     protected String errorMessage;
-    @XmlElement(required = true)
+    @XmlElement(name = "osName", required = true)
     protected String osName;
+    @XmlElement(name = "osVersion", required = true)
     protected String osVersion;
-    @XmlElement(required = true)
+    @XmlElement(name = "biosOem", required = true)
     protected String biosOem;
-    @XmlElement(required = true)
+    @XmlElement(name = "biosVersion", required = true)
     protected String biosVersion;
-    @XmlElement(required = true)
+    @XmlElement(name = "vmmName", required = true)
     protected String vmmName;
-    @XmlElement(required = true)
+    @XmlElement(name = "vmmVersion", required = true)
     protected String vmmVersion;
-    @XmlElement(required = true)
+    @XmlElement(name = "processorInfo", required = true)
     protected String processorInfo;
-    @XmlElement(required = true)
+    @XmlElement(name = "hostUUID", required = true)
     protected String hostUUID;
 
     /**

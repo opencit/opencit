@@ -47,6 +47,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.intel.dcsg.cpg.xml.JAXB;;
 
 public class TrustAgentSecureClient {
     public static final int DEFAULT_TRUST_AGENT_PORT = 9999;
@@ -334,9 +335,11 @@ public class TrustAgentSecureClient {
         HostInfo response;
 		try {
 			byte buf[] = sendRequestWithSSLSocket();
-            log.debug("TrustAgent response: {}", new String(buf));
+            log.debug("TrustAgent response: {}", new String(buf).trim());
         // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
-			response = jaxb.read(new String(buf).trim(), HostInfo.class);
+                        JAXB codec = new JAXB();
+                        response = codec.read(new String(buf).trim(), HostInfo.class);
+			//response = jaxb.read(new String(buf).trim(), HostInfo.class);
         }catch(UnknownHostException e) {
             throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
         }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer
