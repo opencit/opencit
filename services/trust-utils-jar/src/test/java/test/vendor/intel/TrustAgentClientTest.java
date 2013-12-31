@@ -24,7 +24,7 @@ public class TrustAgentClientTest {
     
     @Test
     public void testHostInfoCommand() throws IOException {
-        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.169:9999"), new InsecureTlsPolicy());
+        TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.45:9999"), new InsecureTlsPolicy());
         TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection);
         HostInfo hostInfo = client.getHostInfo();
         ObjectMapper mapper = new ObjectMapper();
