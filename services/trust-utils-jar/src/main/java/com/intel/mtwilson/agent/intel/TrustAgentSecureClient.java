@@ -337,9 +337,7 @@ public class TrustAgentSecureClient {
 			byte buf[] = sendRequestWithSSLSocket();
             log.debug("TrustAgent response: {}", new String(buf).trim());
         // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
-                        JAXB codec = new JAXB();
-                        response = codec.read(new String(buf).trim(), HostInfo.class);
-			//response = jaxb.read(new String(buf).trim(), HostInfo.class);
+                        response = jaxb.read(new String(buf).trim(), HostInfo.class);
         }catch(UnknownHostException e) {
             throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
         }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer
