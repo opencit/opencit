@@ -53,27 +53,30 @@ public class StringCleaningTest {
     public static final String ANY_VALUE = "(.*)";
     
     public static class Pet {
-        public String getName() { return "sparky@"; } 
+//        public String getName() { return "sparky@"; }  // will cause error because of @
+        public String getName() { return "sparky"; }  // validates ok
     }
     public static class Person {
         @Regex (ANY_VALUE)
         public String cs = "intel:https://10.1.71.169:9999"; //"vmware:https://server1.corp.intel.com:123/sdk;Admi@nistrator;intel123!;10.1.71.176"; //        
         //public HostVMMType getHostVMMType2() { return HostVMMType.CITRIX_XENSERVER;};
         //public String test = "sud.-_1234";
-        /*
+
         public String[] names = new String[] {"sdf", "asdf", "2347"};
         public Integer[] tes = new Integer[] {1,2,3};
         public String description = "Test";
         private String desc2 = "Decription";
         public Integer testing =  90;
-        public List<String> namesList = new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"}));
+//        public List<String> namesList = new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"}));
         public Pet newPet = new Pet();
         public Pet[] newPets = new Pet[] {new Pet(), new Pet()};
         public List<Pet> newPetList = new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));
         
         public String getName() { return "bob"; }
         @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
-        public String getHostName() { return "10.1.71.81";}*/
+        public String getHostName() { return "10.1.71.81";}
+        
+        public byte[] getBinaryData() { return new byte[] { 0, 0, 0, 0 }; }
         // @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
         // public String getHostName2() { return "18,19,20";}
         /*@Regex(RegExAnnotation.EMAIL_PATTERN) // not a real email regex,  just for quick testing      // 20131012
@@ -104,6 +107,12 @@ public class StringCleaningTest {
         host.Email = "sudhir@intel.com";
         hostObj.setTxtHostRecord(host);
         validate(hostObj); //new String[] {"one", "two"}); //new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()})));//new ArrayList<String>(Arrays.asList(new String[] {"one","two","th%ree"})));//new String[] {"one", "two"}); // throws an exception if person has invalid strings
+    }
+    
+    @Test
+    public void testValidatePojo2() {
+        Person person = new Person();
+        ValidationUtil.validate(person);
     }
     
     // entry point:   call validate(TxtHost), validate(MLE), etc. 
