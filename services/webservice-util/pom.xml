@@ -30,6 +30,11 @@
 
 
   <dependencies>
+    <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-server</artifactId>
+        <version>1.9-ea04</version>
+    </dependency>
 	<dependency>
 		<groupId>javax</groupId>
 		<artifactId>javaee-web-api</artifactId>
@@ -94,11 +99,6 @@
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
-    </dependency>
-    <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>1.9-ea04</version>
     </dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.common</groupId>
