@@ -37,8 +37,8 @@ public class HostInfoCmd implements ICommand {
             if(context.getOsName() != null &&  context.getOsName().toLowerCase().contains("xenserver")){
                 context.setVmmName(context.getOsName());
                 context.setVmmVersion(context.getOsVersion());
-                log.info("VMM Name: " + context.getVmmName());
-                log.info("VMM Version: " + context.getVmmVersion());
+                log.debug("VMM Name: " + context.getVmmName());
+                log.debug("VMM Version: " + context.getVmmVersion());
 
             }else{
                 getVmmAndVersion();
@@ -46,7 +46,7 @@ public class HostInfoCmd implements ICommand {
             }
             // Retrieve the processor information as well.
             getProcessorInfo();
-
+            getHostUUID();
         } catch (Exception ex) {
             throw new TAException(ErrorCode.ERROR, "Error while getting OS details.", ex);
         }
@@ -81,8 +81,8 @@ public class HostInfoCmd implements ICommand {
                 }
             }
         }
-        log.info("OS Name: " + context.getOsName());
-        log.info("OS Version: " + context.getOsVersion());
+        log.debug("OS Name: " + context.getOsName());
+        log.debug("OS Version: " + context.getOsVersion());
 
     }
 
@@ -96,7 +96,7 @@ public class HostInfoCmd implements ICommand {
         if (result != null && result.size() > 0) {
             context.setBiosOem(result.get(0));
         }
-        log.info("Bios OEM: " + context.getBiosOem());
+        log.debug("Bios OEM: " + context.getBiosOem());
 
 
         result = CommandUtil.runCommand("dmidecode -s bios-version");
@@ -104,7 +104,7 @@ public class HostInfoCmd implements ICommand {
         if (result != null && result.size() > 0) {
             context.setBiosVersion(result.get(0));
         }
-        log.info("Bios Version: " + context.getBiosVersion());
+        log.debug("Bios Version: " + context.getBiosVersion());
 
 
     }
@@ -137,8 +137,8 @@ public class HostInfoCmd implements ICommand {
                     }
                 }
             }
-            log.info("VMM Name: " + context.getVmmName());
-            log.info("VMM Version: " + context.getVmmVersion());
+            log.debug("VMM Name: " + context.getVmmName());
+            log.debug("VMM Version: " + context.getVmmVersion());
 
         }
     }
@@ -173,9 +173,26 @@ public class HostInfoCmd implements ICommand {
                 }            
             }
             
-            log.info("Processor Information " + processorInfo);
+            log.debug("Processor Information " + processorInfo);
             context.setProcessorInfo(processorInfo);
-            log.info("Context is being set with processor info: " + context.getProcessorInfo());
+            log.debug("Context is being set with processor info: " + context.getProcessorInfo());
     }
-       
-    }
+    
+    /**
+     * Retrieves the host UUId information
+     * @throws TAexception
+     * @throws IOException
+     */
+      public void getHostUUID() throws TAException, IOException {
+          List<String> result = CommandUtil.runCommand("dmidecode -s system-uuid");
+          String hostUUID = "";
+          // sample output would look like UUID: 4235D571-8542-FFD3-5BFE-6D9DAC874C84
+          for(String entry: result) {
+              hostUUID = entry;
+          }
+          
+          context.setHostUUID(hostUUID);
+          log.info("Context set with host UUID info: " + context.getHostUUID());
+          
+      }
+}

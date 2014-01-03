@@ -5,6 +5,7 @@
 package com.intel.mtwilson.agent.citrix;
 
 
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.crypto.CryptographyException;
@@ -15,7 +16,8 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
+//import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.model.TpmQuote;
 import com.xensource.xenapi.Types.BadServerResponse;
 import com.xensource.xenapi.Types.XenAPIException;
@@ -34,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.xml.stream.XMLOutputFactory;
@@ -84,19 +87,6 @@ public class CitrixHostAgent implements HostAgent{
     @Override
     public X509Certificate getAikCertificate() {
         throw new UnsupportedOperationException("Not supported");
-        /*
-        X509Certificate cert = null;
-        try {
-            String crt = client.getAIKCertificate().replaceAll("\n", "").replaceAll("\r","");
-            System.out.println("decodeding pem == \n"+crt);
-             cert = X509Util.decodePemCertificate(crt);  
-             
-        }  catch(Exception ex){
-            System.out.println("getAikCert caught: " + ex.getMessage());
-            
-        }
-        return cert;
-        */
     }
 
     @Override
@@ -121,13 +111,14 @@ public class CitrixHostAgent implements HostAgent{
 
     @Override
     public TxtHostRecord getHostDetails() throws IOException {
+        long getHostInfoStart = System.currentTimeMillis();
         //throw new UnsupportedOperationException("Not supported yet.");
         TxtHostRecord record = new TxtHostRecord();
         HostInfo info = null;
         try {
             info = this.client.getHostInfo();
         } catch(Exception ex){
-            log.debug("getHostDetails getHostInfo caught: " + ex.getMessage());
+            log.error("getHostDetails getHostInfo caught: " + ex.getMessage());
             throw new IOException("Cannot get Citrix host info: "+ex.getMessage(), ex);
        }
         
@@ -143,13 +134,20 @@ public class CitrixHostAgent implements HostAgent{
         record.VMM_OSVersion = info.getOsVersion();
         record.AddOn_Connection_String = client.connectionString;
         record.Processor_Info = info.getProcessorInfo();
+        record.AIK_Certificate = null;
         
+        long getHostInfoStart2 = System.currentTimeMillis();
+        log.debug("CitrixClient: Time taken to get host information - " + (getHostInfoStart2 - getHostInfoStart) + " milliseconds");
+        // Nov 19, 1013: Since AIK Cert is not needed by functions that call getHostDetails and also there is a separate function to
+        // retrieve the AIK Cert, we will comment this out.
+        /*
         try {
             record.AIK_Certificate = client.getAIKCertificate();
         }  catch(Exception ex){
-            log.debug("getHostDetails getAikCert caught: " + ex.getMessage());
+            log.error("getHostDetails getAikCert caught: " + ex.getMessage());
        }
-        
+        long getHostInfoStart3 = System.currentTimeMillis();
+        log.debug("CitrixClient: Time taken to get AIK Cert - " + (getHostInfoStart3 - getHostInfoStart2) + " milliseconds");*/
         return record;
     }
     
@@ -164,6 +162,7 @@ public class CitrixHostAgent implements HostAgent{
      */
     @Override
     public String getHostAttestationReport(String pcrList) throws IOException {
+        long getAttReportStart1 = System.currentTimeMillis();
        String attestationReport = "";
         XMLOutputFactory xof = XMLOutputFactory.newInstance();
         XMLStreamWriter xtw;
@@ -178,7 +177,11 @@ public class CitrixHostAgent implements HostAgent{
             xtw.writeAttribute("HostVersion", "5.0");
             //xtw.writeAttribute("TXT_Support", tpmSupport.toString());
         
+            long getAttReportStart2 = System.currentTimeMillis();
+            log.debug("CitrixClient: before calling to get quote info - " + (getAttReportStart2 - getAttReportStart1) + " milliseconds");
             HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
+            long getAttReportStart3 = System.currentTimeMillis();
+            log.debug("CitrixClient: Time taken to get quote info - " + (getAttReportStart3 - getAttReportStart2) + " milliseconds");
             
             Iterator it = pcrMap.entrySet().iterator();
             while (it.hasNext()) {
@@ -196,13 +199,15 @@ public class CitrixHostAgent implements HostAgent{
             xtw.flush();
             xtw.close(); 
             attestationReport = sw.toString();
-        
+            long getAttReportStart4 = System.currentTimeMillis();
+            log.debug("CitrixClient: before sending the quote info - " + (getAttReportStart4 - getAttReportStart3) + " milliseconds");
+
         } catch (XMLStreamException ex) {
 //            Logger.getLogger(CitrixHostAgent.class.getName()).log(Level.SEVERE, null, ex);
             log.error("Cannot get host attestation report", ex);
         }
         
-        log.debug("getHostAttestationReport report:" + attestationReport);
+        log.debug("getHostAttestationReport report:" + attestationReport);       
         return attestationReport;
     }
 
@@ -248,7 +253,7 @@ BwIDAQAB
             pk = X509Util.decodePemPublicKey(crt);
             //client.getAIKCertificate().replace(X509Util.BEGIN_PUBLIC_KEY, "").replace(X509Util.END_PUBLIC_KEY, "").replaceAll("\n","").replaceAll("\r","");  
         }  catch(Exception ex){
-            log.debug("getAik caught: " + ex.getMessage()); 
+            log.error("getAik caught: " + ex.getMessage()); 
             
         }  
         return pk;
@@ -259,7 +264,7 @@ BwIDAQAB
         PcrManifest pcrManifest = new PcrManifest();
         String pcrList = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24";
          HashMap<String, Pcr> pcrMap = client.getQuoteInformationForHost(pcrList);
-         log.debug("CitrixHostAgent: getQuoteInformationForHost done");
+         log.info("CitrixHostAgent: getQuoteInformationForHost done");
          Iterator it = pcrMap.entrySet().iterator();
          while (it.hasNext()) {
                 Map.Entry pairs = (Map.Entry)it.next();
@@ -267,13 +272,37 @@ BwIDAQAB
                 pcrManifest.setPcr(new Pcr(PcrIndex.valueOf(Integer.parseInt(pcr.getIndex().toString())), new Sha1Digest(pcr.getValue().toString())));
                 //it.remove(); // avoids a ConcurrentModificationException
         }
-         log.debug("CitrixHostAgent: created PcrManifest");
+         log.info("CitrixHostAgent: created PcrManifest");
        return pcrManifest;
     }
 
     @Override
-    public Map<String, String> getHostAttributes() throws IOException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Map<String, String> getHostAttributes()  {
+        HashMap<String,String> hm = new HashMap<String, String>();
+        // Retrieve the data from the host and add it into the hashmap
+        HostInfo hostInfo = null;
+        try {
+            hostInfo = client.getHostInfo();
+        } catch (Exception ex) {
+            log.error("Unexpected error during retrieval of the host properties. Details : {}", ex.getMessage());
+        }
+        try {
+            // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+            hm.put("Host_UUID", client.getSystemUUID());
+        } catch(Exception ex){
+            throw new ASException(ex);
+        }
+        return hm;
     }
     
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        try {
+            client.setAssetTag(tag);
+        }
+        catch(Exception e) {
+            log.error("Unexpected error while setting asset tag", e);
+            throw new IOException(e);
+        }
+    }
 }

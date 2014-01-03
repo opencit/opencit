@@ -67,7 +67,7 @@ public class X509RequestVerifier {
             log.debug("Parsing authorization header: {}", authorizationHeader);
             Authorization a = parseAuthorization(authorizationHeader);
 
-            log.debug("X509CertificateAuthorization: Request timestamp ok");
+            log.info("X509CertificateAuthorization: Request timestamp ok");
             RsaSignatureInput signatureBlock = new RsaSignatureInput();
             
             signatureBlock.httpMethod = httpMethod;
@@ -116,7 +116,7 @@ public class X509RequestVerifier {
             
             
             if( userInfo == null ) { 
-                log.warn("X509CertificateAuthorization cannot find user with fingerprint: {} ", a.fingerprintBase64);
+                log.error("X509CertificateAuthorization cannot find user with fingerprint: {} ", a.fingerprintBase64);
                 return null;
             }
             
@@ -149,7 +149,7 @@ public class X509RequestVerifier {
             
 
             if( isValid ) {
-                log.debug("Request is authenticated");
+                log.info("Request is authenticated");
                 
                 // check if the request has expired by looking at the HTTP Date header... but only if it was signed.
                 if( signatureBlock.headers.containsKey("Date") ) {
@@ -181,7 +181,7 @@ public class X509RequestVerifier {
         catch (Exception e) {
             log.error("Unknown error while verifying signature", e);            
         }*/
-        log.debug("Request is NOT AUTHENTICATED");
+        log.error("Request is NOT AUTHENTICATED");
         return null;
     }
     

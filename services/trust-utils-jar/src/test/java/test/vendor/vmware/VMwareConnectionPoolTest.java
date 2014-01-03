@@ -7,16 +7,24 @@ package test.vendor.vmware;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
+import com.intel.mtwilson.agent.vmware.VMwareClient;
+import com.intel.mtwilson.agent.vmware.VMwareConnectionException;
+import com.intel.mtwilson.agent.vmware.VMwareConnectionPool;
+import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.tls.ArrayCertificateRepository;
 import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.mtwilson.tls.TlsConnection;
 import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.mtwilson.tls.TlsPolicyManager;
 import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
+import com.vmware.vim25.mo.ManagedEntity;
 import java.io.IOException;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -65,14 +73,35 @@ public class VMwareConnectionPoolTest {
     }
 
     @Test
-    public void testConnect() throws KeyManagementException, IOException {
-        HostAgent agent = getAgentWithDenyAllTlsPolicy(); //getAgentWithMyKeystore(); // getAgentWithEmptyKeystore();
-        PcrManifest pcrManifest = agent.getPcrManifest();
-        log.debug("Pcr manifest is valid? {}", pcrManifest.isValid());
-        List<X509Certificate> certs = repository.getCertificates();
-        for(X509Certificate cert : certs) {
-            log.debug("Certificate subject: {}", cert.getSubjectX500Principal().getName());
-        }
+    public void testConnect() throws KeyManagementException, IOException, VMwareConnectionException, Exception {
+        log.debug("Acquiring vmware connection pool...");
+        VMwareConnectionPool pool = new VMwareConnectionPool(new VmwareClientFactory());
+        String vmwareConnString = "https://10.1.71.162:443/sdk;Administrator;intel123!";
+        URL url = new URL(vmwareConnString);
+        log.debug("Acquiring vmware client...");
+        VMwareClient client = pool.getClientForConnection(new TlsConnection(url, TlsPolicyManager.getInstance()));
+        
+        List<String> datacenters = client.getDatacenterNames();
+        List<String> clusters = client.getClusterNamesWithDC();
+        
+        log.debug(clusters.get(0).substring(clusters.get(0).indexOf("] ") + 2));
+        log.debug(clusters.get(1).substring(clusters.get(1).indexOf("] ") + 2));
+        log.debug(clusters.get(2).substring(clusters.get(2).indexOf("] ") + 2));
+        
+        List<String> hosts0 = client.getHostNamesForCluster(clusters.get(1).substring(clusters.get(1).indexOf("] ") + 2));
+        
+        
+        
+        log.debug("All tasks complete.");
+        
+        //HostAgent agent = getAgentWithMyKeystore(); //getAgentWithEmptyKeystore(); //getAgentWithDenyAllTlsPolicy(); //
+        //PcrManifest pcrManifest = agent.getPcrManifest();
+        //log.debug("Pcr manifest is valid? {}", pcrManifest.isValid());
+        
+        //List<X509Certificate> certs = repository.getCertificates();
+        //for(X509Certificate cert : certs) {
+        //    log.debug("Certificate subject: {}", cert.getSubjectX500Principal().getName());
+        //}
     }
 
     @Test

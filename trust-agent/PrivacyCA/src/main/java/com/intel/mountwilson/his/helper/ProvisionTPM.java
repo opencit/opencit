@@ -23,11 +23,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 //import com.intel.mountwilson.as.common.ResourceFinder;
 import com.intel.mtwilson.util.ResourceFinder;
+import java.io.FileOutputStream;
+import java.security.SecureRandom;
+import org.apache.commons.codec.binary.Hex;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * <p>This is part 1 of 3 for fully provisioning HIS on a Windows client. This class does the initial provisioning of the TPM.</p>
@@ -52,7 +55,8 @@ import com.intel.mtwilson.util.ResourceFinder;
  */
 public class ProvisionTPM {
 
-	private static Logger log = Logger.getLogger(CreateIdentity.class.getName());
+	
+        private static Logger log = LoggerFactory.getLogger(ProvisionTPM.class);
 
 	/**
 	 * Entry point into the program
@@ -87,14 +91,31 @@ public class ProvisionTPM {
 			homeFolder = propFile.getAbsolutePath();
 			homeFolder = homeFolder.substring(0,homeFolder.indexOf("hisprovisioner.properties"));
 			
-			log.info("Home folder : " + homeFolder);
+			log.debug("Home folder : " + homeFolder);
 			
 			
 			TpmEndorsmentP12 = HisProvisionerProperties.getProperty(EC_P12_FILE, "");
 			
 			EndorsementP12Pass = HisProvisionerProperties.getProperty(EC_P12_PASSWORD, "");
 			EcValidityDays = Integer.parseInt(HisProvisionerProperties.getProperty(EC_VALIDITY, ""));
+            /* Bug #947 TpmOwnerAuth should be randomly generated locally and not read from a file we obtained from privacy ca
 			TpmOwnerAuth = TpmUtils.hexStringToByteArray(HisProvisionerProperties.getProperty(OWNER_AUTH, ""));
+            */
+            File tpmOwnerFile = ResourceFinder.getFile("trustagent.properties");
+            FileInputStream tpmOwnerFileInput = new FileInputStream(tpmOwnerFile);
+            Properties tpmOwnerProperties = new Properties();
+            tpmOwnerProperties.load(tpmOwnerFileInput);
+            tpmOwnerFileInput.close();
+            String tpmOwnerAuthHex = tpmOwnerProperties.getProperty(OWNER_AUTH);
+            if( tpmOwnerAuthHex == null || tpmOwnerAuthHex.trim().isEmpty() ) {
+                // tpm owner password is not set, so generate a new one and save it
+                tpmOwnerAuthHex = generateRandomPasswordHex();
+                tpmOwnerProperties.setProperty(OWNER_AUTH, tpmOwnerAuthHex);
+                FileOutputStream tpmOwnerFileOutput = new FileOutputStream(tpmOwnerFile);
+                tpmOwnerProperties.store(tpmOwnerFileOutput, "Generated TpmOwnerAuth");
+                tpmOwnerFileOutput.close();
+            }
+            TpmOwnerAuth = TpmUtils.hexStringToByteArray(tpmOwnerAuthHex);
 		} catch (FileNotFoundException e) {
 			throw new PrivacyCAException("Error finding HIS Provisioner properties file (HISprovisionier.properties)",e);
 		} catch (IOException e) {
@@ -107,7 +128,7 @@ public class ProvisionTPM {
 				try {
 					PropertyFile.close();
 				} catch (IOException e) {
-					log.log(Level.SEVERE,"Error while closing the property file ", e);
+					log.error("Error while closing the property file ", e);
 				}
 			}
 		}
@@ -141,7 +162,7 @@ public class ProvisionTPM {
 			if (cert != null)
 				TpmClient.provisionTpm(TpmOwnerAuth, TpmUtils.privKeyFromP12(homeFolder + TpmEndorsmentP12, EndorsementP12Pass), cert, EcValidityDays);
 			else
-				log.warning("Certificate was null. Skipping provisioning of TPM. ");
+				log.warn("Certificate was null. Skipping provisioning of TPM. ");
 			
 		}catch (TpmModule.TpmModuleException e){
 			throw new PrivacyCAException("Caught a TPM Module exception: " + e.toString());
@@ -151,4 +172,11 @@ public class ProvisionTPM {
 		log.info("DONE");
 	}
 
+    // fix for bug #947 generate random owner password instead of hardcoded default
+    public static String generateRandomPasswordHex() {
+        byte[] password = new byte[20];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(password);
+        return Hex.encodeHexString(password);
+    }
 }

@@ -43,9 +43,9 @@ public class ChallengeResponseDaaCmd implements ICommand {
 
             // read response and delete the response file
             context.setDaaResponse(CommandUtil.readfile(context.getDaaResponseFileName()));
-            log.info( "DAA Response read to memory - {}", context.getDaaResponseFileName());
+            log.debug( "DAA Response read to memory - {}", context.getDaaResponseFileName());
             FileUtil.delete(new File(context.getDaaResponseFileName()));
-            log.info("DAA Response file deleted - {}", context.getDaaResponseFileName());
+            log.debug("DAA Response file deleted - {}", context.getDaaResponseFileName());
             
         } catch (Exception e) {
             throw new TAException(ErrorCode.COMMAND_ERROR, "Error while preparing DAA challenge response: "+e.toString());

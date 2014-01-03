@@ -11,22 +11,25 @@ import com.intel.mtwilson.model.Nonce;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.mtwilson.model.TpmQuote;
-import com.vmware.vim25.ArrayOfHostCpuPackage;
-import com.vmware.vim25.HostCpuPackage;
 import com.vmware.vim25.HostRuntimeInfo;
 import com.vmware.vim25.HostTpmAttestationReport;
 import com.vmware.vim25.HostTpmDigestInfo;
-import com.vmware.vim25.InvalidPropertyFaultMsg;
+import com.vmware.vim25.InvalidProperty;
+import com.vmware.vim25.RuntimeFault;
+import java.rmi.RemoteException;
+//import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
+//import com.vmware.vim25.RuntimeFaultFaultMsg;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -66,7 +69,9 @@ public class VmwareHostAgent implements HostAgent {
         hostMOR = vmwareClient.getHostReference(hostname); // issue #784 using more efficient method of getting a reference to the host  //vmwareClient.getManagedObjectReference(hostname);
         vCenterVersion = vmwareClient.getVCenterVersion(); //serviceContent.getAbout().getVersion(); // required so we can choose implementations
         log.debug("VCenter version is {}", vCenterVersion);
-        esxVersion = vmwareClient.getMORProperty(hostMOR, "config.product.version").toString(); // required so we can choose implementations and report on host info
+        //esxVersion = vmwareClient.getMORProperty(hostMOR, "config.product.version").toString(); // required so we can choose implementations and report on host info
+        esxVersion = vmwareClient.getMEProperty(hostMOR.type, hostname, "config.product.version").toString();
+        log.debug("esxVersion: " + esxVersion);
     }
     
     public VMwareClient getClient() { return vmware; }
@@ -79,19 +84,21 @@ public class VmwareHostAgent implements HostAgent {
      */
     @Override
     public boolean isTpmPresent() {
-            try {
-                if( isTpmAvailable == null ) {
-                    isTpmAvailable = (Boolean)vmware.getMORProperty(hostMOR,
-                                "capability.tpmSupported");
-                }
-                return isTpmAvailable;
-            } catch (InvalidPropertyFaultMsg ex) {
-                log.error("VCenter host does not support 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
-                return false;
-            } catch (RuntimeFaultFaultMsg ex) {
-                log.error("Runtime fault while fetching 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
-                return false;
+        try {
+            if (isTpmAvailable == null) {
+                isTpmAvailable = (Boolean) vmware.getMEProperty(hostMOR.type, hostname, "capability.tpmSupported");
             }
+            return isTpmAvailable;
+        } catch (InvalidProperty ex) {
+            log.error("VCenter host does not support 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
+            return false;
+        } catch (RuntimeFault ex) {
+            log.error("Runtime fault while fetching 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
+            return false;
+        } catch (RemoteException ex) {
+            log.error("Runtime fault while fetching 'capability.tpmSupported' property: {}", ex.getLocalizedMessage());
+            return false;
+        }
     }
 
     @Override
@@ -249,9 +256,9 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 					HostTpmAttestationReport report = vmware.getAttestationReport(hostMOR);
 //                                        if(hostId != null)
 //                                            auditAttestionReport(hostId,report); // XXX TODO  auditing api should not be logging FROM HERE, it should be logging from attestation service, which also knows the database record ID of the host;   we will just add a vmware-specific method to get the original report in xml and maybe there can be something in the HostAgent interface to accomodate this.
-					log.debug("Retrieved HostTpmAttestationReport.");
+					log.info("Retrieved HostTpmAttestationReport.");
 //                                        vendorHostReport = toXml(HostTpmAttestationReport.class, report);
-					log.debug("Parsed HostTpmAttestationReport.");
+					log.info("Parsed HostTpmAttestationReport.");
 //					manifestMap = postProcessing.processReport(esxVersion,report);
                     if(esxVersion.contains("5.1")) {
                         pcrManifest = VMWare51Esxi51.createPcrManifest(report);
@@ -262,11 +269,11 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
                     }
 				}else{ // XXX TODO should check if it's 5.0 ... because what if it's 5.2 ??? then we need to run code ABOVE
 					
-					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMORProperty(hostMOR, "runtime");
+					HostRuntimeInfo runtimeInfo = (HostRuntimeInfo) vmware.getMEProperty(hostMOR.type, hostname, "runtime");
 //                                        vendorHostReport = toXml(HostRuntimeInfo.class, runtimeInfo);
 					// Now process the digest information
-					List<HostTpmDigestInfo> htdis = runtimeInfo.getTpmPcrValues();
-					log.debug("Retreived HostTpmDigestInfo.");
+					List<HostTpmDigestInfo> htdis = Arrays.asList(runtimeInfo.getTpmPcrValues());
+					log.info("Retreived HostTpmDigestInfo.");
                     // ESX 5.0 did not support module measurement so we return only the PCR's
                     pcrManifest = VMWare50Esxi50.createPcrManifest(htdis); // bug #607 new
 //					pcrManifest =  postProcessing.processDigest(esxVersion,htdis);
@@ -274,7 +281,7 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 //            }        
         }
         catch(Exception e) {
-            log.error("error during getManifest: "+e.toString(), e);
+            log.warn("error during getManifest: "+e.toString(), e);
             boolean isTpmPresent = false;
             try {
                 if( isTpmPresent() ) {
@@ -298,37 +305,16 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
     public TxtHostRecord getHostDetails() throws IOException {
         try {
             TxtHostRecord host = new TxtHostRecord();
-            host.HostName = vmware.getMORProperty(hostMOR, "name").toString();
+            host.HostName = vmware.getMEProperty(hostMOR.type, hostname, "name").toString();
             // hostObj.Description = serviceContent.getAbout().getVersion();
-            host.VMM_Name = vmware.getMORProperty(hostMOR, "config.product.name").toString(); // XXX TODO vmware doesn't return a separate hypervisor name... so for now using same as os name which is "Vmware ESXi"
-            host.VMM_OSName = vmware.getMORProperty(hostMOR, "config.product.name").toString();
-            host.VMM_OSVersion = vmware.getMORProperty(hostMOR, "config.product.version").toString();
-            host.VMM_Version = vmware.getMORProperty(hostMOR, "config.product.build").toString();
-            host.BIOS_Oem = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString();
-            host.BIOS_Name = vmware.getMORProperty(hostMOR, "hardware.systemInfo.vendor").toString(); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
-            host.BIOS_Version = vmware.getMORProperty(hostMOR, "hardware.biosInfo.biosVersion").toString();
-            host.Processor_Info = "";
+            host.VMM_Name = vmware.getMEProperty(hostMOR.type, hostname, "config.product.name").toString(); // XXX TODO vmware doesn't return a separate hypervisor name... so for now using same as os name which is "Vmware ESXi"
+            host.VMM_OSName = vmware.getMEProperty(hostMOR.type, hostname, "config.product.name").toString();
+            host.VMM_OSVersion = vmware.getMEProperty(hostMOR.type, hostname, "config.product.version").toString();
+            host.VMM_Version = vmware.getMEProperty(hostMOR.type, hostname, "config.product.build").toString();
+            host.BIOS_Oem = vmware.getMEProperty(hostMOR.type, hostname, "hardware.systemInfo.vendor").toString();
+            host.BIOS_Name = vmware.getMEProperty(hostMOR.type, hostname, "hardware.systemInfo.vendor").toString(); // XXX TODO we don't get bios name from the host systems... so why do we even have this field?  for now using bios oem/vendor as the bios name.
+            host.BIOS_Version = vmware.getMEProperty(hostMOR.type, hostname, "hardware.biosInfo.biosVersion").toString();
             
-            log.debug("About to retrieve the EAX contents for {}.", host.HostName);
-            // Bug : 933
-            // In order to retrieve the platform name we first need to get the CPU ID, for which we need to get the EAX register contents
-            ArrayOfHostCpuPackage  hcps = (ArrayOfHostCpuPackage) vmware.getMORProperty(hostMOR, "hardware.cpuPkg");
-            if (hcps != null) {
-                HostCpuPackage hcptemp = (HostCpuPackage) hcps.getHostCpuPackage().get(0);
-                String eaxContents = hcptemp.getCpuFeature().get(1).getEax();
-                log.debug("EAX Register contents for {} is {}.", host.HostName, eaxContents);
-                // Now that we got the EAX register contents, lets convert it to HEX value, since CPU ID is stored as HEX value in the DB
-                String cpuIDInHex = "";
-                // EAX String would have a format shown below
-                // 0000:0000:0000:0010:0000:0110:1100:0010
-                String[] split = eaxContents.split(":");
-                for (int i =0; i < split.length; i+=2){
-                   cpuIDInHex = (Integer.toHexString(Integer.valueOf(split[i], 2)) + Integer.toHexString(Integer.valueOf(split[i+1], 2))) + " " + cpuIDInHex;
-                }
-                cpuIDInHex = cpuIDInHex.substring(0, 8).toUpperCase().trim();       
-                log.debug("CPU ID for {} is {}.", host.HostName, cpuIDInHex);
-                host.Processor_Info = cpuIDInHex;
-            }
             /*
             // Possible values for this processor Info includes. So, if there is a "-", we are assuming that it is either a Sandy Bridge or a IVY bridge system
             // For others starting with X56, they are Westmere systems belonging to Thurley platform
@@ -344,19 +330,17 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
             // There is one more attribute in the vCenter that actually provides the processor name directly unlike the open source hosts where we
             // need to do the mapping
             // Possible values include: "intel-westmere", "intel-sandybridge"
-            // Bug: 933 Since on some hosts we have seen this value to be unset, we will use the EAX register values to get the CPU ID and use
-            // the mapping table to get the platform name.
-             /*String processorInfo = vmware.getMORProperty(hostMOR, "summary.maxEVCModeKey").toString().toLowerCase();
+             String processorInfo = vmware.getMEProperty(hostMOR.type, hostname, "summary.maxEVCModeKey").toString().toLowerCase();
              if (processorInfo.contains("intel")) {
                  processorInfo = processorInfo.substring( "intel".length()+1);
              }
-            host.Processor_Info = processorInfo.substring(0, 1).toUpperCase() + processorInfo.substring(1);*/
+            host.Processor_Info = processorInfo.substring(0, 1).toUpperCase() + processorInfo.substring(1);
             
             return host;
-        } catch (InvalidPropertyFaultMsg ex) {
+        } catch (InvalidProperty ex) {
             log.error("VCenter host does not support host details property: {}", ex.getLocalizedMessage());
             throw new IOException(ex);
-        } catch (RuntimeFaultFaultMsg ex) {
+        } catch (RuntimeFault ex) {
             log.error("Runtime fault while fetching host details: {}", ex.getLocalizedMessage());
             throw new IOException(ex);
         }
@@ -396,6 +380,20 @@ Caused by: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialCo
 
     @Override
     public Map<String, String> getHostAttributes() throws IOException {
-         return new HashMap<String,String>();
+        HashMap<String,String> hm = new HashMap<String, String>();
+        String hostUUID = "";
+
+            // Retrieve the data from the host and add it into the hashmap
+            // Currently we are just adding the UUID of th host. Going ahead we can add additional details
+            hostUUID = vmware.getMEProperty("HostSystem", hostname,"hardware.systemInfo.uuid").toString();
+
+        hm.put("Host_UUID", hostUUID);
+        return hm;
    }
+    
+    @Override
+    public void setAssetTag(com.intel.dcsg.cpg.crypto.Sha1Digest tag) throws IOException {
+        throw new UnsupportedOperationException("Unsupported operation");
+    }
+    
 }

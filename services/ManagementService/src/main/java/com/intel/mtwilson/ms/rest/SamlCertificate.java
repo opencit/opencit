@@ -79,14 +79,14 @@ public class SamlCertificate {
 //            X509Certificate cert = X509Util.decodeDerCertificate(certificate);
             X509Certificate cert = X509Util.decodePemCertificate(certificate); // XXX assuming only one, should assume multiple and decide whetehr to sign first (end-subject) or last (root ca). 
             
-            log.debug("Read certificate successfully");
+            log.info("Read certificate successfully");
 
             return cert.getEncoded();
         } catch (CertificateException e) {
-            throw new MSException(ErrorCode.MS_BAD_CERTIFICATE_FILE, e);
+            throw new MSException(ErrorCode.MS_BAD_CERTIFICATE_FILE, ErrorCode.MS_BAD_CERTIFICATE_FILE.getMessage(), e);
 
         } catch (IOException e) {
-            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, e);
+            throw new MSException(ErrorCode.MS_MISSING_CERTIFICATE_FILE, ErrorCode.MS_MISSING_CERTIFICATE_FILE.getMessage(), e);
         }
 
     }

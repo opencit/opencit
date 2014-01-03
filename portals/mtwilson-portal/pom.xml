@@ -12,15 +12,18 @@
     </parent>
 
     <dependencies>
-	<dependency>
-		<groupId>com.intel.dcsg.cpg</groupId>
-		<artifactId>cpg-crypto</artifactId>
-		<version>0.1.4-SNAPSHOT</version>
-	</dependency>
+	   
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>8.2-507.jdbc4</version>
+        </dependency>
+       <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.27</version>
+            <scope>runtime</scope>
+            <!-- XXX TODO LEGAL   must mark as test only  before release ... it is not authorized for distribution  <scope>test</scope>  -->
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -37,6 +40,7 @@
             <groupId>org.glassfish</groupId>
             <artifactId>javax.servlet</artifactId>
             <version>3.1.1</version>
+            <scope>provided</scope>
         </dependency>
 	<dependency>
 		  <groupId>com.intel.mtwilson.services</groupId>
@@ -72,6 +76,12 @@
             <artifactId>jackson-core-asl</artifactId>
             <version>1.9.11</version>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.9.11</version>
+        </dependency>
+        
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -129,12 +139,6 @@
                 <artifactId>my</artifactId>
                 <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.8.3</version>
-            <type>jar</type>
-        </dependency>
         
 
         <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->
@@ -154,6 +158,16 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.1.5-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-authz-token</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -162,6 +176,9 @@
    
     <build>
 	<plugins>
+        
+        
+        
 	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

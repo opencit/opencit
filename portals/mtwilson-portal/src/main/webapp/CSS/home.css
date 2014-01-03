@@ -678,14 +678,14 @@ text-align: center;
 	border: 1px solid #3A4F63;
 }
 
-.requiredField{
+/*.requiredField{
 	color: red;
 	float: left;
 	font-size: small;
 	margin-left: 4px;
         display:inline-block;
 	width:10px;
-}
+}*/
 
 #moduleTypeAttestationMez{
 	font-size: 12px;

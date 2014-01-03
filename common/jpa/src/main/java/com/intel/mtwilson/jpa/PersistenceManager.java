@@ -72,7 +72,7 @@ public abstract class PersistenceManager implements ServletContextListener {
     public EntityManagerFactory getEntityManagerFactory(String persistenceUnitName) {
         log.debug("PersistenceManager is configured with {} factories in getEntityManagerFactory", factories.keySet().size());
         if( factories.keySet().isEmpty() ) {
-            log.debug("PersistenceManager factories is empty, calling configure()");
+            log.info("PersistenceManager factories is empty, calling configure()");
             configure();
             for(String factoryName : factories.keySet()) {
                 EntityManagerFactory factory = factories.get(factoryName);
@@ -116,7 +116,7 @@ public abstract class PersistenceManager implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        log.debug("PersistenceManager initialized");
+        log.info("PersistenceManager initialized");
         
         // XXX can we get persistence unit names from web.xml to simplify configuration?
         Enumeration<String> attrs = sce.getServletContext().getAttributeNames();
@@ -225,19 +225,19 @@ public abstract class PersistenceManager implements ServletContextListener {
                 if( provider.getClass().getName().equals(persistenceUnitInfo.getPersistenceProviderClassName()) ) {
                     emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
                     if( emf != null ) {
-                        log.debug("Found requested persistence provider");
+                        log.info("Found requested persistence provider");
                         return emf;
                     }
                 }
             }
         }
         // check if any other provider can accomodate the persistence unit
-        log.debug("Looking for any compatible JPA provider");
+        log.info("Looking for any compatible JPA provider");
         for (PersistenceProvider provider : providers) {
             log.debug("Looking at provider: {}", provider.getClass().getName());
             emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, persistenceUnitInfo.getProperties()); // important: must use the properties as returned by the persistenceUnitInfo because it may have altered them... specifically:  remove user and password entries after creating datasource to force eclipselink to call getConnection() instead of getConnection(user,password)
             if (emf != null) {
-                log.debug("Found compatible persistence provider");
+                log.info("Found compatible persistence provider");
                 return emf;
             }
         }

@@ -84,7 +84,7 @@
 					<input type="image" onclick="showDialogManifestList()" src="images/helpicon.png">
 				</div>
 				<table>
-					<tr>
+                                    <!-- <tr>
 						<td><span>17</span></td>
 						<td><input type="checkbox" onclick="fnToggelRegisterValue(checked,'MainContent_tb17')" id="MainContent_check17"/></td>
 						<td><input type="text" class="textBox_Border" disabled="disabled" title="Please enter the good known manifest value in HEX format. Ex:BFC3FFD7940E9281A3EBFDFA4E0412869A3F55D8" id="MainContent_tb17"></td>
@@ -94,7 +94,7 @@
 							<input type="button" class="uploadButton" value="Upload" onclick="fnUploadManifestFile()">
 							<input style="float: right;" type="image" onclick="showDialogUploadFile();return false;" src="images/helpicon.png">
 							</form></td>
-					</tr>
+					</tr> -->
 					<tr>
 						<td><span>18</span></td>
 						<td><input type="checkbox" onclick="fnToggelRegisterValue(checked,'MainContent_tb18')" id="MainContent_check18"/></td>
@@ -119,7 +119,7 @@
 			<div id="uploadGkvs" class="singleDiv" style="display: none;">
 					<div class="labelDiv">Required Manifests :</div>
 					<div class="valueDiv" id="gkvs_register_checkbox">
-						<input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span>
+						<!-- <input type="checkbox" id="MainContent_check_gkvs17" name="17"><span>17</span> -->
 						<input type="checkbox" id="MainContent_check_gkvs18" name="18"><span>18</span>
 						<input type="checkbox" id="MainContent_check_gkvs19" name="19"><span>19</span>
 						<input type="checkbox" id="MainContent_check_gkvs20" name="20"><span>20</span>

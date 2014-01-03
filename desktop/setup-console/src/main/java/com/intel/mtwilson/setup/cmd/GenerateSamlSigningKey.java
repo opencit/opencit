@@ -107,7 +107,7 @@ public class GenerateSamlSigningKey implements Command {
         if( samlKeyAlias == null ) {
             samlKeyAlias = "samlkey1";
             conf.setProperty(SAML_KEY_ALIAS_CONF_KEY, samlKeyAlias);
-            log.info("Using default SAML Key Alias: {}", samlKeyAlias);
+            log.debug("Using default SAML Key Alias: {}", samlKeyAlias);
         }
         samlKeyPassword = conf.getString(SAML_KEY_PASSWORD_CONF_KEY); 
         if( samlKeyPassword == null ) {

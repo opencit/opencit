@@ -53,6 +53,7 @@ import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import java.util.List;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
+import com.intel.mtwilson.util.ValidationUtil;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -98,6 +99,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addMle(MleData mleData) {
+        ValidationUtil.validate(mleData);
         return mleBO.addMLe(mleData);
     }
 
@@ -120,6 +122,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMle(MleData mleData) {
+        ValidationUtil.validate(mleData);
         return mleBO.updateMle(mleData);
     }
 
@@ -152,6 +155,7 @@ public class Mle {
 //    @Consumes(MediaType.TEXT_HTML)
     @Produces(MediaType.APPLICATION_JSON)
     public List<MleData> queryForMLE(@QueryParam("searchCriteria") String searchCriteria) {
+        ValidationUtil.validate(searchCriteria);
         return mleBO.listMles(searchCriteria);
     }
 
@@ -177,6 +181,13 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+        
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.findMle(mleName, mleVersion, osName, osVersion, oemName);
     }
 
@@ -203,6 +214,13 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+        
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.deleteMle(mleName, mleVersion,osName, osVersion, oemName);
     }
     
@@ -220,6 +238,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addPCRWhiteList(PCRWhiteList pcrData) {
+        ValidationUtil.validate(pcrData);
         return mleBO.addPCRWhiteList(pcrData);
     }
 
@@ -237,6 +256,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updatePCRWhiteList(PCRWhiteList pcrData) {
+        ValidationUtil.validate(pcrData);
         return mleBO.updatePCRWhiteList(pcrData);
     }
     
@@ -266,6 +286,14 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+        
+        ValidationUtil.validate(pcrName);
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName);
     }
 
@@ -283,6 +311,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addModuleWhiteList(ModuleWhiteList moduleData) {
+        ValidationUtil.validate(moduleData);
         return mleBO.addModuleWhiteList(moduleData);
     }
 
@@ -300,6 +329,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateModuleWhiteList(ModuleWhiteList moduleData) {
+        ValidationUtil.validate(moduleData);
         return mleBO.updateModuleWhiteList(moduleData);
     }
 
@@ -331,6 +361,15 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+        
+        ValidationUtil.validate(componentName);
+        ValidationUtil.validate(eventName);
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.deleteModuleWhiteList(componentName, eventName, mleName, mleVersion, osName, osVersion, oemName);
     }
 
@@ -358,6 +397,13 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+        
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.getModuleWhiteList(mleName, mleVersion, osName, osVersion, oemName);
     }
 
@@ -367,6 +413,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addMleSource(MleSource mleSourceObj) {
+        ValidationUtil.validate(mleSourceObj);
         return mleBO.addMleSource(mleSourceObj);
     }
 
@@ -376,6 +423,7 @@ public class Mle {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMleSource(MleSource mleSourceObj) {
+        ValidationUtil.validate(mleSourceObj);
         return mleBO.updateMleSource(mleSourceObj);
     }
 
@@ -389,6 +437,13 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+        
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
     }
 
@@ -402,6 +457,13 @@ public class Mle {
             @QueryParam("osName") String osName,
             @QueryParam("osVersion") String osVersion,
             @QueryParam("oemName") String oemName) {
+
+        ValidationUtil.validate(mleName);
+        ValidationUtil.validate(mleVersion);
+        ValidationUtil.validate(osName);
+        ValidationUtil.validate(osVersion);
+        ValidationUtil.validate(oemName);
+        
         return mleBO.getMleSource(mleName, mleVersion, osName, osVersion, oemName);
     }
     

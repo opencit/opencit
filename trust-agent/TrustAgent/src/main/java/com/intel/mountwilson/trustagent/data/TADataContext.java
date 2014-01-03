@@ -9,6 +9,10 @@ import java.io.File;
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.HisConfig;
+import com.intel.mtwilson.util.ResourceFinder;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
@@ -18,7 +22,7 @@ public class TADataContext {
 
     private ErrorCode errorCode = ErrorCode.OK;
     private String selectedPCRs = null;
-    private String nonce;
+    private String nonceBase64;
     private String AIKCertificate = null;
     private byte[] tpmQuote = null;
     private String responseXML = null;
@@ -32,8 +36,9 @@ public class TADataContext {
     private String vmmVersion;
     private String modulesStr;
     private String processorInfo;
+    private String hostUUID;
+    private String ipaddress;  // localhost ip address
     
-
     public String getBiosOem() {
         return biosOem;
     }
@@ -91,13 +96,32 @@ public class TADataContext {
     }
 
     public String getNonce() {
-        return nonce;
+        return nonceBase64;
     }
 
     public void setNonce(String nonce) {
-        this.nonce = nonce;
+        this.nonceBase64 = nonce;
     }
 
+    // issue #1038 prevent trust agent relay by default; customer can turn this off in configuration file by setting  mtwilson.tpm.quote.ipv4=false
+    public boolean isQuoteWithIPAddress() {
+        String enabled = Config.getInstance().getProperty("mtwilson.tpm.quote.ipv4");
+        if( enabled == null || "true".equalsIgnoreCase(enabled) || "enabled".equalsIgnoreCase(enabled) ) {
+            return true;
+        }
+        return false;
+    }
+
+    public String getIPAddress() {
+        return ipaddress;
+    }
+
+    // set by TrustAgent when it initializes the context for this request
+    public void setIPAddress(String ipaddress) {
+        this.ipaddress = ipaddress;
+    }
+
+    
     public String getQuoteFileName() {
         return getDataFolder() + Config.getInstance().getProperty("aikquote.filename");
     }
@@ -166,9 +190,18 @@ public class TADataContext {
         this.errorCode = errorCode;
     }
 
-    public Object getIdentityAuthKey() {
-
-        return HisConfig.getConfiguration().getString("HisIdentityAuth");
+    public String getIdentityAuthKey() {
+        try {
+            File aikAuthFile = ResourceFinder.getFile("trustagent.properties");
+            FileInputStream aikAuthFileInput = new FileInputStream(aikAuthFile);
+            Properties tpmOwnerProperties = new Properties();
+            tpmOwnerProperties.load(aikAuthFileInput);
+            aikAuthFileInput.close();
+            return tpmOwnerProperties.getProperty("HisIdentityAuth");
+        }
+        catch(IOException e) {
+            throw new IllegalStateException("Cannot read trustagent.properties", e);
+        }
     }
 
     public void setOsName(String osName) {
@@ -215,4 +248,11 @@ public class TADataContext {
         this.processorInfo = processorInfo;
     }
         
+    public String getHostUUID() {
+     return hostUUID;
+    }
+    public void setHostUUID(String hostUUID) {
+        this.hostUUID = hostUUID;
+    }
+    
 }

@@ -78,7 +78,7 @@ public class TrustKnownCertificateTlsPolicy implements TlsPolicy, ApacheTlsPolic
                         return; // XXX TODO   we need to check the entire chain... we can't just accept any ca  , we need t omake sure tehre is a PATH from the server cert to the trusted cert.
                     }
                     catch(Exception e) {
-                        log.trace("TrustKnownCertificateTlsPolicy checkServerTrusted cert was not valid. checking next cert");
+                        log.warn("TrustKnownCertificateTlsPolicy checkServerTrusted cert was not valid. checking next cert");
                         // don't rethrow because we need to check the rest of the certs
                     }
                 }

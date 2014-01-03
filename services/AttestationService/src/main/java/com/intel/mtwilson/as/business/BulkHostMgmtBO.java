@@ -95,7 +95,10 @@ public class BulkHostMgmtBO {
 
             return hostResponses;
         } catch (Exception ex) {
-            throw new ASException(ex);
+            // throw new ASException(ex);
+            // Bug: 1038 - prevent leaks in error messages to client
+            log.error("Error during bulk host registration.", ex);
+            throw new ASException(ErrorCode.AS_BULK_REGISTER_HOST_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -122,15 +125,17 @@ public class BulkHostMgmtBO {
             }
             try {
                 if (!updateHost)
-                    result = dao.addHost(new TxtHost(hostObj));
+                    result = dao.addHostByFindingMLE(hostObj);
                 else
-                    result = dao.updateHost(new TxtHost(hostObj));
+                    result = dao.updateHostByFindingMLE(hostObj);
             } catch (ASException e) {
                 isError = true;
-                result = new HostResponse(e);
+                result = new HostResponse();
+                result.setErrorCode(e.getErrorCode().toString());
+                result.setErrorMessage(e.getErrorMessage());
             } catch (Exception e) {
                 isError = true;
-                result = new HostResponse(ErrorCode.SYSTEM_ERROR, e.getLocalizedMessage());
+                result = new HostResponse(ErrorCode.AS_REGISTER_HOST_ERROR, String.format(ErrorCode.AS_REGISTER_HOST_ERROR.getMessage(), e.getClass().getSimpleName()));
             }
         }
 

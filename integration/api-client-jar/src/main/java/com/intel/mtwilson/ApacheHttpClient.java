@@ -3,7 +3,6 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
-import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
@@ -20,7 +19,6 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
-import java.util.Locale;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
@@ -66,7 +64,6 @@ public class ApacheHttpClient implements java.io.Closeable {
     private int port = 443;
 //    private boolean requireTrustedCertificate = true;
 //    private boolean verifyHostname = true;
-    private Locale locale = Locale.getDefault();
     
     private ApacheHttpAuthorization authority = null; // can be any implementation - Hmac256 or RSA
     protected static final ObjectMapper mapper = new ObjectMapper();
@@ -100,7 +97,7 @@ public class ApacheHttpClient implements java.io.Closeable {
 
         if( config == null ) {
             config = new SystemConfiguration();
-            log.debug("ApacheHttpClient: using system configuration");
+            log.info("ApacheHttpClient: using system configuration");
         }
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
@@ -167,18 +164,18 @@ public class ApacheHttpClient implements java.io.Closeable {
             boolean requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
             if( requireTrustedCertificate && verifyHostname ) {
-                log.warn("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
+                log.info("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
                 return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
             }
             else if( requireTrustedCertificate && !verifyHostname ) {
                 // two choices: trust first certificate or trust known certificate;  we choose trust first certificate as a usability default
                 // furthermore we assume that the api client keystore is a server-specific keystore (it's a client configured for a specific mt wilson server)
                 // that either has a server instance ssl cert or a cluster ssl cert.  either should work.
-                log.warn("Using TLS Policy TRUST_FIRST_CERTIFICATE");
+                log.info("Using TLS Policy TRUST_FIRST_CERTIFICATE");
                 return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
             }
             else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
-                log.warn("Using TLS Policy INSECURE");
+                log.info("Using TLS Policy INSECURE");
                 return new InsecureTlsPolicy();
             }
         }
@@ -200,7 +197,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         else {
             // unrecognized 1.1 policy defined, so use a secure default
-            log.error("Unknown TLS Policy Name: {}", tlsPolicyName);
+            log.warn("Unknown TLS Policy Name: {}", tlsPolicyName);
             return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
         }
     }
@@ -346,10 +343,10 @@ public class ApacheHttpClient implements java.io.Closeable {
             if( "application/octet-stream".equals(contentType) ) {
                 return MediaType.APPLICATION_OCTET_STREAM_TYPE;
             }
-            log.error("Got unsupported content type from server: "+contentType);
+            log.warn("Got unsupported content type from server: "+contentType);
             return MediaType.APPLICATION_OCTET_STREAM_TYPE;
         }
-        log.error("Missing content type header from server, assuming application/octet-stream");
+        log.warn("Missing content type header from server, assuming application/octet-stream");
         return MediaType.APPLICATION_OCTET_STREAM_TYPE;
     }
     
@@ -371,20 +368,12 @@ public class ApacheHttpClient implements java.io.Closeable {
         return new ApiResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), contentType, content);
     }
     
-    
-    public void setLocale(Locale locale) {
-        if( locale != null ) {
-            this.locale = locale;
-        }
-    }
-    
     public ApiResponse get(String requestURL) throws IOException, ApiException, SignatureException {
         //log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         // send the request and print the response
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
@@ -398,7 +387,6 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         // send the request and print the response
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
@@ -416,7 +404,6 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();
@@ -434,7 +421,6 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
-        request.setHeader("Accept-Language", LocaleUtil.toLanguageTag(locale)); // locale.toLanguageTag() only available in Java 7
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();

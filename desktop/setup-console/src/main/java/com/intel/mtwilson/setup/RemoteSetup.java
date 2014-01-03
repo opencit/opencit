@@ -747,7 +747,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         
         ctx.managementServiceKeystoreDir = msprops.getProperty("mtwilson.ms.keystore.dir");
 
-        ctx.biosPCRs = msprops.getProperty("mtwilson.ms.biosPCRs", "0");
+        ctx.biosPCRs = msprops.getProperty("mtwilson.ms.biosPCRs", "0;17");
         ctx.vmmPCRs = msprops.getProperty("mtwilson.ms.vmmPCRs", "18;19;20");
         
         ctx.samlCertificateFile = msprops.getProperty("mtwilson.saml.certificate.file", mwprops.getProperty("mtwilson.saml.certificate.file") ); // dropping support for   mtwilson.saml.certificate (DER format) that was in management-service.properties

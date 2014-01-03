@@ -11,8 +11,11 @@ import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.his.helper.CreateIdentity;
 import com.intel.mountwilson.trustagent.data.TADataContext;
 import java.io.File;
+import java.util.Properties;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Properties;
 
 /**
  *
@@ -24,6 +27,8 @@ public class CreateIdentityCmd implements ICommand {
     private TADataContext context;
 
     public static void main(String[] args) throws TAException {
+        //619 allow keystore password to be specificed as a env variable
+        CommandUtil.initJavaSslProperties();
         TADataContext ctx = new TADataContext();
         CreateIdentityCmd cmd = new CreateIdentityCmd(ctx);
         cmd.execute();
@@ -40,21 +45,26 @@ public class CreateIdentityCmd implements ICommand {
             // Let us first check if the AIK is already created or not. If it already exists, then we do not need to create the AIK again.
             File aikCertFile = new File(context.getAikCertFileName());
             if (aikCertFile.exists()) {
-                log.info("AIK Certificate already exists at ", context.getAikCertFileName());
+                log.debug("AIK Certificate already exists at ", context.getAikCertFileName());
                 log.info("New AIK certificate will not be created.");
             } else {
                 // this will create the AIK in the configured folder
-                CreateIdentity.createIdentity();
+                Properties configuration = new Properties();
+                configuration.setProperty("aikcert.filename", context.getAikCertFileName());
+                configuration.setProperty("aikblob.filename", context.getAikBlobFileName());
+                CreateIdentity.createIdentity(configuration);
 
             }
 
             context.setAIKCertificate(CommandUtil.readCertificate(context.getAikCertFileName()));
 
-            log.info("AIK Certificate Read to memory - {}", context.getAikCertFileName());
+            log.debug("AIK Certificate Read to memory - {}", context.getAikCertFileName());
 
-        } catch (Exception e) {
-
-            throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", e);
+        } 
+        
+        catch (Exception e) {
+            throw new TAException(ErrorCode.COMMAND_ERROR, e.toString(), e);
+            //throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity.", ex);
         }
     }
 }

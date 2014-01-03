@@ -44,6 +44,9 @@ function sendJSONAjaxRequest(isGet, url, requestData, callbackSuccessFunction, c
 		url:url,
 		data: requestData,
 		dataType: "json",
+        headers: {
+            "AuthorizationToken": authorizationToken // part of fix for issue #1038, see commonUtils.js
+        },
 		success: function (responseJSON) {
 			if(responseJSON == null){
 				fnSessionExpireLoginAgain();

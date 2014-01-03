@@ -60,5 +60,11 @@
 	    <artifactId>mtwilson-jpa</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
+    <dependency>
+      <groupId>com.intel.mtwilson.common</groupId>
+      <artifactId>mtwilson-io</artifactId>
+      <version>${project.version}</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
 </project>

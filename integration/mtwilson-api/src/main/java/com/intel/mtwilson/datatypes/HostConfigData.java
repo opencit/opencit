@@ -1,5 +1,6 @@
 package com.intel.mtwilson.datatypes;
 
+import com.intel.dcsg.cpg.validation.Regex;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class HostConfigData {
@@ -14,6 +15,7 @@ public class HostConfigData {
     private boolean registerHost; 
     private HostVMMType hostVmmType;
     private TxtHostRecord txtHostRecord;
+    private boolean overWriteWhiteList;
 
     // By default we will use the OEM as the white list target for both BIOS and VMM.
     public HostConfigData() {
@@ -27,6 +29,7 @@ public class HostConfigData {
         this.registerHost = false;
         this.hostVmmType = null;
         this.txtHostRecord = null;
+        this.overWriteWhiteList = false;
     }
     
     @JsonProperty("Host_VMM_Type")
@@ -129,7 +132,18 @@ public class HostConfigData {
         this.registerHost = registerHost;
     }
     
+    @JsonProperty("Overwrite_Whitelist")
+    public boolean getOverWriteWhiteList() {
+        return overWriteWhiteList;
+    }
+
+    @JsonProperty("Overwrite_Whitelist")
+    public void setOverWriteWhiteList(boolean overWriteWhiteList) {
+        this.overWriteWhiteList = overWriteWhiteList;
+    }
+
     @Override
+    @Regex(RegExAnnotation.ANY_VALUE)
     public String toString() {
         return "WhiteListConfig [biosWhiteList=" + biosWhiteList
                     + ", vmmWhiteList=" + vmmWhiteList + ", biosWLTarget="

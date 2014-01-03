@@ -14,6 +14,7 @@ import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
+import com.intel.mtwilson.util.ValidationUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,12 +64,14 @@ public class BulkHostTrust {
                 @QueryParam("force_verify") @DefaultValue("false") Boolean forceVerify,
                 //                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                 @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
+            
+                ValidationUtil.validate(hosts);
                 Integer myTimeOut = timeout;
                 // if no timeout value is passed to function, check config for default, 
                 // if not in config, go with default value
                 // Modified the default time out back to 600 seconds as we are seeing time out issues. 30 seconds short for VMware hosts.
                 if (timeout == 600) {
-                        log.debug("getTrustSaml called with default timeout, checking config");
+                        log.info("getTrustSaml called with default timeout, checking config");
                         myTimeOut = ASConfig.getConfiguration().getInt("com.intel.mountwilson.as.attestation.hostTimeout", 600);
                         log.debug("getTrustSaml config returned back" + myTimeOut);
                 }
@@ -82,7 +85,7 @@ public class BulkHostTrust {
                 // bug #783  make sure that we only pass to the next layer hostnames that are likely to be valid 
                 for(String host : Arrays.asList(hosts.split(","))) {
                     log.debug("Host: '{}'", host);
-                    if( !host.trim().isEmpty() ) {
+                    if( !(host.trim().isEmpty() || host.trim() == null) ) {
                         hostSet.add(host.trim());
                     }
                 }
@@ -110,6 +113,7 @@ public class BulkHostTrust {
                 //                        @QueryParam("threads") @DefaultValue("5") Integer threads, // bug #503 max threads now global and configured in properties file
                 @QueryParam("timeout") @DefaultValue("600") Integer timeout) {
 
+                ValidationUtil.validate(hosts);
                 if (hosts == null || hosts.length() == 0) {
                         throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
                                 "hosts");
@@ -132,8 +136,23 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList addHosts(TxtHostRecordList hostRecords) {
+            
+            ValidationUtil.validate(hostRecords);
+            
+            TxtHostRecordList newHostRecords = new TxtHostRecordList();
+            for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
+            if(host.HostName.isEmpty() || host.HostName == null)
+                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,
+                                "host");
+            else
+                newHostRecords.getHostRecords().add(host);
+            }
             BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
-            return bulkHostMgmtBO.addHosts(hostRecords);
+            HostConfigResponseList results =  bulkHostMgmtBO.addHosts(newHostRecords);
+            for (HostConfigResponse hr : results.getHostRecords()) {
+                log.debug("Bulk Add Hosts: " + hr.getHostName() + ":" + hr.getStatus() + ":" + hr.getErrorMessage());
+            }
+            return results;            
         }
 
         /**
@@ -147,7 +166,21 @@ public class BulkHostTrust {
         @Consumes({MediaType.APPLICATION_JSON})
         @Produces({MediaType.APPLICATION_JSON})
         public HostConfigResponseList updateHosts(TxtHostRecordList hostRecords) {
+            
+            ValidationUtil.validate(hostRecords);
+
+              TxtHostRecordList newHostRecords = new TxtHostRecordList();
+            for(TxtHostRecord host : hostRecords.getHostRecords().toArray(new TxtHostRecord[0]) ){
+            if(host.HostName.isEmpty() || host.HostName == null)
+                throw new ASException(com.intel.mtwilson.datatypes.ErrorCode.AS_MISSING_INPUT,"host");
+            else
+                newHostRecords.getHostRecords().add(host);
+            }
             BulkHostMgmtBO bulkHostMgmtBO = new BulkHostMgmtBO();
-            return bulkHostMgmtBO.updateHosts(hostRecords);
+            HostConfigResponseList results = bulkHostMgmtBO.updateHosts(newHostRecords);
+            for (HostConfigResponse hr : results.getHostRecords()) {
+                log.debug("Bulk Update Hosts: " + hr.getHostName() + ":" + hr.getStatus() + ":" + hr.getErrorMessage());
+            }
+            return results;            
         }
 }

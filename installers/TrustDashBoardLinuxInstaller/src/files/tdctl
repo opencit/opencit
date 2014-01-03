@@ -23,7 +23,9 @@ webservice_application_name=TrustDashBoard
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
 if [ -f "${package_dir}/version" ]; then . "${package_dir}/version"; else echo_warning "Missing file: ${package_dir}/version"; fi
 shell_include_files "${package_env_filename}" "${package_install_filename}"
-if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
+load_conf 2>&1 >/dev/null
+load_defaults 2>&1 >/dev/null
+#if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 
 #configure_api_baseurl() {
@@ -44,7 +46,7 @@ if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 
 configure_keystore_dir() {
   # setup mtwilson.mc.keystore.dir
-  local configured_keystore_dir=`read_property_from_file mtwilson.tdbp.keystore.dir ${package_config_filename}`
+  local configured_keystore_dir="$TDBP_KEYSTORE_DIR"   #`read_property_from_file mtwilson.tdbp.keystore.dir ${package_config_filename}`
   package_keystore_users_dir=${configured_keystore_dir:-"${package_keystore_users_dir}"}
   if [[ "$configured_keystore_dir" != "$package_keystore_users_dir" ]]; then
     update_property_in_file mtwilson.tdbp.keystore.dir "${package_config_filename}" "${package_keystore_users_dir}"

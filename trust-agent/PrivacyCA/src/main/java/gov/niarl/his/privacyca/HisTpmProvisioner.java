@@ -39,7 +39,7 @@ import java.util.Properties;
  * </ul>
  * 
  * @author schawki
- *
+ * @deprecated Bug #947 this class isn't being used
  */
 public class HisTpmProvisioner {
 

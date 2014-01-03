@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import com.intel.mountwilson.common.CommandUtil;
 import com.intel.mountwilson.common.Config;
 import com.intel.mountwilson.common.ErrorCode;
+import java.net.InetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +48,7 @@ public abstract class BaseServer {
 	}
 	static Logger log = LoggerFactory.getLogger(BaseServer.class.getName());
 
-	public void handleConnection(InputStream sockInput, OutputStream sockOutput) {
+	public void handleConnection(InetAddress localaddress, InputStream sockInput, OutputStream sockOutput) {
 
 		byte[] buf = new byte[1024];
 		
@@ -68,12 +69,13 @@ public abstract class BaseServer {
 
 			}
 			
-			log.info("Received data from socket: {}", new String(buf));
+			log.debug("Received data from socket: {}", new String(buf));
 
 			
 			TrustAgent agent = new TrustAgent();
+            agent.setLocalAddress(localaddress); // issue #1038 the trust agent needs to know the localhost ip address to use in the quote
 			if (isTakeOwnershipDone) {
-				writeResponse(sockOutput,new TrustAgent().processRequest(getString(buf, bytes_read)));
+				writeResponse(sockOutput,agent.processRequest(getString(buf, bytes_read)));
 			} else {
 				writeResponse(sockOutput,agent
 						.generateErrorResponse(ErrorCode.TPM_OWNERSHIP_ERROR));
@@ -81,7 +83,7 @@ public abstract class BaseServer {
 			
 		} catch (Throwable e) { // Make sure all the exceptions are caught here
 								// and return and response to client
-			log.error("Exception reading from/writing to socket, e = {0}", e);
+			log.error("Exception reading from/writing to socket", e);
 			writeResponse(sockOutput, CommandUtil.generateErrorResponse(ErrorCode.FATAL_ERROR));
 			
 		} 

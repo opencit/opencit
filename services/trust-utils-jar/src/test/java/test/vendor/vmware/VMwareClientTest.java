@@ -3,10 +3,10 @@ package test.vendor.vmware;
 import org.junit.Test;
 import com.intel.mtwilson.agent.vmware.*;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.vmware.vim25.InvalidLocaleFaultMsg;
-import com.vmware.vim25.InvalidPropertyFaultMsg;
+//import com.vmware.vim25.InvalidLocaleFaultMsg;
+//import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;
-import com.vmware.vim25.RuntimeFaultFaultMsg;
+//import com.vmware.vim25.RuntimeFaultFaultMsg;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -72,6 +72,12 @@ public class VMwareClientTest {
     
     @Test
     public void testConnectAndFindHost() throws Exception {
+        // these settings force the jvm to use the local fiddler proxy so we can see the traffic...
+  System.setProperty("http.proxyHost", "127.0.0.1");
+    System.setProperty("https.proxyHost", "127.0.0.1");
+    System.setProperty("http.proxyPort", "8888");
+    System.setProperty("https.proxyPort", "8888");
+    System.setProperty("com.sun.management.jmxremote","true"); // to inform jconsole we want to be monitored
         /*
         VmwareHostAgentFactory factory = new VmwareHostAgentFactory();
         VmwareHostAgent agent = factory.getHostAgent("https://10.1.71.162/sdk;Administrator;intel123!;10.1.71.173", new InsecureTlsPolicy());
@@ -90,10 +96,11 @@ public class VMwareClientTest {
         client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
         ManagedObjectReference ref = client.getHostReference("10.1.71.173");
         if( ref == null ) {
-            log.debug("failed to get reference to host");
+            log.info("failed to get reference to host");
         }
         else {
-            log.debug("got reference!");
+            log.info("got reference!");
+            client.getHostAttestationReport(ref, "10.1.71.173", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24");
         }
         client.disconnect();
     }
@@ -101,24 +108,23 @@ public class VMwareClientTest {
     @Test
     public void clusterTest() throws Exception {
         
-        VMwareClient client = new VMwareClient();
-        client.setTlsPolicy(new InsecureTlsPolicy());
-        client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
-        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "Folsom");
-        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "IBM DC");
-        List<String> ref = client.getDatacenterNames("https://10.1.71.162:443/sdk;Administrator;intel123!");
-        
-        
-        if( ref != null ) {
-            for (String str:ref){                
-                System.out.println(str);
-                System.out.println("\n\n***************************************************************");
-            }
-        }
-        else {
-            System.err.println("fail");
-        }
-        client.disconnect();
+//        VMwareClient client = new VMwareClient();
+//        client.setTlsPolicy(new InsecureTlsPolicy());
+//        client.connect("https://10.1.71.162/sdk", "Administrator", "intel123!");
+//        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "Folsom");
+//        //List<String> ref = client.getClusterNames("https://10.1.71.162:443/sdk;Administrator;intel123!", "IBM DC");
+//        List<String> ref = client.getDatacenterNames("https://10.1.71.162:443/sdk;Administrator;intel123!");
+//        
+//        
+//        if( ref != null ) {
+//            for (String str:ref){                
+//                System.out.println(str);
+//                System.out.println("\n\n***************************************************************");
+//            }
+//        }
+//        else {
+//            System.err.println("fail");
+//        }
+//        client.disconnect();
     }
-    
 }

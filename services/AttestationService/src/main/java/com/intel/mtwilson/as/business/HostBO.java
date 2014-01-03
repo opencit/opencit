@@ -17,6 +17,7 @@ import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.controller.TblTaLogJpaController;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.data.TblMle;
@@ -24,6 +25,7 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
+import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
@@ -44,10 +46,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.intel.mtwilson.as.business.AssetTagCertBO;
 /**
  * All settings should be via setters, not via constructor, because this class
  * may be instantiated by a factory.
@@ -92,7 +95,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -132,12 +135,14 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
+                        if (agent == null) {
+                            HostAgentFactory factory = new HostAgentFactory();
+                            agent = factory.getHostAgent(tblHosts);
+                        }
 
                         if( agent.isAikAvailable() ) { // INTEL and CITRIX
                                 // stores the AIK public key (and certificate, if available) in the host record, and sets AIK_SHA1=SHA1(AIK_PublicKey) on the host record too
-                                setAikForHost(tblHosts, host); 
+                                setAikForHost(tblHosts, host, agent); 
                                 // Intel hosts return an X509 certificate for the AIK public key, signed by the privacy CA.  so we must verify the certificate is ok.
                                 if( agent.isAikCaAvailable() ) {
                                     // we have to check that the aik certificate was signed by a trusted privacy ca
@@ -151,7 +156,8 @@ public class HostBO extends BaseBO {
                         }
 
                         // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
-                        PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
+                        if (pcrManifest == null)
+                            pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
                         
 
                         // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
@@ -168,11 +174,11 @@ public class HostBO extends BaseBO {
                         // Bug: 749: We need to handle the host specific modules only if the PCR 19 is selected for attestation
                         List<TblHostSpecificManifest>   tblHostSpecificManifests = null;
                         if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
-                            log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                            log.info("Host specific modules would be retrieved from the host that extends into PCR 19.");
                             // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
                             tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
                         } else {
-                            log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                            log.info("Host specific modules will not be configured since PCR 19 is not selected for attestation");
                         }
                         
                         // now for vmware specifically,  we have to pass this along to the vmware-specific function because it knows which modules are host-specific (the commandline event)  and has to store those in mw_host_specific  ...
@@ -189,6 +195,10 @@ public class HostBO extends BaseBO {
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
+                        
+                        // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
+                        // to which the host has to be associated
+                        associateAssetTagCertForHost(host, agent.getHostAttributes());
 
 		} catch (ASException ase) {
             //System.err.println("JIM DEBUG"); 
@@ -202,18 +212,31 @@ public class HostBO extends BaseBO {
         catch (Exception e) {
             //System.err.println("JIM DEBUG");
             //e.printStackTrace(System.err);
-			throw new ASException(e);
+			// throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during registration of host.", e);
+                        throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, e.getClass().getSimpleName());
+
 		}
 		return new HostResponse(ErrorCode.OK);
 	}
 
+
+    /**
+     * XXX TODO : THIS IS A DUPLICATE OF WHAT IS THERE IN MANAGEMENT SERVICE HOSTBO.JAVA. IF YOU MAKE ANY CHANGE, PLEASE
+     * CHANGE IT IN THE OTHER LOCATION AS WELL.
+     * 
+     * @param hostAikCert
+     * @return 
+     */
     private boolean isAikCertificateTrusted(X509Certificate hostAikCert) {
+        // XXX code in this first section is duplciated in the IntelHostTrustPolicyFactory ... maybe refactor to put it into a configuration method? it's just loading list of trusted privacy ca's from the configuration.
         log.debug("isAikCertificateTrusted {}", hostAikCert.getSubjectX500Principal().getName());
         // TODO read privacy ca certs from database and see if any one of them signed it. 
         // read privacy ca certificate.  if there is a privacy ca list file available (PrivacyCA.pem) we read the list from that. otherwise we just use the single certificate in PrivacyCA.cer (DER formatt)
         HashSet<X509Certificate> pcaList = new HashSet<X509Certificate>();
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.p12.pem")); // may contain multiple trusted privacy CA certs from remove Privacy CAs
             List<X509Certificate> privacyCaCerts = X509Util.decodePemCertificates(IOUtils.toString(privacyCaIn));
             pcaList.addAll(privacyCaCerts);
             IOUtils.closeQuietly(privacyCaIn);
@@ -225,7 +248,7 @@ public class HostBO extends BaseBO {
             log.warn("Cannot load PrivacyCA.p12.pem");            
         }
         try {
-            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain multiple trusted privacy CA certs
+            InputStream privacyCaIn = new FileInputStream(ResourceFinder.getFile("PrivacyCA.cer")); // may contain one trusted privacy CA cert from local Privacy CA
             X509Certificate privacyCaCert = X509Util.decodeDerCertificate(IOUtils.toByteArray(privacyCaIn));
             pcaList.add(privacyCaCert);
             IOUtils.closeQuietly(privacyCaIn);
@@ -236,6 +259,7 @@ public class HostBO extends BaseBO {
             // CertificateException: error while reading certificate from file
             log.warn("Cannot load PrivacyCA.cer", e);            
         }
+        // XXX code in this second section is also in  AikCertificateTrusted rule in trust-policy... we could just apply that rule directly here instead of duplicating the code.
         boolean validCaSignature = false;
         for(X509Certificate pca : pcaList) {
             try {
@@ -249,7 +273,7 @@ public class HostBO extends BaseBO {
                 }
             }
             catch(Exception e) {
-                log.warn("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
+                log.debug("Failed to verify AIK signature with CA", e); // but don't re-throw because maybe another cert in the list is a valid signer
             }
         }
         return validCaSignature;
@@ -274,7 +298,7 @@ public class HostBO extends BaseBO {
     }
 
 
-        public HostResponse updateHost(TxtHost host) {
+        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
@@ -297,6 +321,7 @@ public class HostBO extends BaseBO {
                         
                         // Using the connection string we will find out the type of the host. This information would be used later
                         ConnectionString hostConnString = new ConnectionString(host.getAddOn_Connection_String());
+                        tblHosts.setAddOnConnectionInfo(hostConnString.getConnectionStringWithPrefix());
                         hostType = hostConnString.getVendor();
                         
                         if (host.getHostName() != null) {
@@ -309,16 +334,21 @@ public class HostBO extends BaseBO {
                                 tblHosts.setPort(host.getPort());
                         }
 
-                        HostAgentFactory factory = new HostAgentFactory();
-                        HostAgent agent = factory.getHostAgent(tblHosts);
-                            log.debug("Getting identity.");
-                                setAikForHost(tblHosts, host);
+                        if (agent == null) {
+                            HostAgentFactory factory = new HostAgentFactory();
+                            agent = factory.getHostAgent(tblHosts);
+                        }
                         
+                        if( agent.isAikAvailable() ) {
+                            log.debug("Getting identity.");
+                                setAikForHost(tblHosts, host, agent);
+                        }
                         
                             if(vmmMleId.getId().intValue() != tblHosts.getVmmMleId().getId().intValue() ){
-                                log.debug("VMM is updated. Update the host specific manifest");
+                                log.info("VMM is updated. Update the host specific manifest");
                                 // retrieve the complete manifest for  the host, includes ALL pcr's and if there is module info available it is included also.
-                                PcrManifest pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
+                                if (pcrManifest == null)
+                                    pcrManifest = agent.getPcrManifest();  // currently Vmware has pcr+module, but in 1.2 we are adding module attestation for Intel hosts too ;   citrix would be just pcr for now i guess
 
 
                                 // send the pcr manifest to a vendor-specific class in order to extract any host-specific information
@@ -330,8 +360,20 @@ public class HostBO extends BaseBO {
 //                                hostReport.tpmQuote = null;
 //                                hostReport.variables = new HashMap<String,String>(); // for example if we know a UUID ... we would ADD IT HERE
 //                                TrustPolicy hostSpecificTrustPolicy = hostTrustPolicyFactory.createHostSpecificTrustPolicy(hostReport, biosMleId, vmmMleId); // XXX TODO add the bios mle and vmm mle information to HostReport ?? only if they are needed by some policies...
-
-                                tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                                
+                                // Bug 962: Earlier we were trying to delete the old host specific values after the host update. By then the VMM MLE would
+                                // already be updated and the query would not find any values to delete.
+                                deleteHostSpecificManifest(tblHosts);
+                                
+                                // Bug 963: We need to check if the white list configured for the MLE requires PCR 19. If not, we will skip creating
+                                // the host specific modules.
+                                if(vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString())) {
+                                    log.debug("Host specific modules would be retrieved from the host that extends into PCR 19.");
+                                    // Added the Vendor parameter to the below function so that we can handle the host specific records differently for different types of hosts.
+                                    tblHostSpecificManifests = createHostSpecificManifestRecords(vmmMleId, pcrManifest, hostType);
+                                } else {
+                                    log.debug("Host specific modules will not be configured since PCR 19 is not selected for attestation");
+                                }
                             }
 
                         log.debug("Saving Host in database");
@@ -351,7 +393,8 @@ public class HostBO extends BaseBO {
                         
                         if(tblHostSpecificManifests != null){
                             log.debug("Updating Host Specific Manifest in database");
-                            deleteHostSpecificManifest(tblHosts);
+                            // Bug 962: Making this call earlier in the function before updating the host with the new MLEs.
+                            //deleteHostSpecificManifest(tblHosts);
                             createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
                         }
 
@@ -360,7 +403,10 @@ public class HostBO extends BaseBO {
                 } catch (CryptographyException e) {
                         throw new ASException(e, ErrorCode.AS_ENCRYPTION_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
                 } catch (Exception e) {
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during host update.", e);
+                        throw new ASException(ErrorCode.AS_UPDATE_HOST_ERROR, e.getClass().getSimpleName());                        
                 }
 
                 return new HostResponse(ErrorCode.OK);
@@ -374,7 +420,9 @@ public class HostBO extends BaseBO {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
                         }
                         log.debug("Deleting Host from database");
-
+                        
+                        deleteHostAssetTagMapping(tblHosts);
+                        
                         deleteHostSpecificManifest(tblHosts);
 
                         deleteTALogs(tblHosts.getId());
@@ -383,6 +431,10 @@ public class HostBO extends BaseBO {
 
                         My.jpa().mwHosts().destroy(tblHosts.getId());
                         log.info("Deleted host: {}", hostName.toString());
+                        
+                        // Now that the host is deleted, we need to remove any asset tag certificate mapped to this host
+                        unmapAssetTagCertFromHost(tblHosts.getId(), tblHosts.getName());
+                        
                 } catch (ASException ase) {
                         //System.err.println("JIM DEBUG"); 
                         //ase.printStackTrace(System.err);
@@ -391,14 +443,25 @@ public class HostBO extends BaseBO {
                         //System.err.println("JIM DEBUG"); 
                         //e.printStackTrace(System.err);
                         throw new ASException(ErrorCode.SYSTEM_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage(), e);
+                        //throw new ASException(ErrorCode.SYSTEM_ERROR, e.getCause() == null ? e.getMessage() : e.getCause().getMessage(), e);
                 } catch (Exception e) {
                         //System.err.println("JIM DEBUG"); 
                         //e.printStackTrace(System.err);
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during host deletion.", e);
+                        throw new ASException(ErrorCode.AS_DELETE_HOST_ERROR, e.getClass().getSimpleName());                        
                 }
                 return new HostResponse(ErrorCode.OK);
         }
-
+        
+        private void deleteHostAssetTagMapping(TblHosts tblHosts) throws NonexistentEntityException, IOException {
+            AssetTagCertAssociateRequest atagRequest = new AssetTagCertAssociateRequest();
+            atagRequest.setHostID(tblHosts.getId());
+            AssetTagCertBO atagBO = new AssetTagCertBO();
+            atagBO.unmapAssetTagCertFromHost(atagRequest);            
+        }
+        
         // PREMIUM FEATURE ? 
         private void deleteHostSpecificManifest(TblHosts tblHosts)
                 throws NonexistentEntityException, IOException {
@@ -429,7 +492,7 @@ public class HostBO extends BaseBO {
                                 try {
                                         tblTaLogJpaController.destroy(taLog.getId());
                                 } catch (NonexistentEntityException e) {
-                                        log.warn("Ta Log is already deleted " + taLog.getId());
+                                        log.error("Ta Log is already deleted " + taLog.getId());
                                 }
                         }
                         log.info("Deleted all the logs for the given host " + hostId);
@@ -453,16 +516,16 @@ public class HostBO extends BaseBO {
                                 try {
                                         samlJpaController.destroy(hostSAML.getId());
                                 } catch (NonexistentEntityException e) {
-                                        log.warn("Ta Log is already deleted " + hostSAML.getId());
+                                        log.error("Ta Log is already deleted " + hostSAML.getId());
                                 }
                         }
                         log.info("Deleted all the logs for the given host " + hostId);
                 }
         }
 
-	private void setAikForHost(TblHosts tblHosts, TxtHost host) {
-            HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
-            HostAgent agent = factory.getHostAgent(tblHosts);
+	private void setAikForHost(TblHosts tblHosts, TxtHost host, HostAgent agent) {
+            //HostAgentFactory factory = new HostAgentFactory(); // we could call IntelHostAgentFactory but then we have to create the TlsPolicy object ourselves... the HostAgentFactory does that for us.
+            //HostAgent agent = factory.getHostAgent(tblHosts);
             if( agent.isAikAvailable() ) {
                 if( agent.isAikCaAvailable() ) {
                     X509Certificate cert = agent.getAikCertificate();
@@ -563,13 +626,13 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
-		
+	private synchronized void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
+		checkForDuplicate(host);
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
 		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
 		
 		String cs = host.getAddOn_Connection_String();
-        //log.info("saveHostInDatabase cs = " + cs);
+                //log.info("saveHostInDatabase cs = " + cs);
 		tblHosts.setAddOnConnectionInfo(cs);
 		tblHosts.setBiosMleId(biosMleId);
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
@@ -594,7 +657,6 @@ public class HostBO extends BaseBO {
 //                if (location != null) {
 //                    tblHosts.setLocation(location);
 //                }
-
                 // create the host
                 log.trace("COMMITING NEW HOST DO DATABASE");
                 //log.error("saveHostInDatabase tblHost  aik=" + tblHosts.getAIKCertificate() + ", cs=" + tblHosts.getAddOnConnectionInfo() + ", aikPub=" + tblHosts.getAikPublicKey() + 
@@ -606,11 +668,13 @@ public class HostBO extends BaseBO {
                     log.debug("SaveHostInDatabase caught ex!");
                     e.printStackTrace();
                     log.trace("end print stack trace");
-                    throw new ASException(e);
+                    // throw new ASException(e);
+                    // Bug: 1038 - prevent leaks in error messages to client
+                    log.error("Error during saving the host to DB.", e);
+                    throw new ASException(ErrorCode.AS_REGISTER_HOST_ERROR, e.getClass().getSimpleName());
                 }
                 log.debug("Save host specific manifest if any.");
                 createHostSpecificManifest(tblHostSpecificManifests, tblHosts);
-
         }
 
     /*
@@ -627,8 +691,8 @@ public class HostBO extends BaseBO {
         List<TblHostSpecificManifest> tblHostSpecificManifests = new ArrayList<TblHostSpecificManifest>();
 
         // Using the connection string, let us first find out the host type
-        
-        if (pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
+        // Bug 963: Ensure that we even check if PCR 19 is required as per the MLE setup
+        if (vmmMleId.getRequiredManifestList().contains(PcrIndex.PCR19.toString()) && pcrManifest != null && pcrManifest.containsPcrEventLog(PcrIndex.PCR19)) {
             PcrEventLog pcrEventLog = pcrManifest.getPcrEventLog(19);
 
             for (Measurement m : pcrEventLog.getEventLog()) {
@@ -695,7 +759,10 @@ public class HostBO extends BaseBO {
                 } catch (ASException e) {
                         throw e;
                 } catch (Exception e) {
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during verification of registered host.", e);
+                        throw new ASException(ErrorCode.AS_VERIFY_HOST_ERROR, e.getClass().getSimpleName());
                 }
         }
 
@@ -766,21 +833,24 @@ public class HostBO extends BaseBO {
 
                         if (tblHostList != null) {
 
-                                log.info(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
+                                log.debug(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
 
                                 for (TblHosts tblHosts : tblHostList) {
                                         TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts);
                                         txtHostList.add(hostObj);
                                 }
                         } else {
-                                log.info(String.format("Found no hosts for search criteria [%s]", searchCriteria));
+                                log.debug(String.format("Found no hosts for search criteria [%s]", searchCriteria));
                         }
 
                         return txtHostList;
                 } catch (ASException e) {
                         throw e;
                 } catch (Exception e) {
-                        throw new ASException(e);
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during querying for registered hosts.", e);
+                        throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, e.getClass().getSimpleName());
                 }
 
         }
@@ -804,4 +874,95 @@ public class HostBO extends BaseBO {
 
                 return hostObj;
         }
+
+        public HostResponse addHostByFindingMLE(TxtHostRecord hostObj) {
+            try {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+            } catch (ASException ae){
+                throw ae;
+			}
+		}
+
+        public HostResponse updateHostByFindingMLE(TxtHostRecord hostObj) {
+            try {
+                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+            } catch (ASException ae) {
+                throw ae;
+            }
+        }
+        
+    /**
+     * 
+     * @param host 
+     */
+    private void associateAssetTagCertForHost(TxtHost host, Map<String, String> hostAttributes) {
+        String hostUUID;
+        
+        try {
+            log.debug("Starting the procedure to map the asset tag certificate for host {}.", host.getHostName().toString());
+            
+            // First let us find if the asset tag is configured for this host or not. This information
+            // would be available in the mw_asset_tag_certificate table, where the host's UUID would be
+            // present.
+            if (hostAttributes != null && hostAttributes.containsKey("Host_UUID")) {
+                hostUUID = hostAttributes.get("Host_UUID");
+            } else {
+                log.info("Since UUID for the host {} is not specified, asset tag would not be configured.", host.getHostName().toString());
+                return;
+            }
+            
+            // Now that we have a valid host UUID, let us search for an entry in the db.
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            MwAssetTagCertificate atagCert = atagCertBO.findValidAssetTagCertForHost(hostUUID);
+            if (atagCert != null) {
+                log.debug("Found a valid asset tag certificate for the host {} with UUID {}.", host.getHostName().toString(), hostUUID);
+                // Now that there is a asset tag certificate for the host, let us retrieve the host ID and update
+                // the asset tag certificate with that ID
+                TblHosts tblHost = My.jpa().mwHosts().findByName(host.getHostName().toString());
+                if (tblHost != null) {
+                    AssetTagCertAssociateRequest atagMapRequest = new AssetTagCertAssociateRequest();
+                    atagMapRequest.setSha1OfAssetCert(atagCert.getSHA1Hash());
+                    atagMapRequest.setHostID(tblHost.getId());
+                    
+                    boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHost(atagMapRequest);
+                    if (mapAssetTagCertToHost)
+                        log.info("Successfully mapped the asset tag certificate with UUID {} to host {}", atagCert.getUuid(), tblHost.getName());
+                    else
+                        log.info("No valid asset tag certificate configured for the host {}.", tblHost.getName());
+                }
+            } else {
+                log.info("No valid asset tag certificate configured for the host {}.", host.getHostName().toString());
+            }
+            
+        } catch (Exception ex) {
+            // Log the error and return back.
+            log.info("Error during asset tag configuration for the host {}. Details: {}.", host.getHostName().toString(), ex.getMessage());
+        }
+        
+    }
+
+    /**
+     * 
+     * @param id
+     * @param name 
+     */
+    private void unmapAssetTagCertFromHost(Integer id, String name) {
+        try {
+            log.debug("Starting the procedure to unmap the asset tag certificate from host {}.", name);
+                        
+            AssetTagCertBO atagCertBO = new AssetTagCertBO();
+            AssetTagCertAssociateRequest atagUnmapRequest = new AssetTagCertAssociateRequest();
+            atagUnmapRequest.setHostID(id);
+                    
+            boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHost(atagUnmapRequest);
+            if (unmapAssetTagCertFromHost)
+                log.info("Either the asset tag certificate was successfully unmapped from the host {} or there was not asset tag certificate associated.", name);
+            else
+                log.info("Either there were errors or no asset tag certificate was configured for the host {}.", name);
+            
+        } catch (Exception ex) {
+            // Log the error and return back.
+            log.info("Error during asset tag unmapping for the host {}. Details: {}.", name, ex.getMessage());
+        }
+    }
 }

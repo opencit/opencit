@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.policy.impl.vendor;
 
+import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.model.Bios;
@@ -45,5 +46,14 @@ public class CitrixHostTrustPolicyFactory implements VendorHostTrustPolicyFactor
     public Set<Rule> loadTrustRulesForLocation(String location, TblHosts host) {
         return reader.loadPcrMatchesConstantRulesForLocation(location, host);
     }
+
+    @Override
+    public Set<Rule> loadComparisonRulesForVmm(Vmm vmm, TblHosts host) {
+        return reader.loadPcrMatchesConstantRulesForVmm(vmm, host);
+    }
     
+     @Override
+    public Set<Rule> loadTrustRulesForAssetTag(MwAssetTagCertificate atagCert, TblHosts host) {
+        return reader.loadPcrMatchesConstantRulesForAssetTag(atagCert, host);
+    }
 }

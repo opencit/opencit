@@ -7,6 +7,7 @@ import com.intel.mountwilson.common.MCPConfig;
 import com.intel.mountwilson.common.MCPersistenceManager;
 import com.intel.mountwilson.common.TDPConfig;
 import com.intel.mtwilson.ApiClient;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.RsaCredential;
 import com.intel.mtwilson.crypto.SimpleKeystore;
@@ -38,14 +39,14 @@ public class CheckLoginController extends AbstractController {
     private Logger log = LoggerFactory.getLogger(getClass());
 	
 	// variable declaration used during Processing data. 
-        private static final Logger logger = LoggerFactory.getLogger(CheckLoginController.class.getName());       
+            
 	private MCPersistenceManager mcManager = new MCPersistenceManager();
-	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU"));
+	
         private boolean isNullOrEmpty(String str) { return str == null || str.isEmpty(); }
 
 	@Override
 	protected ModelAndView handleRequestInternal(HttpServletRequest req,HttpServletResponse res) throws MalformedURLException, IOException {
-            logger.debug("CheckLoginController >>");
+            log.debug("CheckLoginController >>");
             ModelAndView view = new ModelAndView("Login");
             
             
@@ -70,14 +71,22 @@ public class CheckLoginController extends AbstractController {
             //    return view;                    
             //}
             //stdalex 1/15 jks2db!disk
+            MwPortalUserJpaController keystoreJpa = My.jpa().mwPortalUser();
             MwPortalUser tblKeystore = keystoreJpa.findMwPortalUserByUserName(keyAliasName);
             if(tblKeystore == null){
-                view.addObject("message", "Unable to retrieve the user details for authentication. Please enter again.");                
+                view.addObject("message", "Username or Password does not match or the user is not enabled.");                
                 view.addObject("result", false);
                 return view; 
             }
+
+            // Partial fix for Bug 965 to prevent users in rejected/pending status from logging into the portal.
+            if (!tblKeystore.getEnabled()) {
+                view.addObject("message", "Username or Password does not match or the user is not enabled.");                
+                view.addObject("result", false);
+                return view;                 
+            }
+            
             ByteArrayResource keyResource = new ByteArrayResource(tblKeystore.getKeystore());
-            URL baseURL = new URL(MCPConfig.getConfiguration().getString("mtwilson.api.baseurl"));
             RsaCredential credential = null;
             SimpleKeystore keystore = null;
             try {
@@ -89,7 +98,7 @@ public class CheckLoginController extends AbstractController {
 
             } catch (Exception ex) {
                 view.addObject("result", false);
-                view.addObject("message", "Username or Password does not match. Please try again.");
+                view.addObject("message", "Username or Password does not match or the user is not enabled.");
                 return view;                    
             } 
 
@@ -98,17 +107,16 @@ public class CheckLoginController extends AbstractController {
                 Properties p = new Properties();
 //                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", "false");
 //                p.setProperty("mtwilson.api.ssl.verifyHostname", "false");
-                p.setProperty("mtwilson.api.ssl.policy", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
-                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
-                p.setProperty("mtwilson.api.ssl.verifyHostname", MCPConfig.getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
-                if( tblKeystore.getLocale() != null && !tblKeystore.getLocale().isEmpty() ) { 
-                    p.setProperty("mtwilson.locale", tblKeystore.getLocale());
-                }
-                
+                p.setProperty("mtwilson.api.ssl.policy", My.configuration().getConfiguration().getString("mtwilson.api.ssl.policy", "TRUST_CA_VERIFY_HOSTNAME")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.requireTrustedCertificate", My.configuration().getConfiguration().getString("mtwilson.api.ssl.requireTrustedCertificate", "true")); // must be secure out of the box!
+                p.setProperty("mtwilson.api.ssl.verifyHostname",My.configuration().getConfiguration().getString("mtwilson.api.ssl.verifyHostname", "true")); // must be secure out of the box!
+
                 ApiClient rsaApiClient = null;
                 // Instantiate the API Client object and store it in the session. Otherwise either we need
                 // to store the password in the session or the decrypted RSA key
                 try {
+                    // bug #1038 if mtwilson.api.baseurl is not configured or is invalid we get a MalformedURLException so it needs to be in a try block so we can catch it and respond appropriately
+                    URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);
@@ -119,7 +127,7 @@ public class CheckLoginController extends AbstractController {
                 HttpSession session = req.getSession();
                 session.setAttribute("logged-in", true);
                 	session.setAttribute("username", keyAliasName);
-                session.setMaxInactiveInterval(MCPConfig.getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800));
+                session.setMaxInactiveInterval(My.configuration().getConfiguration().getInt("mtwilson.portal.sessionTimeOut", 1800));
                 
 
                         X509Certificate[] trustedCertificates = keystore.getTrustedCertificates(SimpleKeystore.SAML);
@@ -129,10 +137,9 @@ public class CheckLoginController extends AbstractController {
             session.setAttribute("api-object", rsaApiClient);
 			session.setAttribute("apiClientObject",rsaApiClient);
 			session.setAttribute("trustedCertificates",trustedCertificates);
-			session.setMaxInactiveInterval(Integer.parseInt(TDPConfig.getConfiguration().getString("mtwilson.tdbp.sessionTimeOut")));
                 
             } catch (Exception ex) {
-
+                log.error("Login failed", ex);
                 view.addObject("message", "Error during user authentication. " + StringEscapeUtils.escapeHtml(ex.getMessage()));
                 return view;                    
                 

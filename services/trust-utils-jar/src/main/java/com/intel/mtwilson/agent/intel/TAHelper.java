@@ -1,5 +1,8 @@
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.io.ByteArray;
+import com.intel.dcsg.cpg.net.IPv4Address;
+import com.intel.dcsg.cpg.net.InternetAddress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,10 +36,14 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
+//import com.intel.mtwilson.model.Sha1Digest;
+import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URL;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -81,23 +88,24 @@ public class TAHelper {
     private Pattern pcrValuePattern = Pattern.compile("[0-9a-fA-F]{40}"); // 40-character hex string
     private String pcrNumberUntaint = "[^0-9]";
     private String pcrValueUntaint = "[^0-9a-fA-F]";   
-    
+    private boolean quoteWithIPAddress = true; // to fix issue #1038 we use this secure default
 //	private EntityManagerFactory entityManagerFactory;
     private String trustedAik = null; // host's AIK in PEM format, for use in verifying quotes (caller retrieves it from database and provides it to us)
-
+    private boolean deleteTemporaryFiles = true;  // normally we don't need to keep them around but during debugging it's helpful to set this to false
+    
     public TAHelper(/*EntityManagerFactory entityManagerFactory*/) {
         Configuration config = ASConfig.getConfiguration();
         aikverifyhome = config.getString("com.intel.mountwilson.as.home", "C:/work/aikverifyhome");
         aikverifyhomeData = aikverifyhome + File.separator + "data";
         aikverifyhomeBin = aikverifyhome + File.separator + "bin";
         aikverifyCmd = aikverifyhomeBin + File.separator + config.getString("com.intel.mountwilson.as.aikqverify.cmd", "aikqverify.exe");
-
+        quoteWithIPAddress = config.getBoolean("mtwilson.tpm.quote.ipv4", true); // issue #1038
         boolean foundAllRequiredFiles = true;
         String required[] = new String[]{aikverifyhome, aikverifyCmd, aikverifyhomeData};
         for (String filename : required) {
             File file = new File(filename);
             if (!file.exists()) {
-                log.error(String.format("Invalid service configuration: Cannot find %s", filename));
+                log.warn(String.format("Invalid service configuration: Cannot find %s", filename));
                 foundAllRequiredFiles = false;
             }
         }
@@ -118,9 +126,17 @@ public class TAHelper {
         trustedAik = pem;
     }
 
+    /**
+     * The default value of deleteTemporaryFiles is true.
+     * @param deleteTemporaryFiles true to delete them, false to keep them after processing
+     */
+    public void setDeleteTemporaryFiles(boolean deleteTemporaryFiles) {
+        this.deleteTemporaryFiles = deleteTemporaryFiles;
+    }
+    
     // DAA challenge
     //    public void verifyAikWithDaa(String hostIpAddress, int port) {
-    public void verifyAikWithDaa(TblHosts tblHosts) {
+    public void verifyAikWithDaa(TblHosts tblHosts) throws XMLStreamException {
         try {
             //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostIpAddress, port); // bug #497 TODO need to replace with use of HostAgentFactory
             HostAgentFactory factory = new HostAgentFactory();
@@ -139,7 +155,7 @@ public class TAHelper {
             String sessionId = generateSessionId();
 
             // request AIK certificate and CA chain (the AIK Proof File)
-            log.debug("DAA requesting AIK proof");
+            log.info("DAA requesting AIK proof");
             String aikproof = client.getAIKCertificate(); // <identity_request></identity_request>
             FileOutputStream outAikProof = new FileOutputStream(new File(getDaaAikProofFileName(sessionId)));
             IOUtils.write(aikproof, outAikProof);
@@ -233,24 +249,80 @@ public class TAHelper {
         }
     }
 
+    public byte[] getIPAddress(String hostname) throws UnknownHostException {
+            byte[] ipaddress = null;
+            InternetAddress address = new InternetAddress(hostname);
+            if( address.isIPv4() ) {
+                IPv4Address ipv4address = new IPv4Address(hostname);
+                ipaddress = ipv4address.toByteArray();
+                if( ipaddress == null ) {
+                    throw new UnknownHostException(hostname); // throws UnknownHostException
+                }
+                assert ipaddress.length == 4;
+            }
+            else if( address.isIPv6() || address.isHostname() ) {
+                // resolve it to find the ipv4 address
+                InetAddress inetAddress = InetAddress.getByName(hostname); // throws UnknownHostException
+                log.info("Resolved hostname {} to address {}", hostname, inetAddress.getHostAddress());
+                if( inetAddress instanceof Inet4Address ) {
+                    ipaddress = inetAddress.getAddress();
+                    assert ipaddress.length == 4;
+                }
+                else if( inetAddress instanceof Inet6Address ) {
+                    if( ((Inet6Address)inetAddress).isIPv4CompatibleAddress() ) {
+                        ipaddress = ByteArray.subarray(inetAddress.getAddress(), 12, 4); // the last 4 bytes of of an ipv4-compatible ipv6 address are the ipv4 address (first 12 bytes are zero)
+                    }
+                    else {
+                        throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is IPv6: "+hostname);                        
+                    }
+                }
+                else {
+                    throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is unknown type: "+hostname);                                            
+                }
+            }
+            else {
+                throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled and requires an IPv4-compatible address but host address is unknown type: "+hostname);                                                            
+            }
+            return ipaddress;
+    }
+    
     public PcrManifest getQuoteInformationForHost(String hostname, TrustAgentSecureClient client) throws NoSuchAlgorithmException, PropertyException, JAXBException, 
-            UnknownHostException, IOException, KeyManagementException, CertificateException  {
-        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT   
-        String nonce = generateNonce();
-
+            UnknownHostException, IOException, KeyManagementException, CertificateException, XMLStreamException  {
+        //  XXX BUG #497  START CODE SNIPPET MOVED TO INTEL HOST AGENT  
+        File q = null;
+        File n = null;
+        File c = null;
+        File r = null;
+        byte[] nonce = generateNonce(); // 20 random bytes
+        
+        // to fix issue #1038 we have a new option to put the host ip address in the nonce (we don't send this to the host - the hsot automatically would do the same thing)
+        byte[] verifyNonce = nonce; // verifyNonce is what we save to verify against host's tpm quote response
+        if( quoteWithIPAddress ) {
+            // is the hostname a dns name or an ip address?  if it's a dns name we have to resolve it to an ip address
+            // see also corresponding code in TrustAgent CreateNonceFileCmd
+            byte[] ipaddress = getIPAddress(hostname);
+            if( ipaddress == null ) {
+                throw new IllegalArgumentException("mtwilson.tpm.quote.ipv4 is enabled but host address cannot be resolved: "+hostname);
+            }
+            verifyNonce = ByteArray.concat(ByteArray.subarray(nonce,0,16),ipaddress);
+        }
+        String verifyNonceBase64 = Base64.encodeBase64String(verifyNonce);
+        
         String sessionId = generateSessionId();
 
         // FIrst let us ensure that we have an AIK cert created on the host before trying to retrieve the quote. The trust agent
         // would verify if a AIK is already present or not. If not it will create a new one.
         trustedAik = client.getAIKCertificate();
 
-        ClientRequestType clientRequestType = client.getQuote(nonce, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
+        // to fix issue #1038 trust agent relay we send 20 random bytes nonce to the host (base64-encoded) but if mtwilson.tpm.quote.ipaddress is enabled then in our copy we replace the last 4 bytes with the host's ip address, and when the host generates the quote it does the same thing, and we can verify it later
+        String nonceBase64 = Base64.encodeBase64String(nonce);
+        ClientRequestType clientRequestType = client.getQuote(nonceBase64, "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23"); // pcrList used to be a comma-separated list passed to this method... but now we are returning a quote with ALL the PCR's ALL THE TIME.
         log.debug("got response from server [" + hostname + "] " + clientRequestType);
 
         String quote = clientRequestType.getQuote();
         log.debug("extracted quote from response: " + quote);
 
-        saveQuote(quote, sessionId);
+        q = saveQuote(quote, sessionId);
         log.debug("saved quote with session id: " + sessionId);
 
         // we only need to save the certificate when registring the host ... when we are just getting a quote we need to verify it using the previously saved AIK.
@@ -258,18 +330,18 @@ public class TAHelper {
             String aikCertificate = clientRequestType.getAikcert();
             log.debug("extracted aik cert from response: " + aikCertificate);
 
-            saveCertificate(aikCertificate, sessionId);
+            c = saveCertificate(aikCertificate, sessionId);
             log.debug("saved host-provided AIK certificate with session id: " + sessionId);
         } else {
-            saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
+            c = saveCertificate(trustedAik, sessionId); // XXX we only need to save the certificate when registring the host ... when we are just getting a quote we don't need it            
             log.debug("saved database-provided trusted AIK certificate with session id: " + sessionId);
         }
 
-        saveNonce(nonce, sessionId);
+        n = saveNonce(verifyNonceBase64, sessionId);
 
         log.debug("saved nonce with session id: " + sessionId);
 
-        createRSAKeyFile(sessionId);
+        r = createRSAKeyFile(sessionId);
 
         log.debug("created RSA key file for session id: " + sessionId);
         
@@ -282,16 +354,26 @@ public class TAHelper {
 
             // Since we need to add the event log details into the pcrManifest, we will pass in that information to the below function
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, decodedEventLog);
-            log.debug("Got PCR map");
+            log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-
+            if( deleteTemporaryFiles ) {
+                q.delete();
+                n.delete();
+                c.delete();
+                r.delete();
+            }
             return pcrManifest;
         }
         else {
             PcrManifest pcrManifest = verifyQuoteAndGetPcr(sessionId, null); // verify the quote but don't add any event log info to the PcrManifest. // issue #879
-            log.debug("Got PCR map");
+            log.info("Got PCR map");
             //log.log(Level.INFO, "PCR map = "+pcrMap); // need to untaint this first
-
+            if( deleteTemporaryFiles ) {
+                q.delete();
+                n.delete();
+                c.delete();
+                r.delete();
+            }
             return pcrManifest;
         }
 
@@ -373,19 +455,19 @@ public class TAHelper {
         return attestationReport;
     }
 
-    public String generateNonce() {
+    public byte[] generateNonce() {
         try {
             // Create a secure random number generator
             SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
             // Get 1024 random bits
-            byte[] bytes = new byte[16];
+            byte[] bytes = new byte[20]; // bug #1038  nonce should be 20 random bytes;  even though we send 20 random bytes to the host, both we and the host will replace the last 4 bytes with the host's primary IP address 
             sr.nextBytes(bytes);
 
 //            nonce = new BASE64Encoder().encode( bytes);
-            String nonce = Base64.encodeBase64String(bytes);
+//            String nonce = Base64.encodeBase64String(bytes);
 
-            log.debug("Nonce Generated {}", nonce);
-            return nonce;
+            log.debug("Nonce Generated {}", Base64.encodeBase64String(bytes));
+            return bytes;
         } catch (NoSuchAlgorithmException e) {
             throw new ASException(e);
         }
@@ -435,7 +517,7 @@ public class TAHelper {
         return "quote_" + sessionId + ".data";
     }
 
-    private void saveCertificate(String aikCertificate, String sessionId) throws IOException, CertificateException {
+    private File saveCertificate(String aikCertificate, String sessionId) throws IOException, CertificateException {
 
         /*
          // XXX this block of code where we fix the PEM format can be replaced with mtwilson-crypto X509Util.encodePemCertificate(X509Util.decodePemCertificate(...input...))
@@ -452,25 +534,28 @@ public class TAHelper {
 
          saveFile(getCertFileName(sessionId), aikCertificate.getBytes());
          */
-
+        File file = null;
         X509Certificate aikcert = X509Util.decodePemCertificate(aikCertificate);
         String pem = X509Util.encodePemCertificate(aikcert);
-        FileOutputStream out = new FileOutputStream(new File(aikverifyhomeData + File.separator + getCertFileName(sessionId)));
+        file = new File(aikverifyhomeData + File.separator + getCertFileName(sessionId));
+        FileOutputStream out = new FileOutputStream(file);
         IOUtils.write(pem, out);
         IOUtils.closeQuietly(out);
+        return file;
     }
 
     private String getCertFileName(String sessionId) {
         return "aikcert_" + sessionId + ".cer";
     }
 
-    private void saveFile(String fileName, byte[] contents) throws IOException {
+    private File saveFile(String fileName, byte[] contents) throws IOException {
         FileOutputStream fileOutputStream = null;
-
+        File file = null;
         try {
             assert aikverifyhome != null;
             log.debug(String.format("saving file %s to [%s]", fileName, aikverifyhomeData));
-            fileOutputStream = new FileOutputStream(aikverifyhomeData + File.separator + fileName);
+            file = new File(aikverifyhomeData + File.separator + fileName);
+            fileOutputStream = new FileOutputStream(file);
             assert fileOutputStream != null;
             assert contents != null;
             fileOutputStream.write(contents);
@@ -486,24 +571,30 @@ public class TAHelper {
             } catch (IOException ex) {
                 log.error(String.format("Cannot close file %s in [%s]: %s", fileName, aikverifyhomeData, ex.getMessage()), ex);
             }
+            
+            return file;
         }
 
 
     }
 
-    private void saveQuote(String quote, String sessionId) throws IOException {
+    private File saveQuote(String quote, String sessionId) throws IOException {
 //          byte[] quoteBytes = new BASE64Decoder().decodeBuffer(quote);
+        File file = null;
         byte[] quoteBytes = Base64.decodeBase64(quote);
-        saveFile(getQuoteFileName(sessionId), quoteBytes);
+        file = saveFile(getQuoteFileName(sessionId), quoteBytes);
+        return file;
     }
 
-    private void saveNonce(String nonce, String sessionId) throws IOException {
+    private File saveNonce(String nonce, String sessionId) throws IOException {
 //          byte[] nonceBytes = new BASE64Decoder().decodeBuffer(nonce);
         byte[] nonceBytes = Base64.decodeBase64(nonce);
-        saveFile(getNonceFileName(sessionId), nonceBytes);
+        File file = null;
+        file = saveFile(getNonceFileName(sessionId), nonceBytes);
+        return file;
     }
 
-    private void createRSAKeyFile(String sessionId) throws IOException, CertificateException {
+    private File createRSAKeyFile(String sessionId) throws IOException, CertificateException {
         // 20130409 replacing external openssl command with equivalent java code, see below
         /*
          String command = String.format("%s %s %s",opensslCmd,aikverifyhomeData + File.separator + getCertFileName(sessionId),aikverifyhomeData + File.separator+getRSAPubkeyFileName(sessionId)); 
@@ -511,21 +602,23 @@ public class TAHelper {
          CommandUtil.runCommand(command, false, "CreateRsaKey" );
          //log.log(Level.INFO, "Result - {0} ", result);
          */
+        File file = null;
         FileInputStream in = new FileInputStream(new File(aikverifyhomeData + File.separator + getCertFileName(sessionId)));
         String x509cert = IOUtils.toString(in);
         IOUtils.closeQuietly(in);
         X509Certificate aikcert = X509Util.decodePemCertificate(x509cert);
         String aikpubkey = X509Util.encodePemPublicKey(aikcert.getPublicKey());
-        FileOutputStream out = new FileOutputStream(new File(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId)));
+        file = new File(aikverifyhomeData + File.separator + getRSAPubkeyFileName(sessionId));
+        FileOutputStream out = new FileOutputStream(file);
         IOUtils.write(aikpubkey, out);
         IOUtils.closeQuietly(out);
+        return file;
     }
 
     private String getRSAPubkeyFileName(String sessionId) {
         return "rsapubkey_" + sessionId + ".key";
     }
 
-    // BUG #497 need to rewrite this to return List<Pcr> ... the Pcr.equals()  does same as (actually more than) IManifest.verify() because Pcr ensures the index is the same and IManifest does not!  and also it is less redundant, because this method returns Map< pcr index as string, manifest object containing pcr index and value >  
     private PcrManifest verifyQuoteAndGetPcr(String sessionId, String eventLog) {
 //        HashMap<String,PcrManifest> pcrMp = new HashMap<String,PcrManifest>();
         PcrManifest pcrManifest = new PcrManifest();

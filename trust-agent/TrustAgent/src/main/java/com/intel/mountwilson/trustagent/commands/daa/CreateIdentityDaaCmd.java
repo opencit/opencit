@@ -41,7 +41,7 @@ public class CreateIdentityDaaCmd implements ICommand {
 
             // read the AIK certificate
             context.setAIKCertificate(CommandUtil.readCertificate(context.getAikCertFileName()));
-            log.info("AIK Certificate Read to memory - {0}", context.getAikCertFileName());
+            log.debug("AIK Certificate Read to memory - {}", context.getAikCertFileName());
 
         } catch (Exception e) {
             throw new TAException(ErrorCode.COMMAND_ERROR, "Error while creating identity for DAA: "+e.toString());

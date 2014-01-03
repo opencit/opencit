@@ -5,8 +5,7 @@
 package com.intel.mtwilson.datatypes;
 
 import java.net.MalformedURLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Test;
 
 /**
@@ -14,6 +13,8 @@ import org.junit.Test;
  * @author dsmagadx
  */
 public class ErrorCodeTest {
+    
+    private static org.slf4j.Logger log = LoggerFactory.getLogger(ErrorCodeTest.class);
     
     //@Test
     public void testErrorCodeWithFormataAndMultipleConcat(){
@@ -24,7 +25,7 @@ public class ErrorCodeTest {
 
     //@Test
     public void testErrorCodeWithFormataAndSingleConcat(){
-        AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_DATA_MISSING,"MLENAME");
+        AuthResponse authResponse = new AuthResponse(ErrorCode.WS_MLE_DATA_MISSING,"MLNAME");
         if(authResponse.getErrorCodeEnum() == ErrorCode.WS_MLE_DATA_MISSING)
             System.out.println(authResponse.getErrorMessage());
     }
@@ -38,7 +39,7 @@ public class ErrorCodeTest {
             System.out.println(conStr.getManagementServerName());
             System.out.println(conStr.getPort());
         } catch (MalformedURLException ex) {
-            Logger.getLogger(ErrorCodeTest.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
     }
 
@@ -50,9 +51,9 @@ public class ErrorCodeTest {
             System.out.println(conStr.getConnectionStringWithPrefix());
             System.out.println(conStr.getConnectionString());
         } catch (MalformedURLException ex) {
-            Logger.getLogger(ErrorCodeTest.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(ErrorCodeTest.class.getName()).log(Level.SEVERE, null, ex);
+            log.error(null, ex);
         }
     }
 
