@@ -18,7 +18,7 @@ $( document ).ready(function() {
             function(t) {
                 // this function is called with translation function t after the language has been loaded;  use this to automatically translate parts of the UI
                 // find all elements on the page that have data-i18n attribute and automatically translate them
-                $("[data-i18n]").each(function() { 
+                $("[data-i18n]").not("[translate='no']").each(function() { 
                      $(this).i18n(); // translate it using built-in i18next rules
                 });
             }
