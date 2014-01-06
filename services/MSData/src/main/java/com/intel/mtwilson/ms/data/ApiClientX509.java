@@ -81,6 +81,9 @@ public class ApiClientX509 implements Serializable {
     @Basic(optional = true)
     @Column(name = "comment")
     private String comment;
+    @Basic(optional = true)
+    @Column(name = "locale")
+    private String locale;
 
     public ApiClientX509() {
     }
@@ -187,6 +190,16 @@ public class ApiClientX509 implements Serializable {
         this.comment = comment;
     }
     
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    
+    // XXX TODO rewrite using cpg-io library com.intel.dcsg.cpg.x500.DN class like this:   DN dn = new DN(x509UserName); return dn.getCommonName(); 
     public String getUserNameFromName() {
         String x509UserName = name;
         String[] parts = x509UserName.split(",");

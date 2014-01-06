@@ -51,6 +51,10 @@
             <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter,com.intel.mtwilson.ms.helper.MSAuthenticationFilter</param-value>
         </init-param>
         <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+            <param-value>com.intel.mtwilson.ms.helper.MSLocalizationFilter</param-value>
+        </init-param>
+        <init-param>
             <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
             <param-value>com.intel.mtwilson.security.jersey.RolesAllowedResourceFilterFactory</param-value>
         </init-param>

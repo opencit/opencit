@@ -56,4 +56,9 @@ public class Message implements Localizable {
     
     @Override
     public void setLocale(Locale locale) { this.locale = locale; }
+    
+    public static String localize(Locale locale, String messageName, Object params) {
+        Message message = new Message(messageName, params);
+        return message.toString(locale);
+    }
 }

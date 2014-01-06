@@ -9,7 +9,7 @@ package com.intel.mtwilson.i18n;
  * @author jbuhacoff
  */
 public enum BundleName {
-    MTWILSON_STRINGS("mtwilson-strings"); // change to MtWilsonStrings because java convention is that resource bundles are equivalent to classes and should have the same naming convention
+    MTWILSON_STRINGS("MtWilsonStrings"); // changed from mtwilson-strings to MtWilsonStrings because java convention is that resource bundles are equivalent to classes and should have the same naming convention
     
     private String bundleName;
     BundleName(String bundleName) {

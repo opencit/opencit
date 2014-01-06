@@ -70,7 +70,7 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     }
     
     private String localize(MWException exception, Locale locale) {
-        ErrorMessage message = new ErrorMessage(exception.getErrorCode(), exception.getParameters());
+        ErrorMessage message = new ErrorMessage(exception.getErrorCode(), (Object)exception.getParameters());
         return message.toString(locale);
     }
     

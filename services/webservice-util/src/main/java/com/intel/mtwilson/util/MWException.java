@@ -17,6 +17,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 public class MWException extends WebApplicationException {
 
     private AuthResponse authResponse;
+    private Object[] parameters;
     
     private MWException(){
         
@@ -25,6 +26,7 @@ public class MWException extends WebApplicationException {
     public MWException(ErrorCode code, Object... params) {
         super(Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(code, params);
+        parameters = params;
     }
 
     public MWException(Throwable e,ErrorCode code, Object... params) {
@@ -32,18 +34,20 @@ public class MWException extends WebApplicationException {
         //super(e,Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
         super(Response.status(400).entity(new AuthResponse(code, params)).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(code, params);
+        parameters = params;
     }
 
     
     public MWException(ErrorCode code){
         super(Response.status(400).entity(new AuthResponse(code)).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(code);
-
+        parameters = null;
     }
     
     public MWException(Throwable e){
         super(e,Response.status(400).entity(new AuthResponse(ErrorCode.SYSTEM_ERROR, e.getMessage())).type(MediaType.APPLICATION_JSON_TYPE).build());
         authResponse = new AuthResponse(ErrorCode.SYSTEM_ERROR, e.getMessage());
+        parameters = null;
     }
     
     public String getErrorMessage(){
@@ -52,4 +56,9 @@ public class MWException extends WebApplicationException {
     public ErrorCode getErrorCode(){
         return authResponse.getErrorCodeEnum();
     }
+
+    public Object[] getParameters() {
+        return parameters;
+    }
+    
 }
