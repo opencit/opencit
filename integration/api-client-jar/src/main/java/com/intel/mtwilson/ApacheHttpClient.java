@@ -3,6 +3,7 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
+import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.crypto.SimpleKeystore;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
@@ -19,6 +20,7 @@ import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.util.Locale;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
@@ -56,6 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ApacheHttpClient implements java.io.Closeable {
     private final Logger log = LoggerFactory.getLogger(getClass());    
+    private final String ACCEPT_LANGUAGE = "Accept-Language";
 //    private SchemeRegistry sr;
     private ClientConnectionManager connectionManager;
     private HttpClient httpClient;
@@ -64,6 +67,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     private int port = 443;
 //    private boolean requireTrustedCertificate = true;
 //    private boolean verifyHostname = true;
+    private Locale locale = null;
     
     private ApacheHttpAuthorization authority = null; // can be any implementation - Hmac256 or RSA
     protected static final ObjectMapper mapper = new ObjectMapper();
@@ -371,6 +375,9 @@ public class ApacheHttpClient implements java.io.Closeable {
     public ApiResponse get(String requestURL) throws IOException, ApiException, SignatureException {
         //log.debug("GET url: {}", requestURL);        
         HttpGet request = new HttpGet(requestURL);
+        if( locale != null ) {
+            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
@@ -384,6 +391,9 @@ public class ApacheHttpClient implements java.io.Closeable {
     public ApiResponse delete(String requestURL) throws IOException, SignatureException {
         //log.debug("DELETE url: {}", requestURL);
         HttpDelete request = new HttpDelete(requestURL);
+        if( locale != null ) {
+            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
         if( authority != null ) {
             authority.addAuthorization(request); // add authorization header
         }
@@ -400,6 +410,9 @@ public class ApacheHttpClient implements java.io.Closeable {
         HttpPut request = new HttpPut(requestURL);
         if( message != null && message.content != null ) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
+        }
+        if( locale != null ) {
+            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
         }
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
@@ -418,6 +431,9 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( message != null && message.content != null ) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
+        if( locale != null ) {
+            request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
+        }
         if( authority != null ) {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
@@ -426,4 +442,14 @@ public class ApacheHttpClient implements java.io.Closeable {
         request.releaseConnection();
         return apiResponse;
     }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+    
+    
 }
