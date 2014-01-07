@@ -380,6 +380,10 @@ public class MyConfiguration {
     public String[] getMtWilsonRoleArray() {
         return getMtWilsonRoleString().split(",");
     }
+    
+    public String[] getAvailableLocales() {
+        return conf.getString("mtwilson.locales", "en").split(",");
+    }
 
     ///////////////////////// database //////////////////////////////////
 

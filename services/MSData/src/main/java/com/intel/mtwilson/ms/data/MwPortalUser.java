@@ -60,6 +60,9 @@ public class MwPortalUser implements Serializable {
     @Basic(optional = true)
     @Column(name = "comment")
     private String comment;
+    @Basic(optional = true)
+    @Column(name = "locale")
+    private String locale;
     
     @Transient
     private ByteArrayResource keystoreResource;
@@ -140,6 +143,15 @@ public class MwPortalUser implements Serializable {
         this.comment = comment;
     }
 
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    
     
     @Override
     public int hashCode() {

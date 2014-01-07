@@ -20,6 +20,8 @@
         <script type="text/javascript" src="Scripts/JQuery/jquery.ui.menu.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
+        <script type="text/javascript" src="Scripts/i18next-1.7.1.min.js"></script>
+        <script type="text/javascript" src="Scripts/i18_util.js"></script>
         <script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
         <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
 
@@ -32,10 +34,10 @@
     </head>
     <body>
         <div class="header">
-            <div class="title"><h1>Mt. Wilson</h1></div>
+            <div class="title"><h1 data-i18n="app.title">Mt. Wilson</h1></div>
             <div class="loginDisplay">
                 <span id="loginStatusValue">Welcome <%=session.getAttribute("username")%>  </span>
-                <a href="javascript:logoutUser();" id="LogInOut">Logout</a>
+                <a href="javascript:logoutUser();" id="LogInOut" data-i18n="app.logout">Logout</a>
             </div>
 
             <div class="clear hideSkiplink">
@@ -45,11 +47,11 @@
                         <!-- TRUST DASHBOARD --> 
 
                         <li>
-                            <a>Trust</a>
+                            <a data-i18n="link.trust">Trust</a>
                             <ul>
-                                <li><a href="javascript:;" onclick="getDashBoardPage()">Dashboard</a></li> <!-- was "Trust Dashboard" -->
-                                <li><a href="javascript:;" onclick="bulktrustUpdate()">Bulk Refresh</a></li> <!-- was "Bulk Trust Refresh" -->
-                                <li><a href="javascript:;" onclick="getShowReportPage()">Reports</a></li>
+                                <li><a href="javascript:;" onclick="getDashBoardPage()" data-i18n="link.dashboard">Dashboard</a></li> <!-- was "Trust Dashboard" -->
+                                <li><a href="javascript:;" onclick="bulktrustUpdate()" data-i18n="link.bulk_refresh">Bulk Refresh</a></li> <!-- was "Bulk Trust Refresh" -->
+                                <li><a href="javascript:;" onclick="getShowReportPage()" data-i18n="link.reports">Reports</a></li>
                             </ul>
                         </li>
                         <!-- 
@@ -58,12 +60,12 @@
                         <li><a href="javascript:;" onclick="getShowReportPage()">Reports</a><ul></ul></li>
                         -->
                         <li>
-                            <a>Host Management</a>
+                            <a data-i18n="link.host_management">Host Management</a>
                             <ul>
-                                <li><a href="javascript:getRegisterHostPage();">Import...</a></li> <!-- was "Register Host" under Management Console automation -->
-                                <li><a href="javascript:getAddHostPage()">Add Host</a></li>
-                                <li><a href="javascript:getEditHostPage()">Edit Host</a></li>
-                                <li><a href="javascript:getViewHostPage()">View Host</a></li>
+                                <li><a href="javascript:getRegisterHostPage();" data-i18n="link.import">Import...</a></li> <!-- was "Register Host" under Management Console automation -->
+                                <li><a href="javascript:getAddHostPage()" data-i18n="link.add_host">Add Host</a></li>
+                                <li><a href="javascript:getEditHostPage()" data-i18n="link.edit_host">Edit Host</a></li>
+                                <li><a href="javascript:getViewHostPage()" data-i18n="link.view_host">View Host</a></li>
                             </ul>
                         </li>
                         <!-- <li>
@@ -76,20 +78,20 @@
 
                         <!-- WHITELIST PORTAL -->
                         <li >
-                            <a>Whitelist</a>
+                            <a data-i18n="link.whitelist">Whitelist</a>
                             <ul>
-                                <li><a href="javascript:getWhiteListConfigurationPage();">Import from Trusted Host</a></li> <!-- was "Whitelist Configuration" under Management Console automation -->
-                                <li><a href="javascript:getEditMle();">Edit MLE</a></li>
-                                <li><a href="javascript:fnGetEditOS()">Edit OS</a></li>
-                                <li><a href="javascript:fnEditOEM()">Edit OEM</a></li>
+                                <li><a href="javascript:getWhiteListConfigurationPage();" data-i18n="link.import_from_trusted_host">Import from Trusted Host</a></li> <!-- was "Whitelist Configuration" under Management Console automation -->
+                                <li><a href="javascript:getEditMle();" data-i18n="link.edit_mle">Edit MLE</a></li>
+                                <li><a href="javascript:fnGetEditOS()" data-i18n="link.edit_os">Edit OS</a></li>
+                                <li><a href="javascript:fnEditOEM()" data-i18n="link.edit_oem">Edit OEM</a></li>
                             </ul>
                         </li>
                          <li >
-                            <a>Asset Tag Management</a>
+                            <a data-i18n="link.asset_tag_management">Asset Tag Management</a>
                             <ul>
-                                <li><a href="javascript:getAssetTagPage()">Tag Creation</a></li> <!-- was "Register Host" under Management Console automation -->
-                                <li><a href="javascript:getAssetTagPage()">Tag Selection</a></li>
-                                <li><a href="javascript:getAssetTagPage()">Certificate Management</a></li>
+                                <li><a href="javascript:getAssetTagPage()" data-i18n="link.create_asset_tag">Tag Creation</a></li> <!-- was "Register Host" under Management Console automation -->
+                                <li><a href="javascript:getAssetTagPage()" data-i18n="link.select_asset_tag">Tag Selection</a></li>
+                                <li><a href="javascript:getAssetTagPage()" data-i18n="link.certificate_management">Certificate Management</a></li>
                                 <!-- <li><a href="javascript:getAssetTagPage()">Settings</a></li>
                                 <li><a href="javascript:getAssetTagPage()">Log</a></li> -->
                             </ul>
@@ -124,13 +126,13 @@
                         -->
                         <!--  MANAGEMENT CONSOLE -->
                         <li >
-                            <a>Administration</a>
+                            <a data-i18n="link.administration">Administration</a>
                             <ul>
-                                <li><a href="javascript:getApproveRequestPage();">Pending Requests</a></li> <!-- was "Approve Request" -->
-                                <li><a href="javascript:getViewRequest();">List Users</a></li> <!-- was "View Request" -->
-                                <li><a href="javascript:getDeletePendingRegistration();">Delete User</a></li> <!-- was "Delete Request" -->
-                                <li><a href="javascript:getViewExpiringPage();">Extend User</a></li> <!-- was "Extend Request" -->
-                                <li><a href="javascript:viewCert();">View Certificates</a></li>
+                                <li><a href="javascript:getApproveRequestPage();" data-i18n="link.pending_requests">Pending Requests</a></li> <!-- was "Approve Request" -->
+                                <li><a href="javascript:getViewRequest();" data-i18n="link.list_users">List Users</a></li> <!-- was "View Request" -->
+                                <li><a href="javascript:getDeletePendingRegistration();" data-i18n="link.delete_user">Delete User</a></li> <!-- was "Delete Request" -->
+                                <li><a href="javascript:getViewExpiringPage();" data-i18n="link.extend_user">Extend User</a></li> <!-- was "Extend Request" -->
+                                <li><a href="javascript:viewCert();" data-i18n="link.view_certificates">View Certificates</a></li>
                             </ul>
                         </li>
 
