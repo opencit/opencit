@@ -182,6 +182,11 @@
     <dependencies>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-i18n</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>

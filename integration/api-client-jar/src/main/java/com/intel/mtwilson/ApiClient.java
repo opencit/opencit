@@ -57,6 +57,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.xml.JAXB;
+import java.util.Locale;
 /**
  * This class has many constructors to provide convenience for developers. 
  * However, too many options may be confusing.
@@ -86,7 +87,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     private static final String defaultConfigurationFilename = "mtwilson.properties";
 //    private ClassLoader jaxbClassLoader = null;
     private JAXB jaxb = new JAXB();
-    
+    private Locale locale = Locale.getDefault();
     private SimpleKeystore keystore;
         
     /**
@@ -141,8 +142,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
+        setLocale(properties);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("HMAC-256 Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -164,8 +167,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setBaseURL(baseURL);
         Configuration config = new MapConfiguration(properties);
         setKeystore(config);
+        setLocale(properties);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -187,8 +192,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
+        setLocale(config);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("HMAC-256 Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -214,8 +221,10 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
         setBaseURL(baseURL);
         setKeystore(keystore);
+        setLocale(config);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, config);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -229,6 +238,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         setKeystore(keystore);
         log.debug("Base URL: "+baseURL.toExternalForm());
         httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(credential), keystore, tlsPolicy);
+        httpClient.setLocale(locale);
         log.debug("RSA Identity: "+new String(credential.identity(), "UTF-8"));
         }
         catch(Exception e) {
@@ -268,20 +278,26 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
 //            RsaCredential rsaCredential = RsaUtil.fromKeystore(config);
             setKeystore(config);
+            setLocale(config);
             httpClient = new ApacheHttpClient(baseURL, new ApacheRsaHttpAuthorization(rsaCredential), keystore, config);
+            httpClient.setLocale(locale);
             Hex hex = new Hex();
             log.debug("RSA Identity: "+hex.encode(rsaCredential.identity()));
         }
         else if( config.containsKey("mtwilson.api.clientId") && config.containsKey("mtwilson.api.secretKey") ) {
             HmacCredential hmacCredential = new HmacCredential(config.getString("mtwilson.api.clientId"), config.getString("mtwilson.api.secretKey"));
             setKeystore(config);
+            setLocale(config);
             httpClient = new ApacheHttpClient(baseURL, new ApacheHmacHttpAuthorization(hmacCredential), keystore, config);
+            httpClient.setLocale(locale);
             log.debug("HMAC-256 Identity: "+new String(hmacCredential.identity(), "UTF-8"));
         }
         else {
             // no authentication
             setKeystore(config);
+            setLocale(config);
             httpClient = new ApacheHttpClient(baseURL, null, keystore, config);
+            httpClient.setLocale(locale);
             log.info("No identity configured");
         }        
     }
@@ -299,6 +315,34 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         this.keystore = keystore;
     }
 
+    private void setLocale(Properties properties) {
+        String language = properties.getProperty("user.language","");
+        String country = properties.getProperty("user.country","");
+        if( !language.isEmpty() && !country.isEmpty() ) { 
+            locale = new Locale(language, country);
+        }
+        if( !language.isEmpty() ) {
+            locale = new Locale(language);
+        }
+    }
+    private void setLocale(Configuration config) {
+        String language = config.getString("user.language","");
+        String country = config.getString("user.country","");
+        if( !language.isEmpty() && !country.isEmpty() ) { 
+            locale = new Locale(language, country);
+        }
+        if( !language.isEmpty() ) {
+            locale = new Locale(language);
+        }
+    }
+    
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+        if( httpClient != null ) {
+            httpClient.setLocale(locale);
+        }
+    }
+    
     /**
      * Some environments such as OSGi require the use of their own ClassLoader
      * when using JAXB. Use this method to set the ClassLoader that should be
