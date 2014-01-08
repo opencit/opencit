@@ -44,9 +44,10 @@ public class SetAssetTag implements ICommand{
             //create the index if needed
             boolean iExists = indexExists();
             if(iExists){  // if it exists we need to get the password from the service for the nvram
-                
+                log.error("index already exists.");
             }else{ // generate random password 
                 password = generateRandomPass();
+                log.debug("index does not exist. creating it using password " + password);
                 createIndex(password);
             }
             log.debug("using password " + password + " for index");
@@ -78,7 +79,7 @@ public class SetAssetTag implements ICommand{
     private boolean writeHashToNvram(String password) throws TAException, IOException {
         List<String> result;
         try {
-            
+            log.debug("running command tpm_nvwrite -i " + index + " -p" + password + " -f /tmp/hash");
             result = CommandUtil.runCommand("tpm_nvwrite -i " + index + " -p" + password + " -f /tmp/hash");
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToNvram output: " + response);
@@ -105,6 +106,7 @@ public class SetAssetTag implements ICommand{
         List<String> result;
         try {
             String tpmPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=\"AUTHWRITE\"");
             result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=\"AUTHWRITE\"");
             String response = StringUtils.join(result,"\n");
             log.debug("createIndex output: " + response);
