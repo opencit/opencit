@@ -8,6 +8,6 @@ package com.intel.mtwilson.jersey;
  *
  * @author jbuhacoff
  */
-public abstract class PatchLink<T> {
+public interface PatchLink<T> {
     
 }

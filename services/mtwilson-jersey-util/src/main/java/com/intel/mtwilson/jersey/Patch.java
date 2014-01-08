@@ -15,8 +15,8 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  */
 @JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY) // jackson 1.9
 @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
-public class Patch<T,L extends PatchLink<T>> {
-    private T select;
+public class Patch<T,F extends FilterCriteria<T>,L extends PatchLink<T>> {
+    private F select;
     private T replace;
     private L link;
     private L unlink;
@@ -44,7 +44,7 @@ public class Patch<T,L extends PatchLink<T>> {
         return replace;
     }
 
-    public T getSelect() {
+    public F getSelect() {
         return select;
     }
 
@@ -64,7 +64,7 @@ public class Patch<T,L extends PatchLink<T>> {
         this.replace = replace;
     }
 
-    public void setSelect(T select) {
+    public void setSelect(F select) {
         this.select = select;
     }
 
@@ -72,22 +72,12 @@ public class Patch<T,L extends PatchLink<T>> {
         this.test = test;
     }
 
-    public void link(String linkName, L target) {/*
-        ArrayList<L> links = link.get(linkName);
-        if( links == null ) {
-            links = new ArrayList<L>();
-            link.put(linkName, links);
-        }
-        links.add(target);*/
+    public void setLink(L link) {
+        this.link = link;
     }
 
-    public void unlink(String linkName, L target) {/*
-        ArrayList<L> unlinks = unlink.get(linkName);
-        if( unlinks == null ) {
-            unlinks = new ArrayList<L>();
-            unlink.put(linkName, unlinks);
-        }
-        unlinks.add(target);*/
+    public void setUnlink(L unlink) {
+        this.unlink = unlink;
     }
     
 
