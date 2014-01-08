@@ -150,6 +150,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-jersey-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 	    <groupId>com.intel.mtwilson.services</groupId>
 	    <artifactId>webservice-util</artifactId>
 			<version>${project.version}</version>

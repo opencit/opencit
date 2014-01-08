@@ -296,6 +296,11 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-jersey-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         <!--
 		<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
