@@ -77,8 +77,37 @@ public class TrustAgent {
             return respondToDaaChallenge(xmlInput);
         } else if (xmlInput.contains("host_info")) {
             return hostInfo(xmlInput);
-        } else {
+        } else if (xmlInput.contains("set_asset_tag")) {
+            return processAssetTagRequestInput(xmlInput);
+        }else {
             return generateErrorResponse(ErrorCode.UNSUPPORTED_OPERATION, xmlInput);
+        }
+    }
+    
+    private String processAssetTagRequestInput(String xmlInput)  {
+        try{
+
+            Pattern p = Pattern.compile("<asset_tag_hash>([^\"><]*?)</asset_tag_hash>"); // constrained regex from .* to [^\"><]
+            Matcher m = p.matcher(xmlInput);
+            m.find();
+            String assetTagHash = m.group(1);
+            p = Pattern.compile("<asset_tag_uuid>([^\"><]*?)</asset_tag_uuid>"); // constrained regex from .* to [^\"><]
+            m = p.matcher(xmlInput);
+            m.find();
+            String uuid = m.group(1);
+           
+            TADataContext context = new TADataContext();
+            
+            context.setAssetTagHash(assetTagHash);
+           
+            context.setHostUUID(uuid);
+            
+            new SetAssetTag(context).execute();
+            
+            return context.getResponseXML();
+        }catch(TAException ex){
+            log.error( null, ex);
+            return generateErrorResponse(ex.getErrorCode(), ex.getMessage());
         }
     }
 
@@ -98,7 +127,7 @@ public class TrustAgent {
             new GenerateModulesCmd(context).execute();
             new GenerateQuoteCmd(context).execute();
             new BuildQuoteXMLCmd(context).execute();
-
+            
             return context.getResponseXML();
 
         } catch (TAException ex) {

@@ -25,7 +25,7 @@ import org.apache.commons.io.IOUtils;
  * @author dsmagadX
  */
 public class CommandUtil {
-
+    
     private static final Logger log = LoggerFactory.getLogger(CommandUtil.class.getName());
 
     public static List<String> runCommand(String commandLine) throws TAException, IOException {
@@ -86,12 +86,12 @@ public class CommandUtil {
 
         return result;
     }
-
+        
     private static void checkError(int exitValue, String commandLine) throws TAException {
         log.debug( "Return code {}", exitValue);
 
         if (exitValue != 0) {
-            throw new TAException(ErrorCode.FATAL_ERROR, "Error while running command" + commandLine);
+            throw new TAException(ErrorCode.FATAL_ERROR, exitValue + ": Error while running command: " + commandLine);
         }
 
 
