@@ -9,6 +9,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.as.rest.v2.model.HostLinks;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 
@@ -18,7 +19,7 @@ import javax.ws.rs.Path;
  */
 @Stateless
 @Path("/hosts")
-public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriteria> {
+public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriteria,HostLinks> {
 
     @Override
     protected HostCollection search(HostFilterCriteria criteria) {

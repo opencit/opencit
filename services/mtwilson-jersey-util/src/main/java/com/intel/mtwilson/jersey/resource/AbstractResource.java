@@ -14,6 +14,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import com.intel.mtwilson.jersey.Document;
 import com.intel.mtwilson.jersey.DocumentCollection;
+import com.intel.mtwilson.jersey.FilterCriteria;
+import com.intel.mtwilson.jersey.Patch;
+import com.intel.mtwilson.jersey.PatchLink;
 import java.util.List;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -65,7 +68,7 @@ import javax.ws.rs.core.MediaType;
  */
 //@Stateless
 //@Path("/hosts")
-public abstract class AbstractResource<T extends Document,C extends DocumentCollection<T>,F> {
+public abstract class AbstractResource<T extends Document,C extends DocumentCollection<T>,F extends FilterCriteria<T>,L extends PatchLink<T>> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractResource.class);
 
     /**
@@ -256,7 +259,7 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     @PATCH
     @Consumes({OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML}) // XXX TODO probably should define a more specific patch format like application/vnd.mtwilson.patch+json ... or implement the emerging json-patch rfc even though it looks messy
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
-   public T patchOne(@PathParam("id") String id /*, PatchDocument patch */) {
+   public T patchOne(@PathParam("id") String id, Patch<T,F,L> patch) {
         log.debug("patch");
         // XXX TODO wire up to repository...
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...

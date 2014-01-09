@@ -7,6 +7,7 @@ package com.intel.mtwilson.as.rest.v2.resource;
 import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
+import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
 import javax.ejb.Stateless;
@@ -18,7 +19,7 @@ import javax.ws.rs.Path;
  */
 @Stateless
 @Path("/files")
-public class Files extends AbstractResource<File,FileCollection,FileFilterCriteria> {
+public class Files extends AbstractResource<File,FileCollection,FileFilterCriteria,NoLinks<File>> {
 
     @Override
     protected FileCollection search(FileFilterCriteria criteria) {
