@@ -29,6 +29,7 @@
     <module>MSData</module>
     <module>MSCommon</module>
     <module>ASCommon</module>
+	<module>mtwilson-jersey-util</module>
     <module>MtWilsonHttpSecurityAdapters</module>
     <module>trust-utils-jar</module>
     <module>AttestationService</module>
