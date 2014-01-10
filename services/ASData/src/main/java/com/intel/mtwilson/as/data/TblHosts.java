@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 //    @NamedQuery(name = "TblHosts.findByUpdatedOn", query = "SELECT t FROM TblHosts t WHERE t.updatedOn = :updatedOn"),
     @NamedQuery(name = "TblHosts.findByErrorCode", query = "SELECT t FROM TblHosts t WHERE t.errorCode = :errorCode"),
     @NamedQuery(name = "TblHosts.findByErrorDescription", query = "SELECT t FROM TblHosts t WHERE t.errorDescription = :errorDescription"),
+    @NamedQuery(name = "TblHosts.findByHwUUID", query = "SELECT t FROM TblHosts t WHERE t.hardware_uuid = :hardware_uuid"),
     @NamedQuery(name = "TblHosts.findByNameSearchCriteria", query = "SELECT t FROM TblHosts t WHERE t.name like :search")})
 public class TblHosts implements Serializable {
     @Transient
