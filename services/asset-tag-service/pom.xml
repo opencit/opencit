@@ -328,37 +328,30 @@ our customers.
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
-            <version>0.1.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-console</artifactId>
-            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.1.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-util</artifactId>
-            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-performance</artifactId>
-            <version>0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
@@ -393,12 +386,10 @@ our customers.
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.4</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.10</version>
         </dependency>        
         <dependency>
             <groupId>commons-codec</groupId>

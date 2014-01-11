@@ -110,22 +110,18 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-io</artifactId>
-            <version>0.1.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-validation</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.1.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
 
 
@@ -150,12 +146,10 @@ Then you'll be able to run junit tests for search APIs etc that use JOOQ in thei
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.4</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.10</version>
         </dependency>        
         <dependency>
             <groupId>commons-codec</groupId>

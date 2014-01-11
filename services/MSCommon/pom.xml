@@ -45,13 +45,11 @@
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
-		<version>1.6.4</version>
     </dependency>
     <dependency>
-		<groupId>org.slf4j</groupId>
-		<artifactId>slf4j-simple</artifactId>
-		<version>1.6.4</version>
-		<scope>provided</scope>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <scope>test</scope>
     </dependency>
     <dependency>
 		<groupId>junit</groupId>

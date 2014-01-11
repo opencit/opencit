@@ -533,6 +533,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <artifactId>cpg-authz-token</artifactId>
             <version>0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-console</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
 	<dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-crypto</artifactId>
@@ -569,6 +574,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-performance</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-rfc822</artifactId>
             <version>0.2-SNAPSHOT</version>
@@ -602,12 +612,12 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.0.9</version>
+            <version>1.0.13</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.0.9</version>
+            <version>1.0.13</version>
         </dependency>
 		
 		
