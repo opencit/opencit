@@ -308,7 +308,6 @@
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.1.4-SNAPSHOT</version>
         </dependency>
 
 		<dependency>

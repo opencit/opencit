@@ -33,7 +33,6 @@
 	<dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-i18n</artifactId>
-		<version>0.1-SNAPSHOT</version>
 	</dependency>
 	<dependency>
         <groupId>com.sun.jersey</groupId>
@@ -146,7 +145,6 @@
 	<dependency>
 	    <groupId>com.intel.dcsg.cpg</groupId>
 	    <artifactId>cpg-validation</artifactId>
-	    <version>0.1.1-SNAPSHOT</version>
   	</dependency>
   </dependencies>  
 </project>
