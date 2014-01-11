@@ -259,8 +259,23 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     @PATCH
     @Consumes({OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML}) // XXX TODO probably should define a more specific patch format like application/vnd.mtwilson.patch+json ... or implement the emerging json-patch rfc even though it looks messy
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
-   public T patchOne(@PathParam("id") String id, Patch<T,F,L> patch) {
+   public T patchOne(@PathParam("id") String id, Patch<T,F,L>[] patchArray) {
         log.debug("patch");
+        T item = retrieve(id);
+        if( item == null ) {
+            // 404 not found
+            return null;
+        }
+        for(int i=0; i<patchArray.length; i++) {
+            log.debug("Processing patch #{} of {}", i+1, patchArray.length);
+            // XXX TODO check if patchArray[i].getSelect() == null  (expected) , and if it's not null then use abstract method to check that id == id   (like have a method that takes a string id and a filtercriteria and decides if they refer to the same record)
+            // XXX TODO need an abstract method for applying patches for subclasses
+            if( false /* error during processing */ ) {
+                // 400 bad request or 500 internal server error
+                return null;
+            }
+            
+        }
         // XXX TODO wire up to repository...
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
         //return new Host();

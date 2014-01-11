@@ -154,6 +154,9 @@
   
   
   </build>
+  
+  <!-- commenting out this dependency 2014-01-09, it doesn't make sense and doesn't appear to be used here anyway; the java setup code uses it for its jdbc driver and postgres sql scripts -->
+  <!--
   <dependencies>
     <dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
@@ -161,6 +164,7 @@
 		<version>${project.version}</version>
 	</dependency>
   </dependencies>
+  -->
   </profile>
   </profiles>
 

@@ -151,14 +151,12 @@
 	    <plugin>
                 <groupId>org.glassfish.maven.plugin</groupId>
                 <artifactId>maven-glassfish-plugin</artifactId>
-                <version>2.1</version>
             </plugin>
 
 	
 <plugin>
 	<groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
         <executions>
           <execution>
 	    <id>default-cli</id>
@@ -199,7 +197,6 @@
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.5</version>
             <executions>
                 <execution>
                     <id>attach-artifacts</id>
@@ -323,7 +320,6 @@
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.2-507.jdbc4</version>
         </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

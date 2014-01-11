@@ -305,6 +305,46 @@
         </configuration>        
       </plugin>
                 -->
+				
+<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<showWeaveInfo>true</showWeaveInfo>
+					<aspectLibraries>
+                        <!-- security framework -->
+						<aspectLibrary>
+							<groupId>org.apache.shiro</groupId>
+							<artifactId>shiro-aspectj</artifactId>
+    					</aspectLibrary>
+					</aspectLibraries>
+				</configuration>
+				<executions>
+					<execution>
+						<id>aspectj-compile</id>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>                <dependencies>
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>1.7.4</version>
+    </dependency>
+<dependency>
+<groupId>org.aspectj</groupId>
+<artifactId>aspectjtools</artifactId>
+<version>1.7.4</version>
+</dependency>
+                </dependencies>
+
+			</plugin>
+				
 	</plugins>
 
 	<extensions>
@@ -419,7 +459,33 @@
         
   </build>
   
+  <dependencies>
+    <!-- for compile-time aspects declared in the plugins section -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjrt</artifactId>
+      <version>1.7.4</version>
+      <scope>compile</scope>
+    </dependency>
+<dependency>
+<groupId>org.aspectj</groupId>
+<artifactId>aspectjtools</artifactId>
+<version>1.7.4</version>
+      <scope>compile</scope>
+</dependency>
+    <dependency>
+			<groupId>org.apache.shiro</groupId>
+			<artifactId>shiro-aspectj</artifactId>
+            <version>1.2.2</version>
+            <scope>compile</scope>
+		</dependency>
+</dependencies>
+  
     <dependencyManagement>
+    
+	
+	
+	
         <dependencies>
             <dependency>
                 <groupId>commons-configuration</groupId>
@@ -456,6 +522,75 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <version>4.11</version>
             <scope>test</scope>
         </dependency>        
+		
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-authz-token</artifactId>
+            <version>0.1-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-crypto</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-crypto-key</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-extensions</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-i18n</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-io</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-jpa</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-net</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-rfc822</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-util</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-validation</artifactId>
+		<version>0.2-SNAPSHOT</version>
+	</dependency>
+    <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-xml</artifactId>
+            <version>0.2-SNAPSHOT</version>
+    </dependency>
+		
+		
+		
         </dependencies>
     </dependencyManagement>  
     
