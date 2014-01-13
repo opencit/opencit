@@ -384,6 +384,7 @@ mtwilson.atag = mtwilson.atag || {};
     };
     
     mtwilson.atag.autoPopulateUUID = function(input) {
+        $('certificate-request-create-subject').value = "Some Random UUID";
         alert("its working!");
     }
 

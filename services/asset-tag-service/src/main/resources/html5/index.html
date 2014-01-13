@@ -547,7 +547,7 @@ function isNumber(n) {
 
                         <h2>Create New Certificate Request</h2>
                         <form id="auto-populate-uuid-form" action="#" onsubmit="return false;">
-                            <p>Currently works only with Intel Trust Agent and Citrix Xen hosts.</p>
+                            <p>Auto UUID populate currently works only with Intel Trust Agent and Citrix Xen hosts.</p>
                             <input type="hidden" name="populateUuid" id="populate-uuid"/>
                             <ul>
                                 <li>
@@ -559,7 +559,7 @@ function isNumber(n) {
                                     <input type="text" id="uuid-populate-username" name="uuidUsername" placeholder="Username"/>
                                 </li>
                                 <li>
-                                    <label for="certificate-provision-password">Password</label>
+                                    <label for="uuid-populate-password">Password</label>
                                     <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
                                 </li>
                                 <li>
@@ -572,7 +572,7 @@ function isNumber(n) {
                             <ul>
                                 <li><label for="certificate-request-create-subject">Subject</label>
                                     <input type="text" id="certificate-request-create-subject" name="subject" placeholder="Host UUID" data-bind-value="input.subject" class="required"/>
-                                    
+                                    <input type="submit" value="Auto Populate UUID" onclick="$('auto-populate-uuid-form').show(); return false;"/>
                                 </li>
                                 <li><label for="certificate-request-create-tag-selection">Tag Selection</label>
                                     <select id="certificate-request-create-tag-selection" data-bind-value="input.selection" class="required">
@@ -1083,6 +1083,7 @@ function isNumber(n) {
             navTabs.setActiveTab('tags');
 //            navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
+            $('auto-populate-uuid-form').hide();
             $('certificate-provision-form').hide();
         </script>
 
