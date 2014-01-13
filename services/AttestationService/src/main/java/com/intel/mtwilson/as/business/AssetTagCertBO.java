@@ -57,6 +57,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  *
@@ -115,7 +116,7 @@ public class AssetTagCertBO extends BaseBO{
             
             // here we need to check a config option, mtwilson.atag.associate.hosts.auto
             // now try to match a host to it
-            log.debug("trying to associate tag to existing host using " + new String(atagCert.getSHA1Hash()));
+            log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagCert.getSHA1Hash()));
             AssetTagCertAssociateRequest request = new AssetTagCertAssociateRequest();
             request.setSha1OfAssetCert(atagCert.getSHA1Hash());
             //result = 
@@ -144,24 +145,32 @@ public class AssetTagCertBO extends BaseBO{
      */
     public boolean mapAssetTagCertToHost(AssetTagCertAssociateRequest atagObj) {
         boolean result = false;
+        log.debug("mapAssetTagCertToHost");
         AssetTagCertAssociateRequest request = new AssetTagCertAssociateRequest();
         try {
             My.initDataEncryptionKey(); // needed for connection string decryption
             if (atagObj.getSha1OfAssetCert() != null) {
+                log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagObj.getSha1OfAssetCert()));
                 List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
                 // below code is for debugging.. we will delete it later.
                 // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
                 if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                    log.error("mapAssetTagCertToHostById : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                    log.error("mapAssetTagCertToHost : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
                 } else {
                     MwAssetTagCertificate atagCert = atagCerts.get(0);
                     request.setSha1OfAssetCert(atagCert.getSHA1Hash());
                     String uuid = atagCert.getUuid();
                     TblHosts tblHost = My.jpa().mwHosts().findByHwUUID(uuid);
-                    log.debug("found host matching uuid of cert, going to assoicate with host id = " + tblHost.getId());
-                    request.setHostID(tblHost.getId());
-                    result = mapAssetTagCertToHostById(request);
+                    if(tblHost != null) {
+                        log.debug("found host matching uuid of cert, going to assoicate with host id = " + tblHost.getId());
+                        request.setHostID(tblHost.getId());
+                        //atagObj.setHostID(tblHost.getId());
+                        result = mapAssetTagCertToHostById(request);
+                    }else{
+                        log.debug("found no matching uuid of cert");
+                        result = false;
+                    }
                 }
             }
         }catch(Exception ex){
@@ -169,7 +178,7 @@ public class AssetTagCertBO extends BaseBO{
             throw new ASException(ex);
         }       
         
-        return false;
+        return result;
     }
     
     /**
@@ -181,7 +190,7 @@ public class AssetTagCertBO extends BaseBO{
     public boolean mapAssetTagCertToHostById(AssetTagCertAssociateRequest atagObj) {
         boolean result = false;
         Sha1Digest expectedHash = null;
-        
+        log.debug("mapAssetTagCertToHostById");
         try {
             My.initDataEncryptionKey(); // needed for connection string decryption
             // Find the asset tag certificate for the specified Sha256Hash value
