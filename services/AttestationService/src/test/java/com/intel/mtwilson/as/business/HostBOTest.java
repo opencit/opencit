@@ -84,7 +84,8 @@ public class HostBOTest {
     
     @Test
     public void testHostByUUID() throws IOException, CryptographyException{
-        String UUID = "e703fd15-5bd9-e111-a146-001e67577004";
+        //String UUID = "B21FD91B-EF72-E111-BD1D-001E67388954".toLowerCase();
+        String UUID = "b21fd91b-ef72-e111-bd1d-001e67388954";
         TblHosts tblHosts = My.jpa().mwHosts().findByHwUUID(UUID);
         if(tblHosts != null) {
             System.err.println("found host!");

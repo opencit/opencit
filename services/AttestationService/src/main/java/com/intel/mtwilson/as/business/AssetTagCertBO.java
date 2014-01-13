@@ -160,7 +160,8 @@ public class AssetTagCertBO extends BaseBO{
                 } else {
                     MwAssetTagCertificate atagCert = atagCerts.get(0);
                     request.setSha1OfAssetCert(atagCert.getSHA1Hash());
-                    String uuid = atagCert.getUuid();
+                    String uuid = atagCert.getUuid().toLowerCase().trim();
+                    log.debug("searching using " + uuid);
                     TblHosts tblHost = My.jpa().mwHosts().findByHwUUID(uuid);
                     if(tblHost != null) {
                         log.debug("found host matching uuid of cert, going to assoicate with host id = " + tblHost.getId());

@@ -195,7 +195,7 @@ public class HostBO extends BaseBO {
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
                         Map<String,String> attributes = agent.getHostAttributes();
-                        tblHosts.setHardwareUuid(attributes.get("Host_UUID"));
+                        tblHosts.setHardwareUuid(attributes.get("Host_UUID").toLowerCase().trim());
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
