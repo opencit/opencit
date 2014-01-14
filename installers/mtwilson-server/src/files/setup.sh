@@ -194,7 +194,7 @@ mkdir -p /opt/intel/cloudsecurity/setup-console
 #rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
 rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
 #cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
-cp setup-console*.jar /opt/intel/cloudsecurity/mtwilson-console
+cp mtwilson-console*.jar /opt/intel/cloudsecurity/setup-console
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
