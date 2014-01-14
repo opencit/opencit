@@ -18,16 +18,16 @@
     <makeself.directory>${project.build.directory}/${project.artifactId}-${project.version}</makeself.directory>
   </properties>
   
+  <!--
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.parent.version}</version>
       <type>sh</type>
-    </dependency>	
-   
-    
+    </dependency>
   </dependencies>
+  -->
 
   <build>
       <resources>
@@ -44,6 +44,14 @@
                   <family>unix</family>
               </os>
           </activation>
+          <dependencies>
+              <dependency>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>mtwilson-linux-util</artifactId>
+                  <version>${project.parent.version}</version>
+                  <type>sh</type>
+              </dependency>
+          </dependencies>
   <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
