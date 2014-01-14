@@ -186,12 +186,15 @@ auto_install "Installer requirements" "APICLIENT"
 # api client: ensure destination exists and clean it before copying
 mkdir -p /usr/local/share/mtwilson/apiclient/java
 rm -rf /usr/local/share/mtwilson/apiclient/java/*
-unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
+#unzip api-client*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
+unzip mtwilson-client-java6*.zip -d /usr/local/share/mtwilson/apiclient/java >> $INSTALL_LOG_FILE
 
 # setup console: create folder and copy the executable jar
 mkdir -p /opt/intel/cloudsecurity/setup-console
-rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
-cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
+#rm -rf /opt/intel/cloudsecurity/setup-console/setup-console*.jar
+rm -rf /opt/intel/cloudsecurity/setup-console/mtwilson-console*.jar
+#cp setup-console*.jar /opt/intel/cloudsecurity/setup-console
+cp setup-console*.jar /opt/intel/cloudsecurity/mtwilson-console
 
 # create or update mtwilson.properties
 mkdir -p /etc/intel/cloudsecurity
@@ -244,12 +247,12 @@ find_installer() {
 java_installer=`find_installer java`
 monit_installer=`find_installer monit`
 logrotate_installer=`find_installer logrotate`
-mtwilson_util=`find_installer MtWilsonLinuxUtil`
+mtwilson_util=`find_installer mtwilson-linux-util` #MtWilsonLinuxUtil`
 privacyca_service=`find_installer PrivacyCAService`
-management_service=`find_installer ManagementService`
-whitelist_service=`find_installer WLMService`
-attestation_service=`find_installer AttestationService`
-whitelist_portal=`find_installer WhiteListPortal`
+management_service=`find_installer mtwilson-management-service` #ManagementService`
+whitelist_service=`find_installer mtwilson-whitelist-service` #WLMService`
+attestation_service=`find_installer mtwilson-attestation-service` #AttestationService`
+whitelist_portal=`find_installer mtwilson-portal-installer` #WhiteListPortal`
 management_console=`find_installer ManagementConsole`
 trust_dashboard=`find_installer TrustDashBoard`
 mtw_portal=`find_installer mtwilson-portal-installer`
