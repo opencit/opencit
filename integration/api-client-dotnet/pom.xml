@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>api-client-dotnet</artifactId>
+  <artifactId>mtwilson-client-dotnet</artifactId>
   <packaging>pom</packaging>
   <name>API Client for .NET</name>
   
@@ -109,8 +109,8 @@
 
   <dependencies>
 	<dependency>
-	    <groupId>com.intel.mountwilson</groupId>
-	    <artifactId>api-client</artifactId>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-client-java6</artifactId>
 	    <version>${project.version}</version>
 	    <type>jar</type>
 		<classifier>with-dependencies</classifier>
