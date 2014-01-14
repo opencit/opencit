@@ -113,12 +113,12 @@
         
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>api-client</artifactId>
+		<artifactId>mtwilson-client-java6</artifactId>
 		<version>${project.version}</version>        
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
-		<artifactId>my</artifactId>
+		<artifactId>mtwilson-my</artifactId>
 		<version>${project.version}</version>        
     </dependency>
     <dependency>
@@ -165,7 +165,7 @@
     
     <dependency>
         <groupId>com.intel.mtwilson.services</groupId>
-        <artifactId>trust-util-jar</artifactId>
+        <artifactId>mtwilson-trust-utils</artifactId>
 		<version>${project.version}</version>        
     </dependency>
 

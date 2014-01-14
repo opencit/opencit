@@ -31,12 +31,14 @@
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
+    <!--
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>MtWilsonLinuxUtil</artifactId>
+      <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
       <type>sh</type>
-    </dependency>	
+    </dependency>
+    -->
   </dependencies>
 
   <profiles>
@@ -46,6 +48,14 @@
                   <family>unix</family>
               </os>
           </activation>
+          <dependencies>
+              <dependency>
+                  <groupId>com.intel.mtwilson.linux</groupId>
+                  <artifactId>mtwilson-linux-util</artifactId>
+                  <version>${project.version}</version>
+                  <type>sh</type>
+              </dependency>
+          </dependencies>
   <build>
     <plugins>
        <!-- begin copy rpm artifact  plugin -->
@@ -72,7 +82,7 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <artifactId>mtwilson-linux-util</artifactId>
                   <version>${project.version}</version>
                   <type>sh</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>AttestationService</artifactId>
+  <artifactId>mtwilson-attestation-service-installer</artifactId>
 
   <packaging>pom</packaging>
   <name>Attestation Service Linux Installer</name>
@@ -37,14 +37,14 @@
   <dependencies>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>AttestationService</artifactId>
+      <artifactId>mtwilson-attestation-service</artifactId>
       <version>${project.version}</version>
       <type>war</type>
       <classifier>premium</classifier>
     </dependency>	
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
-      <artifactId>MtWilsonLinuxUtil</artifactId>
+      <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
       <type>sh</type>
     </dependency>	
@@ -82,7 +82,7 @@
               <artifactItems>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.services</groupId>
-                  <artifactId>AttestationService</artifactId>
+                  <artifactId>mtwilson-attestation-service</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
                   <classifier>premium</classifier>
@@ -91,7 +91,7 @@
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
-                  <artifactId>MtWilsonLinuxUtil</artifactId>
+                  <artifactId>mtwilson-linux-util</artifactId>
                   <version>${project.version}</version>
                   <type>sh</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>

@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>MtWilsonHttpSecurityAdapters</artifactId>
+  <artifactId>mtwilson-http-security-server</artifactId>
 
   <name>Http Server Security</name>
   <description>JPA and Business Logic for Mt Wilson Web Services</description>
@@ -90,7 +90,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>MtWilsonHttpSecurity</artifactId>
+			<artifactId>mtwilson-http-security</artifactId>
 			<version>${project.version}</version>
 		</dependency>
     
