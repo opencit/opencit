@@ -39,14 +39,15 @@ public class SetAssetTag implements ICommand{
     public void execute() throws TAException{
         try {
             
-            String password = "";
+            String password = "password";
             
             //create the index if needed
             boolean iExists = indexExists();
             if(iExists){  // if it exists we need to get the password from the service for the nvram
                 log.error("index already exists.");
             }else{ // generate random password 
-                password = generateRandomPass();
+                // Just use the same password right now for testing
+                // password =  generateRandomPass();
                 log.debug("index does not exist. creating it using password " + password);
                 createIndex(password);
             }
