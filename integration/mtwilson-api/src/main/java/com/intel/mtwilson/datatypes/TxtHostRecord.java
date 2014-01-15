@@ -18,10 +18,10 @@ import org.codehaus.jackson.annotate.JsonProperty;
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class TxtHostRecord {
     @JsonProperty    
-    @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
+    @Regex(RegExAnnotation.IPADDR_FQDN)
     public String HostName;
     @JsonProperty
-    @Regex(RegExAnnotation.IPADDR_FQDN_PATTERN)
+    @Regex(RegExAnnotation.IPADDR_FQDN)
     public String IPAddress;
     @JsonProperty
     @Regex(RegExAnnotation.PORT)
@@ -46,7 +46,7 @@ public class TxtHostRecord {
     @JsonProperty
     public String Description;
     @JsonProperty
-    @Regex(RegExAnnotation.EMAIL_PATTERN)
+    @Regex(RegExAnnotation.EMAIL)
     public String Email;
     @JsonProperty
     public String Location;

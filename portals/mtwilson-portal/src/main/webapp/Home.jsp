@@ -20,6 +20,7 @@
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menu.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.ui.menubar.js"></script>
 	<script type="text/javascript" src="Scripts/JQuery/jquery.paginate.js"></script>
+        <script type="text/javascript" src="Scripts/token.js"></script>
 	<script type="text/javascript" src="Scripts/ajaxfileupload.js"></script>
     <script type="text/javascript" src="Scripts/JQuery/jquery.popupWindow.js"></script>
     
