@@ -379,26 +379,17 @@
                 <artifactId>logback-classic</artifactId>
         </dependency>
 
-        <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-        </dependency>
-
-            
 	<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.8</version>
 		</dependency>
 	<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
 		</dependency>
 	<dependency>
 			<groupId>commons-math</groupId>
 			<artifactId>commons-math3</artifactId>
-			<version>3.0</version>
 		</dependency>
                 
                 <!--
@@ -459,6 +450,7 @@
 			<version>3.1.1</version>
 			<scope>provided</scope>
 		</dependency>
+        <!--
         <dependency>
             <groupId>org.glassfish.distributions</groupId>
             <artifactId>web-all</artifactId>
@@ -471,6 +463,7 @@
             <version>1.0-alpha-4</version>
             <scope>test</scope>
         </dependency>
+        -->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>

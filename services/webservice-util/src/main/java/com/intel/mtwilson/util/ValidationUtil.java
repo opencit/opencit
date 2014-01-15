@@ -66,6 +66,7 @@ public class ValidationUtil {
     
     
     private static void validate(Object object, ArrayList<Object> stack) {
+        if( object == null ) { return; }
         log.debug("Starting to validate {}", object.getClass().toString());
         // first check if the object being requested is already in the stack... if so we skip it to avoid infinite recursion
         for(Object item : stack) {

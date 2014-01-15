@@ -146,11 +146,13 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <!--
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>mtwilson-jersey-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        -->
 		<dependency>
 	    <groupId>com.intel.mtwilson.services</groupId>
 	    <artifactId>webservice-util</artifactId>
@@ -193,12 +195,18 @@
 			<version>3.1.1</version>
 			<scope>provided</scope>
 		</dependency>
+        
+        <!--
+        Must be "provided" scope to avoid this error when deploying:
+        Error occurred during deployment: Exception while loading the app : CDI deployment failure:WELD-001408 Unsatisfied dependencies for type [Ref<ContainerRequest>] with qualifiers [@Default] at injection point [[BackedAnnotatedParameter] Parameter 1 of [BackedAnnotatedConstructor] @Inject org.glassfish.jersey.server.internal.routing.UriRoutingContext(Ref<ContainerRequest>, ProcessingProviders)]. Please see server.log for more details.
+        -->
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.servlet</artifactId>
 			<version>3.1.1</version>
 			<scope>provided</scope>
 		</dependency>
+        <!--
         <dependency>
             <groupId>org.glassfish.distributions</groupId>
             <artifactId>web-all</artifactId>
@@ -211,6 +219,7 @@
             <version>1.0-alpha-4</version>
             <scope>test</scope>
         </dependency>
+        -->
     	<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
