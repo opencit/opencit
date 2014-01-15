@@ -38,6 +38,7 @@
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>1.9-ea04</version>
+		<scope>provided</scope>
     </dependency>
 	<dependency>
 		<groupId>javax</groupId>
@@ -77,8 +78,6 @@
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
-		<version>1.8.0</version>
-		<scope>compile</scope>
     </dependency>
     <dependency>
             <groupId>commons-configuration</groupId>

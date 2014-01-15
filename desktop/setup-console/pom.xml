@@ -3,7 +3,7 @@
 
   <artifactId>mtwilson-console</artifactId>
   <packaging>jar</packaging>
-  <name>Setup Console</name>
+  <name>mtwilson-console</name>
   
     <parent>
 		<groupId>com.intel.mtwilson.desktop</groupId>

@@ -60,8 +60,6 @@
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
-		<version>1.8.0</version>
-		<scope>compile</scope>
     </dependency>
     <dependency>
 		<groupId>commons-configuration</groupId>
@@ -82,11 +80,13 @@
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
     </dependency>
+    <!--
     <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>1.9-ea04</version>
     </dependency>
+    -->
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>
