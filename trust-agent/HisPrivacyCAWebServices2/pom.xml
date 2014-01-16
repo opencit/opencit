@@ -10,7 +10,7 @@
     <parent>
 	<groupId>com.intel.mtwilson.trustagent</groupId>
 	<artifactId>trust-agent-parent</artifactId>
-	<version>1.2.2</version>
+	<version>1.2.3-SNAPSHOT</version>
     </parent>
    
  <!-- these dependencies are only for including the api client, they are not needed for the core shell script functions. the maven-dependency-plugin copies these dependencies and all their dependencies into a folder for distribution -->
