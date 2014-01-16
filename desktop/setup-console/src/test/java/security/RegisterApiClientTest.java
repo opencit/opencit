@@ -34,7 +34,7 @@ import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.codehaus.plexus.util.StringUtils;
+//import org.codehaus.plexus.util.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -202,7 +202,14 @@ public class RegisterApiClientTest {
             // get local ip address and add it to the list
             InetAddress addr = InetAddress.getLocalHost();
             String[] updatedWhitelist = (String[]) ArrayUtils.add(previousWhitelist, addr.getHostAddress());
-            String updatedWhitelistString = StringUtils.join(updatedWhitelist, ",");
+            // Removing the dependency on  codehaus.plexus
+            // String updatedWhitelistString = StringUtils.join(updatedWhitelist, ",");
+            String updatedWhitelistString = "";
+            for (String temp : updatedWhitelist) {
+                updatedWhitelistString = updatedWhitelistString + temp + ",";
+            }
+            // need to remove the last occurance of the ","
+            updatedWhitelistString.substring(0, (updatedWhitelistString.lastIndexOf(",")-1));
             log.debug("Updated trusted clients network address list: {}", updatedWhitelistString);
             // set the new list on the server and restart the application
             remote(ssh, String.format("asctl edit mtwilson.api.trust \"%s\"", updatedWhitelistString));
