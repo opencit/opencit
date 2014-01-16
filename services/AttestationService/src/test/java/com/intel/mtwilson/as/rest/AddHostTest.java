@@ -8,7 +8,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.datatypes.*;
 import java.io.File;
 import java.io.FileInputStream;

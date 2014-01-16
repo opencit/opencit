@@ -19,7 +19,7 @@ import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Measurement;

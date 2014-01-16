@@ -8,7 +8,7 @@ import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.filter.ClientFilter;
 import com.intel.mtwilson.security.http.HmacAuthorization;
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 //import org.apache.commons.logging.Log;
 //import org.apache.commons.logging.LogFactory;
 

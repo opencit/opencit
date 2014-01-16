@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.KeystoreUtil;
@@ -12,6 +13,7 @@ import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Resource;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -110,7 +112,7 @@ public class KeystoreTest {
     public void addServerSslCertificateToKeystore() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException  {
         KeyStore keystore = KeystoreUtil.open(new MapConfiguration(config));
         URL url = new URL(config.getProperty("mtwilson.api.baseurl"));        
-        X509Certificate[] certs = SslUtil.getServerCertificates(url);
+        X509Certificate[] certs = TlsUtil.getServerCertificates(url);
         String aliasBasename = "serverCert";
         int certificateNumber = 0;
         for(X509Certificate cert : certs) {
@@ -143,7 +145,7 @@ public class KeystoreTest {
         System.out.println(String.format("%d certificates", aliases1.length));
         // add server ssl certificate
         URL url = new URL(config.getProperty("mtwilson.api.baseurl"));        
-        X509Certificate[] certs = SslUtil.getServerCertificates(url);
+        X509Certificate[] certs = TlsUtil.getServerCertificates(url);
         String aliasBasename = "serverCert";
         int certificateNumber = 0;
         for(X509Certificate cert : certs) {
@@ -176,7 +178,7 @@ public class KeystoreTest {
     
     @Test
     public void testGetServerSslCerts() throws IOException, NoSuchAlgorithmException, KeyManagementException, CertificateEncodingException {
-        X509Certificate[] certs = SslUtil.getServerCertificates(new URL("https://10.1.71.81:8181/AttestationService"));
+        X509Certificate[] certs = TlsUtil.getServerCertificates(new URL("https://10.1.71.81:8181/AttestationService"));
         for(X509Certificate cert : certs) {
             System.out.println(String.format("Subject: %s", cert.getSubjectX500Principal().getName()));
             System.out.println(String.format("Issuer: %s", cert.getIssuerX500Principal().getName()));
@@ -213,7 +215,7 @@ public class KeystoreTest {
             String saveCertAndTryAgain = in.readLine().trim();
             if( saveCertAndTryAgain.toUpperCase().startsWith("Y") ) {
                 // download server SSL certificates
-                X509Certificate[] serverCertificates = SslUtil.getServerCertificates(url);
+                X509Certificate[] serverCertificates = TlsUtil.getServerCertificates(url);
                 // create a new temporary trust store and add those certificates
                 KeyStore keystore = KeyStore.getInstance("JKS");
                 keystore.load(null, null);

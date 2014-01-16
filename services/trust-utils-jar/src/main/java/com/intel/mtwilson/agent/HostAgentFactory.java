@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import java.io.File;
 import java.io.FileInputStream;

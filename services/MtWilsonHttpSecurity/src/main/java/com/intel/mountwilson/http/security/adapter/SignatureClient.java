@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import com.intel.mtwilson.security.http.HmacAuthorization;
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 
 /**
  * This class requires the following libraries:

@@ -8,7 +8,7 @@ import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.TrustAssertion;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.ms.data.MwPortalUser;

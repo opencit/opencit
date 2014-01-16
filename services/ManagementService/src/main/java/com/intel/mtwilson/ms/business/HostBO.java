@@ -32,7 +32,7 @@ import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;

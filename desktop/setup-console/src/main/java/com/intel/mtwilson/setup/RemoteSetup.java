@@ -5,11 +5,11 @@
 package com.intel.mtwilson.setup;
 
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.Pkcs12;
+import com.intel.dcsg.cpg.crypto.Pkcs12;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.X509Builder;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Builder;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.*;
@@ -18,7 +18,7 @@ import com.intel.mtwilson.setup.model.DatabaseType;
 import com.intel.mtwilson.setup.model.PrivacyCA;
 import com.intel.mtwilson.setup.model.WebContainerType;
 import com.intel.mtwilson.setup.model.WebServiceSecurityPolicy;
-import com.intel.mtwilson.validation.BuilderModel;
+import com.intel.dcsg.cpg.validation.BuilderModel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;

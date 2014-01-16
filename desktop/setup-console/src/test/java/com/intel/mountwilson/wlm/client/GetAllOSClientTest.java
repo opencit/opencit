@@ -7,7 +7,7 @@ package com.intel.mountwilson.wlm.client;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;

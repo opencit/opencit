@@ -10,7 +10,7 @@ import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyConfiguration;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientStatus;
 import com.intel.mtwilson.datatypes.ApiClientUpdateRequest;

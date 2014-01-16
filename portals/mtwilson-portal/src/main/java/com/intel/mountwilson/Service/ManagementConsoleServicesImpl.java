@@ -10,7 +10,7 @@ import com.intel.mountwilson.util.ConnectionUtil;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.agent.vmware.VMwareClient;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
@@ -32,10 +32,17 @@ import org.slf4j.LoggerFactory;
 public class ManagementConsoleServicesImpl implements IManagementConsoleServices {
 
     private static final Logger log = LoggerFactory.getLogger(ManagementConsoleServicesImpl.class.getName());
-    private MCPersistenceManager mcManager = new MCPersistenceManager();
-    private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU")); // fix bug 677,  MwPortalUser is in MSDataPU, not in ASDataPU
-    private ApiClientX509JpaController apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));
+    private MCPersistenceManager mcManager;
+    private MwPortalUserJpaController keystoreJpa;
+    private ApiClientX509JpaController apiClientJpa;
 
+    
+    public ManagementConsoleServicesImpl() {
+        mcManager = new MCPersistenceManager();
+        keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU")); // fix bug 677,  MwPortalUser is in MSDataPU, not in ASDataPU
+        apiClientJpa = new ApiClientX509JpaController(mcManager.getEntityManagerFactory("MSDataPU"));
+    }
+    
     /**
      *
      * @param hostDetailsObj

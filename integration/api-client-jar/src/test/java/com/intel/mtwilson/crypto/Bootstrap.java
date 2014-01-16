@@ -4,12 +4,14 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.datatypes.*;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -151,7 +153,7 @@ public class Bootstrap {
      * @throws Exception 
      */
     private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore, String tlsProtocol) throws NoSuchAlgorithmException, KeyManagementException, KeyManagementException, IOException, CertificateEncodingException, CertificateEncodingException {
-        X509Certificate[] certs = SslUtil.getServerCertificates(server, tlsProtocol);
+        X509Certificate[] certs = TlsUtil.getServerCertificates(server, tlsProtocol);
         String aliasBasename = server.getHost();
         if( certs.length == 1 ) {
             System.out.println("Adding trusted certificate with SHA-1 fingerprint: "+Hex.encodeHexString(sha1fingerprint(certs[0])));

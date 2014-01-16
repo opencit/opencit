@@ -12,9 +12,8 @@ import com.intel.mtwilson.MultivaluedMapImpl;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
@@ -22,6 +21,7 @@ import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.security.http.HttpRequestURL;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
@@ -72,7 +72,7 @@ public class SecurityTest {
         Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
 //        ApiClient api = new ApiClient(config);
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
-        SslUtil.addSslCertificatesToKeystore(keystore, new URL(config.getString("mtwilson.api.baseurl")));
+        TlsUtil.addSslCertificatesToKeystore(keystore, new URL(config.getString("mtwilson.api.baseurl")));
 //        keystore.save();
     }
     /*

@@ -31,7 +31,7 @@ import com.intel.mountwilson.as.helper.CommandUtil;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;

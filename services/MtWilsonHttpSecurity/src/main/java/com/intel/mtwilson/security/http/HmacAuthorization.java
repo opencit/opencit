@@ -1,6 +1,6 @@
 package com.intel.mtwilson.security.http;
 
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

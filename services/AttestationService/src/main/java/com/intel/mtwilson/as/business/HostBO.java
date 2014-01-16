@@ -29,7 +29,7 @@ import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.helper.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.*;

@@ -5,8 +5,8 @@
 package com.intel.mtwilson.ms.rest;
 
 import com.intel.mtwilson.as.data.MwCertificateX509;
-import com.intel.mtwilson.crypto.Password;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.PasswordHash;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.ms.business.CertificateAuthorityBO;
 import com.intel.mtwilson.ms.common.MSConfig;
@@ -59,7 +59,7 @@ public class CA {
     public String enableCa(String newSaltedPasswordString) {
         try {
             ValidationUtil.validate(newSaltedPasswordString);
-            Password newPassword = Password.valueOf(newSaltedPasswordString);
+            PasswordHash newPassword = PasswordHash.valueOf(newSaltedPasswordString);
             dao.enableCaWithPassword(newPassword);
             return Boolean.TRUE.toString();
         } catch (MSException ex) {

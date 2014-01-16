@@ -5,7 +5,7 @@
 package com.intel.mountwilson.as.client;
 
 import com.intel.mtwilson.ApiClient;
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 

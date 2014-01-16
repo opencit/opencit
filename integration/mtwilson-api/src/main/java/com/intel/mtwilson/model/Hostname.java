@@ -1,7 +1,7 @@
 package com.intel.mtwilson.model;
 
-import com.intel.mtwilson.validation.Fault;
-import com.intel.mtwilson.validation.Model;
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.validation.Model;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;

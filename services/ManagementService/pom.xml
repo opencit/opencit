@@ -131,9 +131,9 @@
 			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-validation</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-validation</artifactId>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>

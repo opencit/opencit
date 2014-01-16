@@ -6,7 +6,7 @@ package com.intel.mtwilson.agent.vmware;
 
 //import java.util.HashMap;
 import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.tls.policy.TlsConnection;

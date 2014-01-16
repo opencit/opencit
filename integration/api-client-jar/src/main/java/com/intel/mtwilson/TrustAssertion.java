@@ -4,9 +4,9 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SamlUtil;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SamlUtil;
+import com.intel.dcsg.cpg.x509.X509Util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;

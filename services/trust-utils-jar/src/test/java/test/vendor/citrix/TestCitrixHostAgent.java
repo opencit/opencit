@@ -4,11 +4,12 @@
  */
 package test.vendor.citrix;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import test.vendor.intel.*;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
@@ -82,7 +83,7 @@ public class TestCitrixHostAgent {
     @Test
     public void getAikFromCitrixXen() throws IOException {
         PublicKey aik = agent.getAik();
-        log.debug("Public key: {}", X509Util.encodePemPublicKey(aik));
+        log.debug("Public key: {}", RsaUtil.encodePemPublicKey(aik));
         assertNotNull(aik);
         
     }

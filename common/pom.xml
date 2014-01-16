@@ -16,7 +16,6 @@
   
   <modules>
     <module>crypto</module>
-    <module>validation</module>
   </modules>
 
 

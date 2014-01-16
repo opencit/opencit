@@ -4,7 +4,7 @@
  */
 package test.privacyca;
 
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
 import java.io.FileInputStream;

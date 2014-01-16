@@ -491,7 +491,7 @@
                                     <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                                     <dependencySourceIncludes>
                                         <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
-                                        <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.dcsg.cpg:cpg-validation</dependencySourceInclude>
                                     </dependencySourceIncludes>
                                 </configuration>
                             </execution>

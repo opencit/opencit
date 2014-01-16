@@ -1,6 +1,6 @@
 package com.intel.mtwilson.model;
 
-import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;

@@ -9,7 +9,7 @@ import com.intel.mtwilson.as.controller.MwKeystoreJpaController;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.CopyResource;

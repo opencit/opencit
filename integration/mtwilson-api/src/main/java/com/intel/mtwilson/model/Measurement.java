@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.model;
 
-import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.util.HashMap;
 import java.util.Map;
 

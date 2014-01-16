@@ -33,7 +33,7 @@ import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.vmware.VMwareConnectionPool;
 import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostVMMType;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;

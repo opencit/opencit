@@ -5,7 +5,7 @@
 package com.intel.mtwilson.client.cmd;
 
 import com.intel.mtwilson.client.AbstractCommand;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import java.io.BufferedReader;
 import java.io.File;

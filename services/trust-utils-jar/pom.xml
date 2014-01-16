@@ -107,6 +107,12 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.intel.mtwilson.common</groupId>
+                    <artifactId>mtwilson-crypto</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -122,6 +128,12 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>ASData</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.intel.mtwilson.common</groupId>
+                    <artifactId>mtwilson-crypto</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -151,6 +163,10 @@
                     <artifactId>jaxb-impl</artifactId>
                     <groupId>com.sun.xml.bind</groupId>
                 </exclusion>                
+                <exclusion>
+                    <groupId>com.intel.mtwilson.common</groupId>
+                    <artifactId>mtwilson-crypto</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

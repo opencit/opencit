@@ -7,9 +7,8 @@ package com.intel.mtwilson;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;
@@ -26,6 +25,7 @@ import javax.net.ssl.TrustManager;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -347,7 +347,7 @@ public class KeystoreUtil {
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
         log.trace("URL Protocol: {}", server.getProtocol());
         if( "https".equals(server.getProtocol()) ) {
-            SslUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol); //CryptographyException, IOException            
+            TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol); //CryptographyException, IOException            
         }
         if(log.isTraceEnabled()) {
             try {

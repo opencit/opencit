@@ -216,10 +216,10 @@
 			<version>0.2-SNAPSHOT</version>
 		</dependency>
 
-                <dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-validation</artifactId>
-			<version>${project.version}</version>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-validation</artifactId>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
 
 		    <dependency>
@@ -373,8 +373,8 @@
                 <!-- aspect libraries are the already-compiled aspect .jars -->
                 <aspectLibraries>
                     <aspectLibrary>
-                        <groupId>com.intel.mtwilson.common</groupId>
-                        <artifactId>mtwilson-validation</artifactId>
+                        <groupId>com.intel.dcsg.cpg</groupId>
+                        <artifactId>cpg-validation</artifactId>
                     </aspectLibrary>
                 </aspectLibraries>
                 <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->
