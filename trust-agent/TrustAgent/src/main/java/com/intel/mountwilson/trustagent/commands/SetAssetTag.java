@@ -94,7 +94,7 @@ public class SetAssetTag implements ICommand{
     private void writeHashToFile() throws TAException, IOException {
         try {
             
-            List<String> result = CommandUtil.runCommand("echo " + context.getAssetTagHash() + " | hex2bin > /tmp/hash");
+            List<String> result = CommandUtil.runCommand("bash -c 'echo " + context.getAssetTagHash() + " | /usr/local/bin/hex2bin > /tmp/hash'");
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToFile output: " + response);
         }catch(TAException ex) {
