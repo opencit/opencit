@@ -88,15 +88,27 @@ public class SslUtil {
     }
     
     /**
+     * Due to issue #870, there is now another method with the TLS protocol
+     * specified as a parameter; this method continues to use TLS as the default
+     * protocol.
+     * @param keystore
+     * @param server
+     * @throws CryptographyException
+     * @throws IOException 
+     */
+    public static void addSslCertificatesToKeystore(SimpleKeystore keystore, URL server) throws CryptographyException, IOException {
+        addSslCertificatesToKeystore(keystore, server, "TLS");
+    }
+    /**
      * Used by registerUserWithKeystore to automatically add a server's ssl certificates to the keystore.
      * It's important for the user to later review the keystore and validate those certificate fingerprints!!
      * @param keystore
      * @param baseURL
      * @throws Exception
      */
-    public static void addSslCertificatesToKeystore(SimpleKeystore keystore, URL server) throws CryptographyException, IOException {
+    public static void addSslCertificatesToKeystore(SimpleKeystore keystore, URL server, String tlsProtocol) throws CryptographyException, IOException {
         try {
-            X509Certificate[] certs = getServerCertificates(server);
+            X509Certificate[] certs = getServerCertificates(server, tlsProtocol);
             String aliasBasename = server.getHost();
             if (certs != null) {
                 int certificateNumber = 0;
@@ -169,7 +181,29 @@ public class SslUtil {
         throw new IllegalArgumentException("TrustManagerFactory did not return an X509TrustManager instance");
     }
 
+    /**
+     * Due to issue #870 there is now another method with a TLS protocol parameter;
+     * this method continues to use TLS as the default protocol.
+     * 
+     * @param url to connect and download the server certificates
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     * @throws IOException 
+     */
     public static X509Certificate[] getServerCertificates(URL url) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        return getServerCertificates(url, "TLS");
+    }
+    /**
+     * 
+     * @param url to connect and download the server certificates
+     * @param tlsProtocol like SSL, SSLv2, SSLv3, TLS, TLSv1.1, TLSv1.2; any value accepted by SSLContext.getInstance(...)
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws KeyManagementException
+     * @throws IOException 
+     */
+    public static X509Certificate[] getServerCertificates(URL url, String tlsProtocol) throws NoSuchAlgorithmException, KeyManagementException, IOException {
         if (!"https".equals(url.getProtocol())) {
             throw new IllegalArgumentException("URL scheme must be https");
         }
@@ -179,7 +213,7 @@ public class SslUtil {
         }
         X509HostnameVerifier hostnameVerifier = new NopX509HostnameVerifierApache();
         CertificateStoringX509TrustManager trustManager = new CertificateStoringX509TrustManager();
-        SSLContext sslcontext = SSLContext.getInstance("TLS");
+        SSLContext sslcontext = SSLContext.getInstance(tlsProtocol);
         sslcontext.init(null, new X509TrustManager[]{trustManager}, null);
         SSLSocketFactory sf = new SSLSocketFactory(sslcontext, hostnameVerifier);
         Scheme https = new Scheme("https", port, sf);

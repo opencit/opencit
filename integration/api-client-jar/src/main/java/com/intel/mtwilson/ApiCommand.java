@@ -94,11 +94,12 @@ public class ApiCommand {
             // we assume the user needs only the Security role; everything else can be done via the management console (including adding more roles to him/herself)
             String roles[] = new String[] { Role.Security.toString() };
             
-            String username = null, password = null;
+            String username = null, password = null, tlsProtocol = "TLS";
             // args[2] is optional username (if not provided we will prompt)
             if( args.length > 3 ) { username = args[3]; }
             // args[3] is optional password plaintext (not recommended) or environment variable name (recommended) (if not provided we will prompt)
             if( args.length > 4 ) { password = args[4]; }
+            if( args.length > 5 ) { tlsProtocol = args[5]; } // issue #870 allow user to specify tls protocol version, default to TLS
             
             // prompt for username and password
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -145,7 +146,7 @@ public class ApiCommand {
             
             // register with the web service
             // download server's ssl certificates and add them to the keystore
-            SslUtil.addSslCertificatesToKeystore(keystore, server);
+            SslUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
             // register the user with the server
             
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);

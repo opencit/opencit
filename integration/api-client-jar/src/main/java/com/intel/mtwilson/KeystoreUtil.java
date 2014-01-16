@@ -341,10 +341,13 @@ public class KeystoreUtil {
     }
     
     public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy, String[] roles) throws IOException, ApiException, CryptographyException, ClientException {
+        return createUserInResource(resource, username, password, server, tlsPolicy, roles, "TLS");
+    }
+    public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy, String[] roles, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
         log.trace("URL Protocol: {}", server.getProtocol());
         if( "https".equals(server.getProtocol()) ) {
-            SslUtil.addSslCertificatesToKeystore(keystore, server); //CryptographyException, IOException            
+            SslUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol); //CryptographyException, IOException            
         }
         if(log.isTraceEnabled()) {
             try {

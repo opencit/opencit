@@ -58,7 +58,7 @@ public class Bootstrap {
         // create new keystore (if file does not exist and is writable it will be created when we save)
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));
         printKeystoreContents(keystore); // list certificates
-        addServerSslCertificateToKeystore(new URL(config.getString("mtwilson.api.baseurl")), keystore); // add server ssl certificate
+        addServerSslCertificateToKeystore(new URL(config.getString("mtwilson.api.baseurl")), keystore, config.getString("mtwilson.api.ssl.protocol", "TLS")); // add server ssl certificate
         printKeystoreContents(keystore); // list certificates again
         keystore.save(); // commit chanages to disk
     }
@@ -144,10 +144,11 @@ public class Bootstrap {
      * and if it's a trust CA policy nothing needs to be added.
      * @param server
      * @param keystore
+     * @param tlsProtocol for example SSL, SSLv2, SSLv3, TLS, TLSv1.1, TLSv1.2
      * @throws Exception 
      */
-    private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore) throws NoSuchAlgorithmException, KeyManagementException, KeyManagementException, IOException, CertificateEncodingException, CertificateEncodingException {
-        X509Certificate[] certs = SslUtil.getServerCertificates(server);
+    private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore, String tlsProtocol) throws NoSuchAlgorithmException, KeyManagementException, KeyManagementException, IOException, CertificateEncodingException, CertificateEncodingException {
+        X509Certificate[] certs = SslUtil.getServerCertificates(server, tlsProtocol);
         String aliasBasename = server.getHost();
         if( certs.length == 1 ) {
             System.out.println("Adding trusted certificate with SHA-1 fingerprint: "+Hex.encodeHexString(sha1fingerprint(certs[0])));
