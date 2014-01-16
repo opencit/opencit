@@ -110,13 +110,13 @@
 		<artifactId>mtwilson-api</artifactId>
 		<version>${project.version}</version>
     </dependency>
-    <dependency>
-		<groupId>com.intel.mtwilson.common</groupId>
-		<artifactId>mtwilson-jpa</artifactId>
-		<version>${project.version}</version>        
-        <optional>true</optional>
-        <scope>provided</scope>
-    </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-jpa</artifactId>
+			<version>0.2-SNAPSHOT</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+		</dependency>
     <!--
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>

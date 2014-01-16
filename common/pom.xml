@@ -16,8 +16,6 @@
   
   <modules>
     <module>crypto</module>
-    <module>io</module>
-    <module>jpa</module>
     <module>validation</module>
   </modules>
 

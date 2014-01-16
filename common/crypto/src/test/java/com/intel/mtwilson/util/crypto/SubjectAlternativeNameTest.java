@@ -12,7 +12,7 @@ import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.mtwilson.validation.Fault;
-import com.intel.mtwilson.x500.DN;
+import com.intel.dcsg.cpg.x500.DN;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;

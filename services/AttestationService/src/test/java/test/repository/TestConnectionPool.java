@@ -6,7 +6,7 @@ package test.repository;
 
 import com.intel.mtwilson.as.controller.TblOemJpaController;
 import com.intel.mtwilson.as.data.TblOem;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;

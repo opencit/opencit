@@ -1,6 +1,6 @@
 package com.intel.mtwilson.as.helper;
 
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import javax.persistence.EntityManagerFactory;
 
 /**

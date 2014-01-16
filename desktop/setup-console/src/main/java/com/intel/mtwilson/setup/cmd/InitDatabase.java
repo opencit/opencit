@@ -9,7 +9,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.dcsg.cpg.io.Classpath;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;

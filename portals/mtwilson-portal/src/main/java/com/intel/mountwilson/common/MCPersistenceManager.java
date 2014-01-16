@@ -6,7 +6,7 @@ package com.intel.mountwilson.common;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

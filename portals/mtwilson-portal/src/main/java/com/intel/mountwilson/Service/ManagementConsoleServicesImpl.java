@@ -16,7 +16,7 @@ import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import com.intel.mtwilson.x500.DN;
+import com.intel.dcsg.cpg.x500.DN;
 import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;

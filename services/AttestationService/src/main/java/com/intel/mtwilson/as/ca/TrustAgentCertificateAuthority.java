@@ -16,7 +16,7 @@ import com.intel.mtwilson.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
-import com.intel.mtwilson.x500.DN;
+import com.intel.dcsg.cpg.x500.DN;
 import com.intel.mtwilson.crypto.X509Util;
 
 import java.io.FileNotFoundException;

@@ -1,7 +1,7 @@
 package com.intel.mtwilson.security.http;
 
 import com.intel.dcsg.cpg.crypto.RsaCredential;
-import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

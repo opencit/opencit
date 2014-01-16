@@ -3,7 +3,7 @@ package com.intel.mtwilson.security.jersey;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.mtwilson.security.core.SecretKeyFinder;
 import com.intel.mtwilson.security.http.HmacSignatureInput;
-import com.intel.mtwilson.iso8601.Iso8601Date;
+import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.model.Md5Digest;
 import java.security.InvalidKeyException;

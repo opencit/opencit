@@ -20,7 +20,7 @@ import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.ms.common.MSConfig;

@@ -21,7 +21,7 @@ import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.mtwilson.security.http.HttpRequestURL;
 import com.intel.mtwilson.security.http.RsaSignatureInput;

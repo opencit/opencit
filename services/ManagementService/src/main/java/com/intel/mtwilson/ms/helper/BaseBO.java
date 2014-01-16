@@ -2,7 +2,7 @@ package com.intel.mtwilson.ms.helper;
 
 
 //import java.util.logging.Logger;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import javax.persistence.EntityManagerFactory;
 
 /**

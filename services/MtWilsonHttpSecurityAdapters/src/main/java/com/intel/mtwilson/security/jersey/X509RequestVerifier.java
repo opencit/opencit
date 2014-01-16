@@ -3,7 +3,7 @@ package com.intel.mtwilson.security.jersey;
 import com.intel.mtwilson.security.core.X509UserFinder;
 import com.intel.mtwilson.security.core.X509UserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
-import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.model.Md5Digest;
 import java.io.UnsupportedEncodingException;

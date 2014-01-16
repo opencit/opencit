@@ -7,7 +7,7 @@ package com.intel.mtwilson.as.controller;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwCertificateX509;
-import com.intel.mtwilson.jpa.GenericJpaController;
+import com.intel.dcsg.cpg.jpa.GenericJpaController;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;

@@ -12,7 +12,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.Filename;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.URL;

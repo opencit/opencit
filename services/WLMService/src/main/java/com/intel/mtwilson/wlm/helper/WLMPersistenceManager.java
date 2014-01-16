@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * shared among all threads.
  * @author jbuhacoff
  */
-public class WLMPersistenceManager extends com.intel.mtwilson.jpa.PersistenceManager {
+public class WLMPersistenceManager extends com.intel.dcsg.cpg.jpa.PersistenceManager {
     private static final Logger log = LoggerFactory.getLogger(WLMPersistenceManager.class);
 
     @Override
