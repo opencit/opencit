@@ -273,6 +273,9 @@ ajax.json = {
                 if (transport.responseText) {
                     var json = transport.responseJSON;
                     var ptr = json;
+                    //var ptrUuid = Object.toJSON(ptr).evalJSON().uuid;
+                    //log.debug("ptrUuid: " + ptrUuid);
+
                     // some apis return metadata in an outer object and the content inside a 'data' field
                     if ((typeof json === 'object') && json.data) {
                         _log.debug("Detected data object in response");
@@ -281,7 +284,16 @@ ajax.json = {
                     if (keyPath !== null) {
                         var existingData = ajax.data.getx(keyPath);
                         if (existingData) {
-                            existingData.merge(ptr);
+                            Object.toJSON(existingData).evalJSON().forEach(function(obj) {
+                                //log.debug("existingData uuid: " + obj.uuid);
+                                if (Object.toJSON(ptr).evalJSON().uuid === obj.uuid) {
+                                    obj.merge(ptr);
+                                }
+                                else {
+                                    existingData.push(ptr);
+                                }
+                            });
+                            //existingData.merge(ptr);
                         }
                         else {
                             existingData = ptr;
