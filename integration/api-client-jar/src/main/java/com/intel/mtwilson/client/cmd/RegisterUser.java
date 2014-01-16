@@ -55,8 +55,10 @@ public class RegisterUser extends AbstractCommand {
 
             String username = Filename.decode(keystoreFile.getName().substring(0, keystoreFile.getName().lastIndexOf("."))); // username is everything before ".jks"
             String password = null;
+            String tlsProtocol = "TLS"; // issue #870 allow user to specify tls protocol version, default to TLS
             // args[4] is optional password plaintext (not recommended) or environment variable name (recommended) (if not provided we will prompt)
             if( args.length > 3 ) { password = args[3]; }
+            if( args.length > 4 ) { tlsProtocol = args[4]; }
 
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             if( password == null || password.isEmpty() ) {
@@ -78,7 +80,7 @@ public class RegisterUser extends AbstractCommand {
             // XXX TODO need to comply with user's specified tls policy, or assume "trust first certificate" if no policy is configured
             // download server's ssl certificates and add them to the keystore  and display for user to confirm later XXX TODO maybe prompt user to accept/decline them before adding, instaed of checking what was added after;  or be able to set an ssl policy here so if we already trust the root CA this should work seamlessly.
             String[] tlsCertAliases0 = keystore.listTrustedSslCertificates();
-            SslUtil.addSslCertificatesToKeystore(keystore, server);
+            SslUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
             String[] tlsCertAliases = keystore.listTrustedSslCertificates();
             String[] newTlsCertAliases = elementsAdded(tlsCertAliases0, tlsCertAliases);
             for(String alias : newTlsCertAliases) {
