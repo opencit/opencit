@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.net.InternetAddress;
 import java.io.*;
 import java.math.BigInteger;

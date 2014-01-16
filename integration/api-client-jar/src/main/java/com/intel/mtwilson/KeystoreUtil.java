@@ -4,15 +4,15 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredential;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
-import com.intel.mtwilson.io.FileResource;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.io.Resource;
 import java.io.*;
 import java.net.URL;
 import java.security.*;
@@ -24,8 +24,8 @@ import java.util.Properties;
 import java.util.Set;
 import javax.net.ssl.TrustManager;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -146,7 +146,7 @@ public class KeystoreUtil {
      * @throws CertificateEncodingException 
      * @deprecated use the SimpleKeystore instead
      */
-    public static RsaCredentialX509 loadX509(KeyStore keystore, String keyAlias, String keyPassword) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException {
+    public static RsaCredentialX509 loadX509(KeyStore keystore, String keyAlias, String keyPassword) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, CertificateEncodingException, com.intel.dcsg.cpg.crypto.CryptographyException {
         // load the key pair
         KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry)keystore.getEntry(keyAlias, new KeyStore.PasswordProtection(keyPassword.toCharArray()));
         if( pkEntry != null ) {
@@ -176,7 +176,7 @@ public class KeystoreUtil {
      * @throws UnrecoverableEntryException 
      * @deprecated use the SimpleKeystore instead
      */
-    public static RsaCredential loadX509(Configuration config) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
+    public static RsaCredential loadX509(Configuration config) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, com.intel.dcsg.cpg.crypto.CryptographyException {
         String keystore = config.getString("mtwilson.api.keystore", "keystore.jks");
         InputStream in;
         try {
@@ -218,7 +218,7 @@ public class KeystoreUtil {
      * @throws UnrecoverableEntryException 
      * @deprecated use the SimpleKeystore instead
      */
-    public static RsaCredential fromKeystore(Configuration config) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
+    public static RsaCredential fromKeystore(Configuration config) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, com.intel.dcsg.cpg.crypto.CryptographyException {
         KeyStore keystore = open(config);
         return loadX509(keystore,
             config.getString("mtwilson.api.key.alias", "mykey"),
@@ -460,7 +460,7 @@ public class KeystoreUtil {
      * @return an ApiClient object configured with the credentials in the keystore
      * @throws Exception 
      */
-    public static ApiClient clientForUserInDirectory(File directory, String username, String password, URL server) throws ClientException, ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException   {
+    public static ApiClient clientForUserInDirectory(File directory, String username, String password, URL server) throws ClientException, ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException, com.intel.dcsg.cpg.crypto.CryptographyException   {
         if( username.contains("..") || username.contains(File.separator) || username.contains(" ") ) { throw new IllegalArgumentException("Username must not include path-forming characters"); }
         File keystoreFile = new File(directory.getAbsoluteFile() + File.separator + username + ".jks");
         FileResource resource = new FileResource(keystoreFile);
@@ -480,11 +480,11 @@ public class KeystoreUtil {
      * @throws Exception 
      * @since 0.5.4
      */
-    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException {
+    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException, com.intel.dcsg.cpg.crypto.CryptographyException {
         return clientForUserInResource(resource, username, password, server, new InsecureTlsPolicy());
     }
     
-    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException  {
+    public static ApiClient clientForUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy) throws ClientException, FileNotFoundException, FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, KeyManagementException, com.intel.dcsg.cpg.crypto.CryptographyException  {
         SimpleKeystore keystore = new SimpleKeystore(resource, password);
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
         ApiClient c = new ApiClient(server, rsaCredential, keystore, tlsPolicy);

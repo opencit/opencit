@@ -7,7 +7,7 @@ package test.repository;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.model.Hostname;
 import java.io.IOException;

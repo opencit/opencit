@@ -3,7 +3,7 @@ package com.intel.mtwilson.security.jersey;
 import com.intel.mtwilson.security.core.PublicKeyUserFinder;
 import com.intel.mtwilson.security.core.PublicKeyUserInfo;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.model.Md5Digest;
 import com.sun.jersey.core.header.HttpDateFormat;
 import java.io.UnsupportedEncodingException;

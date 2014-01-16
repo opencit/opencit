@@ -22,7 +22,7 @@ import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.controller.TblHostSpecificManifestJpaController;
 import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import java.io.StringWriter;

@@ -462,7 +462,7 @@ public class MyConfiguration {
     
     ///////////////////////// tls policy  //////////////////////////////////
     public String getDefaultTlsPolicyName() {
-        return conf.getString("mtwilson.default.tls.policy.name", "TRUST_FIRST_CERTIFICATE");
+        return conf.getString("mtwilson.default.tls.policy.name", "TRUST_CA_VERIFY_HOSTNAME"); // issue #871 default should be secure;  customer can explicitly set to TRUST_FIRST_CERTIFICATE if that's what they want
     }
     
     public String getTlsKeystorePassword() {

@@ -6,21 +6,21 @@ package com.intel.mtwilson;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.api.MtWilson;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.HmacCredential;
 import com.intel.mtwilson.crypto.Password;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.RsaCredential;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponseList;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.security.http.*;
-import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -262,7 +262,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @throws IOException
      * @throws KeyManagementException 
      */
-    private void setHttpClientWithConfig(Configuration config) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, IOException, KeyManagementException {
+    private void setHttpClientWithConfig(Configuration config) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, IOException, KeyManagementException, com.intel.dcsg.cpg.crypto.CryptographyException {
 //        if( config.containsKey("mtwilson.api.keystore") && config.containsKey("mtwilson.api.keystore.password") && config.containsKey("mtwilson.api.key.alias") ) {        
         if( keystore != null ) {
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));

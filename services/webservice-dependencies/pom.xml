@@ -88,11 +88,21 @@
 	    <artifactId>mtwilson-crypto</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-crypto</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.common</groupId>
 	    <artifactId>mtwilson-io</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.common</groupId>
 	    <artifactId>mtwilson-jpa</artifactId>

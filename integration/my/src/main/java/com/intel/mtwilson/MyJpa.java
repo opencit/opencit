@@ -10,7 +10,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.audit.controller.*;
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.ms.controller.*;
 import com.intel.mtwilson.util.Aes128DataCipher;
 import java.io.IOException;

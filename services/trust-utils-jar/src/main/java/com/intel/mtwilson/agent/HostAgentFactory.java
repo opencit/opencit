@@ -8,16 +8,18 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
-import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
+//import com.intel.dcsg.cpg.tls.policy.TrustCaAndVerifyHostnameTlsPolicy;
+//import com.intel.dcsg.cpg.tls.policy.TrustFirstCertificateTlsPolicy;
+//import com.intel.dcsg.cpg.tls.policy.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.util.EnumMap;
@@ -219,13 +221,17 @@ public class HostAgentFactory {
                 }
             }
 //            My.configuration().get tls keystore trusted cas; add them to tlsKeystore  beforee making the policy  so that a global keystore can be used;  or just use the global kesytore...
-            return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
+//            return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
+            return TlsPolicyBuilder.factory().strict(tlsKeystore.getRepository()).build();
         }
         if( ucName.equals("TRUST_FIRST_CERTIFICATE") ) {
-            return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
+//            return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
+            KeystoreCertificateRepository repository = tlsKeystore.getRepository();
+            return TlsPolicyBuilder.factory().strict(repository).trustDelegate(new FirstCertificateTrustDelegate(repository)).skipHostnameVerification().build();
         }
         if( ucName.equals("TRUST_KNOWN_CERTIFICATE") ) {
-            return new TrustKnownCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
+//            return new TrustKnownCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
+            return TlsPolicyBuilder.factory().strict(tlsKeystore.getRepository()).skipHostnameVerification().build();
         }
         if( ucName.equals("INSECURE") ) {
             return new InsecureTlsPolicy();

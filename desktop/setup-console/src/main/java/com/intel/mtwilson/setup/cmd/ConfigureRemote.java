@@ -4,13 +4,13 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.RemoteSetup;

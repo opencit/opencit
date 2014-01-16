@@ -11,17 +11,17 @@ import com.intel.mtwilson.agent.vmware.VMwareClient;
 import com.intel.mtwilson.agent.vmware.VMwareConnectionException;
 import com.intel.mtwilson.agent.vmware.VMwareConnectionPool;
 import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.ArrayCertificateRepository;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsConnection;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TlsPolicyManager;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
-import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
+import com.intel.dcsg.cpg.x509.repository.ArrayCertificateRepository;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.impl.*;
 import com.vmware.vim25.mo.ManagedEntity;
 import java.io.IOException;
 import java.net.URL;
@@ -46,7 +46,8 @@ public class VMwareConnectionPoolTest {
     
     public HostAgent getAgentWithMyKeystore() throws KeyManagementException, IOException {
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
-        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+//        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+        TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().providesAuthentication(keystore.getRepository()).skipHostnameVerification().build();
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent hostAgent = factory.getHostAgent(new ConnectionString(host1), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;
@@ -65,8 +66,9 @@ public class VMwareConnectionPoolTest {
     public HostAgent getAgentWithEmptyKeystore() throws KeyManagementException, IOException {
         resource = new ByteArrayResource();
         keystore = new SimpleKeystore(resource, My.configuration().getKeystorePassword());
-        repository = new KeystoreCertificateRepository(keystore);
-        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(repository);
+        repository = keystore.getRepository(); //new KeystoreCertificateRepository(keystore);
+//        TlsPolicy tlsPolicy = new TrustFirstCertificateTlsPolicy(repository);
+        TlsPolicy tlsPolicy = TlsPolicyBuilder.factory().providesAuthentication(repository).skipHostnameVerification().build();        
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent hostAgent = factory.getHostAgent(new ConnectionString(host1), tlsPolicy); //factory.getHostAgent(host);
         return hostAgent;

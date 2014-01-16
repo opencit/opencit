@@ -2,7 +2,7 @@ package test.vendor.vmware;
 
 import org.junit.Test;
 import com.intel.mtwilson.agent.vmware.*;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 //import com.vmware.vim25.InvalidLocaleFaultMsg;
 //import com.vmware.vim25.InvalidPropertyFaultMsg;
 import com.vmware.vim25.ManagedObjectReference;

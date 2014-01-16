@@ -4,9 +4,9 @@
  */
 package com.intel.mtwilson.api;
 
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.Resource;
-import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import java.net.URL;
 /**
  * 

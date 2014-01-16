@@ -7,7 +7,7 @@ package com.intel.mtwilson.setup;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;

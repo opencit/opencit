@@ -69,6 +69,11 @@
         <artifactId>mtwilson-io</artifactId>
         <version>${project.version}</version>
       </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
@@ -80,13 +85,17 @@
         <artifactId>mtwilson-crypto</artifactId>
         <version>${project.version}</version>
       </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-crypto</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
 
-        <!-- for tls-policy -->
-      <dependency>
-        <groupId>com.intel.mtwilson.integration</groupId>
-        <artifactId>http-authorization</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
             
       <dependency>
         <groupId>com.intel.mtwilson.common</groupId>

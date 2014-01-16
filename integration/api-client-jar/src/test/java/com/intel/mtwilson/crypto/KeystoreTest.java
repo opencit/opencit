@@ -4,12 +4,14 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.Resource;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -121,7 +123,7 @@ public class KeystoreTest {
     }
 
     @Test
-    public void createNewKeystoreWithServerSslCert() throws KeyStoreException, KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException  {
+    public void createNewKeystoreWithServerSslCert() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException, KeyManagementException  {
         createNewKeystore();
         showCertificatesInKeystore();
         addServerSslCertificateToKeystore();

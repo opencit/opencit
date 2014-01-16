@@ -197,5 +197,10 @@
         <version>0.1-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-tls-policy</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
   </dependencies>  
 </project>

@@ -154,10 +154,14 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>http-authorization</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-crypto</artifactId>
+            <version>0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>  
 </project>

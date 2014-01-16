@@ -5,7 +5,7 @@
 package com.intel.mtwilson.client.cmd;
 
 import com.intel.mtwilson.client.AbstractCommand;
-import com.intel.mtwilson.io.Filename;
+import com.intel.dcsg.cpg.io.Filename;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 

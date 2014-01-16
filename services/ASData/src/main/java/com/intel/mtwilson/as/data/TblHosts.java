@@ -6,9 +6,9 @@ package com.intel.mtwilson.as.data;
 
 import com.intel.mtwilson.util.DataCipher;
 import com.intel.mtwilson.audit.handler.AuditEventHandler;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.util.ASDataCipher;
 import java.io.Serializable;
 import java.util.Collection;

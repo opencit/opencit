@@ -4,10 +4,11 @@
  */
 package test.ssl;
 
+import com.intel.dcsg.cpg.tls.policy.impl.*;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
-import com.intel.mtwilson.tls.*;
 import java.io.FileNotFoundException;
 import static org.junit.Assert.*;
 import java.io.IOException;
@@ -114,7 +115,7 @@ public class SinglePolicyPerAddressTest {
     public void testApacheHttpConnectionsWithTrustFirstPolicy() {
         // set up the workload: 
         ArrayList<String> targets = getTargets();
-        HashMap<String,TrustFirstCertificateTlsPolicy> map = new HashMap<String,TrustFirstCertificateTlsPolicy>();
+//        HashMap<String,TrustFirstCertificateTlsPolicy> map = new HashMap<String,TrustFirstCertificateTlsPolicy>();
         for(String url : targets) {/*
             ByteArrayResource resource = new ByteArrayResource();
             

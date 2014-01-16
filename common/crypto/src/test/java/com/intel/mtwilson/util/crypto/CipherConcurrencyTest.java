@@ -7,7 +7,7 @@ package com.intel.mtwilson.util.crypto;
 import com.intel.dcsg.cpg.performance.*;
 import com.intel.dcsg.cpg.performance.report.*;
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.util.ArrayList;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.map.ObjectMapper;

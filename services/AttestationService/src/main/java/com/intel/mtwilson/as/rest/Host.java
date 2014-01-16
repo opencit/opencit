@@ -4,11 +4,11 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import java.security.cert.X509Certificate;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -130,7 +130,7 @@ public class Host {
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
             if( aikId.isValid() ) {
                 TblHosts host = new ASComponentFactory().getHostBO().getHostByAik(aikId);
-                KeystoreCertificateRepository repository = new KeystoreCertificateRepository(new SimpleKeystore(host.getTlsKeystoreResource(),My.configuration().getTlsKeystorePassword())); // XXX the hard-coded "password" is same as in HostAgentFactory... need to make it configurable!!  (or switch to a keystore format w/o a password, like a list of PEM-encoded certificates,  since the attestation service database is trusted and this doesn't need additional protection... and if it did it would have to be either similar to our AES-encryption of the connection string, or something a lot more complicated that involves the api client to control the unlocking)
+                KeystoreCertificateRepository repository = new KeystoreCertificateRepository(host.getTlsKeystoreResource(),My.configuration().getTlsKeystorePassword()); 
                 List<X509Certificate> certificates = repository.getCertificates(); // guaranteed not to be null, but may be empty
                 for(X509Certificate certificate : certificates) {
                     // XXX TODO currently trust agent does not give us a certificate for each AIK, because multiple AIK support has not been implemented.

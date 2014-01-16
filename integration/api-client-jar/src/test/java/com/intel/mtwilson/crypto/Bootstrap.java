@@ -4,9 +4,12 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.datatypes.*;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -186,7 +189,7 @@ public class Bootstrap {
     }
     
         // register the new key with Mt Wilson (should be done AFTER adding the ssl certs to keystore)
-    private void registerNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException {
+    private void registerNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException, com.intel.dcsg.cpg.crypto.CryptographyException {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
         ApiClient c = new ApiClient(config);
         ApiClientCreateRequest me = new ApiClientCreateRequest();
@@ -208,7 +211,7 @@ public class Bootstrap {
      * @param keystore
      * @throws Exception 
      */
-    private void selfApproveNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException {
+    private void selfApproveNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException, com.intel.dcsg.cpg.crypto.CryptographyException {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
         ApiClient c = new ApiClient(config); // KeyManagementException, [MalformedURLException], [UnsupportedEncodingException]
         ApiClientUpdateRequest update = new ApiClientUpdateRequest();

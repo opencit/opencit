@@ -4,13 +4,13 @@
  */
 package com.intel.mtwilson.util.crypto;
 
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.io.FileResource;
+import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.mtwilson.validation.Fault;
 import com.intel.mtwilson.x500.DN;
 import java.io.ByteArrayInputStream;
@@ -99,7 +99,7 @@ public class SubjectAlternativeNameTest {
     }
 
     @Test
-    public void testUsingRsaCredentialX509AndSelfSigned() throws NoSuchAlgorithmException, FileNotFoundException, CertificateEncodingException, IOException  {
+    public void testUsingRsaCredentialX509AndSelfSigned() throws NoSuchAlgorithmException, FileNotFoundException, CertificateEncodingException, IOException, com.intel.dcsg.cpg.crypto.CryptographyException  {
         KeyPair caKeys = RsaUtil.generateRsaKeyPair(1024);
         X509Builder caBuilder = X509Builder.factory().selfSigned("CN=Test CA Cert", caKeys).alternativeName("dns:server.com").expires(30, TimeUnit.DAYS);
         X509Certificate caCert = caBuilder.build();

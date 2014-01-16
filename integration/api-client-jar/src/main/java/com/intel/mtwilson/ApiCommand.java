@@ -4,14 +4,14 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.*;
-import com.intel.mtwilson.io.Filename;
+import com.intel.dcsg.cpg.io.Filename;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.rfc822.Rfc822Date;
 import java.io.*;
 import java.net.InetAddress;
@@ -56,7 +56,7 @@ public class ApiCommand {
      * 
      * @param args 
      */
-    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, CryptographyException, ClientException {
+    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, CryptographyException, ClientException, com.intel.dcsg.cpg.crypto.CryptographyException {
         
             for(int i=0;  i<args.length ;i++) {
                 System.out.println("ApiCommand ARG "+i+" = "+args[i]);

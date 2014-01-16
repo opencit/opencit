@@ -9,17 +9,17 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.HtmlErrorParser;
 import com.intel.mtwilson.MultivaluedMapImpl;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredential;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.SslUtil;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.ErrorResponse;
 import com.intel.mtwilson.datatypes.HostTrustResponse;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.rfc822.Rfc822Date;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
@@ -106,7 +106,7 @@ public class SecurityTest {
     }
     
     @Test
-    public void testInvalidAuthorizationHeader() throws IOException, KeyManagementException, FileNotFoundException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ApiException, SignatureException {
+    public void testInvalidAuthorizationHeader() throws IOException, KeyManagementException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ApiException, SignatureException, com.intel.dcsg.cpg.crypto.CryptographyException {
         Configuration config = ConfigurationUtil.fromResource("/localhost-0.5.2.properties");
         // use the keystore just because it already has the server ssl cert
         SimpleKeystore keystore = new SimpleKeystore(new File(config.getString("mtwilson.api.keystore")), config.getString("mtwilson.api.keystore.password"));

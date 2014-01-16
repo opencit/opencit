@@ -16,7 +16,7 @@ import javax.persistence.criteria.Root;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

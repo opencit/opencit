@@ -5,7 +5,7 @@
 package com.intel.mtwilson.util.crypto;
 
 import com.intel.mtwilson.crypto.Password;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.slf4j.Logger;

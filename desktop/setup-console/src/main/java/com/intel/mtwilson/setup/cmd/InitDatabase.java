@@ -8,7 +8,7 @@ import com.intel.mtwilson.setup.PropertyHidingConfiguration;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
-import com.intel.mtwilson.io.Classpath;
+import com.intel.dcsg.cpg.io.Classpath;
 import com.intel.mtwilson.jpa.PersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;

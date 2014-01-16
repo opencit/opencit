@@ -4,13 +4,14 @@
  */
 package com.intel.mtwilson.setup;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.Pkcs12;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.crypto.X509Builder;
 import com.intel.mtwilson.crypto.X509Util;
 import com.intel.mtwilson.datatypes.TLSPolicy;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.Database;
 import com.intel.mtwilson.setup.model.DatabaseType;
@@ -603,7 +604,7 @@ public class RemoteSetup extends BuilderModel implements Closeable {
         
     }
     
-    public void uploadPrivacyCaKeystoreToServer() throws IOException, KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, KeyManagementException {
+    public void uploadPrivacyCaKeystoreToServer() throws IOException, KeyStoreException, CertificateEncodingException, NoSuchAlgorithmException, KeyManagementException, CryptographyException {
         if( ctx.privacyCA.ekSigningKeyPair == null ) {
             fault("Cannot upload Privacy CA Keystore to server: missing EK Signing Key Private Key");
             return;

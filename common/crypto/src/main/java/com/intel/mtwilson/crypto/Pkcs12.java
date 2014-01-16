@@ -4,7 +4,9 @@
  */
 package com.intel.mtwilson.crypto;
 
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.io.Resource;
 import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -115,7 +117,7 @@ public class Pkcs12 {
         return Collections.list(keystore.aliases());
     }
     
-    public RsaCredentialX509 getRsaCredentialX509(String keyAlias, String keyPassword) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, FileNotFoundException, CertificateEncodingException {
+    public RsaCredentialX509 getRsaCredentialX509(String keyAlias, String keyPassword) throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, FileNotFoundException, CertificateEncodingException, CryptographyException {
         // load the key pair
         KeyStore.PrivateKeyEntry pkEntry = (KeyStore.PrivateKeyEntry)keystore.getEntry(keyAlias, new KeyStore.PasswordProtection(keyPassword.toCharArray())); //NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException
         if( pkEntry != null ) {

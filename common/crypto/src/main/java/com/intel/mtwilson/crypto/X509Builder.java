@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.mtwilson.validation.BuilderModel;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
