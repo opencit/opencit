@@ -130,13 +130,13 @@ public class RolesAllowedResourceFilterFactory implements ResourceFilterFactory 
         @Override
         public ContainerRequest filter(ContainerRequest request) {
             log.debug("UserPrincipal={}", sc.getUserPrincipal() == null ? "UNKNOWN" : sc.getUserPrincipal().getName());
-            log.debug("Evaluating role-based access to {} {}", new String[] { request.getMethod(), request.getPath() });
+            log.debug("Evaluating role-based access to {} {}", request.getMethod(), request.getPath());
             log.debug("DenyAll={}", denyAll ? "ANNOTATED" : "No");
             log.debug("RolesAllowed={}", rolesAllowedString);
             if (!denyAll) {
                 for (String role : rolesAllowed) {
                     if (sc.isUserInRole(role)) {
-                        log.debug("Approving request for user {} in role {} to method {} {}", new String[] { sc.getUserPrincipal().getName(), role, request.getMethod(), request.getPath() });
+                        log.debug("Approving request for user {} in role {} to method {} {}", sc.getUserPrincipal().getName(), role, request.getMethod(), request.getPath());
                         return request;
                     }
                 }

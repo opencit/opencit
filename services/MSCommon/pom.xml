@@ -36,19 +36,21 @@
 		<version>6.0</version>
 		<scope>provided</scope>
 	</dependency>
+    <!--
 	<dependency>
 		<groupId>org.glassfish</groupId>
 		<artifactId>maven-embedded-glassfish-plugin</artifactId>
 		<version>3.1.1</version>
 		<type>maven-plugin</type>
 	</dependency>    
+    -->
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
         <groupId>ch.qos.logback</groupId>
-        <artifactId>logback-core</artifactId>
+        <artifactId>logback-classic</artifactId>
         <scope>test</scope>
     </dependency>
     <dependency>
@@ -60,8 +62,6 @@
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
-		<version>1.8.0</version>
-		<scope>compile</scope>
     </dependency>
     <dependency>
 		<groupId>commons-configuration</groupId>
@@ -82,11 +82,13 @@
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
     </dependency>
+    <!--
     <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>1.9-ea04</version>
     </dependency>
+    -->
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>

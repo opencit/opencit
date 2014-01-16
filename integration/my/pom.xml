@@ -3,7 +3,7 @@
 
   <artifactId>mtwilson-my</artifactId>
   <packaging>jar</packaging>
-  <name>My Config</name>
+  <name>mtwilson-my</name>
   <description>Utility to allow developers to maintain their own local configuration so that JUnit tests do not have any environment-specific configuration embedded in them.</description>
   
     <parent>
@@ -79,7 +79,6 @@
     <dependency>
 		<groupId>org.slf4j</groupId>
 		<artifactId>slf4j-api</artifactId>
-		<version>1.7.5</version>
     </dependency>
     <!--
     <dependency>
@@ -92,16 +91,9 @@
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.11</version>
                 <scope>test</scope>
         </dependency>
 
-        <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.0.11</version>
-                <scope>test</scope>
-        </dependency>
         <!--
        API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-autotest module
     -->
@@ -182,17 +174,14 @@
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-crypto</artifactId>
-        <version>0.1.5-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-io</artifactId>
-        <version>0.1.3-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-console</artifactId>
-        <version>0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>  
 </project>

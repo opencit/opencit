@@ -293,12 +293,12 @@
 			<artifactId>mtwilson-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+        <!--
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
 			<artifactId>mtwilson-jersey-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <!--
 		<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
 		<artifactId>mtwilson-postgres</artifactId>
@@ -372,38 +372,27 @@
         <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
-                    <version>1.6.4</version>
         </dependency>
         
         <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
         </dependency>
 
-        <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.0.9</version>
-        </dependency>
-
-            
 	<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.8</version>
 		</dependency>
 	<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
 		</dependency>
 	<dependency>
 			<groupId>commons-math</groupId>
 			<artifactId>commons-math3</artifactId>
-			<version>3.0</version>
 		</dependency>
                 
+                <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
@@ -431,6 +420,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -458,7 +448,9 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.servlet</artifactId>
 			<version>3.1.1</version>
+			<scope>provided</scope>
 		</dependency>
+        <!--
         <dependency>
             <groupId>org.glassfish.distributions</groupId>
             <artifactId>web-all</artifactId>
@@ -471,6 +463,7 @@
             <version>1.0-alpha-4</version>
             <scope>test</scope>
         </dependency>
+        -->
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -478,6 +471,27 @@
 			<scope>test</scope>
 		</dependency>
 
+<!--
+<dependency>
+        <groupId>com.sun.jersey.contribs</groupId>
+        <artifactId>jersey-multipart</artifactId>
+        <version>${jersey-version}</version>
+    </dependency>
+<dependency>
+	<groupId>org.jvnet</groupId>
+	<artifactId>mimepull</artifactId>
+	<version>1.6</version>
+</dependency>
+                -->
+
+                <!--                
+<dependency>
+	<groupId>org.glassfish.jersey.core</groupId>
+	<artifactId>jersey-server</artifactId>
+	<version>2.4.1</version>
+</dependency>
+                           --> 
+                
         <!-- 
         XXX TODO plugin jars should eventually be installed on filesystem somewhere and added to the application's
         classpath using a custom class loader... not packaged in the war :)  
