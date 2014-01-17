@@ -7,11 +7,12 @@ import com.intel.mountwilson.common.ErrorCode;
 import com.intel.mountwilson.common.ICommand;
 import com.intel.mountwilson.common.TAException;
 import com.intel.mountwilson.trustagent.data.TADataContext;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.plexus.util.IOUtil;
+//import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.persistence.tools.file.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,9 @@ public class ChallengeResponseDaaCmd implements ICommand {
         try {
             // write challenge to file
         	FileOutputStream out = new FileOutputStream(new File(context.getDaaChallengeFileName()));
-            IOUtil.copy(context.getDaaChallenge(), out);
+                IOUtils.copy(new ByteArrayInputStream(context.getDaaChallenge()), out);
+             // Removing the dependency on the codehaus
+            //IOUtil.copy(context.getDaaChallenge(), out);
             IOUtils.closeQuietly(out);
             
             // prepare response to challenge

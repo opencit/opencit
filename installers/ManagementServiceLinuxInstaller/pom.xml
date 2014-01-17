@@ -46,7 +46,13 @@
       <artifactId>mtwilson-linux-util</artifactId>
       <version>${project.version}</version>
       <type>sh</type>
-    </dependency>	
+    </dependency>
+    <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
+        <scope>provided</scope>
+    </dependency>
     <!--
     <dependency>
       <groupId>com.oracle</groupId>
