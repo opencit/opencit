@@ -18,7 +18,7 @@
         <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
     </listener>
     <servlet>
-        <servlet-name>ServletAdaptor</servlet-name>
+        <servlet-name>Jersey1</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
@@ -41,7 +41,7 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>ServletAdaptor</servlet-name>
+        <servlet-name>Jersey1</servlet-name>
         <url-pattern>/resources/*</url-pattern>
     </servlet-mapping>
     <session-config>

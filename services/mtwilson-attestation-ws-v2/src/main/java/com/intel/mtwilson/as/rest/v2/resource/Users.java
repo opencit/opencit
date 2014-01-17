@@ -28,7 +28,7 @@ import javax.ws.rs.Path;
  */
 
 @Stateless
-@Path("/v2/users")
+@Path("/users")
 public class Users extends AbstractResource<User, UserCollection, UserFilterCriteria, UserLinks> {
 
     //TODO : Handling of the exceptions should be changed

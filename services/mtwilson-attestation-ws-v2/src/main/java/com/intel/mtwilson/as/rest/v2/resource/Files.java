@@ -18,7 +18,7 @@ import javax.ws.rs.Path;
  * @author jbuhacoff
  */
 @Stateless
-@Path("/v2/files")
+@Path("/files")
 public class Files extends AbstractResource<File,FileCollection,FileFilterCriteria,NoLinks<File>> {
 
     @Override

@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.launcher.webapp;
 
-import com.intel.mtwilson.jetty.JunitWebapp;
+//import com.intel.mtwilson.jetty.JunitWebapp;
 import java.io.IOException;
 import org.junit.Test;
 
@@ -12,7 +12,7 @@ import org.junit.Test;
  *
  * @author jbuhacoff
  */
-public class WebappTest extends JunitWebapp {
+public class WebappTest/* extends JunitWebapp*/ {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WebappTest.class);
     
     @Test

@@ -32,7 +32,7 @@
 <!--
 To test the application:
     mvn jetty:start
-    http://localhost:8080/v2/application.wadl
+    http://localhost:8080/application.wadl
     http://localhost:8080/v2/files
     http://localhost:8080/v2/files.json
     http://localhost:8080/v2/files.yaml
@@ -61,12 +61,14 @@ This error message indicates you need a jersey implementation like org.glassfish
     </build>
     <dependencies>
 
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-jetty-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-my</artifactId>
@@ -94,13 +96,15 @@ This error message indicates you need a jersey implementation like org.glassfish
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
+        <!--
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
             <version>1.5</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>   
+        -->
+        <!--     
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.ejb</artifactId>
@@ -113,6 +117,7 @@ This error message indicates you need a jersey implementation like org.glassfish
             <version>3.1.1</version>
             <scope>provided</scope>
         </dependency>
+        -->
         <!--
         <dependency>
             <groupId>javax.ws.rs</groupId>
