@@ -166,5 +166,22 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
         }
         return mwKeystoreObj;
     }
+
+    public MwPortalUser findMwPortalUserByUUID(String uuid_hex) {
+        MwPortalUser portalUser;
+        EntityManager em = getEntityManager();
+
+        try {
+            Query query = em.createNamedQuery("MwPortalUser.findByUUID_Hex");
+            query.setParameter("uuid_hex", uuid_hex);
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
+            portalUser = (MwPortalUser) query.getSingleResult();
+        } catch (javax.persistence.NoResultException e) {
+            portalUser = null;
+        } finally {
+            em.close();
+        }
+        return portalUser;
+    }
     
 }
