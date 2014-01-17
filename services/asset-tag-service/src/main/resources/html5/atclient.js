@@ -205,9 +205,46 @@ mtwilson.atag = mtwilson.atag || {};
      }
      */
 // SERVER REPOSITORY HELPER METHODS
-
     mtwilson.atag.notify = function(notice) {
-        log.debug("NOTICE: " + Object.toJSON(notice));
+        $('notifications').classNames().toArray().forEach(function(obj) {
+            $('notifications').removeClassName(obj);
+        });
+        switch (notice.status) {
+            case "OK":
+                log.debug("OK: " + Object.toJSON(notice));
+                $('notifications').addClassName('msgOK');
+                break;
+            case "INFO":
+                log.debug("INFO: " + Object.toJSON(notice));
+                $('notifications').addClassName('msgInfo');
+                break;
+            case "WARN":
+                log.debug("WARN: " + Object.toJSON(notice));
+                $('notifications').addClassName('msgWarn');
+                break;
+            case "ERROR":
+                log.debug("ERROR: " + Object.toJSON(notice));
+                $('notifications').addClassName('msgError');
+                break;
+            default:
+                log.debug("ERROR: " + Object.toJSON(notice));
+                $('notifications').addClassName('msgError');
+                break;
+        }
+        $('notifications').update(notice.text);
+        $('notifications').show();
+
+        switch (notice.clear) {
+            case "AUTO":
+                Element.fade.delay(5, 'notifications');
+                break;
+            case "CONFIRM":
+                break;
+            default:
+                Element.fade.delay(5, 'notifications');
+                break;
+        }
+
 //        mtwilson.atag.data.notices.push(notice); // { text:'...', clear:'auto' }  or clear:'confirm' to force user to acknowledge
         //       view.sync();
         // for now we implement it this way, but in the future it should be part of the data model (data.notices) with automatic confirmations to server when user clicks on a 'confirm' notice to acknowledge it:
@@ -218,26 +255,26 @@ mtwilson.atag = mtwilson.atag || {};
     document.observe("ajax:httpPostSuccess", function(event) {
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Created tag: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Created tag: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Created RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Created RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Created selection: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Created selection: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Created certificate request for: ' + event.memo.resource.app.input.subject, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Created certificate request for: ' + event.memo.resource.app.input.subject, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Created configuration: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Created configuration: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Created file: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Created file: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 break;
             default:
                 log.debug("No handler for successful HTTP POST of " + event.memo.resource.name);
@@ -265,29 +302,29 @@ mtwilson.atag = mtwilson.atag || {};
         log.debug("httpDeleteSuccess: " + Object.toJSON(event.memo));
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Deleted tag: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Deleted tag: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Deleted RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Deleted RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
                 log.debug("deleted selection notification...");
-                mtwilson.atag.notify({text: 'Deleted selection: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Deleted selection: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 log.debug("deleted selection input merge...");
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Deleted certificate request for: ' + event.memo.resource.app.input.subject, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Deleted certificate request for: ' + event.memo.resource.app.input.subject, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Deleted configuration: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Deleted configuration: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Deleted file: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Deleted file: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             default:
@@ -299,27 +336,27 @@ mtwilson.atag = mtwilson.atag || {};
     document.observe("ajax:httpPutSuccess", function(event) {
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Updated tag: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Updated tag: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Updated RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Updated RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Updated selection: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Updated selection: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Updated certificate request for: ' + event.memo.resource.app.input.subject, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Updated certificate request for: ' + event.memo.resource.app.input.subject, clear: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Updated configuration: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Updated configuration successfully.', clear: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Updated file: ' + event.memo.resource.app.input.name, clear: 'auto'});
+                mtwilson.atag.notify({text: 'Updated file: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             default:
@@ -915,3 +952,19 @@ document.observe("dom:loaded", function() {
         }
     }
 });
+
+
+function enableClickableAlerts(){
+    $$('.msgOK').invoke('observe', 'click', function() {
+        this.hide();
+    });
+    $$('.msgInfo').invoke('observe', 'click', function() {
+        this.hide();
+    });
+    $$('.msgWarn').invoke('observe', 'click', function() {
+        this.hide();
+    });
+    $$('.msgError').invoke('observe', 'click', function() {
+        this.hide();
+    });
+}
