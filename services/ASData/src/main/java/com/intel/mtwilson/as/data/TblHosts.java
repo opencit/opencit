@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 //    @NamedQuery(name = "TblHosts.findByUpdatedOn", query = "SELECT t FROM TblHosts t WHERE t.updatedOn = :updatedOn"),
     @NamedQuery(name = "TblHosts.findByErrorCode", query = "SELECT t FROM TblHosts t WHERE t.errorCode = :errorCode"),
     @NamedQuery(name = "TblHosts.findByErrorDescription", query = "SELECT t FROM TblHosts t WHERE t.errorDescription = :errorDescription"),
+    @NamedQuery(name = "TblHosts.findByHwUUID", query = "SELECT t FROM TblHosts t WHERE t.hardware_uuid = :hardware_uuid"),
     @NamedQuery(name = "TblHosts.findByNameSearchCriteria", query = "SELECT t FROM TblHosts t WHERE t.name like :search")})
 public class TblHosts implements Serializable {
     @Transient
@@ -126,6 +127,9 @@ public class TblHosts implements Serializable {
     @ManyToOne(optional = false)
     private TblMle biosMleId;
 
+    @Column(name = "hardware_uuid")
+    private String hardware_uuid;
+    
     public TblHosts() {
     }
 
@@ -398,6 +402,11 @@ public class TblHosts implements Serializable {
         this.tblSamlAssertionCollection = tblSamlAssertionCollection;
     }
 
- 
+    public String getHardwareUuid() {
+        return hardware_uuid;
+    }
     
+    public void setHardwareUuid(String uuid){
+        this.hardware_uuid = uuid;
+    }
 }

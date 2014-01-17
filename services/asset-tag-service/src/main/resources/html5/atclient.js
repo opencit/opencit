@@ -419,6 +419,11 @@ mtwilson.atag = mtwilson.atag || {};
             ajax.json.post('certificateRequests', [requestObject], {app: report}); // pass {app:report} so it will be passed to the event handler after the request is complete
         }
     };
+    
+    mtwilson.atag.autoPopulateUUID = function(input) {
+        $('certificate-request-create-subject').value = "Some Random UUID";
+        alert("its working");
+    }
 
     mtwilson.atag.createSelection = function(input) {
         log.debug("the form model is: " + Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input));
