@@ -25,7 +25,7 @@
         <!-- XXX TODO plugin architecture needs a facility for plugins to declare mappings relevant to their special resources; all mappings must be combined and then declared to jersey?  -->
         <init-param>
             <param-name>jersey.config.server.mediaTypeMappings</param-name>
-            <param-value>txt:text/plain, xml:application/xml, json:application/json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml</param-value>
+            <param-value>txt:text/plain, xml:application/xml, json:application/json, jsonapi: application/vnd.api+json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml</param-value>
         </init-param>
         <!-- XXX TODO plugin architecture needs a facility for configuring this... or just initialize it with all known codes and don't make it available to plugins -->
         <init-param>

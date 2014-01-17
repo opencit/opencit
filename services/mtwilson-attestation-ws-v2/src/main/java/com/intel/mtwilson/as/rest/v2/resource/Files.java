@@ -34,6 +34,7 @@ public class Files extends AbstractResource<File,FileCollection,FileFilterCriter
 
     @Override
     protected File retrieve(String id) {
+        if( !UUID.isValid(id) ) { return null; } // XXX TODO or a localizable input validation error via throw exception (if we don't validate here, UUID.valueOf() will throw IllegalArgumentException if it's not a valid uuid)
         File file = new File();
         file.setId(UUID.valueOf(id));
         file.setName("testfile");
@@ -60,11 +61,6 @@ public class Files extends AbstractResource<File,FileCollection,FileFilterCriter
         FileFilterCriteria criteria = new FileFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
-    }
-
-    @Override
-    protected void create(File item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }
