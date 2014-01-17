@@ -95,7 +95,13 @@
             <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -103,6 +109,7 @@
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
+        -->
         <!--
            API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-autotest module
         -->
