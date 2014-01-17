@@ -93,12 +93,24 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
      * Given an item instance, stores the item into permanent storage replacing
      * any existing item with the same id.
      * 
+     * Pre-Condition: Item should already exist.
+     * 
      * The item will already have a client-provided or auto-generated UUID.
      * 
      * @param id
      * @param item 
      */
     protected abstract void store(T item);
+
+    /**
+     * Creates a new instance and stores it in the DB.
+     * 
+     * The item will already have a client-provided or auto-generated UUID.
+     * 
+     * @param id
+     * @param item 
+     */
+    protected abstract void create(T item);
 
     /**
      * Given an item identifier, delete the corresponding item from 
@@ -181,7 +193,7 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
         if( item.getId() == null ) {
             item.setId(new UUID());
         }
-        store(item);
+        create(item);
         // XXX TODO wire this up to a repository?    needs to implement a business layer interface.... 
         return item;
     }
@@ -234,10 +246,15 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
     public T storeOne(@PathParam("id") String id, T item) {
         log.debug("store");
+        item.setId(UUID.valueOf(id));
         // XXX TODO wire up to repository...
         // we could look it up first or we can just try a database "replace" statement if it's available....  this level of detail in meaning of actions must be present in the business layer API  
-        item.setId(UUID.valueOf(id));
-        store(item);
+        T existing = retrieve(id);
+        if( existing == null ) 
+            { create(item); }
+        else 
+            { store(item); }
+        
         return item;
     }
     
@@ -308,7 +325,7 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
             if( item.getId() == null ) {
                 item.setId(new UUID());
             }
-//            create(item); // XXX TODO   autmoatic multi-threading here so subclass doesn't have to
+            create(item); // XXX TODO   autmoatic multi-threading here so subclass doesn't have to
         }
         // XXX TODO wire this up to a repository?    needs to implement a business layer interface.... 
         return collection;
@@ -362,7 +379,10 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
             return null;
         }
         T item = list.get(0);
-        store(item);
+        if( item == null ) 
+            { create(item); }
+        else 
+            { store(item); }        
         return collection;
     }
 
