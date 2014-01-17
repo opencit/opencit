@@ -13,6 +13,7 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrManifest;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.util.List;
@@ -33,7 +34,7 @@ public class VmwareAgentTest {
         
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
-        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
+        TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore("TRUST_FIRST_CERTIFICATE", tlsKeystore);
         HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), tlsPolicy);
         PcrManifest manifest1 = agent1.getPcrManifest();
         Pcr pcr1 = manifest1.getPcr(19);
@@ -48,7 +49,7 @@ public class VmwareAgentTest {
         
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
-        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
+        TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore("TRUST_FIRST_CERTIFICATE", tlsKeystore);
         HostAgent agent1 = hostAgentFactory.getHostAgent(new ConnectionString(host1), tlsPolicy);
         PcrManifest manifest1 = agent1.getPcrManifest();
         Pcr pcr1 = manifest1.getPcr(19);

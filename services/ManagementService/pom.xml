@@ -78,14 +78,6 @@
     -->
     </build>
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-dependencies</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-        -->
                 <dependency>
                     <groupId>com.intel.mtwilson.services</groupId>
                     <artifactId>mtwilson-whitelist-service</artifactId>

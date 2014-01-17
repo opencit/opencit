@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<!--
+    <filter>
+        <filter-name>AuthorizationExceptionFilter</filter-name>
+        <filter-class>com.intel.mtwilson.shiro.AuthorizationExceptionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ShiroExceptionHandler</filter-name>
+        <url-pattern>/resources/*</url-pattern>
+    </filter-mapping>
+-->
+<!--
+    <listener>
+        <description>Cleans up Persistence factory.</description>
+        <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
+    </listener>
+-->
+    <servlet>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
+        <!-- XXX TODO plugin architecture needs a facility for plugins to declare mappings relevant to their special resources; all mappings must be combined and then declared to jersey?  -->
+        <init-param>
+            <param-name>jersey.config.server.mediaTypeMappings</param-name>
+            <param-value>txt:text/plain, xml:application/xml, json:application/json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml</param-value>
+        </init-param>
+        <!-- XXX TODO plugin architecture needs a facility for configuring this... or just initialize it with all known codes and don't make it available to plugins -->
+        <init-param>
+            <param-name>jersey.config.server.languageMappings</param-name>
+            <param-value>en:en, fr:fr</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+<!--
+    <servlet>
+        <servlet-name>ServletAdaptor</servlet-name>
+        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
+            <param-value>com.sun.jersey.api.container.filter.PostReplaceFilter,com.intel.mtwilson.as.helper.ASAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
+            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
+            <param-value>com.intel.mtwilson.security.jersey.RolesAllowedResourceFilterFactory</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServletAdaptor</servlet-name>
+        <url-pattern>/resources/*</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+-->
+    <!--
+    <listener>
+        <description>Configuration management</description>
+        <listener-class>com.intel.mtwilson.as.helper.ASConfiguration</listener-class>
+    </listener>
+    -->
+    <!--
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/applicationContext.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+-->
+</web-app>

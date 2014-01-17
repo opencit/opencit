@@ -90,7 +90,8 @@
     <dependency>
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
-    	<version>1.9.11</version> <!-- in 1.0-RC2 we used 1.5.5 -->
+    	<version>1.9.13</version> <!-- in 1.0-RC2 we used 1.5.5 -->
+        <optional>true</optional>
     </dependency>
     <dependency>
 		<groupId>javax</groupId>

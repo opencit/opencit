@@ -43,6 +43,10 @@ public class Files extends AbstractResource<File,FileCollection,FileFilterCriter
     }
 
     @Override
+    protected void create(File item) {
+        // store it...
+    }
+    @Override
     protected void store(File item) {
         // store it...
     }

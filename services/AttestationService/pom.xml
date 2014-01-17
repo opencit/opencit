@@ -216,7 +216,28 @@
                 </execution>
             </executions>
         </plugin>
-			
+	
+<!--
+To test the application:
+    mvn jetty:start
+    http://localhost:8080/resources/hosts
+This error indicates you need jersey:
+    Caused by: com.sun.jersey.api.MessageException: A message body writer for Java class com.intel.mtwilson.datatypes.AuthResponse, and Java type class com.intel.mt
+    wilson.datatypes.AuthResponse, and MIME media type application/json was not found
+-->		
+    <plugin>
+    <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.1.0.RC2</version>
+        <configuration>
+          <webAppConfig>
+            <contextPath>/</contextPath>
+            <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
+<!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
+          </webAppConfig>
+        </configuration>
+      </plugin>
 
         </plugins>
 <!--
@@ -265,14 +286,6 @@
             <scope>test</scope>
   	</dependency>
 
-    <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-dependencies</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
--->
 		<dependency>
 			<groupId>com.intel.mtwilson.common</groupId>
 			<artifactId>mtwilson-crypto</artifactId>
@@ -281,22 +294,18 @@
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-crypto</artifactId>
-			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-jpa</artifactId>
-			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-io</artifactId>
-			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-validation</artifactId>
-			<version>0.2-SNAPSHOT</version>
 		</dependency>
         <!--
 		<dependency>
@@ -310,10 +319,6 @@
 		<version>${project.version}</version>
 	</dependency> 
         -->
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
-        </dependency>
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -572,8 +577,32 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-policy</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
+        
+        
+<!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
+<dependency>
+    <groupId>org.codehaus.jackson</groupId>
+    <artifactId>jackson-jaxrs</artifactId>
+    <version>1.9.13</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-mapper-asl</artifactId>
+	<version>1.9.13</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-core-asl</artifactId>
+	<version>1.9.13</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-xc</artifactId>
+	<version>1.9.13</version>
+</dependency>
+        
+        
     </dependencies>
     <properties />
     

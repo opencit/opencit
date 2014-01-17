@@ -81,6 +81,7 @@
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
+        <optional>true</optional>
     </dependency>
     <!--
     <dependency>
