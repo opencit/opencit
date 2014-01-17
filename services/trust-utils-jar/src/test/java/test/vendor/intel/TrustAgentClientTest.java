@@ -35,7 +35,7 @@ public class TrustAgentClientTest {
     public void testSetAssetTagCommand() throws IOException {
         TlsConnection tlsConnection = new TlsConnection(new URL("https://10.1.71.45:9999" ), new InsecureTlsPolicy());
         TrustAgentSecureClient client = new TrustAgentSecureClient(tlsConnection);
-        String hash = "232aef1b5eb261a719970aa27fbd73e8b7c4d82b";
+        String hash = "a6a2c1cc2e36bc3df30bb637a792336d0efdc8af";
         String uuid = "f4b17194-cae7-11df-b40b-001517fa9844";
         boolean response = client.setAssetTag(hash, uuid);
         if(response)
