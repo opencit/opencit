@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.x509.X509Util;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

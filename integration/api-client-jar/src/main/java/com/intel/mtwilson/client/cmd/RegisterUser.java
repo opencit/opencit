@@ -7,12 +7,12 @@ package com.intel.mtwilson.client.cmd;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.client.AbstractCommand;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
-import com.intel.mtwilson.io.Filename;
+import com.intel.dcsg.cpg.io.Filename;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -80,7 +80,7 @@ public class RegisterUser extends AbstractCommand {
             // XXX TODO need to comply with user's specified tls policy, or assume "trust first certificate" if no policy is configured
             // download server's ssl certificates and add them to the keystore  and display for user to confirm later XXX TODO maybe prompt user to accept/decline them before adding, instaed of checking what was added after;  or be able to set an ssl policy here so if we already trust the root CA this should work seamlessly.
             String[] tlsCertAliases0 = keystore.listTrustedSslCertificates();
-            SslUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
+            TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
             String[] tlsCertAliases = keystore.listTrustedSslCertificates();
             String[] newTlsCertAliases = elementsAdded(tlsCertAliases0, tlsCertAliases);
             for(String alias : newTlsCertAliases) {

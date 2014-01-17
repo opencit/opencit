@@ -6,7 +6,7 @@ package com.intel.mtwilson;
 
 //import com.intel.mountwilson.as.common.ASConfig;
 //import com.intel.mtwilson.audit.helper.AuditConfig;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import java.io.IOException;
 //import com.intel.mtwilson.ms.common.MSConfig;
 import java.util.Properties;

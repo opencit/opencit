@@ -4,13 +4,13 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.X509Builder;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.RemoteSetup;
@@ -28,9 +28,9 @@ import com.intel.mtwilson.setup.ui.console.InternetAddressInput;
 import com.intel.mtwilson.setup.ui.console.StringInput;
 import com.intel.mtwilson.setup.ui.console.URLInput;
 import com.intel.mtwilson.setup.ui.console.YesNoInput;
-import com.intel.mtwilson.validation.Fault;
-import com.intel.mtwilson.validation.InputModel;
-import com.intel.mtwilson.validation.Model;
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.validation.InputModel;
+import com.intel.dcsg.cpg.validation.Model;
 import java.io.Console;
 import java.io.IOException;
 import java.net.MalformedURLException;

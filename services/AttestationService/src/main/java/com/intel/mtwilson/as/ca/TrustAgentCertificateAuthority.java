@@ -10,14 +10,14 @@ import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwKeystore;
 import com.intel.mtwilson.as.helper.BaseBO;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.x500.DN;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.x500.DN;
+import com.intel.dcsg.cpg.x509.X509Util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -34,7 +34,7 @@ import java.util.Map;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import java.security.cert.CertificateException;
 /**
  * The Trust Agent Certificate Authority is an RSA key pair that signs SSL

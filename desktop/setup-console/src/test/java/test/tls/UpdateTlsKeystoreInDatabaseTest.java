@@ -12,16 +12,15 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
-import com.intel.mtwilson.tls.*;
 import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
-import com.intel.mtwilson.crypto.X509Util;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.FileResource;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.model.Md5Digest;
 import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.ms.common.MSConfig;
@@ -130,7 +129,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
         log.debug("old keystore: {}", Md5Digest.valueOf(oldkeystore));
         ByteArrayResource resource = new ByteArrayResource(oldkeystore);
         SimpleKeystore keystore = new SimpleKeystore(resource, password);
-        SslUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
+        TlsUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
         keystore.save();
         byte[] newkeystore = resource.toByteArray();
         log.debug("new keystore: {}", Md5Digest.valueOf(newkeystore));
@@ -142,7 +141,7 @@ public class UpdateTlsKeystoreInDatabaseTest {
     public void testAddCurrentTlsCertificateToMyUserKeystore() throws KeyManagementException, CryptographyException, IOException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, CertificateException, NonexistentEntityException, MSDataException {
         FileResource keystoreFile = new FileResource(My.configuration().getKeystoreFile());
         SimpleKeystore keystore = new SimpleKeystore(keystoreFile, My.configuration().getKeystorePassword());
-        SslUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
+        TlsUtil.addSslCertificatesToKeystore(keystore, My.configuration().getMtWilsonURL());
         keystore.save();
     }
     

@@ -1,15 +1,16 @@
 package test.vendor.intel;
 
 
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.agent.intel.TAHelper;
 import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

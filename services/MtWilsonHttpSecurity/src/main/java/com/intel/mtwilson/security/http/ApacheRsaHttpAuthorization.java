@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.security.http;
 
-import com.intel.mtwilson.crypto.RsaCredential;
+import com.intel.dcsg.cpg.crypto.RsaCredential;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.util.HashMap;

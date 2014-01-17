@@ -6,9 +6,9 @@ package com.intel.mtwilson;
 
 import com.intel.mtwilson.api.ClientFactorySpi;
 import com.intel.mtwilson.api.MtWilson;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.Resource;
-import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import java.io.File;
 import java.net.URL;
 import org.slf4j.Logger;

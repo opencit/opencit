@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.setup;
 
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.TLSPolicy;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.model.*;

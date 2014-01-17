@@ -4,22 +4,23 @@
  */
 package test.vendor.citrix;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import test.vendor.intel.*;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.KeyManagementException;
@@ -83,7 +84,7 @@ public class TestCitrixHostAgent {
     @Test
     public void getAikFromCitrixXen() throws IOException {
         PublicKey aik = agent.getAik();
-        log.debug("Public key: {}", X509Util.encodePemPublicKey(aik));
+        log.debug("Public key: {}", RsaUtil.encodePemPublicKey(aik));
         assertNotNull(aik);
         
     }

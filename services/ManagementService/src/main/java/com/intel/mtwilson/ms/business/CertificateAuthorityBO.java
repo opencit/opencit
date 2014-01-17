@@ -6,7 +6,7 @@ package com.intel.mtwilson.ms.business;
 
 import com.intel.mtwilson.as.controller.MwCertificateX509JpaController;
 import com.intel.mtwilson.as.data.MwCertificateX509;
-import com.intel.mtwilson.crypto.Password;
+import com.intel.dcsg.cpg.crypto.PasswordHash;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.controller.MwConfigurationJpaController;
@@ -33,7 +33,7 @@ public class CertificateAuthorityBO extends BaseBO {
     public CertificateAuthorityBO() {
     }
 
-    public void enableCaWithPassword(Password newPassword) {
+    public void enableCaWithPassword(PasswordHash newPassword) {
         try {
             mwConfigurationJPA.setMwConfiguration(CA_PASSWORD_CONF_KEY, newPassword.toString());
             mwConfigurationJPA.setMwConfiguration(CA_ENABLED_CONF_KEY, Boolean.TRUE.toString());

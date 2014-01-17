@@ -109,13 +109,12 @@
 		<artifactId>mtwilson-api</artifactId>
 		<version>${project.version}</version>
     </dependency>
-    <dependency>
-		<groupId>com.intel.mtwilson.common</groupId>
-		<artifactId>mtwilson-jpa</artifactId>
-		<version>${project.version}</version>        
-        <optional>true</optional>
-        <scope>provided</scope>
-    </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-jpa</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+		</dependency>
     <!--
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
@@ -189,6 +188,10 @@
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-console</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-tls-policy</artifactId>
     </dependency>
   </dependencies>  
 </project>

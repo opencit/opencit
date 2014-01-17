@@ -51,11 +51,11 @@
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.intel.mtwilson.common</groupId>
-      <artifactId>mtwilson-jpa</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-jpa</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>webservice-util</artifactId>

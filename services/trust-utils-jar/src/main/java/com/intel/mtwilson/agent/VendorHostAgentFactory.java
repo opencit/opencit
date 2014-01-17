@@ -5,7 +5,7 @@
 package com.intel.mtwilson.agent;
 
 import com.intel.mtwilson.model.InternetAddress;
-import com.intel.mtwilson.tls.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import java.io.IOException;
 
 /**

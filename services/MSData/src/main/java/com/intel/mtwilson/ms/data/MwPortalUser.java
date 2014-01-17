@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.ms.data;
 
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.Resource;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;

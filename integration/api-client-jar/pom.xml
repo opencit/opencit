@@ -188,16 +188,18 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-crypto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-io</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-crypto</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-rfc822</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
@@ -324,9 +326,8 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>http-authorization</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -478,7 +479,7 @@
                                     <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
                                     <dependencySourceIncludes>
                                         <dependencySourceInclude>com.intel.mtwilson.integration:mtwilson-api</dependencySourceInclude>
-                                        <dependencySourceInclude>com.intel.mtwilson.common:mtwilson-validation</dependencySourceInclude>
+                                        <dependencySourceInclude>com.intel.dcsg.cpg:cpg-validation</dependencySourceInclude>
                                     </dependencySourceIncludes>
                                 </configuration>
                             </execution>

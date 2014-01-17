@@ -5,7 +5,7 @@
 package com.intel.mtwilson.setup.ui.console;
 
 import com.intel.mtwilson.setup.model.YesNo;
-import com.intel.mtwilson.validation.InputModel;
+import com.intel.dcsg.cpg.validation.InputModel;
 
 /**
  *

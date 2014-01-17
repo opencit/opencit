@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.model;
 
-import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.regex.Matcher;

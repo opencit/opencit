@@ -5,15 +5,16 @@
 package com.intel.mtwilson;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
-import com.intel.mtwilson.tls.ApacheTlsPolicy;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
-import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.ApacheTlsPolicy;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.StrictTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -174,8 +175,6 @@ public class ApacheHttpClient implements java.io.Closeable {
      * one is used, otherwise the trusted certificate and verify hostname 
      * settings used in 1.0-RC2 are used to choose an appropriate TLS Policy.
      * 
-     * XXX should this go into a TlsPolicyFactory class in the http-authorization project?
-     * 
      * @param config
      * @param sslKeystore
      * @return 
@@ -188,14 +187,15 @@ public class ApacheHttpClient implements java.io.Closeable {
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
             if( requireTrustedCertificate && verifyHostname ) {
                 log.info("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
-                return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
+                return new StrictTlsPolicy(sslKeystore.getRepository());
             }
             else if( requireTrustedCertificate && !verifyHostname ) {
                 // two choices: trust first certificate or trust known certificate;  we choose trust first certificate as a usability default
                 // furthermore we assume that the api client keystore is a server-specific keystore (it's a client configured for a specific mt wilson server)
                 // that either has a server instance ssl cert or a cluster ssl cert.  either should work.
                 log.info("Using TLS Policy TRUST_FIRST_CERTIFICATE");
-                return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
+                KeystoreCertificateRepository repository = sslKeystore.getRepository();
+                return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository));
             }
             else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
                 log.info("Using TLS Policy INSECURE");
@@ -204,15 +204,16 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         else if( tlsPolicyName.equals("TRUST_CA_VERIFY_HOSTNAME") ) {
             log.info("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
-            return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
+            return new StrictTlsPolicy(sslKeystore.getRepository());
         }
         else if( tlsPolicyName.equals("TRUST_FIRST_CERTIFICATE") ) {
             log.info("TLS Policy: TRUST_FIRST_CERTIFICATE");
-            return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
+            KeystoreCertificateRepository repository = sslKeystore.getRepository();
+            return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository));
         }
         else if( tlsPolicyName.equals("TRUST_KNOWN_CERTIFICATE") ) {
             log.info("TLS Policy: TRUST_KNOWN_CERTIFICATE");
-            return new TrustKnownCertificateTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
+            return new TrustKnownCertificateTlsPolicy(sslKeystore.getRepository());
         }
         else if( tlsPolicyName.equals("INSECURE") ) {
             log.warn("TLS Policy: INSECURE");
@@ -221,7 +222,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         else {
             // unrecognized 1.1 policy defined, so use a secure default
             log.warn("Unknown TLS Policy Name: {}", tlsPolicyName);
-            return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(sslKeystore));
+            return new StrictTlsPolicy(sslKeystore.getRepository()); // issue #871 default should be secure
         }
     }
     /*

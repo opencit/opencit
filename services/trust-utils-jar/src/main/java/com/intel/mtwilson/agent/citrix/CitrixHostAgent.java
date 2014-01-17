@@ -8,8 +8,9 @@ package com.intel.mtwilson.agent.citrix;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Aik;
 import com.intel.mtwilson.model.Nonce;
@@ -250,7 +251,7 @@ BwIDAQAB
          try {
             String crt  = client.getAIKCertificate();
             log.debug(" crt == " + crt);
-            pk = X509Util.decodePemPublicKey(crt);
+            pk = RsaUtil.decodePemPublicKey(crt);
             //client.getAIKCertificate().replace(X509Util.BEGIN_PUBLIC_KEY, "").replace(X509Util.END_PUBLIC_KEY, "").replaceAll("\n","").replaceAll("\r","");  
         }  catch(Exception ex){
             log.error("getAik caught: " + ex.getMessage()); 

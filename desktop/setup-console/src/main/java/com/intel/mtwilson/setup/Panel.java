@@ -6,7 +6,7 @@ package com.intel.mtwilson.setup;
 
 //import java.util.Iterator;
 
-import com.intel.mtwilson.validation.Model;
+import com.intel.dcsg.cpg.validation.Model;
 
 
 /**

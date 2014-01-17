@@ -4,9 +4,14 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.mtwilson.datatypes.*;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -148,7 +153,7 @@ public class Bootstrap {
      * @throws Exception 
      */
     private void addServerSslCertificateToKeystore(URL server, SimpleKeystore keystore, String tlsProtocol) throws NoSuchAlgorithmException, KeyManagementException, KeyManagementException, IOException, CertificateEncodingException, CertificateEncodingException {
-        X509Certificate[] certs = SslUtil.getServerCertificates(server, tlsProtocol);
+        X509Certificate[] certs = TlsUtil.getServerCertificates(server, tlsProtocol);
         String aliasBasename = server.getHost();
         if( certs.length == 1 ) {
             System.out.println("Adding trusted certificate with SHA-1 fingerprint: "+Hex.encodeHexString(sha1fingerprint(certs[0])));
@@ -186,7 +191,7 @@ public class Bootstrap {
     }
     
         // register the new key with Mt Wilson (should be done AFTER adding the ssl certs to keystore)
-    private void registerNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException {
+    private void registerNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException, com.intel.dcsg.cpg.crypto.CryptographyException {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
         ApiClient c = new ApiClient(config);
         ApiClientCreateRequest me = new ApiClientCreateRequest();
@@ -208,7 +213,7 @@ public class Bootstrap {
      * @param keystore
      * @throws Exception 
      */
-    private void selfApproveNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, KeyStoreException, NoSuchAlgorithmException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException {
+    private void selfApproveNewApiClientKeypair(SimpleKeystore keystore) throws FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, ClientException, IOException, ApiException, SignatureException, com.intel.dcsg.cpg.crypto.CryptographyException {
         RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(config.getString("mtwilson.api.key.alias"), config.getString("mtwilson.api.key.password"));
         ApiClient c = new ApiClient(config); // KeyManagementException, [MalformedURLException], [UnsupportedEncodingException]
         ApiClientUpdateRequest update = new ApiClientUpdateRequest();

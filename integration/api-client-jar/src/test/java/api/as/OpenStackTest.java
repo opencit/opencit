@@ -9,7 +9,7 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;

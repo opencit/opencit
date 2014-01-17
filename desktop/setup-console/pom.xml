@@ -222,18 +222,6 @@
 			<version>${project.version}</version>
 		</dependency>
 
-                <dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-validation</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-                <dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-io</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-                                	    
 		    <dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
@@ -252,12 +240,12 @@
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-io</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<version>0.2-SNAPSHOT</version>
 </dependency>
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
 	<artifactId>cpg-crypto</artifactId>
-	<version>0.1.1-SNAPSHOT</version>
+	<version>0.2-SNAPSHOT</version>
 </dependency>
 <dependency>
 	<groupId>com.intel.dcsg.cpg</groupId>
@@ -269,6 +257,11 @@
 	<artifactId>cpg-console</artifactId>
 	<version>0.1-SNAPSHOT</version>
 </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-validation</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
     
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
@@ -393,8 +386,8 @@
                 <!-- aspect libraries are the already-compiled aspect .jars -->
                 <aspectLibraries>
                     <aspectLibrary>
-                        <groupId>com.intel.mtwilson.common</groupId>
-                        <artifactId>mtwilson-validation</artifactId>
+                        <groupId>com.intel.dcsg.cpg</groupId>
+                        <artifactId>cpg-validation</artifactId>
                     </aspectLibrary>
                 </aspectLibraries>
                 <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->

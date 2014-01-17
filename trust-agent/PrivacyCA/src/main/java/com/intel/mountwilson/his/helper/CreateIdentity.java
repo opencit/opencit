@@ -12,8 +12,8 @@ package com.intel.mountwilson.his.helper;
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.x509.X509Util;
-import com.intel.mtwilson.crypto.NopX509HostnameVerifier;
 import gov.niarl.his.privacyca.IdentityOS;
 import gov.niarl.his.privacyca.TpmIdentity;
 import gov.niarl.his.privacyca.TpmIdentityRequest;
@@ -305,7 +305,8 @@ public class CreateIdentity {
 
             TpmIdentity newId = TpmModule.collateIdentityRequest(TpmOwnerAuth, HisIdentityAuth, HisIdentityLabel, new TpmPubKey((RSAPublicKey) pcaCert.getPublicKey(), 3, 1).toByteArray(), HisIdentityIndex, (X509Certificate) null, !shortcut);
 
-
+            // XXX TODO issue #497 issue #541 need to allow caller to specify a TlsPolicy; use a secure default StrictTlsPolicy if not specified; do not use NopX509HostnameVerifier it's deprecated; if user wants insecure policy use InsecureTlsPolicy
+            HttpsURLConnection.setDefaultHostnameVerifier((new InsecureTlsPolicy()).getHostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
 //                        HttpsURLConnection.setDefaultHostnameVerifier(new NopX509HostnameVerifier()); // XXX TODO Bug #497 need to allow caller to specify a TlsPolicy // disabled for testing issue #541
             System.err.println("Create Identity... Calling into HisPriv first time. using url = " + PrivacyCaUrl);
             IHisPrivacyCAWebService2 hisPrivacyCAWebService2 = HisPrivacyCAWebServices2ClientInvoker.getHisPrivacyCAWebService2(PrivacyCaUrl);

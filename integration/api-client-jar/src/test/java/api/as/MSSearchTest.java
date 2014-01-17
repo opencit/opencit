@@ -6,8 +6,8 @@ package api.as;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.io.ConfigurationUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ApiClientInfo;
 import com.intel.mtwilson.datatypes.ApiClientSearchCriteria;

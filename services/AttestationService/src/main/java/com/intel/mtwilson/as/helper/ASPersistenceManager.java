@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.as.helper;
 
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
 import org.slf4j.Logger;

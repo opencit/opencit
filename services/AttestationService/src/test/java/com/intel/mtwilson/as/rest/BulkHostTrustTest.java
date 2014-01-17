@@ -6,9 +6,9 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
-import com.intel.mtwilson.crypto.RsaCredential;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.RsaCredential;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import java.io.File;

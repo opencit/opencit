@@ -12,7 +12,7 @@ import com.intel.mtwilson.atag.model.AttributeOidAndValue;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.mtwilson.datatypes.TxtHost;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.io.Resource;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

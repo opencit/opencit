@@ -5,7 +5,7 @@
 package com.intel.mountwilson.http.security.adapter;
 
 import com.intel.mtwilson.security.http.HmacAuthorization;
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 import com.jayway.restassured.filter.Filter;
 import com.jayway.restassured.filter.FilterContext;
 import com.jayway.restassured.response.Response;

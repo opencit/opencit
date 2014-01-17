@@ -14,7 +14,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
-import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.xensource.xenapi.APIVersion;
 import com.xensource.xenapi.Connection;
 import com.xensource.xenapi.Host;

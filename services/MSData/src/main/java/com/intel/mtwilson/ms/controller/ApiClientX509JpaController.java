@@ -8,7 +8,7 @@ import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
-import com.intel.mtwilson.jpa.GenericJpaController;
+import com.intel.dcsg.cpg.jpa.GenericJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import java.io.Serializable;
 import java.util.*;

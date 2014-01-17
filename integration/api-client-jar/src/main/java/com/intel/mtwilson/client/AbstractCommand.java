@@ -6,7 +6,7 @@ package com.intel.mtwilson.client;
 
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.io.ConfigurationUtil;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import java.io.IOException;
 import org.apache.commons.configuration.Configuration;
 import org.codehaus.jackson.map.ObjectMapper;

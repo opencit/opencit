@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.model;
 
-import com.intel.mtwilson.crypto.Pkcs12;
+import com.intel.dcsg.cpg.crypto.Pkcs12;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.Timeout;
 import java.security.KeyPair;
