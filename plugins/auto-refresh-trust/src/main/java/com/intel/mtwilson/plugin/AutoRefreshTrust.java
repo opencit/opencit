@@ -10,7 +10,7 @@ import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.plugin.api.Plugin;
-import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
