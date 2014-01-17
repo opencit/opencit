@@ -312,6 +312,12 @@ our customers.
             <version>${project.version}</version>
         </dependency>
 
+    <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-tls-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
 <!-- mt wilson api client is used to send new x509 attribute certificates to mt wilson as they are created -->
     <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

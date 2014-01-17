@@ -40,6 +40,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -221,7 +222,7 @@ public class TAHelper {
             // 3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
             HostAgentFactory factory = new HostAgentFactory();
             
-            TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
+            TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
 
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {

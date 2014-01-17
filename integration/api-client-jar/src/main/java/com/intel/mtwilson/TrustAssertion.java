@@ -214,7 +214,7 @@ public class TrustAssertion {
         // otherwise, look for a public key field
         String pem = assertionMap.get("AIK_PublicKey");
         if( pem == null || pem.isEmpty() ) { return null; }
-        PublicKey publicKey = X509Util.decodePemPublicKey(pem);
+        PublicKey publicKey = RsaUtil.decodePemPublicKey(pem);
         return publicKey;
     }
     

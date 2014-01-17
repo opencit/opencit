@@ -116,6 +116,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-tls-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>MSData</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

@@ -27,9 +27,9 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.datatypes.ConnectionString;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.model.Hostname;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.sql.SQLException;
@@ -326,6 +326,7 @@ public class CertificateResource extends ServerResource {
         ByteArrayResource tlsKeystore = new ByteArrayResource();
 //        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
         ConnectionString connectionString = ConnectionString.forCitrix(new Hostname(host.toString()), username, password);
+        // XXX TODO use the tls policy factory with the keystore for this host ... from the host tls keystore table
         HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
         hostAgent.setAssetTag(tag);
     }

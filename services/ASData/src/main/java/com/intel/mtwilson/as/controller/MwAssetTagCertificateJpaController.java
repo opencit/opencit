@@ -6,7 +6,7 @@ package com.intel.mtwilson.as.controller;
 
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
-import com.intel.mtwilson.jpa.GenericJpaController;
+import com.intel.dcsg.cpg.jpa.GenericJpaController;
 import java.io.Serializable;
 import java.util.List;
 import javax.persistence.EntityManager;

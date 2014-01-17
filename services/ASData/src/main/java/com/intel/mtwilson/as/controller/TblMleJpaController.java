@@ -478,7 +478,7 @@ public class TblMleJpaController implements Serializable {
             	return mle;
             } catch (NoResultException e) {
                 log.error( "NoResultException: BIOS MLE does not exist Name {} Version {} Oem Name {} ", 
-                        new String[]{mleName, mleVersion, oemName});
+                        mleName, mleVersion, oemName);
                 return null;
             }
                
@@ -508,7 +508,7 @@ public class TblMleJpaController implements Serializable {
 
             } catch (NoResultException e) {
                 log.error( "NoResultException: VMM MLE does not exist Name {} Version {} Os Name {} Os Version {}", 
-                        new String[]{mleName, mleVersion, osName, osVersion});
+                        mleName, mleVersion, osName, osVersion);
                 return null;
             }
             
