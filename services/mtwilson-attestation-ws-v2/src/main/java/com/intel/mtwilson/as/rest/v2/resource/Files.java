@@ -57,5 +57,10 @@ public class Files extends AbstractResource<File,FileCollection,FileFilterCriter
         criteria.id = UUID.valueOf(id);
         return criteria;
     }
+
+    @Override
+    protected void create(File item) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

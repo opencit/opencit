@@ -61,5 +61,10 @@ public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriter
         criteria.id = UUID.valueOf(id);
         return criteria;
     }
+
+    @Override
+    protected void create(Host item) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }
