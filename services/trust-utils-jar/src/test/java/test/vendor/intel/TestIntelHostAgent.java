@@ -23,6 +23,7 @@ import com.intel.dcsg.cpg.tls.policy.impl.*;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+//import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.IOException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -70,6 +71,7 @@ public class TestIntelHostAgent {
     public static HostAgent getAgent() throws Exception {
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
 		TlsPolicy tlsPolicy =  new InsecureTlsPolicy(); //new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
+//        TlsUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
         TlsUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
         keystore.save();
         /*

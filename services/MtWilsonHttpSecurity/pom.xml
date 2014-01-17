@@ -45,11 +45,6 @@
 
   <dependencies>
 
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-crypto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-crypto</artifactId>

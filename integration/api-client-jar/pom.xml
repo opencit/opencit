@@ -185,11 +185,6 @@
             <artifactId>cpg-xml</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-crypto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-crypto</artifactId>

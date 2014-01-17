@@ -80,18 +80,6 @@
 	    <type>jar</type>
 	</dependency>
 
-                <dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-validation</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-                <dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-io</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-                                	    
 		    <dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
@@ -144,6 +132,16 @@
       <type>jar</type>
       <classifier>classes</classifier>
 	  <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-validation</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.dcsg.cpg</groupId>
+        <artifactId>cpg-io</artifactId>
+        <version>0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>  
 

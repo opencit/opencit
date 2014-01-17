@@ -192,12 +192,12 @@
     <dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-io</artifactId>
-		<version>0.1.2-SNAPSHOT</version>
+		<version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-crypto</artifactId>
-		<version>0.1.4-SNAPSHOT</version>
+		<version>0.2-SNAPSHOT</version>
     </dependency>
         <dependency>
             <groupId>junit</groupId>
