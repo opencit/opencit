@@ -36,7 +36,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwPortalUser.findByCommentLike", query = "SELECT a FROM MwPortalUser a WHERE a.comment LIKE :comment"), // it's the caller's responsibility to add "%" before and/or after the name value
     @NamedQuery(name = "MwPortalUser.findByEnabled", query = "SELECT a FROM MwPortalUser a WHERE a.enabled = :enabled"),
     @NamedQuery(name = "MwPortalUser.findByStatus", query = "SELECT a FROM MwPortalUser a WHERE a.status = :status"),
-    @NamedQuery(name = "MwPortalUser.findByEnabledStatus", query = "SELECT a FROM MwPortalUser a WHERE a.enabled = :enabled AND a.status = :status")})
+    @NamedQuery(name = "MwPortalUser.findByEnabledStatus", query = "SELECT a FROM MwPortalUser a WHERE a.enabled = :enabled AND a.status = :status"),
+    @NamedQuery(name = "MwPortalUser.findByUUID_Hex", query = "SELECT a FROM MwPortalUser a WHERE a.uuid_hex = :uuid_hex")})
 public class MwPortalUser implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -63,6 +64,9 @@ public class MwPortalUser implements Serializable {
     @Basic(optional = true)
     @Column(name = "locale")
     private String locale;
+    @Basic(optional = true)
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
     
     @Transient
     private ByteArrayResource keystoreResource;
@@ -151,8 +155,14 @@ public class MwPortalUser implements Serializable {
         this.locale = locale;
     }
 
-    
-    
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
+    }
+   
     @Override
     public int hashCode() {
         int hash = 0;

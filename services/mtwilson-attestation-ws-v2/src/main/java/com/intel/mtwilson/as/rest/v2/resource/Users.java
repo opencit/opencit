@@ -43,8 +43,7 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
         User user = null;
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();         
-            // TODO: Add the new findMwPortalUserByUUID function and use the same here.
-            MwPortalUser portalUser = userJpaController.findMwPortalUser(Integer.parseInt(id));
+            MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(id);
             if (portalUser != null) {
                  user = convert(portalUser);
             }
@@ -105,8 +104,7 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
     protected void delete(String id) {
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();         
-            // TODO: Add the new findMwPortalUserByUUID function and use the same here.
-            MwPortalUser portalUser = userJpaController.findMwPortalUser(Integer.parseInt(id));
+            MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(id);
             if (portalUser != null) {
                 userJpaController.destroy(portalUser.getId());
             }
@@ -126,9 +124,8 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
     
     private User convert(MwPortalUser portalUser) {
         User user = new User();
-        // TODO : Use UUID instead of ID
         if (portalUser != null) {
-            user.setId(UUID.valueOf(portalUser.getId().toString()));
+            user.setId(UUID.valueOf(portalUser.getUuid_hex()));
             user.setName(portalUser.getUsername());
             user.setStatus(portalUser.getStatus());
             user.setEnabled(portalUser.getEnabled());
