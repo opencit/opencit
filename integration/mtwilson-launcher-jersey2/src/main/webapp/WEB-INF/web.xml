@@ -54,7 +54,7 @@ cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJso
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
-            <param-value>com.intel.mtwilson.jersey2.Jersey2Application</param-value>
+            <param-value>com.intel.mtwilson.jersey2.Jersey2Application2</param-value>
         </init-param>
         <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
         <!-- XXX TODO plugin architecture needs a facility for plugins to declare mappings relevant to their special resources; all mappings must be combined and then declared to jersey?  -->

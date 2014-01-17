@@ -194,7 +194,6 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
             item.setId(new UUID());
         }
         create(item);
-        // XXX TODO wire this up to a repository?    needs to implement a business layer interface.... 
         return item;
     }
     
@@ -204,9 +203,13 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     @DELETE
     public void deleteOne(@PathParam("id") String id) {
         log.debug("delete");
-        // delete it.... XXX TODO ....
-        // XXXX  first load it, if it exists then delete it... otherwise retur n404 ... so subclasses don't have to repeat this logic.        
+        T item = retrieve(id);
+        if( item == null ) {
+            // XXXX TODO  SET STATUS TO 404 not found
+            return;            
+        }
         delete(id);
+        // XXX TODO set status to 204  no content  (check what it is by default here since this method has void return type, maybe it's already 204)
     }    
     
     
@@ -225,7 +228,12 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
     public T retrieveOne(@PathParam("id") String id) {
         log.debug("retrieve");
-        return retrieve(id);
+        T item = retrieve(id);
+        if( item == null ) {
+            // XXX TODO return 404 not found
+            return null;
+        }
+        return item;
     }
     
     /**
@@ -247,8 +255,6 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     public T storeOne(@PathParam("id") String id, T item) {
         log.debug("store");
         item.setId(UUID.valueOf(id));
-        // XXX TODO wire up to repository...
-        // we could look it up first or we can just try a database "replace" statement if it's available....  this level of detail in meaning of actions must be present in the business layer API  
         T existing = retrieve(id);
         if( existing == null ) 
             { create(item); }
@@ -274,13 +280,13 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
      */
     @Path("/{id}")
     @PATCH
-    @Consumes({OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML}) // XXX TODO probably should define a more specific patch format like application/vnd.mtwilson.patch+json ... or implement the emerging json-patch rfc even though it looks messy
+    @Consumes(OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
     @Produces({MediaType.APPLICATION_JSON,MediaType.APPLICATION_XML,OtherMediaType.APPLICATION_YAML,OtherMediaType.TEXT_YAML})
    public T patchOne(@PathParam("id") String id, Patch<T,F,L>[] patchArray) {
         log.debug("patch");
         T item = retrieve(id);
         if( item == null ) {
-            // 404 not found
+            // XXX TODO return 404 not found
             return null;
         }
         for(int i=0; i<patchArray.length; i++) {
@@ -297,7 +303,7 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
         //return new Host();
 //        return patch(null);
-        return null;
+        return null; // XXX TODO return final item with changes
     }
     
     
@@ -325,9 +331,8 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
             if( item.getId() == null ) {
                 item.setId(new UUID());
             }
-            create(item); // XXX TODO   autmoatic multi-threading here so subclass doesn't have to
+            create(item); // XXX TODO   autmoatic multi-threading here so subclass doesn't have to ... also if one or more of the given items  already exist we should erturn an error. 
         }
-        // XXX TODO wire this up to a repository?    needs to implement a business layer interface.... 
         return collection;
     }
     
@@ -350,6 +355,11 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
         // same as search with id parameter... 
         F criteria = createFilterCriteriaWithId(id);
         C collection = searchCollection(criteria);
+        if( collection.getDocuments().isEmpty() ) {
+            // XXX TODO set status to 404 not found
+            // but we can still return the empty collection object ...??  what does jsonapi.org say about it?
+            return null;
+        }
         return collection;
     }
     
@@ -371,11 +381,9 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
     public C storeCollection(@PathParam("id") String id, C collection) {// misnomer, what we really mean is "store one but wrapped ina  collection for jsonapi"
         log.debug("storeCollection");
-        // XXX TODO wire up to repository...
-        // we could look it up first or we can just try a database "replace" statement if it's available....  this level of detail in meaning of actions must be present in the business layer API  
         List<T> list = collection.getDocuments();
         if( list == null || list.isEmpty() ) {
-            // 400 bad request
+            // XXX TODO return 400 bad request
             return null;
         }
         T item = list.get(0);
@@ -401,7 +409,7 @@ public abstract class AbstractResource<T extends Document,C extends DocumentColl
      */    
     @Path("/{id}")
     @PATCH
-    @Consumes(OtherMediaType.APPLICATION_VND_API_JSON) // XXX TODO  FOR COMPATIBILITY WITH JSONAPI WE NEED TO CONSUME  THE JSONPATCH FORMAT HERE 
+    @Consumes(OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
     public C patchCollection(@PathParam("id") String id /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
