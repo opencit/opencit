@@ -194,6 +194,9 @@ function isNumber(n) {
             </nav>				
             <div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
             </div>
+            
+            <div style="min-height: 30px;"><div id="notifications" style="display: none;" class="msgError" title="Click to close"></div></div>
+            
             <!--
             <div id="notifications" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
                 <ul style="margin-left: 0px; padding-left: 0px; list-style: none;">
@@ -1081,6 +1084,7 @@ function isNumber(n) {
             //sampledata.tags.push({"name":"new tag","oid":"1.2.3.4","values":["hello","world"]});
             // make sure all dom elements are loaded before initializing the web layer
             document.observe('dom:loaded', function() {
+                enableClickableAlerts();
                 ws.initialize({
                     options: {
                         baseurl: 'http://localhost:8080'

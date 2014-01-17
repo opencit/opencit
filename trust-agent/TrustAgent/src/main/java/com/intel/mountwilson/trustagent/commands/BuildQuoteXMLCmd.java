@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadX
  */
 public class BuildQuoteXMLCmd implements ICommand {
-Logger log = LoggerFactory.getLogger(getClass().getName());
+    Logger log = LoggerFactory.getLogger(getClass().getName());
     private TADataContext context = null;
 
     public BuildQuoteXMLCmd(TADataContext context) {

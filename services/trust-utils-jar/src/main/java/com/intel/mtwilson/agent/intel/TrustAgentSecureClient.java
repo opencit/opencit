@@ -47,6 +47,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.intel.dcsg.cpg.xml.JAXB;;
 
 public class TrustAgentSecureClient {
     public static final int DEFAULT_TRUST_AGENT_PORT = 9999;
@@ -334,9 +335,9 @@ public class TrustAgentSecureClient {
         HostInfo response;
 		try {
 			byte buf[] = sendRequestWithSSLSocket();
-            log.debug("TrustAgent response: {}", new String(buf));
+            log.debug("TrustAgent response: {}", new String(buf).trim());
         // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
-			response = jaxb.read(new String(buf).trim(), HostInfo.class);
+                        response = jaxb.read(new String(buf).trim(), HostInfo.class);
         }catch(UnknownHostException e) {
             throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
         }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer
@@ -365,5 +366,42 @@ public class TrustAgentSecureClient {
        return response;
     }
 
+     /**
+     * How to test this:  
+     * 
+     * openssl s_client -connect 10.1.71.169:9999
+     * <set_asset_tag><asset_tag_hash>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</asset_tag_hash><asset_tag_uuid>aaaa-aaa-aaa-aaa</asset_tag_uuid></set_asset_tag>
+     * 
+     * Example response:
+     * <response>true</response>
+     * 
+     * 
+     * @return 
+     */
+    public boolean setAssetTag(String assetTagHash, String uuid) {
+        String xml = "<set_asset_tag><asset_tag_hash>" + assetTagHash + "</asset_tag_hash><asset_tag_uuid>" + uuid +"</asset_tag_uuid></set_asset_tag>";
+        this.data = xml.getBytes();
+        
+	try {
+	    byte buf[] = sendRequestWithSSLSocket();
+            log.debug("TrustAgent response: {}", new String(buf));
+        // bug #1038 use secure xml parsing settings, encapsulated in cpg-xml JAXB utility
+	    // response = jaxb.read(new String(buf).trim(), HostInfo.class);
+        }catch(UnknownHostException e) {
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
+        }catch(NoRouteToHostException e) { // NoRouteToHostException is a subclass of IOException that may be thrown by the socket layer
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
+        }catch(IOException e) {
+            throw new ASException(e,ErrorCode.AS_HOST_COMMUNICATION_ERROR,this.serverHostname);
+        }catch(NoSuchAlgorithmException e) {
+            throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
+        }catch(KeyManagementException e) {
+            throw new ASException(e,ErrorCode.TLS_COMMMUNICATION_ERROR,this.serverHostname, e.toString());
+        }
+     
+        return true;
+    }
+    
+    
     
 }
