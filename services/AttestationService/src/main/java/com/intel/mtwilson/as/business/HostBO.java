@@ -194,11 +194,13 @@ public class HostBO extends BaseBO {
                         log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
+                        Map<String,String> attributes = agent.getHostAttributes();
+                        tblHosts.setHardwareUuid(attributes.get("Host_UUID").toLowerCase().trim());
                         saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
                         // to which the host has to be associated
-                        associateAssetTagCertForHost(host, agent.getHostAttributes());
+                        associateAssetTagCertForHost(host, attributes);
 
 		} catch (ASException ase) {
             //System.err.println("JIM DEBUG"); 
@@ -459,7 +461,7 @@ public class HostBO extends BaseBO {
             AssetTagCertAssociateRequest atagRequest = new AssetTagCertAssociateRequest();
             atagRequest.setHostID(tblHosts.getId());
             AssetTagCertBO atagBO = new AssetTagCertBO();
-            atagBO.unmapAssetTagCertFromHost(atagRequest);            
+            atagBO.unmapAssetTagCertFromHostById(atagRequest);            
         }
         
         // PREMIUM FEATURE ? 
@@ -924,7 +926,7 @@ public class HostBO extends BaseBO {
                     atagMapRequest.setSha1OfAssetCert(atagCert.getSHA1Hash());
                     atagMapRequest.setHostID(tblHost.getId());
                     
-                    boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHost(atagMapRequest);
+                    boolean mapAssetTagCertToHost = atagCertBO.mapAssetTagCertToHostById(atagMapRequest);
                     if (mapAssetTagCertToHost)
                         log.info("Successfully mapped the asset tag certificate with UUID {} to host {}", atagCert.getUuid(), tblHost.getName());
                     else
@@ -954,7 +956,7 @@ public class HostBO extends BaseBO {
             AssetTagCertAssociateRequest atagUnmapRequest = new AssetTagCertAssociateRequest();
             atagUnmapRequest.setHostID(id);
                     
-            boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHost(atagUnmapRequest);
+            boolean unmapAssetTagCertFromHost = atagCertBO.unmapAssetTagCertFromHostById(atagUnmapRequest);
             if (unmapAssetTagCertFromHost)
                 log.info("Either the asset tag certificate was successfully unmapped from the host {} or there was not asset tag certificate associated.", name);
             else

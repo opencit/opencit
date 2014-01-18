@@ -204,10 +204,11 @@ public class CertificateResource extends ServerResource {
     }
     public static class CertificateProvisionAction extends CertificateAction {
         public InternetAddress host;
-        
+        public int port;
         // for citrix:
         public String username;
         public String password;
+        
         
         public CertificateProvisionAction() {
             super(CertificateActionName.PROVISION);
@@ -221,6 +222,14 @@ public class CertificateResource extends ServerResource {
             return host;
         }
 
+        public void setPort(int port) {
+            this.port = port;
+        }
+        
+        public int getPort() {
+            return port;
+        }
+        
         public String getUsername() {
             return username;
         }
@@ -293,7 +302,7 @@ public class CertificateResource extends ServerResource {
                 */
                 // XXX TODO send it to the host...
                 try {
-                    deployAssetTagToHost(certificate.getSha1(), actionChoice.provision.getHost(), actionChoice.provision.getUsername(), actionChoice.provision.getPassword());
+                    deployAssetTagToHost(certificate.getSha1(), actionChoice.provision.getHost(),actionChoice.provision.port, actionChoice.provision.getUsername(), actionChoice.provision.getPassword());
                 }
                 catch(IOException e) {
                     // need a way to send the error in the result... i18n Message and error code
@@ -321,7 +330,8 @@ public class CertificateResource extends ServerResource {
         return null;
     }
     
-    private void deployAssetTagToHost(Sha1Digest tag, InternetAddress host, String username, String password) throws IOException {
+    private void deployAssetTagToHost(Sha1Digest tag, InternetAddress host, int port, String username, String password) throws IOException {
+        log.debug("deploy Asset Tag port == " + port);
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
 //        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);

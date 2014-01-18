@@ -549,15 +549,41 @@ function isNumber(n) {
 
 
                         <h2>Create New Certificate Request</h2>
-
+                        <form id="auto-populate-uuid-form" action="#" onsubmit="return false;">
+                            <p>Auto UUID populate currently works only with Intel Trust Agent and Citrix Xen hosts.</p>
+                            <input type="hidden" name="populateUuid" id="populate-uuid"/>
+                            <ul>
+                                <li>
+                                    <label for="uuid-populate-host">Internet Address</label>
+                                    <input type="text" id="uuid-populate-host" name="uuidHost" size="40" placeholder="Hostname or IP Address"/>
+                                </li>
+                                <li>
+                                    <label for="uuid-populate-port">Port</label>
+                                    <input type="text" id="uuid-populate-port" name="uuidPort" size="40" placeholder="Port number"/>
+                                </li>
+                                <li>
+                                    <label for="uuid-populate-username">Username</label>
+                                    <input type="text" id="uuid-populate-username" name="uuidUsername" placeholder="Username"/>
+                                </li>
+                                <li>
+                                    <label for="uuid-populate-password">Password</label>
+                                    <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
+                                </li>
+                                <li>
+                                    <input type="button" value="Populate UUID Box" onclick="ws.autoPopulateUUID(this); return false;"/>
+                                    <input type="button" value="Cancel" onclick="$('auto-populate-uuid-form').hide(); return false;"/>
+                                </li>
+                            </ul>
+                        </form>
                         <form id="certificate-request-create-form" action="#" onsubmit="return false;">
                             <ul>
                                 <li><label for="certificate-request-create-subject">Subject</label>
                                     <input type="text" id="certificate-request-create-subject" name="subject" placeholder="Host UUID" data-bind-value="input.subject" class="required"/>
+                                    <input type="submit" value="Auto Populate UUID" onclick="$('auto-populate-uuid-form').show(); return false;"/>
                                 </li>
                                 <li><label for="certificate-request-create-tag-selection">Tag Selection</label>
                                     <select id="certificate-request-create-tag-selection" data-bind-value="input.selection" class="required">
-                                            <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
+                                        <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
                                     </select>
                                 </li>
                                 <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
@@ -628,7 +654,7 @@ function isNumber(n) {
                                 </tr>
                             </tbody>
                         </table>
-                        
+
                         <h2>Search Certificates</h2>
 
                         <form id="certificate-search-form" action="#" onsubmit="return false;">
@@ -683,7 +709,7 @@ function isNumber(n) {
                                         <option value="true">Revoked</option>
                                     </select>
                                 </li>
-                                
+
                                 <!--
                                 <li>
                                     <label for="certificate-search-selection">Selection</label>
@@ -709,9 +735,9 @@ function isNumber(n) {
                                 <li><input type="button" value="Search..." onclick="ws.searchCertificates(this); return false;"/></li>
                             </ul>
                         </form>
-                                                
 
-                        
+
+
                         <h2>Browse Certificates</h2>
                         <table id="certificate-browse-table" class="dataview">
                             <thead>
@@ -743,7 +769,7 @@ function isNumber(n) {
                                     <td data-bind-text="item.sha1 | wrap 16"></td>
                                     <td data-bind-text="item.sha256 | wrap 16"></td>
                                     <td>
-                                        
+
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> <br/>
                                         <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
@@ -753,7 +779,7 @@ function isNumber(n) {
                                 </tr>
                             </tbody>
                         </table>
-                        
+
                         <form id="certificate-provision-form" action="#" onsubmit="return false;">
                             <p>Currently push-provisioning works only with Citrix Xen hosts.</p>
                             <input type="hidden" name="certificateUuid" id="certificate-provision-uuid"/>
@@ -761,6 +787,10 @@ function isNumber(n) {
                                 <li>
                                     <label for="certificate-provision-host">Internet Address</label>
                                     <input type="text" id="certificate-provision-host" name="host" size="40" placeholder="Hostname or IP Address"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-provision-port">Port</label>
+                                    <input type="text" id="certificate-provision-port" name="port" size="40" placeholder="Port number"/>
                                 </li>
                                 <li>
                                     <label for="certificate-provision-username">Username</label>
@@ -780,14 +810,14 @@ function isNumber(n) {
                                     <span id="certificate-provision-sha256"></span>
                                 </li>
                                 -->
-                                 <li>
-                                        <input type="button" value="Provision" onclick="ws.provisionCertificate(this); return false;"/>
-                                        <input type="button" value="Cancel" onclick="$('certificate-provision-form').hide(); return false;"/>
-                                 </li>
+                                <li>
+                                    <input type="button" value="Provision" onclick="ws.provisionCertificate(this); return false;"/>
+                                    <input type="button" value="Cancel" onclick="$('certificate-provision-form').hide(); return false;"/>
+                                </li>
                             </ul>
                         </form>
-                        
-                        
+
+
                     </div> <!-- end certificates tab -->
                    <!--
                     <div id="rdf">
@@ -1064,6 +1094,7 @@ function isNumber(n) {
             navTabs.setActiveTab('tags');
 //            navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
+            $('auto-populate-uuid-form').hide();
             $('certificate-provision-form').hide();
         </script>
 
