@@ -601,6 +601,7 @@ mtwilson.atag = mtwilson.atag || {};
 //            var provisionObject = report.input.clone(); //Object.toJSON(report.input).evalJSON();
         var provisionObject = {
             host: $('certificate-provision-host').value,
+            port: $('certificate-provision-port').value,
             username: $('certificate-provision-username').value,
             password: $('certificate-provision-password').value
         };
