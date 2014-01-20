@@ -129,7 +129,7 @@ public class CertificateResource extends ServerResource {
     }
     
     public static enum CertificateActionName {
-        REVOKE, PROVISION, DEPLOY, AUTOMATION;
+        REVOKE, PROVISION, DEPLOY;
         @Override
         public String toString() {
             return name().toLowerCase();
@@ -160,56 +160,7 @@ public class CertificateResource extends ServerResource {
         }
         
     }
-    public static class CertificateAutomationAction extends CertificateAction {
-        public String UUID;
-         public InternetAddress host;
-        public int port;
-        // for citrix:
-        public String username;
-        public String password;
-        
-        public CertificateAutomationAction(CertificateActionName name) {
-            super(CertificateActionName.AUTOMATION);
-        }
-        
-        public String getUUID() {
-            return this.UUID;
-        }
-        
-        public void   setUUID(String UUID) {
-            this.UUID = UUID;
-        }
-        
-         public void setHost(InternetAddress host) {
-            this.host = host;
-        }
-
-        public InternetAddress getHost() {
-            return host;
-        }
-
-        public void setPort(int port) {
-            this.port = port;
-        }
-        
-        public int getPort() {
-            return port;
-        }
-        
-        public String getUsername() {
-            return username;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-        
-        
-    }
+  
     
     public static class CertificateDeployAction extends CertificateAction {
         public Date effective;
@@ -312,21 +263,19 @@ public class CertificateResource extends ServerResource {
         public CertificateRevokeAction revoke;
         public CertificateProvisionAction provision;
         public CertificateDeployAction deploy;
-        public CertificateAutomationAction automate;
+        
     }
     
     @Post("json:json")
     public CertificateActionChoice actionCertificate(CertificateActionChoice actionChoice) throws IOException, ApiException, SignatureException {
-        UUID uuid = null;
-        Certificate certificate = null;
-        if(actionChoice.automate == null) {
-          uuid = UUID.valueOf(getAttribute("id"));
-          certificate = dao.findByUuid(uuid);
+        
+         UUID uuid = UUID.valueOf(getAttribute("id"));
+          Certificate certificate = dao.findByUuid(uuid);
           if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
           }
-        }
+          
         // only one of the actions can be processed for any one request
         if( actionChoice.revoke != null ) {
             actionChoice.revoke.setUuid(uuid);
@@ -381,13 +330,7 @@ public class CertificateResource extends ServerResource {
          result.deploy = actionChoice.deploy;
          return result;
         }
-        if (actionChoice.automate != null) {
-            log.debug("Inside actionCertificate, setting UUID");
-            actionChoice.automate.UUID = "F4B17194-CAE7-11DF-B40B-001517FA9844";
-            CertificateActionChoice result = new CertificateActionChoice();
-            result.automate = actionChoice.automate;
-            return result;
-        }
+      
         setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         return null;
     }
