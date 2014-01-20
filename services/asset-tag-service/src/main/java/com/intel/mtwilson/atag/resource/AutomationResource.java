@@ -14,6 +14,7 @@ import com.intel.mtwilson.atag.dao.Derby;
 import com.intel.mtwilson.atag.resource.CertificateResource.CertificateActionName;
 import java.sql.SQLException;
 import org.restlet.data.Status;
+import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
@@ -37,6 +38,12 @@ public class AutomationResource extends ServerResource {
     protected void doRelease() throws ResourceException {
         super.doRelease();
     }
+    
+    @Get("txt")
+    public String existingCertificateContent() {
+        return "It worked!";
+    }
+    
     public static enum AutomationActionName {
         GETUUID;
         @Override
