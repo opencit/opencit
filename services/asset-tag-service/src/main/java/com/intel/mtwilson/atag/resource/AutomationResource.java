@@ -117,6 +117,7 @@ public class AutomationResource extends ServerResource {
     
     @Post("json:json")
     public AutomationActionChoice actionAutomation(AutomationActionChoice actionChoice) {
+        log.debug("made it into actionAutomation!");
         if(actionChoice.uuid != null) {
             AutomationActionChoice result = new AutomationActionChoice();
             result.uuid = actionChoice.uuid;
