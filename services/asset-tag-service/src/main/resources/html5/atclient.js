@@ -570,7 +570,7 @@ mtwilson.atag = mtwilson.atag || {};
         var wrappedUuidObject = {'automate': uuidObject};
         var pass = false;
         var myResult = "";
-        var certificateUuid = "111111111111111111111";
+        var certificateUuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
         ajax.json.post('automate-certificate', wrappedUuidObject,
                 {'uri': '/certificates/' + certificateUuid,
                     'datapath': null, // prevent result from being stored in global data model

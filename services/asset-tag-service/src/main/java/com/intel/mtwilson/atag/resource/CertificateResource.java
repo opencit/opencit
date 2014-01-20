@@ -277,13 +277,16 @@ public class CertificateResource extends ServerResource {
     
     @Post("json:json")
     public CertificateActionChoice actionCertificate(CertificateActionChoice actionChoice) throws IOException, ApiException, SignatureException {
-        UUID uuid = UUID.valueOf(getAttribute("id"));
-        Certificate certificate = dao.findByUuid(uuid);
-        if( certificate == null ) {
+        UUID uuid = null;
+        Certificate certificate = null;
+        if(actionChoice.automate == null) {
+          uuid = UUID.valueOf(getAttribute("id"));
+          certificate = dao.findByUuid(uuid);
+          if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
+          }
         }
-        
         // only one of the actions can be processed for any one request
         if( actionChoice.revoke != null ) {
             actionChoice.revoke.setUuid(uuid);
@@ -339,6 +342,7 @@ public class CertificateResource extends ServerResource {
          return result;
         }
         if (actionChoice.automate != null) {
+            log.debug("Inside actionCertificate, setting UUID");
             actionChoice.automate.UUID = "F4B17194-CAE7-11DF-B40B-001517FA9844";
             CertificateActionChoice result = new CertificateActionChoice();
             result.automate = actionChoice.automate;
