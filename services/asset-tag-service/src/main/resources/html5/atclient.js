@@ -570,8 +570,8 @@ mtwilson.atag = mtwilson.atag || {};
         var wrappedUuidObject = {'automate': uuidObject};
         var pass = false;
         var myResult = "";
-        ajax.json.post('automate-certificate', wrappedUuidObject,
-                {'uri': '/certificates/auto',
+        ajax.json.post('uuid-automation', wrappedUuidObject,
+                {'uri': '//automation',
                     'datapath': null, // prevent result from being stored in global data model
                     'onSuccess': function(result) {
                         log.debug("autoPopulateUUID success! " + Object.toJSON(result));    
