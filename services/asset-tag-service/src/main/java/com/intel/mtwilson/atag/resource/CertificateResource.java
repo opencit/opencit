@@ -162,12 +162,52 @@ public class CertificateResource extends ServerResource {
     }
     public static class CertificateAutomationAction extends CertificateAction {
         public String UUID;
+         public InternetAddress host;
+        public int port;
+        // for citrix:
+        public String username;
+        public String password;
+        
         public CertificateAutomationAction(CertificateActionName name) {
             super(CertificateActionName.AUTOMATION);
         }
         
-        public String getUUID() {return this.UUID;}
-        public void   setUUID(String UUID) {this.UUID = UUID;}
+        public String getUUID() {
+            return this.UUID;
+        }
+        
+        public void   setUUID(String UUID) {
+            this.UUID = UUID;
+        }
+        
+         public void setHost(InternetAddress host) {
+            this.host = host;
+        }
+
+        public InternetAddress getHost() {
+            return host;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+        
+        public int getPort() {
+            return port;
+        }
+        
+        public String getUsername() {
+            return username;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+        
         
     }
     
