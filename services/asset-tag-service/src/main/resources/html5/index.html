@@ -932,7 +932,7 @@ function isNumber(n) {
                         
                         <form id="config-form" onsubmit="return false;">
                             <input type="button" id="config-save-button" value="Save" onclick="ws.storeMainConfiguration(this); return false;"/>
-                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration(); return false;"/>
+                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration_resetClick(); return false;"/>
 
                                 <!--
                                 <h2>Local Data</h2>
@@ -1000,7 +1000,7 @@ function isNumber(n) {
                                     </li>
                                 </ul>
                             </fieldset>
-                            
+                                <!--
                                 <fieldset>
                                     <legend>Mt Wilson</legend>
                                     <ul>
@@ -1018,7 +1018,7 @@ function isNumber(n) {
                                         </li>
                                     </ul>                                    
                                 </fieldset>
-
+                                -->
                         </form>
 
                           <!-- since there is a create-ca-key command now, disabling this forma nd just showing the cacerts for import to mt wilson -->

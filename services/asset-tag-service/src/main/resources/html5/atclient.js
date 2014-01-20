@@ -209,6 +209,21 @@ mtwilson.atag = mtwilson.atag || {};
         $('notifications').classNames().toArray().forEach(function(obj) {
             $('notifications').removeClassName(obj);
         });
+
+        if (notice.status == null) {
+            notice.status = "INFO";
+            notice.default_status = true;
+        }
+
+        if (notice.clearAfter == null) {
+            if (notice.status == "OK" || notice.status == "INFO") {
+                notice.clearAfter = "AUTO";
+            }
+            else {
+                notice.clearAfter = "CONFIRM";
+            }
+        }
+
         switch (notice.status) {
             case "OK":
                 log.debug("OK: " + Object.toJSON(notice));
@@ -227,57 +242,51 @@ mtwilson.atag = mtwilson.atag || {};
                 $('notifications').addClassName('msgError');
                 break;
             default:
-                log.debug("ERROR: " + Object.toJSON(notice));
-                $('notifications').addClassName('msgError');
                 break;
         }
         $('notifications').update(notice.text);
         $('notifications').show();
 
-        switch (notice.clear) {
+        switch (notice.clearAfter) {
             case "AUTO":
                 Element.fade.delay(5, 'notifications');
                 break;
             case "CONFIRM":
                 break;
             default:
-                Element.fade.delay(5, 'notifications');
                 break;
         }
-
-//        mtwilson.atag.data.notices.push(notice); // { text:'...', clear:'auto' }  or clear:'confirm' to force user to acknowledge
-        //       view.sync();
-        // for now we implement it this way, but in the future it should be part of the data model (data.notices) with automatic confirmations to server when user clicks on a 'confirm' notice to acknowledge it:
-//        $('notifications').insert({ bottom: notice.text });
     };
 
 // VIEW API
     document.observe("ajax:httpPostSuccess", function(event) {
+        log.debug("httpPostSuccess: " + Object.toJSON(event.memo));
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Created tag: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Created tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Created RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Created RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Created selection: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Created selection SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Created certificate request for: ' + event.memo.resource.app.input.subject, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Created certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Created configuration: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Created configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Created file: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Created file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             default:
                 log.debug("No handler for successful HTTP POST of " + event.memo.resource.name);
+                break;
         }
         ;
         /*
@@ -297,104 +306,232 @@ mtwilson.atag = mtwilson.atag || {};
          }
          */
     });
+    
+    document.observe("ajax:httpPostFailure", function(event) {
+        log.debug("httpPostFailure: " + Object.toJSON(event.memo));
+        switch (event.memo.resource.name) {
+            case 'tags':
+                mtwilson.atag.notify({text: 'Create tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'rdfTriples':
+                mtwilson.atag.notify({text: 'Create RDF triple FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'selections':
+                mtwilson.atag.notify({text: 'Create selection FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificateRequests':
+                mtwilson.atag.notify({text: 'Create certificate request FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'configurations':
+                mtwilson.atag.notify({text: 'Create configuration FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'files':
+                mtwilson.atag.notify({text: 'Create file FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            default:
+                log.debug("No handler for failure HTTP POST of " + event.memo.resource.name);
+                break;
+        }
+        ;
+    });
 
     document.observe("ajax:httpDeleteSuccess", function(event) {
         log.debug("httpDeleteSuccess: " + Object.toJSON(event.memo));
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Deleted tag: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Deleted tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Deleted RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Deleted RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
                 log.debug("deleted selection notification...");
-                mtwilson.atag.notify({text: 'Deleted selection: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Deleted selection SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 log.debug("deleted selection input merge...");
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Deleted certificate request for: ' + event.memo.resource.app.input.subject, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Deleted certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Deleted configuration: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Deleted configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Deleted file: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Deleted file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             default:
                 log.debug("No handler for successful HTTP DELETE of " + event.memo.resource.name);
+                break;
+        }
+        ;
+    });
+    
+    document.observe("ajax:httpDeleteFailure", function(event) {
+        log.debug("httpDeleteFailure: " + Object.toJSON(event.memo));
+        switch (event.memo.resource.name) {
+            case 'tags':
+                mtwilson.atag.notify({text: 'Delete tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'rdfTriples':
+                mtwilson.atag.notify({text: 'Delete RDF triple FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'selections':
+                mtwilson.atag.notify({text: 'Delete selection FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificateRequests':
+                mtwilson.atag.notify({text: 'Delete certificate request FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'configurations':
+                mtwilson.atag.notify({text: 'Delete configuration FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'files':
+                mtwilson.atag.notify({text: 'Delete file FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            default:
+                log.debug("No handler for failure HTTP DELETE of " + event.memo.resource.name);
+                break;
         }
         ;
     });
 
     document.observe("ajax:httpPutSuccess", function(event) {
+        log.debug("httpPutSuccess: " + Object.toJSON(event.memo));
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Updated tag: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Updated tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', oid: '', values: []});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Updated RDF triple: ' + event.memo.resource.app.input.subject + ' ' + event.memo.resource.app.input.predicate + ' ' + event.memo.resource.app.input.object, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Updated RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', predicate: '', object: ''});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Updated selection: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Updated selection SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({name: '', subjects: [], tags: []});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Updated certificate request for: ' + event.memo.resource.app.input.subject, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Updated certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Updated configuration successfully.', clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Updated configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Updated file: ' + event.memo.resource.app.input.name, clear: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Updated file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
                 break;
             default:
                 log.debug("No handler for successful HTTP PUT of " + event.memo.resource.name);
+                break;
+        }
+        ;
+    });
+    
+    document.observe("ajax:httpPutFailure", function(event) {
+        log.debug("httpPutFailure: " + Object.toJSON(event.memo));
+        switch (event.memo.resource.name) {
+            case 'tags':
+                mtwilson.atag.notify({text: 'Update tag FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'rdfTriples':
+                mtwilson.atag.notify({text: 'Update RDF triple FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'selections':
+                mtwilson.atag.notify({text: 'Update selection FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificateRequests':
+                mtwilson.atag.notify({text: 'Update certificate request FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'configurations':
+                mtwilson.atag.notify({text: 'Update configuration FAILURE:' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'files':
+                mtwilson.atag.notify({text: 'Update file FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            default:
+                log.debug("No handler for failure HTTP PUT of " + event.memo.resource.name);
+                break;
         }
         ;
     });
 
     document.observe("ajax:httpGetSuccess", function(event) {
-        log.debug("HTTP GET OK: " + event.memo.resource.name);
+        log.debug("httpGetSuccess: " + Object.toJSON(event.memo));
+        //log.debug("HTTP GET OK: " + event.memo.resource.name);
         switch (event.memo.resource.name) {
             case 'resources':
                 log.debug("resources: " + Object.toJSON(ajax.data.getx("event.memo.resource.datapath")));
+                mtwilson.atag.notify({text: 'Retrieved resource SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'tags':
                 // update various controls that refer to the tags... 
                 selection_create_form_init();  /// TODO:  this control should always have the full list of tags... nto just the search results from the other tab... so maybe instaed of updating it here, we need to make a distinction between a refresh of 'all tags' data and what the search screen asked for.
+                mtwilson.atag.notify({text: 'Retrieved tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'rdfTriples':
+                mtwilson.atag.notify({text: 'Retrieved RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'selections':
                 //log.debug("got selections! "+Object.toJSON(event.memo));
 //                    automatic-tag-selection-name
+                mtwilson.atag.notify({text: 'Retrieved selection SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'certificateRequests':
+                mtwilson.atag.notify({text: 'Retrieved certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'configurations':
                 if (event.memo.resource.callback) {
                     event.memo.resource.callback(event.memo);
                 }
+                mtwilson.atag.notify({text: 'Retrieved configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'files':
                 if (event.memo.resource.callback) {
                     event.memo.resource.callback(event.memo);
                 }
+                mtwilson.atag.notify({text: 'Retrieved file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             default:
                 log.debug("No handler for successful HTTP GET of " + event.memo.resource.name);
+                break;
+        }
+        ;
+    });
+    
+    document.observe("ajax:httpGetFailure", function(event) {
+        log.debug("httpGetFailure: " + Object.toJSON(event.memo));
+        //log.debug("HTTP GET OK: " + event.memo.resource.name);
+        switch (event.memo.resource.name) {
+            case 'resources':
+                mtwilson.atag.notify({text: 'Retrieve resource FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'tags':
+                mtwilson.atag.notify({text: 'Retrieve tag FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'rdfTriples':
+                mtwilson.atag.notify({text: 'Retrieve RDF triple FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'selections':
+                mtwilson.atag.notify({text: 'Retrieve selection FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificateRequests':
+                mtwilson.atag.notify({text: 'Retrieve certificate request FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'configurations':
+                mtwilson.atag.notify({text: 'Retrieve configuration FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'files':
+                mtwilson.atag.notify({text: 'Retrieve file FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            default:
+                log.debug("No handler for failure HTTP GET of " + event.memo.resource.name);
+                break;
         }
         ;
     });
@@ -753,7 +890,12 @@ mtwilson.atag = mtwilson.atag || {};
 //    apiwait("Searching tags...");
     };
 
+    mtwilson.atag.retrieveMainConfiguration_resetClick = function() {
+        mtwilson.atag.retrieveMainConfiguration();
+        mtwilson.atag.notify({text: 'Configuration reset SUCCESSFULLY.', clear: 'AUTO', status: 'INFO'});
+    }
 
+    //XXX TODO SAVY 20140120: save a defaut config, only one config is ever saved
     mtwilson.atag.retrieveMainConfiguration = function(eventMemo_not_used) {
         log.debug("retrieveMainConfiguration searching for main...");
         // we get called after all the configurations are retrieved from the server...
