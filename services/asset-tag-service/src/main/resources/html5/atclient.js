@@ -278,6 +278,19 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Created certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: ''});
                 break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Created certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                break;
+            case 'provision-certificate':
+                mtwilson.atag.notify({text: 'Provisioned certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                $('certificate-provision-form').hide();
+                break;
+            case 'deploy-certificate':
+                mtwilson.atag.notify({text: 'Deployed certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                break;
+            case 'revoke-certificate':
+                mtwilson.atag.notify({text: 'Revoked certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                break;
             case 'configurations':
                 mtwilson.atag.notify({text: 'Created configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
@@ -322,6 +335,18 @@ mtwilson.atag = mtwilson.atag || {};
             case 'certificateRequests':
                 mtwilson.atag.notify({text: 'Create certificate request FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Create certificate FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'provision-certificate':
+                mtwilson.atag.notify({text: 'Provision certificate FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'deploy-certificate':
+                mtwilson.atag.notify({text: 'Deploy certificate FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'revoke-certificate':
+                mtwilson.atag.notify({text: 'Revoke certificate FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
             case 'configurations':
                 mtwilson.atag.notify({text: 'Create configuration FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
@@ -356,6 +381,9 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Deleted certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Deleted certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                break;
             case 'configurations':
                 mtwilson.atag.notify({text: 'Deleted configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
@@ -385,6 +413,9 @@ mtwilson.atag = mtwilson.atag || {};
                 break;
             case 'certificateRequests':
                 mtwilson.atag.notify({text: 'Delete certificate request FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Delete certificate FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
                 mtwilson.atag.notify({text: 'Delete configuration FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
@@ -418,6 +449,9 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Updated certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 event.memo.resource.app.input.merge({subject: '', tags: []});
                 break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Updated certificate SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                break;
             case 'configurations':
                 mtwilson.atag.notify({text: 'Updated configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
 //                    event.memo.resource.app.input.merge({name:'', subjects:[], tags:[]});
@@ -437,22 +471,25 @@ mtwilson.atag = mtwilson.atag || {};
         log.debug("httpPutFailure: " + Object.toJSON(event.memo));
         switch (event.memo.resource.name) {
             case 'tags':
-                mtwilson.atag.notify({text: 'Update tag FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Update tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Update RDF triple FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Update RDF triple FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Update selection FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Update selection FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Update certificate request FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Update certificate request FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Update certificate FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Update configuration FAILURE:' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Update configuration FAILED:' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Update file FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Update file FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             default:
                 log.debug("No handler for failure HTTP PUT of " + event.memo.resource.name);
@@ -472,7 +509,7 @@ mtwilson.atag = mtwilson.atag || {};
             case 'tags':
                 // update various controls that refer to the tags... 
                 selection_create_form_init();  /// TODO:  this control should always have the full list of tags... nto just the search results from the other tab... so maybe instaed of updating it here, we need to make a distinction between a refresh of 'all tags' data and what the search screen asked for.
-                mtwilson.atag.notify({text: 'Retrieved tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Retrieved tags SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'rdfTriples':
                 mtwilson.atag.notify({text: 'Retrieved RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -480,10 +517,13 @@ mtwilson.atag = mtwilson.atag || {};
             case 'selections':
                 //log.debug("got selections! "+Object.toJSON(event.memo));
 //                    automatic-tag-selection-name
-                mtwilson.atag.notify({text: 'Retrieved selection SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Retrieved selections SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Retrieved certificate request SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                mtwilson.atag.notify({text: 'Retrieved certificate requests SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Retrieved certificates SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'configurations':
                 if (event.memo.resource.callback) {
@@ -509,25 +549,28 @@ mtwilson.atag = mtwilson.atag || {};
         //log.debug("HTTP GET OK: " + event.memo.resource.name);
         switch (event.memo.resource.name) {
             case 'resources':
-                mtwilson.atag.notify({text: 'Retrieve resource FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve resource FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'tags':
-                mtwilson.atag.notify({text: 'Retrieve tag FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve tags FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'rdfTriples':
-                mtwilson.atag.notify({text: 'Retrieve RDF triple FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve RDF triple FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'selections':
-                mtwilson.atag.notify({text: 'Retrieve selection FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve selections FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Retrieve certificate request FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve certificate requests FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                break;
+            case 'certificates':
+                mtwilson.atag.notify({text: 'Retrieve certificates FAILED.', clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Retrieve configuration FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve configuration FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
-                mtwilson.atag.notify({text: 'Retrieve file FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve file FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             default:
                 log.debug("No handler for failure HTTP GET of " + event.memo.resource.name);
@@ -722,7 +765,7 @@ mtwilson.atag = mtwilson.atag || {};
                 log.debug("Sending deploy-certificate request");
                 // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
                 ajax.json.post('deploy-certificate', {'deploy': {}}, {'uri': '/certificates/' + uuid, datapath: 'deployCertificates', idkey: 'uuid'});
-                alert("Certificate deployed to Mt. Wilson");
+                //alert("Certificate deployed to Mt. Wilson");
             }
         }
         //view.sync();
@@ -747,25 +790,26 @@ mtwilson.atag = mtwilson.atag || {};
 //            delete provisionObject['certificateUuid'];
         var wrappedProvisionObject = {'provision': provisionObject};
         // XXX TODO need a different way to handle the calls that don't result in updates to the resource collections
-        var pass = false;
+        //var pass = false;
         ajax.json.post('provision-certificate', wrappedProvisionObject,
                 {'uri': '/certificates/' + certificateUuid,
-                    'datapath': null, // prevent result from being stored in global data model
-                    'onSuccess': function(result) {
-                        log.debug("provisionCertificate success! " + Object.toJSON(result));                       
+                    'datapath': null // prevent result from being stored in global data model
+                    /*'onSuccess': function(result) {
+                        log.debug("provisionCertificate success! " + Object.toJSON(result));
                         $('certificate-provision-form').hide();
-                        pass = true;
+                        //pass = true;
+                        ajax.event.fire("httpPostSuccess", {resource: {name: 'provision-certificate'}, content: wrappedProvisionObject, response: result.responseJSON});
                     },
                     'onFailure': function(result) {
                         log.error("provisionCertificate failed! " + Object.toJSON(result));
                         pass = false;
-                    }
+                    }*/
                 }
         );
-        if( pass = true ) 
-            alert("Certificate provisioned to host");
-        else
-            alert("Unable to provision certificate to host");
+        //if( pass = true )
+            //alert("Certificate provisioned to host");
+        //else
+            //alert("Unable to provision certificate to host");
         // TODO  on success :  $('certificate-provision-form').hide();
 //            view.sync(); //view.update(data);
 //        }
