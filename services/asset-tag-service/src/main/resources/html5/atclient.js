@@ -564,7 +564,7 @@ mtwilson.atag = mtwilson.atag || {};
             host: $('uuid-populate-host').value,
             port: $('uuid-populate-port').value,
             username: $('uuid-populate-username').value,
-            password: $('certificate-provision-password').value
+            password: $('uuid-populate-password').value
         };
         log.debug("autoPopulateUUID  object: " + Object.toJSON(uuidObject)); // should have subject, host address,port, username, password
         var wrappedUuidObject = {'automate': uuidObject};
