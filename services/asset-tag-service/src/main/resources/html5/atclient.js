@@ -586,7 +586,7 @@ mtwilson.atag = mtwilson.atag || {};
                     }
                 }
         );
-        if( pass = true ) 
+        if( pass == true ) 
             alert("got uuid of host: " + myResult);
         else
             alert("Unable to get UUID of host: " + myResult);
