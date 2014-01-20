@@ -172,13 +172,27 @@ ajax.json = {
                         ajax.data.setx(keyPath, existingData);
                     }
                     ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: json});
-
                 }
                 else {
                     ajax.event.fire("httpPostSuccess", {resource: my, content: postObject, response: null});
-
                 }
                 ajax.view.sync();
+            },
+            onFailure: function(transport) {
+                var response = transport.responseText || "no response text";
+                _log.debug("Failure! \n\n" + response);
+                if (transport.responseText) {
+                    var json = transport.responseJSON;
+                    // some apis return metadata in an outer object and the content inside a 'data' field
+                    if (typeof json === 'object' && json != null) {  //check if object
+                        _log.debug("ERROR: Detected json response: " + json.error_message);
+                        ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: json, message: json.error_message});
+                    }
+                    else {
+                        _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
+                        ajax.event.fire("httpPostFailure", {resource: my, content: postObject, response: transport, message: transport.statusText});
+                    }
+                }
             }
         });
         ajax.requests.push(request);
@@ -225,18 +239,33 @@ ajax.json = {
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(json);
                     }
-
                 }
                 else {
                     ajax.event.fire("httpGetSuccess", {resource: my, params: params, response: null});
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(null);
                     }
-
                 }
                 log.debug("calling view sync");
                 ajax.view.sync();
-            } /*,
+            },
+            onFailure: function(transport) {
+                var response = transport.responseText || "no response text";
+                _log.debug("Failure! \n\n" + response);
+                if (transport.responseText) {
+                    var json = transport.responseJSON;
+                    // some apis return metadata in an outer object and the content inside a 'data' field
+                    if (typeof json === 'object' && json != null) {  //check if object
+                        _log.debug("ERROR: Detected json response: " + json.error_message);
+                        ajax.event.fire("httpGetFailure", {resource: my, params: params, response: json, message: json.error_message});
+                    }
+                    else {
+                        _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
+                        ajax.event.fire("httpGetFailure", {resource: my, params: params, response: transport, message: transport.statusText});
+                    }
+                }
+            }
+            /*,
              onFailure: function(a,b) {
              _log.error("GET "+resourcePath+" into "+keyPath+": "+Object.toJSON(a)+": "+b);
              },
@@ -305,16 +334,30 @@ ajax.json = {
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(json);
                     }
-
                 }
                 else {
                     ajax.event.fire("httpPutSuccess", {resource: my, content: putObject, response: null});
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(null);
                     }
-
                 }
                 ajax.view.sync();
+            },
+            onFailure: function(transport) {
+                var response = transport.responseText || "no response text";
+                _log.debug("Failure! \n\n" + response);
+                if (transport.responseText) {
+                    var json = transport.responseJSON;
+                    // some apis return metadata in an outer object and the content inside a 'data' field
+                    if (typeof json === 'object' && json != null) {  //check if object
+                        _log.debug("ERROR: Detected json response: " + json.error_message);
+                        ajax.event.fire("httpPutFailure", {resource: my, content: putObject, response: json, message: json.error_message});
+                    }
+                    else {
+                        _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
+                        ajax.event.fire("httpPutFailure", {resource: my, content: putObject, response: transport, message: transport.statusText});
+                    }
+                }
             }
         });
         ajax.requests.push(request);
@@ -348,9 +391,24 @@ ajax.json = {
                     if( typeof my.onSuccess === 'function' ) {
                         my.onSuccess(null);
                     }
-
                 }
 //                ajax.view.sync();
+            },
+            onFailure: function(transport) {
+                var response = transport.responseText || "no response text";
+                _log.debug("Failure! \n\n" + response);
+                if (transport.responseText) {
+                    var json = transport.responseJSON;
+                    // some apis return metadata in an outer object and the content inside a 'data' field
+                    if (typeof json === 'object' && json != null) {  //check if object
+                        _log.debug("ERROR: Detected json response: " + json.error_message);
+                        ajax.event.fire("httpDeleteFailure", {resource: my, content: deleteObject, response: json, message: json.error_message});
+                    }
+                    else {
+                        _log.debug("ERROR: Detected NON-json response: " + transport.statusText);
+                        ajax.event.fire("httpDeleteFailure", {resource: my, content: deleteObject, response: transport, message: transport.statusText});
+                    }
+                }
             }
         });
         ajax.requests.push(request);
