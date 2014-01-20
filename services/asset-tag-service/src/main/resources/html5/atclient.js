@@ -895,6 +895,7 @@ mtwilson.atag = mtwilson.atag || {};
         mtwilson.atag.notify({text: 'Configuration reset SUCCESSFULLY.', clear: 'AUTO', status: 'INFO'});
     }
 
+    //XXX TODO SAVY 20140120: save a defaut config, only one config is ever saved
     mtwilson.atag.retrieveMainConfiguration = function(eventMemo_not_used) {
         log.debug("retrieveMainConfiguration searching for main...");
         // we get called after all the configurations are retrieved from the server...
