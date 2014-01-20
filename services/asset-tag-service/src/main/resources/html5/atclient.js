@@ -576,7 +576,7 @@ mtwilson.atag = mtwilson.atag || {};
                     'onSuccess': function(result) {
                         log.debug("autoPopulateUUID success! " + Object.toJSON(result));    
                         myResult = Object.toJSON(result);
-                        $('certificate-provision-form').hide();
+                        $('auto-populate-uuid-form').hide();
                         pass = true;
                     },
                     'onFailure': function(result) {
