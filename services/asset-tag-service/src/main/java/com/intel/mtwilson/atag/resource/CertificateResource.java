@@ -129,7 +129,7 @@ public class CertificateResource extends ServerResource {
     }
     
     public static enum CertificateActionName {
-        REVOKE, PROVISION, DEPLOY;
+        REVOKE, PROVISION, DEPLOY, AUTOMATION;
         @Override
         public String toString() {
             return name().toLowerCase();
@@ -160,6 +160,17 @@ public class CertificateResource extends ServerResource {
         }
         
     }
+    public static class CertificateAutomationAction extends CertificateAction {
+        public String UUID;
+        public CertificateAutomationAction(CertificateActionName name) {
+            super(CertificateActionName.AUTOMATION);
+        }
+        
+        public String getUUID() {return this.UUID;}
+        public void   setUUID(String UUID) {this.UUID = UUID;}
+        
+    }
+    
     public static class CertificateDeployAction extends CertificateAction {
         public Date effective;
         public CertificateDeployAction() {
@@ -261,6 +272,7 @@ public class CertificateResource extends ServerResource {
         public CertificateRevokeAction revoke;
         public CertificateProvisionAction provision;
         public CertificateDeployAction deploy;
+        public CertificateAutomationAction automate;
     }
     
     @Post("json:json")
@@ -325,6 +337,12 @@ public class CertificateResource extends ServerResource {
          CertificateActionChoice result = new CertificateActionChoice();
          result.deploy = actionChoice.deploy;
          return result;
+        }
+        if (actionChoice.automate != null) {
+            actionChoice.automate.UUID = "F4B17194-CAE7-11DF-B40B-001517FA9844";
+            CertificateActionChoice result = new CertificateActionChoice();
+            result.automate = actionChoice.automate;
+            return result;
         }
         setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         return null;

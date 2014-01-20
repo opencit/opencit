@@ -558,9 +558,40 @@ mtwilson.atag = mtwilson.atag || {};
     };
     
     mtwilson.atag.autoPopulateUUID = function(input) {
-        $('certificate-request-create-subject').value = "Some Random UUID";
-        alert("its working");
-    }
+        //$('certificate-request-create-subject').value = "Some Random UUID";
+        //alert("its working");
+        var uuidObject = {
+            host: $('uuid-populate-host').value,
+            port: $('uuid-populate-port').value,
+            username: $('uuid-populate-username').value,
+            password: $('certificate-provision-password').value
+        };
+        log.debug("autoPopulateUUID  object: " + Object.toJSON(uuidObject)); // should have subject, host address,port, username, password
+        var wrappedUuidObject = {'automate': uuidObject};
+        var pass = false;
+        var myResult = "";
+        var certificateUuid = "111111111111111111111";
+        ajax.json.post('automate-certificate', wrappedUuidObject,
+                {'uri': '/certificates/' + certificateUuid,
+                    'datapath': null, // prevent result from being stored in global data model
+                    'onSuccess': function(result) {
+                        log.debug("provisionCertificate success! " + Object.toJSON(result));    
+                        myResult = Object.toJSON(result);
+                        $('certificate-provision-form').hide();
+                        pass = true;
+                    },
+                    'onFailure': function(result) {
+                        log.error("provisionCertificate failed! " + Object.toJSON(result));
+                        myResult = Object.toJSON(result);
+                        pass = false;
+                    }
+                }
+        );
+        if( pass = true ) 
+            alert("got uuid of host: " + myResult);
+        else
+            alert("Unable to get UUID of host: " + myResult);
+    };
 
     mtwilson.atag.createSelection = function(input) {
         log.debug("the form model is: " + Object.toJSON(mtwilson.rivets.forms['selection-create-form'].input));
