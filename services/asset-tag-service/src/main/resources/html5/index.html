@@ -192,10 +192,10 @@ function isNumber(n) {
                 </ul>
                 <!-- navigation ends-->	
             </nav>				
-            <div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
-            </div>
+            <!--<div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+            </div>-->
             
-            <div style="min-height: 30px;"><div id="notifications" style="display: none;" class="msgError" title="Click to close"></div></div>
+            <div style="min-height: 30px; clear: both;"><div id="notifications" style="display: none;" class="msgError" title="Click to close"></div></div>
             
             <!--
             <div id="notifications" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
@@ -932,7 +932,7 @@ function isNumber(n) {
                         
                         <form id="config-form" onsubmit="return false;">
                             <input type="button" id="config-save-button" value="Save" onclick="ws.storeMainConfiguration(this); return false;"/>
-                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration_resetClick(); return false;"/>
+                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration(); return false;"/>
 
                                 <!--
                                 <h2>Local Data</h2>

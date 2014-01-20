@@ -260,7 +260,7 @@ mtwilson.atag = mtwilson.atag || {};
 
 // VIEW API
     document.observe("ajax:httpPostSuccess", function(event) {
-        log.debug("httpPostSuccess: " + Object.toJSON(event.memo));
+        log.debug("httpPostSuccess: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Created tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -321,7 +321,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
     
     document.observe("ajax:httpPostFailure", function(event) {
-        log.debug("httpPostFailure: " + Object.toJSON(event.memo));
+        log.debug("httpPostFailure: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Create tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
@@ -361,7 +361,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
 
     document.observe("ajax:httpDeleteSuccess", function(event) {
-        log.debug("httpDeleteSuccess: " + Object.toJSON(event.memo));
+        log.debug("httpDeleteSuccess: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Deleted tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -400,7 +400,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
     
     document.observe("ajax:httpDeleteFailure", function(event) {
-        log.debug("httpDeleteFailure: " + Object.toJSON(event.memo));
+        log.debug("httpDeleteFailure: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Delete tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
@@ -431,7 +431,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
 
     document.observe("ajax:httpPutSuccess", function(event) {
-        log.debug("httpPutSuccess: " + Object.toJSON(event.memo));
+        log.debug("httpPutSuccess: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Updated tag SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -468,7 +468,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
     
     document.observe("ajax:httpPutFailure", function(event) {
-        log.debug("httpPutFailure: " + Object.toJSON(event.memo));
+        log.debug("httpPutFailure: " + event.memo.message);
         switch (event.memo.resource.name) {
             case 'tags':
                 mtwilson.atag.notify({text: 'Update tag FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
@@ -499,7 +499,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
 
     document.observe("ajax:httpGetSuccess", function(event) {
-        log.debug("httpGetSuccess: " + Object.toJSON(event.memo));
+        log.debug("httpGetSuccess: " + event.memo.message);
         //log.debug("HTTP GET OK: " + event.memo.resource.name);
         switch (event.memo.resource.name) {
             case 'resources':
@@ -509,7 +509,11 @@ mtwilson.atag = mtwilson.atag || {};
             case 'tags':
                 // update various controls that refer to the tags... 
                 selection_create_form_init();  /// TODO:  this control should always have the full list of tags... nto just the search results from the other tab... so maybe instaed of updating it here, we need to make a distinction between a refresh of 'all tags' data and what the search screen asked for.
-                mtwilson.atag.notify({text: 'Retrieved tags SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                if (event.memo.response.length > 0) {
+                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' tags SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                } else {
+                    mtwilson.atag.notify({text: 'No tags available. Create a tag first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                }
                 break;
             case 'rdfTriples':
                 mtwilson.atag.notify({text: 'Retrieved RDF triple SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
@@ -517,19 +521,35 @@ mtwilson.atag = mtwilson.atag || {};
             case 'selections':
                 //log.debug("got selections! "+Object.toJSON(event.memo));
 //                    automatic-tag-selection-name
-                mtwilson.atag.notify({text: 'Retrieved selections SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                if (event.memo.response.length > 0) {
+                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' selections SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                } else {
+                    mtwilson.atag.notify({text: 'No selections available. Create a selection first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                }
                 break;
             case 'certificateRequests':
-                mtwilson.atag.notify({text: 'Retrieved certificate requests SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                if (event.memo.response.length > 0) {
+                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' certificate requests SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                } else {
+                    mtwilson.atag.notify({text: 'No certificate requests available. Create a certificate request first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                }
                 break;
             case 'certificates':
-                mtwilson.atag.notify({text: 'Retrieved certificates SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                if (event.memo.response.length > 0) {
+                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' certificates SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                } else {
+                    mtwilson.atag.notify({text: 'No certificates available. Create a certificate first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                }
                 break;
             case 'configurations':
                 if (event.memo.resource.callback) {
                     event.memo.resource.callback(event.memo);
                 }
-                mtwilson.atag.notify({text: 'Retrieved configuration SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                if (event.memo.response.length > 0) {
+                    mtwilson.atag.notify({text: 'Retrieved ' + event.memo.response.length + ' configurations SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
+                } else {
+                    mtwilson.atag.notify({text: 'No configurations available. Create a configuration first.', clearAfter: 'CONFIRM', status: 'WARN'});
+                }
                 break;
             case 'files':
                 if (event.memo.resource.callback) {
@@ -545,7 +565,7 @@ mtwilson.atag = mtwilson.atag || {};
     });
     
     document.observe("ajax:httpGetFailure", function(event) {
-        log.debug("httpGetFailure: " + Object.toJSON(event.memo));
+        log.debug("httpGetFailure: " + event.memo.message);
         //log.debug("HTTP GET OK: " + event.memo.resource.name);
         switch (event.memo.resource.name) {
             case 'resources':
@@ -567,7 +587,7 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Retrieve certificates FAILED.', clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'configurations':
-                mtwilson.atag.notify({text: 'Retrieve configuration FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                mtwilson.atag.notify({text: 'Retrieve configurations FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'files':
                 mtwilson.atag.notify({text: 'Retrieve file FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
@@ -933,11 +953,6 @@ mtwilson.atag = mtwilson.atag || {};
         ajax.json.get('certificates', $(report.formId).serialize(true)); // pass parameters as object (serialize=true) and no other options (no third argument)
 //    apiwait("Searching tags...");
     };
-
-    mtwilson.atag.retrieveMainConfiguration_resetClick = function() {
-        mtwilson.atag.retrieveMainConfiguration();
-        mtwilson.atag.notify({text: 'Configuration reset SUCCESSFULLY.', clear: 'AUTO', status: 'INFO'});
-    }
 
     //XXX TODO SAVY 20140120: save a defaut config, only one config is ever saved
     mtwilson.atag.retrieveMainConfiguration = function(eventMemo_not_used) {
