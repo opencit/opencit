@@ -574,13 +574,13 @@ mtwilson.atag = mtwilson.atag || {};
                 {'uri': '/certificates/auto',
                     'datapath': null, // prevent result from being stored in global data model
                     'onSuccess': function(result) {
-                        log.debug("provisionCertificate success! " + Object.toJSON(result));    
+                        log.debug("autoPopulateUUID success! " + Object.toJSON(result));    
                         myResult = Object.toJSON(result);
                         $('certificate-provision-form').hide();
                         pass = true;
                     },
                     'onFailure': function(result) {
-                        log.error("provisionCertificate failed! " + Object.toJSON(result));
+                        log.error("AutoPopulateUUID failed! " + Object.toJSON(result));
                         myResult = Object.toJSON(result);
                         pass = false;
                     }
