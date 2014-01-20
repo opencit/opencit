@@ -571,7 +571,7 @@ mtwilson.atag = mtwilson.atag || {};
         var pass = false;
         var myResult = "";
         ajax.json.post('uuid-automation', wrappedUuidObject,
-                {'uri': '//automation',
+                {'uri': '/automation',
                     'datapath': null, // prevent result from being stored in global data model
                     'onSuccess': function(result) {
                         log.debug("autoPopulateUUID success! " + Object.toJSON(result));    
