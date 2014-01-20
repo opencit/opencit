@@ -890,6 +890,10 @@ mtwilson.atag = mtwilson.atag || {};
 //    apiwait("Searching tags...");
     };
 
+    mtwilson.atag.retrieveMainConfiguration_resetClick = function() {
+        mtwilson.atag.retrieveMainConfiguration();
+        mtwilson.atag.notify({text: 'Configuration reset SUCCESSFULLY.', clear: 'AUTO', status: 'INFO'});
+    }
 
     mtwilson.atag.retrieveMainConfiguration = function(eventMemo_not_used) {
         log.debug("retrieveMainConfiguration searching for main...");
