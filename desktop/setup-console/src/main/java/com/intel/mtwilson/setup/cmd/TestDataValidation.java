@@ -7,10 +7,10 @@ package com.intel.mtwilson.setup.cmd;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
-import com.intel.mtwilson.validation.Fault;
-import com.intel.mtwilson.validation.InvalidModelException;
-import com.intel.mtwilson.validation.Model;
-import com.intel.mtwilson.validation.Unchecked;
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.validation.InvalidModelException;
+import com.intel.dcsg.cpg.validation.Model;
+import com.intel.dcsg.cpg.validation.Unchecked;
 import java.util.List;
 import org.apache.commons.configuration.Configuration;
 

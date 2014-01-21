@@ -1,15 +1,17 @@
 package test.vendor.intel;
 
 
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.xml.JAXB;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mtwilson.agent.*;
 import com.intel.mtwilson.agent.intel.TAHelper;
 import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
-import com.intel.mtwilson.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,7 +46,7 @@ public class TrustAgentSecureClientTest {
         System.out.println("Sending Generate Identity");
         //byte[] data = "<identity_request></identity_request>".getBytes();
         HostAgentFactory factory = new HostAgentFactory();
-        TlsPolicy tlsPolicy = factory.getTlsPolicy("INSECURE", new ByteArrayResource());
+        TlsPolicy tlsPolicy = new InsecureTlsPolicy(); //factory.getTlsPolicy("INSECURE", new ByteArrayResource());
         TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(new URL(String.format("https://%s:%d",hostname,port)), tlsPolicy));
 //        TrustAgentSecureClient client = new TrustAgentSecureClient(hostname, port, data);
  // TODO ... need client.setData(data)
@@ -148,7 +150,7 @@ Exception during testIdentityRequest: TPM quote verification failed.Command erro
         //byte[] data = "<quote_request><nonce>Iamnonce</nonce><pcr_list>3,19</pcr_list></quote_request>".getBytes();
         //             data = "<quote_request><nonce>+nao5lHKxcMoqIGY3LuAYQ==</nonce><pcr_list>3-5,4-8</pcr_list></quote_request>".getBytes();
         HostAgentFactory factory = new HostAgentFactory();
-        TlsPolicy tlsPolicy = factory.getTlsPolicy("INSECURE", new ByteArrayResource());
+        TlsPolicy tlsPolicy = new InsecureTlsPolicy(); //factory.getTlsPolicy("INSECURE", new ByteArrayResource());
         TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(new URL(String.format("https://%s:%d",hostname,port)), tlsPolicy));
         /* this works to get the quote response, but doesn't verify it */
         /*
@@ -244,7 +246,7 @@ Exception during testIdentityRequest: TPM quote verification failed.Command erro
 //             data = "<quote_request><nonce>+nao5lHKxcMoqIGY3LuAYQ==</nonce><pcr_list>3-5,4-8</pcr_list></quote_request>".getBytes();
              //data = "<quote_request><nonce>Iamnonce</nonce><pcr_list>3,19</pcr_list></quote_request>".getBytes();
         HostAgentFactory factory = new HostAgentFactory();
-        TlsPolicy tlsPolicy = factory.getTlsPolicy("INSECURE", new ByteArrayResource());
+        TlsPolicy tlsPolicy = new InsecureTlsPolicy(); //factory.getTlsPolicy("INSECURE", new ByteArrayResource());
         TrustAgentSecureClient client = new TrustAgentSecureClient(new TlsConnection(new URL(String.format("https://%s:%d",hostname,port)), tlsPolicy));
 //            TrustAgentSecureClient client = new TrustAgentSecureClient(hostname, port, data);
         // TODO ... need client.setData(data)

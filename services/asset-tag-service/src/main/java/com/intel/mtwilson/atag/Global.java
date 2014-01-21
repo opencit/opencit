@@ -12,13 +12,14 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.atag.dao.jdbi.*;
 import com.intel.mtwilson.atag.model.*;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.FileResource;
-import com.intel.mtwilson.io.Resource;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.FileResource;
+import com.intel.dcsg.cpg.io.Resource;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
+//import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
 import java.io.IOException;
 import java.net.URL;
 import java.security.PrivateKey;
@@ -156,10 +157,12 @@ public class Global {
             String keystorePassword = My.configuration().getKeystorePassword(); //configuration().getMtWilsonClientKeystorePassword();
             
             SimpleKeystore keystore = new SimpleKeystore(keystoreResource, keystorePassword);
-            KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
+//            KeystoreCertificateRepository respository = new KeystoreCertificateRepository(keystore);
             URL url = My.configuration().getMtWilsonURL();  //configuration().getMtWilsonURL();
             ApiClientFactory factory = new ApiClientFactory();
-            mtwilson = factory.clientForUserInResource(keystoreResource, keystoreUsername, keystorePassword, url, new TrustFirstCertificateTlsPolicy(respository));
+            // XXX TODO need to use the configured trust policy like the host agent factory does; default configured should be STRICT, user can change to STRICT_AFTER_FIRST to restore old behavior
+            TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(keystore);
+            mtwilson = factory.clientForUserInResource(keystoreResource, keystoreUsername, keystorePassword, url, tlsPolicy);
             }
             catch(Exception e) {
                 log.error("Cannot create MtWilson client", e);

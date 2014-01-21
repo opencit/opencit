@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.setup.ui.console;
 
-import com.intel.mtwilson.validation.InputModel;
+import com.intel.dcsg.cpg.validation.InputModel;
 import org.apache.commons.lang3.Range;
 /**
  *

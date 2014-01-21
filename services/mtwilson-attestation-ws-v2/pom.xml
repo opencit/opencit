@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
     
     <properties />
@@ -49,26 +49,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-crypto</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-io</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-validation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-jersey-util</artifactId>
             <version>${project.version}</version>
@@ -76,6 +56,14 @@
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-io</artifactId>
         </dependency>
 
         <dependency>
@@ -109,6 +97,7 @@
             <artifactId>MSCommon</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-http-security</artifactId>
@@ -119,6 +108,7 @@
             <artifactId>mtwilson-http-security-server</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         <!--
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -182,14 +172,14 @@
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>jsr311-api</artifactId>
-            <version>1.1</version>
+            <version>1.1.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.persistence</groupId>
             <artifactId>persistence-api</artifactId>
-            <version>1.0</version>
-            <scope>test</scope>
+            <version>1.0.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>xml-apis</groupId>
@@ -223,7 +213,6 @@
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-policy</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
     </dependencies>
     

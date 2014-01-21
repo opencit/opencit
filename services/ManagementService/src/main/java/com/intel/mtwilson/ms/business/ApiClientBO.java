@@ -6,7 +6,7 @@ package com.intel.mtwilson.ms.business;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyJpa;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;

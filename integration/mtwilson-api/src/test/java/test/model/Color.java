@@ -4,7 +4,8 @@
  */
 package test.model;
 
-import com.intel.mtwilson.validation.*;
+import com.intel.dcsg.cpg.validation.Fault;
+import com.intel.dcsg.cpg.validation.Model;
 import java.util.List;
 
 /**

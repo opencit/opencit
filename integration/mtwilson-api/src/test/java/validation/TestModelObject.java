@@ -4,8 +4,9 @@
  */
 package validation;
 
+import com.intel.dcsg.cpg.validation.Model;
+import com.intel.dcsg.cpg.validation.Unchecked;
 import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.validation.*;
 import org.junit.Test;
 
 /**

@@ -9,10 +9,9 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.model.Measurement;
@@ -20,10 +19,11 @@ import com.intel.mtwilson.model.Pcr;
 import com.intel.mtwilson.model.PcrEventLog;
 import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.*;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+//import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.IOException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -71,7 +71,8 @@ public class TestIntelHostAgent {
     public static HostAgent getAgent() throws Exception {
         SimpleKeystore keystore = new SimpleKeystore(My.configuration().getKeystoreFile(), My.configuration().getKeystorePassword());
 		TlsPolicy tlsPolicy =  new InsecureTlsPolicy(); //new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
-        SslUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
+//        TlsUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
+        TlsUtil.addSslCertificatesToKeystore(keystore, new URL("https://"+hostname+":9999"));
         keystore.save();
         /*
         // make sure that the current certificate for this host, from the database, is in our keystore...

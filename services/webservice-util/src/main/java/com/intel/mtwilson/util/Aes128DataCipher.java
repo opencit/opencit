@@ -5,7 +5,7 @@
 package com.intel.mtwilson.util;
 
 import com.intel.mtwilson.crypto.Aes128;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

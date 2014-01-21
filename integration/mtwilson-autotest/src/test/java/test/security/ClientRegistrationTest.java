@@ -4,19 +4,20 @@
  */
 package test.security;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyConfiguration;
 import com.intel.mtwilson.api.ClientFactory;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.FileResource;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import org.junit.Test;
  */
 public class ClientRegistrationTest {
     @Test
-    public void testRegisterClient() throws IOException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, IllegalOrphanException, NonexistentEntityException, MSDataException {
+    public void testRegisterClient() throws IOException, FileNotFoundException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException, CertificateEncodingException, IllegalOrphanException, NonexistentEntityException, MSDataException, CryptographyException {
 //        My.client().r
         ByteArrayResource keystoreResource = new ByteArrayResource();
         MyConfiguration config = My.configuration(); // new MyConfiguration();

@@ -20,13 +20,12 @@ import com.intel.mtwilson.atag.dao.jdbi.ConfigurationDAO;
 import com.intel.mtwilson.atag.dao.jdbi.FileDAO;
 import com.intel.mtwilson.atag.model.Configuration;
 import com.intel.mtwilson.atag.model.File;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.ByteArrayResource;
-import com.intel.mtwilson.io.Resource;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.Resource;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.security.KeyPair;
@@ -91,6 +90,7 @@ public class CreateMtWilsonClient extends AtagCommand {
 //        SimpleKeystore keystore = new SimpleKeystore(keystoreResource, mtwilsonClientKeystorePassword);
 //        TrustFirstCertificateTlsPolicy policy = new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(keystore));
         ApiClientFactory factory = new ApiClientFactory();
+        // XXX TODO use the tls keystore and policy configured for the mt wilson server ... 
         SimpleKeystore keystore = factory.createUserInResource(keystoreResource, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword, url, new InsecureTlsPolicy(), roles);
         keystore.save();
         

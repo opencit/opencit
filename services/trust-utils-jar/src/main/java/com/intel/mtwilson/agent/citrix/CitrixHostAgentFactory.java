@@ -7,9 +7,9 @@ package com.intel.mtwilson.agent.citrix;
 import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.VendorHostAgentFactory;
 import com.intel.mtwilson.model.InternetAddress;
-import com.intel.mtwilson.tls.TlsConnection;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
 import java.io.IOException;
 import java.net.URL;
 

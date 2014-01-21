@@ -1,7 +1,7 @@
 package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.datatypes.OsData;
-import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.validation.ObjectModel;
 import org.apache.commons.lang3.Validate;
 
 /**

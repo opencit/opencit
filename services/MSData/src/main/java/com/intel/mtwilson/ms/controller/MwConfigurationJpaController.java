@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.ms.controller;
 
-import com.intel.mtwilson.jpa.GenericJpaController;
+import com.intel.dcsg.cpg.jpa.GenericJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwConfiguration;

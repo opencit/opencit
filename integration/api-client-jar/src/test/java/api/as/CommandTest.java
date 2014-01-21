@@ -8,7 +8,7 @@ import org.junit.Test;
 import com.intel.mtwilson.ApiCommand;
 import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.ClientException;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;

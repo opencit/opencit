@@ -6,9 +6,9 @@
     <name>mtwilson-console</name>
   
     <parent>
-        <groupId>com.intel.mtwilson.desktop</groupId>
-        <artifactId>mtwilson-desktop</artifactId>
-        <version>1.2.3-SNAPSHOT</version>
+		<groupId>com.intel.mtwilson.desktop</groupId>
+		<artifactId>mtwilson-desktop</artifactId>
+		<version>1.2.3-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -223,18 +223,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-validation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.intel.mtwilson.common</groupId>
-            <artifactId>mtwilson-io</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-                                	    
-        <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.1</version>
@@ -249,26 +237,31 @@
         <!-- end sshj for remote administration  -->
     
     
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-io</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-crypto</artifactId>
-            <version>0.1.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-net</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.intel.dcsg.cpg</groupId>
-            <artifactId>cpg-console</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-io</artifactId>
+	<version>0.2-SNAPSHOT</version>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-crypto</artifactId>
+	<version>0.2-SNAPSHOT</version>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-net</artifactId>
+	<version>0.1-SNAPSHOT</version>
+</dependency>
+<dependency>
+	<groupId>com.intel.dcsg.cpg</groupId>
+	<artifactId>cpg-console</artifactId>
+	<version>0.1-SNAPSHOT</version>
+</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-validation</artifactId>
+			<version>0.2-SNAPSHOT</version>
+		</dependency>
     
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
@@ -383,39 +376,39 @@
             </activation>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>aspectj-maven-plugin</artifactId>
-                        <version>1.4</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
-                                    <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
-                                </goals>
-                                <configuration>
-                                    <source>1.6</source>
-                                    <target>1.6</target>
-                                    <!-- aspect libraries are the already-compiled aspect .jars -->
-                                    <aspectLibraries>
-                                        <aspectLibrary>
-                                            <groupId>com.intel.mtwilson.common</groupId>
-                                            <artifactId>mtwilson-validation</artifactId>
-                                        </aspectLibrary>
-                                    </aspectLibraries>
-                                    <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->
-                                    <!--
-                                    <weaveDependencies>
-                                        <weaveDependency>
-                                            <groupId>com.intel.mtwilson.services</groupId>
-                                            <artifactId>mtwilson-management-service</artifactId>
-                                        </weaveDependency>
-                                    </weaveDependencies>
-                                    -->
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>	
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>aspectj-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>compile</goal>       <!-- use this goal to weave all your main classes -->
+              <goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
+            </goals>
+            <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+                <!-- aspect libraries are the already-compiled aspect .jars -->
+                <aspectLibraries>
+                    <aspectLibrary>
+                        <groupId>com.intel.dcsg.cpg</groupId>
+                        <artifactId>cpg-validation</artifactId>
+                    </aspectLibrary>
+                </aspectLibraries>
+                <!-- weave dependencies are regular java dependencies (declared in the dependencies section of this pom) into which we want to weave the same aspects that are weaved into this project -->
+                <!--
+                <weaveDependencies>
+                    <weaveDependency>
+                        <groupId>com.intel.mtwilson.services</groupId>
+                        <artifactId>mtwilson-management-service</artifactId>
+                    </weaveDependency>
+                </weaveDependencies>
+                -->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>	
       
                     
                 </plugins>

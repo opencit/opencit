@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.model;
 
-import com.intel.mtwilson.validation.Model;
-import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.validation.Model;
+import com.intel.dcsg.cpg.validation.ObjectModel;
 
 /**
  * An Internet Address can be a hostname, FQDN, IPv4, or IPv6 address. If any other

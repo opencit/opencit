@@ -5,7 +5,7 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
 import java.io.IOException;

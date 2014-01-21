@@ -116,6 +116,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-tls-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>MSData</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -145,10 +150,8 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>http-authorization</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
         </dependency>
     </dependencies>  
 </project>

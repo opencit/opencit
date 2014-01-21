@@ -7,7 +7,7 @@ package com.intel.mtwilson.policy.impl.vendor;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.policy.impl.JpaPolicyReader;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.Rule;

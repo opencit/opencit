@@ -18,7 +18,7 @@ import javax.ws.rs.Path;
  * @author jbuhacoff
  */
 @Stateless
-@Path("/v2/hosts")
+@Path("/hosts")
 public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriteria,HostLinks> {
 
     @Override

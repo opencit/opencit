@@ -4,10 +4,10 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SamlUtil;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SamlUtil;
+import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -214,7 +214,7 @@ public class TrustAssertion {
         // otherwise, look for a public key field
         String pem = assertionMap.get("AIK_PublicKey");
         if( pem == null || pem.isEmpty() ) { return null; }
-        PublicKey publicKey = X509Util.decodePemPublicKey(pem);
+        PublicKey publicKey = RsaUtil.decodePemPublicKey(pem);
         return publicKey;
     }
     

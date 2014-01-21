@@ -4,13 +4,13 @@
  */
 package com.intel.mtwilson.setup.cmd;
 
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupException;
 import com.intel.mtwilson.setup.SetupWizard;
-import com.intel.mtwilson.io.Filename;
+import com.intel.dcsg.cpg.io.Filename;
 import com.intel.mtwilson.setup.SetupContext;
 import java.io.BufferedReader;
 import java.io.Console;

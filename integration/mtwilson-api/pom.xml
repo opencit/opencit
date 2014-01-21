@@ -72,39 +72,26 @@
 		<artifactId>cpg-crypto</artifactId>
 	</dependency>
       
-      <dependency>
-        <groupId>com.intel.mtwilson.common</groupId>
-        <artifactId>mtwilson-io</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+		</dependency>
     <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-net</artifactId>
     </dependency>
       
-      <dependency>
-        <groupId>com.intel.mtwilson.common</groupId>
-        <artifactId>mtwilson-crypto</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
-        <!-- for tls-policy -->
-      <dependency>
-        <groupId>com.intel.mtwilson.integration</groupId>
-        <artifactId>http-authorization</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-            
-      <dependency>
-        <groupId>com.intel.mtwilson.common</groupId>
-        <artifactId>mtwilson-validation</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-tls-policy</artifactId>
+        </dependency>
       
     <dependency>
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
-    	<version>1.9.11</version> <!-- in 1.0-RC2 we used 1.5.5 -->
+    	<version>1.9.13</version> <!-- in 1.0-RC2 we used 1.5.5 -->
+        <optional>true</optional>
     </dependency>
     <dependency>
 		<groupId>javax</groupId>

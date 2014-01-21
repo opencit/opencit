@@ -4,8 +4,8 @@
  */
 package com.intel.mtwilson.ms.rest;
 
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;

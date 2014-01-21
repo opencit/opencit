@@ -17,17 +17,17 @@ import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.helper.BaseBO;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.Vendor;
-import com.intel.mtwilson.jpa.PersistenceManager;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.security.http.ApacheBasicHttpAuthorization;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
 import java.io.FileInputStream;
@@ -424,6 +424,7 @@ public class AssetTagCertBO extends BaseBO{
         log.error("attempting to connect to asset tag host");
         String requestURL = My.configuration().getAssetTagServerURL() + "/tags?oidEqualTo="+oid;
         
+        // XXX TODO  1) during setup need to save asset tag service ssl cert so we can use the secure tls policy;  2) add the asset tag apis to the java client 
         //1.3.6.1.4.1.99999.3"; 
         ApacheHttpClient client = new ApacheHttpClient(My.configuration().getAssetTagServerURL(), new ApacheBasicHttpAuthorization(new UsernamePasswordCredentials(My.configuration().getAssetTagApiUsername(),My.configuration().getAssetTagApiPassword())), null, new InsecureTlsPolicy());
 

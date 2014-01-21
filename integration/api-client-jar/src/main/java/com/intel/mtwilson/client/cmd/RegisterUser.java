@@ -7,12 +7,12 @@ package com.intel.mtwilson.client.cmd;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.client.AbstractCommand;
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
-import com.intel.mtwilson.io.Filename;
+import com.intel.dcsg.cpg.io.Filename;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -55,8 +55,10 @@ public class RegisterUser extends AbstractCommand {
 
             String username = Filename.decode(keystoreFile.getName().substring(0, keystoreFile.getName().lastIndexOf("."))); // username is everything before ".jks"
             String password = null;
+            String tlsProtocol = "TLS"; // issue #870 allow user to specify tls protocol version, default to TLS
             // args[4] is optional password plaintext (not recommended) or environment variable name (recommended) (if not provided we will prompt)
             if( args.length > 3 ) { password = args[3]; }
+            if( args.length > 4 ) { tlsProtocol = args[4]; }
 
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             if( password == null || password.isEmpty() ) {
@@ -78,7 +80,7 @@ public class RegisterUser extends AbstractCommand {
             // XXX TODO need to comply with user's specified tls policy, or assume "trust first certificate" if no policy is configured
             // download server's ssl certificates and add them to the keystore  and display for user to confirm later XXX TODO maybe prompt user to accept/decline them before adding, instaed of checking what was added after;  or be able to set an ssl policy here so if we already trust the root CA this should work seamlessly.
             String[] tlsCertAliases0 = keystore.listTrustedSslCertificates();
-            SslUtil.addSslCertificatesToKeystore(keystore, server);
+            TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
             String[] tlsCertAliases = keystore.listTrustedSslCertificates();
             String[] newTlsCertAliases = elementsAdded(tlsCertAliases0, tlsCertAliases);
             for(String alias : newTlsCertAliases) {
@@ -130,7 +132,7 @@ public class RegisterUser extends AbstractCommand {
                 Set<X509Certificate> cacerts = c.getRootCaCertificates();
                 for(X509Certificate cacert : cacerts) {
                     keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
-                    log.debug("Added CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                    log.debug("Added CA Certificate with alias {}, subject {}, fingerprint {}, from server {}",  cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
                 }
             }
             catch(Exception e) {
@@ -141,7 +143,7 @@ public class RegisterUser extends AbstractCommand {
                 Set<X509Certificate> cacerts = c.getPrivacyCaCertificates();
                 for(X509Certificate cacert : cacerts) {
                     keystore.addTrustedCaCertificate(cacert, cacert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
-                    log.debug("Added Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost() });
+                    log.debug("Added Privacy CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", cacert.getSubjectX500Principal().getName(), cacert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cacert.getEncoded()), server.getHost());
                 }
             }
             catch(Exception e) {
@@ -153,11 +155,11 @@ public class RegisterUser extends AbstractCommand {
                 for(X509Certificate cert : cacerts) {
                     if( cert.getBasicConstraints() == -1 ) {  // -1 indicates the certificate is not a CA cert; so we add it as the saml cert
                         keystore.addTrustedSamlCertificate(cert, server.getHost());
-                        log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                        log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost());
                     }
                     else {
                         keystore.addTrustedCaCertificate(cert, cert.getSubjectX500Principal().getName()); // XXX TODO need error checking on:  1) is the name a valid alias or does it need munging, 2) is there already a different cert with that alias in the keystore
-                        log.debug("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost() });
+                        log.debug("Added SAML CA Certificate with alias {}, subject {}, fingerprint {}, from server {}", cert.getSubjectX500Principal().getName(), cert.getSubjectX500Principal().getName(), DigestUtils.shaHex(cert.getEncoded()), server.getHost());
                     }
                 }
             }

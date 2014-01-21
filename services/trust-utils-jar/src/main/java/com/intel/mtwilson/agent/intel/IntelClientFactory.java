@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.agent.intel;
 
-import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import org.apache.commons.pool.BaseKeyedPoolableObjectFactory;
 
 /**

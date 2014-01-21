@@ -20,5 +20,6 @@ public class UserFilterCriteria implements FilterCriteria<User> {
     public String nameEqualTo;
     @QueryParam("nameContains")
     public String nameContains;
-    
+    @QueryParam("enabled")
+    public Boolean enabled;
 }

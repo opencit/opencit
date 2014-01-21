@@ -8,7 +8,7 @@ import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
-import com.intel.mtwilson.jpa.GenericJpaController;
+import com.intel.dcsg.cpg.jpa.GenericJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import java.io.Serializable;
 import java.util.*;
@@ -264,6 +264,16 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
         parameters.put("enabled", enabled);
         parameters.put("status", status);
         return searchByNamedQuery("findByEnabledStatus", parameters);
+    }
+    
+    public ApiClientX509 findApiClientX509ByUUID(String uuid_hex) {
+        
+        List<ApiClientX509> list = searchByNamedQuery("findByUUID_Hex", "uuid_hex", uuid_hex);
+        if( list != null && !list.isEmpty() ) {
+            return list.get(0);
+        }
+        return null;
+        
     }
     
 }

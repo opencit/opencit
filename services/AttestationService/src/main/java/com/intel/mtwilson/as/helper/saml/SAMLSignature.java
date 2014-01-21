@@ -1,6 +1,6 @@
 package com.intel.mtwilson.as.helper.saml;
 
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.*;
 import java.net.URL;

@@ -5,7 +5,7 @@
 package com.intel.mtwilson.setup.ui.console;
 
 import com.intel.mtwilson.model.InternetAddress;
-import com.intel.mtwilson.validation.InputModel;
+import com.intel.dcsg.cpg.validation.InputModel;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

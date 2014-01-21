@@ -4,7 +4,7 @@
  */
 package com.intel.mountwilson.http.security;
 
-import com.intel.mtwilson.iso8601.Iso8601Date;
+import com.intel.dcsg.cpg.iso8601.Iso8601Date;
 import java.text.ParseException;
 import java.util.Date;
 import org.slf4j.Logger;

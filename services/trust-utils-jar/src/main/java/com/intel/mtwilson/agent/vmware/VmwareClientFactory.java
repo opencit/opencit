@@ -4,8 +4,7 @@
  */
 package com.intel.mtwilson.agent.vmware;
 
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import com.vmware.vim25.InvalidProperty;
 import com.vmware.vim25.RuntimeFault;
 import java.rmi.RemoteException;

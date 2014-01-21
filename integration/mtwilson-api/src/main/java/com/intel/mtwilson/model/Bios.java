@@ -1,7 +1,7 @@
 package com.intel.mtwilson.model;
 
 import com.intel.mtwilson.datatypes.OemData;
-import com.intel.mtwilson.validation.ObjectModel;
+import com.intel.dcsg.cpg.validation.ObjectModel;
 
 /**
  * Representation of a Bios record comprised of Name, Version, and OEM.

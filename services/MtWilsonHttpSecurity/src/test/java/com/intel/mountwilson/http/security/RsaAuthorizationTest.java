@@ -4,8 +4,9 @@
  */
 package com.intel.mountwilson.http.security;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.security.http.RsaAuthorization;
-import com.intel.mtwilson.crypto.RsaCredential;
+import com.intel.dcsg.cpg.crypto.RsaCredential;
 import java.io.IOException;
 import java.security.*;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class RsaAuthorizationTest {
     private static int keySizeInBits = 1024;
     private static String httpUrlWithHost = "http://www.example.com";
     
-    private RsaCredential generateRsaCredential() throws NoSuchAlgorithmException {
+    private RsaCredential generateRsaCredential() throws NoSuchAlgorithmException, CryptographyException {
         KeyPairGenerator r = KeyPairGenerator.getInstance("RSA");
         r.initialize(keySizeInBits);
         KeyPair keypair = r.generateKeyPair();
@@ -56,7 +57,7 @@ Date: Mon, 25 Jun 2012 12:34:36 PDT
      * @throws SignatureException 
      */
     @Test
-    public void testGenerateRsaAuthorizationHeaderWithGET() throws NoSuchAlgorithmException, InvalidKeyException, IOException, SignatureException {
+    public void testGenerateRsaAuthorizationHeaderWithGET() throws NoSuchAlgorithmException, InvalidKeyException, IOException, SignatureException, CryptographyException {
         RsaCredential credential = generateRsaCredential();
         RsaAuthorization auth = new RsaAuthorization(credential);
         auth.setRealm("Attestation");
@@ -81,7 +82,7 @@ Date: Mon, 25 Jun 2012 12:34:36 PDT
      * @throws SignatureException 
      */
     @Test
-    public void testGenerateRsaAuthorizationHeaderWithPOST() throws NoSuchAlgorithmException, InvalidKeyException, IOException, SignatureException {
+    public void testGenerateRsaAuthorizationHeaderWithPOST() throws NoSuchAlgorithmException, InvalidKeyException, IOException, SignatureException, CryptographyException {
         RsaCredential credential = generateRsaCredential();
         RsaAuthorization auth = new RsaAuthorization(credential);
         auth.setRealm("Attestation");

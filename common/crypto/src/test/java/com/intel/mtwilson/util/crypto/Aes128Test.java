@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.util.crypto;
 
-import com.intel.mtwilson.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.crypto.Aes128;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;

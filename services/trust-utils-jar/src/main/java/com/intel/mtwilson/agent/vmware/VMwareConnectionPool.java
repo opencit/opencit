@@ -6,10 +6,10 @@ package com.intel.mtwilson.agent.vmware;
 
 //import java.util.HashMap;
 import com.intel.mtwilson.agent.vmware.VmwareClientFactory;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.model.Sha1Digest;
-import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -137,8 +137,8 @@ public class VMwareConnectionPool {
             // is it because of an ssl failure?  we're looking for this:  com.sun.xml.internal.ws.client.ClientTransportException: HTTP transport error: javax.net.ssl.SSLHandshakeException: java.security.cert.CertificateException: Server certificate is not trusted
             if( e.getCause() != null && e.getCause() instanceof javax.net.ssl.SSLHandshakeException) {
                 javax.net.ssl.SSLHandshakeException e2 = (javax.net.ssl.SSLHandshakeException)e.getCause();
-                if( e2.getCause() != null && e2.getCause() instanceof com.intel.mtwilson.tls.UnknownCertificateException ) {
-                    com.intel.mtwilson.tls.UnknownCertificateException e3 = (com.intel.mtwilson.tls.UnknownCertificateException)e2.getCause();
+                if( e2.getCause() != null && e2.getCause() instanceof com.intel.dcsg.cpg.tls.policy.UnknownCertificateException ) {
+                    com.intel.dcsg.cpg.tls.policy.UnknownCertificateException e3 = (com.intel.dcsg.cpg.tls.policy.UnknownCertificateException)e2.getCause();
                     log.warn("Failed to connect to vcenter due to unknown certificate exception: {}", e3.toString());
                     X509Certificate[] chain = e3.getCertificateChain();
                     if( chain == null || chain.length == 0 ) {

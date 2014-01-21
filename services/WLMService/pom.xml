@@ -52,14 +52,6 @@
 
     </build>
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-webservice-dependencies</artifactId>
-            <version>${project.version}</version>
-            <type>pom</type>
-        </dependency>
-        -->
 <dependency>
 	<groupId>mysql</groupId>
 	<artifactId>mysql-connector-java</artifactId>
@@ -132,19 +124,19 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-jpa</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-jpa</artifactId>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-io</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-validation</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-validation</artifactId>
+			<version>0.2-SNAPSHOT</version>
 		</dependency>
         <!--
 		<dependency>

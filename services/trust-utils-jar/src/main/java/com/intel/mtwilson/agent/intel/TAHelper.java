@@ -1,5 +1,8 @@
 package com.intel.mtwilson.agent.intel;
 
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyManager;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.io.ByteArray;
 import com.intel.dcsg.cpg.net.IPv4Address;
 import com.intel.dcsg.cpg.net.InternetAddress;
@@ -18,7 +21,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 import com.intel.mtwilson.agent.*;
-import com.intel.mtwilson.tls.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.io.IOUtils;
@@ -29,7 +31,7 @@ import com.intel.mountwilson.as.helper.CommandUtil;
 import com.intel.mountwilson.ta.data.ClientRequestType;
 import com.intel.mountwilson.ta.data.daa.response.DaaResponse;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Measurement;
 import com.intel.mtwilson.model.Pcr;
@@ -38,6 +40,7 @@ import com.intel.mtwilson.model.PcrIndex;
 import com.intel.mtwilson.model.PcrManifest;
 //import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
+import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
 import com.vmware.vim25.HostTpmEventLogEntry;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -219,7 +222,7 @@ public class TAHelper {
             // 3) one day this entire function will be in the IntelHostAgent or that agent will call THIS function instaed of the othe way around
             HostAgentFactory factory = new HostAgentFactory();
             
-            TlsPolicy tlsPolicy = factory.getTlsPolicy(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
+            TlsPolicy tlsPolicy = TlsPolicyFactory.getInstance().getTlsPolicyWithKeystore(tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystoreResource());
 
             String connectionString = tblHosts.getAddOnConnectionInfo();
             if (connectionString == null || connectionString.isEmpty()) {

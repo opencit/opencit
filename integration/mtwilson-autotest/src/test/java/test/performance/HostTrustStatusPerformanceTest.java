@@ -15,7 +15,7 @@ import com.intel.mtwilson.agent.intel.*;
 import com.intel.dcsg.cpg.performance.*;
 import com.intel.dcsg.cpg.performance.report.*;
 import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import java.net.MalformedURLException;
 import java.security.SignatureException;
 import java.util.ArrayList;

@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.security.http;
 
-import com.intel.mtwilson.crypto.HmacCredential;
+import com.intel.dcsg.cpg.crypto.HmacCredential;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntityEnclosingRequest;

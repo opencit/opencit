@@ -4,15 +4,15 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.crypto.RsaCredentialX509;
-import com.intel.mtwilson.crypto.RsaUtil;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.crypto.SslUtil;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
-import com.intel.mtwilson.io.Filename;
+import com.intel.dcsg.cpg.io.Filename;
 import com.intel.mtwilson.api.*;
-import com.intel.mtwilson.crypto.CryptographyException;
-import com.intel.mtwilson.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.rfc822.Rfc822Date;
+import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.URL;
@@ -56,7 +56,7 @@ public class ApiCommand {
      * 
      * @param args 
      */
-    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, CryptographyException, ClientException {
+    public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException, GeneralSecurityException, ApiException, CryptographyException, ClientException, com.intel.dcsg.cpg.crypto.CryptographyException {
         
             for(int i=0;  i<args.length ;i++) {
                 System.out.println("ApiCommand ARG "+i+" = "+args[i]);
@@ -94,11 +94,12 @@ public class ApiCommand {
             // we assume the user needs only the Security role; everything else can be done via the management console (including adding more roles to him/herself)
             String roles[] = new String[] { Role.Security.toString() };
             
-            String username = null, password = null;
+            String username = null, password = null, tlsProtocol = "TLS";
             // args[2] is optional username (if not provided we will prompt)
             if( args.length > 3 ) { username = args[3]; }
             // args[3] is optional password plaintext (not recommended) or environment variable name (recommended) (if not provided we will prompt)
             if( args.length > 4 ) { password = args[4]; }
+            if( args.length > 5 ) { tlsProtocol = args[5]; } // issue #870 allow user to specify tls protocol version, default to TLS
             
             // prompt for username and password
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -145,7 +146,7 @@ public class ApiCommand {
             
             // register with the web service
             // download server's ssl certificates and add them to the keystore
-            SslUtil.addSslCertificatesToKeystore(keystore, server);
+            TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol);
             // register the user with the server
             
             RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
@@ -183,7 +184,7 @@ public class ApiCommand {
             // download server's saml certificate and save in the keystore
             X509Certificate samlCertificate = c.getSamlCertificate();
             keystore.addTrustedSamlCertificate(samlCertificate, server.getHost());
-            log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", new String[] { server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost() });
+            log.debug("Added SAML Certificate with alias {}, subject {}, fingerprint {}, from server {}", server.getHost(), samlCertificate.getSubjectX500Principal().getName(), DigestUtils.shaHex(samlCertificate.getEncoded()), server.getHost());
             keystore.save();        
 
             /*

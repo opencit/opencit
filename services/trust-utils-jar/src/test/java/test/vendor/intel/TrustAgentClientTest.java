@@ -6,8 +6,8 @@ package test.vendor.intel;
 
 import com.intel.mountwilson.ta.data.hostinfo.HostInfo;
 import com.intel.mtwilson.agent.intel.TrustAgentSecureClient;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.TlsConnection;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsConnection;
 import java.io.IOException;
 import java.net.URL;
 import org.codehaus.jackson.map.ObjectMapper;

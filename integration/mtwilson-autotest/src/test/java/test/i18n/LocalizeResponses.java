@@ -9,7 +9,7 @@ import com.intel.mtwilson.ApiClient;
 import test.api.*;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigData;

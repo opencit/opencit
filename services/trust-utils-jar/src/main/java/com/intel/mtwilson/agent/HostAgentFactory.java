@@ -8,16 +8,19 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.agent.intel.IntelHostAgentFactory;
 import com.intel.mtwilson.agent.vmware.VmwareHostAgentFactory;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.crypto.SimpleKeystore;
-import com.intel.mtwilson.io.Resource;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.Resource;
 import com.intel.mtwilson.model.InternetAddress;
 import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.tls.InsecureTlsPolicy;
-import com.intel.mtwilson.tls.KeystoreCertificateRepository;
-import com.intel.mtwilson.tls.TlsPolicy;
-import com.intel.mtwilson.tls.TrustCaAndVerifyHostnameTlsPolicy;
-import com.intel.mtwilson.tls.TrustFirstCertificateTlsPolicy;
-import com.intel.mtwilson.tls.TrustKnownCertificateTlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
+import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
+import com.intel.mtwilson.tls.policy.TlsPolicyFactory;
+//import com.intel.dcsg.cpg.tls.policy.TrustCaAndVerifyHostnameTlsPolicy;
+//import com.intel.dcsg.cpg.tls.policy.TrustFirstCertificateTlsPolicy;
+//import com.intel.dcsg.cpg.tls.policy.TrustKnownCertificateTlsPolicy;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.util.EnumMap;
@@ -26,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgentFactory;
 import com.intel.mtwilson.agent.citrix.CitrixHostAgent;
-import com.intel.mtwilson.crypto.X509Util;
+import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ConnectionString;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,9 +48,8 @@ import org.apache.commons.io.IOUtils;
 public class HostAgentFactory {
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Map<Vendor,VendorHostAgentFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostAgentFactory>(Vendor.class);
-    private long tlsPemLastModified = 0;
-    private long tlsCrtLastModified = 0;
-    private ArrayList<X509Certificate> tlsAuthorities = new ArrayList<X509Certificate>();
+    // XXX MOVED TO MTWILSON-TLS-POLICY TLSPOLICYFACTORY
+    private TlsPolicyFactory tlsPolicyFactory = TlsPolicyFactory.getInstance();
     
     //private Logger log = LoggerFactory.getLogger(getClass());
     public HostAgentFactory() {
@@ -82,8 +84,8 @@ public class HostAgentFactory {
             String tlsPolicyName = host.getTlsPolicyName() == null ? My.configuration().getDefaultTlsPolicyName() : host.getTlsPolicyName(); // txtHost.getTlsPolicy();  // XXX TODO TxtHost doesn't have this field yet
 //            ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO it's the responsibility of the caller to save the TblHosts record after calling this method if the policy is trust first certificate ; we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
             String password = My.configuration().getTlsKeystorePassword(); 
-            SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); // XXX TODO see above commment about password;  the per-host trusted certificates keystore has to either be protected by a password known to all mt wilson instances (stored in database or sync'd across each server's configuration files) or it has to be protected by a group secret known to all authorized clients (and then we need a mechanism for the api client to send us the secret in the request, and a way get secrets in and out of api client's keystore so it can be sync'd across the authorized group of clients) or we can just not store it encrypted and use a pem-format keystore instead of a java KeyStore 
-            TlsPolicy tlsPolicy = getTlsPolicy(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
+            SimpleKeystore tlsKeystore = new SimpleKeystore(host.getTlsKeystoreResource(), password); 
+            TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(tlsPolicyName, tlsKeystore);
             HostAgent hostAgent = getHostAgent(hostAddress, connectionString, tlsPolicy);
             PcrManifest pcrManifest = hostAgent.getPcrManifest();
 //            host.setTlsKeystore(resource.toByteArray()); // if the tls policy is TRUST_FIRST_CERTIFICATE then it's possible a new cert has been saved in it and we have to make sure it gets saved to the host record;  for all other tls policies there would be no change so this is a no-op -  the byte array will be the same as the one we started with
@@ -149,90 +151,10 @@ public class HostAgentFactory {
         }
 //        ByteArrayResource resource = new ByteArrayResource(host.getTlsKeystore() == null ? new byte[0] : host.getTlsKeystore()); // XXX TODO we need to get tie the keystore to the database, especially for TRUST_FIRST_CERTIFICATE, so if it's the first connection we can save the certificate back to the database after connecting
 //        KeyStore tlsKeystore = txtHost.getTlsKeystore(); // XXX TODO TxtHost doesn't have this field yet
-        TlsPolicy tlsPolicy = getTlsPolicy(host.getTlsPolicyName(), host.getTlsKeystoreResource());
+        TlsPolicy tlsPolicy = tlsPolicyFactory.getTlsPolicyWithKeystore(host.getTlsPolicyName(), host.getTlsKeystoreResource());
         return tlsPolicy;
     }
 
-    public TlsPolicy getTlsPolicy(String tlsPolicyName, Resource resource) throws KeyManagementException, IOException {
-        String password = My.configuration().getTlsKeystorePassword();
-        SimpleKeystore tlsKeystore = new SimpleKeystore(resource, password); // XXX TODO only because txthost doesn't have the field yet... we should get the keystore from the txthost object
-        TlsPolicy tlsPolicy = getTlsPolicy(tlsPolicyName, tlsKeystore); // XXX TODO not sure that this belongs in the http-authorization package, because policy names are an application-level thing (allowed configurations), and creating the right repository is an application-level thing too (mutable vs immutable, and underlying implementation - keystore, array, cms of pem-list.
-        return tlsPolicy;
-    }
-    
-    private void initTlsTrustedCertificateAuthorities() throws IOException {
-            // read the trusted CA's
-            String tlsCaFilename = My.configuration().getConfiguration().getString("mtwilson.tls.certificate.file", "mtwilson-tls.pem");
-            if( tlsCaFilename != null ) {
-                if( !tlsCaFilename.startsWith("/") ) { 
-                    tlsCaFilename = String.format("/etc/intel/cloudsecurity/%s", tlsCaFilename);// XXX TODO assuming linux ,but could be windows ... need to use platform-dependent configuration folder location
-                }
-                if( tlsCaFilename.endsWith(".pem") ) {
-                    File tlsPemFile = new File(tlsCaFilename);
-                    if( tlsPemFile.lastModified() > tlsPemLastModified ) {
-                        tlsPemLastModified = tlsPemFile.lastModified();
-                        tlsAuthorities.clear();
-                        FileInputStream in = new FileInputStream(tlsPemFile);
-                        String content = IOUtils.toString(in);
-                        IOUtils.closeQuietly(in);
-                        try {
-                            List<X509Certificate> cacerts = X509Util.decodePemCertificates(content);
-                            tlsAuthorities.addAll(cacerts);
-                        }
-                        catch(CertificateException e) {
-                            log.error("Cannot read trusted TLS CA certificates", e);
-                        }
-                    }
-                }
-                if( tlsCaFilename.endsWith(".crt") ) {
-                    File tlsCrtFile = new File(tlsCaFilename);
-                    if( tlsCrtFile.lastModified() > tlsCrtLastModified ) {
-                        tlsCrtLastModified = tlsCrtFile.lastModified();
-                        tlsAuthorities.clear();
-                        FileInputStream in = new FileInputStream(tlsCrtFile);
-                        byte[] content = IOUtils.toByteArray(in);
-                        IOUtils.closeQuietly(in);
-                        try {
-                            X509Certificate cert = X509Util.decodeDerCertificate(content);
-                            tlsAuthorities.add(cert);
-                        }
-                        catch(CertificateException e) {
-                            log.error("Cannot read trusted TLS CA certificates", e);
-                        }
-                    }
-                }
-            } 
-    }
-    
-    private TlsPolicy getTlsPolicy(String tlsPolicyName, SimpleKeystore tlsKeystore) throws IOException {
-        if( tlsPolicyName == null ) { tlsPolicyName = My.configuration().getDefaultTlsPolicyName(); } // XXX for backwards compatibility with records that don't have a policy set, but maybe this isn't the place to put it - maybe it should be in the DAO that provides us the txthost object.
-        String ucName = tlsPolicyName.toUpperCase();
-        if( ucName.equals("TRUST_CA_VERIFY_HOSTNAME") ) {
-            initTlsTrustedCertificateAuthorities();
-            for(X509Certificate cacert : tlsAuthorities) {
-                log.debug("Adding trusted TLS CA certificate {}", cacert.getSubjectX500Principal().getName());
-                try {
-                    tlsKeystore.addTrustedSslCertificate(cacert, cacert.getSubjectX500Principal().getName());
-                }
-                catch(KeyManagementException e) {
-                    log.error("Cannot add TLS certificate authority to host keystore {}", cacert.getSubjectX500Principal().getName());
-                }
-            }
-//            My.configuration().get tls keystore trusted cas; add them to tlsKeystore  beforee making the policy  so that a global keystore can be used;  or just use the global kesytore...
-            return new TrustCaAndVerifyHostnameTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
-        }
-        if( ucName.equals("TRUST_FIRST_CERTIFICATE") ) {
-            return new TrustFirstCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
-        }
-        if( ucName.equals("TRUST_KNOWN_CERTIFICATE") ) {
-            return new TrustKnownCertificateTlsPolicy(new KeystoreCertificateRepository(tlsKeystore));
-        }
-        if( ucName.equals("INSECURE") ) {
-            return new InsecureTlsPolicy();
-        }
-        throw new IllegalArgumentException("Unknown TLS Policy: "+tlsPolicyName);
-    }
-    
     /**
      * 
      * @param connectionString what is also known as the "AddOn_Connection_String", in the form vendor:url, for example vmware:https://vcenter.com/sdk;Administrator;password

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.intel.mtwilson.jersey.http.OtherMediaType;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -30,7 +31,7 @@ import javax.ws.rs.core.MediaType;
  * @author jbuhacoff
  */
 @Provider
-@Produces({MediaType.APPLICATION_JSON})
+@Produces({MediaType.APPLICATION_JSON,OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON,OtherMediaType.APPLICATION_VND_API_JSON,OtherMediaType.APPLICATION_JSON_PATCH})
 public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper> {
  
     private final ObjectMapper defaultObjectMapper;

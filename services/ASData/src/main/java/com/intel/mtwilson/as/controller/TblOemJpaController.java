@@ -147,4 +147,37 @@ public class TblOemJpaController implements Serializable {
         }
     }
     
+    public List<TblOem> findTblOemByNameLike(String name) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblOem.findByNameLike");
+            query.setParameter("name", "%" + name + "%");
+            List<TblOem> resultList = query.getResultList();
+            return resultList;
+
+        } catch(NoResultException e){
+            log.error( "NoResultException : OEMs matching {} not found", name);
+            return null;
+        }finally {
+            em.close();
+        }
+    }
+
+    public TblOem findTblOemByUUID(String uuid_hex) {
+        
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblOem.findByUUID_Hex");
+            query.setParameter("uuid_hex", uuid_hex);
+            TblOem tblOem = (TblOem) query.getSingleResult();
+            return tblOem;
+
+        } catch(NoResultException e){
+            log.error( "NoResultException : OEM with UUID {} not found", uuid_hex);
+            return null;
+        }finally {
+            em.close();
+        }        
+    }
+    
 }
