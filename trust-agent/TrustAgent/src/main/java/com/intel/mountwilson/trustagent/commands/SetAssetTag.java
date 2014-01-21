@@ -80,8 +80,9 @@ public class SetAssetTag implements ICommand{
     private boolean writeHashToNvram(String password) throws TAException, IOException {
         List<String> result;
         try {
-            log.debug("running command tpm_nvwrite -i " + index + " -p" + password + " -f /tmp/hash");
-            result = CommandUtil.runCommand("tpm_nvwrite -i " + index + " -p" + password + " -f /tmp/hash");
+            String tpmPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            log.debug("running command tpm_nvwrite -x -i " + index + " -p" + password + " -f /tmp/hash");
+            result = CommandUtil.runCommand("tpm_nvwrite -x -i " + index + " -p" + password +" -f /tmp/hash");
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToNvram output: " + response);
         }catch(TAException ex) {
@@ -107,8 +108,8 @@ public class SetAssetTag implements ICommand{
         List<String> result;
         try {
             String tpmPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
-            log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=\"AUTHWRITE\"");
-            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=\"AUTHWRITE\"");
+            log.debug("running command tpm_nvdefine -x -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
+            result = CommandUtil.runCommand("tpm_nvdefine -x -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
             String response = StringUtils.join(result,"\n");
             log.debug("createIndex output: " + response);
         }catch(TAException ex) {
