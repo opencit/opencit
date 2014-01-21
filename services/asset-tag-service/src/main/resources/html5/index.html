@@ -186,7 +186,7 @@ function isNumber(n) {
                     <li class="tab"><a href="#tags">Tag Creation</a></li>  <!-- red color:  style="color: #c55" -->
                     <!-- <li class="tab"><a href="#rdf">RDF</a></li> -->
                     <li class="tab"><a href="#selections">Tag Selection</a></li>
-                    <li class="tab"><a href="#certificates">Certificate Management</a></li>			
+                    <li class="tab"><a href="#certificates">Certificates</a></li>			
                     <li class="tab"><a href="#configure">Settings</a></li>
                     <li class="tab"><a href="#log">Log</a></li>
                 </ul>
@@ -558,18 +558,6 @@ function isNumber(n) {
                                 <li>
                                     <label for="uuid-populate-host">Internet Address</label>
                                     <input type="text" id="uuid-populate-host" name="uuidHost" size="40" placeholder="Hostname or IP Address"/>
-                                </li>
-                                <li>
-                                    <label for="uuid-populate-port">Port</label>
-                                    <input type="text" id="uuid-populate-port" name="uuidPort" size="40" placeholder="Port number"/>
-                                </li>
-                                <li>
-                                    <label for="uuid-populate-username">Username</label>
-                                    <input type="text" id="uuid-populate-username" name="uuidUsername" placeholder="Username"/>
-                                </li>
-                                <li>
-                                    <label for="uuid-populate-password">Password</label>
-                                    <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
                                 </li>
                                 <li>
                                     <input type="button" value="Populate UUID Box" onclick="ws.autoPopulateUUID(this); return false;"/>

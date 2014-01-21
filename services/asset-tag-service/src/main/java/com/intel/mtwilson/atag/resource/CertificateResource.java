@@ -160,6 +160,8 @@ public class CertificateResource extends ServerResource {
         }
         
     }
+  
+    
     public static class CertificateDeployAction extends CertificateAction {
         public Date effective;
         public CertificateDeployAction() {
@@ -261,17 +263,19 @@ public class CertificateResource extends ServerResource {
         public CertificateRevokeAction revoke;
         public CertificateProvisionAction provision;
         public CertificateDeployAction deploy;
+        
     }
     
     @Post("json:json")
     public CertificateActionChoice actionCertificate(CertificateActionChoice actionChoice) throws IOException, ApiException, SignatureException {
-        UUID uuid = UUID.valueOf(getAttribute("id"));
-        Certificate certificate = dao.findByUuid(uuid);
-        if( certificate == null ) {
+        
+         UUID uuid = UUID.valueOf(getAttribute("id"));
+          Certificate certificate = dao.findByUuid(uuid);
+          if( certificate == null ) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
-        }
-        
+          }
+          
         // only one of the actions can be processed for any one request
         if( actionChoice.revoke != null ) {
             actionChoice.revoke.setUuid(uuid);
@@ -326,6 +330,7 @@ public class CertificateResource extends ServerResource {
          result.deploy = actionChoice.deploy;
          return result;
         }
+      
         setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
         return null;
     }
