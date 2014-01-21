@@ -123,7 +123,7 @@ mtwilson.atag = mtwilson.atag || {};
     ajax.resources.selections = {uri: '/selections', datapath: 'selections', idkey: 'uuid'}; // selections can also use idkey:'name'
     ajax.resources.configurations = {uri: '/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.files = {uri: '/files', datapath: 'files', idkey: 'uuid'}; // configurations can also use idkey:'name'
-    ajax.resources.uuid = {uri: '/host-uuids', datapath: null, idkey: null};
+    ajax.resources.uuid = {uri: '/host-uuids', datapath: 'uuid', idkey: null};
 //    mtwilson.atag.data = data; 
 //    log.debug("again, data = "+Object.toJSON(mtwilson.atag.data));
 // UTILITIES
@@ -497,6 +497,9 @@ mtwilson.atag = mtwilson.atag || {};
                 }
                 mtwilson.atag.notify({text: 'Retrieved file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
+            case 'uuid':
+                alert("getUuid:" + event.memo.response.host_uuid);
+                $('certificate-request-create-subject').value = event.memo.response.host_uuid;
             default:
                 log.debug("No handler for successful HTTP GET of " + event.memo.resource.name);
                 break;
@@ -529,6 +532,8 @@ mtwilson.atag = mtwilson.atag || {};
             case 'files':
                 mtwilson.atag.notify({text: 'Retrieve file FAILURE: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
+            case 'uuid':
+                alert("getUUID:" + event.memo.response);
             default:
                 log.debug("No handler for failure HTTP GET of " + event.memo.resource.name);
                 break;

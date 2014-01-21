@@ -31,11 +31,27 @@ public class UuidResource extends ServerResource{
         super.doRelease();
     }
     
-    @Get("txt")
-    public String search(/*TagSearchCriteria query*/) {
+    public class UuidResponse {
+        public String host_uuid;
+        
+        public UuidResponse(){}
+        
+        public void setHostUuid(String host_uuid) {
+            this.host_uuid = host_uuid;
+        }
+        
+        public String getHostUuid() {
+            return this.host_uuid;
+        }
+    }
+    
+    @Get("json")
+    public UuidResponse search(/*TagSearchCriteria query*/) {
         String ip = getQuery().getFirstValue("ipaddress");
         log.debug("made it into actionAutomation! got ip of " + ip);
         //String ip = getQuery().getFirstValue("ipaddress");
-        return "F4B17194-CAE7-11DF-B40B-001517FA9844";
+        UuidResponse response = new UuidResponse();
+        response.host_uuid = "F4B17194-CAE7-11DF-B40B-001517FA9844";
+        return response;
     }
 }
