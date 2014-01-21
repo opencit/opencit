@@ -206,6 +206,11 @@ mtwilson.atag = mtwilson.atag || {};
      */
 // SERVER REPOSITORY HELPER METHODS
     mtwilson.atag.notify = function(notice) {
+        if ($('notifications')) {
+            $('notifications').remove();
+        }
+        $('notifications_container').insert("<div id=\"notifications\" style=\"display: none;\" title=\"Click to close\"></div>");
+        enableClickableAlerts();
         $('notifications').classNames().toArray().forEach(function(obj) {
             $('notifications').removeClassName(obj);
         });
@@ -246,10 +251,11 @@ mtwilson.atag = mtwilson.atag || {};
         }
         $('notifications').update(notice.text);
         $('notifications').show();
+        $('notifications').setOpacity(1.0);
 
         switch (notice.clearAfter) {
             case "AUTO":
-                Element.fade.delay(5, 'notifications');
+                $('notifications').fade.bind($('notifications')).delay(5);
                 break;
             case "CONFIRM":
                 break;
@@ -1162,9 +1168,13 @@ document.observe("dom:loaded", function() {
 
 
 function enableClickableAlerts(){
-    $$('.msgOK').invoke('observe', 'click', function() {
+    $('notifications').observe('click', function(event) {
         this.hide();
     });
+
+    /*$$('.msgOK').invoke('observe', 'click', function() {
+     this.hide();
+     });
     $$('.msgInfo').invoke('observe', 'click', function() {
         this.hide();
     });
@@ -1173,5 +1183,5 @@ function enableClickableAlerts(){
     });
     $$('.msgError').invoke('observe', 'click', function() {
         this.hide();
-    });
+    });*/
 }
