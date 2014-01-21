@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
 
   <name>Mt Wilson</name>
-  
+     
   <description>
     Mt Wilson is a middleware solution that enables data centers to attest
       to the trust of hypervisors and operating systems on multiple devices
@@ -19,7 +19,7 @@
       assess and provide an Assurance that the security components on the devices are 
       protecting the assets executing or stored on the devices.      
   </description>
-  
+    
   <modules>
     <module>common</module>
     <module>database</module>
