@@ -156,7 +156,7 @@ public class InitDatabase extends AtagCommand {
         // configuration to allow automatic tag selection & approval
         log.debug("inserting configuration");
         Properties p = new Properties();
-        p.setProperty("allowTagsInCertificateRequests", "false");
+        p.setProperty("allowTagsInCertificateRequests", "true");
         p.setProperty("allowAutomaticTagSelection", "true");
         p.setProperty("automaticTagSelectionName", defaultSelectionUuid.toString());
         p.setProperty("approveAllCertificateRequests", "true");
