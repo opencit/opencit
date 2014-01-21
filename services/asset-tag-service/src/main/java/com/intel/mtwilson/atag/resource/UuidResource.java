@@ -33,7 +33,8 @@ public class UuidResource extends ServerResource{
     
     @Get("txt")
     public String search(/*TagSearchCriteria query*/) {
-        log.debug("made it into actionAutomation!");
+        String ip = getQuery().getFirstValue("ipaddress");
+        log.debug("made it into actionAutomation! got ip of " + ip);
         //String ip = getQuery().getFirstValue("ipaddress");
         return "F4B17194-CAE7-11DF-B40B-001517FA9844";
     }

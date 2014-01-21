@@ -123,7 +123,7 @@ mtwilson.atag = mtwilson.atag || {};
     ajax.resources.selections = {uri: '/selections', datapath: 'selections', idkey: 'uuid'}; // selections can also use idkey:'name'
     ajax.resources.configurations = {uri: '/configurations', datapath: 'configurations', idkey: 'uuid'}; // configurations can also use idkey:'name'
     ajax.resources.files = {uri: '/files', datapath: 'files', idkey: 'uuid'}; // configurations can also use idkey:'name'
-
+    ajax.resources.uuid = {uri: '/host-uuids', datapath: null, idkey: null};
 //    mtwilson.atag.data = data; 
 //    log.debug("again, data = "+Object.toJSON(mtwilson.atag.data));
 // UTILITIES
@@ -560,8 +560,8 @@ mtwilson.atag = mtwilson.atag || {};
     mtwilson.atag.autoPopulateUUID = function(input) {
         //$('certificate-request-create-subject').value = "Some Random UUID";
         //alert("its working");
-        ajax.json.get('/host-uuids', {nameEqualTo:$('uuid-populate-host').value}, { callback: function(response) { alert(response);}});
-       
+        var ip = $('uuid-populate-host').value;
+        ajax.json.get('uuid', {'ipaddress':ip},{'onSuccess': function(result){alert("success:" + result);},'onFailure': function(result){alert("failure:"+result)}});      
     };
 
     mtwilson.atag.createSelection = function(input) {
