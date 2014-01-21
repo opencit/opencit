@@ -44,7 +44,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "ApiClientX509.findByExpiresBefore", query = "SELECT a FROM ApiClientX509 a WHERE a.expires < :expires"),
     @NamedQuery(name = "ApiClientX509.findByEnabled", query = "SELECT a FROM ApiClientX509 a WHERE a.enabled = :enabled"),
     @NamedQuery(name = "ApiClientX509.findByStatus", query = "SELECT a FROM ApiClientX509 a WHERE a.status = :status"),
-    @NamedQuery(name = "ApiClientX509.findByEnabledStatus", query = "SELECT a FROM ApiClientX509 a WHERE a.enabled = :enabled AND a.status = :status")})
+    @NamedQuery(name = "ApiClientX509.findByEnabledStatus", query = "SELECT a FROM ApiClientX509 a WHERE a.enabled = :enabled AND a.status = :status"),
+    @NamedQuery(name = "ApiClientX509.findByUUID_Hex", query = "SELECT a FROM ApiClientX509 a WHERE a.uuid_hex = :uuid_hex")})
+
 public class ApiClientX509 implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -84,6 +86,9 @@ public class ApiClientX509 implements Serializable {
     @Basic(optional = true)
     @Column(name = "locale")
     private String locale;
+    @Basic(optional = true)
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
 
     public ApiClientX509() {
     }
@@ -196,6 +201,14 @@ public class ApiClientX509 implements Serializable {
 
     public void setLocale(String locale) {
         this.locale = locale;
+    }
+
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
     }
 
     

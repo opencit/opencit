@@ -92,13 +92,20 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
     protected void store(User item) {
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
-            MwPortalUser portalUser = new MwPortalUser();
-            portalUser.setUsername(item.getName());
-            portalUser.setStatus(item.getStatus()); 
-            portalUser.setEnabled(item.getEnabled()); 
-            portalUser.setKeystore(item.getKeystore());
-            portalUser.setLocale(item.getLocale());
+            MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(item.getId().toString());
+            if (portalUser == null)
+                throw new NonexistentEntityException(null);
+            
+            if (item.getStatus() != null)
+                portalUser.setStatus(item.getStatus()); 
+            if (item.getEnabled() != null)
+                portalUser.setEnabled(item.getEnabled()); 
+            if (item.getKeystore() != null)
+                portalUser.setKeystore(item.getKeystore());
+            if (item.getLocale() != null)
+                portalUser.setLocale(item.getLocale());
             userJpaController.edit(portalUser);
+
         } catch (IOException ex) {
             Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NonexistentEntityException ex) {
