@@ -12,5 +12,6 @@
     
     <!-- not effectie in logback-test.xml -->
     <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="org.apache.commons.beanutils" level="INFO"/>
     
 </configuration>

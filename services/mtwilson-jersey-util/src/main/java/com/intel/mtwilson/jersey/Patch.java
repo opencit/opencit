@@ -7,6 +7,7 @@ package com.intel.mtwilson.jersey;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
@@ -17,7 +18,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
 public class Patch<T,F extends FilterCriteria<T>,L extends PatchLink<T>> {
     private F select;
-    private T replace;
+    private Map<String,Object> replace;
     private L link;
     private L unlink;
     private T insert;
@@ -40,7 +41,7 @@ public class Patch<T,F extends FilterCriteria<T>,L extends PatchLink<T>> {
         return insert;
     }
 
-    public T getReplace() {
+    public Map<String,Object> getReplace() {
         return replace;
     }
 
@@ -60,7 +61,7 @@ public class Patch<T,F extends FilterCriteria<T>,L extends PatchLink<T>> {
         this.insert = insert;
     }
 
-    public void setReplace(T replace) {
+    public void setReplace(Map<String,Object> replace) {
         this.replace = replace;
     }
 

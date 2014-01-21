@@ -22,7 +22,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.BeanParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Reference: https://jersey.java.net/documentation/latest/user-guide.html
@@ -207,8 +209,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("delete");
         T item = retrieve(id);
         if (item == null) {
-            // XXXX TODO  SET STATUS TO 404 not found
-            return;
+            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
         delete(id);
         // XXX TODO set status to 204  no content  (check what it is by default here since this method has void return type, maybe it's already 204)
@@ -231,8 +232,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("retrieve");
         T item = retrieve(id);
         if (item == null) {
-            // XXX TODO return 404 not found
-            return null;
+            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
         return item;
     }
@@ -281,14 +281,13 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     @Path("/{id}")
     @PATCH
-    @Consumes(OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON)
+    @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T patchOne(@PathParam("id") String id, Patch<T, F, L>[] patchArray) {
         log.debug("patch");
         T item = retrieve(id);
         if (item == null) {
-            // XXX TODO return 404 not found
-            return null;
+            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
         for (int i = 0; i < patchArray.length; i++) {
             log.debug("Processing patch #{} of {}", i + 1, patchArray.length);
@@ -352,9 +351,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         F criteria = createFilterCriteriaWithId(id);
         C collection = searchCollection(criteria);
         if (collection.getDocuments().isEmpty()) {
-            // XXX TODO set status to 404 not found
-            // but we can still return the empty collection object ...??  what does jsonapi.org say about it?
-            return null;
+            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
         return collection;
     }
@@ -378,8 +375,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         log.debug("storeCollection");
         List<T> list = collection.getDocuments();
         if (list == null || list.isEmpty()) {
-            // XXX TODO return 400 bad request
-            return null;
+            throw new WebApplicationException(Response.Status.BAD_REQUEST); // TODO i18n
         }
         T item = list.get(0);
         if (item == null) {
