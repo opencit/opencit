@@ -12,10 +12,12 @@ import com.intel.mtwilson.as.rest.v2.model.UserLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.My;
+import com.intel.mtwilson.datatypes.ApiClientStatus;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +37,35 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
     
     @Override
     protected UserCollection search(UserFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        UserCollection userCollection = null;
+        try {
+            // TODO : To see if we can dynamically build the queries and have a single function
+            MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
+            if (criteria.id != null) {
+                MwPortalUser userObj = userJpaController.findMwPortalUserByUUID(criteria.id.toString());
+                userCollection.getUsers().add(convert(userObj));
+            } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
+                List<MwPortalUser> userList = userJpaController.findMwPortalUsersMatchingName(criteria.nameContains);
+                if (userList != null && !userList.isEmpty()) {
+                    for(MwPortalUser userObj : userList) {
+                        userCollection.getUsers().add(convert(userObj));
+                    }
+                }
+            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                MwPortalUser userObj = userJpaController.findMwPortalUserByUserName(criteria.nameContains);
+                userCollection.getUsers().add(convert(userObj));
+            } else if (criteria.enabled != null) {
+                List<MwPortalUser> userList = userJpaController.findMwPortalUsersWithEnabledStatus(criteria.enabled);
+                if (userList != null && !userList.isEmpty()) {
+                    for(MwPortalUser userObj : userList) {
+                        userCollection.getUsers().add(convert(userObj));
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return userCollection;
     }
 
     @Override
@@ -89,8 +119,7 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
             MwPortalUser portalUser = new MwPortalUser();
             portalUser.setUsername(item.getName());
-            // TODO: Do we want to create an enum for this ??
-            portalUser.setStatus("PENDING"); 
+            portalUser.setStatus(ApiClientStatus.PENDING.toString()); 
             portalUser.setEnabled(Boolean.FALSE); 
             portalUser.setKeystore(item.getKeystore());
             portalUser.setLocale(item.getLocale());

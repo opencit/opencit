@@ -9,6 +9,7 @@ import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -182,6 +183,42 @@ public class MwPortalUserJpaController extends GenericJpaController<MwPortalUser
             em.close();
         }
         return portalUser;
+    }
+
+    public List<MwPortalUser> findMwPortalUsersMatchingName(String name) {
+        List<MwPortalUser> portalUsers = new ArrayList<MwPortalUser>();
+        EntityManager em = getEntityManager();
+
+        try {
+            Query query = em.createNamedQuery("MwPortalUser.findByUsernameLike");
+            query.setParameter("username", "%"+name+"%");
+
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
+
+            portalUsers = query.getResultList();
+
+        } finally {
+            em.close();
+        }
+        return portalUsers;
+    }
+
+    public List<MwPortalUser> findMwPortalUsersWithEnabledStatus(Boolean enabled) {
+        List<MwPortalUser> portalUsers = new ArrayList<MwPortalUser>();
+        EntityManager em = getEntityManager();
+
+        try {
+            Query query = em.createNamedQuery("MwPortalUser.findByEnabled");
+            query.setParameter("enabled", enabled);
+
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.CheckCacheThenDatabase); //.DoNotCheckCache);
+
+            portalUsers = query.getResultList();
+
+        } finally {
+            em.close();
+        }
+        return portalUsers;
     }
     
 }
