@@ -564,7 +564,6 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Retrieved file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'uuid':
-                alert("getUuid:" + event.memo.response.host_uuid);
                 $('certificate-request-create-subject').value = event.memo.response.host_uuid;
             default:
                 log.debug("No handler for successful HTTP GET of " + event.memo.resource.name);
@@ -635,7 +634,7 @@ mtwilson.atag = mtwilson.atag || {};
         //$('certificate-request-create-subject').value = "Some Random UUID";
         //alert("its working");
         var ip = $('uuid-populate-host').value;
-        ajax.json.get('uuid', {'ipaddress':ip},{'onSuccess': function(result){alert("success:" + result);},'onFailure': function(result){alert("failure:"+result)}});      
+        ajax.json.get('uuid', {'ipaddress':ip});      
     };
 
     mtwilson.atag.createSelection = function(input) {
