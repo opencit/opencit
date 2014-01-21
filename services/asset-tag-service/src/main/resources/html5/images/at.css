@@ -1,11 +1,13 @@
 * { margin: 0; padding: 0; outline: 0 }
 
-body {
+body, html {
 /*	text-align: center; */
+        height: 95%;
 }
 #wrap {
 	margin-left: 5px;
 	margin-right: 5px;
+        height: 100%;
 /*
 	display: inline;
 	text-align: left;
@@ -135,11 +137,13 @@ span.input-required:after {
 }
 
 #content-wrap {
-	width: 850px;		
-	padding: 0;	
-	margin-left: 5px;
-	margin-right: 5px;
-  clear: both;
+    width: 850px;
+    padding: 0;
+    margin-left: 5px;
+    margin-right: 5px;
+    clear: both;
+    height: calc(100% - 100px);
+    overflow-y: auto;
 }
 #content-wrap { margin: 2; padding: 1; outline: 0 }
 
