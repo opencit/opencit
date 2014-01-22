@@ -241,7 +241,8 @@ public class TrustAgentSecureClient {
     	SSLContext ctx = SSLContext.getInstance("SSL");
         ctx.init(null, new javax.net.ssl.TrustManager[]{x509}, null);
         */
-    	SSLContext ctx = SSLContext.getInstance("SSL");
+        log.debug("Connecting to trust agent with ProtocolSelector: {}", tlsPolicy.getProtocolSelector().preferred());
+    	SSLContext ctx = SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // bug #871 ssl policy should be configurable; was hardcoded to "SSL"
         ctx.init(null, new javax.net.ssl.TrustManager[]{ tlsPolicy.getTrustManager() }, null);
         return ctx;
     }
