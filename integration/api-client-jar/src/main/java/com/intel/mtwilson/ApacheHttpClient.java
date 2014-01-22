@@ -6,11 +6,13 @@ package com.intel.mtwilson;
 import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.tls.policy.ProtocolSelector;
 import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
 import com.intel.dcsg.cpg.tls.policy.impl.ApacheTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicyBuilder;
+import com.intel.dcsg.cpg.tls.policy.impl.ConfigurableProtocolSelector;
 import com.intel.dcsg.cpg.tls.policy.impl.FirstCertificateTrustDelegate;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.dcsg.cpg.tls.policy.impl.StrictTlsPolicy;
@@ -65,7 +67,7 @@ public class ApacheHttpClient implements java.io.Closeable {
     private HttpClient httpClient;
 //    private SimpleKeystore keystore;
     private String protocol = "https";
-    private String tlsProtocol = "TLS"; // issue #870  possible values are SSL, SSLv2, SSLv3, TLS, TLSv1, TLSv1.1, and TLSv1.2, and we use TLS as the default
+//    private String tlsProtocol = "TLS"; // issue #870  possible values are SSL, SSLv2, SSLv3, TLS, TLSv1, TLSv1.1, and TLSv1.2, and we use TLS as the default
     private int port = 443;
     private ApacheTlsPolicy apacheTlsPolicy;
 //    private boolean requireTrustedCertificate = true;
@@ -109,7 +111,7 @@ public class ApacheHttpClient implements java.io.Closeable {
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
         apacheTlsPolicy = createTlsPolicy(config, sslKeystore);
-        tlsProtocol = config.getString("mtwilson.api.ssl.protocol", "TLS");
+//        tlsProtocol = config.getString("mtwilson.api.ssl.protocol", "TLS");
         //log.debug("ApacheHttpClient: TLS Policy Name: {}", tlsPolicy.getClass().getName());
         initHttpClient();
     }
@@ -139,13 +141,13 @@ public class ApacheHttpClient implements java.io.Closeable {
 
 //        requireTrustedCertificate = config.getBoolean("mtwilson.api.ssl.requireTrustedCertificate", true);
 //        verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
-        apacheTlsPolicy = createApacheTlsPolicy(tlsPolicy, sslKeystore);
+        apacheTlsPolicy = createApacheTlsPolicy(tlsPolicy/*, sslKeystore*/);
         // tlsProtocol = "TLS"; // the default  
         //log.debug("ApacheHttpClient: TLS Policy Name: {}", tlsPolicy.getClass().getName());
         initHttpClient();
     }
     
-    private ApacheTlsPolicy createApacheTlsPolicy(TlsPolicy tlsPolicy, SimpleKeystore sslKeystore) {
+    private ApacheTlsPolicy createApacheTlsPolicy(TlsPolicy tlsPolicy/*, SimpleKeystore sslKeystore*/) {
         if( tlsPolicy instanceof ApacheTlsPolicy ) {
             return (ApacheTlsPolicy)tlsPolicy;
         }
@@ -153,8 +155,8 @@ public class ApacheHttpClient implements java.io.Closeable {
     }
     
     private void initHttpClient() throws KeyManagementException, NoSuchAlgorithmException {
-        log.debug("Using TLS protocol {}", tlsProtocol);
-        SchemeRegistry sr = initSchemeRegistryWithPolicy(protocol, port, apacheTlsPolicy, tlsProtocol);
+//        log.debug("Using TLS protocol {}", tlsProtocol);
+        SchemeRegistry sr = initSchemeRegistryWithPolicy(protocol, port, apacheTlsPolicy/*, tlsProtocol*/);
         connectionManager = new PoolingClientConnectionManager(sr);
 
         // the http client is re-used for all the requests
@@ -163,10 +165,12 @@ public class ApacheHttpClient implements java.io.Closeable {
         httpClient = new DefaultHttpClient(connectionManager, httpParams);
     }
     
+    /*
     public void setTlsProtocol(String protocol) throws KeyManagementException, NoSuchAlgorithmException {
-        tlsProtocol = protocol;
+//        tlsProtocol = protocol;
         initHttpClient(); // reset the client with the updated protocol
     }
+    */
     
     /**
      * Used in Mt Wilson 1.1
@@ -180,6 +184,8 @@ public class ApacheHttpClient implements java.io.Closeable {
      * @return 
      */
     private ApacheTlsPolicy createTlsPolicy(Configuration config, SimpleKeystore sslKeystore) {
+        String tlsProtocol = config.getString("mtwilson.api.ssl.protocol", "TLS");
+        ProtocolSelector pSelector = new ConfigurableProtocolSelector(tlsProtocol);
         String tlsPolicyName = config.getString("mtwilson.api.ssl.policy","");
         if( tlsPolicyName == null || tlsPolicyName.isEmpty() ) {
             // no 1.1 policy name, so use 1.0-RC2 settings to pick a policy
@@ -187,7 +193,7 @@ public class ApacheHttpClient implements java.io.Closeable {
             boolean verifyHostname = config.getBoolean("mtwilson.api.ssl.verifyHostname", true);
             if( requireTrustedCertificate && verifyHostname ) {
                 log.info("Using TLS Policy TRUST_CA_VERIFY_HOSTNAME");
-                return new StrictTlsPolicy(sslKeystore.getRepository());
+                return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
             }
             else if( requireTrustedCertificate && !verifyHostname ) {
                 // two choices: trust first certificate or trust known certificate;  we choose trust first certificate as a usability default
@@ -195,7 +201,7 @@ public class ApacheHttpClient implements java.io.Closeable {
                 // that either has a server instance ssl cert or a cluster ssl cert.  either should work.
                 log.info("Using TLS Policy TRUST_FIRST_CERTIFICATE");
                 KeystoreCertificateRepository repository = sslKeystore.getRepository();
-                return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository));
+                return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
             }
             else { // !requireTrustedCertificate && (verifyHostname || !verifyHostname)
                 log.info("Using TLS Policy INSECURE");
@@ -204,16 +210,16 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         else if( tlsPolicyName.equals("TRUST_CA_VERIFY_HOSTNAME") ) {
             log.info("TLS Policy: TRUST_CA_VERIFY_HOSTNAME");
-            return new StrictTlsPolicy(sslKeystore.getRepository());
+            return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector);
         }
         else if( tlsPolicyName.equals("TRUST_FIRST_CERTIFICATE") ) {
             log.info("TLS Policy: TRUST_FIRST_CERTIFICATE");
             KeystoreCertificateRepository repository = sslKeystore.getRepository();
-            return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository));
+            return new TrustKnownCertificateTlsPolicy(repository, new FirstCertificateTrustDelegate(repository), pSelector);
         }
         else if( tlsPolicyName.equals("TRUST_KNOWN_CERTIFICATE") ) {
             log.info("TLS Policy: TRUST_KNOWN_CERTIFICATE");
-            return new TrustKnownCertificateTlsPolicy(sslKeystore.getRepository());
+            return new TrustKnownCertificateTlsPolicy(sslKeystore.getRepository(), pSelector);
         }
         else if( tlsPolicyName.equals("INSECURE") ) {
             log.warn("TLS Policy: INSECURE");
@@ -222,7 +228,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         else {
             // unrecognized 1.1 policy defined, so use a secure default
             log.warn("Unknown TLS Policy Name: {}", tlsPolicyName);
-            return new StrictTlsPolicy(sslKeystore.getRepository()); // issue #871 default should be secure
+            return new StrictTlsPolicy(sslKeystore.getRepository(), pSelector); // issue #871 default should be secure
         }
     }
     /*
@@ -314,14 +320,15 @@ public class ApacheHttpClient implements java.io.Closeable {
      * @throws KeyManagementException
      * @throws NoSuchAlgorithmException 
      */
-    private SchemeRegistry initSchemeRegistryWithPolicy(String protocol, int port, ApacheTlsPolicy policy, String tlsProtocol) throws KeyManagementException, NoSuchAlgorithmException {
+    private SchemeRegistry initSchemeRegistryWithPolicy(String protocol, int port, ApacheTlsPolicy policy /*, String tlsProtocol*/) throws KeyManagementException, NoSuchAlgorithmException {
         SchemeRegistry sr = new SchemeRegistry();
         if( "http".equals(protocol) ) {
             Scheme http = new Scheme("http", port, PlainSocketFactory.getSocketFactory());
             sr.register(http);
         }
         if( "https".equals(protocol) ) {
-            SSLContext sslcontext = SSLContext.getInstance(tlsProtocol); // issue #870 allow client to configure TLS protocol version with mtwilson.api.ssl.protocol
+            log.debug("Initializing {} connection", policy.getProtocolSelector().preferred());
+            SSLContext sslcontext = SSLContext.getInstance(policy.getProtocolSelector().preferred() /*tlsProtocol*/); // issue #870 allow client to configure TLS protocol version with mtwilson.api.ssl.protocol
             sslcontext.init(null, new X509TrustManager[] { policy.getTrustManager() }, null); // key manager, trust manager, securerandom
             SSLSocketFactory sf = new SSLSocketFactory(
                 sslcontext,

@@ -161,14 +161,12 @@ public class CitrixClient {
 
         TrustManager[] trustAllCerts = new TrustManager[]{tlsConnection.getTlsPolicy().getTrustManager()};
 
-        // Install the all-trusting trust manager  
-        SSLContext sc = SSLContext.getInstance("SSL");
-        // Create empty HostnameVerifier  
-        HostnameVerifier hv = tlsConnection.getTlsPolicy().getHostnameVerifier();
+        log.debug("Connecting to Citrix with ProtocolSelector: {}", tlsConnection.getTlsPolicy().getProtocolSelector().preferred());
+        SSLContext sc = SSLContext.getInstance(tlsConnection.getTlsPolicy().getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable;   was hardcoded to "SSL" before
 
         sc.init(null, trustAllCerts, new java.security.SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(hv);
+        HttpsURLConnection.setDefaultHostnameVerifier(tlsConnection.getTlsPolicy().getHostnameVerifier());
 
         connection = new Connection(url);
 
