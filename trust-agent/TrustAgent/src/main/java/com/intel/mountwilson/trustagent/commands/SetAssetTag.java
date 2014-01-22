@@ -39,7 +39,7 @@ public class SetAssetTag implements ICommand{
     public void execute() throws TAException{
         try {
             
-            String password = "password";
+            String password = "fffffff";
             
             //create the index if needed
             boolean iExists = indexExists();
@@ -108,8 +108,8 @@ public class SetAssetTag implements ICommand{
         List<String> result;
         try {
             String tpmPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
-            log.debug("running command tpm_nvdefine -x -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
-            result = CommandUtil.runCommand("tpm_nvdefine -x -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
+            log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
+            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
             String response = StringUtils.join(result,"\n");
             log.debug("createIndex output: " + response);
         }catch(TAException ex) {
