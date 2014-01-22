@@ -151,8 +151,8 @@ public class VMwareClient implements TlsClient {
         log.debug("Connecting to vcenter with TlsPolicy: {}", tlsPolicy.getClass().getName());
         log.debug("Connecting to vcenter with HostnameVerifier: {}", tlsPolicy.getHostnameVerifier().getClass().getName());
         log.debug("Connecting to vcenter with TrustManager: {}", tlsPolicy.getTrustManager().getClass().getName());
-
-        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("SSL");
+        log.debug("Connecting to vcenter with ProtocolSelector: {}", tlsPolicy.getProtocolSelector().preferred());
+        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance(tlsPolicy.getProtocolSelector().preferred()); // issue #871 ssl protocol should be configurable; was hardcoded to "SSL"
         javax.net.ssl.SSLSessionContext sslsc = sc.getServerSessionContext();
         sslsc.setSessionTimeout(0);
         sc.init(null, new javax.net.ssl.TrustManager[]{tlsPolicy.getTrustManager()}, null);

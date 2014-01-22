@@ -145,8 +145,13 @@ public class BootstrapUser implements Command {
 //        ApiClientInfo apiClientRecord = findApiClientRecord(serviceConf, rsaCredentialX509.identity());
 //        if( apiClientRecord == null ) {
         // approve user
-        approveApiClientRecord(serviceConf,  username, rsaCredentialX509.identity());
-        System.err.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
+         try {
+            approveApiClientRecord(serviceConf,  username, rsaCredentialX509.identity());
+            System.err.println(String.format("Approved %s [fingerprint %s]", username, Hex.encodeHexString(rsaCredentialX509.identity())));        
+         }
+         catch(Exception e) {
+             System.err.println(String.format("Failed to approve %s [fingerprint %s]: %s", username, Hex.encodeHexString(rsaCredentialX509.identity()), e.getMessage()));
+         }
     }
     
     private void approveApiClientRecord(Configuration conf, String username, byte[] fingerprint) throws SetupException {
@@ -170,6 +175,10 @@ public class BootstrapUser implements Command {
             System.err.println(String.format("Attempt to approved %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
             ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
             ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
+            if( client == null ) {
+                log.error("Cannot find client record with fingerprint {}", Hex.encodeHexString(fingerprint));
+                throw new IllegalStateException("Cannot find client record with fingerprint "+Hex.encodeHexString(fingerprint));
+            }
             client.setStatus("Approved");
             client.setEnabled(true);
             x509jpaController.edit(client);

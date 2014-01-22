@@ -128,8 +128,10 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
      */
     protected abstract void delete(String id);
 
-    protected abstract F createFilterCriteriaWithId(String id); // hopefully just a temporary helper so we can make the json api work ok with our generics; looking for another way to do this but at least the implementations for this will be really easy 2-liners
+//    protected abstract F createFilterCriteriaWithId(String id); // hopefully just a temporary helper so we can make the json api work ok with our generics; looking for another way to do this but at least the implementations for this will be really easy 2-liners
 
+    protected abstract C createEmptyCollection(); 
+    
     /**
      * Search for items. Input Content-Type is not applicable because GET
      * requests do not have a request body. Output Content-Type is any of
@@ -347,12 +349,12 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
     public C retrieveCollection(@PathParam("id") String id) { // misnomer, what we really mean is "retrieve one but wrapped ina  collection for jsonapi"
         log.debug("retrieveCollection");
-        // same as search with id parameter... 
-        F criteria = createFilterCriteriaWithId(id);
-        C collection = searchCollection(criteria);
-        if (collection.getDocuments().isEmpty()) {
+        T item = retrieve(id);
+        if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
+        C collection = createEmptyCollection();
+        collection.getDocuments().add(item);
         return collection;
     }
 

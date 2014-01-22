@@ -13,16 +13,21 @@ import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OemLinks;
+import com.intel.mtwilson.as.rest.v2.model.OsFilterCriteria;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.Stateless;
+import javax.ws.rs.Path;
 
 /**
  *
  * @author ssbangal
  */
+@Stateless
+@Path("/oems")
 public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria, OemLinks>{
 
     @Override
@@ -92,9 +97,18 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
         }
     }
 
+    /*
     @Override
     protected OemFilterCriteria createFilterCriteriaWithId(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OemFilterCriteria criteria = new OemFilterCriteria();
+        criteria.id = UUID.valueOf(id);
+        return criteria;
+
+    }
+    */
+    @Override
+    protected OemCollection createEmptyCollection() {
+        return new OemCollection();
     }
 
     private Oem convert(TblOem tblOemObj) {

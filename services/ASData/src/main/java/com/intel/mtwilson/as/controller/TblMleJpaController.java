@@ -560,4 +560,21 @@ public class TblMleJpaController implements Serializable {
         
     }
     
+    public TblMle findTblMleByUUID(String uuid_hex) {
+        
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblMle.findByUUID_Hex");
+            query.setParameter("uuid_hex", uuid_hex);
+            TblMle tblOem = (TblMle) query.getSingleResult();
+            return tblOem;
+
+        } catch(NoResultException e){
+            log.error( "NoResultException : MLE with UUID {} not found", uuid_hex);
+            return null;
+        }finally {
+            em.close();
+        }        
+    }
+    
 }
