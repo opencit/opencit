@@ -12,6 +12,7 @@ import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
@@ -134,6 +135,7 @@ public class BootstrapUser implements Command {
             keyTable.setUsername(username);
             keyTable.setKeystore(certResource.toByteArray());
             keyTable.setStatus("PENDING");
+            keyTable.setUuid_hex(new UUID().toHexString());
             portalUserJpa.create(keyTable);
          }
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
