@@ -10,6 +10,7 @@ import com.intel.mtwilson.KeystoreUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.Role;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.net.URL;
@@ -94,6 +95,7 @@ public class RegisterUserController extends AbstractController {
                 keyTable.setUsername(username);
                 keyTable.setStatus("PENDING");
                 keyTable.setKeystore(certResource.toByteArray());
+                keyTable.setUuid_hex(new UUID().toHexString());
                 log.info("registerusercontroller calling create");
                 keystoreJpa.create(keyTable);
         	

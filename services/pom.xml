@@ -29,6 +29,7 @@
     <module>MSData</module>
     <module>MSCommon</module>
     <module>ASCommon</module>
+    <module>mtwilson-attestation-ws-v2</module>
     <module>mtwilson-tls-policy</module>
 	<module>mtwilson-jersey-util</module>
     <module>MtWilsonHttpSecurityAdapters</module>

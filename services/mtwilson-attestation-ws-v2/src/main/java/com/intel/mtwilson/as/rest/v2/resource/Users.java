@@ -130,6 +130,7 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
             portalUser.setEnabled(Boolean.FALSE); 
             portalUser.setKeystore(item.getKeystore());
             portalUser.setLocale(item.getLocale());
+            portalUser.setUuid_hex(new UUID().toHexString());
             userJpaController.create(portalUser);
         } catch (IOException ex) {
             Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
