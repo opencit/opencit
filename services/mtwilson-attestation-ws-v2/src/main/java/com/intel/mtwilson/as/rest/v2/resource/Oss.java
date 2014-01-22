@@ -98,11 +98,17 @@ public class Oss extends AbstractResource<Os, OsCollection, OsFilterCriteria, Os
         }
     }
 
+    /*
     @Override
     protected OsFilterCriteria createFilterCriteriaWithId(String id) {
         OsFilterCriteria criteria = new OsFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
+    }
+    */
+    @Override
+    protected OsCollection createEmptyCollection() {
+        return new OsCollection();
     }
     
     private Os convert(TblOs tblOsObj) {

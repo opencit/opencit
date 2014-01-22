@@ -56,11 +56,16 @@ public class Files extends AbstractResource<File,FileCollection,FileFilterCriter
     protected void delete(String id) {
     }
 
+    /*
     @Override
     protected FileFilterCriteria createFilterCriteriaWithId(String id) {
         FileFilterCriteria criteria = new FileFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
     }
-    
+    */
+    @Override
+    protected FileCollection createEmptyCollection() {
+        return new FileCollection();
+    }
 }

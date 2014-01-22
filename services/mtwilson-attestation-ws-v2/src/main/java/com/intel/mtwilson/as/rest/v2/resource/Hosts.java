@@ -55,11 +55,17 @@ public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriter
     protected void delete(String id) {
     }
 
+    /*
     @Override
     protected HostFilterCriteria createFilterCriteriaWithId(String id) {
         HostFilterCriteria criteria = new HostFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
+    }
+    */
+    @Override
+    protected HostCollection createEmptyCollection() {
+        return new HostCollection();
     }
 
     @Override

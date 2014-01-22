@@ -152,12 +152,19 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
         }        
     }
 
+    /*
     @Override
     protected UserFilterCriteria createFilterCriteriaWithId(String id) {
         UserFilterCriteria criteria = new UserFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
     }
+    */
+    @Override
+    protected UserCollection createEmptyCollection() {
+        return new UserCollection();
+    }
+    
     
     private User convert(MwPortalUser portalUser) {
         User user = new User();

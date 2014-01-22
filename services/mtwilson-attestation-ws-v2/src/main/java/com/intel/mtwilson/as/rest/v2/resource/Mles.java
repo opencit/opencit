@@ -94,12 +94,19 @@ public class Mles extends AbstractResource<Mle, MleCollection, MleFilterCriteria
         }
     }
 
+    /*
     @Override
     protected MleFilterCriteria createFilterCriteriaWithId(String id) {
         MleFilterCriteria criteria = new MleFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
     }
+    */
+    @Override
+    protected MleCollection createEmptyCollection() {
+        return new MleCollection();
+    }
+    
     
     private Mle convert(TblMle tblMleObj) {
         Mle mle = new Mle();

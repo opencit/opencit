@@ -138,11 +138,17 @@ public class UserCertificates extends AbstractResource<UserCertificate, UserCert
         }
     }
 
+    /*
     @Override
     protected UserCertificateFilterCriteria createFilterCriteriaWithId(String id) {
         UserCertificateFilterCriteria criteria = new UserCertificateFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
+    }
+    */
+    @Override
+    protected UserCertificateCollection createEmptyCollection() {
+        return new UserCertificateCollection();
     }
     
     private UserCertificate convert(ApiClientX509 apiObj) {

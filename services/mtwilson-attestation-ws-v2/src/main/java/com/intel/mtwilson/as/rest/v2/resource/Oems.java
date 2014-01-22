@@ -97,12 +97,18 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
         }
     }
 
+    /*
     @Override
     protected OemFilterCriteria createFilterCriteriaWithId(String id) {
         OemFilterCriteria criteria = new OemFilterCriteria();
         criteria.id = UUID.valueOf(id);
         return criteria;
 
+    }
+    */
+    @Override
+    protected OemCollection createEmptyCollection() {
+        return new OemCollection();
     }
 
     private Oem convert(TblOem tblOemObj) {
