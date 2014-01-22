@@ -19,12 +19,15 @@ import javax.persistence.criteria.Root;
 import org.eclipse.persistence.config.CacheUsage;
 import org.eclipse.persistence.config.HintValues;
 import org.eclipse.persistence.config.QueryHints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author dsmagadx
  */
 public class TblOsJpaController implements Serializable {
+    private Logger log = LoggerFactory.getLogger(getClass());
 
     public TblOsJpaController(EntityManagerFactory emf) {
         this.emf = emf;
@@ -150,4 +153,54 @@ public class TblOsJpaController implements Serializable {
             em.close();
         }
     }
+    
+    public List<TblOs> findTblOsByName(String name) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblOs.findByName");
+            query.setParameter("name", name);
+            List<TblOs> resultList = query.getResultList();
+            return resultList;
+
+        } catch(NoResultException e){
+            log.error( "NoResultException : OS matching {} not found", name);
+            return null;
+        }finally {
+            em.close();
+        }
+    }
+    
+    public List<TblOs> findTblOsByNameLike(String name) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblOs.findByNameLike");
+            query.setParameter("name", "%" + name + "%");
+            List<TblOs> resultList = query.getResultList();
+            return resultList;
+
+        } catch(NoResultException e){
+            log.error( "NoResultException : OS matching {} not found", name);
+            return null;
+        }finally {
+            em.close();
+        }
+    }
+
+    public TblOs findTblOsByUUID(String uuid_hex) {
+        
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblOs.findByUUID_Hex");
+            query.setParameter("uuid_hex", uuid_hex);
+            TblOs tblOem = (TblOs) query.getSingleResult();
+            return tblOem;
+
+        } catch(NoResultException e){
+            log.error( "NoResultException : OS with UUID {} not found", uuid_hex);
+            return null;
+        }finally {
+            em.close();
+        }        
+    }
+    
 }

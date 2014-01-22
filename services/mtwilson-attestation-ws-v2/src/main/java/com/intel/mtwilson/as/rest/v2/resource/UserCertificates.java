@@ -21,11 +21,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.Stateless;
+import javax.ws.rs.Path;
 
 /**
  *
  * @author ssbangal
  */
+@Stateless
+@Path("/user_certificates")
 public class UserCertificates extends AbstractResource<UserCertificate, UserCertificateCollection, UserCertificateFilterCriteria, UserCertificateLinks> {
 
     @Override
@@ -136,7 +140,9 @@ public class UserCertificates extends AbstractResource<UserCertificate, UserCert
 
     @Override
     protected UserCertificateFilterCriteria createFilterCriteriaWithId(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        UserCertificateFilterCriteria criteria = new UserCertificateFilterCriteria();
+        criteria.id = UUID.valueOf(id);
+        return criteria;
     }
     
     private UserCertificate convert(ApiClientX509 apiObj) {
