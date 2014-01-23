@@ -44,6 +44,9 @@ import org.slf4j.LoggerFactory;
     @NamedQuery(name = "TblModuleManifest.findByDescription", query = "SELECT t FROM TblModuleManifest t WHERE t.description = :description"),
 //    @NamedQuery(name = "TblModuleManifest.findByCreatedOn", query = "SELECT t FROM TblModuleManifest t WHERE t.createdOn = :createdOn"),
     @NamedQuery(name = "TblModuleManifest.findByMleId", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId"),
+    @NamedQuery(name = "TblModuleManifest.findByUuidHex", query = "SELECT t FROM TblModuleManifest t WHERE t.uuid_hex = :uuid_hex"),
+    @NamedQuery(name = "TblModuleManifest.findByMleUuidHex", query = "SELECT t FROM TblModuleManifest t WHERE t.mle_uuid_hex = :mle_uuid_hex"),    
+    @NamedQuery(name = "TblModuleManifest.findByComponentNameLike", query = "SELECT t FROM TblModuleManifest t WHERE t.componentName LIKE :name"),    
     @NamedQuery(name = "TblModuleManifest.findByMleNameEventName", query = "SELECT t FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.componentName= :name and t.eventID.name = :eventName"),
     @NamedQuery(name = "TblModuleManifest.findByMleIDEventID", query = "SELECT t.id FROM TblModuleManifest t WHERE t.mleId.id = :mleId and t.eventID.id = :eventId and t.componentName= :name")
     })
@@ -111,6 +114,10 @@ public class TblModuleManifest implements Serializable {
     @JoinColumn(name = "MLE_ID", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblMle mleId;
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
+    @Column(name = "mle_uuid_hex")
+    private String mle_uuid_hex;
 
     public TblModuleManifest() {
     }
@@ -313,5 +320,22 @@ public class TblModuleManifest implements Serializable {
     public void setNameSpaceID(TblPackageNamespace nameSpaceID) {
         this.nameSpaceID = nameSpaceID;
     }
+
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
+    }
+
+    public String getMle_uuid_hex() {
+        return mle_uuid_hex;
+    }
+
+    public void setMle_uuid_hex(String mle_uuid_hex) {
+        this.mle_uuid_hex = mle_uuid_hex;
+    }
+    
     
 }

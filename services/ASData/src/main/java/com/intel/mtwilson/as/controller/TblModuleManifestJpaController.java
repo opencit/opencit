@@ -600,5 +600,62 @@ public class TblModuleManifestJpaController implements Serializable {
         }
             	
     }
+   
+    public List<TblModuleManifest> findTblModuleManifestByMleUuid(String mleUuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByMleUuidHex");
+            query.setParameter("mle_uuid_hex", mleUuid);
+
+            List<TblModuleManifest> moduleList = query.getResultList();
+            return moduleList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("MLE information with UUID {} not found in the DB.", mleUuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public TblModuleManifest findTblModuleManifestByUuid(String uuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByUuidHex");
+            query.setParameter("uuid_hex", uuid);
+
+            TblModuleManifest pcrObj = (TblModuleManifest) query.getSingleResult();
+            return pcrObj;
+
+        } catch(NoResultException e){
+        	log.error(String.format("Module information with UUID {} not found in the DB.", uuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public List<TblModuleManifest> findTblModuleManifestByComponentNameLike(String moduleName) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByComponentNameLike");
+            query.setParameter("name", moduleName);
+
+            List<TblModuleManifest> pcrList = query.getResultList();
+            return pcrList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("Module information with name {} not found in the DB.", moduleName));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
     
 }
