@@ -5,13 +5,15 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.mtwilson.datatypes.ManifestData;
 import com.intel.mtwilson.jersey.Document;
+import java.util.List;
 
 /**
  *
  * @author ssbangal
  */
-@JacksonXmlRootElement(localName="os")
+@JacksonXmlRootElement(localName="mle")
 public class Mle extends Document{
     
     public enum MleType {
@@ -29,10 +31,11 @@ public class Mle extends Document{
     private AttestationType attestationType;
     private MleType mleType;
     private String description;
-    private String osUUID;
-    private String oemUUID;
+    private String osUuid;
+    private String oemUuid;
     private String source; // source host used for whitelisting
-
+    private List<ManifestData> mleManifests;
+    
     public String getName() {
         return name;
     }
@@ -73,20 +76,20 @@ public class Mle extends Document{
         this.description = description;
     }
 
-    public String getOsUUID() {
-        return osUUID;
+    public String getOsUuid() {
+        return osUuid;
     }
 
-    public void setOsUUID(String osUUID) {
-        this.osUUID = osUUID;
+    public void setOsUuid(String osUuid) {
+        this.osUuid = osUuid;
     }
 
-    public String getOemUUID() {
-        return oemUUID;
+    public String getOemUuid() {
+        return oemUuid;
     }
 
-    public void setOemUUID(String oemUUID) {
-        this.oemUUID = oemUUID;
+    public void setOemUuid(String oemUuid) {
+        this.oemUuid = oemUuid;
     }
 
     public String getSource() {
@@ -95,6 +98,14 @@ public class Mle extends Document{
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public List<ManifestData> getMleManifests() {
+        return mleManifests;
+    }
+
+    public void setMleManifests(List<ManifestData> mleManifests) {
+        this.mleManifests = mleManifests;
     }
     
     
