@@ -39,6 +39,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblPcrManifest.findByValue", query = "SELECT t FROM TblPcrManifest t WHERE t.value = :value"),
 //    @NamedQuery(name = "TblPcrManifest.findByCreatedOn", query = "SELECT t FROM TblPcrManifest t WHERE t.createdOn = :createdOn"),
 //    @NamedQuery(name = "TblPcrManifest.findByUpdatedOn", query = "SELECT t FROM TblPcrManifest t WHERE t.updatedOn = :updatedOn"),
+    @NamedQuery(name = "TblPcrManifest.findByUuidHex", query = "SELECT t FROM TblPcrManifest t WHERE t.uuid_hex = :uuid_hex"),
+    @NamedQuery(name = "TblPcrManifest.findByMleUuidHex", query = "SELECT t FROM TblPcrManifest t WHERE t.mle_uuid_hex = :mle_uuid_hex"),    
     @NamedQuery(name = "TblPcrManifest.findByPCRDescription", query = "SELECT t FROM TblPcrManifest t WHERE t.pCRDescription = :pCRDescription"),
     @NamedQuery(name = "TblPcrManifest.findByMleIdName", query = "SELECT t FROM TblPcrManifest t WHERE t.mleId.id = :mleId and t.name = :name")})
 
@@ -81,6 +83,10 @@ public class TblPcrManifest implements Serializable {
     @JoinColumn(name = "MLE_ID", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblMle mleId;
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
+    @Column(name = "mle_uuid_hex")
+    private String mle_uuid_hex;
 
     public TblPcrManifest() {
     }
@@ -182,6 +188,23 @@ public class TblPcrManifest implements Serializable {
         this.mleId = mleId;
     }
 
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
+    }
+
+    public String getMle_uuid_hex() {
+        return mle_uuid_hex;
+    }
+
+    public void setMle_uuid_hex(String mle_uuid_hex) {
+        this.mle_uuid_hex = mle_uuid_hex;
+    }
+
+    
     @Override
     public int hashCode() {
         int hash = 0;

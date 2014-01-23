@@ -338,4 +338,61 @@ public class TblPcrManifestJpaController implements Serializable {
         }               
     }
 
+    public List<TblPcrManifest> findTblPcrManifestByMleUuid(String mleUuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByMleUuidHex");
+            query.setParameter("mle_uuid_hex", mleUuid);
+
+            List<TblPcrManifest> pcrList = query.getResultList();
+            return pcrList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("MLE information with UUID {} not found in the DB.", mleUuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public TblPcrManifest findTblPcrManifestByUuid(String uuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByUuidHex");
+            query.setParameter("uuid_hex", uuid);
+
+            TblPcrManifest pcrObj = (TblPcrManifest) query.getSingleResult();
+            return pcrObj;
+
+        } catch(NoResultException e){
+        	log.error(String.format("PCR information with UUID {} not found in the DB.", uuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public List<TblPcrManifest> findTblPcrManifestByPcrName(String pcrName) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByName");
+            query.setParameter("name", pcrName);
+
+            List<TblPcrManifest> pcrList = query.getResultList();
+            return pcrList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("PCR information with name {} not found in the DB.", pcrName));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+    
 }
