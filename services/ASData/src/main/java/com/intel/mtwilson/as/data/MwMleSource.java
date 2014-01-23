@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwMleSource.findById", query = "SELECT t FROM MwMleSource t WHERE t.id = :id"),
     @NamedQuery(name = "MwMleSource.findByHostName", query = "SELECT t FROM MwMleSource t WHERE t.hostName = :hostName"),
     @NamedQuery(name = "MwMleSource.findByUUID_Hex", query = "SELECT t FROM MwMleSource t WHERE t.uuid_hex = :uuid_hex"),
+    @NamedQuery(name = "MwMleSource.findByMleUuidHex", query = "SELECT t FROM MwMleSource t WHERE t.mle_uuid_hex = :mle_uuid_hex"),
     @NamedQuery(name = "MwMleSource.findByHostNameLike", query = "SELECT t FROM MwMleSource t WHERE t.hostName LIKE :hostName"),    
     @NamedQuery(name = "MwMleSource.findByMleID", query = "SELECT t FROM MwMleSource t WHERE t.mleId.id =:mleId")})
 
@@ -37,6 +38,8 @@ public class MwMleSource implements Serializable {
     private TblMle mleId;
     @Column(name = "uuid_hex")
     private String uuid_hex;
+    @Column(name = "mle_uuid_hex")
+    private String mle_uuid_hex;
 
     public MwMleSource() {
     }

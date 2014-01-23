@@ -14,8 +14,10 @@ import javax.ws.rs.QueryParam;
  */
 public class MleSourceFilterCriteria implements FilterCriteria<MleSource>{
 
-    @QueryParam("mleId")
-    public UUID mleId;
+    @QueryParam("id")
+    public UUID id;
+    @QueryParam("mleUuid")
+    public UUID mleUuid;
     @QueryParam("nameEqualTo")
     public String nameEqualTo;
     @QueryParam("nameContains")

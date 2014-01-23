@@ -190,8 +190,8 @@ public class MwMleSourceJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByUUID_Hex");
-            query.setParameter("uuid_hex", mleUuid);
+            Query query = em.createNamedQuery("MwMleSource.findByMleUuidHex");
+            query.setParameter("mle_uuid_hex", mleUuid);
 
             query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
 

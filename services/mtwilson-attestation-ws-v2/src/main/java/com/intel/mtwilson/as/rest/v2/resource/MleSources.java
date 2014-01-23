@@ -32,10 +32,13 @@ public class MleSources extends AbstractResource<MleSource, MleSourceCollection,
         MleSourceCollection mleSourceCollection = null;
         try {
             MwMleSourceJpaController jpaController = My.jpa().mwMleSource();
-            if (criteria.mleId != null) {
-                MleSource mleSource = convert(jpaController.findByMleUuid(criteria.mleId.toString()));            
+            if (criteria.id != null) {
+                MleSource mleSource = convert(jpaController.findByMleUuid(criteria.id.toString()));            
                 mleSourceCollection.getMleSources().add(mleSource);
-            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+            } else if (criteria.mleUuid != null) {
+                MleSource mleSource = convert(jpaController.findByMleUuid(criteria.mleUuid.toString()));            
+                mleSourceCollection.getMleSources().add(mleSource);
+            }else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                 List<MwMleSource> mleSourceList = jpaController.findByHostName(criteria.nameEqualTo);
                 if (mleSourceList != null && !mleSourceList.isEmpty()) {
                     for(MwMleSource mleSourceObj : mleSourceList) {
