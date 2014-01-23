@@ -39,7 +39,7 @@ public class SetAssetTag implements ICommand{
     public void execute() throws TAException{
         try {
             
-            String password = "fffffff";
+            String password = "ffffffffffffffffffffffffffffffffffffffff";
             
             //create the index if needed
             boolean iExists = indexExists();
