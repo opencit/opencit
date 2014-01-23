@@ -184,4 +184,68 @@ public class MwMleSourceJpaController implements Serializable {
             em.close();
         }               
     }    
+
+    public MwMleSource findByMleUuid(String mleUuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByUUID_Hex");
+            query.setParameter("uuid_hex", mleUuid);
+
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+
+            MwMleSource mleSourceObj = (MwMleSource) query.getSingleResult();
+            return mleSourceObj;
+
+        } catch(NoResultException e){
+        	log.error(String.format("MLE information with UUID {} not found in the DB.", mleUuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public List<MwMleSource> findByHostName(String hostName) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByHostName");
+            query.setParameter("hostName", hostName);
+
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+
+            List<MwMleSource> mleSourceList = query.getResultList();
+            return mleSourceList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("MLE source information with host name {} not found in the DB.", hostName));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public List<MwMleSource> findByHostNameLike(String hostName) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByHostNameLike");
+            query.setParameter("hostName", "%"+hostName+"%");
+
+            query.setHint(QueryHints.CACHE_USAGE, CacheUsage.DoNotCheckCache);
+
+            List<MwMleSource> mleSourceList = query.getResultList();
+            return mleSourceList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("MLE source information with host name {} not found in the DB.", hostName));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+    
 }

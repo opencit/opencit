@@ -19,6 +19,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwMleSource.findAll", query = "SELECT t FROM MwMleSource t"),
     @NamedQuery(name = "MwMleSource.findById", query = "SELECT t FROM MwMleSource t WHERE t.id = :id"),
     @NamedQuery(name = "MwMleSource.findByHostName", query = "SELECT t FROM MwMleSource t WHERE t.hostName = :hostName"),
+    @NamedQuery(name = "MwMleSource.findByUUID_Hex", query = "SELECT t FROM MwMleSource t WHERE t.uuid_hex = :uuid_hex"),
+    @NamedQuery(name = "MwMleSource.findByHostNameLike", query = "SELECT t FROM MwMleSource t WHERE t.hostName LIKE :hostName"),    
     @NamedQuery(name = "MwMleSource.findByMleID", query = "SELECT t FROM MwMleSource t WHERE t.mleId.id =:mleId")})
 
 public class MwMleSource implements Serializable {
@@ -33,6 +35,8 @@ public class MwMleSource implements Serializable {
     @JoinColumn(name = "MLE_ID", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private TblMle mleId;
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
 
     public MwMleSource() {
     }
@@ -65,6 +69,15 @@ public class MwMleSource implements Serializable {
         this.mleId = mleId;
     }
 
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
+    }
+
+    
     @Override
     public int hashCode() {
         int hash = 0;
