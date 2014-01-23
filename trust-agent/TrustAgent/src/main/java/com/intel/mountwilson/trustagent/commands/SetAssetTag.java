@@ -95,8 +95,11 @@ public class SetAssetTag implements ICommand{
     private void writeHashToFile() throws TAException, IOException {
         try {
             
-            List<String> result = CommandUtil.runCommand("echo " + context.getAssetTagHash() + " | /usr/local/bin/hex2bin > /tmp/hash");
+            List<String> result = CommandUtil.runCommand("echo " + context.getAssetTagHash() + " > /tmp/prehash"); //| /usr/local/bin/hex2bin > /tmp/hash");
             String response = StringUtils.join(result,"\n");
+            log.debug("writeHashToFile output: " + response);
+            result = CommandUtil.runCommand("cat /tmp/prehash | /usr/local/bin/hex2bin > /tmp/hash ");
+            response = StringUtils.join(result,"\n");
             log.debug("writeHashToFile output: " + response);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
