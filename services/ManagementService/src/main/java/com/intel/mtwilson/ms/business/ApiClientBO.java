@@ -19,7 +19,7 @@ import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509;
 import com.intel.mtwilson.ms.data.ApiRoleX509PK;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import com.intel.mtwilson.ms.helper.BaseBO;
+import com.intel.mtwilson.ms.BaseBO;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.*;
 import java.util.ArrayList;

@@ -4,7 +4,7 @@
  */
 package com.intel.mtwilson.ms.helper;
 
-import com.intel.mtwilson.ms.helper.OpenSourceVMMHelper;
+import com.intel.mtwilson.ms.OpenSourceVMMHelper;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import org.junit.AfterClass;
 import org.junit.Before;

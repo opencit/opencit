@@ -12,7 +12,7 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
-import com.intel.mtwilson.ms.helper.MSComponentFactory;
+import com.intel.mtwilson.ms.MSComponentFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BulkHostRegBO {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private HostBO hostBO = new MSComponentFactory().getHostBO();
+    private HostBO hostBO = MSComponentFactory.getHostBO();
     private int timeout;
     private static ExecutorService scheduler = Executors.newFixedThreadPool(MSConfig.getConfiguration().getInt("mtwilson.ms.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
     

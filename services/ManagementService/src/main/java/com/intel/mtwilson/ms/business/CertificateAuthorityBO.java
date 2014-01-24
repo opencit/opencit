@@ -11,7 +11,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.ms.controller.MwConfigurationJpaController;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
-import com.intel.mtwilson.ms.helper.BaseBO;
+import com.intel.mtwilson.ms.BaseBO;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

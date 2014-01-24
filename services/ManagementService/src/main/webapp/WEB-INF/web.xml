@@ -77,6 +77,6 @@
     </welcome-file-list>
     <listener>
         <description>Cleans up Persistence factory.</description>
-        <listener-class>com.intel.mtwilson.ms.helper.MSPersistenceManager</listener-class>
+        <listener-class>com.intel.mtwilson.ms.MSPersistenceManager</listener-class>
     </listener>
 </web-app>

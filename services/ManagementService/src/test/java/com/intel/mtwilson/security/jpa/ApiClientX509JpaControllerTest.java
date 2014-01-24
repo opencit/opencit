@@ -1,7 +1,7 @@
 package com.intel.mtwilson.security.jpa;
 
 //import com.intel.mountwilson.ms.common.BaseBO;
-import com.intel.mtwilson.ms.helper.MSPersistenceManager;
+import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import java.util.List;

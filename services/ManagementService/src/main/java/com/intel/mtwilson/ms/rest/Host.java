@@ -5,7 +5,7 @@
 package com.intel.mtwilson.ms.rest;
 
 import com.intel.mtwilson.ms.business.HostBO;
-import com.intel.mtwilson.ms.helper.MSComponentFactory;
+import com.intel.mtwilson.ms.MSComponentFactory;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.ms.business.BulkHostRegBO;
@@ -75,7 +75,7 @@ public class Host {
     public String registerHost(TxtHostRecord hostObj) throws ApiException {
         ValidationUtil.validate(hostObj);
         long regHostStart = System.currentTimeMillis(); // XXX savy performance
-        boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
+        boolean result = MSComponentFactory.getHostBO().registerHost(hostObj);
         long regHostStop = System.currentTimeMillis();// XXX savy performance
         log.debug("XXX savy performance registerHost [" + hostObj.HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
         return Boolean.toString(result);
@@ -89,7 +89,7 @@ public class Host {
     public String registerHost(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
         long regHostStart = System.currentTimeMillis(); // XXX savy performance
-        boolean result = new MSComponentFactory().getHostBO().registerHostFromCustomData(hostConfigObj);
+        boolean result = MSComponentFactory.getHostBO().registerHostFromCustomData(hostConfigObj);
         long regHostStop = System.currentTimeMillis();// XXX savy performance
         log.debug("XXX savy performance registerHost [" + hostConfigObj.getTxtHostRecord().HostName + "]: {}", regHostStop-regHostStart); // XXX savy performance
         return Boolean.toString(result);
@@ -102,7 +102,7 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(TxtHostRecord hostObj) throws ApiException {
         ValidationUtil.validate(hostObj);
-        boolean result = new MSComponentFactory().getHostBO().configureWhiteListFromHost(hostObj);
+        boolean result = MSComponentFactory.getHostBO().configureWhiteListFromHost(hostObj);
         return Boolean.toString(result);
     }
 
@@ -113,7 +113,7 @@ public class Host {
     @Produces(MediaType.TEXT_PLAIN)
     public String configureWhiteList(HostConfigData hostConfigObj) throws ApiException {
         ValidationUtil.validate(hostConfigObj);
-        boolean result = new MSComponentFactory().getHostBO().configureWhiteListFromCustomData(hostConfigObj);
+        boolean result = MSComponentFactory.getHostBO().configureWhiteListFromCustomData(hostConfigObj);
         return Boolean.toString(result);
     }
 
@@ -152,7 +152,7 @@ public class Host {
         return results;
 
 
-        //HostConfigResponseList results = new MSComponentFactory().getHostBO().registerHosts(hostRecords);
+        //HostConfigResponseList results = MSComponentFactory.getHostBO().registerHosts(hostRecords);
         //return results;
 
 
@@ -165,7 +165,7 @@ public class Host {
          hostResponse.setHostName(hostRecord.getTxtHostRecord().HostName);
          // Since we do not want to throw exception for each host separately, we capture the exception details into the error message field, which would be sent back to the caller.
          try {
-         boolean result = new MSComponentFactory().getHostBO().registerHostFromCustomData(hostRecord);
+         boolean result = MSComponentFactory.getHostBO().registerHostFromCustomData(hostRecord);
          hostResponse.setStatus(Boolean.toString(result));
          hostResponse.setErrorMessage("");
          } catch (MSException mse) {
@@ -198,7 +198,7 @@ public class Host {
     public HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws ApiException {
         ValidationUtil.validate(hostRecords);
         log.warn("About to execute the registerhosts function");
-        HostConfigResponseList results = new MSComponentFactory().getHostBO().registerHosts(hostRecords);
+        HostConfigResponseList results = MSComponentFactory.getHostBO().registerHosts(hostRecords);
         return results;
         /*HostConfigResponseList hostResponses = new HostConfigResponseList();
          List <HostConfigResponse> hostResList = new ArrayList<HostConfigResponse>();       
@@ -212,7 +212,7 @@ public class Host {
          hostResList.add(hostResponse);
          }           
          }
-         // boolean result = new MSComponentFactory().getHostBO().registerHost(hostObj);
+         // boolean result = MSComponentFactory.getHostBO().registerHost(hostObj);
          hostResponses.setHostRecords(hostResList);
          return hostResponses;*/
     }

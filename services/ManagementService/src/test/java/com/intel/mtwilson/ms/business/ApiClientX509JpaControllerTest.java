@@ -1,6 +1,6 @@
 package com.intel.mtwilson.ms.business;
 
-import com.intel.mtwilson.ms.helper.BaseBO;
+import com.intel.mtwilson.ms.BaseBO;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import org.junit.Test;

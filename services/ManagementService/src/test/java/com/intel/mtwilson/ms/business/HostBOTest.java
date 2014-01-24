@@ -5,7 +5,7 @@
 package com.intel.mtwilson.ms.business;
 
 import com.intel.mtwilson.ms.business.HostBO;
-import com.intel.mtwilson.ms.helper.MSComponentFactory;
+import com.intel.mtwilson.ms.MSComponentFactory;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
@@ -53,7 +53,7 @@ public class HostBOTest {
         hostObj.Port = 9999;        
 //        hostObj.HostName = "10.1.71.155";
 //        hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
-        HostBO instance = new MSComponentFactory().getHostBO();
+        HostBO instance = MSComponentFactory.getHostBO();
         boolean expResult = true;
         boolean result = instance.registerHost(hostObj);
         assertEquals(expResult, result);
@@ -69,7 +69,7 @@ public class HostBOTest {
         hostConfigObj.setTxtHostRecord(hostObj);
         hostConfigObj.setBiosWLTarget(HostWhiteListTarget.BIOS_HOST);
         hostConfigObj.setVmmWLTarget(HostWhiteListTarget.VMM_GLOBAL);
-        HostBO instance = new MSComponentFactory().getHostBO();
+        HostBO instance = MSComponentFactory.getHostBO();
         boolean result = instance.registerHostFromCustomData(hostConfigObj);
         System.out.println(result);
     }
@@ -83,7 +83,7 @@ public class HostBOTest {
         TxtHostRecord gkvHost = new TxtHostRecord();
         gkvHost.HostName = "10.1.71.155";
         gkvHost.AddOn_Connection_String = "vmware:https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
-        HostBO instance = new MSComponentFactory().getHostBO();
+        HostBO instance = MSComponentFactory.getHostBO();
         boolean expResult = false;
         boolean result = instance.configureWhiteListFromHost(gkvHost);
         assertEquals(expResult, result);
@@ -107,7 +107,7 @@ public class HostBOTest {
         wlObj.setBiosWLTarget(HostWhiteListTarget.BIOS_OEM);
         wlObj.setVmmWLTarget(HostWhiteListTarget.VMM_OEM);
         wlObj.setRegisterHost(false);
-        HostBO instance = new MSComponentFactory().getHostBO();
+        HostBO instance = MSComponentFactory.getHostBO();
         boolean result = instance.configureWhiteListFromCustomData(wlObj);
         System.out.println(result);
     }
@@ -121,7 +121,7 @@ public class HostBOTest {
        //         hostObj.AddOn_Connection_String = "https://10.1.71.87:443/sdk;Administrator;P@ssw0rd";
        //         hostList.getHostRecords().add(hostObj);
        //
-       //         HostConfigResponseList result = new MSComponentFactory().getHostBO().registerHosts(hostList);
+       //         HostConfigResponseList result = MSComponentFactory.getHostBO().registerHosts(hostList);
        //         for (HostConfigResponse hostRes : result.getHostRecords()) {
        //                 System.out.println(hostRes.getHostName() + ":" + hostRes.getStatus() + ":" + hostRes.getErrorMessage());
        //         }

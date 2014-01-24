@@ -1,6 +1,6 @@
 package com.intel.mtwilson.security.jpa;
 
-import com.intel.mtwilson.ms.helper.MSPersistenceManager;
+import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.mtwilson.ms.controller.TblApiClientJpaController;
 import com.intel.mtwilson.ms.data.TblApiClient;
 import org.junit.Test;

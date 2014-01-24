@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.helper;
 
+import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.security.jersey.AuthenticationJerseyFilter;
 import com.intel.mtwilson.security.jersey.HmacRequestVerifier;
