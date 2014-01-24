@@ -39,7 +39,8 @@
     <module>MtWilsonHttpSecurityAdapters</module>
     <module>trust-utils-jar</module>
     <module>WLMService</module>
-    <module>ManagementService</module>
+    <module>mtwilson-management</module>
+    <module>mtwilson-management-ws-v1</module>
     <module>MSCmdUtility</module>
   </modules>
 
