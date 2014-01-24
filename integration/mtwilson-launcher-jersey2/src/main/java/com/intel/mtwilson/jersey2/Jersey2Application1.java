@@ -116,7 +116,7 @@ register(com.intel.mtwilson.wlm.rest.WlmStatus.class);
         // but need the mtwilson-launcher to call Thread.currentThread().setContextClassLoader(...)   with whatever classloader it wants us to use to load resources. 
         // this class loader will need to be able to see any resources that are loaded from all modules (their public apis) so if using a shared or fenced model it has to be the "commoN" classloader...
         // but XXX TODO  classloaderstrategy doesn't provide a method to get this "top" class loader so it might need an addition to the ClassLoadingStrategy interface...
-        log.debug("v2resourceconfig classloader is: {}", getClassLoader().getClass().getName()); // sun.misc.Launcher$AppClassLoader   explains why the extensions can't be cast... this is the system classloader and the extensions are loaded by one of the strategies in cpg-classpath.    or you might see org.eclipse.jetty.webapp.WebAppClassLoader  when using the WebAppContext handler
+        log.debug("v1resourceconfig classloader is: {}", getClassLoader().getClass().getName()); // sun.misc.Launcher$AppClassLoader   explains why the extensions can't be cast... this is the system classloader and the extensions are loaded by one of the strategies in cpg-classpath.    or you might see org.eclipse.jetty.webapp.WebAppClassLoader  when using the WebAppContext handler
         if( getClassLoader().getParent() != null ) {
             log.debug("and the parent classloader is: {}", getClassLoader().getParent().getClass().getName()); // sun.misc.Launcher$ExtClassLoader      //    or you would see sun.misc.Launcher$AppClassLoader  if the current classloader is  the WebAppClassLoader
         }

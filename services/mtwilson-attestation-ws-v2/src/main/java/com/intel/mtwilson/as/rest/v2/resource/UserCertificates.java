@@ -29,7 +29,7 @@ import javax.ws.rs.Path;
  * @author ssbangal
  */
 @Stateless
-@Path("/user_certificates")
+@Path("/user-certificates")
 public class UserCertificates extends AbstractResource<UserCertificate, UserCertificateCollection, UserCertificateFilterCriteria, UserCertificateLinks> {
 
     @Override
