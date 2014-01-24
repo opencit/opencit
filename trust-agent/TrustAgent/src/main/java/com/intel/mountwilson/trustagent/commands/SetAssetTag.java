@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mountwilson.common.TAConfig;
+import java.io.PrintWriter;
 import org.apache.commons.lang.StringUtils;
 
 
@@ -94,12 +95,11 @@ public class SetAssetTag implements ICommand{
     
     private void writeHashToFile() throws TAException, IOException {
         try {
-            
-            List<String> result = CommandUtil.runCommand("echo " + context.getAssetTagHash() + " > /tmp/prehash"); //| /usr/local/bin/hex2bin > /tmp/hash");
+            PrintWriter writer = new PrintWriter("/tmp/preHash");
+            writer.print(context.getAssetTagHash() );
+            writer.close();
+            List<String> result = CommandUtil.runCommand("/usr/local/bin/hex2bin /tmp/preHash /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
             String response = StringUtils.join(result,"\n");
-            log.debug("writeHashToFile output: " + response);
-            result = CommandUtil.runCommand("cat /tmp/prehash | /usr/local/bin/hex2bin > /tmp/hash ");
-            response = StringUtils.join(result,"\n");
             log.debug("writeHashToFile output: " + response);
         }catch(TAException ex) {
                 log.error("error writing to nvram, " + ex.getMessage() );
