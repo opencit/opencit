@@ -7,7 +7,7 @@ package com.intel.mtwilson.util;
 import com.intel.mtwilson.i18n.ErrorMessage;
 import com.intel.mtwilson.datatypes.AuthResponse;
 import com.intel.mtwilson.i18n.BundleName;
-import java.text.MessageFormat;
+//import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -34,6 +34,7 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     
     @Override
     public Response toResponse(MWException exception) {
+        log.debug("intercepted MWException; localizing response");
         Locale locale = localeForRequest();
         // localize the error message using the selected locale
         String output = localize(exception, locale);
@@ -75,6 +76,7 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     }
     
     private String localize(MWException exception, Locale locale) {
+        log.debug("localizing MWException to {}", locale.getDisplayName());
         ErrorMessage message = new ErrorMessage(exception.getErrorCode(), (Object)exception.getParameters());
         return message.toString(locale);
     }

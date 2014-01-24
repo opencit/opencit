@@ -5,14 +5,14 @@
 package com.intel.mtwilson.wlm.helper;
 
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.util.LocalizationResponseFilter;
+import com.intel.dcsg.cpg.i18n.LocalizableResponseFilter;
 import java.io.IOException;
 
 /**
  *
  * @author jbuhacoff
  */
-public class WLMLocalizationFilter extends LocalizationResponseFilter {
+public class WLMLocalizationFilter extends LocalizableResponseFilter {
     public WLMLocalizationFilter() throws IOException {
         setAvailableLocales(My.configuration().getAvailableLocales());
     }

@@ -13,7 +13,9 @@ import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.*;
+import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
+import com.intel.mtwilson.util.MWException;
 import java.util.ArrayList;
 import java.io.IOException;
 import java.util.Arrays;
@@ -46,6 +48,15 @@ public class Test {
     private HostBO hostBO = new ASComponentFactory().getHostBO(); 
     private static HostAgentFactory hostAgentFactory = new HostAgentFactory(); 
 //    private static VMwareConnectionPool vcenterPool = new VMwareConnectionPool(); // BUG #497 replacing this with the HostAgentFactory - the underlying implementation uses a pool and respects tls policy for each host
+    
+    
+    @PermitAll
+    @GET
+    @Path("/error/400")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String error400() {
+        throw new MWException(ErrorCode.UNKNOWN_ERROR);
+    }
     
     /**
      *
