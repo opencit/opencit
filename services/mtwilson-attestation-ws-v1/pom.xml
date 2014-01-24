@@ -1,0 +1,683 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mtwilson-attestation-ws-v1</artifactId>
+    <packaging>war</packaging>
+    <name>mtwilson-attestation-ws-v1</name>
+
+    <parent>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-services</artifactId>
+		<version>1.2.3-SNAPSHOT</version>
+    </parent>
+
+    <build>
+	
+<testResources>
+  <testResource>
+    <directory>src/test/env</directory>
+    <includes>
+      <include>**/*.properties</include>
+    </includes>
+  </testResource>
+  <!--
+  <testResource>
+      <directory>../ASData/src/main/resources/META-INF</directory>
+      <includes>
+          <include>**/*.xml</include>
+      </includes>
+  </testResource>
+  -->
+</testResources>	
+	
+		<plugins>
+		    
+
+		    
+		    <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-jar-plugin</artifactId>
+			<version>2.4</version>
+			<executions>
+			    <execution>
+				<id>create-core</id>
+				<phase>package</phase>
+				<goals>
+				    <goal>jar</goal>
+				</goals>
+				<configuration>
+				    <classifier>core</classifier>
+				    <excludes>
+					<exclude>com/intel/mtwilson/as/premium/</exclude>
+				    </excludes>
+				</configuration>
+			    </execution>
+			    <execution>
+				<id>create-premium</id>
+				<phase>package</phase>
+				<goals>
+				    <goal>jar</goal>
+				</goals>
+				<configuration>
+				    <classifier>premium</classifier>
+				    <includes>
+					<include>com/intel/mtwilson/as/premium/*</include>
+				    </includes>
+				</configuration>
+			    </execution>
+			</executions>
+		    </plugin>
+		    
+		    
+			<plugin>
+				<groupId>com.sun.tools.xjc.maven2</groupId>
+				<artifactId>maven-jaxb-plugin</artifactId>
+                                <version>1.1.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<includeSchemas>
+						<includeSchema>xsd/*.xsd</includeSchema>
+					</includeSchemas>
+					<strict>true</strict>
+					<verbose>true</verbose>
+				</configuration>
+			</plugin>
+
+	    
+	    <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <inherited>true</inherited>
+		<version>2.3.2</version>     
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-surefire-plugin</artifactId>
+  <version>2.12.4</version>
+  <configuration>
+    <testFailureIgnore>true</testFailureIgnore>
+    <systemProperties>
+      <property>
+        <name>java.util.logging.config.file</name>
+        <value>${project.build.directory}/test-classes/logging.properties</value>
+      </property>
+    </systemProperties>
+  </configuration>
+</plugin>
+
+	    <plugin>
+		<artifactId>maven-war-plugin</artifactId>
+		<version>2.2</version>
+		<configuration>
+		    <archiveClasses>true</archiveClasses>
+		    <attachClasses>true</attachClasses>
+		    <classifier>premium</classifier>
+<!--
+                    <overlays>
+                        <overlay>
+                            <groupId>com.intel.mtwilson.services</groupId>
+                            <artifactId>ASData</artifactId>
+                            <type>jar</type>
+                            <includes>
+                                <include>META-INF/**/*.xml</include>
+                                <exclude>com/*</exclude>
+                            </includes>
+                        </overlay>
+                        <overlay>
+                            <groupId>com.intel.mtwilson.services</groupId>
+                            <artifactId>MSData</artifactId>
+                            <type>jar</type>
+                            <includes>
+                                <include>META-INF/**/*.xml</include>
+                                <exclude>com/*</exclude>
+                            </includes>
+                        </overlay>
+                    </overlays>
+-->                    
+		</configuration>
+	    </plugin>
+	    
+	    <plugin>
+                <groupId>org.glassfish.maven.plugin</groupId>
+                <artifactId>maven-glassfish-plugin</artifactId>
+            </plugin>
+
+	
+<plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+	    <id>default-cli</id>
+            <phase>package</phase>
+	    <goals>
+		<goal>run</goal>
+	    </goals>
+            <configuration>
+		<target>
+	    <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}-core.war">
+		<zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-premium.war">
+		    <exclude name="WEB-INF/lib/${project.artifactId}-${project.version}.jar" />
+		</zipfileset>
+		<zipfileset dir="${project.build.directory}" prefix="WEB-INF/lib">
+		    <include name="${project.artifactId}-${project.version}-core.jar" />
+		</zipfileset>
+	    </zip>
+			
+		</target>
+            </configuration>
+          </execution>
+        </executions>
+            <dependencies>
+		<dependency>
+		    <groupId>org.apache.ant</groupId>
+		    <artifactId>ant</artifactId>
+		    <version>1.8.4</version>
+		</dependency>
+                <dependency>
+                    <groupId>ant-contrib</groupId>
+                    <artifactId>ant-contrib</artifactId>
+                    <version>1.0b3</version>
+                </dependency>
+            </dependencies>
+      </plugin>	    
+		    	
+			
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <executions>
+                <execution>
+                    <id>attach-artifacts</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>attach-artifact</goal>
+                    </goals>
+                    <configuration>
+                        <artifacts>
+                            <artifact>
+                                <file>${project.build.directory}/${project.artifactId}-${project.version}-core.war</file>
+                                <type>war</type>
+				<classifier>core</classifier>
+                            </artifact>
+                        </artifacts>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+	
+<!--
+To test the application:
+    mvn jetty:start
+    http://localhost:8080/resources/hosts
+This error indicates you need jersey:
+    Caused by: com.sun.jersey.api.MessageException: A message body writer for Java class com.intel.mtwilson.datatypes.AuthResponse, and Java type class com.intel.mt
+    wilson.datatypes.AuthResponse, and MIME media type application/json was not found
+-->		
+    <plugin>
+    <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>9.1.0.RC2</version>
+        <configuration>
+          <webAppConfig>
+            <contextPath>/</contextPath>
+            <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
+<!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
+          </webAppConfig>
+        </configuration>
+      </plugin>
+
+        </plugins>
+<!--
+	<extensions>
+	    <extension>
+		<groupId>org.apache.maven.wagon</groupId>
+		<artifactId>wagon-webdav</artifactId>
+		<version>1.0-beta-2</version>
+	    </extension>
+	</extensions>
+    -->
+    </build>
+    <dependencies>
+        
+        <!--
+        enunciate requires the source to the datatypes in order to document them... but
+        for some reason, when we include the source here, enunciate throws an exception:
+        "Problem assembling the enunciate app. A model must be established."
+        -->
+        <!--
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>mtwilson-api</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>   
+    -->
+
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-my</artifactId>
+	    <version>${project.version}</version>
+	    <type>jar</type>
+	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-api</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.integration</groupId>
+	    <artifactId>mtwilson-env</artifactId>
+	    <version>${project.version}</version>
+            <scope>test</scope>
+  	</dependency>
+
+		<dependency>
+			<groupId>com.intel.mtwilson.common</groupId>
+			<artifactId>mtwilson-crypto</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-crypto</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.intel.dcsg.cpg</groupId>
+			<artifactId>cpg-validation</artifactId>
+		</dependency>
+        <!--
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-jersey-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+		<groupId>com.intel.mtwilson.database</groupId>
+		<artifactId>mtwilson-postgres</artifactId>
+		<version>${project.version}</version>
+	</dependency> 
+        -->
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>asset-tag-model</artifactId>
+			<version>${project.version}</version>
+		 <type>jar</type>
+		 </dependency>
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ASData</artifactId>
+			<version>${project.version}</version>
+		 <type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>MSData</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>ASCommon</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>MSCommon</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+                <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>mtwilson-http-security</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+        <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>mtwilson-http-security-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+        <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>mtwilson-trust-utils</artifactId>
+			<version>${project.version}</version>
+        </dependency>
+		<!--
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        -->
+        <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>opensaml</artifactId>
+                <version>2.5.1-1</version>
+        </dependency>
+        
+        <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+        </dependency>
+        
+        <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+        </dependency>
+
+	<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+	<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+	<dependency>
+			<groupId>commons-math</groupId>
+			<artifactId>commons-math3</artifactId>
+		</dependency>
+                
+                <!--
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
+            <version>${jersey-version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jaxb-api</artifactId>
+                    <groupId>javax.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jaxb-impl</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-core-asl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-xc</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+        <dependency>
+                <groupId>com.jayway.restassured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>1.5</version>
+                <scope>test</scope>
+        </dependency>        
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${jersey-version}</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.ejb</artifactId>
+			<version>3.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.servlet</artifactId>
+			<version>3.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+        <!--
+        <dependency>
+            <groupId>org.glassfish.distributions</groupId>
+            <artifactId>web-all</artifactId>
+            <version>10.0-build-20080430</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.embedded</groupId>
+            <artifactId>gf-embedded-api</artifactId>
+            <version>1.0-alpha-4</version>
+            <scope>test</scope>
+        </dependency>
+        -->
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1</version>
+			<scope>test</scope>
+		</dependency>
+
+<!--
+<dependency>
+        <groupId>com.sun.jersey.contribs</groupId>
+        <artifactId>jersey-multipart</artifactId>
+        <version>${jersey-version}</version>
+    </dependency>
+<dependency>
+	<groupId>org.jvnet</groupId>
+	<artifactId>mimepull</artifactId>
+	<version>1.6</version>
+</dependency>
+                -->
+
+                <!--                
+<dependency>
+	<groupId>org.glassfish.jersey.core</groupId>
+	<artifactId>jersey-server</artifactId>
+	<version>2.4.1</version>
+</dependency>
+                           --> 
+                
+        <!-- 
+        XXX TODO plugin jars should eventually be installed on filesystem somewhere and added to the application's
+        classpath using a custom class loader... not packaged in the war :)  
+        but as a first step all the plugins are included in attestation service premium 
+        -->
+		<!--
+        <dependency>
+            <groupId>com.intel.mtwilson.plugins</groupId>
+            <artifactId>mtwilson-plugin-auto-refresh-trust</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+		-->
+        <!-- end plugins -->
+        
+
+		<dependency>
+			<groupId>javax.persistence</groupId>
+			<artifactId>persistence-api</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+            <!-- <scope>test</scope> this was supposed to be for test but now xercesImpl is in the production artifact so this is required too -->
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-handler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>audit-data</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+<!-- used by AsAuthenticationFilter -->        
+<dependency>
+    <groupId>javax.ws.rs</groupId>
+    <artifactId>javax.ws.rs-api</artifactId>
+    <version>2.0</version>
+</dependency>
+        <!--
+        <dependency>
+            <groupId>org.codehaus.enunciate</groupId>
+            <artifactId>enunciate-rt</artifactId>
+            <version>1.26</version>            
+        </dependency>        
+        <dependency>
+            <groupId>com.intel.mtwilson.database</groupId>
+            <artifactId>mtwilson-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+-->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <scope>provided</scope>
+        <optional>true</optional>
+	</dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.2</version>
+        </dependency>                        
+		
+<!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
+<!--
+        <dependency>
+            <groupId>com.sun.jersey.contribs</groupId>
+            <artifactId>jersey-spring</artifactId>
+            <version>1.16</version>
+        </dependency>
+-->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-trust-policy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        
+<!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
+<dependency>
+    <groupId>org.codehaus.jackson</groupId>
+    <artifactId>jackson-jaxrs</artifactId>
+    <version>1.9.13</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-mapper-asl</artifactId>
+	<version>1.9.13</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-core-asl</artifactId>
+	<version>1.9.13</version>
+</dependency>
+<dependency>
+	<groupId>org.codehaus.jackson</groupId>
+	<artifactId>jackson-xc</artifactId>
+	<version>1.9.13</version>
+</dependency>
+        
+        
+    </dependencies>
+    <properties />
+    
+    <profiles>
+        <profile>
+            <activation>
+                <property>
+                    <name>release</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-javadoc-plugin</artifactId>
+                      <version>2.8.1</version>
+                      <executions>
+                          <execution>
+                              <phase>prepare-package</phase>
+                              <goals>
+              <!--                    <goal>jar</goal> -->
+                                  <goal>javadoc</goal>
+                              </goals>        
+                          </execution>
+                      </executions>
+                      <configuration>
+                          <show>public</show>
+                          <stylesheet>java</stylesheet> <!-- alternate value: maven,  or use the stylesheetfile tag to specify a .css file -->
+                          <encoding>utf-8</encoding>
+                      </configuration>
+                    </plugin>
+                        <!-- Enunciate generates API documentation -->
+                      <plugin>
+                        <groupId>org.codehaus.enunciate</groupId>
+                        <artifactId>maven-enunciate-plugin</artifactId>
+                        <version>1.26</version>
+                        <executions>
+                          <execution>
+                              <phase>package</phase>
+                            <goals>
+                <!--              <goal>assemble</goal> -->
+                              <goal>docs</goal>
+                            </goals>
+                            <configuration>
+                                <configFile>enunciate.xml</configFile>
+                              <!-- the directory where to put the docs -->
+                              <docsDir>${project.build.directory}/docs</docsDir>
+                              <docsSubdir>webservice</docsSubdir>
+                              <!-- the site directory in which to put the html docs -->
+                              <!--
+                              <sources>
+                                  <source>
+                                      <groupId>com.intel.mtwilson.integration</groupId>
+                                      <artifactId>mtwilson-api</artifactId>
+                                      <version>${project.version}</version>
+                                  </source>
+                              </sources>
+                              -->
+                            </configuration>
+                          </execution>
+                        </executions>
+                      </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
+</project>
