@@ -9,6 +9,7 @@ import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblMleJpaController;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.as.data.MwMleSource;
 import com.intel.mtwilson.as.data.TblMle;
 import com.intel.mtwilson.as.rest.v2.model.Mle;
 import com.intel.mtwilson.as.rest.v2.model.MleCollection;
@@ -16,6 +17,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,9 +116,15 @@ public class Mles extends AbstractResource<Mle, MleCollection, MleFilterCriteria
             mle.setId(UUID.valueOf(tblMleObj.getUuid_hex()));
             mle.setName(tblMleObj.getName());
             mle.setVersion(tblMleObj.getVersion());
-            mle.setOemUUID(tblMleObj.getOemId().getUuid_hex());
-            mle.setOsUUID(tblMleObj.getOsId().getUuid_hex());
-            mle.setDescription(tblMleObj.getDescription());            
+            mle.setOemUuid(tblMleObj.getOemId().getUuid_hex());
+            mle.setOsUuid(tblMleObj.getOsId().getUuid_hex());
+            mle.setDescription(tblMleObj.getDescription());   
+            // Since there will be only one entry per MLE in the MleSource table, we will try to get it and return it back to the caller
+            Collection<MwMleSource> mwMleSourceCollection = tblMleObj.getMwMleSourceCollection();
+            if (mwMleSourceCollection != null && !mwMleSourceCollection.isEmpty()) {
+                MwMleSource mleSource = (MwMleSource) mwMleSourceCollection.toArray()[0];
+                mle.setSource(mleSource.getHostName());
+            }
         } else {
             mle = null;
         }
