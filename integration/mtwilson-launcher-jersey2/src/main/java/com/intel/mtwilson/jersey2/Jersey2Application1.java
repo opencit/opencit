@@ -65,8 +65,10 @@ register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // 
 register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
 //register(com.intel.mtwilson.as.helper.ASAuthenticationFilter.class); // XXX TODO to be replaced with APACHE SHIRO
+register(org.apache.shiro.web.servlet.ShiroFilter.class);
 //register(com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter.class);  // XXX TODO re-enable
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
+register(com.intel.mtwilson.shiro.AuthorizationExceptionMapper.class);
 register(com.intel.mtwilson.as.helper.ASLocalizationFilter.class);
 // XXX TODO extension point here to load all resource classes... jersey already has this capability but see comment below, it's not working properly and only one resource class gets loaded when we use the "packages" directive
 //register(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);

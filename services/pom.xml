@@ -35,6 +35,7 @@
     <module>mtwilson-attestation-ws-v2</module>
     <module>mtwilson-tls-policy</module>
 	<module>mtwilson-jersey-util</module>
+	<module>mtwilson-shiro-util</module>
     <module>MtWilsonHttpSecurityAdapters</module>
     <module>trust-utils-jar</module>
     <module>mtwilson-whitelist</module>

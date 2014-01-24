@@ -23,7 +23,10 @@
     <module>mtwilson-client-java5</module>
     <module>mtwilson-client-dotnet</module>
 	-->
-    <module>mtwilson-autotest</module>
+    <module>mtwilson-launcher</module>
+    <module>mtwilson-launcher-ext</module>
+    <module>mtwilson-launcher-jersey2</module>
+    <module>mtwilson-test</module>
   </modules>
 
 

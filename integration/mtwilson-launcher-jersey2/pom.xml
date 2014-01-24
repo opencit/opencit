@@ -61,6 +61,11 @@ This error message indicates you need a jersey implementation like org.glassfish
     </build>
     <dependencies>
 
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>

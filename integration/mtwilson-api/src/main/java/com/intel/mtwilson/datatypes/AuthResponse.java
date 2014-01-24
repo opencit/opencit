@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * XXX TODO convert uses of this class to ErrorResponse 
  * @author dsmagadx
  */
 public class AuthResponse {

@@ -518,4 +518,24 @@ public class MyConfiguration {
     public String getAssetTagMtwilsonBaseUrl() {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
     }
+    
+    public String getMtWilsonHome() {
+        String mtwilsonHome = System.getenv("MTWILSON_HOME");
+        log.debug("MTWILSON_HOME={}", mtwilsonHome);
+        if( mtwilsonHome == null ) {
+            if( Platform.isUnix() ) {
+                mtwilsonHome = "/opt/default";
+                log.debug("MTWILSON_HOME={} (Linux default)", mtwilsonHome);
+            }
+            if( Platform.isWindows() ) {
+                mtwilsonHome = System.getenv("ProgramFiles") + File.separator + "MtWilson"; // C:\Program Files\MtWilson  -- but we cannot create if does not exist unless administrator started the program with admin rights; XXX TODO maybe use C:\Intel\MtWilson instead
+                log.debug("MTWILSON_HOME={} (Windows default)", mtwilsonHome);
+            }
+        }
+        if( mtwilsonHome == null ) {
+            throw new IllegalStateException("MTWILSON_HOME environment variable must be defined");
+        }
+        return mtwilsonHome;
+    }
+    
 }

@@ -111,7 +111,7 @@
         </dependency>
         -->
         <!--
-       API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-autotest module
+       API-CLIENT depenedency and corresponding test.myconfig package moved to mtwilson-test module
     -->
     <dependency>
 		<groupId>com.intel.mtwilson.integration</groupId>
