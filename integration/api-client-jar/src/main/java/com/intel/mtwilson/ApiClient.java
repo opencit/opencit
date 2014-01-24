@@ -1551,4 +1551,16 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return results;                
     }
     
+    /**
+     * Retrieves list of available i18n locales
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    @Override
+    public String[] getLocales() throws IOException, ApiException, SignatureException {
+        String[] locales = fromJSON(httpGet(msurl("/i18n/locales")), String[].class);
+        return locales;
+    }
 }

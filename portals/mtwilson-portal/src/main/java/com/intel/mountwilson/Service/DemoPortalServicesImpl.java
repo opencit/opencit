@@ -756,4 +756,18 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		
 		return report.getPcrLogs();
 	}
+        
+    @Override
+    public String[] getLocales(ManagementService apiClientServices) throws DemoPortalException {
+        String[] ret = null;
+
+        try {
+            ret = apiClientServices.getLocales();
+
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ConnectionUtil.handleDemoPortalException(e);
+        }
+        return ret;
+    }
 }

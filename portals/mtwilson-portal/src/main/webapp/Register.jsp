@@ -1,3 +1,4 @@
+<%@ taglib prefix = "c" uri = "http://java.sun.com/jsp/jstl/core" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -38,6 +39,16 @@
                                         <td ><label>User Name : </label></td>
                                         <td><input type="text" class="textBoxClass" name="userNameTXT" id="userNameValue"></td>
                                         <td><span class="requiredField">*</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><label>Locale : </label></td>
+                                        <!--<td><select type="text" class="textBoxClass" name="userNameTXT" id="userNameValue"></td>-->
+                                        <td><select class="textBoxClass" id="ddlLocales" > <!-- onchange="fnChangehostType(this, true)" > -->
+                                            <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">
+                                                <option value="${locale.localeName}">${locale.localeName}</option>
+                                            </c:forEach>
+                                        </select></td>
+                                        <!--<td><span class="requiredField">*</span></td>-->
                                     </tr>
                                     <tr>
                                         <td><label>Password : </label></td>

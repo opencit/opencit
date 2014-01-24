@@ -4,6 +4,7 @@
 package com.intel.mountwilson.controller;
 
 import com.intel.mountwilson.constant.HelperConstant;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.HostVMMType;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
 import java.util.ArrayList;
@@ -106,10 +107,27 @@ public class ManagementConsoleViewController extends MultiActionController{
 	public ModelAndView getViewRequestPage(HttpServletRequest req,HttpServletResponse res ) {
 		return new ModelAndView("ViewRequest");
 	}
-    public ModelAndView getRegisterPage(HttpServletRequest req,HttpServletResponse res) {
-	log.info("WLMViewController.getRegisterPage >>");
-	return new ModelAndView("Register");
-    }	
+    public ModelAndView getRegisterPage(HttpServletRequest req, HttpServletResponse res) {
+        //log.info("WLMViewController.getRegisterPage >>");
+//        ModelAndView modelAndView = new ModelAndView("Register");
+//        try {
+//            List<Map<String, Object>> localeList = new ArrayList<Map<String, Object>>();
+//            for (String localeName : My.configuration().getAvailableLocales()) {
+//                Map<String, Object> map = new HashMap<String, Object>();
+//                map.put("localeName", localeName);
+//                localeList.add(map);
+//            }
+//            modelAndView.addObject("locales", localeList);
+//        } catch (Exception e) {
+//            log.error("Error while Getting locale selections." + e.getMessage());
+//            modelAndView.addObject("result", false);
+//            modelAndView.addObject("message", "Error while Getting locale selections.");
+//            return modelAndView;
+//        }
+//        return modelAndView;
+        
+        return new ModelAndView("Register");
+    }
    /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
     public ModelAndView getCAStatusPage(HttpServletRequest req,HttpServletResponse res ) {
 		return new ModelAndView("CAStatus");

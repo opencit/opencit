@@ -63,4 +63,6 @@ public interface ManagementService {
     HostConfigResponseList registerHosts(TxtHostRecordList hostRecords) throws IOException, ApiException, SignatureException;
     
     HostConfigResponseList registerHosts(HostConfigDataList hostRecords) throws IOException, ApiException, SignatureException;
+    
+    String[] getLocales() throws IOException, ApiException, SignatureException;
 }

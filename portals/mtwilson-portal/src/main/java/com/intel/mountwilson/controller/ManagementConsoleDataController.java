@@ -2639,6 +2639,35 @@ public class ManagementConsoleDataController extends MultiActionController {
         }
         return service;
     }
+    
+    /**
+     * Method to retrieve available locales.
+     *
+     * @param req (HttpServletRequest Object)
+     * @param res (HttpServletResponse Object)
+     * @return
+     */
+    public ModelAndView getLocales(HttpServletRequest req, HttpServletResponse res) {
+        ModelAndView responseView = new ModelAndView(new JSONView());
+
+        try {
+            List<Map<String, Object>> localeList = new ArrayList<Map<String, Object>>();
+            for (String localeName : demoPortalServices.getLocales(getAttestationService(req, ApiClient.class))) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("localeName", localeName);
+                localeList.add(map);
+            }
+            responseView.addObject("locales", localeList);
+        } catch (DemoPortalException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+            responseView.addObject("result", false);
+            responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+            return responseView;
+        }
+        responseView.addObject("message", "");
+        return responseView;
+    }
 
     // Methods to create services layer object, used by other methods while calling into a Service Layer.
     //these method are called by spring container while dependencies injuction.
