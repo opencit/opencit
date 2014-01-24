@@ -2,10 +2,10 @@
 -- ssbangal
 -- Adds the uuid column to all the tables and updates the same with a unique uuid value
 
-ALTER TABLE `mw_as`.`mw_portal_user` ADD COLUMN `uuid_hex` CHAR(36) NOT NULL;
+ALTER TABLE `mw_as`.`mw_portal_user` ADD COLUMN `uuid_hex` CHAR(36) NULL;
 UPDATE mw_portal_user SET uuid_hex = (SELECT uuid());
 
-ALTER TABLE `mw_as`.`mw_api_client_x509` ADD COLUMN `uuid_hex` CHAR(36) NOT NULL;
+ALTER TABLE `mw_as`.`mw_api_client_x509` ADD COLUMN `uuid_hex` CHAR(36) NULL;
 UPDATE mw_api_client_x509 SET uuid_hex = (SELECT uuid());
 
 ALTER TABLE `mw_as`.`mw_oem` ADD COLUMN `uuid_hex` CHAR(36) NOT NULL;
