@@ -104,7 +104,7 @@
     <!-- for security data objects in JPA -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>MSData</artifactId>
+			<artifactId>mtwilson-management-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

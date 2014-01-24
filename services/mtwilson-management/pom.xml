@@ -81,12 +81,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>MSCommon</artifactId>
+			<artifactId>mtwilson-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>MSData</artifactId>
+			<artifactId>mtwilson-management-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -190,11 +190,6 @@
 			<version>${project.version}</version>
 		</dependency>
                 		
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>mtwilson-util</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 <!--                <dependency>
                     <groupId>org.glassfish.metro</groupId>
                     <artifactId>webservices-osgi</artifactId>

@@ -127,7 +127,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>MSData</artifactId>
+            <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

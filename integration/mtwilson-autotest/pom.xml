@@ -124,7 +124,7 @@
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>MSCommon</artifactId>
+		<artifactId>mtwilson-util</artifactId>
 		<version>${project.version}</version>        
     </dependency>
     <dependency>
@@ -139,7 +139,7 @@
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>MSData</artifactId>
+		<artifactId>mtwilson-management</artifactId>
 		<version>${project.version}</version>        
     </dependency>
         <dependency>
