@@ -14,7 +14,7 @@ import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;

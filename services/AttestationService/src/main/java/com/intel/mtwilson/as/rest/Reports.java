@@ -9,7 +9,7 @@ import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;

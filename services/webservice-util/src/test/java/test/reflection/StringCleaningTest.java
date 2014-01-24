@@ -9,9 +9,9 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.HostVMMType;
 import com.intel.mtwilson.datatypes.HostWhiteListTarget;
-import com.intel.mtwilson.datatypes.RegExAnnotation;
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -73,7 +73,7 @@ public class StringCleaningTest {
         public List<Pet> newPetList = new ArrayList<Pet>(Arrays.asList(new Pet[] {new Pet(),new Pet(),new Pet()}));
         
         public String getName() { return "bob"; }
-        @Regex(RegExAnnotation.IPADDR_FQDN)
+        @Regex(RegexPatterns.IPADDR_FQDN)
         public String getHostName() { return "10.1.71.81";}
         
         public byte[] getBinaryData() { return new byte[] { 0, 0, 0, 0 }; }

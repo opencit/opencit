@@ -6,7 +6,7 @@ import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.helper.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.io.IOException;
 import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;

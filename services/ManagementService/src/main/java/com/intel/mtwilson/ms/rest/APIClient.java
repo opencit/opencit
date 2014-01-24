@@ -10,7 +10,7 @@ import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

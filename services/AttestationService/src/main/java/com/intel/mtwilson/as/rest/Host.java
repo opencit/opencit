@@ -32,7 +32,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
 import java.io.IOException;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DefaultValue;

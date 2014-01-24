@@ -9,7 +9,7 @@ import com.intel.mtwilson.datatypes.OsData;
 import java.util.List;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

@@ -12,7 +12,7 @@ import com.intel.mtwilson.ms.business.BulkHostRegBO;
 import com.intel.mtwilson.ms.common.MSException;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;

@@ -1,5 +1,6 @@
 package com.intel.mtwilson.datatypes;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.Regex;
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -143,7 +144,7 @@ public class HostConfigData {
     }
 
     @Override
-    @Regex(RegExAnnotation.ANY_VALUE)
+    @Regex(RegexPatterns.ANY_VALUE)
     public String toString() {
         return "WhiteListConfig [biosWhiteList=" + biosWhiteList
                     + ", vmmWhiteList=" + vmmWhiteList + ", biosWLTarget="

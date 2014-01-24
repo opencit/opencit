@@ -14,7 +14,7 @@ import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.x509.X509Util;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;

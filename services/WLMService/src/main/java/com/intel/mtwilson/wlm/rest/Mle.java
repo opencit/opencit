@@ -53,7 +53,7 @@ import com.intel.mtwilson.datatypes.ModuleWhiteList;
 import java.util.List;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
-import com.intel.mtwilson.util.ValidationUtil;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
