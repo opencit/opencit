@@ -13,7 +13,7 @@ import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblModuleManifestLog;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import com.intel.mtwilson.as.data.TblTaLog;
-import com.intel.mtwilson.as.helper.ASPersistenceManager;
+import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.mtwilson.audit.controller.AuditLogEntryJpaController;
 import com.intel.mtwilson.audit.data.AuditLogEntry;
 import com.intel.mtwilson.setup.Command;

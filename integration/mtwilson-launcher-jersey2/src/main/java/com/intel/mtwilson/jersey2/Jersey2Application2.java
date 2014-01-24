@@ -64,9 +64,23 @@ register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class);
 register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // jersey2 equivalent of com.sun.jersey.api.container.filter.PostReplaceFilter
 register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
+//register(com.intel.mtwilson.as.helper.ASAuthenticationFilter.class); // XXX TODO to be replaced with APACHE SHIRO
+//register(com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter.class);// XXX TODO re-enable
+//register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
+register(com.intel.mtwilson.as.helper.ASLocalizationFilter.class);
+// XXX TODO extension point here to load all resource classes... jersey already has this capability but see comment below, it's not working properly and only one resource class gets loaded when we use the "packages" directive
 register(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);
 register(com.intel.mtwilson.as.rest.v2.resource.Files.class);
 register(com.intel.mtwilson.as.rest.v2.resource.Users.class);
+//register(com.intel.mtwilson.as.rest.AsStatus.class);
+//register(com.intel.mtwilson.as.rest.AssetTagCert.class);
+//register(com.intel.mtwilson.as.rest.BulkHostTrust.class);
+//register(com.intel.mtwilson.as.rest.CA.class);
+//register(com.intel.mtwilson.as.rest.Host.class);
+//register(com.intel.mtwilson.as.rest.PollHosts.class);
+//register(com.intel.mtwilson.as.rest.Reports.class);
+//register(com.intel.mtwilson.as.rest.SAML.class);
+//register(com.intel.mtwilson.as.rest.Test.class);
 
         // XXX TODO LOW/NO PRIORITY  register(ApplicationWwwUrlFormEncodedProvider.class); // low priority for allowing html forms to create objects using POST ...  would go along with an ApplicationHtmlProvider.class which would implement message body writer and generate html for any obejct... basically a fields/values table for collections and a key/value table for a single object, with links from meta section rendered as <a> tags, etc.  it could load an html file template from configuration and use antlr, stringtemplate, or moustache plugins to render it with the given object. not intended for creating fully-featured web apps but it could be used for quick in browser testing and browsing of regular resources... 
 

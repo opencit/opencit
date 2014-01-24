@@ -71,10 +71,8 @@ This error message indicates you need jackson 1.x implementation like org.codeha
         </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-service</artifactId>
+            <artifactId>mtwilson-attestation-ws-v1</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
-            <classifier>classes</classifier>
         </dependency>
 
         <dependency>

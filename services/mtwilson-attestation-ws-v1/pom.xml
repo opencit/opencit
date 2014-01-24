@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mtwilson-attestation-ws-v1</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>mtwilson-attestation-ws-v1</name>
 
     <parent>
@@ -19,75 +19,12 @@
       <include>**/*.properties</include>
     </includes>
   </testResource>
-  <!--
-  <testResource>
-      <directory>../ASData/src/main/resources/META-INF</directory>
-      <includes>
-          <include>**/*.xml</include>
-      </includes>
-  </testResource>
-  -->
 </testResources>	
 	
 		<plugins>
 		    
 
 		    
-		    <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-jar-plugin</artifactId>
-			<version>2.4</version>
-			<executions>
-			    <execution>
-				<id>create-core</id>
-				<phase>package</phase>
-				<goals>
-				    <goal>jar</goal>
-				</goals>
-				<configuration>
-				    <classifier>core</classifier>
-				    <excludes>
-					<exclude>com/intel/mtwilson/as/premium/</exclude>
-				    </excludes>
-				</configuration>
-			    </execution>
-			    <execution>
-				<id>create-premium</id>
-				<phase>package</phase>
-				<goals>
-				    <goal>jar</goal>
-				</goals>
-				<configuration>
-				    <classifier>premium</classifier>
-				    <includes>
-					<include>com/intel/mtwilson/as/premium/*</include>
-				    </includes>
-				</configuration>
-			    </execution>
-			</executions>
-		    </plugin>
-		    
-		    
-			<plugin>
-				<groupId>com.sun.tools.xjc.maven2</groupId>
-				<artifactId>maven-jaxb-plugin</artifactId>
-                                <version>1.1.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<includeSchemas>
-						<includeSchema>xsd/*.xsd</includeSchema>
-					</includeSchemas>
-					<strict>true</strict>
-					<verbose>true</verbose>
-				</configuration>
-			</plugin>
-
 	    
 	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -100,144 +37,6 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
-
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-surefire-plugin</artifactId>
-  <version>2.12.4</version>
-  <configuration>
-    <testFailureIgnore>true</testFailureIgnore>
-    <systemProperties>
-      <property>
-        <name>java.util.logging.config.file</name>
-        <value>${project.build.directory}/test-classes/logging.properties</value>
-      </property>
-    </systemProperties>
-  </configuration>
-</plugin>
-
-	    <plugin>
-		<artifactId>maven-war-plugin</artifactId>
-		<version>2.2</version>
-		<configuration>
-		    <archiveClasses>true</archiveClasses>
-		    <attachClasses>true</attachClasses>
-		    <classifier>premium</classifier>
-<!--
-                    <overlays>
-                        <overlay>
-                            <groupId>com.intel.mtwilson.services</groupId>
-                            <artifactId>ASData</artifactId>
-                            <type>jar</type>
-                            <includes>
-                                <include>META-INF/**/*.xml</include>
-                                <exclude>com/*</exclude>
-                            </includes>
-                        </overlay>
-                        <overlay>
-                            <groupId>com.intel.mtwilson.services</groupId>
-                            <artifactId>MSData</artifactId>
-                            <type>jar</type>
-                            <includes>
-                                <include>META-INF/**/*.xml</include>
-                                <exclude>com/*</exclude>
-                            </includes>
-                        </overlay>
-                    </overlays>
--->                    
-		</configuration>
-	    </plugin>
-	    
-	    <plugin>
-                <groupId>org.glassfish.maven.plugin</groupId>
-                <artifactId>maven-glassfish-plugin</artifactId>
-            </plugin>
-
-	
-<plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-	    <id>default-cli</id>
-            <phase>package</phase>
-	    <goals>
-		<goal>run</goal>
-	    </goals>
-            <configuration>
-		<target>
-	    <zip destfile="${project.build.directory}/${project.artifactId}-${project.version}-core.war">
-		<zipfileset src="${project.build.directory}/${project.artifactId}-${project.version}-premium.war">
-		    <exclude name="WEB-INF/lib/${project.artifactId}-${project.version}.jar" />
-		</zipfileset>
-		<zipfileset dir="${project.build.directory}" prefix="WEB-INF/lib">
-		    <include name="${project.artifactId}-${project.version}-core.jar" />
-		</zipfileset>
-	    </zip>
-			
-		</target>
-            </configuration>
-          </execution>
-        </executions>
-            <dependencies>
-		<dependency>
-		    <groupId>org.apache.ant</groupId>
-		    <artifactId>ant</artifactId>
-		    <version>1.8.4</version>
-		</dependency>
-                <dependency>
-                    <groupId>ant-contrib</groupId>
-                    <artifactId>ant-contrib</artifactId>
-                    <version>1.0b3</version>
-                </dependency>
-            </dependencies>
-      </plugin>	    
-		    	
-			
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <executions>
-                <execution>
-                    <id>attach-artifacts</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>attach-artifact</goal>
-                    </goals>
-                    <configuration>
-                        <artifacts>
-                            <artifact>
-                                <file>${project.build.directory}/${project.artifactId}-${project.version}-core.war</file>
-                                <type>war</type>
-				<classifier>core</classifier>
-                            </artifact>
-                        </artifacts>
-                    </configuration>
-                </execution>
-            </executions>
-        </plugin>
-	
-<!--
-To test the application:
-    mvn jetty:start
-    http://localhost:8080/resources/hosts
-This error indicates you need jersey:
-    Caused by: com.sun.jersey.api.MessageException: A message body writer for Java class com.intel.mtwilson.datatypes.AuthResponse, and Java type class com.intel.mt
-    wilson.datatypes.AuthResponse, and MIME media type application/json was not found
--->		
-    <plugin>
-    <!-- reference: http://wiki.eclipse.org/Jetty/Feature/Jetty_Maven_Plugin -->
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-maven-plugin</artifactId>
-        <version>9.1.0.RC2</version>
-        <configuration>
-          <webAppConfig>
-            <contextPath>/</contextPath>
-            <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
-<!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
-          </webAppConfig>
-        </configuration>
-      </plugin>
 
         </plugins>
 <!--
@@ -326,15 +125,10 @@ This error indicates you need jersey:
 			<version>${project.version}</version>
 		 <type>jar</type>
 		 </dependency>
-       <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ASData</artifactId>
+			<artifactId>mtwilson-attestation</artifactId>
 			<version>${project.version}</version>
-		 <type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -343,7 +137,7 @@ This error indicates you need jersey:
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ASCommon</artifactId>
+			<artifactId>mtwilson-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -561,12 +355,6 @@ This error indicates you need jersey:
             <version>${project.version}</version>
         </dependency>
 -->
-	<dependency>
-		<groupId>mysql</groupId>
-		<artifactId>mysql-connector-java</artifactId>
-        <scope>provided</scope>
-        <optional>true</optional>
-	</dependency>
 
         <dependency>
             <groupId>joda-time</groupId>
@@ -588,6 +376,12 @@ This error indicates you need jersey:
             <version>${project.version}</version>
         </dependency>
         
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>jsr311-api</artifactId>
+            <version>1.1.1</version>
+            <scope>provided</scope>
+        </dependency>
         
 <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
 <dependency>

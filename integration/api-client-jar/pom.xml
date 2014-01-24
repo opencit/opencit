@@ -360,7 +360,9 @@
         </dependency>
 
         
-        <!-- begin jersey  -->
+        <!-- begin jersey 
+        TODO upgrade to jersey2: org.glassfish.jersey.core:jersey-client
+        -->
     
         <!-- jersey-core provides MultivaluedMap and MediaType -->
         <dependency>

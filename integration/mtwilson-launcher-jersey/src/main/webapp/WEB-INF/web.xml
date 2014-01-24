@@ -15,7 +15,7 @@
 -->
     <listener>
         <description>Cleans up Persistence factory.</description>
-        <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
+        <listener-class>com.intel.mtwilson.as.ASPersistenceManager</listener-class>
     </listener>
     <servlet>
         <servlet-name>Jersey1</servlet-name>

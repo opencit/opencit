@@ -22,7 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.owasp.esapi.codecs.Hex;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+//import org.owasp.esapi.codecs.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,8 +155,12 @@ public class VMWare51Esxi51   {
                  * if it only hashes if it's longer than 20 bytes, or if it always hashes.  Probably always hashes for consistency.
                  */
                 log.error("Event Digest is non-zero longer than 20 bytes: {}  -- trying to decode it", digest);
-                return new Measurement(Sha1Digest.valueOf(Hex.decode(digest)), label, info ); // XXX need some thought on how to handle this.  maybe change the Measurement class to accept ANY SIZE byte[]  instead of a Sha1Digest ??
-                
+                try{
+                return new Measurement(Sha1Digest.valueOf(Hex.decodeHex(digest.toCharArray())), label, info ); // XXX need some thought on how to handle this.  maybe change the Measurement class to accept ANY SIZE byte[]  instead of a Sha1Digest ??
+                }
+                catch(DecoderException e) {
+                    throw new IllegalArgumentException(digest); // XXX TODO throw a MWException with appropriate ErrorCode for invalid measurement data
+                }
     }
 
 	private static String getCommandLine(HostTpmCommandEventDetails commandEventDetails) {
