@@ -258,6 +258,16 @@
             <version>${project.version}</version>
         </dependency>
         
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-client-java6</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>mtwilson-http-security-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         
 <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
 <dependency>
