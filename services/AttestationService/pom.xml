@@ -366,13 +366,13 @@ This error indicates you need jersey:
 			<artifactId>mtwilson-trust-utils</artifactId>
 			<version>${project.version}</version>
         </dependency>
-		
+		<!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
             <version>${jersey-version}</version>
         </dependency>
-
+        -->
         <dependency>
                 <groupId>org.opensaml</groupId>
                 <artifactId>opensaml</artifactId>
@@ -436,6 +436,7 @@ This error indicates you need jersey:
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--
         <dependency>
                 <groupId>com.jayway.restassured</groupId>
                 <artifactId>rest-assured</artifactId>
@@ -448,6 +449,7 @@ This error indicates you need jersey:
             <version>${jersey-version}</version>
             <scope>test</scope>
         </dependency>
+        -->
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.ejb</artifactId>
@@ -540,6 +542,13 @@ This error indicates you need jersey:
             <artifactId>audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+<!-- used by AsAuthenticationFilter -->        
+<dependency>
+    <groupId>javax.ws.rs</groupId>
+    <artifactId>javax.ws.rs-api</artifactId>
+    <version>2.0</version>
+</dependency>
         <!--
         <dependency>
             <groupId>org.codehaus.enunciate</groupId>

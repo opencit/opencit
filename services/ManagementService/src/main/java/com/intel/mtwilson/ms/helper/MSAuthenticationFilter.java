@@ -10,7 +10,8 @@ import com.intel.mtwilson.security.jersey.HmacRequestVerifier;
 import com.intel.mtwilson.security.jersey.X509RequestVerifier;
 import com.intel.mtwilson.security.jpa.ApiClientBO;
 import com.intel.mtwilson.security.jpa.ApiClientX509BO;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
+//import com.sun.jersey.spi.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
