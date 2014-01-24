@@ -9,7 +9,7 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.*;
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
 @Path("/test")
 public class Test {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private HostBO hostBO = new ASComponentFactory().getHostBO(); 
+    private HostBO hostBO = ASComponentFactory.getHostBO(); 
     private static HostAgentFactory hostAgentFactory = new HostAgentFactory(); 
 //    private static VMwareConnectionPool vcenterPool = new VMwareConnectionPool(); // BUG #497 replacing this with the HostAgentFactory - the underlying implementation uses a pool and respects tls policy for each host
     

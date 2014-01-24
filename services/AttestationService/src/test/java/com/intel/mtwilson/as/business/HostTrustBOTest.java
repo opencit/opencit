@@ -3,7 +3,7 @@ package com.intel.mtwilson.as.business;
 
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.HostLocation;
 import com.intel.mtwilson.datatypes.HostTrustStatus;
 import com.intel.mtwilson.model.*;
@@ -39,7 +39,7 @@ public class HostTrustBOTest {
     
    //@Test
     public void testAddHostLocation() {
-        HostTrustBO hostTBO = new ASComponentFactory().getHostTrustBO();
+        HostTrustBO hostTBO = ASComponentFactory.getHostTrustBO();
         boolean result = hostTBO.addHostLocation(new HostLocation("Folsom", "12345678"));
         System.out.println(result);
         

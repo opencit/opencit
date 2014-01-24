@@ -25,9 +25,9 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblSamlAssertion;
 import java.io.IOException;
 import com.intel.mtwilson.as.data.TblTaLog;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.util.Aes128DataCipher;
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -877,7 +877,7 @@ public class HostBO extends BaseBO {
 
         public HostResponse addHostByFindingMLE(TxtHostRecord hostObj) {
             try {
-                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+                return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
             } catch (ASException ae){
                 throw ae;
 			}
@@ -885,7 +885,7 @@ public class HostBO extends BaseBO {
 
         public HostResponse updateHostByFindingMLE(TxtHostRecord hostObj) {
             try {
-                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
+                return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostObj);
             } catch (ASException ae) {
                 throw ae;
             }

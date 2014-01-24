@@ -16,7 +16,7 @@ import com.intel.mtwilson.api.ApiRequest;
 import com.intel.mtwilson.api.ApiResponse;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.AssetTagCertAssociateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;

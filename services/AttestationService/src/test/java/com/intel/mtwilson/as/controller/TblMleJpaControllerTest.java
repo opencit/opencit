@@ -5,7 +5,7 @@
 package com.intel.mtwilson.as.controller;
 
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 
 import java.util.List;
 import javax.persistence.Persistence;

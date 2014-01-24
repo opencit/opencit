@@ -3,7 +3,7 @@ package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
@@ -23,7 +23,7 @@ import javax.ws.rs.QueryParam;
 @Stateless
 @Path("/saml")
 public class SAML {
-    private HostTrustBO hostTrustBO = new ASComponentFactory().getHostTrustBO();
+    private HostTrustBO hostTrustBO = ASComponentFactory.getHostTrustBO();
 //    private final Marshaller hostManifestReportXML;
 //    private SamlGenerator saml;
 //    

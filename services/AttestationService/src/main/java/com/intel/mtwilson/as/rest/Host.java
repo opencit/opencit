@@ -3,7 +3,7 @@ package com.intel.mtwilson.as.rest;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
@@ -27,7 +27,7 @@ import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @Path("/hosts")
 public class Host {
 
-        private HostBO hostBO = new ASComponentFactory().getHostBO();
+        private HostBO hostBO = ASComponentFactory.getHostBO();
         private Logger log = LoggerFactory.getLogger(getClass());
 
         /**
@@ -67,7 +67,7 @@ public class Host {
         public HostLocation getLocation(@QueryParam("hostName") String hostName) {
                 ValidationUtil.validate(hostName);
                 if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-                else return new ASComponentFactory().getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
+                else return ASComponentFactory.getHostTrustBO().getHostLocation(new Hostname(hostName)); // datatype.Hostname            
         }
 
         @RolesAllowed({"Attestation", "Security"})
@@ -76,7 +76,7 @@ public class Host {
         @Path("/location")
         public String addLocation(HostLocation hlObj) {
                 ValidationUtil.validate(hlObj);
-                Boolean result = new ASComponentFactory().getHostTrustBO().addHostLocation(hlObj);
+                Boolean result = ASComponentFactory.getHostTrustBO().addHostLocation(hlObj);
                 return Boolean.toString(result);
         }
 
@@ -92,7 +92,7 @@ public class Host {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
             if( aikId.isValid() ) {
-                HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatusByAik(aikId);
+                HostTrustStatus trust = ASComponentFactory.getHostTrustBO().getTrustStatusByAik(aikId);
                 return new HostTrustResponse(new Hostname(aikId.toString()), trust);                
             }
             throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
@@ -120,7 +120,7 @@ public class Host {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
             if( aikId.isValid() ) {
-                return new ASComponentFactory().getHostTrustBO().getTrustWithSamlByAik(aikId, forceVerify);
+                return ASComponentFactory.getHostTrustBO().getTrustWithSamlByAik(aikId, forceVerify);
             }
             throw new ASException(ErrorCode.HTTP_INVALID_REQUEST, "Invalid AIK fingerprint: must be SHA1 digest");
         }
@@ -155,7 +155,7 @@ public class Host {
             // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
             Sha1Digest aikId = new Sha1Digest(aikFingerprint);
             if( aikId.isValid() ) {
-                TblHosts host = new ASComponentFactory().getHostBO().getHostByAik(aikId);
+                TblHosts host = ASComponentFactory.getHostBO().getHostByAik(aikId);
                 KeystoreCertificateRepository repository = new KeystoreCertificateRepository(host.getTlsKeystoreResource(),My.configuration().getTlsKeystorePassword()); 
                 List<X509Certificate> certificates = repository.getCertificates(); // guaranteed not to be null, but may be empty
                 for(X509Certificate certificate : certificates) {
@@ -289,8 +289,8 @@ public class Host {
                         // 0.5.1 returned MediaType.TEXT_PLAIN string like "BIOS:0,VMM:0" :  return new HostTrustBO().getTrustStatusString(new Hostname(hostName)); // datatype.Hostname            
                         Hostname hostname = new Hostname(hostName);
                         if(hostname.isValid()){
-                            //HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatus(hostname);
-                            HostTrustStatus trust = new ASComponentFactory().getHostTrustBO().getTrustStatusWithCache(hostName, forceVerify);
+                            //HostTrustStatus trust = ASComponentFactory.getHostTrustBO().getTrustStatus(hostname);
+                            HostTrustStatus trust = ASComponentFactory.getHostTrustBO().getTrustStatusWithCache(hostName, forceVerify);
                         return new HostTrustResponse(hostname, trust);
                         }
                         else throw new ASException(ErrorCode.AS_MISSING_INPUT, "hostName");
@@ -345,7 +345,7 @@ public class Host {
         @Path("/mle")
         public HostResponse registerHostByFindingMLE(TxtHostRecord hostRecord) {
                 ValidationUtil.validate(hostRecord);
-                return new ASComponentFactory().getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
+                return ASComponentFactory.getHostTrustBO().getTrustStatusOfHostNotInDBAndRegister(hostRecord);
         }
 
         @RolesAllowed({"Attestation"})
@@ -355,7 +355,7 @@ public class Host {
         @Path("/mle/verify")
         public String checkMatchingMLEExists(TxtHostRecord hostRecord) {
                 ValidationUtil.validate(hostRecord);
-                String result = new ASComponentFactory().getHostTrustBO().checkMatchingMLEExists(hostRecord, 
+                String result = ASComponentFactory.getHostTrustBO().checkMatchingMLEExists(hostRecord, 
                         hostRecord.Location.substring(0, hostRecord.Location.indexOf("|")), hostRecord.Location.substring(hostRecord.Location.indexOf("|")+1));
                 System.out.println("checkMatchingMLEExists RESULT:" + result);
                 return result;

@@ -4,7 +4,7 @@ import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.business.BulkHostMgmtBO;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigResponse;

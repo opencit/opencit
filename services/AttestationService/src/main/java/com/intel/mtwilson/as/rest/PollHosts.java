@@ -2,7 +2,7 @@
 package com.intel.mtwilson.as.rest;
 
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
@@ -71,7 +71,7 @@ public class PollHosts {
         try {
             ValidationUtil.validate(input);
             log.debug("PCR Mask {}", input.pcrMask);
-            return new ASComponentFactory().getHostTrustBO().getPollHosts(input);
+            return ASComponentFactory.getHostTrustBO().getPollHosts(input);
         }
         catch(ASException e) {
             throw e;

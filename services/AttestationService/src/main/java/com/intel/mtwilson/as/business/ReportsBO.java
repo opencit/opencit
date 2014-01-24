@@ -9,7 +9,7 @@ import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.data.TblPcrManifest;
 import com.intel.mtwilson.as.business.trust.Util;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.datatypes.ErrorCode;
 //import com.intel.mtwilson.model;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;

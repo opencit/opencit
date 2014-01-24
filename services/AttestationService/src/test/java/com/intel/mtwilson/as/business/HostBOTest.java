@@ -11,7 +11,7 @@ import com.intel.mtwilson.agent.HostAgent;
 import com.intel.mtwilson.agent.HostAgentFactory;
 import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.datatypes.*;
@@ -84,7 +84,7 @@ public class HostBOTest {
     
     @Test
     public void testAddHostLocation() {
-        HostTrustBO hostTBO = new ASComponentFactory().getHostTrustBO();
+        HostTrustBO hostTBO = ASComponentFactory.getHostTrustBO();
         boolean result = hostTBO.addHostLocation(new HostLocation("Folsom", "12345678"));
         System.out.println(result);
     }
@@ -218,7 +218,7 @@ public class HostBOTest {
      */
     @Test
     public void testGetTrustStatusForKnownHost() throws IOException {
-        HostTrustBO htbo = new ASComponentFactory().getHostTrustBO();
+        HostTrustBO htbo = ASComponentFactory.getHostTrustBO();
         HostTrustStatus response = htbo.getTrustStatus(new Hostname(knownHost));
         System.out.println("testGetTrustStatusForKnownHost response bios: "+response.bios+" vmm: "+response.vmm);
 //        assertTrue("BIOS:0,VMM:0".equals(response));
@@ -328,7 +328,7 @@ public class HostBOTest {
 
         HostAgentFactory factory = new HostAgentFactory();
         HostAgent agent = factory.getHostAgent(tblHosts);
-        HostBO hbo = new ASComponentFactory().getHostBO();
+        HostBO hbo = ASComponentFactory.getHostBO();
         PcrManifest pcrManifest = agent.getPcrManifest();
         HostResponse response = hbo.addHost(hostObj, pcrManifest, null); //.getTrustStatus(new Hostname(hostName));
         
@@ -343,7 +343,7 @@ public class HostBOTest {
     public void SavyTest() throws IOException, CryptographyException, KeyManagementException {
         My.initDataEncryptionKey();
         String hostName = "10.1.71.169";
-        HostTrustBO hbo = new ASComponentFactory().getHostTrustBO();
+        HostTrustBO hbo = ASComponentFactory.getHostTrustBO();
         hbo.getTrustStatus(new Hostname(hostName));
         
     }

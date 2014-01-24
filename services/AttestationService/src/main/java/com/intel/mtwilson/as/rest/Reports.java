@@ -5,7 +5,7 @@ import com.intel.mountwilson.as.common.ValidationException;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.as.business.ReportsBO;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.*;
@@ -137,5 +137,5 @@ public class Reports {
     }
     
     
-    ReportsBO reportsBO = new ASComponentFactory().getReportsBO();
+    ReportsBO reportsBO = ASComponentFactory.getReportsBO();
 }

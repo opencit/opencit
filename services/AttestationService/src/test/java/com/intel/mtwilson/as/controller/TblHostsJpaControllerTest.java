@@ -8,14 +8,14 @@ import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.ASPersistenceManager;
+import com.intel.mtwilson.as.ASPersistenceManager;
 
 import javax.persistence.Persistence;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;

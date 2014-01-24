@@ -8,7 +8,7 @@ package com.intel.mtwilson.as.controller;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblOs;
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.BeforeClass;

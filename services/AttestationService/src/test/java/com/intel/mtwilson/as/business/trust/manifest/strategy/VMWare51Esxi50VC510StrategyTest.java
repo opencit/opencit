@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import com.intel.mtwilson.as.helper.BaseBO;
+import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 
 public class VMWare51Esxi50VC510StrategyTest {

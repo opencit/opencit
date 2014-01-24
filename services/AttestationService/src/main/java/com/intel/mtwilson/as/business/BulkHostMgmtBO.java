@@ -6,7 +6,7 @@ package com.intel.mtwilson.as.business;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigResponse;
 import com.intel.mtwilson.datatypes.HostConfigResponseList;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class BulkHostMgmtBO {
 
     private Logger log = LoggerFactory.getLogger(getClass());
-    private HostBO hostBO = new ASComponentFactory().getHostBO();
+    private HostBO hostBO = ASComponentFactory.getHostBO();
     private int timeout;
     private static ExecutorService scheduler = Executors.newFixedThreadPool(ASConfig.getConfiguration().getInt("mtwilson.bulkmgmt.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
 

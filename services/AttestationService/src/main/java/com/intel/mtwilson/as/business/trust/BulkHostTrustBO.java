@@ -6,7 +6,7 @@ package com.intel.mtwilson.as.business.trust;
 
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.BulkHostTrustResponse;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.HostTrust;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BulkHostTrustBO {
     private Logger log = LoggerFactory.getLogger(getClass());
-    private HostTrustBO hostTrustBO = new ASComponentFactory().getHostTrustBO(); 
+    private HostTrustBO hostTrustBO = ASComponentFactory.getHostTrustBO(); 
 //    private int maxThreads;
     private int timeout;
     private static ExecutorService scheduler = Executors.newFixedThreadPool(ASConfig.getConfiguration().getInt("mtwilson.bulktrust.threads.max", 32)); //  bug #503 move thread pool to static so multiple requests do not overload it; TODO do we need to provide a web application listener that calls shutdown() on this pool?
