@@ -41,18 +41,14 @@
     <dependencies>
                 <dependency>
                     <groupId>com.intel.mtwilson.services</groupId>
-                    <artifactId>mtwilson-whitelist-service</artifactId>
-                    <classifier>classes</classifier> 
+                    <artifactId>mtwilson-whitelist</artifactId>
                     <version>${project.version}</version>
-                    <type>jar</type>                     
                 </dependency>
-               <!-- <dependency>
+               <dependency>
                     <groupId>com.intel.mtwilson.services</groupId>
-                    <artifactId>mtwilson-attestation-service</artifactId>
-                    <classifier>classes</classifier> 
+                    <artifactId>mtwilson-attestation</artifactId>
                     <version>${project.version}</version>
-                    <type>jar</type>                     
-                </dependency>         -->
+                </dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>

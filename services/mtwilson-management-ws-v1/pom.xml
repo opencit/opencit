@@ -80,10 +80,8 @@
     <dependencies>
                 <dependency>
                     <groupId>com.intel.mtwilson.services</groupId>
-                    <artifactId>mtwilson-whitelist-service</artifactId>
-                    <classifier>classes</classifier> 
+                    <artifactId>mtwilson-whitelist</artifactId>
                     <version>${project.version}</version>
-                    <type>jar</type>                     
                 </dependency>
 		<dependency>
 			<groupId>mysql</groupId>

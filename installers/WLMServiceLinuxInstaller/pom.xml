@@ -35,12 +35,20 @@
           </activation>
 
   <dependencies>
+      <!--
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
       <artifactId>mtwilson-whitelist-service</artifactId>
       <version>${project.version}</version>
       <type>war</type>
-    </dependency>	
+    </dependency>
+    -->
+    <dependency>
+      <groupId>com.intel.mtwilson.integration</groupId>
+      <artifactId>mtwilson-launcher-jersey2</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>mtwilson-linux-util</artifactId>
@@ -86,8 +94,8 @@
             <configuration>
               <artifactItems>
                 <artifactItem>
-                  <groupId>com.intel.mtwilson.services</groupId>
-                  <artifactId>mtwilson-whitelist-service</artifactId>
+                  <groupId>com.intel.mtwilson.integration</groupId>
+                  <artifactId>mtwilson-launcher-jersey2</artifactId>
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
