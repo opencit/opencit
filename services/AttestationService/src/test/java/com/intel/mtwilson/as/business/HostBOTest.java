@@ -83,6 +83,18 @@ public class HostBOTest {
     }
     
     @Test
+    public void testHostByUUID() throws IOException, CryptographyException{
+        //String UUID = "B21FD91B-EF72-E111-BD1D-001E67388954".toLowerCase();
+        String UUID = "b21fd91b-ef72-e111-bd1d-001e67388954";
+        TblHosts tblHosts = My.jpa().mwHosts().findByHwUUID(UUID);
+        if(tblHosts != null) {
+            System.err.println("found host!");
+           
+        }else
+            System.err.println("did not find host!");
+    }
+    
+    @Test
     public void testAddHostLocation() {
         HostTrustBO hostTBO = new ASComponentFactory().getHostTrustBO();
         boolean result = hostTBO.addHostLocation(new HostLocation("Folsom", "12345678"));

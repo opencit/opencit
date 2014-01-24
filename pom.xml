@@ -11,13 +11,13 @@
   <description>
     Mt Wilson is a middleware solution that enables data centers to attest
       to the trust of hypervisors and operating systems on multiple devices
-      including Servers, Clients, Network and Storage components.
+      including Servers, Clients, Network and Storage components.  
       The primary purpose of this attestation is for Trust Verification, Remediation, Reporting, 
       and Compliance in a Data Center and Cloud environments. Whether it is public 
       cloud, private cloud, hybrid or Enterprise cloud, the Attestation Solution can be 
       used by Cloud/Virtualization Resource Schedulers, SIEMs, Policy Engines and GRC tools, to 
       assess and provide an Assurance that the security components on the devices are 
-      protecting the assets executing or stored on the devices.      
+      protecting the assets executing or stored on the devices. 
   </description>
     
   <modules>

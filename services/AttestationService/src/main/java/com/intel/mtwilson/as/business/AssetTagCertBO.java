@@ -57,6 +57,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  *
@@ -110,7 +111,16 @@ public class AssetTagCertBO extends BaseBO{
 
             log.debug("assetTag writing cert to DB");
             My.jpa().mwAssetTagCertificate().create(atagCert);
+            
             result = true;
+            
+            // here we need to check a config option, mtwilson.atag.associate.hosts.auto
+            // now try to match a host to it
+            log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagCert.getSHA1Hash()));
+            AssetTagCertAssociateRequest request = new AssetTagCertAssociateRequest();
+            request.setSha1OfAssetCert(atagCert.getSHA1Hash());
+            //result = 
+            mapAssetTagCertToHost(request);
             
         } catch (ASException ase) {
             log.error("Error during creation of a new asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
@@ -119,19 +129,69 @@ public class AssetTagCertBO extends BaseBO{
             log.error("Unexpected error during creation of a new asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
+        
+        // Now that the asset tag has been created and added to the DB
+        // Check to see if any host has a matching UUID in the mw_hosts table
+        
         return result;       
     }
-
+    
     /**
      * This function would be used to associate a asset tag certificate with the host for which it is 
-     * provisioned for.
+     * provisioned for.  It does not require you know the ID of the host you are associating to.  
+     * Here you are giving the hash of the cert to the code and letting it find a matching host
      * @param atagObj
-     * @return 
+     * @return true if host was found, false if not
      */
     public boolean mapAssetTagCertToHost(AssetTagCertAssociateRequest atagObj) {
         boolean result = false;
-        Sha1Digest expectedHash = null;
+        log.debug("mapAssetTagCertToHost");
+        AssetTagCertAssociateRequest request = new AssetTagCertAssociateRequest();
+        try {
+            My.initDataEncryptionKey(); // needed for connection string decryption
+            if (atagObj.getSha1OfAssetCert() != null) {
+                log.debug("trying to associate tag to existing host using " + Hex.encodeHexString(atagObj.getSha1OfAssetCert()));
+                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1OfAssetCert());
+                // below code is for debugging.. we will delete it later.
+                // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
+                if (atagCerts.isEmpty() || atagCerts.size() > 1) {
+                    log.error("mapAssetTagCertToHost : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                    throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
+                } else {
+                    MwAssetTagCertificate atagCert = atagCerts.get(0);
+                    request.setSha1OfAssetCert(atagCert.getSHA1Hash());
+                    String uuid = atagCert.getUuid().toLowerCase().trim();
+                    log.debug("searching using " + uuid);
+                    TblHosts tblHost = My.jpa().mwHosts().findByHwUUID(uuid);
+                    if(tblHost != null) {
+                        log.debug("found host matching uuid of cert, going to assoicate with host id = " + tblHost.getId());
+                        request.setHostID(tblHost.getId());
+                        //atagObj.setHostID(tblHost.getId());
+                        result = mapAssetTagCertToHostById(request);
+                    }else{
+                        log.debug("found no matching uuid of cert");
+                        result = false;
+                    }
+                }
+            }
+        }catch(Exception ex){
+            log.error("Unexpected error during mapping of host to the asset tag certificate. Error Details - {}.", ex.getMessage());
+            throw new ASException(ex);
+        }       
         
+        return result;
+    }
+    
+    /**
+     * This function would be used to associate a asset tag certificate with the host for which it is 
+     * provisioned for.  It requires you know the ID of the host it is to be associated with 
+     * @param atagObj
+     * @return 
+     */
+    public boolean mapAssetTagCertToHostById(AssetTagCertAssociateRequest atagObj) {
+        boolean result = false;
+        Sha1Digest expectedHash = null;
+        log.debug("mapAssetTagCertToHostById");
         try {
             My.initDataEncryptionKey(); // needed for connection string decryption
             // Find the asset tag certificate for the specified Sha256Hash value
@@ -140,7 +200,7 @@ public class AssetTagCertBO extends BaseBO{
                 // below code is for debugging.. we will delete it later.
                 // List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByHostUUID("494cb5dc-a3e1-4e46-9b52-e694349b1654");
                 if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                    log.error("mapAssetTagCertToHost : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                    log.error("mapAssetTagCertToHostById : Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
                     throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
                 } else {
                     // Now that we have the asset tag identified, let us update the entry with the host ID for which it has
@@ -155,7 +215,7 @@ public class AssetTagCertBO extends BaseBO{
                     if (cs.getVendor() == Vendor.CITRIX) {
                         // Citrix stores the SHA1 digest value as such in the NVRAM
                         Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
-                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
+                        log.debug("mapAssetTagCertToHostById : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
                         
                         // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
                         
@@ -168,15 +228,15 @@ public class AssetTagCertBO extends BaseBO{
                         
                         // Final value that is written into PCR 22 is the SHA1 of the zero appended value
                         expectedHash = Sha1Digest.ZERO.extend( Sha1Digest.digestOf(tag.toHexString().getBytes()) );
-                        log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
+                        log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
                         
                     } else if (cs.getVendor() == Vendor.VMWARE) {
                         
                         Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
-                        log.debug("mapAssetTagCertToHost : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
+                        log.debug("mapAssetTagCertToHostById : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
 
                         expectedHash =Sha1Digest.ZERO.extend(tag.toByteArray());
-                        log.debug("mapAssetTagCertToHost : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
+                        log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
                         
                     } else {
                         // Default open source
@@ -189,14 +249,14 @@ public class AssetTagCertBO extends BaseBO{
                     result = true;
                 }
             } else {
-                log.error("Sha256Hash for the asset tag is not specified.");
+                log.error("Sha1Hash for the asset tag is not specified.");
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
         } catch (ASException ase) {
             log.error("Error during mapping of host to the asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;
         } catch (Exception ex) {
-            log.error("Unexpected error during mapping of host to the asset tag certificate. Error Details - {}.", ex.getMessage());
+            log.error("Unexpected error during mapping of host by id to the asset tag certificate. Error Details - {}.", ex.getMessage());
             throw new ASException(ex);
         }
         return result;       
@@ -212,7 +272,7 @@ public class AssetTagCertBO extends BaseBO{
      * @param atagObj
      * @return 
      */
-    public boolean unmapAssetTagCertFromHost(AssetTagCertAssociateRequest atagObj) {
+    public boolean unmapAssetTagCertFromHostById(AssetTagCertAssociateRequest atagObj) {
         boolean result = false;
         
         try {

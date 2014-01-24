@@ -93,4 +93,8 @@ public class At {
         return client;
     }
     
+    public static ClientResource hostUuids() {
+        return new ClientResource(baseurl() + "/host-uuids");
+    }
+    
 }
