@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mtwilson-portal</artifactId>
     <packaging>war</packaging>
-    <name>Mt Wilson Web Portal</name>
+    <name>mtwilson-portal</name>
     
     <parent>
         <groupId>com.intel.mtwilson.portals</groupId>
@@ -160,24 +160,17 @@
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-crypto</artifactId>
-            <version>0.2-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-authz-token</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-jpa</artifactId>
-            <version>0.2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
-    <properties>
-        <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
-    </properties>
-   
     <build>
 	<plugins>
         
