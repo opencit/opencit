@@ -3,7 +3,7 @@
 
     <artifactId>mtwilson-client-java6</artifactId>
     <packaging>jar</packaging>
-    <name>API Client for Java 6</name>
+    <name>mtwilson-client-java6</name>
     <description>
         The API Client provides an easy-to-use programming interface to access 
         Mt Wilson services. Using the API Client, you can manage the Whitelist,

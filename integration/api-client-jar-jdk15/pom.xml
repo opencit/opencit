@@ -3,12 +3,12 @@
 
   <artifactId>mtwilson-client-java5</artifactId>
   <packaging>jar</packaging>
-  <name>API Client for Java 5</name>
+  <name>mtwilson-client-java5</name>
   
     <parent>
 		<groupId>com.intel.mtwilson.integration</groupId>
 		<artifactId>mtwilson-integration</artifactId>
-		<version>1.2-SNAPSHOT</version>
+		<version>1.2.3-SNAPSHOT</version>
     </parent>
 
     <build>
