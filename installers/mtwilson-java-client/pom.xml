@@ -5,13 +5,13 @@
   <artifactId>mtwilson-client-java6-installer</artifactId>
 
   <packaging>pom</packaging>
-  <name>Mt Wilson Client for Java</name>
+  <name>mtwilson-client-java6-installer</name>
   <description>Mt Wilson API for Java Applications</description>
 
     <parent>
         <groupId>com.intel.mtwilson.linux</groupId>
         <artifactId>mtwilson-linux</artifactId>
-        <version>1.2-SNAPSHOT</version>
+        <version>1.2.3-SNAPSHOT</version>
     </parent>
   
   <properties>
