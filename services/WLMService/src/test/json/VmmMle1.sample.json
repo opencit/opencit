@@ -1,1 +1,0 @@
-{"Name":"VMM MLE A","Description":"VMM MLE","Attestation_Type":"PCR","MLE_Manifests":[{"Name":"1","Value":"abcdefghijklmnop"},{"Name":"2","Value":"jklmnopabcdefghi"}],"MLE_Type":"VMM","Version":"1.2.3","OsName":"RHEL","OsVersion":"6.1"}

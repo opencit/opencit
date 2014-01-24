@@ -38,7 +38,8 @@
 	<module>mtwilson-jersey-util</module>
     <module>MtWilsonHttpSecurityAdapters</module>
     <module>trust-utils-jar</module>
-    <module>WLMService</module>
+    <module>mtwilson-whitelist</module>
+    <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-management</module>
     <module>mtwilson-management-ws-v1</module>
     <module>MSCmdUtility</module>

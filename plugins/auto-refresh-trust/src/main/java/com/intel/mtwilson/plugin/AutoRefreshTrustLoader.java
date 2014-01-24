@@ -7,7 +7,7 @@ package com.intel.mtwilson.plugin;
 import com.intel.mountwilson.as.common.ASConfig;
 import com.intel.mtwilson.as.business.trust.BulkHostTrustBO;
 import com.intel.mtwilson.as.controller.TblSamlAssertionJpaController;
-import com.intel.mtwilson.as.helper.ASPersistenceManager;
+import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.mtwilson.plugin.api.Plugin;
 import com.intel.mtwilson.plugin.api.PluginLoader;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
