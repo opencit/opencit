@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dsmagadX
  */
-@Path("/ca")
+@Path("/ManagementService/resources/ca")
 public class CA {
 	
     private Logger log = LoggerFactory.getLogger(getClass());

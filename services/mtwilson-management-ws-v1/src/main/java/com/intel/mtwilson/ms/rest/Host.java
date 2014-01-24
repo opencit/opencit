@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @Stateless
-@Path("/host")
+@Path("/ManagementService/resources/host")
 public class Host {
 
     @Context

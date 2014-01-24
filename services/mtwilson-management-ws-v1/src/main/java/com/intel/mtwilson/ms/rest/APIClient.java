@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadx
  */
 @Stateless
-@Path("/apiclient")
+@Path("/ManagementService/resources/apiclient")
 public class APIClient {
     private Logger log = LoggerFactory.getLogger(getClass());
     

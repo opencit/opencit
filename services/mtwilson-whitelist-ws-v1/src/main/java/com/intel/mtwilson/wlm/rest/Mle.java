@@ -75,7 +75,7 @@ import javax.ws.rs.core.MediaType;
  * @author mkuchtiak
  */
 @Stateless
-@Path("/mles")
+@Path("/WLMService/resources/mles")
 public class Mle {
 
     MleBO mleBO = new MleBO();

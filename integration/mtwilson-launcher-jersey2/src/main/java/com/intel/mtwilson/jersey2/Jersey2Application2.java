@@ -69,8 +69,15 @@ register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
 register(com.intel.mtwilson.as.helper.ASLocalizationFilter.class);
 // XXX TODO extension point here to load all resource classes... jersey already has this capability but see comment below, it's not working properly and only one resource class gets loaded when we use the "packages" directive
-register(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);
 register(com.intel.mtwilson.as.rest.v2.resource.Files.class);
+register(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);
+register(com.intel.mtwilson.as.rest.v2.resource.MleModules.class);
+register(com.intel.mtwilson.as.rest.v2.resource.MlePcrs.class);
+register(com.intel.mtwilson.as.rest.v2.resource.MleSources.class);
+register(com.intel.mtwilson.as.rest.v2.resource.Mles.class);
+register(com.intel.mtwilson.as.rest.v2.resource.Oems.class);
+register(com.intel.mtwilson.as.rest.v2.resource.Oss.class);
+register(com.intel.mtwilson.as.rest.v2.resource.UserCertificates.class);
 register(com.intel.mtwilson.as.rest.v2.resource.Users.class);
 //register(com.intel.mtwilson.as.rest.AsStatus.class);
 //register(com.intel.mtwilson.as.rest.AssetTagCert.class);

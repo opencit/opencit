@@ -27,7 +27,7 @@ import javax.ws.rs.core.MediaType;
  *
  * @author dsmagadx
  */
-@Path("/oem")
+@Path("/WLMService/resources/oem")
 public class Oem {  
 
     

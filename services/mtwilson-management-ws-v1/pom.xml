@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mtwilson-management-ws-v1</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>mtwilson-management-ws-v1</name>
 
     <parent>
@@ -35,20 +35,6 @@
                 </configuration>
             </plugin>
 
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-surefire-plugin</artifactId>
-  <version>2.12.4</version>
-  <configuration>
-    <testFailureIgnore>true</testFailureIgnore>
-    <systemProperties>
-      <property>
-        <name>java.util.logging.config.file</name>
-        <value>${project.build.directory}/test-classes/logging.properties</value>
-      </property>
-    </systemProperties>
-  </configuration>
-</plugin>
 
 	    <plugin>
 		<artifactId>maven-war-plugin</artifactId>
@@ -59,12 +45,6 @@
 		</configuration>
 	    </plugin>
 	    
-	    <plugin>
-                <groupId>org.glassfish.maven.plugin</groupId>
-                <artifactId>maven-glassfish-plugin</artifactId>
-                <version>2.1</version>
-            </plugin>
-
         
         </plugins>
 <!--
@@ -317,9 +297,6 @@
             
                 
     </dependencies>
-    <properties>
-        <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
-    </properties>
     
     <profiles>
         <profile>

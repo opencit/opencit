@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dsmagadX
  */
-@Path("/saml")
+@Path("/ManagementService/resources/saml")
 public class SamlCertificate {
 
     private Logger log = LoggerFactory.getLogger(getClass());

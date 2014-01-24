@@ -26,7 +26,7 @@ import javax.ws.rs.core.MediaType;
  *
  * @author dsmagadx
  */
-@Path("/os")
+@Path("/WLMService/resources/os")
 public class Os {
 
     
