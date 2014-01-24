@@ -61,6 +61,7 @@ register(com.fasterxml.jackson.jaxrs.xml.JacksonJaxbXMLProvider.class);
 //register(com.fasterxml.jackson.jaxrs.xml.JsonParseExceptionMapper.class); 
 register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class); 
 //register(com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMapper.class);
+register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // jersey2 equivalent of com.sun.jersey.api.container.filter.PostReplaceFilter
 register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
 register(com.intel.mtwilson.as.rest.v2.resource.Hosts.class);
