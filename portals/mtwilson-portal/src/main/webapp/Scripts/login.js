@@ -24,7 +24,7 @@ function validateValue(inputID){
 
 function getRegisterUserPage() {
     $('#mainContainer').prepend(disabledDiv);
-    sendJSONAjaxRequest(true, 'getData/getLocales.html', null, getLocalesSuccess, null);
+    //sendJSONAjaxRequest(true, 'getData/getLocales.html', null, getLocalesSuccess, null);
     sendHTMLAjaxRequest(true, "getView/getRegisterPage.htm", null, registerUserPageSuccess, null);
 }
 

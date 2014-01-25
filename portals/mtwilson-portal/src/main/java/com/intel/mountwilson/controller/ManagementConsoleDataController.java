@@ -2647,12 +2647,12 @@ public class ManagementConsoleDataController extends MultiActionController {
      * @param res (HttpServletResponse Object)
      * @return
      */
-    public ModelAndView getLocales(HttpServletRequest req, HttpServletResponse res) {
+    public ModelAndView getLocales(HttpServletRequest req, HttpServletResponse res) throws ManagementConsolePortalException {
         ModelAndView responseView = new ModelAndView(new JSONView());
 
         try {
             List<Map<String, Object>> localeList = new ArrayList<Map<String, Object>>();
-            for (String localeName : demoPortalServices.getLocales(getAttestationService(req, ApiClient.class))) {
+            for (String localeName : demoPortalServices.getLocales(getApiClientService(req, ApiClient.class))) {
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("localeName", localeName);
                 localeList.add(map);

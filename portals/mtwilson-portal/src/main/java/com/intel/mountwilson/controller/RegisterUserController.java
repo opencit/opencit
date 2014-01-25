@@ -96,6 +96,7 @@ public class RegisterUserController extends AbstractController {
                 keyTable.setStatus("PENDING");
                 keyTable.setKeystore(certResource.toByteArray());
                 keyTable.setUuid_hex(new UUID().toHexString());
+                keyTable.setLocale(req.getParameter("localeTXT"));
                 log.info("registerusercontroller calling create");
                 keystoreJpa.create(keyTable);
         	
