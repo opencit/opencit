@@ -42,6 +42,7 @@
     <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-management</module>
     <module>mtwilson-management-ws-v1</module>
+    <module>mtwilson-rpc</module>
     <module>MSCmdUtility</module>
   </modules>
 
