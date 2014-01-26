@@ -257,7 +257,8 @@ public class MyConfiguration {
         return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
     }
     public final File getDirectory() {
-        return new File(getDirectoryPath());
+//        return new File(getDirectoryPath());
+        return new File(getMtWilsonConf()); // use MTWILSON_CONF instead of java preferences, so admin can set it before running setup
     }
 /* /// this one is a bad idea because the configuration can come from several places, and the config file is not the top priority source,
  * // so providing this could create a situation where someone think that by writing to this config file they can affect the configuration
@@ -289,8 +290,7 @@ public class MyConfiguration {
 
         // sixth priority: properties defined in standard install location
         if( Platform.isWindows() ) {
-            files.add(new File("C:" + File.separator + "Intel" + File.separator
-                    + "MtWilson" + File.separator + "mtwilson.properties"));
+            files.add(new File( getMtWilsonConf() + File.separator + "mtwilson.properties")); // like C:\Intel\MtWilson\conf\mtwilson.properties
             files.add(new File("C:" + File.separator + "Intel" + File.separator
                     + "CloudSecurity" + File.separator + "mtwilson.properties"));
 //            files.add(new File(System.getProperty("user.home") + File.separator
@@ -312,7 +312,7 @@ public class MyConfiguration {
         }
         // linux-specific location
         if (Platform.isUnix() ) {
-            files.add(new File("/etc/mtwilson/mtwilson.properties"));
+            files.add(new File( getMtWilsonConf() + File.separator + "mtwilson.properties")); // like /etc/mtwilson/mtwilson.properties
 //            files.add(new File("/etc/intel/cloudsecurity/" + propertiesFilename));
             files.add(new File("/etc/intel/cloudsecurity/mtwilson.properties"));
             files.add(new File("/etc/intel/cloudsecurity/management-service.properties"));
@@ -522,6 +522,8 @@ public class MyConfiguration {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
     }
     
+    ///////////////////////// filesystem locations  //////////////////////////////////
+    
     /**
      * 
      * @return /opt/mtwilson on Linux or value of MTWILSON_HOME
@@ -622,5 +624,22 @@ public class MyConfiguration {
         return getMtWilsonHome() + File.separator + "license.d";
     }
     
+    ///////////////////////// certificate authority //////////////////////////////////
     
+    // XXX TODO this assumes the CA keystore is on disk... it might be in
+    // the database, which means this should really be encapsulated into a
+    // CA plugin that declares a repository interface so we can swap out
+    // the storage mechanism as needed
+    // XXX TODO INSECURE need to specify the encryption and integrity 
+    // algorithms IAW our minimum requirements
+    // another alternative is to use a zip/gzip file that uses our
+    // encryption and integrity format over the entire zip/gzip file ,
+    // so it simply contains one key or cert per file inside it
+    public File getCaKeystoreFile() {
+        return new File(getMtWilsonConf() + File.separator + "cakey.pem");
+    }
+    // XXX TODO INSECURE needs to be integrity protected 
+    public File getCaCertsFile() {
+        return new File(getMtWilsonConf() + File.separator + "cacerts.pem");
+    }
 }

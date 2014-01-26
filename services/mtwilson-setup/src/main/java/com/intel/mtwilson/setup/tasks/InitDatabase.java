@@ -1,25 +1,20 @@
 /*
- * Copyright (C) 2012 Intel Corporation
+ * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson.setup.cmd;
+package com.intel.mtwilson.setup.tasks;
 
-import com.intel.mtwilson.setup.PropertyHidingConfiguration;
-import com.intel.mountwilson.as.common.ASConfig;
+//import com.intel.dcsg.cpg.io.Resource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import com.intel.dcsg.cpg.jpa.PersistenceManager;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyPersistenceManager;
-import com.intel.dcsg.cpg.io.Classpath;
-import com.intel.dcsg.cpg.jpa.PersistenceManager;
-import com.intel.mtwilson.setup.Command;
-import com.intel.mtwilson.setup.SetupContext;
+import com.intel.mtwilson.setup.LocalSetupTask;
 import com.intel.mtwilson.setup.SetupException;
-import com.intel.mtwilson.setup.SetupWizard;
 import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URL;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,106 +22,85 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.sql.DataSource;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Bug #509 create java program to handle database updates and ensure that 
- * old updates (already executed) are not executed again
- * 
- * Added -n (dry run) option on request from the SAM team: provide a way to determine if the
- * installer is compatible with the database; in other words, can the installer use the existing
- * database or does it know how to upgrade it as necessary. This is only true if the changelog
- * in the database is a subset of what is in the installer - in this case return a dry run success. 
- * If the database has any entries that are not in the installer, return a dry run failure.
- * 
- * Examples:
- * 
- * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase postgres --check
- * 
- * java -jar setup-console-1.2-SNAPSHOT-with-dependencies.jar InitDatabase mysql --check
- * 
- * Test cases for the --check option:
- * 1. install mt wilson, then run the tool.  Should report no changes are necessary 
- * 2. delete some entries from the mw_changelog table, run the tool. Should report that there are database upgrades to apply.
- * 3. create new bogus entries in the mw_changelog table, run the tool. Should report that it's not compatible with the database
- * 
- * 
- * TODO:  consolidate the persistence units into ASDataPU... the MSDataPU can't really be separate from
- * the ASDataPU because audit logs need to refer to users and to whitelist data...
- * 
- * References:
- * http://stackoverflow.com/questions/1429172/how-do-i-list-the-files-inside-a-jar-file
- * http://stackoverflow.com/questions/1044194/running-a-sql-script-using-mysql-with-jdbc
- * 
- * @deprecated moving this functionality to InitDatabase in mtwilson-setup 
+ *
  * @author jbuhacoff
  */
-public class InitDatabase implements Command {
-    private final Logger log = LoggerFactory.getLogger(getClass());
-    
-    private SetupContext ctx = null;
-    private String databaseVendor = null;
-    
-    @Override
-    public void setContext(SetupContext ctx) {
-        this.ctx = ctx;
-    }
+public class InitDatabase extends LocalSetupTask {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InitDatabase.class);
 
-    private Configuration options = null;
-    @Override
-    public void setOptions(Configuration options) {
-        this.options = options;
-    }
-
-    @Override
-    public void execute(String[] args) throws Exception {
-        // first arg:  mysql or postgres  (installer detects and invokes this command with that argument)
-        if( args.length < 1 ) {
+    private String databaseHost;
+    private String databasePort;
+    private String databaseDriver;
+    private String databaseUsername;
+    private String databasePassword;
+    private String databaseUrl;
+    private String databaseVendor;
             
-            throw new SetupException("Usage: InitDatabase mysql|postgres [--check]");
+    @Override
+    protected void configure() throws Exception {
+        databaseDriver = My.jdbc().driver();
+        if( databaseDriver == null ) {
+            configuration("Database driver not configured");
         }
-        
-        databaseVendor = args[0];
-        vendor = databaseVendor;
+        else {
+            log.debug("Database driver: {}", databaseDriver);
+        }
+        databaseUrl = My.jdbc().url();
+        if( databaseUrl == null ) {
+            configuration("Database URL not configured");
+        }
+        else {
+            log.debug("Database URL: {}", databaseUrl); // XXX TODO INSECURE do not print this in the log after things are worknig
+        }
+        databaseVendor = My.configuration().getDatabaseProtocol();
+        if( databaseVendor == null ) {
+            configuration("Database vendor not configured");
+        }
+        else {
+            log.debug("Database vendor: {}", databaseVendor);
+        }
+    }
+
+    @Override
+    protected void validate() throws Exception {
+        if( testConnection() ) {
+            checkAvailableUpdates();
+        }
+    }
+
+    @Override
+    protected void execute() throws Exception {
+        initDatabase();
+    }
+    
+    private boolean testConnection() throws Exception {
         try {
-            initDatabase();
+            Connection c = My.jdbc().connection();
+            Statement s = c.createStatement();
+            s.executeQuery("SELECT 1"); // XXX TODO  this doesn't work on all databases;  need to have dialect-specific query to check connection
+            s.close();
+            c.close();
+            return true;
         }
         catch(Exception e) {
-            throw new SetupException("Cannot setup database: "+e.toString(), e);
+            log.error("Cannot connect to database", e);
+            validation("Cannot connect to database");
+            return false;
         }
-
+        
     }
-    
-    public static class ChangelogEntry {
-        public String id;
-        public String applied_at;
-        public String description;
-        public ChangelogEntry() { }
-        public ChangelogEntry(String id, String applied_at, String description) {
-            this.id = id;
-            this.applied_at = applied_at;
-            this.description = description;
-        }
-    }
-    private String vendor = null;
+ 
     /*
     private boolean checkDatabaseConnection() throws SetupException, IOException, SQLException {
         
@@ -143,16 +117,34 @@ public class InitDatabase implements Command {
             }
     }
     */
-    
-    private void verbose(String format, Object... args) {
-        if( options.getBoolean("verbose", false) ) {
-            System.out.println(String.format(format, args));
+
+    public static class ChangelogEntry {
+        public String id;
+        public String applied_at;
+        public String description;
+        public ChangelogEntry() { }
+        public ChangelogEntry(String id, String applied_at, String description) {
+            this.id = id;
+            this.applied_at = applied_at;
+            this.description = description;
         }
     }
     
-    private void initDatabase() throws SetupException, IOException, SQLException {
+    private void verbose(String format, Object... args) {
+        /*
+        if( options.getBoolean("verbose", false) ) {
+            System.out.println(String.format(format, args));
+        }
+        */
+        log.debug(String.format(format, args));
+    }
+    
+    private Map<Long,Resource> sql;
+    private HashSet<Long> changesToApply;
+    
+    private void checkAvailableUpdates() throws SetupException, IOException, SQLException {
         log.debug("Loading SQL for {}", databaseVendor);
-        Map<Long,Resource> sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
+        sql = getSql(databaseVendor); //  TODO change to Map<Long,Resource> and then pass it directly to the populator !!!!
         
 //        Configuration attestationServiceConf = ASConfig.getConfiguration();
         DataSource ds = getDataSource();
@@ -163,9 +155,10 @@ public class InitDatabase implements Command {
             c = ds.getConnection();  // username and password should already be set in the datasource
         }
         catch(SQLException e) {
-            log.error("Failed to connect to {} with schema: error =" + e.getMessage(), databaseVendor); 
-                log.error("Cannot connect to database");
-                System.exit(2);
+            log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage()); 
+                validation("Cannot connect to database");
+                return;
+//                System.exit(2);
 //            throw e;
             // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
@@ -178,37 +171,73 @@ public class InitDatabase implements Command {
         HashMap<Long,ChangelogEntry> presentChanges = new HashMap<Long,ChangelogEntry>(); // what is already in the database according to the changelog
         verbose("Existing database changelog has %d entries", changelog.size());
         for(ChangelogEntry entry : changelog) {
-            presentChanges.put(Long.valueOf(entry.id), entry);
-            if( entry != null ) { verbose("%s %s %s", entry.id, entry.applied_at, entry.description); }
+            if( entry != null ) { 
+                verbose("%s %s %s", entry.id, entry.applied_at, entry.description); 
+                presentChanges.put(Long.valueOf(entry.id), entry);
+            }
         }
 
         // Does it have any changes that we don't?  In other words, is the database schema newer than what we know in this installer?
-        if( options.getBoolean("check", false) ) {
+//        if( options.getBoolean("check", false) ) {
             HashSet<Long> unknownChanges = new HashSet<Long>(presentChanges.keySet()); // list of what is in database
             unknownChanges.removeAll(sql.keySet()); // remove what we have in this installer
             if( unknownChanges.isEmpty() ) {
-                System.out.println("Database is compatible");
+                log.info("Database is compatible");
 //                System.exit(0); // not yet -- after this block we'll print out if there are any changes to apply
             }
             else { // if( !unknownChanges.isEmpty() ) {
                 // Database has new schema changes we dont' know about
-                System.out.println("WARNING: Database schema is newer than this version of Mt Wilson");
+                log.warn("Database schema is newer than this version of Mt Wilson");
                 ArrayList<Long> unknownChangesInOrder = new ArrayList<Long>(unknownChanges);
                 Collections.sort(unknownChangesInOrder);
                 for(Long unknownChangeId : unknownChangesInOrder) {
                     ChangelogEntry entry = presentChanges.get(unknownChangeId);
-                    System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
+                    log.info(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
                 }
-                System.exit(8); // database not compatible
+//                System.exit(8); // database not compatible
+                validation("Database is not compatible");
+                return;
             }
-        }
+//        }
         
-        HashSet<Long> changesToApply = new HashSet<Long>(sql.keySet());
+        changesToApply = new HashSet<Long>(sql.keySet());
         changesToApply.removeAll(presentChanges.keySet());
         
         if( changesToApply.isEmpty() ) {
-            System.out.println("No database updates available");
-            System.exit(0); // database is compatible;   whether we are doing a dry run with --check or not, we exit here with success because there is nothing else to do
+            log.info("No database updates available");
+//            return;
+//            System.exit(0); // database is compatible;   whether we are doing a dry run with --check or not, we exit here with success because there is nothing else to do
+        }
+        else {
+            validation("There are %s database updates to apply", changesToApply.size());
+        }
+        
+    }
+
+    /**
+     * Must call checkAvailableUpdates() first in order to initialize the 
+     * "sql" and "changesToApply" member variables
+     * 
+     * @throws SetupException
+     * @throws IOException
+     * @throws SQLException 
+     */
+    private void initDatabase() throws SetupException, IOException, SQLException {
+//        Configuration attestationServiceConf = ASConfig.getConfiguration();
+        DataSource ds = getDataSource();
+        
+        log.debug("Connecting to {}", databaseVendor);
+        Connection c = null;
+        try {
+            c = ds.getConnection();  // username and password should already be set in the datasource
+        }
+        catch(SQLException e) {
+            log.error("Failed to connect to {} with schema: error = {}", databaseVendor, e.getMessage()); 
+                validation("Cannot connect to database");
+                return;
+//                System.exit(2);
+//            throw e;
+            // it's possible that the database connection is fine but the SCHEMA doesn't exist... so try connecting w/o a schema
         }
         
         // At this point we know we have some updates to the databaseschema. 
@@ -217,18 +246,18 @@ public class InitDatabase implements Command {
         Collections.sort(changesToApplyInOrder);
         
         
-        if(options.getBoolean("check", false)) {
-            System.out.println("The following changes will be applied:");
+//        if(options.getBoolean("check", false)) {
+            log.info("The following changes will be applied:");
                     for(Long changeId : changesToApplyInOrder) {
                         /*
                         ChangelogEntry entry = presentChanges.get(changeId);
                         System.out.println(String.format("%s %s %s", entry.id, entry.applied_at, entry.description));
                         */
-                        System.out.println(changeId);
+                        log.info("Change ID: {}", changeId);
                     }
-            System.exit(0); // database is compatible
+//            System.exit(0); // database is compatible
 //            return;
-        }
+//        }
         
         ResourceDatabasePopulator rdp = new ResourceDatabasePopulator();
         // removing unneeded output as user can't choice what updates to apply
@@ -290,7 +319,7 @@ public class InitDatabase implements Command {
                     sqlmap.put(timestamp, resource);
                 }
                 else {
-                    System.err.println("SQL filename is not in recognized format: "+url.toExternalForm());
+                    log.error("SQL filename is not in recognized format: "+url.toExternalForm());
                 }
             }
         }
@@ -412,10 +441,10 @@ public class InitDatabase implements Command {
         Statement s = c.createStatement();
         
         String sql = "";
-        if (vendor.equals("mysql")){
+        if (databaseVendor.equals("mysql")){
             sql = "SHOW TABLES";
         }
-        else if (vendor.equals("postgres")){
+        else if (databaseVendor.equals("postgresql")){
             sql = "SELECT table_name FROM information_schema.tables;";          
         }
        
@@ -494,6 +523,5 @@ public class InitDatabase implements Command {
         s.close();
         return list;
     }
-    
     
 }

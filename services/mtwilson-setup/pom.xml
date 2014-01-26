@@ -56,6 +56,44 @@
             <scope>test</scope>
         </dependency>
 		
+        <!-- database connectors for junit tests -->
+    <dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+        <optional>true</optional>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+		<groupId>postgresql</groupId>
+		<artifactId>postgresql</artifactId>
+        <optional>true</optional>
+        <scope>test</scope>
+    </dependency>
+    
+    <!-- sql scripts by vendor -->
+    <dependency>
+        <groupId>com.intel.mtwilson.database</groupId>
+        <artifactId>mtwilson-mysql</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.database</groupId>
+        <artifactId>mtwilson-postgresql</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+        <!-- components used by InitDatabase -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>3.2.0.RELEASE</version>
+        </dependency>
+    
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>3.2.0.RELEASE</version>
+        </dependency>
+        
     </dependencies>  
 
 

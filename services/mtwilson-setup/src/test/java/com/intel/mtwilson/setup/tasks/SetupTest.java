@@ -19,8 +19,13 @@ public class SetupTest {
     @Test
     public void testSetupTasks() {
         ArrayList<SetupTask> tasks = new ArrayList<SetupTask>();
+        /*
         tasks.add(new ConfigureFilesystem());
-//        tasks.add(new CreateCertificateAuthorityKey());
+        tasks.add(new CreateMtWilsonPropertiesFile());
+        tasks.add(new CreateCertificateAuthorityKey());
+        tasks.add(new ConfigureDatabase());
+        */
+        tasks.add(new InitDatabase());
         
         for(SetupTask task : tasks) {
             if( task.isConfigured() && task.isValidated() ) {
