@@ -16,6 +16,10 @@
 
         <dependency>
 		<groupId>com.intel.dcsg.cpg</groupId>
+		<artifactId>cpg-classpath</artifactId>
+        </dependency>
+        <dependency>
+		<groupId>com.intel.dcsg.cpg</groupId>
 		<artifactId>cpg-extensions</artifactId>
         </dependency>
         

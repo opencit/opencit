@@ -290,6 +290,8 @@ public class MyConfiguration {
         // sixth priority: properties defined in standard install location
         if( Platform.isWindows() ) {
             files.add(new File("C:" + File.separator + "Intel" + File.separator
+                    + "MtWilson" + File.separator + "mtwilson.properties"));
+            files.add(new File("C:" + File.separator + "Intel" + File.separator
                     + "CloudSecurity" + File.separator + "mtwilson.properties"));
 //            files.add(new File(System.getProperty("user.home") + File.separator
 //                    + propertiesFilename));
@@ -310,6 +312,7 @@ public class MyConfiguration {
         }
         // linux-specific location
         if (Platform.isUnix() ) {
+            files.add(new File("/etc/mtwilson/mtwilson.properties"));
 //            files.add(new File("/etc/intel/cloudsecurity/" + propertiesFilename));
             files.add(new File("/etc/intel/cloudsecurity/mtwilson.properties"));
             files.add(new File("/etc/intel/cloudsecurity/management-service.properties"));
@@ -519,16 +522,20 @@ public class MyConfiguration {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
     }
     
+    /**
+     * 
+     * @return /opt/mtwilson on Linux or value of MTWILSON_HOME
+     */
     public String getMtWilsonHome() {
         String mtwilsonHome = System.getenv("MTWILSON_HOME");
         log.debug("MTWILSON_HOME={}", mtwilsonHome);
         if( mtwilsonHome == null ) {
             if( Platform.isUnix() ) {
-                mtwilsonHome = "/opt/default";
+                mtwilsonHome = "/opt/mtwilson";
                 log.debug("MTWILSON_HOME={} (Linux default)", mtwilsonHome);
             }
             if( Platform.isWindows() ) {
-                mtwilsonHome = System.getenv("ProgramFiles") + File.separator + "MtWilson"; // C:\Program Files\MtWilson  -- but we cannot create if does not exist unless administrator started the program with admin rights; XXX TODO maybe use C:\Intel\MtWilson instead
+                mtwilsonHome = /*System.getenv("ProgramFiles")*/ "C:" + File.separator + "Intel" + File.separator + "MtWilson"; // applications in Program Files need administrator permission to write to their folders 
                 log.debug("MTWILSON_HOME={} (Windows default)", mtwilsonHome);
             }
         }
@@ -537,5 +544,83 @@ public class MyConfiguration {
         }
         return mtwilsonHome;
     }
+    
+    /**
+     * 
+     * @return /etc/mtwilson on Linux or value of MTWILSON_CONF
+     */
+    public String getMtWilsonConf() {
+        String mtwilsonConf = System.getenv("MTWILSON_CONF");
+        log.debug("MTWILSON_CONF={}", mtwilsonConf);
+        if( mtwilsonConf == null ) {
+            if( Platform.isUnix() ) {
+                mtwilsonConf = "/etc/mtwilson";
+                log.debug("MTWILSON_CONF={} (Linux default)", mtwilsonConf);
+            }
+            if( Platform.isWindows() ) {
+                mtwilsonConf = getMtWilsonHome() + File.separator + "conf"; 
+                log.debug("MTWILSON_CONF={} (Windows default)", mtwilsonConf);
+            }
+        }
+        if( mtwilsonConf == null ) {
+            throw new IllegalStateException("MTWILSON_CONF environment variable must be defined");
+        }
+        return mtwilsonConf;
+    }
+
+    /**
+     * 
+     * @return /opt/mtwilson/bin on Linux or MTWILSON_HOME/bin
+     */
+    public String getMtWilsonBin() {
+        return getMtWilsonHome() + File.separator + "bin";
+    }
+    
+    
+    /**
+     * 
+     * @return /opt/mtwilson/env.d on Linux or MTWILSON_HOME/env.d
+     */
+    public String getMtWilsonEnv() {
+        return getMtWilsonHome() + File.separator + "env.d";
+    }
+    
+    /**
+     * 
+     * @return /opt/mtwilson/java on Linux or MTWILSON_HOME/java or MTWILSON_JAVA
+     */
+    public String getMtWilsonJava() {
+        String mtwilsonJava = System.getenv("MTWILSON_JAVA");
+        log.debug("MTWILSON_JAVA={}", mtwilsonJava);
+        if( mtwilsonJava == null ) {
+            mtwilsonJava = getMtWilsonHome() + File.separator + "java";
+        }
+        return mtwilsonJava;
+    }
+    
+    /**
+     * 
+     * @return /opt/mtwilson/util.d on Linux or MTWILSON_HOME/util.d
+     */
+    public String getMtWilsonUtil() {
+        return getMtWilsonHome() + File.separator + "util.d";
+    }
+    
+    /**
+     * 
+     * @return /opt/mtwilson/resource on Linux or MTWILSON_HOME/resource
+     */
+    public String getMtWilsonResource() {
+        return getMtWilsonHome() + File.separator + "resource";
+    }
+
+    /**
+     * 
+     * @return /opt/mtwilson/license.d on Linux or MTWILSON_HOME/license.d
+     */
+    public String getMtWilsonLicense() {
+        return getMtWilsonHome() + File.separator + "license.d";
+    }
+    
     
 }

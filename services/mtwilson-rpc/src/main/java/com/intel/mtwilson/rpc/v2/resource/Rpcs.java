@@ -20,7 +20,7 @@ import javax.ws.rs.Path;
  */
 @V2
 @Stateless
-@Path("/rpc")
+@Path("/rpcs")
 public class Rpcs extends AbstractResource<Rpc,RpcCollection,RpcFilterCriteria,NoLinks<Rpc>> {
 
     @Override

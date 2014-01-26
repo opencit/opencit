@@ -13,7 +13,7 @@ import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
 import com.intel.dcsg.cpg.extensions.ExtensionUtil;
 import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.module.Container;
-import com.intel.dcsg.cpg.module.JarClassIterator;
+import com.intel.dcsg.cpg.classpath.JarClassIterator;
 import com.intel.dcsg.cpg.module.Module;
 import com.intel.dcsg.cpg.module.ModuleUtil;
 import com.intel.mtwilson.launcher.ExtensionLauncher;

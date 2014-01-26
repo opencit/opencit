@@ -10,6 +10,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostFilterCriteria;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.rest.v2.model.HostLinks;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 
@@ -17,6 +18,7 @@ import javax.ws.rs.Path;
  *
  * @author jbuhacoff
  */
+@V2
 @Stateless
 @Path("/hosts")
 public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriteria,HostLinks> {

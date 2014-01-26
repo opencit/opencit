@@ -179,16 +179,18 @@ public class DirectoryLauncher {
         return directory.toPath().resolve(artifact).toFile().exists();
     }
 
-    // XXX TODO this inner class is probably too much it scans the directory and any subdirectories
-    // for jar files ... we should just restrict the  search to the given directory's contents and ignore 
-    // subdirectories...    so just do   Iterator<File> it = new ArrayIterator<File>( directory.listFiles(jarfilter) );
-    public static class JarFileIterator implements Iterator<File> {
+    // this inner class scans the directory and any subdirectories
+    // for jar files ... 
+    // if you need a non-recursive list of jars you can use simply:
+    // Iterator<File> it = new ArrayIterator<File>( directory.listFiles(jarfilter) );
+    // TODO:  if a jar file contains embedded jar files, we should recurse into that as well
+    public static class RecursiveJarFileIterator implements Iterator<File> {
 
         private final FileTree tree = new FileTree();
         private final Iterator<File> folders; // iterates over all subdirectories (including directory itself)
         private Iterator<File> files = null; // iterates over files in current folder ; when it runs out we need to move on to next folder
 
-        public JarFileIterator(File directory) {
+        public RecursiveJarFileIterator(File directory) {
             folders = new BreadthFirstTreeIterator<File>(tree, directory, new DirectoryFilter());
         }
 

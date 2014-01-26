@@ -15,6 +15,7 @@ import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OemLinks;
 import com.intel.mtwilson.as.rest.v2.model.OsFilterCriteria;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -26,6 +27,7 @@ import javax.ws.rs.Path;
  *
  * @author ssbangal
  */
+@V2
 @Stateless
 @Path("/oems")
 public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria, OemLinks>{

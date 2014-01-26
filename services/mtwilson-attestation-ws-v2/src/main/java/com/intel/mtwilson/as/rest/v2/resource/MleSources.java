@@ -12,6 +12,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleSourceCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ import javax.ws.rs.Path;
  *
  * @author ssbangal
  */
+@V2
 @Stateless
 @Path("/mle-sources")
 public class MleSources extends AbstractResource<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLinks>{

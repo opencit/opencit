@@ -16,6 +16,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -28,6 +29,7 @@ import javax.ws.rs.Path;
  *
  * @author ssbangal
  */
+@V2
 @Stateless
 @Path("/mles")
 public class Mles extends AbstractResource<Mle, MleCollection, MleFilterCriteria, MleLinks> {

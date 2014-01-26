@@ -18,7 +18,6 @@ import com.intel.mtwilson.jersey.DocumentCollection;
 import com.intel.mtwilson.jersey.FilterCriteria;
 import com.intel.mtwilson.jersey.Patch;
 import com.intel.mtwilson.jersey.PatchLink;
-import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.util.List;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -74,7 +73,6 @@ import javax.ws.rs.core.Response;
  */
 //@Stateless
 //@Path("/hosts")
-@V2 // automatically marks any subclasses as belonging to the v2 api
 public abstract class AbstractResource<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, L extends PatchLink<T>> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractResource.class);

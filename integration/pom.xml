@@ -27,6 +27,7 @@
     <module>mtwilson-launcher-ext</module>
     <module>mtwilson-launcher-jersey2</module>
     <module>mtwilson-test</module>
+    <module>mtwilson-version</module>
   </modules>
 
 

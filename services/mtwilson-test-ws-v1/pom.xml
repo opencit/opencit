@@ -35,63 +35,22 @@
         <artifactId>mtwilson-launcher-ext</artifactId>
         <version>${project.version}</version>
     </dependency>
-
-	<dependency>
-	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>mtwilson-my</artifactId>
-	    <version>${project.version}</version>
-	    <type>jar</type>
-	</dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
-	<dependency>
-	    <groupId>com.intel.mtwilson.integration</groupId>
-	    <artifactId>mtwilson-env</artifactId>
-	    <version>${project.version}</version>
-            <scope>test</scope>
-  	</dependency>
 
-		<dependency>
-			<groupId>com.intel.mtwilson.common</groupId>
-			<artifactId>mtwilson-crypto</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-crypto</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-io</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.intel.dcsg.cpg</groupId>
-			<artifactId>cpg-validation</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>asset-tag-model</artifactId>
-			<version>${project.version}</version>
-		 <type>jar</type>
-		 </dependency>
-		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>mtwilson-attestation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>mtwilson-management-jpa</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+        <!--
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>mtwilson-util</artifactId>
@@ -117,7 +76,7 @@
                 <artifactId>opensaml</artifactId>
                 <version>2.5.1-1</version>
         </dependency>
-        
+        -->
         <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
@@ -127,7 +86,7 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
         </dependency>
-
+<!--
 	<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
@@ -140,7 +99,7 @@
 			<groupId>commons-math</groupId>
 			<artifactId>commons-math3</artifactId>
 		</dependency>
-
+-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -158,24 +117,31 @@
 			<version>3.1.1</version>
 			<scope>provided</scope>
 		</dependency>
+        <!--
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
 			<version>1.1</version>
 			<scope>test</scope>
 		</dependency>
-
+-->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
+        <!--
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
             <version>1.4.01</version>
-            <!-- <scope>test</scope> this was supposed to be for test but now xercesImpl is in the production artifact so this is required too -->
             <type>jar</type>
         </dependency>
         <dependency>
@@ -188,13 +154,6 @@
             <artifactId>audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-<!-- used by AsAuthenticationFilter -->        
-<dependency>
-    <groupId>javax.ws.rs</groupId>
-    <artifactId>javax.ws.rs-api</artifactId>
-    <version>2.0</version>
-</dependency>
 
         <dependency>
             <groupId>joda-time</groupId>
@@ -214,29 +173,8 @@
             <version>1.1.1</version>
             <scope>provided</scope>
         </dependency>
-        
-<!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
-<dependency>
-    <groupId>org.codehaus.jackson</groupId>
-    <artifactId>jackson-jaxrs</artifactId>
-    <version>1.9.13</version>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-mapper-asl</artifactId>
-	<version>1.9.13</version>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-core-asl</artifactId>
-	<version>1.9.13</version>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-xc</artifactId>
-	<version>1.9.13</version>
-</dependency>
-        
+                -->
+
         
     </dependencies>
     <properties />

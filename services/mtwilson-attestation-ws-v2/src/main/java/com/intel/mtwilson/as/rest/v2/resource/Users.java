@@ -13,6 +13,7 @@ import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.ApiClientStatus;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
@@ -28,7 +29,7 @@ import javax.ws.rs.Path;
  *
  * @author ssbangal
  */
-
+@V2
 @Stateless
 @Path("/users")
 public class Users extends AbstractResource<User, UserCollection, UserFilterCriteria, UserLinks> {
