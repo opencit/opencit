@@ -44,6 +44,7 @@
     <module>mtwilson-management-ws-v1</module>
     <module>mtwilson-rpc</module>
     <module>MSCmdUtility</module>
+	<module>mtwilson-test-ws-v1</module>
   </modules>
 
 </project>

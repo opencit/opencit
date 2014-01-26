@@ -10,6 +10,7 @@ import com.intel.mtwilson.rpc.v2.model.RpcCollection;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 
@@ -17,6 +18,7 @@ import javax.ws.rs.Path;
  *
  * @author jbuhacoff
  */
+@V2
 @Stateless
 @Path("/rpc")
 public class Rpcs extends AbstractResource<Rpc,RpcCollection,RpcFilterCriteria,NoLinks<Rpc>> {
