@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.rest;
 
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.ms.business.HostBO;
 import com.intel.mtwilson.ms.MSComponentFactory;
 import com.intel.mtwilson.api.*;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
+@V1
 @Stateless
 @Path("/ManagementService/resources/host")
 public class Host {

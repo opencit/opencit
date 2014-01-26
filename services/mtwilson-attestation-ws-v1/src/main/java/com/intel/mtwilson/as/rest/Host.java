@@ -33,6 +33,7 @@ import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.security.annotations.*;
 import java.io.IOException;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * REST Web Service *
  */
+@V1
 @Stateless
 @Path("/AttestationService/resources/hosts")
 public class Host {

@@ -18,6 +18,7 @@ import com.intel.mtwilson.jersey.DocumentCollection;
 import com.intel.mtwilson.jersey.FilterCriteria;
 import com.intel.mtwilson.jersey.Patch;
 import com.intel.mtwilson.jersey.PatchLink;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import java.util.List;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -73,6 +74,7 @@ import javax.ws.rs.core.Response;
  */
 //@Stateless
 //@Path("/hosts")
+@V2 // automatically marks any subclasses as belonging to the v2 api
 public abstract class AbstractResource<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, L extends PatchLink<T>> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractResource.class);
@@ -183,7 +185,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({OtherMediaType.APPLICATION_VND_API_JSON, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public C searchCollection(@BeanParam F criteria) {
         log.debug("searchCollection");
-//        ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
+        ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
         return search(criteria);
     }
 
@@ -203,7 +205,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T createOne(T item) {
         log.debug("create");
-//        ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
+        ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
         if (item.getId() == null) {
             item.setId(new UUID());
         }
@@ -265,7 +267,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T storeOne(@PathParam("id") String id, T item) {
         log.debug("store");
-//        ValidationUtil.validate(item);
+        ValidationUtil.validate(item);
         item.setId(UUID.valueOf(id));
         T existing = retrieve(id); // subclass is responsible for validating id
         if (existing == null) {
@@ -299,7 +301,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
-//        ValidationUtil.validate(patchArray);
+        ValidationUtil.validate(patchArray);
         for (int i = 0; i < patchArray.length; i++) {
             log.debug("Processing patch #{} of {}", i + 1, patchArray.length);
             // XXX TODO check if patchArray[i].getSelect() == null  (expected) , and if it's not null then use abstract method to check that id == id   (like have a method that takes a string id and a filtercriteria and decides if they refer to the same record)
@@ -334,7 +336,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
     public C createCollection(C collection) {
         log.debug("createCollection");
-//        ValidationUtil.validate(collection);
+        ValidationUtil.validate(collection);
         // this behavior of autmoatically generating uuids if client didn't provide could be implemented in one place and reused in all create() methods...  the utility could accept a DocumentCollection and set the ids... 
         for (T item : collection.getDocuments()) {
             if (item.getId() == null) {
@@ -385,7 +387,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
     public C storeCollection(@PathParam("id") String id, C collection) {// misnomer, what we really mean is "store one but wrapped ina  collection for jsonapi"
         log.debug("storeCollection");
-//        ValidationUtil.validate(collection);
+        ValidationUtil.validate(collection);
         List<T> list = collection.getDocuments();
         if (list == null || list.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST); // TODO i18n
@@ -417,7 +419,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
     public C patchCollection(@PathParam("id") String id /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
-
+        // TODO  ValidationUtil.validate(patchCollection)
         // XXX TODO wire up to repository...
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
 //        HostFilterCriteria criteria = new HostFilterCriteria();

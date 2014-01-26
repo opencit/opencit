@@ -17,11 +17,13 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.mtwilson.as.business.AssetTagCertBO;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 
 /**
  *
  * @author ssbangal
  */
+@V1
 @Stateless
 @Path("/AttestationService/resources/assetTagCert")
 public class AssetTagCert {

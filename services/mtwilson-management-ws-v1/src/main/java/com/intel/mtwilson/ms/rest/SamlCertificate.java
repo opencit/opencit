@@ -7,6 +7,7 @@ package com.intel.mtwilson.ms.rest;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import com.intel.mtwilson.security.annotations.PermitAll;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dsmagadX
  */
+@V1
 @Path("/ManagementService/resources/saml")
 public class SamlCertificate {
 

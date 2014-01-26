@@ -8,6 +8,7 @@ import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelReport;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * so removed it from the pollHosts method documentation.
  * 
  */
-
+@V1
 @Stateless
 @Path("/AttestationService/resources/PollHosts")
 public class PollHosts {

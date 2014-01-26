@@ -15,6 +15,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.io.FileNotFoundException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -26,7 +27,7 @@ import org.apache.commons.codec.binary.Base64;
  * REST Web Service
  * * 
  */
-
+@V1
 @Stateless
 @Path("/AttestationService/resources/ca2")
 public class CA {

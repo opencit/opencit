@@ -1,6 +1,7 @@
 
 package com.intel.mtwilson.ms.rest;
 
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
@@ -15,7 +16,7 @@ import javax.ws.rs.GET;
  * REST Web Service
  * * 
  */
-
+@V1
 @Stateless
 @Path("/ManagementService/resources/msstatus")
 public class MsStatus {

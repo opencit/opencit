@@ -11,6 +11,7 @@ import java.util.List;
 //import javax.annotation.security.RolesAllowed;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.MediaType;
  *
  * @author dsmagadx
  */
+@V1
 @Path("/WLMService/resources/oem")
 public class Oem {  
 

@@ -15,6 +15,7 @@ import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.TxtHostRecordList;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dmagadix
  */
+@V1
 @Stateless
 @Path("/AttestationService/resources/hosts/bulk")
 public class BulkHostTrust {

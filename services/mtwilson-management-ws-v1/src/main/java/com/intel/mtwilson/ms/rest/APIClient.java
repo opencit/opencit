@@ -11,6 +11,7 @@ import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author dsmagadx
  */
+@V1
 @Stateless
 @Path("/ManagementService/resources/apiclient")
 public class APIClient {

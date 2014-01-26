@@ -2,6 +2,7 @@
 package com.intel.mtwilson.as.rest;
 
 
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
@@ -13,7 +14,7 @@ import javax.ws.rs.GET;
  * REST Web Service
  * * 
  */
-
+@V1
 @Stateless
 @Path("/AttestationService/resources/asstatus")
 public class AsStatus {

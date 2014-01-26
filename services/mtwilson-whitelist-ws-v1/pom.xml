@@ -37,6 +37,11 @@
 </plugins>
     </build>
     <dependencies>
+    <dependency>
+        <groupId>com.intel.mtwilson.integration</groupId>
+        <artifactId>mtwilson-launcher-ext</artifactId>
+        <version>${project.version}</version>
+    </dependency>
 <dependency>
 	<groupId>mysql</groupId>
 	<artifactId>mysql-connector-java</artifactId>

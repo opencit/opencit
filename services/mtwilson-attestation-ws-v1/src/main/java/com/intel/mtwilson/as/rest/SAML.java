@@ -7,6 +7,7 @@ import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.io.IOException;
 import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
@@ -19,7 +20,7 @@ import javax.ws.rs.QueryParam;
  * REST Web Service
  * * 
  */
-
+@V1
 @Stateless
 @Path("/AttestationService/resources/saml")
 public class SAML {

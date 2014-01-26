@@ -10,6 +10,7 @@ import com.intel.mtwilson.datatypes.AttestationReport;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -22,7 +23,7 @@ import javax.xml.namespace.QName;
  * REST Web Service
  * * 
  */
-
+@V1
 @Stateless
 @Path("/AttestationService/resources/hosts/reports")
 public class Reports {
