@@ -12,6 +12,7 @@ import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.model.*;
 import com.intel.mtwilson.security.annotations.PermitAll;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jbuhacoff
  */
+@V1
 @Stateless
 @Path("/AttestationService/resources/test")
 public class Test {
