@@ -162,4 +162,4 @@ BEGIN
    END LOOP;
 END$$;
 
-INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20140117160000,NOW(),'Added UUID fields for all the tables');
+INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140117160000,NOW(),'Added UUID fields for all the tables');
