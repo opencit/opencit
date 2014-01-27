@@ -119,20 +119,32 @@ function getDashBoardPage() {
 }
 
 function getAssetTagPage() {
-    //alert("setting up iframes 2");
+    alert(assetTagUrl);
     //setLoadImage('AddHostPage', '40px', '500px');
     //var serverAddy = <% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString();) %>;
     $('#mainContainer').html('<div id="AssetTagPage"></div>');
-    $('#AssetTagPage').html('<iframe src="' + assetTagUrl + '" width="900" height="745" > </iframe>');
+    $('#AssetTagPage').html('<iframe src="' + assetTagUrl + "/#tags" + '" width="900" height="745" > </iframe>');
             //'<iframe height="410" width="100%" frameBorder="3" src="http://www.google.com.au/webhp?sourceid=navclient&ie=UTF-8/index.php">your browser does not support IFRAMEs</iframe>'    
     //window.open("https://127.0.0.1:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
 }
 
-function getAddHostPage() {
-	isAddHostPage = true;
-	$('#mainContainer').html('<div id="AddHostPage"></div>');
-	setLoadImage('AddHostPage', '40px', '500px');
-	sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnDisplayContent, null,'AddHostPage');
+function getAssetTagPage() {
+    //setLoadImage('AddHostPage', '40px', '500px');
+    //var serverAddy = <% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString();) %>;
+    $('#mainContainer').html('<div id="AssetTagPage"></div>');
+    $('#AssetTagPage').html('<iframe src="' + assetTagUrl + "/#tags" + '" width="900" height="745" > </iframe>');
+            //'<iframe height="410" width="100%" frameBorder="3" src="http://www.google.com.au/webhp?sourceid=navclient&ie=UTF-8/index.php">your browser does not support IFRAMEs</iframe>'    
+    //window.open("https://127.0.0.1:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
+}
+
+function getAssetSelectionPage() {
+	$('#mainContainer').html('<div id="AssetSelectionPage"></div>');
+        $('#AssetSelectionPage').html('<iframe src="' + assetTagUrl + "/#selections" + '" width="900" height="745" > </iframe>');
+}
+
+function getAssetCertificatePage() {
+	$('#mainContainer').html('<div id="AssetCertificatePage"></div>');
+        $('#AssetCertificatePage').html('<iframe src="' + assetTagUrl + "/#certificates" + '" width="900" height="745" > </iframe>');
 }
 
 function getViewHostPage() {
