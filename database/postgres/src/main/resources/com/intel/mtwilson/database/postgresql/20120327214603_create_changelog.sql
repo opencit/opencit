@@ -1,10 +1,8 @@
+CREATE TABLE changelog (
+  ID numeric(20,0) NOT NULL,
+  APPLIED_AT varchar(25) NOT NULL,
+  DESCRIPTION varchar(255) NOT NULL,
+  PRIMARY KEY (ID)
+);
 
-CREATE TABLE `changelog` (
-  `ID` decimal(20,0) NOT NULL,
-  `APPLIED_AT` varchar(25) NOT NULL,
-  `DESCRIPTION` varchar(255) NOT NULL,
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-INSERT INTO `changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20120327214603,NOW(),'create changelog');
-
+INSERT INTO changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20120327214603,NOW(),'create changelog');
