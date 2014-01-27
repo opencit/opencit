@@ -48,6 +48,7 @@
 	<module>mtwilson-version-ws-v2</module>
 	<module>mtwilson-setup</module>
 	<module>mtwilson-setup-ws-v2</module>
+	<module>mtwilson-trustagent-model</module>
   </modules>
 
 </project>
