@@ -90,11 +90,11 @@
                          <li >
                             <a>Asset Tag Management</a>
                             <ul>
-                                <li><a href="javascript:getAssetTagPage()">Tag Creation</a></li> <!-- was "Register Host" under Management Console automation -->
-                                <li><a href="javascript:getAssetTagPage()">Tag Selection</a></li>
-                                <li><a href="javascript:getAssetTagPage()">Certificate Management</a></li>
-                                <!-- <li><a href="javascript:getAssetTagPage()">Settings</a></li>
-                                <li><a href="javascript:getAssetTagPage()">Log</a></li> -->
+                                <li><a href="javascript:getAssetTagTagPage()">Tags</a></li> <!-- was "Register Host" under Management Console automation -->
+                                <li><a href="javascript:getAssetTagSelectionPage()">Selections</a></li>
+                                <li><a href="javascript:getAssetTagCertificatePage()">Certificates</a></li>
+                                <li><a href="javascript:getAssetTagConfigurePage()">Settings</a></li>
+                                <li><a href="javascript:getAssetTagLogPage()">Log</a></li>
                             </ul>
                         </li>
                         <!--

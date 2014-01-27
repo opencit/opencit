@@ -19,7 +19,7 @@ public class TestCitrixTag {
     public void testCitrixTag() {
         // given this tag:
         //.valueOf
-        Sha1Digest tag = Sha1Digest.valueOf("4b53ab7d24b2cfb5bb4388df3f81bbb068c50dee");
+        Sha1Digest tag = Sha1Digest.valueOf("940a3e5c1610b686ee21bca1a648869c253bf626");
         log.debug("Asset tag: {}", tag.toHexString());
         // what we send to citrix is base64(hex-tag):
         String citrix = Base64.encodeBase64String(tag.toHexString().getBytes());
