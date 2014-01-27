@@ -90,7 +90,7 @@
                          <li >
                             <a>Asset Tag Management</a>
                             <ul>
-                                <li><a href="javascript:getAssetTagTagPage()">Tags</a></li> <!-- was "Register Host" under Management Console automation -->
+                                <li><a href="javascript:getAssetTagPage()">Tags</a></li> <!-- was "Register Host" under Management Console automation -->
                                 <li><a href="javascript:getAssetTagSelectionPage()">Selections</a></li>
                                 <li><a href="javascript:getAssetTagCertificatePage()">Certificates</a></li>
                                 <li><a href="javascript:getAssetTagConfigurePage()">Settings</a></li>
