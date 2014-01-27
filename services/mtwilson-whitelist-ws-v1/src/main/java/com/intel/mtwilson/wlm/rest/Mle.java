@@ -102,7 +102,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String addMle(MleData mleData) {
         ValidationUtil.validate(mleData);
-        return mleBO.addMLe(mleData);
+        return mleBO.addMLe(mleData, null);
     }
 
     /**
@@ -125,7 +125,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMle(MleData mleData) {
         ValidationUtil.validate(mleData);
-        return mleBO.updateMle(mleData);
+        return mleBO.updateMle(mleData, null);
     }
 
     /**
@@ -223,7 +223,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteMle(mleName, mleVersion,osName, osVersion, oemName);
+        return mleBO.deleteMle(mleName, mleVersion,osName, osVersion, oemName, null);
     }
     
     /**

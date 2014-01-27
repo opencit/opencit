@@ -76,7 +76,8 @@ public class MleBO extends BaseBO {
 	 * @param mleData
 	 * @return
 	 */
-	public String addMLe(MleData mleData) {
+	public String addMLe(MleData mleData, String mleUuid) {
+            String osOemUuid = null;
                                 try {
                                     log.debug("add mle type: {}", mleData.getMleType());
                                     log.debug("add mle name: {}", mleData.getName());
@@ -101,8 +102,17 @@ public class MleBO extends BaseBO {
                                                         throw new ASException(ErrorCode.WS_ESX_MLE_NOT_SUPPORTED);
                                                 }
                                         }
-                                        tblMle = getTblMle(mleData);
                                         
+                                        // If the mleUuid is not specified a new one would be created. But we need to get the reference
+                                        // to either BIOS or VMM UUID from the DB.
+                                        if (mleData.getMleType().equals("VMM")) {
+                                                osOemUuid = tblMle.getOsId().getUuid_hex();
+                                        } else if (mleData.getMleType().equals("BIOS")) {
+                                                osOemUuid = tblMle.getOemId().getUuid_hex();
+                                        }
+
+                                        tblMle = getTblMle(mleData, mleUuid, osOemUuid);
+                                                                                
                                         // before we create the MLE, check that the provided PCR values are valid -- if they aren't we abort
                                         if( mleData.getManifestList() != null ) {
                                             for(ManifestData pcrData : mleData.getManifestList()) {
@@ -146,12 +156,17 @@ public class MleBO extends BaseBO {
                          * @param mleData
                          * @return 
                          */
-	public String updateMle(MleData mleData) {
+	public String updateMle(MleData mleData, String mleUuid) {
+            TblMle tblMle = null;
                                 try {
-                                        TblMle tblMle = getMleDetails(mleData.getName(),
+                                    // Feature: 917 - Support for UUID
+                                    if (mleUuid != null && !mleUuid.isEmpty()) {
+                                        tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                                    } else {
+                                        tblMle = getMleDetails(mleData.getName(),
                                                         mleData.getVersion(), mleData.getOsName(),
                                                         mleData.getOsVersion(), mleData.getOemName());
-
+                                    }
                                         if (tblMle == null) {
                                                 throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
                                         }
@@ -183,9 +198,14 @@ public class MleBO extends BaseBO {
                          * @param oemName
                          * @return 
                          */
-	public String deleteMle(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
+	public String deleteMle(String mleName, String mleVersion, String osName, String osVersion, String oemName, String mleUuid) {
+            TblMle tblMle = null;
                                 try {
-                                    TblMle tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+                                    if (mleUuid != null && !mleUuid.isEmpty()) {
+                                        tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                                    } else {
+                                        tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+                                    }
 
                                     if (tblMle == null) {
                                             throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
@@ -364,7 +384,7 @@ public class MleBO extends BaseBO {
                          * @param mleData
                          * @return 
                          */
-	private TblMle getTblMle(MleData mleData) {
+	private TblMle getTblMle(MleData mleData, String mleUuid, String osOemUuid) {
 		TblMle tblMle = new TblMle();
 
 		tblMle.setMLEType(mleData.getMleType());
@@ -376,10 +396,18 @@ public class MleBO extends BaseBO {
 		tblMle.setRequiredManifestList(getRequiredManifestList(mleData
 				.getManifestList()));
 
+                // Feature: 917: Need to add the MLE, OS and OEM UUIDs
+                if (mleUuid != null && !mleUuid.isEmpty())
+                    tblMle.setUuid_hex(mleUuid);
+                else
+                    tblMle.setUuid_hex(new com.intel.dcsg.cpg.io.UUID().toString());
+                
 		if (mleData.getMleType().equals("VMM")) {
 			tblMle.setOsId(getTblOs(mleData.getOsName(), mleData.getOsVersion()));
+                        tblMle.setOs_uuid_hex(osOemUuid);
 		} else if (mleData.getMleType().equals("BIOS")) {
 			tblMle.setOemId(getTblOem(mleData.getOemName()));
+                        tblMle.setOem_uuid_hex(osOemUuid);
 		}
 
 		return tblMle;
