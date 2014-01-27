@@ -23,6 +23,7 @@ public class SetupTest {
         tasks.add(new ConfigureFilesystem());
         tasks.add(new CreateMtWilsonPropertiesFile());
         tasks.add(new CreateCertificateAuthorityKey());
+        tasks.add(new CreateTlsCertificate());
         tasks.add(new ConfigureDatabase());
         tasks.add(new InitDatabase());
         */
