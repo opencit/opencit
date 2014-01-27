@@ -33,16 +33,24 @@ import org.apache.commons.io.IOUtils;
 public class CreateCertificateAuthorityKey extends AbstractSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateCertificateAuthorityKey.class);
 
-    private String distinguishedName = "CN=mtwilson-ca,OU=mtwilson";
+    private String caDistinguishedName = "CN=mtwilson-ca,OU=mtwilson";
 
-    public String getDistinguishedName() {
-        return distinguishedName;
+    public String getCaDistinguishedName() {
+        return caDistinguishedName;
     }
 
-    public void setDistinguishedName(String distinguishedName) {
-        this.distinguishedName = distinguishedName;
+    public void setCaDistinguishedName(String distinguishedName) {
+        this.caDistinguishedName = distinguishedName;
     }
 
+    @Override
+    protected void configure() throws Exception {
+        if( caDistinguishedName == null ) {
+            configuration("CA distinguished name is not configured");
+        }
+    }
+
+    
     @Override
     protected void execute() throws Exception {
         createCaKey();
@@ -52,7 +60,7 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
         // create a new key pair
         KeyPair cakey = RsaUtil.generateRsaKeyPair(2048); // throws NoSuchAlgorithmException
         X509Builder builder = X509Builder.factory();
-        X509Certificate cacert = builder.selfSigned(distinguishedName, cakey).build();
+        X509Certificate cacert = builder.selfSigned(caDistinguishedName, cakey).build();
         if( cacert == null ) {
 //            log.error("Failed to create certificate"); // no need to print this, if the build failed there are guaranteed to be faults to print...
             List<Fault> faults = builder.getFaults();
@@ -130,13 +138,6 @@ public class CreateCertificateAuthorityKey extends AbstractSetupTask {
             validation("File not found: %s", My.configuration().getCaCertsFile().getAbsolutePath());
         }
         
-    }
-
-    @Override
-    protected void configure() throws Exception {
-        if( distinguishedName == null ) {
-            configuration("Distinguished name is not configured");
-        }
     }
 
     

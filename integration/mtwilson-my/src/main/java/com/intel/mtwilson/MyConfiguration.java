@@ -254,7 +254,8 @@ public class MyConfiguration {
      * @return ~/.mtwilson  unless you have changed your preferences (see testSetMyConfigDir)
      */
     public final String getDirectoryPath() {
-        return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
+//        return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
+        return getDirectory().getAbsolutePath();
     }
     public final File getDirectory() {
 //        return new File(getDirectoryPath());
@@ -471,7 +472,12 @@ public class MyConfiguration {
     public String getDefaultTlsPolicyName() {
         return conf.getString("mtwilson.default.tls.policy.name", "TRUST_CA_VERIFY_HOSTNAME"); // issue #871 default should be secure;  customer can explicitly set to TRUST_FIRST_CERTIFICATE if that's what they want
     }
-    
+
+    // XXX TODO   if using glassfish or tomcat need to point to where they keep their keystores.... or configure them to use this one (but only if WE install them... not if we deploy mtwilson onto an existing web server which already has its keystore)
+    public File getTlsKeystoreFile() {
+        return new File(getMtWilsonConf() + File.separator + "mtwilson-tls.jks");
+    }
+
     public String getTlsKeystorePassword() {
         return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
     }

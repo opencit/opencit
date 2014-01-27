@@ -24,8 +24,9 @@ public class SetupTest {
         tasks.add(new CreateMtWilsonPropertiesFile());
         tasks.add(new CreateCertificateAuthorityKey());
         tasks.add(new ConfigureDatabase());
-        */
         tasks.add(new InitDatabase());
+        */
+        tasks.add(new CreateTlsCertificate());
         
         for(SetupTask task : tasks) {
             if( task.isConfigured() && task.isValidated() ) {
