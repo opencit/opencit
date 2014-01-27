@@ -416,7 +416,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String addMleSource(MleSource mleSourceObj) {
         ValidationUtil.validate(mleSourceObj);
-        return mleBO.addMleSource(mleSourceObj);
+        return mleBO.addMleSource(mleSourceObj, null);
     }
 
     @PUT
@@ -426,7 +426,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMleSource(MleSource mleSourceObj) {
         ValidationUtil.validate(mleSourceObj);
-        return mleBO.updateMleSource(mleSourceObj);
+        return mleBO.updateMleSource(mleSourceObj, null);
     }
 
     @DELETE
@@ -446,7 +446,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
+        return mleBO.deleteMleSource(mleName, mleVersion, osName, osVersion, oemName, null);
     }
 
     @GET

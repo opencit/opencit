@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.resource;
 
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.MwMleSourceJpaController;
 import com.intel.mtwilson.as.data.MwMleSource;
@@ -11,14 +12,15 @@ import com.intel.mtwilson.as.rest.v2.model.MleSource;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceCollection;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLinks;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import java.io.IOException;
+import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,18 +31,25 @@ import javax.ws.rs.Path;
 @Path("/mle-sources")
 public class MleSources extends AbstractResource<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLinks>{
 
+    Logger log = LoggerFactory.getLogger(getClass().getName());
+
     @Override
     protected MleSourceCollection search(MleSourceFilterCriteria criteria) {
-        MleSourceCollection mleSourceCollection = null;
+        MleSourceCollection mleSourceCollection = new MleSourceCollection();
+        
         try {
             MwMleSourceJpaController jpaController = My.jpa().mwMleSource();
             if (criteria.id != null) {
-                MleSource mleSource = convert(jpaController.findByMleUuid(criteria.id.toString()));            
-                mleSourceCollection.getMleSources().add(mleSource);
+                MwMleSource obj = jpaController.findByUuid(criteria.id.toString());
+                if (obj != null) {
+                    mleSourceCollection.getMleSources().add(convert(obj));
+                }
             } else if (criteria.mleUuid != null) {
-                MleSource mleSource = convert(jpaController.findByMleUuid(criteria.mleUuid.toString()));            
-                mleSourceCollection.getMleSources().add(mleSource);
-            }else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                MwMleSource obj = jpaController.findByMleUuid(criteria.mleUuid.toString());            
+                if (obj != null) {
+                    mleSourceCollection.getMleSources().add(convert(obj));
+                }
+            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                 List<MwMleSource> mleSourceList = jpaController.findByHostName(criteria.nameEqualTo);
                 if (mleSourceList != null && !mleSourceList.isEmpty()) {
                     for(MwMleSource mleSourceObj : mleSourceList) {
@@ -55,39 +64,73 @@ public class MleSources extends AbstractResource<MleSource, MleSourceCollection,
                     }
                 }                
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Oems.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during MLE Source search.", ex);
+            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
         return mleSourceCollection;
     }
 
     @Override
     protected MleSource retrieve(String id) {
-        MleSource obj = null;
+        if( id == null ) { return null; }
         try {
             MwMleSourceJpaController jpaController = My.jpa().mwMleSource();
-            if (id != null) {
-                obj = convert(jpaController.findByMleUuid(id));            
+            MwMleSource obj = jpaController.findByUuid(id);
+            if (obj != null) {
+                MleSource mleSource = convert(obj);
+                return mleSource;            
             } 
-        } catch (IOException ex) {
-            Logger.getLogger(Oems.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during MLE Source search.", ex);
+            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
-        return obj;
+        return null;
     }
 
     @Override
     protected void store(MleSource item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
+        try {
+            obj.setHostName(item.getName());
+            new MleBO().updateMleSource(obj, item.getId().toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during MLE source host mapping update.", ex);
+            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_UPDATE_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     @Override
     protected void create(MleSource item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        com.intel.mtwilson.datatypes.MleSource obj = new com.intel.mtwilson.datatypes.MleSource();
+        try {
+            obj.setHostName(item.getName());
+            obj.setMleData(null);
+            new MleBO().addMleSource(obj, item.getId().toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during MLE source host mapping creation.", ex);
+            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_CREATE_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     @Override
     protected void delete(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            new MleBO().deleteMleSource(null, null, null, null, null, id);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during MLE source host mapping deletion.", ex);
+            throw new ASException(ErrorCode.WS_MLE_HOST_MAP_DELETE_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -97,12 +140,8 @@ public class MleSources extends AbstractResource<MleSource, MleSourceCollection,
 
     private MleSource convert(MwMleSource obj) {
         MleSource convObj = new MleSource();
-        if (obj != null) {            
-            convObj.setMleUuid(obj.getUuid_hex());
-            convObj.setName(obj.getHostName());
-        } else {
-            convObj = null;
-        }
+        convObj.setMleUuid(obj.getUuid_hex());
+        convObj.setName(obj.getHostName());
         return convObj;
     }
     

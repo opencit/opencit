@@ -239,7 +239,7 @@ public class MleBO extends BaseBO {
 
                                     // We also need to delete entries in the MleSource table for the MLE. This table would store the host
                                     // name that was used to white list the MLE.
-                                    deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
+                                    deleteMleSource(mleName, mleVersion, osName, osVersion, oemName, null);
 
                                     mleJpaController.destroy(tblMle.getId());
 
@@ -1214,20 +1214,28 @@ public class MleBO extends BaseBO {
          * @param mleSourceObj : Object containing the details of the host and the MLE.
          * @return True or False
          */
-        public String addMleSource(MleSource mleSourceObj) {
-            TblMle tblMle;
+        public String addMleSource(MleSource mleSourceObj, String mleUuid) {
+            TblMle tblMle = null;
             MleData mleData = null ;
             try {
 
-                try {
-                    mleData = mleSourceObj.getMleData();
-                    // Verify if the MLE exists in the system.
-                    tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
-                                    mleData.getOsVersion(), mleData.getOemName());
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                if (mleUuid != null && !mleUuid.isEmpty()) {
+                    tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                } else {
+                    try {
+                        mleData = mleSourceObj.getMleData();
+                        // Verify if the MLE exists in the system.
+                        tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
+                                        mleData.getOsVersion(), mleData.getOemName());
+                    } catch (NoResultException nre){
+                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                    }
                 }
-                                
+                  
+                if (tblMle == null) {
+                    throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
+                }
+                
                 MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
                 
                 // Let us check if there is a mapping entry already for this MLE. If it does, then we need to return
@@ -1262,20 +1270,27 @@ public class MleBO extends BaseBO {
          * @param mleSourceObj
          * @return 
          */
-        public String updateMleSource(MleSource mleSourceObj) {
-            TblMle tblMle;
+        public String updateMleSource(MleSource mleSourceObj, String mleUuid) {
+            TblMle tblMle = null;
             MleData mleData = null ;
             try {
 
-                try {
-                    mleData = mleSourceObj.getMleData();
-                    // Verify if the MLE exists in the system.
-                    tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
-                                    mleData.getOsVersion(), mleData.getOemName());
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                if (mleUuid != null && !mleUuid.isEmpty()) {
+                    tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                } else {
+                    try {
+                        mleData = mleSourceObj.getMleData();
+                        // Verify if the MLE exists in the system.
+                        tblMle = getMleDetails(mleData.getName(), mleData.getVersion(), mleData.getOsName(),
+                                        mleData.getOsVersion(), mleData.getOemName());
+                    } catch (NoResultException nre){
+                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
+                    }
                 }
-                                
+                if (tblMle == null) {
+                    throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
+                }
+                
                 MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
                 // If the mapping does not exist already in the db, then we need to return back error.
                 MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
@@ -1308,18 +1323,24 @@ public class MleBO extends BaseBO {
          * @param oemName
          * @return 
          */
-        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName) {
-            TblMle tblMle;
+        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName, String mleUuid) {
+            TblMle tblMle = null;
             try {
-                
-                try {
-                    // First check if the entry exists in the MLE table.
-                    tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+                if (mleUuid != null && !mleUuid.isEmpty()) {
+                    tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                } else {                
+                    try {
+                        // First check if the entry exists in the MLE table.
+                        tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
 
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
+                    } catch (NoResultException nre){
+                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
+                    }
                 }
-                                
+                if (tblMle == null) {
+                    throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
+                }
+                
                 MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
                 MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
                 // If the mapping does not exist, it is ok. We don't need to worry. Actually for MLES
