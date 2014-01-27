@@ -37,15 +37,22 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
     
     @Override
     protected OemCollection search(OemFilterCriteria criteria) {
-        OemCollection oemCollection = null;
+        // start with a collection instance; if we don't find anything we'll return the empty collection
+        OemCollection oemCollection = new OemCollection();
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
             if (criteria.id != null) {
-                Oem oem = convert(oemJpaController.findTblOemByUUID(criteria.id.toString()));            
-                oemCollection.getOems().add(oem);
+                // re-arranged slightly to look more like the nameContains case below
+                TblOem tblOem = oemJpaController.findTblOemByUUID(criteria.id.toString());
+                if( tblOem != null ) {
+                    oemCollection.getOems().add(convert(tblOem));
+                }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                Oem oem = convert(oemJpaController.findTblOemByName(criteria.nameEqualTo));
-                oemCollection.getOems().add(oem);                
+                // re-arranged slightly to look more like the nameContains case below
+                TblOem tblOem = oemJpaController.findTblOemByName(criteria.nameEqualTo);
+                if( tblOem != null ) {
+                    oemCollection.getOems().add(convert(tblOem));                
+                }
             } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
                 List<TblOem> oemList = oemJpaController.findTblOemByNameLike(criteria.nameContains);
                 if (oemList != null && !oemList.isEmpty()) {
@@ -65,13 +72,13 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
 
     @Override
     protected Oem retrieve(String id) {
-        Oem oem = null;
+        if( id == null ) { return null; }
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
-            if (id != null) {
-                TblOem tblOem = oemJpaController.findTblOemByUUID(id);
-                if (tblOem != null)
-                    oem = convert(tblOem);
+            TblOem tblOem = oemJpaController.findTblOemByUUID(id);
+            if (tblOem != null) {
+                Oem oem = convert(tblOem);
+                return oem;
             }
         } catch (ASException aex) {
             throw aex;            
@@ -79,7 +86,7 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
             log.error("Error during OEM retrieval.", ex);
             throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
-        return oem;
+        return null;
     }
 
     @Override
@@ -129,15 +136,13 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
         return new OemCollection();
     }
 
+    // passing null to this method would be a programming error and NullPointerException is appropriate
+    // calling code should check for null before calling
     private Oem convert(TblOem tblOemObj) {
         Oem oem = new Oem();
-        if (tblOemObj != null) {
-            oem.setId(UUID.valueOf(tblOemObj.getUuid_hex()));
-            oem.setName(tblOemObj.getName());
-            oem.setDescription(tblOemObj.getDescription());
-        } else {
-            oem = null;
-        }
+        oem.setId(UUID.valueOf(tblOemObj.getUuid_hex()));
+        oem.setName(tblOemObj.getName());
+        oem.setDescription(tblOemObj.getDescription());
         return oem;
     }
     
