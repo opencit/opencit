@@ -5,22 +5,25 @@
 package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
-import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.rest.v2.model.Os;
 import com.intel.mtwilson.as.rest.v2.model.OsCollection;
 import com.intel.mtwilson.as.rest.v2.model.OsFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OsLinks;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import java.io.IOException;
+import com.intel.mtwilson.wlm.business.OsBO;
+
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -31,14 +34,19 @@ import javax.ws.rs.Path;
 @Path("/oss")
 public class Oss extends AbstractResource<Os, OsCollection, OsFilterCriteria, OsLinks>{
 
+    Logger log = LoggerFactory.getLogger(getClass().getName());
+
     @Override
     protected OsCollection search(OsFilterCriteria criteria) {
-        OsCollection osCollection = null;
+        // start with a collection instance; if we don't find anything we'll return the empty collection
+        OsCollection osCollection = new OsCollection();
         try {
             TblOsJpaController osJpaController = My.jpa().mwOs();
             if (criteria.id != null) {
-                Os os = convert(osJpaController.findTblOsByUUID(criteria.id.toString()));            
-                osCollection.getOss().add(os);
+                TblOs tblOs = osJpaController.findTblOsByUUID(criteria.id.toString());
+                if (tblOs != null) {
+                    osCollection.getOss().add(convert(tblOs));
+                }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                 List<TblOs> osList = osJpaController.findTblOsByName(criteria.nameContains);
                 if (osList != null && !osList.isEmpty()) {
@@ -54,60 +62,77 @@ public class Oss extends AbstractResource<Os, OsCollection, OsFilterCriteria, Os
                     }
                 }                
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Oems.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OS search.", ex);
+            throw new ASException(ErrorCode.WS_OS_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
         return osCollection;
     }
 
     @Override
     protected Os retrieve(String id) {
-        Os os = null;
-        if (id != null) {
-            try {
-                TblOsJpaController osJpaController = My.jpa().mwOs();            
-                os = convert(osJpaController.findTblOsByUUID(id));
-            } catch (IOException ex) {
-                Logger.getLogger(Oss.class.getName()).log(Level.SEVERE, null, ex);
+        if( id == null ) { return null; }
+        try {
+            TblOsJpaController osJpaController = My.jpa().mwOs();            
+            TblOs tblOs = osJpaController.findTblOsByUUID(id);
+            if (tblOs != null) {
+                Os os = convert(tblOs);
+                return os;
             }
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OS retrieval.", ex);
+            throw new ASException(ErrorCode.WS_OS_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
-        return os;
+        return null;
     }
 
     @Override
     protected void store(Os item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OsData obj = new OsData();
+        try {
+            obj.setName(item.getName());
+            obj.setDescription(item.getDescription());
+            new OsBO().updateOs(obj, item.getId().toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OS update.", ex);
+            throw new ASException(ErrorCode.WS_OS_UPDATE_ERROR, ex.getClass().getSimpleName());
+        }        
     }
 
     @Override
     protected void create(Os item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OsData obj = new OsData();
+        try {
+            obj.setName(item.getName());
+            obj.setVersion(item.getVersion());
+            obj.setDescription(item.getDescription());
+            new OsBO().createOs(obj, item.getId().toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OS creation.", ex);
+            throw new ASException(ErrorCode.WS_OS_CREATE_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     @Override
     protected void delete(String id) {
         try {
-            TblOsJpaController osJpaController = My.jpa().mwOs();
-            if (id != null) {
-                TblOs tblOs = osJpaController.findTblOsByUUID(id);
-                if (tblOs != null)
-                    osJpaController.destroy(tblOs.getId());
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(UserCertificates.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
-            Logger.getLogger(Oems.class.getName()).log(Level.SEVERE, null, ex);
+            new OsBO().deleteOs(null, null, id);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OS delete.", ex);
+            throw new ASException(ErrorCode.WS_OS_DELETE_ERROR, ex.getClass().getSimpleName());
         }
     }
 
-    /*
-    @Override
-    protected OsFilterCriteria createFilterCriteriaWithId(String id) {
-        OsFilterCriteria criteria = new OsFilterCriteria();
-        criteria.id = UUID.valueOf(id);
-        return criteria;
-    }
-    */
     @Override
     protected OsCollection createEmptyCollection() {
         return new OsCollection();
@@ -115,14 +140,10 @@ public class Oss extends AbstractResource<Os, OsCollection, OsFilterCriteria, Os
     
     private Os convert(TblOs tblOsObj) {
         Os os = new Os();
-        if (tblOsObj != null) {
-            os.setId(UUID.valueOf(tblOsObj.getUuid_hex()));
-            os.setName(tblOsObj.getName());
-            os.setVersion(tblOsObj.getVersion());
-            os.setDescription(tblOsObj.getDescription());
-        } else {
-            os = null;
-        }
+        os.setId(UUID.valueOf(tblOsObj.getUuid_hex()));
+        os.setName(tblOsObj.getName());
+        os.setVersion(tblOsObj.getVersion());
+        os.setDescription(tblOsObj.getDescription());
         return os;
     }
     

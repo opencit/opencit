@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.wlm.business;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.controller.TblOsJpaController;
 import com.intel.mtwilson.as.data.TblMle;
@@ -63,10 +64,14 @@ public class OsBO extends BaseBO {
      * @param osData
      * @return 
      */
-    public String updateOs(OsData osData) {
-
+    public String updateOs(OsData osData, String uuid) {
+        TblOs tblOs = null;
         try {
-            TblOs tblOs = tblOsJpaController.findTblOsByNameVersion(osData.getName(), osData.getVersion());
+            // Feature: 917 - Added support for UUID
+            if (uuid != null && !uuid.isEmpty())
+                tblOs = tblOsJpaController.findTblOsByUUID(uuid);
+            else
+                tblOs = tblOsJpaController.findTblOsByNameVersion(osData.getName(), osData.getVersion());
 
             if (tblOs == null) {
                 throw new ASException(ErrorCode.WS_OS_DOES_NOT_EXIST, osData.getName(), osData.getVersion());
@@ -93,7 +98,7 @@ public class OsBO extends BaseBO {
      * @param osData
      * @return 
      */
-    public String createOs(OsData osData) {
+    public String createOs(OsData osData, String uuid) {
         try {
             TblOs tblOs = tblOsJpaController.findTblOsByNameVersion(osData.getName(), osData.getVersion());
 
@@ -105,6 +110,11 @@ public class OsBO extends BaseBO {
             tblOs.setName(osData.getName());
             tblOs.setVersion(osData.getVersion());
             tblOs.setDescription(osData.getDescription());
+            // Feature: 917 - Added support for UUID
+            if (uuid != null && !uuid.isEmpty())
+                tblOs.setUuid_hex(uuid);
+            else
+                tblOs.setUuid_hex(new UUID().toString());
 
             tblOsJpaController.create(tblOs);
 
@@ -126,9 +136,15 @@ public class OsBO extends BaseBO {
      * @param osVersion
      * @return 
      */
-    public String deleteOs(String osName, String osVersion) {
+    public String deleteOs(String osName, String osVersion, String uuid) {
+        TblOs tblOs = null;
+        
         try {
-            TblOs tblOs = tblOsJpaController.findTblOsByNameVersion(osName, osVersion);
+            // Feature: 917 - Added support for UUID
+            if (uuid != null && !uuid.isEmpty())
+                tblOs = tblOsJpaController.findTblOsByUUID(uuid);
+            else
+                tblOs = tblOsJpaController.findTblOsByNameVersion(osName, osVersion);
 
             if (tblOs == null) {
                 throw new ASException(ErrorCode.WS_OS_DOES_NOT_EXIST,osName, osVersion);                

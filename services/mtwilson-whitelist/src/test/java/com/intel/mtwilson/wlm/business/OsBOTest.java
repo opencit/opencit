@@ -56,11 +56,11 @@ public class OsBOTest {
         
         // if it's already in the database, delete it first
         if( found ) {
-            instance.deleteOs(osData.getName(), osData.getVersion());
+            instance.deleteOs(osData.getName(), osData.getVersion(), null);
         }
         
         String expResult = "true";
-        String result = instance.createOs(osData);
+        String result = instance.createOs(osData, null);
         assertEquals(expResult, result);
 
     }
@@ -85,11 +85,11 @@ public class OsBOTest {
         
         // if it's not in the database, we need to add it before testing the duplicate check              
         if( !found ) {
-            instance.createOs(osData);
+            instance.createOs(osData, null);
         }
         
         try {
-            instance.createOs(osData);
+            instance.createOs(osData, null);
             fail("Duplicate create test failed.");
         } catch (ASException e) {
             // success, trying to add a duplicate raised an exception
@@ -133,12 +133,12 @@ public class OsBOTest {
             }
         }
         if(!found) {
-            instance.createOs(osData);
+            instance.createOs(osData, null);
         }
         
         String updatedDescription = "updated "+rnd.nextInt(99);
         osData.setDescription(updatedDescription);
-        String result = instance.updateOs(osData);
+        String result = instance.updateOs(osData, null);
         assertEquals(expResult, result);
         // now check that the record was updated. since the OsBO API does not have a query for a specific instance, we just look through all of them
         boolean isUpdated = false;
@@ -164,7 +164,7 @@ public class OsBOTest {
         osData.setDescription("udpated");
         OsBO instance = new OsBO();
 //        String expResult = "true";
-        String result = instance.updateOs(osData); // trying to update a non-existent OS should cause an exception
+        String result = instance.updateOs(osData, null); // trying to update a non-existent OS should cause an exception
         System.out.println("testUpdateNonExistentOs result is "+result);
     }
 
@@ -189,11 +189,11 @@ public class OsBOTest {
         
         // if it's not in the database, we need to add it before testing the duplicate check              
         if( !found ) {
-            instance.createOs(osData);
+            instance.createOs(osData, null);
         }
         
         String expResult = "true";
-        String result = instance.deleteOs(osData.getName(), osData.getVersion());
+        String result = instance.deleteOs(osData.getName(), osData.getVersion(), null);
         assertEquals(expResult, result);
     }
 
