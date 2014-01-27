@@ -88,7 +88,7 @@ public class MleBOTest {
             }
             if( !found ) {
                 oem = tmp;
-                db.createOem(oem);                
+                db.createOem(oem,null);                
             }
         }
         assert(oem!=null);

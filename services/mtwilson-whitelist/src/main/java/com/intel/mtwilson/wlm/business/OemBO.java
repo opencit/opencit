@@ -11,6 +11,8 @@ import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.wlm.helper.BaseBO;
+import com.intel.dcsg.cpg.io.UUID;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -61,10 +63,14 @@ public class OemBO extends BaseBO {
      * @param oemData
      * @return 
      */
-    public String updateOem(OemData oemData) {
-
+    public String updateOem(OemData oemData, String uuid) {
+        TblOem tblOem = null;
         try {
-            TblOem tblOem = tblOemJpaController.findTblOemByName(oemData.getName());
+            // Feature: 917 - Added support for UUID
+            if (uuid != null && !uuid.isEmpty())
+                tblOem = tblOemJpaController.findTblOemByUUID(uuid);
+            else
+                tblOem = tblOemJpaController.findTblOemByName(oemData.getName());
             
             if(tblOem == null)
                 throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST,  oemData.getName());
@@ -90,7 +96,7 @@ public class OemBO extends BaseBO {
      * @param oemData
      * @return 
      */
-    public String createOem(OemData oemData) {
+    public String createOem(OemData oemData, String uuid) {
         try {
             TblOem tblOem = tblOemJpaController.findTblOemByName(oemData.getName());
             
@@ -100,6 +106,11 @@ public class OemBO extends BaseBO {
             tblOem = new TblOem();
             tblOem.setName(oemData.getName());
             tblOem.setDescription(oemData.getDescription());
+            // Feature: 917 - Added support for UUID
+            if (uuid != null && !uuid.isEmpty())
+                tblOem.setUuid_hex(uuid);
+            else
+                tblOem.setUuid_hex(new UUID().toString());
             
             tblOemJpaController.create(tblOem);
             
@@ -117,15 +128,20 @@ public class OemBO extends BaseBO {
 
     /**
      * 
-     * @param osName
+     * @param oemName
      * @return 
      */
-    public String deleteOem(String osName) {
+    public String deleteOem(String oemName,  String uuid) {
+        TblOem tblOem = null;
         try{
-            TblOem tblOem = tblOemJpaController.findTblOemByName(osName);
+            // Feature: 917 - Added support for UUID
+            if (uuid != null && !uuid.isEmpty())
+                tblOem = tblOemJpaController.findTblOemByUUID(uuid);
+            else
+                tblOem = tblOemJpaController.findTblOemByName(oemName);
             
             if(tblOem == null){
-                throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST, osName);
+                throw new ASException(ErrorCode.WS_OEM_DOES_NOT_EXIST, oemName);
             }
             
             Collection<TblMle> tblMleCollection = tblOem.getTblMleCollection();
@@ -133,7 +149,7 @@ public class OemBO extends BaseBO {
                 log.debug("OEM is currently associated with # MLEs: " + tblMleCollection.size());
             
                 if(!tblMleCollection.isEmpty()){
-                    throw new ASException(ErrorCode.WS_OEM_ASSOCIATION_EXISTS, osName, tblMleCollection.size());
+                    throw new ASException(ErrorCode.WS_OEM_ASSOCIATION_EXISTS, oemName, tblMleCollection.size());
                 }
             }
             
@@ -146,7 +162,7 @@ public class OemBO extends BaseBO {
 //                         osName, e.getMessage()), e);
             log.error("Error during OEM deletion.", e);
             // throw new ASException(e);
-            throw new ASException(ErrorCode.WS_OEM_CREATE_ERROR, e.getClass().getSimpleName());
+            throw new ASException(ErrorCode.WS_OEM_DELETE_ERROR, e.getClass().getSimpleName());
             }
         return "true";
     }
