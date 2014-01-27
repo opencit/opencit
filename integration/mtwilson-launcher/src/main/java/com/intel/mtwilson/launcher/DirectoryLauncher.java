@@ -176,7 +176,10 @@ public class DirectoryLauncher {
     }
 
     public boolean contains(String artifact) {
-        return directory.toPath().resolve(artifact).toFile().exists();
+        // in java7 this would be:
+        // return directory.toPath().resolve(artifact).toFile().exists();
+        File file = new File(directory.getAbsolutePath(), artifact);
+        return file.exists();
     }
 
     // this inner class scans the directory and any subdirectories

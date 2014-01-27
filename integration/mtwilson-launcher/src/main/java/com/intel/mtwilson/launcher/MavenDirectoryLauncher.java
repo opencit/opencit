@@ -75,7 +75,7 @@ public class MavenDirectoryLauncher extends DirectoryLauncher {
                 InputStream in = m2.findJar(artifactName);
                 if (in != null) {
                     log.debug("Found artifact {} in maven repository", artifactName);
-                    File target = directory.toPath().resolve(artifactName).toFile();
+                    File target = new File(directory.getAbsolutePath(), artifactName);  // in java 7 this would be directory.toPath().resolve(artifactName).toFile()
                     FileOutputStream out = new FileOutputStream(target); // throws FileNotFoundException
                     IOUtils.copy(in, out); // throws IOException
                     in.close();
