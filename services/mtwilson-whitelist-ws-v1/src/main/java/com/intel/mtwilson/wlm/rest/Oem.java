@@ -72,7 +72,7 @@ public class Oem {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateOem(OemData oemData) {
         ValidationUtil.validate(oemData);
-        return oemBo.updateOem(oemData);
+        return oemBo.updateOem(oemData, null); // passing in default null for UUID);
     }
     /**
      * Adds the specified Oem in the database. If it can be added a success message
@@ -94,7 +94,7 @@ public class Oem {
     @Produces(MediaType.TEXT_PLAIN)
     public String addOem(OemData oemData) {
         ValidationUtil.validate(oemData);
-        return oemBo.createOem(oemData);
+        return oemBo.createOem(oemData, null); // passing in default null for UUID
     }
     
     /**
@@ -117,7 +117,7 @@ public class Oem {
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteOem(@QueryParam("Name")String oemName ) {
         ValidationUtil.validate(oemName);
-        return oemBo.deleteOem(oemName);
+        return oemBo.deleteOem(oemName, null); // passing in default null for UUID);
     }
     
     

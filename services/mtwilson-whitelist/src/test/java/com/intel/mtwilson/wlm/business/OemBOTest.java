@@ -58,12 +58,12 @@ public class OemBOTest {
         
         // if it's already in the database, delete it first
         if( found ) {
-            instance.deleteOem(oemData.getName());
+            instance.deleteOem(oemData.getName(),null);
         }
         
         
         String expResult = "true";
-        String result = instance.createOem(oemData);
+        String result = instance.createOem(oemData,null);
         assertEquals(expResult, result);
     }
     /**
@@ -98,12 +98,12 @@ public class OemBOTest {
             }
         }        
         if( !found ) {
-            instance.createOem(oemData);
+            instance.createOem(oemData,null);
         }
         
         String updatedDescription = "updated "+rnd.nextInt(99);
         oemData.setDescription(updatedDescription);
-        String result = instance.updateOem(oemData);
+        String result = instance.updateOem(oemData,null);
         assertEquals(expResult, result);
         // now make sure it was updated
         boolean isUpdated = false;
@@ -139,11 +139,11 @@ public class OemBOTest {
         
         // if it's not in the database, we need to add it before testing the delete action
         if( !found ) {
-            instance.createOem(oemData);
+            instance.createOem(oemData,null);
         }
         
         
-        String result = instance.deleteOem(oemData.getName());
+        String result = instance.deleteOem(oemData.getName(),null);
         assertEquals(expResult, result);
     }
     
