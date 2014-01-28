@@ -296,7 +296,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName);
+        return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName, null);
     }
 
      /**
@@ -372,7 +372,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteModuleWhiteList(componentName, eventName, mleName, mleVersion, osName, osVersion, oemName);
+        return mleBO.deleteModuleWhiteList(componentName, eventName, mleName, mleVersion, osName, osVersion, oemName, null);
     }
 
     /**
@@ -416,7 +416,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String addMleSource(MleSource mleSourceObj) {
         ValidationUtil.validate(mleSourceObj);
-        return mleBO.addMleSource(mleSourceObj, null);
+        return mleBO.addMleSource(mleSourceObj, null, null);
     }
 
     @PUT

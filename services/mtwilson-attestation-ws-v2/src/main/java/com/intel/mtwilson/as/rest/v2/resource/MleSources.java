@@ -112,7 +112,7 @@ public class MleSources extends AbstractResource<MleSource, MleSourceCollection,
         try {
             obj.setHostName(item.getName());
             obj.setMleData(null);
-            new MleBO().addMleSource(obj, item.getId().toString());
+            new MleBO().addMleSource(obj, item.getId().toString(), item.getMleUuid());
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {

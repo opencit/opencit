@@ -11,6 +11,8 @@ import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.wlm.helper.BaseBO;
+import com.intel.dcsg.cpg.io.UUID;
+
 import java.util.*;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -121,7 +123,7 @@ public class MleBO extends BaseBO {
                                         }
                                         mleJpaController.create(tblMle);
                                         // now add the PCRs that were validated above
-                                        addPcrManifest(tblMle, mleData.getManifestList(),null);
+                                        addPcrManifest(tblMle, mleData.getManifestList(), null, null);
 
                                 } catch (ASException ase) {
                                     //log.error("Exception while adding MLE data." + ase.getErrorMessage());
@@ -455,7 +457,7 @@ public class MleBO extends BaseBO {
                         /**
                          * 
                          */
-	private void addPcrManifest(TblMle tblMle, List<ManifestData> mleManifests, EntityManager em) {
+	private void addPcrManifest(TblMle tblMle, List<ManifestData> mleManifests, EntityManager em, String uuid) {
 		
 		tblMle.setTblPcrManifestCollection(new ArrayList<TblPcrManifest>());
 
@@ -467,6 +469,10 @@ public class MleBO extends BaseBO {
                 log.debug("add pcr manifest value: '{}'", manifestData.getValue());
                 
 				TblPcrManifest pcrManifest = new TblPcrManifest();
+                                if (uuid != null && !uuid.isEmpty())
+                                    pcrManifest.setUuid_hex(uuid);
+                                else
+                                    pcrManifest.setUuid_hex(new UUID().toString());
 				pcrManifest.setName(manifestData.getName());
                                                                                                 // Bug: 375. Need to ensure we are accepting only valid hex strings.
                                                                                                 validateWhitelistValue(manifestData.getName(), manifestData.getValue()); // throws exception if invalid
@@ -479,6 +485,7 @@ public class MleBO extends BaseBO {
 				pcrManifest.setUpdatedOn(today);
                                                                                                 */
 				pcrManifest.setMleId(tblMle);
+                                pcrManifest.setMle_uuid_hex(tblMle.getUuid_hex());
                                 if (em == null)
                                     pcrManifestJpaController.create(pcrManifest);
                                 else
@@ -627,7 +634,7 @@ public class MleBO extends BaseBO {
 	}
 
 	public String addPCRWhiteList(PCRWhiteList pcrData) {
-            return addPCRWhiteList(pcrData, null);
+            return addPCRWhiteList(pcrData, null, null, null);
         }        
                         /**
                          * Added By: Sudhir on June 20, 2012
@@ -637,20 +644,28 @@ public class MleBO extends BaseBO {
                          * @param pcrData: White list data sent by the user
                          * @return : true if the call is successful or else exception.
                          */
-	public String addPCRWhiteList(PCRWhiteList pcrData, EntityManager em) {
-                                TblMle tblMle;
-                                TblPcrManifest tblPcr;
+	public String addPCRWhiteList(PCRWhiteList pcrData, EntityManager em, String uuid, String mleUuid) {
+                                TblMle tblMle = null;
+                                TblPcrManifest tblPcr = null;
                                 try {
-
-                                    try {
-                                        // First check if the entry exists in the MLE table.
-                                        tblMle = getMleDetails(pcrData.getMleName(),
-                                                        pcrData.getMleVersion(), pcrData.getOsName(),
-                                                        pcrData.getOsVersion(), pcrData.getOemName());
-                                    } catch (NoResultException nre){
-                                        throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
+                                    if (mleUuid != null && !mleUuid.isEmpty()) {
+                                        tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                                    } else {
+                                        try {
+                                            // First check if the entry exists in the MLE table.
+                                            tblMle = getMleDetails(pcrData.getMleName(),
+                                                            pcrData.getMleVersion(), pcrData.getOsName(),
+                                                            pcrData.getOsVersion(), pcrData.getOemName());
+                                        } catch (NoResultException nre){
+                                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
+                                        }
                                     }
-
+                                    
+                                    if (tblMle == null) {
+                                        log.error("MLE specified is not found in the DB");
+                                        throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
+                                    }
+                                    
                                     // this code was checking for NoResultException but this exception is not thrown... the function findByMleIdName() called inside getPCRWhiteListDetails returns null if the record was not found.
                     //                try {
                                         // Now we need to check if PCR is already configured. If yes, then
@@ -670,7 +685,7 @@ public class MleBO extends BaseBO {
                                     pcrWhiteList.add(new ManifestData(pcrData.getPcrName(), pcrData.getPcrDigest()));
 
                                     // Now add the pcr to the database.
-                                    addPcrManifest(tblMle, pcrWhiteList, em);
+                                    addPcrManifest(tblMle, pcrWhiteList, em, uuid);
 
                                 } catch (ASException ase) {
                                     throw ase;
@@ -702,7 +717,7 @@ public class MleBO extends BaseBO {
 
         
         	public String updatePCRWhiteList(PCRWhiteList pcrData) {
-                    return updatePCRWhiteList(pcrData, null);
+                    return updatePCRWhiteList(pcrData, null, null);
                 }
         
                         /**
@@ -713,27 +728,29 @@ public class MleBO extends BaseBO {
                          * @param pcrData: White list data sent by the user
                          * @return : true if the call is successful or else exception.
                          */
-	public String updatePCRWhiteList(PCRWhiteList pcrData, EntityManager em) {
-                                TblMle tblMle;
-                                TblPcrManifest tblPcr; 
+	public String updatePCRWhiteList(PCRWhiteList pcrData, EntityManager em, String uuid) {
+                                TblMle tblMle = null;
+                                TblPcrManifest tblPcr = null; 
 
                                 try {
 
-                                    try {
-                                        // First check if the entry exists in the MLE table.
-                                        tblMle = getMleDetails(pcrData.getMleName(),
-                                                        pcrData.getMleVersion(), pcrData.getOsName(),
-                                                        pcrData.getOsVersion(), pcrData.getOemName());
-                                    } catch (NoResultException nre){
-                                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
-                                    }
-
-                                    try {
-                                        // Now we need to check if PCR is already configured. If yes, then
-                                        // we ned to ask the user to use the Update option instead of create
+                                    if (uuid != null && !uuid.isEmpty()) {
+                                        tblPcr = pcrManifestJpaController.findTblPcrManifestByUuid(uuid);
+                                    } else {
+                                        try {
+                                            // First check if the entry exists in the MLE table.
+                                            tblMle = getMleDetails(pcrData.getMleName(),
+                                                            pcrData.getMleVersion(), pcrData.getOsName(),
+                                                            pcrData.getOsVersion(), pcrData.getOemName());
+                                        } catch (NoResultException nre){
+                                            throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, pcrData.getMleName(), pcrData.getMleVersion());
+                                        }
+                                        
                                         tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrData.getPcrName());
-                                    } catch (NoResultException nre) {
-                                        throw new ASException(nre, ErrorCode.WS_PCR_WHITELIST_DOES_NOT_EXIST, pcrData.getPcrName());
+                                    }
+                                                                           
+                                    if (tblPcr == null) {
+                                        throw new ASException(ErrorCode.WS_PCR_WHITELIST_DOES_NOT_EXIST, pcrData.getPcrName());
                                     }
 
                                     // Now update the pcr in the database.
@@ -776,26 +793,29 @@ public class MleBO extends BaseBO {
                          * @param oemName : OEM Name associated with the BIOS MLE
                          * @return 
                          */
-	public String deletePCRWhiteList(String pcrName, String mleName, String mleVersion, String osName,  String osVersion, String oemName) {
-                                TblPcrManifest tblPcr;
-                                TblMle tblMle;
+	public String deletePCRWhiteList(String pcrName, String mleName, String mleVersion, String osName,  String osVersion, String oemName, String pcrUuid) {
+                                TblPcrManifest tblPcr = null;
+                                TblMle tblMle = null;
                                 try {
-                                    try {
+                                    
+                                    if (pcrUuid != null && !pcrUuid.isEmpty()) {
+                                        tblPcr = pcrManifestJpaController.findTblPcrManifestByUuid(pcrUuid);                                        
+                                    } else {
+                                    
+                                        try {
+                                            tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+                                        } catch (NoResultException nre){
+                                            // If the MLE is not configured, then return back a proper error
+                                            throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST,mleName, mleVersion);
+                                        }
+                                        
+                                        // Now get the PCR details
+                                        tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrName);
 
-                                        tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
-
-                                    } catch (NoResultException nre){
-                                        // If the MLE is not configured, then return back a proper error
-                                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST,mleName, mleVersion);
                                     }
-
-                                    try {
-                                        // Now we need to check if PCR value exists. If it does, then we do delete or else
-                                        // we still return true since the data does not exist.
-                                            tblPcr = getPCRWhiteListDetails(tblMle.getId(), pcrName);
-                                    } catch (NoResultException nre) {
+                                                                        
+                                    if (tblPcr == null)
                                         return "true";
-                                    }
 
                                     // Delete the PCR white list entry.
                                     pcrManifestJpaController.destroy(tblPcr.getId());
@@ -812,7 +832,7 @@ public class MleBO extends BaseBO {
 	}
         
         public String addModuleWhiteList(ModuleWhiteList moduleData) {
-            return addModuleWhiteList(moduleData, null);
+            return addModuleWhiteList(moduleData, null, null, null);
         }
 
         /**
@@ -823,24 +843,34 @@ public class MleBO extends BaseBO {
          * @param moduleData: Data of the white list
          * @return : "true" if everything is successful or else exception
          */
-        public String addModuleWhiteList(ModuleWhiteList moduleData, EntityManager em) {
-            TblMle tblMle;
-            TblEventType tblEvent;
-            TblPackageNamespace nsPackNS;
-            TblModuleManifest tblModule;
+        public String addModuleWhiteList(ModuleWhiteList moduleData, EntityManager em, String uuid, String mleUuid) {
+            TblMle tblMle = null;
+            TblEventType tblEvent = null;
+            TblPackageNamespace nsPackNS = null;
+            TblModuleManifest tblModule = null;
             String fullComponentName ;
             long addModule = System.currentTimeMillis();
             
             try {
 
-                try {
-                    // First check if the entry exists in the MLE table.
-                    tblMle = getMleDetails(moduleData.getMleName(),
-                                    moduleData.getMleVersion(), moduleData.getOsName(),
-                                    moduleData.getOsVersion(), moduleData.getOemName());
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, moduleData.getMleName(), moduleData.getMleVersion());
+                if (mleUuid != null && !mleUuid.isEmpty()) {
+                    tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                } else {
+                    try {
+                        // First check if the entry exists in the MLE table.
+                        tblMle = getMleDetails(moduleData.getMleName(),
+                                        moduleData.getMleVersion(), moduleData.getOsName(),
+                                        moduleData.getOsVersion(), moduleData.getOemName());
+                    } catch (NoResultException nre){
+                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, moduleData.getMleName(), moduleData.getMleVersion());
+                    }
                 }
+                
+                if (tblMle == null) {
+                    log.error("MLE specified is not found in the DB");
+                    throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
+                }
+                
                 long addModule1 = System.currentTimeMillis();
                 log.debug("ADDMLETIME: after retrieving MLE info - {} ", (addModule1 - addModule));                
                 try {
@@ -905,7 +935,14 @@ public class MleBO extends BaseBO {
                     log.debug("ADDMLETIME: after searching for package info - {} ", (addModule4 - addModule3));  
 
                     TblModuleManifest newModuleRecord = new TblModuleManifest();
+                    if (uuid != null && !uuid.isEmpty())
+                        newModuleRecord.setUuid_hex(uuid);
+                    else
+                        newModuleRecord.setUuid_hex(new UUID().toString());
+                    
                 newModuleRecord.setMleId(tblMle);
+                newModuleRecord.setMle_uuid_hex(tblMle.getUuid_hex());
+                
                 newModuleRecord.setEventID(tblEvent);
                 newModuleRecord.setNameSpaceID(nsPackNS);
                 log.debug("MleBO addModuleWhiteList setComponentName {}", fullComponentName);
@@ -950,7 +987,7 @@ public class MleBO extends BaseBO {
 
         
         public String updateModuleWhiteList(ModuleWhiteList moduleData) {
-            return updateModuleWhiteList(moduleData, null);
+            return updateModuleWhiteList(moduleData, null, null);
         }
         
         /**
@@ -961,7 +998,7 @@ public class MleBO extends BaseBO {
          * @param moduleData: Data of the white list
          * @return : "true" if everything is successful or else exception
          */
-        public String updateModuleWhiteList(ModuleWhiteList moduleData, EntityManager em) {
+        public String updateModuleWhiteList(ModuleWhiteList moduleData, EntityManager em, String uuid) {
             TblMle tblMle;
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
@@ -970,56 +1007,63 @@ public class MleBO extends BaseBO {
             
             try {
                 
-                try {
-                    // First check if the entry exists in the MLE table.
-                    tblMle = getMleDetails(moduleData.getMleName(),
-                                    moduleData.getMleVersion(), moduleData.getOsName(),
-                                    moduleData.getOsVersion(), moduleData.getOemName());
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, moduleData.getMleName(), moduleData.getMleVersion());
-                }
-                                
-                try {
-
-                    // Before we insert the record, we need the identity for the event name
-                    tblEvent = eventTypeJpaController.findEventTypeByName(moduleData.getEventName());
+                if (uuid != null &&  !uuid.isEmpty()) {
                     
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_EVENT_TYPE_DOES_NOT_EXIST, moduleData.getEventName());
-                }
-                
-                try {
-                    // Now we need to check if Module is already configured. If yes, then
-                    // we need to ask the user to use the Update option instead of create
-                    validateNull("ComponentName", moduleData.getComponentName());
-                    validateNull("EventName", moduleData.getEventName());
-                    log.debug("updateModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
-                   
-                    // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
-                    // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
-                    if (moduleData.getEventName().contains("Vim25")) {
-                        fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
-                    } else {
-                        fullComponentName = moduleData.getComponentName();
-                    }
-                    // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
-                    if( fullComponentName != null ) {
-                        log.debug("trimming fullComponentName: " + fullComponentName);
-                        fullComponentName = fullComponentName.trim(); 
-                    }
-                    log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
-
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+                    tblModule = moduleManifestJpaController.findTblModuleManifestByUuid(uuid);
                     
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());                    
+                } else {
+                    
+                    try {
+                        // First check if the entry exists in the MLE table.
+                        tblMle = getMleDetails(moduleData.getMleName(),
+                                        moduleData.getMleVersion(), moduleData.getOsName(),
+                                        moduleData.getOsVersion(), moduleData.getOemName());
+                    } catch (NoResultException nre){
+                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, moduleData.getMleName(), moduleData.getMleVersion());
+                    }
+
+                    try {
+
+                        // Before we insert the record, we need the identity for the event name
+                        tblEvent = eventTypeJpaController.findEventTypeByName(moduleData.getEventName());
+
+                    } catch (NoResultException nre){
+                        throw new ASException(nre,ErrorCode.WS_EVENT_TYPE_DOES_NOT_EXIST, moduleData.getEventName());
+                    }
+
+                    try {
+                        // Now we need to check if Module is already configured. If yes, then
+                        // we need to ask the user to use the Update option instead of create
+                        validateNull("ComponentName", moduleData.getComponentName());
+                        validateNull("EventName", moduleData.getEventName());
+                        log.debug("updateModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+moduleData.getComponentName()+"' event name '"+moduleData.getEventName()+"'");
+
+                        // For Open Source hypervisors, we do not want to prefix the event type field name. So, we need to check if the event name
+                        // corresponds to VMware, then we will append the event type fieldName to the component name. Otherwise we won't
+                        if (moduleData.getEventName().contains("Vim25")) {
+                            fullComponentName = tblEvent.getFieldName() + "." + moduleData.getComponentName();
+                        } else {
+                            fullComponentName = moduleData.getComponentName();
+                        }
+                        // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+                        if( fullComponentName != null ) {
+                            log.debug("trimming fullComponentName: " + fullComponentName);
+                            fullComponentName = fullComponentName.trim(); 
+                        }
+                        log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
+
+                        tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), fullComponentName, moduleData.getEventName());
+
+                    } catch (NoResultException nre){
+                        throw new ASException(nre,ErrorCode.WS_MODULE_WHITELIST_DOES_NOT_EXIST, moduleData.getComponentName());                    
+                    }
+
+                    if(! packageNSJpaController.namespaceExists("Standard_Global_NS"))
+                        throw new ASException(ErrorCode.WS_NAME_SPACE_DOES_NOT_EXIST);
                 }
-                
-                if(! packageNSJpaController.namespaceExists("Standard_Global_NS"))
-                    throw new ASException(ErrorCode.WS_NAME_SPACE_DOES_NOT_EXIST);
                 
                 validateWhitelistValue(moduleData.getComponentName(), moduleData.getDigestValue()); // throws exception if invalid
-                         tblModule.setDigestValue(moduleData.getDigestValue());
+                tblModule.setDigestValue(moduleData.getDigestValue());
                 
                 tblModule.setDescription(moduleData.getDescription());
                 // @since 1.1 we are relying on the audit log for "created on", "created by", etc. type information
@@ -1064,7 +1108,7 @@ public class MleBO extends BaseBO {
          * @return : "true" if everything is successful or else exception
          */
         public String deleteModuleWhiteList(String componentName, String eventName, String mleName, String mleVersion, 
-                String osName, String osVersion, String oemName) {
+                String osName, String osVersion, String oemName, String uuid) {
             TblMle tblMle;
             TblEventType tblEvent;
             TblPackageNamespace nsPackNS;
@@ -1072,49 +1116,56 @@ public class MleBO extends BaseBO {
             
             try {
                 
-                try {
-                    // First check if the entry exists in the MLE table.
-                    tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
-
-                } catch (NoResultException nre){
-                    throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
-                }
-                                
-                try {
-
-                    // Before we insert the record, we need the identity for the event name
-                    tblEvent = eventTypeJpaController.findEventTypeByName(eventName);
+                if (uuid != null && !uuid.isEmpty()) {
                     
-                } catch (NoResultException nre){
-                    throw new ASException(nre, ErrorCode.WS_EVENT_TYPE_DOES_NOT_EXIST, eventName);
+                    tblModule = moduleManifestJpaController.findTblModuleManifestByUuid(uuid);
+                    
+                } else {
+                    
+                    try {
+                        // First check if the entry exists in the MLE table.
+                        tblMle = getMleDetails(mleName, mleVersion, osName, osVersion, oemName);
+
+                    } catch (NoResultException nre){
+                        throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
+                    }
+
+                    try {
+
+                        // Before we insert the record, we need the identity for the event name
+                        tblEvent = eventTypeJpaController.findEventTypeByName(eventName);
+
+                    } catch (NoResultException nre){
+                        throw new ASException(nre, ErrorCode.WS_EVENT_TYPE_DOES_NOT_EXIST, eventName);
+                    }
+
+                    try {
+                        // Now we need to check if Module is already configured. If yes, then
+                        // we need to ask the user to use the Update option instead of create
+                        validateNull("ComponentName", componentName);
+                        validateNull("EventName", eventName);
+                        String fullComponentName = tblEvent.getFieldName() + "." + componentName;
+
+                        // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
+                        if( fullComponentName != null ) {
+                            log.debug("trimming fullComponentName: " + fullComponentName);
+                            fullComponentName = fullComponentName.trim(); 
+                        }
+                        log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
+
+                        log.debug("deleteModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+componentName+"' event name '"+eventName+"'");
+                        tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), 
+                                tblEvent.getFieldName() + "." + componentName, eventName);
+
+                    } catch (NoResultException nre){
+                        // If the module manifest that we are trying to delete does not exist, it is ok.
+                        // Just return back success
+                        return "true";
+                    }
                 }
                 
-                try {
-                    // Now we need to check if Module is already configured. If yes, then
-                    // we need to ask the user to use the Update option instead of create
-                    validateNull("ComponentName", componentName);
-                    validateNull("EventName", eventName);
-                    String fullComponentName = tblEvent.getFieldName() + "." + componentName;
-                    
-                    // fix for Bug #730 that affected postgres only because postgres does not automatically trim spaces on queries but mysql automatically trims
-                    if( fullComponentName != null ) {
-                        log.debug("trimming fullComponentName: " + fullComponentName);
-                        fullComponentName = fullComponentName.trim(); 
-                    }
-                    log.debug("uploadToDB searching for module manifest with fullComponentName '" + fullComponentName + "'");
-
-                    log.debug("deleteModuleWhiteList searching for module manifest with field name '"+tblEvent.getFieldName()+"' component name '"+componentName+"' event name '"+eventName+"'");
-                    tblModule = moduleManifestJpaController.findByMleNameEventName(tblMle.getId(), 
-                            tblEvent.getFieldName() + "." + componentName, eventName);
-                    
-                } catch (NoResultException nre){
-                    // If the module manifest that we are trying to delete does not exist, it is ok.
-                    // Just return back success
-                    return "true";
-                }
-                                                
-                // Create the new white list record.
-                moduleManifestJpaController.destroy(tblModule.getId());
+                if (tblModule != null) 
+                    moduleManifestJpaController.destroy(tblModule.getId());
                 
             } catch (ASException ase) {
                     throw ase;
@@ -1214,7 +1265,7 @@ public class MleBO extends BaseBO {
          * @param mleSourceObj : Object containing the details of the host and the MLE.
          * @return True or False
          */
-        public String addMleSource(MleSource mleSourceObj, String mleUuid) {
+        public String addMleSource(MleSource mleSourceObj, String uuid, String mleUuid) {
             TblMle tblMle = null;
             MleData mleData = null ;
             try {
@@ -1233,6 +1284,7 @@ public class MleBO extends BaseBO {
                 }
                   
                 if (tblMle == null) {
+                    log.error("MLE specified is not found in the DB");
                     throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
                 }
                 
@@ -1249,7 +1301,12 @@ public class MleBO extends BaseBO {
                 
                 // Else create a new entry in the DB.
                 MwMleSource mleSourceData = new MwMleSource();
+                if (uuid != null && !uuid.isEmpty())
+                    mleSourceData.setUuid_hex(uuid);
+                else
+                    mleSourceData.setUuid_hex(new UUID().toString());
                 mleSourceData.setMleId(tblMle);
+                mleSourceData.setMle_uuid_hex(tblMle.getUuid_hex());
                 mleSourceData.setHostName(mleSourceObj.getHostName());        
                         
                 mleSourceJpaController.create(mleSourceData);
@@ -1270,13 +1327,16 @@ public class MleBO extends BaseBO {
          * @param mleSourceObj
          * @return 
          */
-        public String updateMleSource(MleSource mleSourceObj, String mleUuid) {
+        public String updateMleSource(MleSource mleSourceObj, String uuid) {
             TblMle tblMle = null;
             MleData mleData = null ;
+            MwMleSource mwMleSource = null;
             try {
 
-                if (mleUuid != null && !mleUuid.isEmpty()) {
-                    tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                
+                if (uuid != null && !uuid.isEmpty()) {
+                    mwMleSource = mleSourceJpaController.findByUuid(uuid);
                 } else {
                     try {
                         mleData = mleSourceObj.getMleData();
@@ -1286,14 +1346,12 @@ public class MleBO extends BaseBO {
                     } catch (NoResultException nre){
                         throw new ASException(ErrorCode.WS_MLE_DOES_NOT_EXIST, mleData.getName(), mleData.getVersion());
                     }
+                    
+                    // Now retrieve the MleSource details
+                    mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
                 }
-                if (tblMle == null) {
-                    throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
-                }
-                
-                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                                
                 // If the mapping does not exist already in the db, then we need to return back error.
-                MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
                 if (mwMleSource == null) {
                     throw new ASException(ErrorCode.WS_MLE_SOURCE_MAPPING_DOES_NOT_EXIST, mleData.getName());
                 }
@@ -1323,11 +1381,14 @@ public class MleBO extends BaseBO {
          * @param oemName
          * @return 
          */
-        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName, String mleUuid) {
+        public String deleteMleSource(String mleName, String mleVersion, String osName, String osVersion, String oemName, String uuid) {
             TblMle tblMle = null;
+            MwMleSource mwMleSource = null;
             try {
-                if (mleUuid != null && !mleUuid.isEmpty()) {
-                    tblMle = mleJpaController.findTblMleByUUID(mleUuid);
+                 MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
+                 
+                if (uuid != null && !uuid.isEmpty()) {
+                    mwMleSource = mleSourceJpaController.findByUuid(uuid);
                 } else {                
                     try {
                         // First check if the entry exists in the MLE table.
@@ -1336,13 +1397,11 @@ public class MleBO extends BaseBO {
                     } catch (NoResultException nre){
                         throw new ASException(nre,ErrorCode.WS_MLE_DOES_NOT_EXIST, mleName, mleVersion);
                     }
-                }
-                if (tblMle == null) {
-                    throw new ASException(ErrorCode.WS_MLE_RETRIEVAL_ERROR, this.getClass().getSimpleName());
+                    
+                    // Now retrieve the MwMleSource table entry
+                    mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
                 }
                 
-                MwMleSourceJpaController mleSourceJpaController = new MwMleSourceJpaController(getEntityManagerFactory());
-                MwMleSource mwMleSource = mleSourceJpaController.findByMleId(tblMle.getId());
                 // If the mapping does not exist, it is ok. We don't need to worry. Actually for MLES
                 // configured manully, this entry does not exist.
                 if  (mwMleSource != null)                                

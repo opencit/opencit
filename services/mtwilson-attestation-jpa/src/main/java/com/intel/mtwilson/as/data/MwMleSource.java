@@ -80,6 +80,14 @@ public class MwMleSource implements Serializable {
         this.uuid_hex = uuid_hex;
     }
 
+    public String getMle_uuid_hex() {
+        return mle_uuid_hex;
+    }
+
+    public void setMle_uuid_hex(String mle_uuid_hex) {
+        this.mle_uuid_hex = mle_uuid_hex;
+    }
+
     
     @Override
     public int hashCode() {
