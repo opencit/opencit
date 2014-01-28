@@ -20,11 +20,14 @@ import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.mtwilson.datatypes.xml.HostTrustXmlResponse;
 import com.intel.mtwilson.model.Hostname;
+import java.io.IOException;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -757,6 +760,14 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
 		return report.getPcrLogs();
 	}
         
+    
+    /**
+     * Returns list of available locales.
+     * 
+     * @param apiClientServices
+     * @return
+     * @throws DemoPortalException 
+     */
     @Override
     public String[] getLocales(ManagementService apiClientServices) throws DemoPortalException {
         String[] ret = null;
@@ -769,5 +780,27 @@ public class DemoPortalServicesImpl implements IDemoPortalServices {
             throw ConnectionUtil.handleDemoPortalException(e);
         }
         return ret;
+    }
+    
+    /**
+     * Returns locale for specified portal user.
+     * 
+     * @param username
+     * @param apiclient
+     * @return
+     * @throws DemoPortalException 
+     */
+    @Override
+    public String getLocale(String username, ApiClient apiclient) throws DemoPortalException {
+        String locale = null;
+        
+        try {
+            locale = apiclient.getLocale(username);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw ConnectionUtil.handleDemoPortalException(e);
+        }
+
+        return locale;
     }
 }

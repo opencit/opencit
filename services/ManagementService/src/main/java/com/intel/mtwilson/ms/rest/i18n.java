@@ -5,8 +5,10 @@
 package com.intel.mtwilson.ms.rest;
 
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.ms.common.common.MCPersistenceManager;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
+import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
+import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
+import com.intel.mtwilson.ms.data.MwPortalUser;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
 import java.io.IOException;
 import javax.ejb.Stateless;
@@ -30,6 +32,59 @@ public class i18n {
     }
 
     /**
+     * Returns locale for specified user.
+     * 
+     * @param username
+     * @return
+     * @throws IOException 
+     */
+    @GET
+    @Consumes("application/json")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/locale")
+    @RolesAllowed({"Security"})
+    public String getLocaleForUser(
+            @QueryParam("username") String username) throws IOException {
+        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
+        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+            if(portalUser != null) {
+                return portalUser.getLocale();
+            } else {
+                return "Portal user not found.";
+            }
+    }
+    
+    /**
+     * Sets the user defined locale.
+     * 
+     * @param username
+     * @param locale
+     * @return
+     * @throws IOException
+     * @throws NonexistentEntityException
+     * @throws MSDataException 
+     */
+    @POST
+    @Consumes("application/json")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/locale")
+    @RolesAllowed({"Security"})
+    public String setLocaleForUser(
+            //@QueryParam("api") Boolean api,
+            @QueryParam("username") String username,
+            @QueryParam("locale") String locale) throws IOException, NonexistentEntityException, MSDataException {
+        //ValidationUtil.validate(apiClientRequest);
+        MwPortalUserJpaController mwPortalUserJpaController = My.jpa().mwPortalUser(); //new MwPortalUserJpaController(getMSEntityManagerFactory());
+        MwPortalUser portalUser = mwPortalUserJpaController.findMwPortalUserByUserName(username);
+        if (portalUser != null) {
+            portalUser.setLocale(locale);
+            mwPortalUserJpaController.edit(portalUser);
+        } else { return "Portal user not found."; }
+        
+        return "OK";
+    }
+    
+    /**
      * Retrieves list of available locales
      *
      * @return
@@ -41,22 +96,5 @@ public class i18n {
     @RolesAllowed({"Security"})
     public String[] getLocales() throws IOException {
         return My.configuration().getAvailableLocales();
-    }
-    
-    
-    @POST
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes("application/json")
-    @Path("/locales")
-    @RolesAllowed({"Security"})
-    public String setLocaleForUser(
-            @QueryParam("api") Boolean api,
-            @QueryParam("username") String username,
-            @QueryParam("locale") String locale) {
-        //ValidationUtil.validate(apiClientRequest);
-//        private MCPersistenceManager mcManager = new MCPersistenceManager();
-//	private MwPortalUserJpaController keystoreJpa = new MwPortalUserJpaController(mcManager.getEntityManagerFactory("MSDataPU"));
-//        new ApiClientBO().create(apiClientRequest);
-        return "OK";
     }
 }

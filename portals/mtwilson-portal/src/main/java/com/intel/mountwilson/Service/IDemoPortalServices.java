@@ -153,5 +153,15 @@ public interface IDemoPortalServices {
 	 * @throws DemoPortalException
          */
         public String[] getLocales(ManagementService apiClientServices) throws DemoPortalException;
+        
+        /**
+         * Returns locale for specified portal user.
+         * 
+         * @param username
+         * @param apiclient
+         * @return
+         * @throws DemoPortalException 
+         */
+        public String getLocale(String username, ApiClient apiclient) throws DemoPortalException;
 }
 
