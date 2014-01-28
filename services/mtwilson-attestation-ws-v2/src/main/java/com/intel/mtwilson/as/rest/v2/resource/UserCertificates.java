@@ -36,7 +36,8 @@ public class UserCertificates extends AbstractResource<UserCertificate, UserCert
 
     @Override
     protected UserCertificateCollection search(UserCertificateFilterCriteria criteria) {
-        UserCertificateCollection userCertCollection = null;
+        // start with empty collection, then add search results to it;  if no results found we will return the empty collection
+        UserCertificateCollection userCertCollection = new UserCertificateCollection();
         try {
             ApiClientX509JpaController userCertJpaController = My.jpa().mwApiClientX509();
             if (criteria.id != null) {
