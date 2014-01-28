@@ -30,7 +30,7 @@ import org.apache.commons.io.IOUtils;
 //import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 /**
- *
+ * Reference: https://jersey.java.net/documentation/latest/message-body-workers.html
  * @author jbuhacoff
  */
 @Provider
@@ -42,7 +42,7 @@ public class X509CertificateDerProvider implements
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(OtherMediaType.APPLICATION_PKIX_CERT) );
+        return X509Certificate.class.isAssignableFrom(type) && ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(OtherMediaType.APPLICATION_PKIX_CERT) );
     }
 
     @Override
@@ -67,7 +67,7 @@ public class X509CertificateDerProvider implements
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(OtherMediaType.APPLICATION_PKIX_CERT) );
+        return X509Certificate.class.isAssignableFrom(type) && ( mediaType.toString().equals(MediaType.APPLICATION_OCTET_STREAM) || mediaType.toString().equals(OtherMediaType.APPLICATION_PKIX_CERT) );
     }
 
     @Override
