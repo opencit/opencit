@@ -33,6 +33,24 @@ public class CreateSamlCertificate extends LocalSetupTask {
     private String samlDistinguishedName = "CN=mtwilson-saml,OU=mtwilson";
 //    private File tlsKeystoreFile = null; // maybe the path would be a configuration item, currently it's hardcoded to be "mtwilson-tls.jks" under MTWILSON_CONF
     private String samlKeystorePassword = null;
+
+    public String getSamlKeystorePassword() {
+        return samlKeystorePassword;
+    }
+
+    public void setSamlKeystorePassword(String samlKeystorePassword) {
+        this.samlKeystorePassword = samlKeystorePassword;
+    }
+
+    public String getSamlDistinguishedName() {
+        return samlDistinguishedName;
+    }
+
+    public void setSamlDistinguishedName(String samlDistinguishedName) {
+        this.samlDistinguishedName = samlDistinguishedName;
+    }
+    
+    
     
     @Override
     protected void configure() throws Exception {

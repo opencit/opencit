@@ -31,10 +31,44 @@ public class CreateTlsCertificate extends LocalSetupTask {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CreateTlsCertificate.class);
 
     private String tlsDistinguishedName = "CN=mtwilson-tls,OU=mtwilson";
-    private String ipAlternativeName = "127.0.0.1"; // XXX TODO we need to provide a configuration setting for this ... it may already be in the mtwilson.env and just need to formalize it in My.configuration()
-    private String dnsAlternativeName = "localhost";
+    private String ipAlternativeName = null;
+    private String dnsAlternativeName = null;
 //    private File tlsKeystoreFile = null; // maybe the path would be a configuration item, currently it's hardcoded to be "mtwilson-tls.jks" under MTWILSON_CONF
     private String tlsKeystorePassword = null;
+
+    public String getTlsDistinguishedName() {
+        return tlsDistinguishedName;
+    }
+
+    public void setTlsDistinguishedName(String tlsDistinguishedName) {
+        this.tlsDistinguishedName = tlsDistinguishedName;
+    }
+
+    public String getIpAlternativeName() {
+        return ipAlternativeName;
+    }
+
+    public void setIpAlternativeName(String ipAlternativeName) {
+        this.ipAlternativeName = ipAlternativeName;
+    }
+
+    public String getDnsAlternativeName() {
+        return dnsAlternativeName;
+    }
+
+    public void setDnsAlternativeName(String dnsAlternativeName) {
+        this.dnsAlternativeName = dnsAlternativeName;
+    }
+
+    public String getTlsKeystorePassword() {
+        return tlsKeystorePassword;
+    }
+
+    public void setTlsKeystorePassword(String tlsKeystorePassword) {
+        this.tlsKeystorePassword = tlsKeystorePassword;
+    }
+    
+    
     
     @Override
     protected void configure() throws Exception {

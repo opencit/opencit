@@ -7,6 +7,7 @@ package com.intel.mtwilson.setup.tasks;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.setup.SetupTask;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
 
 /**
@@ -16,20 +17,39 @@ import org.junit.Test;
 public class SetupTest {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SetupTest.class);
 
-    @Test
-    public void testSetupTasks() {
+    private List<SetupTask> getSetupTasks() {
         ArrayList<SetupTask> tasks = new ArrayList<SetupTask>();
-        /*
         tasks.add(new ConfigureFilesystem());
         tasks.add(new CreateMtWilsonPropertiesFile());
         tasks.add(new CreateCertificateAuthorityKey());
-        tasks.add(new CreateTlsCertificate());
-        tasks.add(new CreateSamlCertificate());
+        CreateTlsCertificate createTlsCertificate = new CreateTlsCertificate();
+        createTlsCertificate.setDnsAlternativeName("localhost");
+        createTlsCertificate.setIpAlternativeName("127.0.0.1");
+        createTlsCertificate.setTlsKeystorePassword("password"); // or use My.configuration()...
+        tasks.add(createTlsCertificate);
+        CreateSamlCertificate createSamlCertificate = new CreateSamlCertificate();
+        createSamlCertificate.setSamlKeystorePassword("password");// or use My.configuration()...
+        tasks.add(createSamlCertificate);
         tasks.add(new ConfigureDatabase());
         tasks.add(new InitDatabase());
-        */
-        tasks.add(new CreateSamlCertificate());
+        return tasks;
+    }
+    
+    @Test
+    public void testLastSetupTask() {
+        List<SetupTask> tasks = getSetupTasks();
+        ArrayList<SetupTask> last = new ArrayList<SetupTask>();
+        last.add(tasks.get(tasks.size()-1));
+        runSetupTasks(last);
+    }
+    
+    @Test
+    public void testAllSetupTasks() {
+        List<SetupTask> tasks = getSetupTasks();
+        runSetupTasks(tasks);
+    }
         
+    public void runSetupTasks(List<SetupTask> tasks) {
         for(SetupTask task : tasks) {
             if( task.isConfigured() && task.isValidated() ) {
                 log.debug("nothing to do for {}", task.getClass().getName());
