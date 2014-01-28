@@ -340,7 +340,14 @@ public class CertificateResource extends ServerResource {
         HostAgentFactory hostAgentFactory = new HostAgentFactory();
         ByteArrayResource tlsKeystore = new ByteArrayResource();
 //        TlsPolicy tlsPolicy = hostAgentFactory.getTlsPolicy("TRUST_FIRST_CERTIFICATE", tlsKeystore);
-        ConnectionString connectionString = ConnectionString.forCitrix(new Hostname(host.toString()), username, password);
+        ConnectionString connectionString = null;
+        if(port == 443) {
+            log.debug("writing citrix asset tag ["+host.toString()+" , " + port + ", " + username + ", " + password + "]");
+            connectionString = ConnectionString.forCitrix(new Hostname(host.toString()), username, password);
+        }else {
+            log.debug("writing ta asset tag ["+host.toString()+" , " + port + ", " + username + ", " + password + "]");
+            connectionString = ConnectionString.forIntel(host.toString(),port);
+        }
         HostAgent hostAgent = hostAgentFactory.getHostAgent(connectionString, new InsecureTlsPolicy());
         hostAgent.setAssetTag(tag);
     }
