@@ -24,10 +24,11 @@ public class SetupTest {
         tasks.add(new CreateMtWilsonPropertiesFile());
         tasks.add(new CreateCertificateAuthorityKey());
         tasks.add(new CreateTlsCertificate());
+        tasks.add(new CreateSamlCertificate());
         tasks.add(new ConfigureDatabase());
         tasks.add(new InitDatabase());
         */
-        tasks.add(new CreateTlsCertificate());
+        tasks.add(new CreateSamlCertificate());
         
         for(SetupTask task : tasks) {
             if( task.isConfigured() && task.isValidated() ) {

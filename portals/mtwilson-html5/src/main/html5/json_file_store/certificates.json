@@ -1,0 +1,29 @@
+{
+    "href": "json_file_store/certificates.json",
+    "meta": {
+        "type": "certificate-list"
+    },
+    "certificates": [
+        {
+            "uuid": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "subject": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "certificate": "(base64 data here)",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "pcrEvent": "bbbbbbbbbbbbbbbbbbbb"
+        },
+        {
+            "uuid": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "subject": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "certificate": "(base64 data here)",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "pcrEvent": "bbbbbbbbbbbbbbbbbbbb"
+        },
+        {
+            "uuid": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "subject": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "certificate": "(base64 data here)",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "pcrEvent": "bbbbbbbbbbbbbbbbbbbb"
+        }
+    ]
+}
