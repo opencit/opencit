@@ -32,7 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 //import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 /**
- *
+ * Reference: https://jersey.java.net/documentation/latest/message-body-workers.html
+ * 
  * @author jbuhacoff
  */
 @Provider
@@ -44,7 +45,7 @@ public class X509CertificateArrayPemProvider implements
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ( mediaType.toString().equals(OtherMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
+        return X509Certificate[].class.isAssignableFrom(type) && ( mediaType.toString().equals(OtherMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
     }
 
     @Override
@@ -69,7 +70,7 @@ public class X509CertificateArrayPemProvider implements
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ( mediaType.toString().equals(OtherMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
+        return X509Certificate[].class.isAssignableFrom(type) && ( mediaType.toString().equals(OtherMediaType.APPLICATION_X_PEM_FILE) || mediaType.toString().equals(MediaType.TEXT_PLAIN) );
     }
 
     @Override
