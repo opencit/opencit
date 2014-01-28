@@ -102,7 +102,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String addMle(MleData mleData) {
         ValidationUtil.validate(mleData);
-        return mleBO.addMLe(mleData);
+        return mleBO.addMLe(mleData, null);
     }
 
     /**
@@ -125,7 +125,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMle(MleData mleData) {
         ValidationUtil.validate(mleData);
-        return mleBO.updateMle(mleData);
+        return mleBO.updateMle(mleData, null);
     }
 
     /**
@@ -223,7 +223,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteMle(mleName, mleVersion,osName, osVersion, oemName);
+        return mleBO.deleteMle(mleName, mleVersion,osName, osVersion, oemName, null);
     }
     
     /**
@@ -296,7 +296,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName);
+        return mleBO.deletePCRWhiteList(pcrName, mleName, mleVersion,osName, osVersion, oemName, null);
     }
 
      /**
@@ -372,7 +372,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteModuleWhiteList(componentName, eventName, mleName, mleVersion, osName, osVersion, oemName);
+        return mleBO.deleteModuleWhiteList(componentName, eventName, mleName, mleVersion, osName, osVersion, oemName, null);
     }
 
     /**
@@ -416,7 +416,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String addMleSource(MleSource mleSourceObj) {
         ValidationUtil.validate(mleSourceObj);
-        return mleBO.addMleSource(mleSourceObj);
+        return mleBO.addMleSource(mleSourceObj, null, null);
     }
 
     @PUT
@@ -426,7 +426,7 @@ public class Mle {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateMleSource(MleSource mleSourceObj) {
         ValidationUtil.validate(mleSourceObj);
-        return mleBO.updateMleSource(mleSourceObj);
+        return mleBO.updateMleSource(mleSourceObj, null);
     }
 
     @DELETE
@@ -446,7 +446,7 @@ public class Mle {
         ValidationUtil.validate(osVersion);
         ValidationUtil.validate(oemName);
         
-        return mleBO.deleteMleSource(mleName, mleVersion, osName, osVersion, oemName);
+        return mleBO.deleteMleSource(mleName, mleVersion, osName, osVersion, oemName, null);
     }
 
     @GET

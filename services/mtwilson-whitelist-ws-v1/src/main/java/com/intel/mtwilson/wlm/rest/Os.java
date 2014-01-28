@@ -71,7 +71,7 @@ public class Os {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateOs(OsData osData) {
         ValidationUtil.validate(osData);
-        return osBO.updateOs(osData);
+        return osBO.updateOs(osData, null);
     }
     /**
      * Adds the specified OS in the database. If it can be added a success message
@@ -93,7 +93,7 @@ public class Os {
     @Produces(MediaType.TEXT_PLAIN)
     public String addOs(OsData osData) {
         ValidationUtil.validate(osData);
-        return osBO.createOs(osData);
+        return osBO.createOs(osData, null);
     }
     
     
@@ -104,7 +104,7 @@ public class Os {
     public String deleteOs(@QueryParam("Name")String osName, @QueryParam("Version")String osVersion ) {
         ValidationUtil.validate(osName);
         ValidationUtil.validate(osVersion);
-        return osBO.deleteOs(osName,osVersion);
+        return osBO.deleteOs(osName,osVersion, null);
     }
     
     

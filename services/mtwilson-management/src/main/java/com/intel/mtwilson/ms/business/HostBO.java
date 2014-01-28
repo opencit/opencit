@@ -2262,14 +2262,14 @@ public class HostBO extends BaseBO {
                             }*/
                             if (!hostConfigObj.getOverWriteWhiteList()) {
                                 if (isWhiteListServiceLocal())
-                                    mleBO.addModuleWhiteList(moduleObj, emt);
+                                    mleBO.addModuleWhiteList(moduleObj, emt, null, null);
                                 else
                                     wlsClient.addModuleWhiteList(moduleObj);
                                 log.debug("Successfully created a new module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
 
                             } else {
                                 if (isWhiteListServiceLocal())
-                                    mleBO.updateModuleWhiteList(moduleObj, emt);
+                                    mleBO.updateModuleWhiteList(moduleObj, emt, null);
                                 else
                                     wlsClient.updateModuleWhiteList(moduleObj);
                                 log.debug("Successfully updated the module manifest for : " + hostObj.VMM_Name + ":" + moduleObj.getComponentName());
@@ -2301,14 +2301,14 @@ public class HostBO extends BaseBO {
                                     tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                     if (tblPCR == null) {
                                         if (isWhiteListServiceLocal())
-                                            mleBO.addPCRWhiteList(pcrObj, emt);
+                                            mleBO.addPCRWhiteList(pcrObj, emt, null, null);
                                         else
                                             wlsClient.addPCRWhiteList(pcrObj);
                                         log.debug("Successfully created a new BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
 
                                     } else {
                                         if (isWhiteListServiceLocal())
-                                            mleBO.updatePCRWhiteList(pcrObj, emt);
+                                            mleBO.updatePCRWhiteList(pcrObj, emt, null);
                                         else
                                             wlsClient.updatePCRWhiteList(pcrObj);
                                         log.debug("Successfully updated the BIOS PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
@@ -2354,13 +2354,13 @@ public class HostBO extends BaseBO {
                                 tblPCR = pcrJpa.findByMleIdName(mleID, pcrObj.getPcrName());
                                 if (tblPCR == null) {
                                     if (isWhiteListServiceLocal())
-                                        mleBO.addPCRWhiteList(pcrObj, emt);
+                                        mleBO.addPCRWhiteList(pcrObj, emt, null, null);
                                     else
                                         wlsClient.addPCRWhiteList(pcrObj);
                                     log.debug("Successfully created a new VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());
                                 } else {
                                     if (isWhiteListServiceLocal())
-                                        mleBO.updatePCRWhiteList(pcrObj, emt);
+                                        mleBO.updatePCRWhiteList(pcrObj, emt, null);
                                     else
                                         wlsClient.updatePCRWhiteList(pcrObj);
                                     log.debug("Successfully updated the VMM PCR manifest for : " + pcrObj.getMleName() + ":" + pcrObj.getPcrName());

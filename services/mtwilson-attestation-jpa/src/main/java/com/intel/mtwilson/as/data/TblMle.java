@@ -82,8 +82,15 @@ public class TblMle implements Serializable {
     private String requiredManifestList;
     @Column(name = "Description")
     private String description;
+    @Basic(optional = false)
     @Column(name = "uuid_hex")
     private String uuid_hex;
+    @Basic(optional = true)
+    @Column(name = "oem_uuid_hex")
+    private String oem_uuid_hex;
+    @Basic(optional = true)
+    @Column(name = "os_uuid_hex")
+    private String os_uuid_hex;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "vmmMleId")
     private Collection<TblHosts> tblHostsCollection;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "biosMleId")
@@ -173,6 +180,22 @@ public class TblMle implements Serializable {
 
     public void setUuid_hex(String uuid_hex) {
         this.uuid_hex = uuid_hex;
+    }
+
+    public String getOem_uuid_hex() {
+        return oem_uuid_hex;
+    }
+
+    public void setOem_uuid_hex(String oem_uuid_hex) {
+        this.oem_uuid_hex = oem_uuid_hex;
+    }
+
+    public String getOs_uuid_hex() {
+        return os_uuid_hex;
+    }
+
+    public void setOs_uuid_hex(String os_uuid_hex) {
+        this.os_uuid_hex = os_uuid_hex;
     }
 
     

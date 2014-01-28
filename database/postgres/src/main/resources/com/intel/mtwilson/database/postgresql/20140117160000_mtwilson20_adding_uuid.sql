@@ -76,6 +76,36 @@ BEGIN
    END LOOP;
 END$$;
 
+-- Adds the reference to the OEM UUID column in the MLE table
+ALTER TABLE mw_mle ADD COLUMN oem_uuid_hex CHAR(36) NULL;
+DO
+$$
+DECLARE
+    rec   record;
+BEGIN
+   FOR rec IN
+      SELECT *
+      FROM   mw_mle
+   LOOP
+      UPDATE mw_mle mw SET oem_uuid_hex = (SELECT moem.uuid_hex FROM mw_oem moem WHERE moem.ID = mm.OEM_ID);
+   END LOOP;
+END$$;
+
+-- Adds the reference to the OS UUID column in the MLE table
+ALTER TABLE mw_mle ADD COLUMN os_uuid_hex CHAR(36) NULL;
+DO
+$$
+DECLARE
+    rec   record;
+BEGIN
+   FOR rec IN
+      SELECT *
+      FROM   mw_mle
+   LOOP
+      UPDATE mw_mle mw SET os_uuid_hex = (SELECT mos.uuid_hex FROM mw_os mos WHERE mos.ID = mm.OS_ID);
+   END LOOP;
+END$$;
+
 ALTER TABLE mw_mle_source ADD COLUMN uuid_hex CHAR(36) NULL;
 DO
 $$
@@ -90,7 +120,7 @@ BEGIN
    END LOOP;
 END$$;
 
--- We need to use the UUID from the mw_mle table to update the mw_mle_source table 
+-- Adds the reference to the MLE UUID column in the MW_MLE_Source table
 ALTER TABLE mw_mle_source ADD COLUMN mle_uuid_hex CHAR(36) NULL;
 DO
 $$
@@ -120,6 +150,7 @@ BEGIN
    END LOOP;
 END$$;
 
+-- Adds the reference to the MLE UUID column in the MW_PCR_Manifest table
 ALTER TABLE mw_pcr_manifest ADD COLUMN mle_uuid_hex CHAR(36) NULL;
 DO
 $$
@@ -148,6 +179,7 @@ BEGIN
    END LOOP;
 END$$;
 
+-- Adds the reference to the MLE UUID column in the MW_PCR_Manifest table
 ALTER TABLE mw_module_manifest ADD COLUMN mle_uuid_hex CHAR(36) NULL;
 DO
 $$

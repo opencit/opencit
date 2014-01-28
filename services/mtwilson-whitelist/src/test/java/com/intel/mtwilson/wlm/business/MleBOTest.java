@@ -59,7 +59,7 @@ public class MleBOTest {
             }
             if( !found ) {
                 os = tmp;
-                db.createOs(os);                
+                db.createOs(os, null);                
             }
         }
         assert(os!=null);
@@ -149,7 +149,7 @@ public class MleBOTest {
         System.out.println("addMLeVmm");
         MleBO instance = new MleBO();
         String expResult = "true";
-        String result = instance.addMLe(getVmmMle());
+        String result = instance.addMLe(getVmmMle(), null);
         assertEquals(expResult, result);
     }
 
@@ -161,7 +161,7 @@ public class MleBOTest {
         System.out.println("addMLeBios");
         MleBO instance = new MleBO();
         String expResult = "true";
-        String result = instance.addMLe(getBiosMle());
+        String result = instance.addMLe(getBiosMle(), null);
         assertEquals(expResult, result);
     }
 
@@ -182,12 +182,12 @@ public class MleBOTest {
         }
         catch(Exception e) {
             // record was not in the database, so add it with its initial description
-            instance.addMLe(vmm);
+            instance.addMLe(vmm, null);
         }
         
         String updatedDescription = vmm.getDescription() + "updated " + rnd.nextInt(99);
         vmm.setDescription(updatedDescription); 
-        String result = instance.updateMle(vmm);
+        String result = instance.updateMle(vmm, null);
         assertEquals(expResult, result);
         // now check that it was updated
         MleData updatedRecord = instance.findMle(vmm.getName(), vmm.getVersion(), vmm.getOsName(), vmm.getOsVersion(), null);
@@ -250,7 +250,7 @@ public class MleBOTest {
         String expResult = "true";
         MleData vmm = getVmmMle();
         String resultVmm = instance.deleteMle(vmm.getName(), vmm.getVersion(), 
-                vmm.getOsName(), vmm.getOsVersion(), vmm.getOemName());
+                vmm.getOsName(), vmm.getOsVersion(), vmm.getOemName(), null);
         assertEquals(expResult, resultVmm);
     }
 
@@ -261,7 +261,7 @@ public class MleBOTest {
         String expResult = "true";
         MleData bios = getBiosMle();
         String resultBios = instance.deleteMle(bios.getName(), bios.getVersion(), 
-                bios.getOsName(), bios.getOsVersion(), bios.getOemName());
+                bios.getOsName(), bios.getOsVersion(), bios.getOemName(), null);
         assertEquals(expResult, resultBios);
     }
 

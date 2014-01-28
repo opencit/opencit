@@ -206,6 +206,25 @@ public class MwMleSourceJpaController implements Serializable {
         }               
     }    
 
+    public MwMleSource findByUuid(String uuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByUUID_Hex");
+            query.setParameter("uuid_hex", uuid);
+
+            MwMleSource mleSourceObj = (MwMleSource) query.getSingleResult();
+            return mleSourceObj;
+
+        } catch(NoResultException e){
+        	log.error(String.format("MLE host map information with UUID {} not found in the DB.", uuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
     public List<MwMleSource> findByHostName(String hostName) {
         
         EntityManager em = getEntityManager();
