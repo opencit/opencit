@@ -5,14 +5,17 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.jersey.CertificateDocument;
-import com.intel.mtwilson.jersey.Document;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *
@@ -28,7 +31,13 @@ public class UserCertificate extends CertificateDocument {
     private Date expires;
     private boolean enabled;
     private String status;
+    
+    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
+    @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
+    @JacksonXmlElementWrapper(localName="roles")
+    @JacksonXmlProperty(localName="role")        
     private String[] roles;
+    
     private String comment;
 
     public String getName() {

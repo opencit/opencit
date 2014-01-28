@@ -167,8 +167,16 @@ public class UserCertificates extends AbstractResource<UserCertificate, UserCert
             userCert.setIssuer(apiObj.getIssuer());
             userCert.setSerialNumber(apiObj.getSerialNumber());
             userCert.setStatus(apiObj.getStatus());
-            Collection<ApiRoleX509> apiRoleX509Collection = apiObj.getApiRoleX509Collection();
-            userCert.setRoles(apiRoleX509Collection.toArray(new String[apiRoleX509Collection.size()]));
+            // can't assign ApiRoleX509 to String
+//            Collection<ApiRoleX509> apiRoleX509Collection = apiObj.getApiRoleX509Collection();
+//            userCert.setRoles(apiRoleX509Collection.toArray(new String[apiRoleX509Collection.size()]));
+            String[] roles = new String[apiObj.getApiRoleX509Collection().size()];
+            int i = 0;
+            for(ApiRoleX509 role : apiObj.getApiRoleX509Collection()) {
+                roles[i] = role.getApiRoleX509PK().getRole();
+                i++;
+            }
+            userCert.setRoles(roles);
         } else {
             apiObj = null;
         }
