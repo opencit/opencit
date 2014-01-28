@@ -63,7 +63,7 @@ This error message indicates you need a jersey implementation like org.glassfish
             <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
 <!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
           </webAppConfig>
-          <reload>automatic</reload>
+          <reload>manual</reload>
         </configuration>
       </plugin>
 
@@ -83,6 +83,11 @@ This error message indicates you need a jersey implementation like org.glassfish
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-shiro-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-servlets</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--

@@ -464,8 +464,11 @@ public class MyConfiguration {
     
     ///////////////////////// saml key for attestation service //////////////////////////////////
 
+    public File getSamlKeystoreFile() {
+        return new File(conf.getString("saml.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-saml.jks"));
+    }
     public String getSamlKeystorePassword() {
-        return conf.getString("saml.key.password", conf.getString("SAMLPASSWORD", "")); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("saml.key.password", ""); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
     }
     
     ///////////////////////// tls policy  //////////////////////////////////
@@ -475,7 +478,7 @@ public class MyConfiguration {
 
     // XXX TODO   if using glassfish or tomcat need to point to where they keep their keystores.... or configure them to use this one (but only if WE install them... not if we deploy mtwilson onto an existing web server which already has its keystore)
     public File getTlsKeystoreFile() {
-        return new File(getMtWilsonConf() + File.separator + "mtwilson-tls.jks");
+        return new File(conf.getString("mtwilson.tls.keystore.file",getMtWilsonConf() + File.separator + "mtwilson-tls.jks"));
     }
 
     public String getTlsKeystorePassword() {
@@ -526,6 +529,12 @@ public class MyConfiguration {
     
     public String getAssetTagMtwilsonBaseUrl() {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
+    }
+    
+    ///////////////////////// mtwilson portal  //////////////////////////////////
+    
+    public String getPortalHtml5Dir() {
+        return conf.getString("mtwilson.portal.html5.dir");
     }
     
     ///////////////////////// filesystem locations  //////////////////////////////////

@@ -92,12 +92,19 @@ register(com.fasterxml.jackson.jaxrs.xml.JacksonJaxbXMLProvider.class);
 //register(com.fasterxml.jackson.jaxrs.xml.JsonParseExceptionMapper.class); 
 register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class); 
 //register(com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMapper.class);
+        // we can register javax.ws.rs filters here that implement
+        // javax.ws.rs.container.ContainerRequestFilter or
+        // javax.ws.rs.container.ContainerResponseFilter,
+        // but registering servlet filters will not work;
+        // that is why the LocalizableResponseFilter (implements 
+        // ContainerResponseFilter) can be registered here but
+        // the ShiroFilter must be declared in web.xml instead.
         log.debug("Registering exception mappers and filters");
 register(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
 register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // jersey2 equivalent of com.sun.jersey.api.container.filter.PostReplaceFilter
 register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
 //register(com.intel.mtwilson.as.helper.ASAuthenticationFilter.class); // XXX TODO to be replaced with APACHE SHIRO
-register(org.apache.shiro.web.servlet.ShiroFilter.class);
+//register(org.apache.shiro.web.servlet.ShiroFilter.class); // must be in web.xml because it's a servlet filter, not a javax.ws.rs filter
 //register(com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter.class);// XXX TODO re-enable
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
 register(com.intel.mtwilson.shiro.AuthorizationExceptionMapper.class);

@@ -13,6 +13,7 @@
         <url-pattern>/resources/*</url-pattern>
     </filter-mapping>
 -->
+
 <!--
     <listener>
         <description>Cleans up Persistence factory.</description>
@@ -22,7 +23,17 @@
     <listener>
         <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
     </listener>
+    <filter>
+        <filter-name>ShiroFilter</filter-name>
+        <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+    </filter>
 
+    <!-- Filter all web requests.  This filter mapping is typically declared
+        before all others to ensure any other filters are secured as well: -->
+    <filter-mapping>
+        <filter-name>ShiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <!--
     Jersey reference: https://jersey.java.net/documentation/latest/deployment.html
     
@@ -158,7 +169,19 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <servlet-name>Jersey2</servlet-name>
         <url-pattern>/v2/*</url-pattern>
     </servlet-mapping>
-<!--
+
+    
+    <servlet>
+        <servlet-name>Html5</servlet-name>
+        <servlet-class>com.intel.mtwilson.servlet.FileServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Html5</servlet-name>
+        <url-pattern>/static/*</url-pattern>
+    </servlet-mapping>
+    
+    <!--
     <servlet>
         <servlet-name>ServletAdaptor</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -205,4 +228,17 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 -->
+    <mime-mapping>
+        <extension>json</extension>
+        <mime-type>application/json</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>jsonapi</extension>
+        <mime-type>application/vnd.api+json</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>yaml</extension>
+        <mime-type>application/yaml</mime-type>
+    </mime-mapping>
+
 </web-app>
