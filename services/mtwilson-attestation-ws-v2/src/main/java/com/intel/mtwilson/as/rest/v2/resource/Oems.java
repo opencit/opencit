@@ -5,42 +5,54 @@
 package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblOemJpaController;
-import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.rest.v2.model.Oem;
 import com.intel.mtwilson.as.rest.v2.model.OemCollection;
 import com.intel.mtwilson.as.rest.v2.model.OemFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.OemLinks;
-import com.intel.mtwilson.as.rest.v2.model.OsFilterCriteria;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
-import java.io.IOException;
+import com.intel.mtwilson.launcher.ws.ext.V2;
+import com.intel.mtwilson.wlm.business.OemBO;
+
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author ssbangal
  */
+@V2
 @Stateless
 @Path("/oems")
 public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria, OemLinks>{
-
+    Logger log = LoggerFactory.getLogger(getClass().getName());
+    
     @Override
     protected OemCollection search(OemFilterCriteria criteria) {
-        OemCollection oemCollection = null;
+        // start with a collection instance; if we don't find anything we'll return the empty collection
+        OemCollection oemCollection = new OemCollection();
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
             if (criteria.id != null) {
-                Oem oem = convert(oemJpaController.findTblOemByUUID(criteria.id.toString()));            
-                oemCollection.getOems().add(oem);
+                // re-arranged slightly to look more like the nameContains case below
+                TblOem tblOem = oemJpaController.findTblOemByUUID(criteria.id.toString());
+                if( tblOem != null ) {
+                    oemCollection.getOems().add(convert(tblOem));
+                }
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                Oem oem = convert(oemJpaController.findTblOemByName(criteria.nameEqualTo));
-                oemCollection.getOems().add(oem);                
+                // re-arranged slightly to look more like the nameContains case below
+                TblOem tblOem = oemJpaController.findTblOemByName(criteria.nameEqualTo);
+                if( tblOem != null ) {
+                    oemCollection.getOems().add(convert(tblOem));                
+                }
             } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
                 List<TblOem> oemList = oemJpaController.findTblOemByNameLike(criteria.nameContains);
                 if (oemList != null && !oemList.isEmpty()) {
@@ -49,77 +61,88 @@ public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria
                     }
                 }                
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Oems.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OEM search.", ex);
+            throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
         return oemCollection;
     }
 
     @Override
     protected Oem retrieve(String id) {
-        Oem oem = null;
+        if( id == null ) { return null; }
         try {
             TblOemJpaController oemJpaController = My.jpa().mwOem();
-            if (id != null) {
-                TblOem tblOem = oemJpaController.findTblOemByUUID(id);
-                if (tblOem != null)
-                    oem = convert(tblOem);
+            TblOem tblOem = oemJpaController.findTblOemByUUID(id);
+            if (tblOem != null) {
+                Oem oem = convert(tblOem);
+                return oem;
             }
-        } catch (IOException ex) {
-            Logger.getLogger(UserCertificates.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OEM retrieval.", ex);
+            throw new ASException(ErrorCode.WS_OEM_RETRIEVAL_ERROR, ex.getClass().getSimpleName());
         }
-        return oem;
+        return null;
     }
 
     @Override
     protected void store(Oem item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OemData obj = new OemData();
+        try {
+            obj.setName(item.getName());
+            obj.setDescription(item.getDescription());
+            new OemBO().updateOem(obj, item.getId().toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OEM update.", ex);
+            throw new ASException(ErrorCode.WS_OEM_UPDATE_ERROR, ex.getClass().getSimpleName());
+        }        
     }
 
     @Override
     protected void create(Oem item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OemData obj = new OemData();
+        try {
+            obj.setName(item.getName());
+            obj.setDescription(item.getDescription());
+            new OemBO().createOem(obj, item.getId().toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OEM creation.", ex);
+            throw new ASException(ErrorCode.WS_OEM_CREATE_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     @Override
     protected void delete(String id) {
         try {
-            TblOemJpaController oemJpaController = My.jpa().mwOem();
-            if (id != null) {
-                TblOem tblOem = oemJpaController.findTblOemByUUID(id);
-                if (tblOem != null)
-                    oemJpaController.destroy(tblOem.getId());
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(UserCertificates.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
-            Logger.getLogger(Oems.class.getName()).log(Level.SEVERE, null, ex);
+            new OemBO().deleteOem(null, id);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during OEM delete.", ex);
+            throw new ASException(ErrorCode.WS_OEM_DELETE_ERROR, ex.getClass().getSimpleName());
         }
     }
 
-    /*
-    @Override
-    protected OemFilterCriteria createFilterCriteriaWithId(String id) {
-        OemFilterCriteria criteria = new OemFilterCriteria();
-        criteria.id = UUID.valueOf(id);
-        return criteria;
-
-    }
-    */
     @Override
     protected OemCollection createEmptyCollection() {
         return new OemCollection();
     }
 
+    // passing null to this method would be a programming error and NullPointerException is appropriate
+    // calling code should check for null before calling
     private Oem convert(TblOem tblOemObj) {
         Oem oem = new Oem();
-        if (tblOemObj != null) {
-            oem.setId(UUID.valueOf(tblOemObj.getUuid_hex()));
-            oem.setName(tblOemObj.getName());
-            oem.setDescription(tblOemObj.getDescription());
-        } else {
-            oem = null;
-        }
+        oem.setId(UUID.valueOf(tblOemObj.getUuid_hex()));
+        oem.setName(tblOemObj.getName());
+        oem.setDescription(tblOemObj.getDescription());
         return oem;
     }
     

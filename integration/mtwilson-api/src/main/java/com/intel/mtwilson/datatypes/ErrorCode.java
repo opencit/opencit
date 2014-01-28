@@ -89,7 +89,7 @@ public enum ErrorCode {
     AS_HOST_LOCATION_ERROR(1210, "Error during retrieval of host location information: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_HOST_LOCATION_CONFIG_ERROR(1211, "Error during configuration of host location: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_HOST_TRUST_CERT_ERROR(1212, "Error during retrieval of host trust certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
-    AS_INPUT_VALIDATION_ERROR(1213, "Input specified by the user %s for %s is not valid."),
+    AS_INPUT_VALIDATION_ERROR(1213, "Input %s for %s is not valid."),
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),

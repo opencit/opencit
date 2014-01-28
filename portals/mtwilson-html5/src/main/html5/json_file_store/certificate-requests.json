@@ -1,0 +1,59 @@
+{
+    "href": "json_file_store/certificate-requests.json",
+    "meta": {
+        "type": "certificate-request-list"
+    },
+    "certificate_requests": [
+        {
+            "uuid": "f2cd4f7a-35e7-4f57-a11e-200bbe1d6792",
+            "subject": "375e566b-51dc-4c35-9a90-47c994e3653e",
+            "tags": [{
+                    "name": "country",
+                    "oid": "1.3.6.1.4.1.99999.1",
+                    "value": "US"
+                }, {
+                    "name": "state",
+                    "oid": "1.3.6.1.4.1.99999.2",
+                    "value": "CA"
+                }, {
+                    "name": "city",
+                    "oid": "1.3.6.1.4.1.99999.3",
+                    "value": "Folsom"
+                }],
+            "status": null,
+            "certificateId": 0
+        }, {
+            "uuid": "4a9a11b1-555e-49cb-98b6-709415c25fe2",
+            "subject": "53fb5cc8-fbf6-4ed4-8726-1dd801a5d5f7",
+            "tags": [{
+                    "name": "country",
+                    "oid": "1.3.6.1.4.1.99999.1",
+                    "value": "US"
+                }, {
+                    "name": "state",
+                    "oid": "1.3.6.1.4.1.99999.2",
+                    "value": "CA"
+                }, {
+                    "name": "state",
+                    "oid": "1.3.6.1.4.1.99999.3",
+                    "value": "Santa Clara"
+                }, {
+                    "name": "customer",
+                    "oid": "1.3.6.1.4.1.99999.4",
+                    "value": "Coke"
+                }],
+            "status": null,
+            "certificateId": 0
+        }, {
+            "uuid": "75a7fabf-3a3c-4725-ab24-da3a5159529e",
+            "subject": "18148d3d-4078-49fa-a7c5-bfc73f1f15e8",
+            "tags": [{
+                    "name": "country",
+                    "oid": "1.3.6.1.4.1.99999.1",
+                    "value": "MX"
+                }],
+            "status": null,
+            "certificateId": 0
+        }
+    ]
+}

@@ -10,8 +10,10 @@ import com.intel.mtwilson.security.core.AuthorizationScheme;
 import com.intel.mtwilson.security.core.IPAddressUtil;
 import com.intel.mtwilson.security.core.RequestInfo;
 import com.intel.mtwilson.security.core.RequestLog;
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.ContainerRequestContext;
+//import com.sun.jersey.spi.container.ContainerRequest;
+//import com.sun.jersey.spi.container.ContainerRequestFilter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -77,18 +79,18 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
      * @return request object if processing should continue
      */
     @Override
-    public ContainerRequest filter(ContainerRequest request) {
-        log.debug("AuthenticationJerseyFilter request for {} {} with Authorization={}", request.getMethod(), request.getPath(), request.getHeaderValue("Authorization"));
+    public void filter(ContainerRequestContext request) {
+        log.debug("AuthenticationJerseyFilter request for {} {} with Authorization={}", request.getMethod(), request.getUriInfo().getPath(), request.getHeaderString("Authorization"));
         log.debug("AuthenticationJerseyFilter: HTTP method="+request.getMethod());
-        log.debug("AuthenticationJerseyFilter: Request URI="+request.getRequestUri());
-        log.debug("AuthenticationJerseyFilter: Secure/https="+request.isSecure());
+        log.debug("AuthenticationJerseyFilter: Request URI="+request.getUriInfo().getRequestUri());
+        log.debug("AuthenticationJerseyFilter: Secure/https="+request.getSecurityContext().isSecure());
         
         // TODO: the servletRequest is not being populated. maybe it's for "servlets" and the info doesn't get passed to the filter. fidn another way!!!
         if( servletRequest != null ) {
             log.debug("AuthenticationJerseyFilter: Remote Address="+servletRequest.getRemoteAddr());            
         }
         
-        if( sslRequired &&  !request.isSecure() ) {
+        if( sslRequired &&  !request.getSecurityContext().isSecure() ) {
             log.error("AuthenticationJerseyFilter: rejecting insecure (http) request");
             throw new WebApplicationException(Response.status(Response.Status.FORBIDDEN).entity("Secure connection required").build());            
         }
@@ -108,13 +110,13 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
             if( trustedAddress != null ) {
                 try {
                     log.debug("Request from trusted remote addr "+servletRequest.getRemoteAddr()+" matches "+trustedAddress+" in mtwilson.api.trust");
-                    User user = new User(servletRequest.getRemoteAddr(), new Role[] { Role.Attestation, Role.Audit, Role.Report, Role.Security, Role.Whitelist }, servletRequest.getRemoteAddr(), Md5Digest.valueOf((request.getMethod()+" "+request.getPath()+" "+String.valueOf(request.getHeaderValue("Date"))).getBytes("UTF-8")));
-                    request.setSecurityContext(new MtWilsonSecurityContext(user, request.isSecure()));
+                    User user = new User(servletRequest.getRemoteAddr(), new Role[] { Role.Attestation, Role.Audit, Role.Report, Role.Security, Role.Whitelist }, servletRequest.getRemoteAddr(), Md5Digest.valueOf((request.getMethod()+" "+request.getUriInfo().getPath()+" "+String.valueOf(request.getHeaderString("Date"))).getBytes("UTF-8")));
+                    request.setSecurityContext(new MtWilsonSecurityContext(user, request.getSecurityContext().isSecure()));
                     requestInfo.source = servletRequest.getRemoteAddr();
                     requestInfo.md5Hash = user.getMd5Hash().toByteArray(); // XXX for trusted ip's only the hash is of the httpp method and the url
                     // MtWilsonThreadLocal.set(new MtWilsonSecurityContext(user, request.isSecure()));
                     //requestLog.logRequestInfo(requestInfo); // bug #380.  NOTE: for trusted ip clients, we DO NOT check for replay attacks. 
-                    return request;
+//                    return request;
                 }
                 catch(Exception e) {
                     throw new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Cannot log request: "+e.getMessage()).build());                
@@ -122,23 +124,23 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
             }
         }
         
-        if( request.getHeaderValue("Authorization") != null ) {
+        if( request.getHeaderString("Authorization") != null ) {
             try {
                 // support both the symmetric-key HMAC-SHA256 method "MtWilson" and the RSA method "PublicKey"
                 User user = null;
-                AuthorizationScheme scheme = getAuthorizationScheme(request.getHeaderValue("Authorization"));
+                AuthorizationScheme scheme = getAuthorizationScheme(request.getHeaderString("Authorization"));
                 log.debug("Authorization scheme is {}", scheme.name());
                 if( x509Authorization != null && scheme.equals(AuthorizationScheme.X509) ) {
-                    user = x509Authorization.getUserForRequest(request.getMethod(), request.getRequestUri().toString(), request.getRequestHeaders(), requestBody);
+                    user = x509Authorization.getUserForRequest(request.getMethod(), request.getUriInfo().getRequestUri().toString(), request.getHeaders(), requestBody);
                 }
                 else if( publickeyAuthorization != null && scheme.equals(AuthorizationScheme.PublicKey) ) {
-                    user = publickeyAuthorization.getUserForRequest(request.getMethod(), request.getRequestUri().toString(), request.getRequestHeaders(), requestBody);
+                    user = publickeyAuthorization.getUserForRequest(request.getMethod(), request.getUriInfo().getRequestUri().toString(), request.getHeaders(), requestBody);
                 }
                 else if( hmacAuthorization != null && scheme.equals(AuthorizationScheme.MtWilson) ) {
-                    user = hmacAuthorization.getUserForRequest(request.getMethod(), request.getRequestUri().toString(), request.getRequestHeaders(), requestBody);                
+                    user = hmacAuthorization.getUserForRequest(request.getMethod(), request.getUriInfo().getRequestUri().toString(), request.getHeaders(), requestBody);                
                 }
                 else if(httpBasicAuthorization != null && scheme.equals(AuthorizationScheme.Basic)) {
-                    user = httpBasicAuthorization.getUserForRequest(request.getMethod(), request.getRequestUri().toString(), request.getRequestHeaders(), requestBody);
+                    user = httpBasicAuthorization.getUserForRequest(request.getMethod(), request.getUriInfo().getRequestUri().toString(), request.getHeaders(), requestBody);
                 }
                 
                 if( user != null ) {
@@ -166,10 +168,10 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
                     //requestLog.logRequestInfo(requestInfo); // bug #380.
                     log.debug("User {} with roles {} is authenticated. Security context is being set.", user.getLoginName(), user.getRoles());
                     log.info("AuthenticationJerseyFilter: Got user, setting security context");
-                    request.setSecurityContext(new MtWilsonSecurityContext(user, request.isSecure()));
+                    request.setSecurityContext(new MtWilsonSecurityContext(user, request.getSecurityContext().isSecure()));
                     log.info("AuthenticationJerseyFilter: Set security context");
                     // MtWilsonThreadLocal.set(new MtWilsonSecurityContext(user, request.isSecure()));
-                    return request;
+//                    return request;
                 }
             }
             catch(Exception e) {
@@ -193,7 +195,7 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         throw new WebApplicationException(forbidden.build()); // send one WWW-Authenticate header for each supported scheme. 
         * 
         */
-        return request; // let the roles allowed resource filter throw an exception if the user does not have the proper roles
+//        return request; // let the roles allowed resource filter throw an exception if the user does not have the proper roles
     }
     
     /**
@@ -201,14 +203,14 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
      * @param request
      * @return 
      */
-    private String readEntityBodyQuietly(ContainerRequest request) {
+    private String readEntityBodyQuietly(ContainerRequestContext request) {
         String requestBody=null;
         try {
-            InputStream in = request.getEntityInputStream();
+            InputStream in = request.getEntityStream();
             ByteArrayOutputStream content = new ByteArrayOutputStream();
             IOUtils.copy(in, content);
             byte[] contentBytes = content.toByteArray();
-            request.setEntityInputStream(new ByteArrayInputStream(contentBytes));
+            request.setEntityStream(new ByteArrayInputStream(contentBytes));
             requestBody = new String(contentBytes);
             
             //log.debug("AuthenticationJerseyFilter: content follows:\n"+requestBody+"\n");
@@ -245,10 +247,10 @@ public class AuthenticationJerseyFilter implements ContainerRequestFilter {
         }
     }
     
-    private String createRequestString(ContainerRequest request, String requestBody) {
+    private String createRequestString(ContainerRequestContext request, String requestBody) {
         StringBuilder content = new StringBuilder();
-        content.append(String.format("%s %s\n", request.getMethod(), request.getRequestUri()));
-        MultivaluedMap<String,String> headers = request.getRequestHeaders();
+        content.append(String.format("%s %s\n", request.getMethod(), request.getUriInfo().getRequestUri()));
+        MultivaluedMap<String,String> headers = request.getHeaders();
         ArrayList<String> headerNames = new ArrayList<String>(headers.keySet());
         Collections.sort(headerNames);
         for(String headerName : headerNames) {

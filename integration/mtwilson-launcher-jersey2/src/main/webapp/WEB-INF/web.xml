@@ -13,14 +13,27 @@
         <url-pattern>/resources/*</url-pattern>
     </filter-mapping>
 -->
+
 <!--
     <listener>
         <description>Cleans up Persistence factory.</description>
         <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
     </listener>
 -->
+    <listener>
+        <listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+    </listener>
+    <filter>
+        <filter-name>ShiroFilter</filter-name>
+        <filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+    </filter>
 
-
+    <!-- Filter all web requests.  This filter mapping is typically declared
+        before all others to ensure any other filters are secured as well: -->
+    <filter-mapping>
+        <filter-name>ShiroFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <!--
     Jersey reference: https://jersey.java.net/documentation/latest/deployment.html
     
@@ -45,6 +58,60 @@ cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJso
     container is not present, even though it is.    
     
     -->
+    
+    <servlet>
+        <!--
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        -->
+        <servlet-name>Jersey1</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.intel.mtwilson.jersey2.Jersey2Application1</param-value>
+        </init-param>
+        <!--
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerRequestFilter</param-name>
+            <param-value>org.glassfish.jersey.server.filter.HttpMethodOverrideFilter,com.intel.mtwilson.as.helper.ASAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerResponseFilter</param-name>
+            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+        </init-param>
+        -->
+        <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
+        <!-- XXX TODO plugin architecture needs a facility for configuring this... or just initialize it with all known codes and don't make it available to plugins -->
+        <init-param>
+            <param-name>jersey.config.server.languageMappings</param-name>
+            <param-value>en:en, fr:fr</param-value>
+        </init-param>
+        <!--        
+These are the two providers referenced below from the org.glassfish entries:        
+org.glassfish.jersey.client.filter.HttpDigestAuthFilter
+org.glassfish.jersey.server.wadl.internal.WadlResource
+The com.intel.mtwilson entry includes our provider adapters and also our 
+web resource classes.
+The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
+        -->
+        <!--
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>
+                com.intel.mtwilson;com.fasterxml.jackson.jaxrs;org.glassfish.jersey.server;org.glassfish.jersey.client
+            </param-value>        
+        </init-param>
+        -->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <!--
+        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        -->
+        <servlet-name>Jersey1</servlet-name>
+        <url-pattern>/v1/*</url-pattern>
+    </servlet-mapping>
+    
     <servlet>
         <!--
         <servlet-name>javax.ws.rs.core.Application</servlet-name>
@@ -56,11 +123,21 @@ cksonYamlObjectMapperProvider, class com.fasterxml.jackson.jaxrs.json.JacksonJso
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>com.intel.mtwilson.jersey2.Jersey2Application2</param-value>
         </init-param>
+        <!--
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerRequestFilter</param-name>
+            <param-value>org.glassfish.jersey.server.filter.HttpMethodOverrideFilter,com.intel.mtwilson.as.helper.ASAuthenticationFilter,com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>javax.ws.rs.container.ContainerResponseFilter</param-name>
+            <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
+        </init-param>
+        -->
         <!-- complete list of jersey 2.x properties: https://jersey.java.net/apidocs/latest/jersey/org/glassfish/jersey/server/ServerProperties.html -->
         <!-- XXX TODO plugin architecture needs a facility for plugins to declare mappings relevant to their special resources; all mappings must be combined and then declared to jersey?  -->
         <init-param>
             <param-name>jersey.config.server.mediaTypeMappings</param-name>
-            <param-value>txt:text/plain, xml:application/xml, json:application/json, jsonapi: application/vnd.api+json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml</param-value>
+            <param-value>txt:text/plain, xml:application/xml, json:application/json, jsonapi: application/vnd.api+json, html:text/html, saml:application/saml+xml, bin:application/octet-stream, yaml:text/yaml, pem:application/x-pem-file, cer:application/pkix-cert, crt:application/octet-stream</param-value>
         </init-param>
         <!-- XXX TODO plugin architecture needs a facility for configuring this... or just initialize it with all known codes and don't make it available to plugins -->
         <init-param>
@@ -90,9 +167,21 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <servlet-name>javax.ws.rs.core.Application</servlet-name>
         -->
         <servlet-name>Jersey2</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/v2/*</url-pattern>
     </servlet-mapping>
-<!--
+
+    
+    <servlet>
+        <servlet-name>Html5</servlet-name>
+        <servlet-class>com.intel.mtwilson.servlet.FileServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Html5</servlet-name>
+        <url-pattern>/static/*</url-pattern>
+    </servlet-mapping>
+    
+    <!--
     <servlet>
         <servlet-name>ServletAdaptor</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -139,4 +228,17 @@ The com.fasterxml.jackson.jaxrs entry includes the json and xml mappers.
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 -->
+    <mime-mapping>
+        <extension>json</extension>
+        <mime-type>application/json</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>jsonapi</extension>
+        <mime-type>application/vnd.api+json</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>yaml</extension>
+        <mime-type>application/yaml</mime-type>
+    </mime-mapping>
+
 </web-app>

@@ -13,7 +13,7 @@ import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.controller.exceptions.ASDataException;
 import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.data.*;
-import com.intel.mtwilson.as.helper.ASComponentFactory;
+import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.x509.X509Util;

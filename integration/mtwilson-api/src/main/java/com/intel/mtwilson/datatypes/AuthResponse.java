@@ -5,12 +5,11 @@
 package com.intel.mtwilson.datatypes;
 
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * XXX TODO convert uses of this class to ErrorResponse 
  * @author dsmagadx
  */
 public class AuthResponse {
@@ -75,7 +74,8 @@ public class AuthResponse {
     
   
     
-    @JsonIgnore(true)
+    @org.codehaus.jackson.annotate.JsonIgnore(true) // jackson 1.9
+    @com.fasterxml.jackson.annotation.JsonIgnore // jackson 2.0
     public ErrorCode getErrorCodeEnum(){
         return errorCode;
     }

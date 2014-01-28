@@ -16,6 +16,15 @@
 	
         <plugins>
 		    
+	    <plugin>
+		<artifactId>maven-war-plugin</artifactId>
+		<version>2.4</version>
+		<configuration>
+		    <archiveClasses>true</archiveClasses>
+		    <attachClasses>true</attachClasses>
+		</configuration>
+	    </plugin>
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -54,6 +63,7 @@ This error message indicates you need a jersey implementation like org.glassfish
             <descriptor>${basedir}/src/webapp/WEB-INF/web.xml</descriptor>
 <!--            <jettyEnvXml>${basedir}/src/over/here/jetty-env.xml</jettyEnvXml> -->
           </webAppConfig>
+          <reload>manual</reload>
         </configuration>
       </plugin>
 
@@ -61,6 +71,25 @@ This error message indicates you need a jersey implementation like org.glassfish
     </build>
     <dependencies>
 
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-extensions</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-version</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-shiro-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-http-servlets</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
@@ -71,12 +100,12 @@ This error message indicates you need a jersey implementation like org.glassfish
         -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
-            <artifactId>mtwilson-my</artifactId>
+            <artifactId>mtwilson-launcher</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.intel.mtwilson.services</groupId>
-            <artifactId>mtwilson-attestation-ws-v2</artifactId>
+            <groupId>com.intel.mtwilson.integration</groupId>
+            <artifactId>mtwilson-my</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -145,6 +174,66 @@ This error message indicates you need a jersey implementation like org.glassfish
             <artifactId>jersey-container-servlet</artifactId>
             <version>2.4.1</version>
         </dependency>        
+        
+        <!-- mtwilson plugins to include -->
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v1</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-jaxrs</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.jackson</groupId>
+                    <artifactId>jackson-xc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-attestation-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-management-ws-v1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-whitelist-ws-v1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-test-ws-v1</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-rpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-version-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-configuration-ws-v2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         
     </dependencies>
     

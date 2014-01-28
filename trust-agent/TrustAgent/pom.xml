@@ -212,7 +212,7 @@
         </dependency>
        		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>ASCommon</artifactId>
+			<artifactId>mtwilson-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -15,7 +15,7 @@
 -->
     <listener>
         <description>Cleans up Persistence factory.</description>
-        <listener-class>com.intel.mtwilson.as.helper.ASPersistenceManager</listener-class>
+        <listener-class>com.intel.mtwilson.as.ASPersistenceManager</listener-class>
     </listener>
     <servlet>
         <servlet-name>Jersey1</servlet-name>
@@ -28,10 +28,13 @@
             <param-name>com.sun.jersey.spi.container.ContainerResponseFilters</param-name>
             <param-value>com.intel.mtwilson.as.helper.ASLocalizationFilter,com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter</param-value>
         </init-param>
+        <!--
+        XXX TODO replace this with apache shiro
         <init-param>
             <param-name>com.sun.jersey.spi.container.ResourceFilters</param-name>
             <param-value>com.intel.mtwilson.security.jersey.RolesAllowedResourceFilterFactory</param-value>
         </init-param>
+        -->
         <!--
         <init-param>
             <param-name>com.sun.jersey.config.property.packages</param-name>

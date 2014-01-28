@@ -4,7 +4,10 @@
  */
 package com.intel.mtwilson.datatypes;
 
+import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.Regex;
+import com.intel.dcsg.cpg.validation.Validator;
+import com.intel.mtwilson.validators.ConnectionStringValidator;
 import java.net.MalformedURLException;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -18,13 +21,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class TxtHostRecord {
     @JsonProperty    
-    @Regex(RegExAnnotation.IPADDR_FQDN)
+    @Regex(RegexPatterns.IPADDR_FQDN)
     public String HostName;
     @JsonProperty
-    @Regex(RegExAnnotation.IPADDR_FQDN)
+    @Regex(RegexPatterns.IPADDR_FQDN)
     public String IPAddress;
     @JsonProperty
-    @Regex(RegExAnnotation.PORT)
+    @Regex(RegexPatterns.PORT)
     public Integer Port;
     @JsonProperty
     public String BIOS_Name;
@@ -41,12 +44,13 @@ public class TxtHostRecord {
     @JsonProperty
     public String VMM_OSVersion;
     @JsonProperty
-    @Regex(RegExAnnotation.ADDON_CONNECTION_STRING)
+//    @Regex(RegExAnnotation.ADDON_CONNECTION_STRING)
+    @Validator(ConnectionStringValidator.class)
     public String AddOn_Connection_String;
     @JsonProperty
     public String Description;
     @JsonProperty
-    @Regex(RegExAnnotation.EMAIL)
+    @Regex(RegexPatterns.EMAIL)
     public String Email;
     @JsonProperty
     public String Location;

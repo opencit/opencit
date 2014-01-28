@@ -23,7 +23,7 @@ To dump all the tables into one script, you can use this command:
 	<version>1.2.3-SNAPSHOT</version>
     </parent>
   
-  
+  <!--
   <dependencies>
 	<dependency>
 		<groupId>mysql</groupId>
@@ -31,7 +31,7 @@ To dump all the tables into one script, you can use this command:
         <scope>provided</scope>
 	</dependency>
   </dependencies>
-
+-->
   <build><!--
       <resources>
           <resource>

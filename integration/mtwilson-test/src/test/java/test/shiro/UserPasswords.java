@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2013 Intel Corporation
+ * All rights reserved.
+ */
+package test.shiro;
+
+import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.jersey.NoLinks;
+import javax.ws.rs.Path;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
+/**
+ * Just a sample resource for testing
+ * 
+ * @author jbuhacoff
+ */
+//@Stateless
+@Path("/user-passwords")
+public class UserPasswords extends AbstractResource<UserPassword,UserPasswordCollection,UserPasswordFilterCriteria,NoLinks<UserPassword>> {
+
+    @RequiresPermissions("user_password:read")
+    @Override
+    protected UserPasswordCollection search(UserPasswordFilterCriteria criteria) {
+        UserPasswordCollection userPasswords = new UserPasswordCollection();
+        UserPassword userPassword = new UserPassword();
+        userPassword.setId(new UUID()); // id
+        userPassword.setName("userPasswordabc"); // name
+        userPassword.setPassword("babsdf"); // description
+        userPasswords.getUserPasswords().add(userPassword);
+        return userPasswords;
+    }
+
+    @RequiresPermissions("user_password:read")
+    @Override
+    protected UserPassword retrieve(String id) {
+        UserPassword tmp = new UserPassword();
+        tmp.setId(new UUID());
+        tmp.setName("userPasswordxyz");
+        tmp.setPassword("test userPassword");
+        return tmp;
+    }
+
+    @RequiresPermissions("user_password:write")
+    @Override
+    protected void store(UserPassword item) {
+        // store it...
+    }
+    @RequiresPermissions("user_password:write")
+    @Override
+    protected void create(UserPassword item) {
+        // store it...
+    }
+
+    @RequiresPermissions("user_password:delete")
+    @Override
+    protected void delete(String id) {
+    }
+
+    @Override
+    protected UserPasswordCollection createEmptyCollection() {
+        return new UserPasswordCollection();
+    }
+    
+}

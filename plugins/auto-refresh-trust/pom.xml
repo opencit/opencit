@@ -93,12 +93,12 @@
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>ASData</artifactId>
+			<artifactId>mtwilson-attestation-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
-			<artifactId>ASCommon</artifactId>
+			<artifactId>mtwilson-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
     
@@ -119,34 +119,25 @@
 
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-management-service</artifactId>
+      <artifactId>mtwilson-management</artifactId>
       <version>${project.version}</version>
-      <type>jar</type>
-      <classifier>classes</classifier>
-	  <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.services</groupId>
-      <artifactId>mtwilson-attestation-service</artifactId>
+      <artifactId>mtwilson-attestation</artifactId>
       <version>${project.version}</version>
-      <type>jar</type>
-      <classifier>classes</classifier>
-	  <scope>compile</scope>
     </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-validation</artifactId>
-        <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-io</artifactId>
-        <version>0.2-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>com.intel.dcsg.cpg</groupId>
         <artifactId>cpg-rfc822</artifactId>
-        <version>0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>  
 

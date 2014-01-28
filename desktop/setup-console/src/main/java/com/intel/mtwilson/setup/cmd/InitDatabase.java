@@ -75,6 +75,8 @@ import org.slf4j.LoggerFactory;
  * References:
  * http://stackoverflow.com/questions/1429172/how-do-i-list-the-files-inside-a-jar-file
  * http://stackoverflow.com/questions/1044194/running-a-sql-script-using-mysql-with-jdbc
+ * 
+ * @deprecated moving this functionality to InitDatabase in mtwilson-setup 
  * @author jbuhacoff
  */
 public class InitDatabase implements Command {

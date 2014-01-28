@@ -67,7 +67,7 @@
 	
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ASCommon</artifactId>
+            <artifactId>mtwilson-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -94,6 +94,12 @@
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-xml</artifactId>
         </dependency>
+<dependency>
+    <groupId>javax.ws.rs</groupId>
+    <artifactId>javax.ws.rs-api</artifactId>
+    <version>2.0</version>
+    <scope>provided</scope>
+</dependency>
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-api</artifactId>
@@ -111,7 +117,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ASData</artifactId>
+            <artifactId>mtwilson-attestation-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -121,9 +127,14 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>MSData</artifactId>
+            <artifactId>mtwilson-management-jpa</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mtwilson-trustagent-model</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -137,18 +148,20 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+                <!-- must exclude com.sun.xml.bind:jaxb-impl from mtwilson-client-java6 to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->
+        <!--
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-client-java6</artifactId>
             <version>${project.version}</version>
             <exclusions>
-                <!-- must exclude this artifact to prevent the error: com.sun.xml.bind.v2.runtime.JAXBContextImpl cannot be cast to com.sun.xml.internal.bind.api.JAXBRIContext -->
                 <exclusion>
                     <artifactId>jaxb-impl</artifactId>
                     <groupId>com.sun.xml.bind</groupId>
                 </exclusion>                
             </exclusions>
         </dependency>
+        -->
         <dependency>
             <groupId>com.intel.dcsg.cpg</groupId>
             <artifactId>cpg-tls-policy</artifactId>

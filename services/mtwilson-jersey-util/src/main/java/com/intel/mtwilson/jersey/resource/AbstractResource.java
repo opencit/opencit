@@ -7,6 +7,7 @@ package com.intel.mtwilson.jersey.resource;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.http.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.dcsg.cpg.validation.ValidationUtil;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -88,6 +89,11 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     /**
      * Given an item identifier, returns the specified item if it exists or null
      * if the item doesn't exist.
+     * 
+     * Subclass is responsible for validating the id in whatever manner it needs to.
+     * Most will return null if !UUID.isValid(id)  but we don't do it here because
+     * a resource might want to allow using something other than uuid as the url
+     * key, for example a Host resource might accept uuid OR hostname as {id}
      *
      * @param id
      * @return
@@ -177,6 +183,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({OtherMediaType.APPLICATION_VND_API_JSON, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public C searchCollection(@BeanParam F criteria) {
         log.debug("searchCollection");
+        ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
         return search(criteria);
     }
 
@@ -196,7 +203,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T createOne(T item) {
         log.debug("create");
-        // this behavior of autmoatically generating uuids if client didn't provide could be implemented in one place and reused in all create() methods...  the utility could accept a DocumentCollection and set the ids... 
+        ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
         if (item.getId() == null) {
             item.setId(new UUID());
         }
@@ -209,7 +216,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @DELETE
     public void deleteOne(@PathParam("id") String id) {
         log.debug("delete");
-        T item = retrieve(id);
+        T item = retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
@@ -232,7 +239,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T retrieveOne(@PathParam("id") String id) {
         log.debug("retrieve");
-        T item = retrieve(id);
+        T item = retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
@@ -258,8 +265,9 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T storeOne(@PathParam("id") String id, T item) {
         log.debug("store");
+        ValidationUtil.validate(item);
         item.setId(UUID.valueOf(id));
-        T existing = retrieve(id);
+        T existing = retrieve(id); // subclass is responsible for validating id
         if (existing == null) {
             create(item);
         } else {
@@ -287,10 +295,11 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     public T patchOne(@PathParam("id") String id, Patch<T, F, L>[] patchArray) {
         log.debug("patch");
-        T item = retrieve(id);
+        T item = retrieve(id); // subclass is responsible for validating id
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
+        ValidationUtil.validate(patchArray);
         for (int i = 0; i < patchArray.length; i++) {
             log.debug("Processing patch #{} of {}", i + 1, patchArray.length);
             // XXX TODO check if patchArray[i].getSelect() == null  (expected) , and if it's not null then use abstract method to check that id == id   (like have a method that takes a string id and a filtercriteria and decides if they refer to the same record)
@@ -325,6 +334,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
     public C createCollection(C collection) {
         log.debug("createCollection");
+        ValidationUtil.validate(collection);
         // this behavior of autmoatically generating uuids if client didn't provide could be implemented in one place and reused in all create() methods...  the utility could accept a DocumentCollection and set the ids... 
         for (T item : collection.getDocuments()) {
             if (item.getId() == null) {
@@ -349,7 +359,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces({OtherMediaType.APPLICATION_VND_API_JSON})
     public C retrieveCollection(@PathParam("id") String id) { // misnomer, what we really mean is "retrieve one but wrapped ina  collection for jsonapi"
         log.debug("retrieveCollection");
-        T item = retrieve(id);
+        T item = retrieve(id); // subclass is responsible for validating id
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
@@ -375,6 +385,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
     public C storeCollection(@PathParam("id") String id, C collection) {// misnomer, what we really mean is "store one but wrapped ina  collection for jsonapi"
         log.debug("storeCollection");
+        ValidationUtil.validate(collection);
         List<T> list = collection.getDocuments();
         if (list == null || list.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST); // TODO i18n
@@ -406,7 +417,7 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)
     public C patchCollection(@PathParam("id") String id /*, PatchDocumentCollection patch */) {
         log.debug("patchCollection");
-
+        // TODO  ValidationUtil.validate(patchCollection)
         // XXX TODO wire up to repository...
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
 //        HostFilterCriteria criteria = new HostFilterCriteria();
@@ -414,4 +425,15 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
 //        return searchCollection(criteria);
         return null;
     }
+    
+    /*
+    private void validate(Object input) {
+        try {
+            ValidationUtil.validate(input);
+        }
+        catch(Exception e) {
+            throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());            
+        }
+    }
+    */
 }

@@ -18,7 +18,7 @@ import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import com.intel.mtwilson.ms.helper.MSPersistenceManager;
+import com.intel.mtwilson.ms.MSPersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import com.intel.mtwilson.setup.SetupException;

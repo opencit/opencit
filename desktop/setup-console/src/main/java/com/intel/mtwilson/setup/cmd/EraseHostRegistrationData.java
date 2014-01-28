@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.as.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.helper.ASPersistenceManager;
+import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;

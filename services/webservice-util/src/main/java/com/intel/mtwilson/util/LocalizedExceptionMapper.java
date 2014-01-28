@@ -7,7 +7,7 @@ package com.intel.mtwilson.util;
 import com.intel.mtwilson.i18n.ErrorMessage;
 import com.intel.mtwilson.datatypes.AuthResponse;
 import com.intel.mtwilson.i18n.BundleName;
-import java.text.MessageFormat;
+//import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -34,6 +34,16 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     
     @Override
     public Response toResponse(MWException exception) {
+        log.debug("intercepted MWException; localizing response");
+        Locale locale = localeForRequest();
+        // localize the error message using the selected locale
+        String output = localize(exception, locale);
+        // XXX if we want to set a different http status code for various errors, we could have different exception classes like NotFound extends MWException and sets a status code of 404
+        Response response = Response.status(400).entity(new AuthResponse(exception.getErrorCode(), output)).type(MediaType.APPLICATION_JSON_TYPE).build();
+        return response;
+    }
+    
+    private Locale localeForRequest() {
         ArrayList<Locale> list = new ArrayList<Locale>();
         Locale locale = null;
         Enumeration<Locale> locales = request.getLocales(); // in priority order based on the accept language header in the request; if request doesn't specify then it contains the server's default locale (java-provided, not mtwilson-configured)
@@ -62,14 +72,11 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
                 locale = list.get(i); // last element
             }
         }
-        // localize the error message using the selected locale
-        String output = localize(exception, locale);
-        // XXX if we want to set a different http status code for various errors, we could have different exception classes like NotFound extends MWException and sets a status code of 404
-        Response response = Response.status(400).entity(new AuthResponse(exception.getErrorCode(), output)).type(MediaType.APPLICATION_JSON_TYPE).build();
-        return response;
+        return locale;
     }
     
     private String localize(MWException exception, Locale locale) {
+        log.debug("localizing MWException to {}", locale.getDisplayName());
         ErrorMessage message = new ErrorMessage(exception.getErrorCode(), (Object)exception.getParameters());
         return message.toString(locale);
     }

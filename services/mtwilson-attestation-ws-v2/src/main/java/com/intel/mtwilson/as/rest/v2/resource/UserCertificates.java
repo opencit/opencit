@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.UserCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateLinks;
 import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
 import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
@@ -28,13 +29,15 @@ import javax.ws.rs.Path;
  *
  * @author ssbangal
  */
+@V2
 @Stateless
-@Path("/user_certificates")
+@Path("/user-certificates")
 public class UserCertificates extends AbstractResource<UserCertificate, UserCertificateCollection, UserCertificateFilterCriteria, UserCertificateLinks> {
 
     @Override
     protected UserCertificateCollection search(UserCertificateFilterCriteria criteria) {
-        UserCertificateCollection userCertCollection = null;
+        // start with empty collection, then add search results to it;  if no results found we will return the empty collection
+        UserCertificateCollection userCertCollection = new UserCertificateCollection();
         try {
             ApiClientX509JpaController userCertJpaController = My.jpa().mwApiClientX509();
             if (criteria.id != null) {

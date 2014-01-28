@@ -4,8 +4,14 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.x509.X509Util;
+import com.intel.mtwilson.jersey.CertificateDocument;
 import com.intel.mtwilson.jersey.Document;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 
 /**
@@ -13,7 +19,7 @@ import java.util.Date;
  * @author ssbangal
  */
 @JacksonXmlRootElement(localName="user_certificate")
-public class UserCertificate extends Document {
+public class UserCertificate extends CertificateDocument {
     private String name;
     private byte[] certificate;
     private byte[] fingerprint;
@@ -103,6 +109,33 @@ public class UserCertificate extends Document {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    @JsonIgnore
+    @Override
+    public X509Certificate getX509Certificate() {
+        if( certificate == null ) { return null; }
+        try {
+            return X509Util.decodeDerCertificate(certificate);
+        }
+        catch(CertificateException e) {
+            throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+        }
+    }
+
+    @JsonIgnore
+    @Override
+    public void setX509Certificate(X509Certificate certificate) {
+        if( certificate == null ) {
+            this.certificate = null;
+            return;
+        }
+        try {
+            this.certificate = certificate.getEncoded();
+        }
+        catch(CertificateEncodingException e) {
+            throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+        }
     }
     
     

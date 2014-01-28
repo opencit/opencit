@@ -21,7 +21,7 @@ import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.data.TblOem;
 import com.intel.mtwilson.as.data.TblOs;
 import com.intel.mtwilson.as.data.TblPcrManifest;
-import com.intel.mtwilson.as.helper.ASPersistenceManager;
+import com.intel.mtwilson.as.ASPersistenceManager;
 import com.intel.mtwilson.setup.Command;
 import com.intel.mtwilson.setup.SetupContext;
 import java.util.Collection;
