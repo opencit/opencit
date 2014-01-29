@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import org.eclipse.persistence.internal.jpa.EntityManagerImpl;
 import org.eclipse.persistence.queries.DatabaseQuery;
 import org.slf4j.Logger;
@@ -366,4 +367,44 @@ public class TblHostsJpaController implements Serializable {
         return hostList;      
     }
 
+    public TblHosts findHostByUuid(String uuid) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("TblHosts.findByUuidHex");
+            query.setParameter("uuid_hex", uuid);
+
+            TblHosts pcrObj = (TblHosts) query.getSingleResult();
+            return pcrObj;
+
+        } catch(NoResultException e){
+        	log.error(String.format("Host information with UUID {} not found in the DB.", uuid));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public List<TblHosts> findHostsByDescriptionSearchCriteria(String searchCriteria) {
+        List<TblHosts> hostList = null;
+        EntityManager em = getEntityManager();
+        
+        try {           
+            Query query = em.createNamedQuery("TblHosts.findByDescriptionSearchCriteria");
+            query.setParameter("search", "%"+searchCriteria+"%");
+            
+            if (query.getResultList() != null && !query.getResultList().isEmpty()) {
+                 
+                hostList = query.getResultList();
+               
+            }
+            
+        } finally {
+            em.close();
+        }
+        
+        return hostList;      
+    }
+    
 }
