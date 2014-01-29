@@ -154,4 +154,8 @@ public class MwAssetTagCertificateJpaController extends GenericJpaController<MwA
         return searchByNamedQuery("findByHostID", "hostID", hostID);
     }
 
+    public List<MwAssetTagCertificate> findAssetTagCertificatesByUuid(String uuid) {
+        return searchByNamedQuery("findByUuidHex", "uuid_hex", uuid);
+    }
+
 }

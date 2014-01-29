@@ -114,7 +114,7 @@ public class AssetTagCertBOTest {
         AssetTagCertCreateRequest atagRequest = new AssetTagCertCreateRequest();
         atagRequest.setCertificate(Base64.decodeBase64(attrCert.getBytes()));
         
-        boolean importAssetTagCertificate = atagBO.importAssetTagCertificate(atagRequest);        
+        boolean importAssetTagCertificate = atagBO.importAssetTagCertificate(atagRequest, null);        
         System.out.println(importAssetTagCertificate);
     }
     
@@ -125,7 +125,7 @@ public class AssetTagCertBOTest {
         atagRequest.setSha256OfAssetCert(Sha256Digest.digestOf(Base64.decodeBase64(attrCert.getBytes())).toByteArray());        
         AssetTagCertBO atagBO = new AssetTagCertBO();
         
-        boolean revokeAssetTagCertificate = atagBO.revokeAssetTagCertificate(atagRequest);
+        boolean revokeAssetTagCertificate = atagBO.revokeAssetTagCertificate(atagRequest, null);
         System.out.println(revokeAssetTagCertificate);
     }
     

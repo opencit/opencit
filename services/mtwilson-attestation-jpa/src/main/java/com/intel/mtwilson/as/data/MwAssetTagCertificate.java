@@ -31,6 +31,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "MwAssetTagCertificate.findAll", query = "SELECT m FROM MwAssetTagCertificate m"),
     @NamedQuery(name = "MwAssetTagCertificate.findById", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.id = :id"),
     @NamedQuery(name = "MwAssetTagCertificate.findByHostID", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.hostID = :hostID"),
+    @NamedQuery(name = "MwAssetTagCertificate.findByUuidHex", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid_hex = :uuid_hex"),
     @NamedQuery(name = "MwAssetTagCertificate.findByUuid", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.uuid = :uuid"),
     @NamedQuery(name = "MwAssetTagCertificate.findByRevoked", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.revoked = :revoked"),
     @NamedQuery(name = "MwAssetTagCertificate.findByNotBefore", query = "SELECT m FROM MwAssetTagCertificate m WHERE m.notBefore = :notBefore"),
@@ -56,6 +57,9 @@ public class MwAssetTagCertificate implements Serializable {
     @Lob
     @Column(name = "SHA1_Hash")
     private byte[] sHA1Hash;
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
+    
     /*
     @Lob
     @Column(name = "SHA256_Hash")
@@ -166,6 +170,15 @@ public class MwAssetTagCertificate implements Serializable {
         this.notAfter = notAfter;
     }
 
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
+    }
+
+    
     @Override
     public int hashCode() {
         int hash = 0;

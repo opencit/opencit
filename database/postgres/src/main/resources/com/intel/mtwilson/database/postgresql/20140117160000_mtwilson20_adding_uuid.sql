@@ -194,4 +194,18 @@ BEGIN
    END LOOP;
 END$$;
 
+ALTER TABLE mw_asset_tag_certificate ADD COLUMN uuid_hex CHAR(36) NULL;
+DO
+$$
+DECLARE
+    rec   record;
+BEGIN
+   FOR rec IN
+      SELECT *
+      FROM   mw_asset_tag_certificate
+   LOOP
+      UPDATE mw_asset_tag_certificate mw SET uuid_hex = (SELECT uuid_generate_v4()) where mw.id = rec.id;
+   END LOOP;
+END$$;
+
 INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140117160000,NOW(),'Added UUID fields for all the tables');
