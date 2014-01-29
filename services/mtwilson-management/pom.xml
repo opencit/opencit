@@ -97,7 +97,6 @@
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.2-507.jdbc4</version>
         </dependency>
     
 			<dependency>

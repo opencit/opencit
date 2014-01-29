@@ -62,7 +62,7 @@ public class ApiClientX509 implements Serializable {
     @Basic(optional = false)
     @Lob
     @Column(name = "certificate")
-    @Convert(converter=ByteArrayToBase64Converter.class)
+//    @Convert(converter=ByteArrayToBase64Converter.class)
     private byte[] certificate;
     @Basic(optional = false)
     @Lob
