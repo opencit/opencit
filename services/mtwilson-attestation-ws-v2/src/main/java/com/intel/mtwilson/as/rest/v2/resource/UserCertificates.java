@@ -10,7 +10,7 @@ import com.intel.mtwilson.as.rest.v2.model.UserCertificate;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificateLinks;
-import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.jersey.resource.AbstractCertificateResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.controller.exceptions.IllegalOrphanException;
@@ -32,7 +32,7 @@ import javax.ws.rs.Path;
 @V2
 @Stateless
 @Path("/user-certificates")
-public class UserCertificates extends AbstractResource<UserCertificate, UserCertificateCollection, UserCertificateFilterCriteria, UserCertificateLinks> {
+public class UserCertificates extends AbstractCertificateResource<UserCertificate, UserCertificateCollection, UserCertificateFilterCriteria, UserCertificateLinks> {
 
     @Override
     protected UserCertificateCollection search(UserCertificateFilterCriteria criteria) {
@@ -113,8 +113,17 @@ public class UserCertificates extends AbstractResource<UserCertificate, UserCert
 
     @Override
     protected void store(UserCertificate item) {
-        // Need to see how we can call into the Business object directly
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            ApiClientX509JpaController userCertJpaController = My.jpa().mwApiClientX509();
+            ApiClientX509 user = userCertJpaController.findApiClientX509ByUUID(item.getId().toString());            
+            if( user != null ) {
+                user.setCertificate(item.getCertificate());
+                // TODO  all the other fields too
+                userCertJpaController.edit(user);
+            }            
+        } catch(Exception e) {
+            // TODO  use slf4j  not java.util.Logggin
+        }
     }
 
     @Override

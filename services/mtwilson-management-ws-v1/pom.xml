@@ -223,6 +223,7 @@
 			<version>2.0</version>
 		</dependency>
                 
+        <!--
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -235,6 +236,7 @@
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
+        -->
                 <dependency>
                         <groupId>xml-apis</groupId>
                         <artifactId>xml-apis</artifactId>

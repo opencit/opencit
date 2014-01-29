@@ -23,6 +23,8 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  */
 @JacksonXmlRootElement(localName="user_certificate")
 public class UserCertificate extends CertificateDocument {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserCertificate.class);
+
     private String name;
     private byte[] certificate;
     private byte[] fingerprint;
@@ -125,6 +127,7 @@ public class UserCertificate extends CertificateDocument {
     public X509Certificate getX509Certificate() {
         if( certificate == null ) { return null; }
         try {
+            log.debug("Certificate bytes length {}", certificate.length);
             return X509Util.decodeDerCertificate(certificate);
         }
         catch(CertificateException e) {

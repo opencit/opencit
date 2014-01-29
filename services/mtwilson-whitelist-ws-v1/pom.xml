@@ -217,6 +217,7 @@
                 <version>1.5</version>
                 <scope>test</scope>
         </dependency>        
+        <!--
         <dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -229,6 +230,7 @@
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
+        -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>audit-handler</artifactId>

@@ -125,6 +125,7 @@
 			<scope>test</scope>
 		</dependency>
 -->
+        <!--
         <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
@@ -137,7 +138,6 @@
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
-        <!--
         <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
