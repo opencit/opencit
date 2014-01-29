@@ -249,8 +249,7 @@ public class HostTrustBO extends BaseBO {
                 }
             } else {
                 log.error("getTrustStatusOfHostNotInDB: BIOS MLE search for '{}' did not retrieve any matching MLEs.", hostObj.BIOS_Name);
-                String [] params = {hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.HostName};
-                log.error("getTrustStatusOfHostNotInDB: BIOS MLE {} with version {} is not configured for host {}.", params);
+                log.error("getTrustStatusOfHostNotInDB: BIOS MLE {} with version {} is not configured for host {}.", hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.HostName);
                 throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.BIOS_Name, hostObj.BIOS_Version);
             }
 
