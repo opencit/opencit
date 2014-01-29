@@ -239,8 +239,23 @@ public class AssetTagCertBO extends BaseBO{
                         log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
                         
                     } else {
-                        // Default open source
-                        // TODO : Need to implement how VMware calculates PCR 22
+                        // Default open source, this should match citrix
+                        Sha1Digest tag = Sha1Digest.digestOf(atagCert.getCertificate());
+                        log.debug("mapAssetTagCertToHostById : Sha1 Hash of the certificate with UUID {} is {}.", atagCert.getUuid(), tag.toString());
+                        
+                        // When Citrix code reads NVRAM, it reads it as string and then calculates the SHA1 has of it
+                        
+                        
+                        
+                        // It then appends a 20 byte zero array to the SHA1 of SHA1 hash for extending into PCR 22
+                        //byte[] destination = new byte[Sha1Digest.ZERO.toByteArray().length + citrixInput.toByteArray().length];                   
+                        //System.arraycopy(Sha1Digest.ZERO.toByteArray(), 0, destination, 0, Sha1Digest.ZERO.toByteArray().length);                     
+                        //System.arraycopy(citrixInput.toByteArray(), 0, destination, Sha1Digest.ZERO.toByteArray().length, citrixInput.toByteArray().length); 
+                        
+                        // Final value that is written into PCR 22 is the SHA1 of the zero appended value
+                        //expectedHash = Sha1Digest.ZERO.extend( Sha1Digest.digestOf(tag.toHexString().getBytes()) );
+                        expectedHash = Sha1Digest.ZERO.extend( tag );
+                        log.debug("mapAssetTagCertToHostById : Final expected PCR for the certificate with UUID {} is {}.", atagCert.getUuid(), expectedHash.toString());
                     }
                     
                     atagCert.setPCREvent(expectedHash.toByteArray());
