@@ -42,4 +42,7 @@ UPDATE mw_module_manifest SET uuid_hex = (SELECT uuid());
 ALTER TABLE `mw_as`.`mw_module_manifest` ADD COLUMN `mle_uuid_hex` CHAR(36) NULL;
 UPDATE mw_module_manifest mpm SET mle_uuid_hex = (SELECT m.uuid_hex FROM mw_mle m WHERE m.ID = mpm.MLE_ID);
 
+ALTER TABLE `mw_as`.`mw_asset_tag_certificate` ADD COLUMN `uuid_hex` CHAR(36) NULL;
+UPDATE mw_asset_tag_certificate SET uuid_hex = (SELECT uuid());
+
 INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20140117160000,NOW(),'Added UUID fields for all the tables');

@@ -90,6 +90,10 @@ public enum ErrorCode {
     AS_HOST_LOCATION_CONFIG_ERROR(1211, "Error during configuration of host location: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_HOST_TRUST_CERT_ERROR(1212, "Error during retrieval of host trust certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_INPUT_VALIDATION_ERROR(1213, "Input %s for %s is not valid."),
+    AS_ASSET_TAG_CERT_RETRIEVE_ERROR(1214, "Error during retrieval of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_ASSET_TAG_CERT_CREATE_ERROR(1215, "Error during creation of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_ASSET_TAG_CERT_UPDATE_ERROR(1216, "Error during update of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_ASSET_TAG_CERT_DELETE_ERROR(1217, "Error during deletion of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),
