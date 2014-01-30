@@ -17,6 +17,7 @@ import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import javax.ws.rs.GET;
@@ -31,7 +32,19 @@ import org.apache.commons.codec.binary.Base64;
 @Stateless
 @Path("/AttestationService/resources/ca2")
 public class CA {
-    private TrustAgentCertificateAuthority ca = new TrustAgentCertificateAuthority();
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CA.class);
+
+    private TrustAgentCertificateAuthority ca = null;
+    
+    public CA() {
+        try {
+            ca = new TrustAgentCertificateAuthority();
+        }
+        catch(IOException e) {
+            log.error("Cannot initialize CA", e);
+            ca = null;
+        }
+    }
     
     
     @GET
@@ -68,6 +81,10 @@ public class CA {
     @Produces({MediaType.TEXT_PLAIN})
     @Path("/signTrustAgentSsl")
     public String signTrustAgentSsl(String csrBase64, @QueryParam("password") String caPassword) {
+        if( ca == null ) {
+            log.error("signTrustAgentSsl request cannot be completed because CA is not initialized");
+            return null;
+        }
         ValidationUtil.validate(csrBase64);
         ValidationUtil.validate(caPassword);
 

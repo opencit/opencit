@@ -18,7 +18,7 @@ import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.x500.DN;
 import com.intel.dcsg.cpg.x509.X509Util;
-
+import com.intel.mtwilson.My;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -58,7 +58,7 @@ public class TrustAgentCertificateAuthority extends BaseBO {
     
     private Logger log = LoggerFactory.getLogger(getClass());
     private Configuration config = ASConfig.getConfiguration();
-    private MwKeystoreJpaController keystoreJpa = new MwKeystoreJpaController(getEntityManagerFactory());
+    private MwKeystoreJpaController keystoreJpa;  //new MwKeystoreJpaController(getEntityManagerFactory());
     private MwKeystore mwKeystore = null;
     private ByteArrayResource mwKeystoreResource = null;
     private SimpleKeystore keystore = null;
@@ -67,7 +67,8 @@ public class TrustAgentCertificateAuthority extends BaseBO {
     private String keyAlias = null;
     private String keyPassword = null;
     
-    public TrustAgentCertificateAuthority() {
+    public TrustAgentCertificateAuthority() throws IOException {
+        keystoreJpa = My.jpa().mwKeystore();
     }
     
     public TrustAgentCertificateAuthority(Configuration config) {
