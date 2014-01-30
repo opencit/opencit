@@ -8,6 +8,7 @@ import com.intel.mtwilson.atag.model.X509AttributeCertificate;
 import com.intel.mtwilson.datatypes.TagDataType;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.Sha256Digest;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.ApacheHttpClient;
 import com.intel.mtwilson.My;
@@ -80,7 +81,7 @@ public class AssetTagCertBO extends BaseBO{
      * @param atagObj
      * @return 
      */
-    public boolean importAssetTagCertificate(AssetTagCertCreateRequest atagObj) {
+    public boolean importAssetTagCertificate(AssetTagCertCreateRequest atagObj, String uuid) {
         boolean result = false;
         X509AttributeCertificate x509AttrCert;
         
@@ -93,6 +94,10 @@ public class AssetTagCertBO extends BaseBO{
             }            
             
             MwAssetTagCertificate atagCert = new MwAssetTagCertificate();
+            if (uuid != null && !uuid.isEmpty())
+                atagCert.setUuid_hex(uuid);
+            else
+                atagCert.setUuid_hex(new UUID().toString());
             atagCert.setCertificate(atagObj.getCertificate());
             atagCert.setUuid(x509AttrCert.getSubject());
             atagCert.setNotAfter(x509AttrCert.getNotAfter());
@@ -254,27 +259,30 @@ public class AssetTagCertBO extends BaseBO{
      * @param atagObj
      * @return 
      */
-    public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest atagObj) {
+    public boolean revokeAssetTagCertificate(AssetTagCertRevokeRequest atagObj, String uuid) {
         boolean result = false;
-        
+        List<MwAssetTagCertificate> atagCerts = null;
         try {
             // Find the asset tag certificate for the specified Sha256Hash value
-            if (atagObj.getSha1fAssetCert() != null) {
-                List<MwAssetTagCertificate> atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1fAssetCert());
-                if (atagCerts.isEmpty() || atagCerts.size() > 1) {
-                    log.error("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
-                    throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
-                } else {
-                    // Now that we have the asset tag identified, set the revoked flag to true.
-                    MwAssetTagCertificate atagCert = atagCerts.get(0);
-                    atagCert.setRevoked(true);
-                    My.jpa().mwAssetTagCertificate().edit(atagCert);
-                    result = true;
-                }
+            if (uuid != null && !uuid.isEmpty()) {
+                atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificatesByUuid(uuid);
+            } else if (atagObj.getSha1fAssetCert() != null) {
+                atagCerts = My.jpa().mwAssetTagCertificate().findAssetTagCertificateBySha1Hash(atagObj.getSha1fAssetCert());
             } else {
                 log.error("Sha256Hash for the asset tag is not specified.");
                 throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
             }            
+
+            if (atagCerts.isEmpty() || atagCerts.size() > 1) {
+                log.error("Either the asset tag certificate does not exist or there were multiple matches for the specified hash.");
+                throw new ASException(ErrorCode.AS_INVALID_ASSET_TAG_CERTIFICATE_HASH);
+            } else {
+                // Now that we have the asset tag identified, set the revoked flag to true.
+                MwAssetTagCertificate atagCert = atagCerts.get(0);
+                atagCert.setRevoked(true);
+                My.jpa().mwAssetTagCertificate().edit(atagCert);
+                result = true;
+            }
         } catch (ASException ase) {
             log.error("Error during revocation of the asset tag certificate. Error Details - {}:{}.", ase.getErrorCode(), ase.getErrorMessage());
             throw ase;

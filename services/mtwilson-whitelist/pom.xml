@@ -73,7 +73,6 @@
             <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.2-507.jdbc4</version>
         </dependency>
 
 		<dependency>
@@ -141,12 +140,14 @@
 			<version>2.0</version>
 		</dependency>
                 
+        <!--
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
+        -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>audit-handler</artifactId>

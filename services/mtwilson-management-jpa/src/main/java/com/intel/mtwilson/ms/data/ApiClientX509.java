@@ -4,12 +4,14 @@
  */
 package com.intel.mtwilson.ms.data;
 
+import com.intel.mtwilson.ms.converter.ByteArrayToBase64Converter;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.persistence.Convert;
 
 /**
             @QueryParam("expiresAfter") String expiresAfter,
@@ -60,6 +62,7 @@ public class ApiClientX509 implements Serializable {
     @Basic(optional = false)
     @Lob
     @Column(name = "certificate")
+//    @Convert(converter=ByteArrayToBase64Converter.class)
     private byte[] certificate;
     @Basic(optional = false)
     @Lob

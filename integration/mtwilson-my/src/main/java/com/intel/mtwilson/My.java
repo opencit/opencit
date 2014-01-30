@@ -4,18 +4,13 @@
  */
 package com.intel.mtwilson;
 
-import com.intel.mtwilson.api.ClientFactory;
-import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
-import com.intel.dcsg.cpg.io.FileResource;
-import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.util.ASDataCipher;
 import com.intel.mtwilson.util.Aes128DataCipher;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +28,8 @@ import org.slf4j.LoggerFactory;
 public class My {
     private transient static Logger log = LoggerFactory.getLogger(My.class);
     private static MyConfiguration config = null;
-    private static MtWilson client = null;
+//    private static MtWilson client = null;
+    private static MyClient client = null;
     private static MyPersistenceManager pm = null;
     private static MyJdbc jdbc = null;
     private static MyJpa jpa = null;
@@ -70,16 +66,9 @@ public class My {
     
     public static MtWilson client() throws MalformedURLException, IOException {
         if( client == null ) {
-            log.debug("Mt Wilson URL: {}", configuration().getMtWilsonURL().toString());
-            client = ClientFactory.clientForUserInResource(
-                new FileResource(configuration().getKeystoreFile()), 
-                configuration().getKeystoreUsername(),
-                configuration().getKeystorePassword(),
-                configuration().getMtWilsonURL(),
-                new InsecureTlsPolicy() // XXX TODO need to load the policy name, then instantiate the right one using the keystore file 
-                );
+            client = new MyClient();
         }
-        return client;
+        return client.v1();
     }
     
     public static MyPersistenceManager persistenceManager() throws IOException {

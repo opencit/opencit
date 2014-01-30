@@ -45,7 +45,7 @@ public class AssetTagCert {
     public String importAssetTagCertificate(AssetTagCertCreateRequest atagObj)  {
         log.debug(("assetTagDemo are we landing in here instead?"));
         AssetTagCertBO object = new AssetTagCertBO();
-        boolean result = object.importAssetTagCertificate(atagObj);
+        boolean result = object.importAssetTagCertificate(atagObj, null);
         return Boolean.toString(result);
     }
     
@@ -61,7 +61,7 @@ public class AssetTagCert {
     public String revokeAssetTagCertificate(AssetTagCertRevokeRequest atagObj)  {
         boolean result = true;
         AssetTagCertBO object = new AssetTagCertBO();
-        result = object.revokeAssetTagCertificate(atagObj);
+        result = object.revokeAssetTagCertificate(atagObj, null);
         return Boolean.toString(result);
     }
     

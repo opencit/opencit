@@ -5,6 +5,7 @@
 package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.as.rest.v2.model.User;
 import com.intel.mtwilson.as.rest.v2.model.UserCollection;
 import com.intel.mtwilson.as.rest.v2.model.UserFilterCriteria;
@@ -13,17 +14,15 @@ import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.ms.controller.MwPortalUserJpaController;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.datatypes.ApiClientStatus;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import com.intel.mtwilson.ms.controller.exceptions.MSDataException;
-import com.intel.mtwilson.ms.controller.exceptions.NonexistentEntityException;
 import com.intel.mtwilson.ms.data.MwPortalUser;
-import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ejb.Stateless;
 import javax.ws.rs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -34,17 +33,23 @@ import javax.ws.rs.Path;
 @Path("/users")
 public class Users extends AbstractResource<User, UserCollection, UserFilterCriteria, UserLinks> {
 
-    //TODO : Handling of the exceptions should be changed
-    
+    Logger log = LoggerFactory.getLogger(getClass().getName());
+
     @Override
     protected UserCollection search(UserFilterCriteria criteria) {
-        UserCollection userCollection = null;
+        UserCollection userCollection = new UserCollection();
         try {
-            // TODO : To see if we can dynamically build the queries and have a single function
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
             if (criteria.id != null) {
                 MwPortalUser userObj = userJpaController.findMwPortalUserByUUID(criteria.id.toString());
-                userCollection.getUsers().add(convert(userObj));
+                if (userObj != null) {
+                    userCollection.getUsers().add(convert(userObj));
+                }
+            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                MwPortalUser userObj = userJpaController.findMwPortalUserByUserName(criteria.nameContains);
+                if (userObj != null) {
+                    userCollection.getUsers().add(convert(userObj));
+                }
             } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
                 List<MwPortalUser> userList = userJpaController.findMwPortalUsersMatchingName(criteria.nameContains);
                 if (userList != null && !userList.isEmpty()) {
@@ -52,9 +57,6 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
                         userCollection.getUsers().add(convert(userObj));
                     }
                 }
-            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                MwPortalUser userObj = userJpaController.findMwPortalUserByUserName(criteria.nameContains);
-                userCollection.getUsers().add(convert(userObj));
             } else if (criteria.enabled != null) {
                 List<MwPortalUser> userList = userJpaController.findMwPortalUsersWithEnabledStatus(criteria.enabled);
                 if (userList != null && !userList.isEmpty()) {
@@ -63,25 +65,32 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
                     }
                 }
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during user search.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
         }
         return userCollection;
     }
 
     @Override
     protected User retrieve(String id) {
-        User user = null;
+        if( id == null ) { return null; }
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();         
             MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(id);
             if (portalUser != null) {
-                 user = convert(portalUser);
+                 User user = convert(portalUser);
+                 return user;
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during user search.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());
         }
-        return user;
+        return null;
     }
 
     /**
@@ -94,8 +103,9 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
             MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(item.getId().toString());
-            if (portalUser == null)
-                throw new NonexistentEntityException(null);
+            if (portalUser == null) {
+                throw new ASException(ErrorCode.MS_USER_DOES_NOT_EXISTS, item.getId().toString());
+            }
             
             if (item.getStatus() != null)
                 portalUser.setStatus(item.getStatus()); 
@@ -107,12 +117,11 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
                 portalUser.setLocale(item.getLocale());
             userJpaController.edit(portalUser);
 
-        } catch (IOException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MSDataException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during user update.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_UPDATE_ERROR, ex.getClass().getSimpleName());
         }
         
     }
@@ -125,7 +134,11 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
     protected void create(User item) {
         try {
             MwPortalUserJpaController userJpaController = My.jpa().mwPortalUser();
-            MwPortalUser portalUser = new MwPortalUser();
+            MwPortalUser portalUser = userJpaController.findMwPortalUserByUUID(item.getId().toString());
+            if (portalUser == null) {
+                throw new ASException(ErrorCode.MS_USER_ALREADY_EXISTS, item.getId().toString());
+            }
+            
             portalUser.setUsername(item.getName());
             portalUser.setStatus(ApiClientStatus.PENDING.toString()); 
             portalUser.setEnabled(Boolean.FALSE); 
@@ -133,8 +146,11 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
             portalUser.setLocale(item.getLocale());
             portalUser.setUuid_hex(new UUID().toHexString());
             userJpaController.create(portalUser);
-        } catch (IOException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during user creation.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_REGISTRATION_ERROR, ex.getClass().getSimpleName());
         }
     }
 
@@ -146,21 +162,14 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
             if (portalUser != null) {
                 userJpaController.destroy(portalUser.getId());
             }
-        } catch (IOException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NonexistentEntityException ex) {
-            Logger.getLogger(Users.class.getName()).log(Level.SEVERE, null, ex);
-        }        
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during user deletion.", ex);
+            throw new ASException(ErrorCode.MS_API_USER_DELETION_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
-    /*
-    @Override
-    protected UserFilterCriteria createFilterCriteriaWithId(String id) {
-        UserFilterCriteria criteria = new UserFilterCriteria();
-        criteria.id = UUID.valueOf(id);
-        return criteria;
-    }
-    */
     @Override
     protected UserCollection createEmptyCollection() {
         return new UserCollection();
@@ -169,16 +178,12 @@ public class Users extends AbstractResource<User, UserCollection, UserFilterCrit
     
     private User convert(MwPortalUser portalUser) {
         User user = new User();
-        if (portalUser != null) {
-            user.setId(UUID.valueOf(portalUser.getUuid_hex()));
-            user.setName(portalUser.getUsername());
-            user.setStatus(portalUser.getStatus());
-            user.setEnabled(portalUser.getEnabled());
-            user.setLocale(portalUser.getLocale());
-            user.setComments(portalUser.getComment());
-        } else {
-            user = null;
-        }            
+        user.setId(UUID.valueOf(portalUser.getUuid_hex()));
+        user.setName(portalUser.getUsername());
+        user.setStatus(portalUser.getStatus());
+        user.setEnabled(portalUser.getEnabled());
+        user.setLocale(portalUser.getLocale());
+        user.setComments(portalUser.getComment());
         return user;
     }
 }

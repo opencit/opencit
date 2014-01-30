@@ -60,13 +60,11 @@
     <dependency>
 		<groupId>mysql</groupId>
 		<artifactId>mysql-connector-java</artifactId>
-        <optional>true</optional>
         <scope>test</scope>
     </dependency>
     <dependency>
 		<groupId>postgresql</groupId>
 		<artifactId>postgresql</artifactId>
-        <optional>true</optional>
         <scope>test</scope>
     </dependency>
     

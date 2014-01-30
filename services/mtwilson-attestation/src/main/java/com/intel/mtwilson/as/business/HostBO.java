@@ -30,6 +30,7 @@ import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
@@ -95,7 +96,7 @@ public class HostBO extends BaseBO {
        
     }
         
-	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
+	public HostResponse addHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
             
            System.err.println("HOST BO ADD HOST STARTING");
             
@@ -194,7 +195,7 @@ public class HostBO extends BaseBO {
                         log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length);
 
                         log.trace("HOST BO CALLING SAVEHOSTINDATABASE");
-                        saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId);
+                        saveHostInDatabase(tblHosts, host, pcrManifest, tblHostSpecificManifests, biosMleId, vmmMleId, uuid);
                         
                         // Now that the host has been registered successfully, let us see if there is an asset tag certificated configured for the host
                         // to which the host has to be associated
@@ -298,12 +299,16 @@ public class HostBO extends BaseBO {
     }
 
 
-        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent) {
+        public HostResponse updateHost(TxtHost host, PcrManifest pcrManifest, HostAgent agent, String uuid) {
                 List<TblHostSpecificManifest> tblHostSpecificManifests = null;
                 Vendor hostType;
                 try {
-
-                        TblHosts tblHosts = getHostByName(host.getHostName()); // datatype.Hostname
+                        TblHosts tblHosts = null;
+                        if (uuid != null && !uuid.isEmpty()) {
+                            tblHosts = My.jpa().mwHosts().findHostByUuid(uuid);
+                        } else {                            
+                            tblHosts = getHostByName(host.getHostName()); // datatype.Hostname
+                        }
                         if (tblHosts == null) {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, host.getHostName().toString());
                         }
@@ -387,6 +392,8 @@ public class HostBO extends BaseBO {
                         }
                         if( host.getPort() != null ) { tblHosts.setPort(host.getPort()); }                        
                         tblHosts.setVmmMleId(vmmMleId);
+                        tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
+                        tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
 
 			My.jpa().mwHosts().edit(tblHosts);
 			log.info("Updated host: {}", tblHosts.getName());
@@ -412,10 +419,16 @@ public class HostBO extends BaseBO {
                 return new HostResponse(ErrorCode.OK);
         }
 
-        public HostResponse deleteHost(Hostname hostName) { // datatype.Hostname
+        public HostResponse deleteHost(Hostname hostName, String uuid) { // datatype.Hostname
 
                 try {
-                        TblHosts tblHosts = getHostByName(hostName);
+                        TblHosts tblHosts = null;
+                        if (uuid != null && !uuid.isEmpty()) {
+                            tblHosts = My.jpa().mwHosts().findHostByUuid(uuid);
+                        } else {                            
+                            tblHosts = getHostByName(hostName);
+                        }
+                        
                         if (tblHosts == null) {
                                 throw new ASException(ErrorCode.AS_HOST_NOT_FOUND, hostName);
                         }
@@ -626,7 +639,7 @@ public class HostBO extends BaseBO {
 	}
 
     // BUG #607 changing HashMap<String, ? extends IManifest> pcrMap to PcrManifest
-	private synchronized void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId) throws CryptographyException, MalformedURLException, IOException {
+	private synchronized void saveHostInDatabase(TblHosts newRecordWithTlsPolicyAndKeystore, TxtHost host, PcrManifest pcrManifest, List<TblHostSpecificManifest> tblHostSpecificManifests, TblMle biosMleId, TblMle vmmMleId, String uuid) throws CryptographyException, MalformedURLException, IOException {
 		checkForDuplicate(host);
 		TblHosts tblHosts = newRecordWithTlsPolicyAndKeystore; // new TblHosts();       
 		log.debug("Saving Host in database with TlsPolicyName {} and TlsKeystoreLength {}", tblHosts.getTlsPolicyName(), (tblHosts.getTlsKeystore() == null ? "null" : tblHosts.getTlsKeystore().length));
@@ -651,6 +664,14 @@ public class HostBO extends BaseBO {
                         tblHosts.setPort(host.getPort());
                 }
                 tblHosts.setVmmMleId(vmmMleId);
+                
+                // We need to check if the user has passed in the UUID or we need to generate one
+                if (uuid != null && !uuid.isEmpty())
+                    tblHosts.setUuid_hex(uuid);
+                else
+                    tblHosts.setUuid_hex(new UUID().toString());
+                tblHosts.setBios_mle_uuid_hex(biosMleId.getUuid_hex());
+                tblHosts.setVmm_mle_uuid_hex(vmmMleId.getUuid_hex());
                 
                 // Bug:583: Since we have seen exception related to this in the log file, we will check for contents
                 // before setting the location value.

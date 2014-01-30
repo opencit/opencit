@@ -335,10 +335,10 @@ public class HostTrustBO extends BaseBO {
             // We need to check if the host is already configured in the system. If yes, we need to update the host or else create a new one
             if (hostBO.getHostByName(new Hostname((hostObj.HostName))) != null) {
                 // update the host
-                hostResponse = hostBO.updateHost(new TxtHost(hostObjToRegister), pcrManifest, agent);
+                hostResponse = hostBO.updateHost(new TxtHost(hostObjToRegister), pcrManifest, agent, null);
             } else {
                 // create the host
-                hostResponse = hostBO.addHost(new TxtHost(hostObjToRegister), pcrManifest, agent);
+                hostResponse = hostBO.addHost(new TxtHost(hostObjToRegister), pcrManifest, agent, null);
             }
                 
             long getTrustStatusOfHostNotInDBStop = System.currentTimeMillis();
@@ -566,7 +566,7 @@ public class HostTrustBO extends BaseBO {
             // We need to update the host only if we found a new BIOS MLE or a VMM MLE to map to the host so that host would be trusted
             if (updateBIOSMLE || updateVMMMLE) {
                 HostBO hostBO = new HostBO();
-                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest, agent);
+                hostBO.updateHost(new TxtHost(hostUpdateObj), hostReport.pcrManifest, agent, null);
             }
 
             if (updateBIOSMLE)

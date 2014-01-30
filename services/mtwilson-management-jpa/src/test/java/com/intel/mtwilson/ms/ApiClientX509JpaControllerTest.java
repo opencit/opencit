@@ -1,5 +1,6 @@
 package com.intel.mtwilson.ms;
 
+//import com.intel.mtwilson.My;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import java.util.Calendar;
@@ -10,7 +11,16 @@ import org.junit.Test;
 //import com.intel.mtwilson.ms.data.TblApiClient;
 
 public class ApiClientX509JpaControllerTest {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApiClientX509JpaControllerTest.class);
 
+    /*
+    @Test
+    public void testBinaryCertificate() throws Exception {
+        ApiClientX509 user = My.jpa().mwApiClientX509().findApiClientX509ByUUID("7f2a647d-8172-44a6-b15a-30eaa42580e7");
+        log.debug("Certificate bytes length: {}", user.getCertificate().length);
+    }
+    */
+    
     //@Test
 	public void testFindClientByPrimaryKey() {
 		ManagementBaseBO config = new ManagementBaseBO();
