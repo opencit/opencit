@@ -128,7 +128,6 @@
        <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.2-507.jdbc4</version>
         </dependency>
 			<dependency>
 			<groupId>com.intel.mtwilson.services</groupId>
@@ -223,6 +222,7 @@
 			<version>2.0</version>
 		</dependency>
                 
+        <!--
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
 			<artifactId>jsr311-api</artifactId>
@@ -235,6 +235,7 @@
 			<version>1.0</version>
 			<scope>test</scope>
 		</dependency>
+        -->
                 <dependency>
                         <groupId>xml-apis</groupId>
                         <artifactId>xml-apis</artifactId>

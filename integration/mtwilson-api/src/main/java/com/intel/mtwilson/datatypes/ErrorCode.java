@@ -73,6 +73,8 @@ public enum ErrorCode {
     AS_INVALID_ASSET_TAG_CERTIFICATE(1031, "Invalid asset tag certificate specified."),
     AS_HOST_SPECIFIED_IS_CURRENTLY_NOT_MAPPED_TO_ASSET_TAG_CERTIFICATE(1032, "Host specified is currently not mapped to any asset tag certificate."),
     AS_MLE_DOES_NOT_EXIST(1033, "MLE '%s' of version '%s' is not configured in the system."),
+    AS_INVALID_BIOS_MLE(1034, "BIOS MLE specified is not valid. %s"),
+    AS_INVALID_VMM_MLE(1035, "VMM MLE specified is not valid. %s"),
  
 
     // Below error codes are for general white list service errors
@@ -90,6 +92,10 @@ public enum ErrorCode {
     AS_HOST_LOCATION_CONFIG_ERROR(1211, "Error during configuration of host location: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_HOST_TRUST_CERT_ERROR(1212, "Error during retrieval of host trust certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     AS_INPUT_VALIDATION_ERROR(1213, "Input %s for %s is not valid."),
+    AS_ASSET_TAG_CERT_RETRIEVE_ERROR(1214, "Error during retrieval of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_ASSET_TAG_CERT_CREATE_ERROR(1215, "Error during creation of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_ASSET_TAG_CERT_UPDATE_ERROR(1216, "Error during update of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
+    AS_ASSET_TAG_CERT_DELETE_ERROR(1217, "Error during deletion of asset tag certificate: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
 
     // Error codes for White List Service
     WS_OEM_DOES_NOT_EXIST(2001, "OEM '%s' is not configured in the system."),
@@ -174,6 +180,7 @@ public enum ErrorCode {
     MS_SSL_CERT_NOT_FOUND_ERROR(3030, "Server SSL certificate file is not found: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     MS_SSL_CERT_READ_ERROR(3031, "Failed to read server SSL certificate file: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     MS_SSL_CERT_ERROR(3032, "Error during retrieval of SSL CA chain: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()    
+    MS_API_USER_DELETION_ERROR(3033, "Error during API Client deletion: %s. More information is available in the server log"),  // argument should be  e.getClass().getSimpleName()
     
     // 3100 to 3200 APIClient
     MS_EXPIRED_CERTIFICATE(3101, "Client certificate has already expired. %s"),
@@ -190,6 +197,8 @@ public enum ErrorCode {
     MS_API_CLIENT_FIND_ERROR(3112, "Error during the search for Api Client in the system."),
     MS_INVALID_CERTIFICATE_DATA(3113, "Certificate data is not valid. %s"),
     MS_ERROR_PARSING_INPUT(3114,"Error parsing input: %s"),
+    MS_USER_ALREADY_EXISTS(3115, "User %s already exists in the system."),
+    MS_USER_DOES_NOT_EXISTS(3116, "User %s is not configured in the system"),
 
     // 3201 to 3300 Automation
     MS_HOST_COMMUNICATION_ERROR(3201, "Error during communication with the host. Please verify the host parameters. '%s'."),

@@ -17,5 +17,6 @@
       <property name="javax.persistence.jdbc.user" value="root"/>
     </properties>
     -->
+    <class>com.intel.mtwilson.ms.converter.ByteArrayToBase64Converter</class>
   </persistence-unit>
 </persistence>

@@ -221,7 +221,7 @@ public class Host {
     public HostResponse post(TxtHostRecord hostRecord) { 
         ValidationUtil.validate(hostRecord);
         if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-        else return hostBO.addHost(new TxtHost(hostRecord), null, null); 
+        else return hostBO.addHost(new TxtHost(hostRecord), null, null, null); 
     }
     
     
@@ -260,7 +260,7 @@ public class Host {
             ValidationUtil.validate(hostRecord);
             
             if( hostRecord == null || hostRecord.HostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-            else return hostBO.updateHost(new TxtHost(hostRecord), null, null);
+            else return hostBO.updateHost(new TxtHost(hostRecord), null, null, null);
     }
     
         /**
@@ -322,7 +322,7 @@ public class Host {
         public HostResponse delete(@QueryParam("hostName") String hostName) {
                 ValidationUtil.validate(hostName);
                 if( hostName == null || hostName.isEmpty() ) { throw new ValidationException("Missing hostNames parameter"); }
-                else return hostBO.deleteHost(new Hostname(hostName));
+                else return hostBO.deleteHost(new Hostname(hostName), null);
         }
 
         /**

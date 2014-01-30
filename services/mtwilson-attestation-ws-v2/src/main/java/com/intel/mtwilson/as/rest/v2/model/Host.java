@@ -28,8 +28,12 @@ public class Host extends Document {
     private String name;
     private String connectionUrl;
     private String description;
-    private String biosMLE;
-    private String IPAddress;
+    private String biosMleUuid;
+    private String vmmMleUuid;
+    private String email;
+    private String aikCertificate;  // may be null
+    private String aikPublicKey;  // may be null
+    private String aikSha1;  // may be null
 
     public String getName() {
         return name;
@@ -53,23 +57,54 @@ public class Host extends Document {
 
     public void setDescription(String description) {
         this.description = description;
+    }    
+
+    public String getBiosMleUuid() {
+        return biosMleUuid;
     }
 
-    public String getBiosMLE() {
-        return biosMLE;
+    public void setBiosMleUuid(String biosMleUuid) {
+        this.biosMleUuid = biosMleUuid;
     }
 
-    public void setBiosMLE(String biosMLE) {
-        this.biosMLE = biosMLE;
+    public String getVmmMleUuid() {
+        return vmmMleUuid;
     }
 
-    public String getIPAddress() {
-        return IPAddress;
+    public void setVmmMleUuid(String vmmMleUuid) {
+        this.vmmMleUuid = vmmMleUuid;
     }
 
-    public void setIPAddress(String IPAddress) {
-        this.IPAddress = IPAddress;
+    public String getEmail() {
+        return email;
     }
-    
-    
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAikCertificate() {
+        return aikCertificate;
+    }
+
+    public void setAikCertificate(String aikCertificate) {
+        this.aikCertificate = aikCertificate;
+    }
+
+    public String getAikPublicKey() {
+        return aikPublicKey;
+    }
+
+    public void setAikPublicKey(String aikPublicKey) {
+        this.aikPublicKey = aikPublicKey;
+    }
+
+    public String getAikSha1() {
+        return aikSha1;
+    }
+
+    public void setAikSha1(String aikSha1) {
+        this.aikSha1 = aikSha1;
+    }
+        
 }
