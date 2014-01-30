@@ -5,9 +5,13 @@
 package com.intel.mtwilson.rpc.v2.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.jersey.Document;
+import com.intel.dcsg.cpg.performance.Progress;
 
 /**
  * A remote procedure call has an id, href, name of the procedure, input, 
@@ -28,7 +32,8 @@ import com.intel.mtwilson.jersey.Document;
  * instead
  * of the normal document links section.
  * 
- * The faults will only be populated if meta.error is set to true. 
+ * The faults will only be populated if meta.error is set to true. Otherwise
+ * it will be either null or an empty list (TBD).
  * The status and progress are attributes in the meta section.
  * The meta.status value will be one of 
  * "QUEUE" (indicates the task is in the queue waiting for processing), 
@@ -47,14 +52,27 @@ import com.intel.mtwilson.jersey.Document;
  *      the authorizationToken is normally not included in the meta section,
  *      only someone with administrative/audit permissions may view the token.
  * 
+ * 
+ * The web service would look like POST /rpc/{name}   (request body -> response body)
+ * Client can send additional headers with the request.
+ * 
+ * 
  * @author jbuhacoff
  */
 @JacksonXmlRootElement(localName="rpc")
 public class Rpc extends Document {
     private String name;
-    private Object input;
-    private Object output;
+    private byte[] input;
+    private String inputContentType;
+    private byte[] output;
+    private String outputContentType;
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    @JacksonXmlElementWrapper(localName="faults")
+    @JacksonXmlProperty(localName="fault")        
     private Fault[] faults;
+    private String authorizationToken;
+    private RpcStatus status;
+    private RpcProgress progress;
     
     public String getName() {
         return name;
@@ -64,22 +82,39 @@ public class Rpc extends Document {
         this.name = name;
     }
 
-    public Object getInput() {
+    public byte[] getInput() {
         return input;
     }
 
-    public void setInput(Object input) {
+    public void setInput(byte[] input) {
         this.input = input;
     }
 
-    public Object getOutput() {
+    public byte[] getOutput() {
         return output;
     }
 
-    public void setOutput(Object output) {
+    public void setOutput(byte[] output) {
         this.output = output;
     }
 
+    public String getInputContentType() {
+        return inputContentType;
+    }
+
+    public void setInputContentType(String inputContentType) {
+        this.inputContentType = inputContentType;
+    }
+
+    public String getOutputContentType() {
+        return outputContentType;
+    }
+
+    public void setOutputContentType(String outputContentType) {
+        this.outputContentType = outputContentType;
+    }
+
+    
     public Fault[] getFaults() {
         return faults;
     }
@@ -88,24 +123,48 @@ public class Rpc extends Document {
         this.faults = faults;
     }
 
-    /*
-     * XXX diasbling this because @JsonIgnore is not suitable, it would
-     * not be possible to remove it whena dn admin  wants to view the token.
-     * Token would have t be filtered out by the resource before returning
-     * to the client.
-     * 
-    @JsonIgnore
     public String getAuthorizationToken() {
-        if( getMeta().containsKey("authorization_token") ) {
-            String token = (String)getMeta().get("authorization_token");
-            return token;
-        }
-        return null;
+        return authorizationToken;
     }
     
-    @JsonIgnore
-    public void setAuthorizationToken(String token) {
-        getMeta().put("authorization_token", token);
+    public void setAuthorizationToken(String authorizationToken) {
+        this.authorizationToken = authorizationToken;
     }
-    */
+
+    public RpcStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(RpcStatus status) {
+        this.status = status;
+    }
+
+    public RpcProgress getProgress() {
+        return progress;
+    }
+
+    public void setProgress(RpcProgress progress) {
+        this.progress = progress;
+    }
+    
+    
+    public static enum RpcStatus {
+        QUEUE, PROGRESS, OUTPUT, ERROR;
+    }
+    
+    public static class RpcProgress implements Progress {
+        private Long current;
+        private Long max;
+        
+        @Override
+        public Long getCurrent() {
+            return current;
+        }
+
+        @Override
+        public Long getMax() {
+            return max;
+        }
+        
+    }
 }

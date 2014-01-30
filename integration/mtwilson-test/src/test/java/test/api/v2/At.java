@@ -34,5 +34,9 @@ public class At {
     public static ClientResource userCertificates(String anyUuidOidName) {
         return new ClientResource(baseurl() + "/v2/user-certificates/" + anyUuidOidName);
     }
+
+    public static ClientResource manifestSignature() {
+        return new ClientResource(baseurl() + "/v2/manifest-signature");
+    }
     
 }

@@ -67,7 +67,7 @@ public class APIClient {
     @Produces(MediaType.TEXT_PLAIN)
     public String updateApiClient(ApiClientUpdateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
-        new ApiClientBO().update(apiClientRequest);
+        new ApiClientBO().update(apiClientRequest, null);
         return "OK";
     }
     /**
@@ -86,7 +86,7 @@ public class APIClient {
     @Produces(MediaType.TEXT_PLAIN)
     public String addApiClient(ApiClientCreateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
-        new ApiClientBO().create(apiClientRequest);
+        new ApiClientBO().create(apiClientRequest, null);
         return "OK";
     }
 
@@ -196,7 +196,7 @@ public class APIClient {
     public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
         log.debug("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
-        new ApiClientBO().create(apiClientRequest);
+        new ApiClientBO().create(apiClientRequest, null);
         return "OK";
     }
 
@@ -224,7 +224,7 @@ public class APIClient {
             apiClientRequest.comment = String.format("%s. Deleted on %s", info.comment, Rfc822Date.format(new Date()));
         }
         apiClientRequest.roles = info.roles;
-        bo.update(apiClientRequest);
+        bo.update(apiClientRequest, null);
     }
     
     private byte[] fromHex(String hex) {

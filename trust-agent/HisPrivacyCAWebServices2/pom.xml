@@ -31,25 +31,16 @@
 	<dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
-        </dependency>
-
-        <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.0.9</version>
         </dependency>
 
         <!-- XXX the following dependencies are declared so the java code will compile in the IDE - but they are included separately by the ant build for now; when we fully mavenize, we can use them directly -->
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-crypto</artifactId>
-			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.intel.dcsg.cpg</groupId>
 			<artifactId>cpg-tls-policy</artifactId>
-			<version>0.2-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>

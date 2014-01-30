@@ -30,6 +30,7 @@ import com.intel.mtwilson.util.Aes128DataCipher;
 import com.intel.mtwilson.as.BaseBO;
 import com.intel.mtwilson.crypto.Aes128;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.datatypes.*;
@@ -545,7 +546,7 @@ public class HostBO extends BaseBO {
                     try {
                         String certPem = X509Util.encodePemCertificate(cert);
                         tblHosts.setAIKCertificate(certPem);
-                        tblHosts.setAikPublicKey(X509Util.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
+                        tblHosts.setAikPublicKey(RsaUtil.encodePemPublicKey(cert.getPublicKey())); // NOTE: we are getting the public key from the cert, NOT by calling agent.getAik() ... that's to ensure that someone doesn't give us a valid certificate and then some OTHER public key that is not bound to the TPM
                         tblHosts.setAikSha1(Sha1Digest.valueOf(cert.getPublicKey().getEncoded()).toString());
                     }
                     catch(Exception e) {
@@ -554,7 +555,7 @@ public class HostBO extends BaseBO {
                 }
                 else {
                     PublicKey publicKey = agent.getAik();
-                    String pem = X509Util.encodePemPublicKey(publicKey); 
+                    String pem = RsaUtil.encodePemPublicKey(publicKey); 
                     tblHosts.setAIKCertificate(null);
                     tblHosts.setAikPublicKey(pem);
                     tblHosts.setAikSha1(Sha1Digest.valueOf(publicKey.getEncoded()).toString());
