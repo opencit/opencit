@@ -15,7 +15,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.mountwilson.as.common.ASException;
+import com.intel.mtwilson.datatypes.ErrorCode;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -23,7 +27,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  */
 @JacksonXmlRootElement(localName="user_certificate")
 public class UserCertificate extends CertificateDocument {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserCertificate.class);
+    Logger log = LoggerFactory.getLogger(getClass().getName());
 
     private String name;
     private byte[] certificate;
@@ -130,8 +134,9 @@ public class UserCertificate extends CertificateDocument {
             log.debug("Certificate bytes length {}", certificate.length);
             return X509Util.decodeDerCertificate(certificate);
         }
-        catch(CertificateException e) {
-            throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+        catch(CertificateException ce) {
+            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
     }
 
@@ -145,8 +150,10 @@ public class UserCertificate extends CertificateDocument {
         try {
             this.certificate = certificate.getEncoded();
         }
-        catch(CertificateEncodingException e) {
-            throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+        catch(CertificateEncodingException ce) {
+            log.error("Error decoding certificat.", ce);
+            //throw new IllegalArgumentException("Cannot decode certificate", e); // XXX TODO  for i18n we need to throw MWException here with an appropriate error code
+            throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
     }
     
