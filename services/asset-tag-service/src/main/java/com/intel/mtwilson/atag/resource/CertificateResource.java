@@ -27,6 +27,7 @@ import com.intel.mtwilson.api.ApiException;
 import com.intel.mtwilson.api.MtWilson;
 import com.intel.mtwilson.atag.Global;
 import com.intel.mtwilson.datatypes.ConnectionString;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.io.ByteArrayResource;
 import com.intel.mtwilson.model.Hostname;
 import com.intel.mtwilson.tls.InsecureTlsPolicy;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 import org.restlet.data.Status;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
@@ -306,6 +308,13 @@ public class CertificateResource extends ServerResource {
                 */
                 // XXX TODO send it to the host...
                 try {
+                    List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(actionChoice.provision.getHost().toString());
+                    if(hostList == null || hostList.size() == 0) {
+                        log.error("No hosts were returned back matching name " + actionChoice.provision.getHost().toString());
+                        setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+                        return null;
+                    }
+                    TxtHostRecord
                     deployAssetTagToHost(certificate.getSha1(), actionChoice.provision.getHost(),actionChoice.provision.port, actionChoice.provision.getUsername(), actionChoice.provision.getPassword());
                 }
                 catch(IOException e) {
