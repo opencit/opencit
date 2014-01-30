@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.ms.business;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.MyJpa;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -48,7 +49,7 @@ public class ApiClientBO extends BaseBO {
      * 
      * @param apiClientRequest 
      */
-    public void create(ApiClientCreateRequest apiClientRequest) {
+    public void create(ApiClientCreateRequest apiClientRequest, String uuid) {
 
 
         try {
@@ -59,7 +60,7 @@ public class ApiClientBO extends BaseBO {
                 throw new MSException(e, ErrorCode.MS_INVALID_CERTIFICATE_DATA, e.getMessage());
             }
             validate(apiClientRequest, x509Certificate);
-            createApiClientAndRole(apiClientRequest, x509Certificate);
+            createApiClientAndRole(apiClientRequest, x509Certificate, uuid);
             
             // Log the details into the syslog
             Object[] paramArray = {Arrays.toString(getFingerPrint(x509Certificate)), Arrays.toString(apiClientRequest.getRoles())};
@@ -135,12 +136,16 @@ public class ApiClientBO extends BaseBO {
      * @param x509Certificate 
      */
     private void createApiClientAndRole(ApiClientCreateRequest apiClientRequest,
-            X509Certificate x509Certificate) {
+            X509Certificate x509Certificate, String uuid) {
 
         try {
 
             ApiClientX509 apiClientX509 = new ApiClientX509();
 
+            if (uuid != null && !uuid.isEmpty())
+                apiClientX509.setUuid_hex(uuid);
+            else
+                apiClientX509.setUuid_hex(new UUID().toString());
             apiClientX509.setCertificate(apiClientRequest.getCertificate());
             apiClientX509.setEnabled(false);
             apiClientX509.setExpires(x509Certificate.getNotAfter());
@@ -224,13 +229,25 @@ public class ApiClientBO extends BaseBO {
      * 
      * @param apiClientRequest 
      */
-    public void update(ApiClientUpdateRequest apiClientRequest) {
-        
+    public void update(ApiClientUpdateRequest apiClientRequest, String uuid) {
+        ApiClientX509 apiClientX509 = null;
+        String userName = null;
         try {
             ApiClientX509JpaController apiClientX509JpaController = new ApiClientX509JpaController(getMSEntityManagerFactory());
 
-            ApiClientX509 apiClientX509 = apiClientX509JpaController.findApiClientX509ByFingerprint(apiClientRequest.fingerprint);
+            if (uuid != null && !uuid.isEmpty()) {
+                apiClientX509 = apiClientX509JpaController.findApiClientX509ByUUID(uuid);
+                userName = uuid;
+            } else {
+                apiClientX509 = apiClientX509JpaController.findApiClientX509ByFingerprint(apiClientRequest.fingerprint);
+                userName = apiClientRequest.fingerprint.toString();
+            }
 
+            if (apiClientX509 == null) {
+                log.error("Specified user does not exist in the system.");
+                throw new MSException(ErrorCode.MS_USER_DOES_NOT_EXISTS, userName);
+            }
+            
             apiClientX509.setEnabled(apiClientRequest.enabled);
             apiClientX509.setStatus(apiClientRequest.status);
             apiClientX509.setComment(apiClientRequest.comment);            
