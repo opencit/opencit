@@ -212,6 +212,8 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
     }
 
     // the delete method is on a specific resource id and because we don't return any content it's the same whether its simple object or json api 
+    // jersey automatically returns status code 204 No Content (successful) to the client because
+    // we have a void return type
     @Path("/{id}")
     @DELETE
     public void deleteOne(@PathParam("id") String id) {
@@ -221,7 +223,6 @@ public abstract class AbstractResource<T extends Document, C extends DocumentCol
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
         delete(id);
-        // XXX TODO set status to 204  no content  (check what it is by default here since this method has void return type, maybe it's already 204)
     }
 
     /**

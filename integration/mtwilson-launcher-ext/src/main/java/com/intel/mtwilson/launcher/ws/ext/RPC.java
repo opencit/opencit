@@ -10,13 +10,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Classes annotated with @V1 and @Path("path") can be accessed at a URL 
- * like /v1/{path} and indicates they are part of the Mt Wilson 1.x APIs
- *
+ * Classes annotated with @RPC("name") can be accessed via a URL
+ * like /v2/rpc/{name} and indicates they follow the Mt Wilson 2.x RPC
+ * conventions
+ * 
  * @author jbuhacoff
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface V1 {
-    
+public @interface RPC {
+    /**
+     * The name of the remote procedure call
+     * @return 
+     */
+    String value();
 }
