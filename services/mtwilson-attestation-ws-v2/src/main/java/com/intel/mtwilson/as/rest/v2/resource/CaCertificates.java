@@ -9,7 +9,7 @@ import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateLinks;
 import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.resource.AbstractResource;
+import com.intel.mtwilson.jersey.resource.AbstractCertificateResource;
 import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import java.io.File;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CaCertificates extends AbstractResource<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLinks> {
+public class CaCertificates extends AbstractCertificateResource<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLinks> {
 
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
