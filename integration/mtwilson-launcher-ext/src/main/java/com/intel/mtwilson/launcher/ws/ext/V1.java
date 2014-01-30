@@ -10,6 +10,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Classes annotated with @V1 and @Path("path") can be accessed at a URL 
+ * like /v1/{path} and indicates they are part of the Mt Wilson 1.x APIs
  *
  * @author jbuhacoff
  */
