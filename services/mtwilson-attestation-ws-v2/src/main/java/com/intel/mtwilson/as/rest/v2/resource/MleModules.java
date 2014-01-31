@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
 import com.intel.mtwilson.as.data.TblModuleManifest;
 import com.intel.mtwilson.as.rest.v2.model.MleModule;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleCollection;
-import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCollection;
+import com.intel.mtwilson.as.rest.v2.model.MleModuleFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.MleModuleLinks;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.ModuleWhiteList;
@@ -31,12 +31,12 @@ import org.slf4j.LoggerFactory;
 @V2
 @Stateless
 @Path("/mle-modules")
-public class MleModules extends AbstractResource<MleModule, MleModuleCollection, MleModuleFilterCollection, MleModuleLinks> {
+public class MleModules extends AbstractResource<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLinks> {
 
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
     @Override
-    protected MleModuleCollection search(MleModuleFilterCollection criteria) {
+    protected MleModuleCollection search(MleModuleFilterCriteria criteria) {
         MleModuleCollection objCollection = new MleModuleCollection();
         try {
             TblModuleManifestJpaController jpaController = My.jpa().mwModuleManifest();
