@@ -101,19 +101,16 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-whitelist</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-attestation</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>mtwilson-management</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
         <!--
         <dependency>

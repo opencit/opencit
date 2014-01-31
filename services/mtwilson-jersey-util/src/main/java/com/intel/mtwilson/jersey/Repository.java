@@ -8,7 +8,10 @@ import com.intel.dcsg.cpg.io.UUID;
 import java.util.Collection;
 
 /**
- *
+ * XXX TODO   compare this Repository  to SimpleRepository in the resource 
+ * package and pick one or combine them;  since all the v2 resources implemented
+ * so far are written like the SimpleRepository maybe we can just extend it
+ * to have some of the methods here? if they are useful.  
  * @author jbuhacoff
  */
 public interface Repository<T> {

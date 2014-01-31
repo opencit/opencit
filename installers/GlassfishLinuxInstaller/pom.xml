@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>glassfish</artifactId>
-  <version>3.1.1</version>
+  <version>4.0</version>
 
   <packaging>pom</packaging>
   <name>Glassfish Linux Installer</name>
@@ -44,7 +44,7 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>glassfish</artifactId>
-      <version>3.1.1</version>
+      <version>4.0</version>
       <type>zip</type>
     </dependency>	
 <dependency>
@@ -94,10 +94,10 @@
                 <artifactItem>
                   <groupId>com.oracle</groupId>
                   <artifactId>glassfish</artifactId>
-                  <version>3.1.1</version>
+                  <version>4.0</version>
                   <type>zip</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>glassfish-3.1.1.zip</destFileName>
+                  <destFileName>glassfish-4.0.zip</destFileName>
                 </artifactItem>
                 <artifactItem>
                     <groupId>org.codehaus.jackson</groupId>
