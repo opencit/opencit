@@ -96,7 +96,7 @@
 		</dependency>
 		<dependency>
 		<groupId>com.intel.mtwilson.database</groupId>
-		<artifactId>mtwilson-postgres</artifactId>
+		<artifactId>mtwilson-postgresql</artifactId>
 		<version>${project.version}</version>
 	</dependency>
             <dependency>
