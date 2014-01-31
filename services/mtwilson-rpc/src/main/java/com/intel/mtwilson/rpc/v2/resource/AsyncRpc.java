@@ -4,21 +4,17 @@
  */
 package com.intel.mtwilson.rpc.v2.resource;
 
+import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
-import com.intel.mtwilson.rpc.v2.model.RpcCollection;
-import com.intel.mtwilson.rpc.v2.model.RpcFilterCriteria;
+import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 /**
  * Characteristics of a Remote Procedure Call is that the input and output
@@ -39,7 +35,8 @@ import javax.ws.rs.core.Response;
  *
  * @author jbuhacoff
  */
-//@V2
+@V2
+@Stateless
 @Path("/rpc")
 public class AsyncRpc {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AsyncRpc.class);

@@ -175,7 +175,8 @@
                     -->
                     <li class="tab"><a href="#resourcesCustom">Test Custom Resources</a></li>			
                     <li class="tab"><a href="#resources">Resources</a></li>			
-                    <li class="tab"><a href="#wadl">WADL</a></li>			
+                    <li class="tab"><a href="#rpc">RPC</a></li>			
+                    <li class="tab"><a href="#wadl">WADL</a></li>
                     <li class="tab"><a href="#log">Log</a></li>			
                 </ul>
                 <!-- navigation ends-->	
@@ -201,6 +202,15 @@
                 <div id="jsonapi-resources"></div>
             </div>
 
+            <div id="rpc" style="display: none;">
+                <div id="rpc-list">
+                    <form method="POST" action="/v2/rpc/test_rpc_method">
+                        <input type="text" name="try html form" value="works!"/>
+                        <input type="submit"/>
+                    </form>
+                </div>
+            </div>
+            
             <div id="wadl" style="display: none;">
                 <div id="wadl-resources"></div>
             </div>
