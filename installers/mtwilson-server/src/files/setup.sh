@@ -9,6 +9,9 @@ if [ ! $currentUser == "root" ]; then
  exit -1
 fi
 
+#load the functions file first so we can use the generatePassword function
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+
 #define defaults so that they can be overwriten 
 #if the value appears in mtwilson.env
 export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
@@ -20,11 +23,11 @@ export LOG_SIZE=100M
 export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
 export AUTO_UPDATE_ON_UNTRUST=false
-
+export WEBSERVICE_USERNAME=mtwilsonAdmin
+export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 

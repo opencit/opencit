@@ -43,7 +43,7 @@ fi
 
 cd $TOMCAT_CONF
 mv tomcat-users.xml tomcat-users.xml.old
-sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomcat" password="tomcat" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
 rm  -f tomcat-users.xml.old
 
 
@@ -59,5 +59,9 @@ mv server_temp.xml server.xml
 sed -i.bak 's/sslProtocol=\"TLS\" \/>/sslProtocol=\"SSLv3\" keystoreFile=\"\/usr\/share\/apache-tomcat-6.0.29\/ssl\/.keystore\" keystorePass=\"changeit\" \/>/g' server.xml
 
 tomcat_permissions ${TOMCAT_HOME}
+
+update_property_in_file "tomcat.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
+update_property_in_file "tomcat.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+
 
 echo "Starting Tomcat..."

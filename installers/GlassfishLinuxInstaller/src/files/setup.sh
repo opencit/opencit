@@ -41,4 +41,7 @@ cp *.jar ${GLASSFISH_HOME}/modules/
 glassfish_stop
 glassfish_start
 
+update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
+update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
+
 echo
