@@ -15,7 +15,7 @@ package_keystore_users_dir=/var/opt/intel/${package_name}/users
 #mysql_required_version=5.0
 #mysql_setup_log=/var/log/intel.${package_name}.install.log
 #mysql_script_dir=${package_dir}/database
-#glassfish_required_version=3.0
+#glassfish_required_version=4.0
 webservice_application_name=TrustDashBoard
 #java_required_version=1.7.0_51
 

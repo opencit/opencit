@@ -3,7 +3,7 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-#glassfish_required_version=3.0
+#glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 
 # detect the packages we have to install

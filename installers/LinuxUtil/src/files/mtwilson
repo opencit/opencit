@@ -12,7 +12,7 @@ env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
-#glassfish_required_version=3.0
+#glassfish_required_version=4.0
 #java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY and VERSION INFORMATION
@@ -42,7 +42,7 @@ elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
 if using_glassfish; then
-    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
+    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
 fi

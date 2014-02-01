@@ -166,7 +166,7 @@ elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
 if using_glassfish; then
-    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
+    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
 fi
