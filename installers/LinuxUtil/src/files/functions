@@ -1925,6 +1925,14 @@ glassfish_install() {
       echo "http://glassfish.java.net/"
       return 1
     fi
+    
+    asenvFile=`find $GLASSFISH_HOME -name asenv.conf`
+    echo "AS_JAVA=$JAVA_HOME" >> asenvFile
+    echo "Increasing glassfish max thread pool size to 200..."
+    $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+    echo "Enabling secure admin for glassfish..."
+    $glassfish_bin enable-secure-admin
+    
   else
     echo "Glassfish is already installed in $GLASSFISH_HOME"
   fi
