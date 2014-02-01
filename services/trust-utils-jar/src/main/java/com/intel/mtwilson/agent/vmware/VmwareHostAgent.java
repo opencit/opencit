@@ -198,7 +198,7 @@ public class VmwareHostAgent implements HostAgent {
      * 
      * Here is the exception that we were getting when the addLog() call executed:
      * 
-[#|2012-11-20T09:56:10.575-0800|WARNING|glassfish3.1.1|javax.enterprise.system.container.ejb.com.sun.ejb.containers|_ThreadID=33;_ThreadName=Thread-2;|A system exception occurred during an invocation on EJB SAML method public java.lang.String com.intel.mountwilson.as.rest.SAML.getHostAssertions(java.lang.String)
+[#|2012-11-20T09:56:10.575-0800|WARNING|glassfish4.0|javax.enterprise.system.container.ejb.com.sun.ejb.containers|_ThreadID=33;_ThreadName=Thread-2;|A system exception occurred during an invocation on EJB SAML method public java.lang.String com.intel.mountwilson.as.rest.SAML.getHostAssertions(java.lang.String)
 javax.ejb.EJBException
 ...
 Caused by: com.intel.mountwilson.as.common.ASException: com.intel.mtwilson.audit.helper.AuditHandlerException: java.lang.ClassCastException: com.sun.enterprise.naming.impl.SerialContext cannot be cast to com.intel.mtwilson.audit.api.AuditWorker

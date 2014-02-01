@@ -656,7 +656,7 @@ fi
 mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
- echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
+ echo "/usr/share/glassfish4/glassfish/domains/domain1/logs/server.log {
 	missingok
 	notifempty
 	rotate $LOG_OLD
@@ -692,7 +692,7 @@ mkdir -p /etc/monit/conf.d
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
  echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
+check file gf_installed with path \"/usr/share/glassfish4/bin/asadmin\"
 	group gf_server
 	if does not exist then unmonitor
 # Monitoring the glassfish java service

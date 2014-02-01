@@ -1801,7 +1801,7 @@ no_glassfish() {
 # Run this AFTER glassfish_install
 # optional global variables:  
 #   glassfish_username (default value glassfish)
-#   GLASSFISH_HOME (default value /usr/share/glassfish3)
+#   GLASSFISH_HOME (default value /usr/share/glassfish4)
 # works on Debian, Ubuntu, CentOS, RedHat, SUSE
 # Username should not contain any spaces or punctuation
 # Optional arguments:  one or more directories for glassfish user to own
@@ -1810,7 +1810,7 @@ glassfish_permissions() {
   local username=${glassfish_username:-glassfish}
   local user_exists=`cat /etc/passwd | grep "^${username}"`
   if [ -z "$user_exists" ]; then
-    useradd -c "Glassfish" -d "${GLASSFISH_HOME:-/usr/share/glassfish3}" -r -s /bin/bash "$username"
+    useradd -c "Glassfish" -d "${GLASSFISH_HOME:-/usr/share/glassfish4}" -r -s /bin/bash "$username"
   fi
   local file
   for file in $chown_locations
@@ -1893,10 +1893,10 @@ glassfish_install() {
   if glassfish_running; then glassfish_stop; fi
 
   if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
-    if [ -d /usr/share/glassfish3 ]; then
+    if [ -d /usr/share/glassfish4 ]; then
       # we do not remove it automatically in case there are applications or data in there that the user wants to save!!
-      echo_warning "Glassfish not detected but /usr/share/glassfish3 exists"
-      echo "Remove /usr/share/glassfish3 and try again"
+      echo_warning "Glassfish not detected but /usr/share/glassfish4 exists"
+      echo "Remove /usr/share/glassfish4 and try again"
       return 1
     fi
     if [[ -z "$GLASSFISH_PACKAGE" || ! -f "$GLASSFISH_PACKAGE" ]]; then
@@ -1906,7 +1906,7 @@ glassfish_install() {
     auto_install "Glassfish requirements" "GLASSFISH"
     echo "Installing $GLASSFISH_PACKAGE"
     unzip $GLASSFISH_PACKAGE 2>&1  >/dev/null
-    mv glassfish3 /usr/share/
+    mv glassfish4 /usr/share/
     # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
     if [ -f "/etc/hosts" ]; then
         local hostname=`hostname`
