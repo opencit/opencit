@@ -16,7 +16,7 @@ package_install_filename=${package_dir}/${package_name}.install
 #mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
 webservice_application_name=AttestationService
-#java_required_version=1.6.0_29
+#java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
@@ -162,7 +162,7 @@ download_privacyca_certs() {
 
 
 create_saml_key() {
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+  if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
   # TODO:  keystore password can be set in environment variable and passed like env:varname (see docs.. only in java 1.7 did they copy this from openssl)... same for key password
   # windows path: C:\Intel\CloudSecurity\SAML.jks
   # the saml.keystore.file property is just a file name and not an absolute path

@@ -12,7 +12,7 @@ package_var_bin_dir=${package_var_dir}/bin
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 #mysql_required_version=5.0
 #glassfish_required_version=3.0
-#java_required_version=1.6.0_29
+#java_required_version=1.7.0_51
 
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 

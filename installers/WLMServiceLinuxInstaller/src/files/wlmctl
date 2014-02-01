@@ -22,7 +22,7 @@ package_install_filename=${package_dir}/${package_name}.install
 #mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
 webservice_application_name=WLMService
-#java_required_version=1.6.0_29
+#java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi

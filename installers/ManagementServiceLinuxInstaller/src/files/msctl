@@ -17,7 +17,7 @@ package_keystore_users_dir=/var/opt/intel/${package_name}/users
 #mysql_script_dir=${package_dir}/database
 #glassfish_required_version=3.0
 webservice_application_name=ManagementService
-#java_required_version=1.6.0_29
+#java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY, VERSION INFORMATION, and LOCAL CONFIGURATION
 if [ -f "${package_dir}/functions" ]; then . "${package_dir}/functions"; else echo "Missing file: ${package_dir}/functions"; exit 1; fi
@@ -94,7 +94,7 @@ bootstrap_ms_internal_user() {
 # - Key alias (such as "admin", corresponding to "admin.jks" in the user directory)
 # - Key password
 bootstrap_ms_approve_user() {
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+  if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
   keytool=${JAVA_HOME}/bin/keytool
   local key_dir="${1}"
   local key_alias="${2}"

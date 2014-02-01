@@ -10,7 +10,7 @@ TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tgz 2>/dev/null | tail -n 1`
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
-if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
+if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
