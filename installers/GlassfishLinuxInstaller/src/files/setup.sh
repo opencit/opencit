@@ -24,8 +24,8 @@ asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
 echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
 echo "Increasing glassfish max thread pool size to 200..."
 $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
-echo "Enabling secure admin for glassfish..."
-$glassfish_bin enable-secure-admin
+#echo "Enabling secure admin for glassfish..."
+#$glassfish_bin enable-secure-admin
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
