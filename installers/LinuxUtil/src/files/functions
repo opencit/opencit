@@ -2759,7 +2759,7 @@ java_install_openjdk() {
 }
 
 java_install() {
-  local JAVA_PACKAGE="${1-:jdk-7u51-linux-x64.bin}"
+  local JAVA_PACKAGE="${1-:jdk-7u51-linux-x64.tar.gz}"
 #  JAVA_YUM_PACKAGES="java-1.7.0-openjdk java-1.7.0-openjdk-devel"
 #  JAVA_APT_PACKAGES="openjdk-7-jre openjdk-7-jdk"
 #  auto_install "Java" "JAVA"
@@ -2771,10 +2771,13 @@ java_install() {
     fi
     local javafile=$JAVA_PACKAGE
     echo "Installing $javafile"  >> $INSTALL_LOG_FILE
+    is_targz=`echo $javafile | grep ".tar.gz$"`
     is_gzip=`echo $javafile | grep ".gz$"`
     is_bin=`echo $javafile | grep ".bin$"`
     javaname=`echo $javafile | awk -F . '{ print $1 }'`
-    if [ -n "$is_gzip" ]; then
+    if [ -n "$is_targz" ]; then
+      tar xzvf $javafile 2>&1 >> $INSTALL_LOG_FILE
+    elif [ -n "$is_gzip" ]; then
       gunzip $javafile 2>&1 >/dev/null  >> $INSTALL_LOG_FILE
       chmod +x $javaname
       ./$javaname | grep -vE "inflating:|creating:|extracting:|linking:|^Creating" 
