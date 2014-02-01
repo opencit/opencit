@@ -9,6 +9,9 @@ if [ ! $currentUser == "root" ]; then
  exit -1
 fi
 
+#load the functions file first so we can use the generatePassword function
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+
 #define defaults so that they can be overwriten 
 #if the value appears in mtwilson.env
 export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
@@ -20,11 +23,11 @@ export LOG_SIZE=100M
 export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
 export AUTO_UPDATE_ON_UNTRUST=false
-
+export WEBSERVICE_USERNAME=mtwilsonAdmin
+export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
@@ -868,9 +871,13 @@ echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
+  update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
+  update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
   glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
+  update_property_in_file "tomcat.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
+  update_property_in_file "tomcat.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
   tomcat_restart
 fi
 
