@@ -1,9 +1,11 @@
 #!/bin/bash
-
+# VERSION 1.0.0     last-edited-by: rksavinx     date: 2014-02-01
 TITLE="Asset tag provisioning Agent"
 
 certSha1=/tmp/certSha1
 nvramPass=ffffffffffffffffffffffffffffffffffffffff
+ownerPass=ffffffffffffffffffffffffffffffffffffffff
+srkPass=ffffffffffffffffffffffffffffffffffffffff
 server=""
 cert=""
 username=""
@@ -17,8 +19,16 @@ IFS=' '
 read -a valueArray <<< "${values}"
 IFS="$OIFS"
 cmdFile=/tmp/command
-tpmnvdefine=`which tpm_nvdefine 2>/dev/null`
-tpmnvwrite=`which tpm_nvwrite 2>/dev/null`
+tpmnvinfo=/usr/local/sbin/tpm_nvinfo
+tpmnvdefine=/usr/local/sbin/tpm_nvdefine
+tpmnvwrite=/usr/local/sbin/tpm_nvwrite
+tpmnvrelease=/usr/local/sbin/tpm_nvrelease
+tpmnvread=/usr/local/sbin/tpm_nvread
+tpmtakeownership=/usr/local/sbin/tpm_takeownership
+expect=/usr/bin/expect
+INDEX=0x40000010
+SIZE=0x14
+
 #read the variables from /proc/cmdline
 #to support automation ussuage with the script
 #to pass data it uses this form
@@ -57,7 +67,6 @@ fi
 
 WGET="wget --secure-protocol=SSLv3 --no-proxy --ca-certificate=$CERT_FILE_LOCATION --password=$password --user=$username"
 UUID=`dmidecode |grep UUID | awk '{print $2}'`
-INDEX=0x40000010
 tagChoice=""
 tagFile=""
 tagServer=""
@@ -77,11 +86,41 @@ rm $certSha1
 functionReturn=0
 isUsingXml=0
 
+function generatePasswordHex() {
+  < /dev/urandom tr -dc a-f0-9 | head -c${1:-32}
+}
+
+function takeOwnershipTpm() {
+ functionReturn=0
+ $tpmtakeownership -x -t -oownerPass -z > /dev/null 2>&1
+#(
+#$expect << EOD
+#spawn $tpmtakeownership
+#expect "Enter owner password:"
+#send "$ownerPass\r"
+#expect "Confirm password:"
+#send "$ownerPass\r"
+#expect "Enter SRK password:"
+#send "$srkPass\r"
+#expect "Confirm password:"
+#send "$srkPass\r"
+#interact
+#expect eof
+#EOD
+#) > /dev/null 2>&1
+}
+
+function releaseNvram() {
+ functionReturn=0
+ $tpmnvrelease -x -t -i $INDEX -oownerPass > /dev/null 2>&1
+}
+
+
 function createIndex4() {
  functionReturn=0
- output=`tpm_nvinfo -i $INDEX`
+ output=`$tpmnvinfo -i $INDEX`
  if [ -z "$output" ]; then
-  $tpmnvdefine -i $INDEX -s 0x14 -a"$nvramPass" --permissions="AUTHWRITE"
+  $tpmnvdefine -x -t -i $INDEX -s $SIZE -anvramPass -oownerPass -p AUTHWRITE
  fi
 }
 
@@ -149,10 +188,22 @@ function provisionCert() {
  if [ $? -eq 0 ]; then
   sha1=`xml2 < $certFile  | grep sha1`
   sha1=`echo "${sha1#*sha1=}"`
+  
+  # Generate passwords for ownership and nvram  
+  export nvramPass=`generatePasswordHex 40`
+  export ownerPass=`generatePasswordHex 40`
+  export srkPass=`generatePasswordHex 40`
+  
+  # Overwrite password if TA, skip taking ownership
+
+  takeOwnershipTpm
+  releaseNvram
   createIndex4
+
   echo "$sha1" | hex2bin > $certSha1
-  echo "$tpmnvwrite -i $INDEX -p$nvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
-  $tpmnvwrite -i $INDEX -p"$nvramPass" -f $certSha1 > /tmp/certWrite  2>&1
+  # hex2bin "$sha1" $certSha1
+  echo "$tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite" >> $cmdFile
+  $tpmnvwrite -x -t -i $INDEX -pnvramPass -f $certSha1 > /tmp/certWrite 2>&1
   result=$?
   sleep 5;
   if [ $result -eq 0 ]; then 
@@ -162,6 +213,7 @@ function provisionCert() {
   fi
  fi
 }
+
 
 function _main() {
  getTagOption
