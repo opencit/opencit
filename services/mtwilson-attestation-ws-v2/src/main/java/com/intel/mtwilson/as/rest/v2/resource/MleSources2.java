@@ -34,6 +34,7 @@ public class MleSources2 extends AbstractJsonapiResource<MleSource, MleSourceCol
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources2.class);
     
     public MleSources2() {
+        super();
         setRepository(new MleSourceRepository());
     }
 

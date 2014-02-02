@@ -86,31 +86,6 @@ register(com.intel.mtwilson.wlm.rest.WlmStatus.class);
 
 
     @Override
-    protected File[] getJars() {
-        try {
-            // find the plugin directory, try My.configuration() first then the maven target folder
-            File javaPath = new File(My.configuration().getMtWilsonJava());
-            if( !javaPath.exists() ) {
-                // try target/.../WEB-INF/lib in case we are running on a developer laptop
-                javaPath = new File("target"+File.separator+"mtwilson-launcher-jersey2-"+Version.VERSION+File.separator+"WEB-INF"+File.separator+"lib");
-            }
-            log.debug("Relative path for testing: {}", javaPath.getAbsolutePath());
-            if(javaPath.exists()) {
-                log.debug("Found relative WEB-INF/lib");
-            }
-            else {
-    //            targetWebinfLib = new File("C:\\Users\\jbuhacof\\workspace\\dcg_security-mtwilson\\integration\\mtwilson-launcher-jersey2\\target\\mtwilson-launcher-jersey2-1.2.3-SNAPSHOT\\WEB-INF\\lib");
-                // check mtwilson home ... or maybe reverse the order?
-            }
-            DirectoryLauncher.JarFilter jarfilter = new DirectoryLauncher.JarFilter();
-            return javaPath.listFiles(jarfilter);
-        }
-        catch(IOException e) {
-            throw new RuntimeException("Cannot load configuration", e);
-        }
-    }
-
-    @Override
     protected Registrar[] getRegistrars() {
         // scan the jar files for mtwilson plugins that contain classes annotated with @Path from javax.ws.rs
         AnnotationRegistrar registrar = new AnnotationRegistrar(V1.class);

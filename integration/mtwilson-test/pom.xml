@@ -157,6 +157,16 @@
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-rpc</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-rpc-model</artifactId>
+		<version>${project.version}</version>        
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>audit-handler</artifactId>
 		<version>${project.version}</version>        
     </dependency>
