@@ -813,9 +813,9 @@ mtwilson.atag = mtwilson.atag || {};
 //            var provisionObject = report.input.clone(); //Object.toJSON(report.input).evalJSON();
         var provisionObject = {
             host: $('certificate-provision-host').value,
-            port: $('certificate-provision-port').value,
-            username: $('certificate-provision-username').value,
-            password: $('certificate-provision-password').value
+            //port: $('certificate-provision-port').value,
+            //username: $('certificate-provision-username').value,
+            //password: $('certificate-provision-password').value
         };
         log.debug("provisionCertificate  object: " + Object.toJSON(provisionObject)); // should have subject, host address, username, password
         var certificateUuid = $('certificate-provision-uuid').value; // provisionObject.certificateUuid;

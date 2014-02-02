@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.mountwilson.common.TAConfig;
+import java.io.PrintWriter;
 import org.apache.commons.lang.StringUtils;
 
 
@@ -39,14 +40,16 @@ public class SetAssetTag implements ICommand{
     public void execute() throws TAException{
         try {
             
-            String password = "";
+            String password = "ffffffffffffffffffffffffffffffffffffffff";
             
             //create the index if needed
             boolean iExists = indexExists();
             if(iExists){  // if it exists we need to get the password from the service for the nvram
-                
+                log.error("index already exists.");
             }else{ // generate random password 
-                password = generateRandomPass();
+                // Just use the same password right now for testing
+                // password =  generateRandomPass();
+                log.debug("index does not exist. creating it using password " + password);
                 createIndex(password);
             }
             log.debug("using password " + password + " for index");
@@ -78,8 +81,9 @@ public class SetAssetTag implements ICommand{
     private boolean writeHashToNvram(String password) throws TAException, IOException {
         List<String> result;
         try {
-            
-            result = CommandUtil.runCommand("tpm_nvwrite -i " + index + " -p" + password + " -f /tmp/hash");
+            String tpmPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
+            log.debug("running command tpm_nvwrite -x -i " + index + " -p" + password + " -f /tmp/hash");
+            result = CommandUtil.runCommand("tpm_nvwrite -x -i " + index + " -p" + password +" -f /tmp/hash");
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToNvram output: " + response);
         }catch(TAException ex) {
@@ -91,8 +95,7 @@ public class SetAssetTag implements ICommand{
     
     private void writeHashToFile() throws TAException, IOException {
         try {
-            
-            List<String> result = CommandUtil.runCommand("echo " + context.getAssetTagHash() + " | hex2bin > /tmp/hash");
+            List<String> result = CommandUtil.runCommand("/usr/local/bin/hex2bin " + context.getAssetTagHash() + " /tmp/hash"); //| /usr/local/bin/hex2bin > /tmp/hash");
             String response = StringUtils.join(result,"\n");
             log.debug("writeHashToFile output: " + response);
         }catch(TAException ex) {
@@ -105,7 +108,8 @@ public class SetAssetTag implements ICommand{
         List<String> result;
         try {
             String tpmPass = TAConfig.getConfiguration().getString("TpmOwnerAuth");
-            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -a" + password + " -o" + tpmPass +" --permissions=\"AUTHWRITE\"");
+            log.debug("running command tpm_nvdefine -i " + index + " -s 0x14 -x -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
+            result = CommandUtil.runCommand("tpm_nvdefine -i " + index + " -s 0x14 -x -a" + password + " -o" + tpmPass +" --permissions=AUTHWRITE");
             String response = StringUtils.join(result,"\n");
             log.debug("createIndex output: " + response);
         }catch(TAException ex) {
