@@ -7,6 +7,7 @@ package com.intel.mtwilson.jersey2;
 //import com.intel.dcsg.cpg.extensions.Extensions;
 import com.intel.dcsg.cpg.extensions.AnnotationRegistrar;
 import com.intel.dcsg.cpg.extensions.Extensions;
+import com.intel.dcsg.cpg.extensions.ImplementationRegistrar;
 import com.intel.dcsg.cpg.extensions.Registrar;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.launcher.DirectoryLauncher;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.util.List;
 import javax.ws.rs.Path;
 import com.intel.mtwilson.Version;
+import com.intel.mtwilson.launcher.ws.ext.RPC;
 import java.io.IOException;
 
 /**
@@ -63,36 +65,11 @@ public class Jersey2Application2 extends AbstractJerseyPluginApplication {
     }
 
     @Override
-    protected File[] getJars() {
-        try {
-            // find the plugin directory, try My.configuration() first then the maven target folder
-            File javaPath = new File(My.configuration().getMtWilsonJava());
-            if( !javaPath.exists() ) {
-                // try target/.../WEB-INF/lib in case we are running on a developer laptop
-//                javaPath = new File("target"+File.separator+"mtwilson-launcher-jersey2-"+Version.VERSION+File.separator+"WEB-INF"+File.separator+"lib");
-                javaPath = new File("target"+File.separator+"mtwilson-launcher-jetty9-"+Version.VERSION+File.separator+"WEB-INF"+File.separator+"lib");
-            }
-            log.debug("Relative path for testing: {}", javaPath.getAbsolutePath());
-            if(javaPath.exists()) {
-                log.debug("Found relative WEB-INF/lib");
-            }
-            else {
-    //            targetWebinfLib = new File("C:\\Users\\jbuhacof\\workspace\\dcg_security-mtwilson\\integration\\mtwilson-launcher-jersey2\\target\\mtwilson-launcher-jersey2-1.2.3-SNAPSHOT\\WEB-INF\\lib");
-                // check mtwilson home ... or maybe reverse the order?
-            }
-            DirectoryLauncher.JarFilter jarfilter = new DirectoryLauncher.JarFilter();
-            return javaPath.listFiles(jarfilter);
-        }
-        catch(IOException e) {
-            throw new RuntimeException("Cannot load configuration", e);
-        }
-    }
-
-    @Override
     protected Registrar[] getRegistrars() {
-        // scan the jar files for mtwilson plugins that contain classes annotated with @Path from javax.ws.rs
-        AnnotationRegistrar registrar = new AnnotationRegistrar(V2.class);
-        return new Registrar[] { registrar };
+        AnnotationRegistrar v2 = new AnnotationRegistrar(V2.class); // Mt Wilson 2.0 Resource APIs 
+        AnnotationRegistrar rpc = new AnnotationRegistrar(RPC.class); // Mt Wilson 2.0 Remote Procedure Call APIs 
+        ImplementationRegistrar runnables = new ImplementationRegistrar(); //  backgroudn tasks TODO  move the scanning of these into a ServletContextListener so it will happen at application startup regarldess of v1/v2  ??
+        return new Registrar[] { v2, rpc, runnables };
     }
 
 }

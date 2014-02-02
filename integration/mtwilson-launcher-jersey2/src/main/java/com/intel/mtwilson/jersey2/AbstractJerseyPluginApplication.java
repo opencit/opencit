@@ -56,26 +56,12 @@ import javax.ws.rs.ext.Provider;
 public abstract class AbstractJerseyPluginApplication extends ResourceConfig {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractJerseyPluginApplication.class);
     
-    protected abstract File[] getJars();
+//    protected abstract File[] getJars();
     
     protected abstract Registrar[] getRegistrars();
     
     public AbstractJerseyPluginApplication() {
-        File[] jars = getJars();
-        Registrar[] registrars = getRegistrars();
-        Iterator<File> it = new ArrayIterator<File>(jars); // only scans directory for jar files; does NOT scan subdirectories
-        while (it.hasNext()) {
-            File jar = it.next();
-            try {
-                for(Registrar registrar : registrars) {
-                    ExtensionUtil.scan(registrar, new JarClassIterator(jar, getClass().getClassLoader()));// we use our current classloader which means if any classes are already loaded we'll reuse them
-                }
-            }
-            catch(Throwable e) { // catch ClassNotFoundException and NoClassDefFoundError 
-                log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName());
-                // log.error("Cannot read jar file {}", jar.getAbsolutePath());
-            }
-        }
+        Util.scanJars(Util.findAllJars(),getRegistrars());
         
         log.debug("Registering YAML, XML, JSON providers");
 register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
@@ -112,6 +98,7 @@ register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class);
 //register(com.intel.mtwilson.audit.helper.AuditJerseyResponseFilter.class);// XXX TODO re-enable
 register(com.intel.mtwilson.shiro.AuthorizationExceptionMapper.class);
 register(com.intel.mtwilson.as.helper.ASLocalizationFilter.class);
+register(com.intel.mtwilson.jersey.filter.ErrorLogFilter.class);
         log.debug("Registering other resources");
 register(org.glassfish.jersey.server.wadl.internal.WadlResource.class);
 

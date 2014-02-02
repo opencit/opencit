@@ -11,7 +11,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * Not clear yet if we'll offer a search capability that would possibly
@@ -24,7 +24,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 public class RpcCollection extends DocumentCollection<Rpc> {
     private final ArrayList<Rpc> rpcs = new ArrayList<Rpc>();
     
-    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
+//    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="rpcs")
     @JacksonXmlProperty(localName="rpc")    

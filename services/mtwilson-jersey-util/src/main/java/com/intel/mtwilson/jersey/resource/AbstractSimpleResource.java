@@ -4,6 +4,8 @@
  */
 package com.intel.mtwilson.jersey.resource;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.http.PATCH;
 import com.intel.dcsg.cpg.io.UUID;
@@ -76,7 +78,7 @@ import javax.ws.rs.core.Response;
 public abstract class AbstractSimpleResource<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractSimpleResource.class);
-
+    private ObjectMapper mapper = new ObjectMapper(); // for debugging only
     private SimpleRepository<T,C,F,L> repository;
     
     public void setRepository(SimpleRepository<T,C,F,L> repository) {
@@ -89,10 +91,10 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     // TODO:   searchCollection  which @Produces   OtherMediaType.APPLICATION_VND_API_JSON  
     //       must be implemented in a subclass...
     @GET
-    public C searchCollection(@BeanParam F criteria) {
-        log.debug("searchCollection 2zz");
-        ValidationUtil.validate(criteria); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        return repository.search(criteria);
+    public C searchCollection(@BeanParam F selector) {
+        try { log.debug("searchCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
+        ValidationUtil.validate(selector); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
+        return repository.search(selector);
     }
 
     /**
@@ -108,7 +110,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
      */
     @POST
     public T createOne(@BeanParam L locator, T item) {
-        log.debug("create");
+        try { log.debug("createOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         locator.copyTo(item);
         ValidationUtil.validate(item); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
         if (item.getId() == null) {
@@ -124,7 +126,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Path("/{id}")
     @DELETE
     public void deleteOne(@BeanParam L locator) {
-        log.debug("delete");
+        try { log.debug("deleteOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         T item = repository.retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
@@ -149,7 +151,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     
     @DELETE
     public void deleteCollection(@BeanParam F selector) {
-        log.debug("delete collection");
+        try { log.debug("deleteCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize selector: {}", e.getMessage()); }
         C collection = repository.search(selector);
         if( collection.getDocuments().isEmpty() ) {            
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
@@ -174,7 +176,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Path("/{id}")
     @GET
     public T retrieveOne(@BeanParam L locator) {
-        log.debug("retrieve");
+        try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         /*
         T item = repository.retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
@@ -210,7 +212,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Path("/{id}")
     @PUT
     public T storeOne(@BeanParam L locator, T item) {
-        log.debug("store");
+        try { log.debug("storeOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         ValidationUtil.validate(item);
 //        item.setId(UUID.valueOf(id));
         locator.copyTo(item);
@@ -240,7 +242,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @PATCH
     @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
     public T patchOne(@BeanParam L locator, Patch<T, F, P>[] patchArray) {
-        log.debug("patch");
+        try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         T item = repository.retrieve(locator); // subclass is responsible for validating id
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
