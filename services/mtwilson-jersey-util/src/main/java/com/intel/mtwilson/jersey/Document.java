@@ -10,13 +10,13 @@ import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *
  * @author jbuhacoff
  */
-@JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY) // jackson 1.9
+//@JsonSerialize(include=JsonSerialize.Inclusion.NON_EMPTY) // jackson 1.9
 @JsonInclude(JsonInclude.Include.NON_EMPTY) // jackson 2.0
 public abstract class Document {
     private UUID id;

@@ -39,4 +39,12 @@ public class At {
         return new ClientResource(baseurl() + "/v2/manifest-signature");
     }
     
+    public static ClientResource testAddIntegers() {
+        return new ClientResource(baseurl() + "/v2/rpc/add_integers");
+    }
+
+    public static ClientResource testRpcStatus(UUID id) {
+        return new ClientResource(baseurl() + "/v2/rpcs/"+id);
+    }
+
 }

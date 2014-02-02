@@ -4,6 +4,7 @@
  */
 package test.patch;
 
+import com.intel.mtwilson.jersey.patch.ReverseLowerCaseWithUnderscoresStrategy;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import com.intel.mtwilson.jersey.patch.PatchUtil;
 
 /**
  *
@@ -143,7 +145,7 @@ public class RelationalPatchTest {
         appleSearch.id = "1234";
         
         // create the patch document
-        Map<String,Object> appleReplace = diff(apple,appleUpdate);
+        Map<String,Object> appleReplace = PatchUtil.diff(apple,appleUpdate);
         Patch<Fruit,FruitFilterCriteria,NoLinks<Fruit>> patch = new Patch<Fruit,FruitFilterCriteria,NoLinks<Fruit>>();
         patch.setSelect(appleSearch);
         patch.setReplace(appleReplace);
@@ -159,84 +161,10 @@ public class RelationalPatchTest {
     }
     
 
-    /**
-     * Returns a "replace" map showing which attributes changes from
-     * o1 to o2
-     * 
-     * This method assumes the objects are flat -- it does not support
-     * objects having arrays, lists, etc.  maybe a future version will.
-     * so currently any object taht is present will replace the previous
-     * value completely, which means changes to arrays or maps require the
-     * full arra/map to be sent
-     */
-    private <T> Map<String,Object> diff(T o1, T o2) throws PatchException {
-        try {
-            LowerCaseWithUnderscoresStrategy namingStrategy = new LowerCaseWithUnderscoresStrategy();
-            Map<String,Object> result = new HashMap<String,Object>();
-            Map<String,Object> replaceAttrs = PropertyUtils.describe(o1);// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
-            for(Map.Entry<String,Object> attr : replaceAttrs.entrySet()) {
-                String translatedKey = namingStrategy.translate(attr.getKey());
-                // there are attributes we skip, like "class" from getClass() 
-                if( attr.getKey().equals("class") ) { continue; }
-                Object a1 = PropertyUtils.getSimpleProperty(o1, attr.getKey());
-                Object a2 = PropertyUtils.getSimpleProperty(o2, attr.getKey());
-                if( a1 == null && a2 == null ) { continue; }
-                else if( a1 != null && a2 == null ) { result.put(translatedKey, null); }
-                else if( a1 == null && a2 != null ) { result.put(translatedKey, a2); }
-                else if( a1 != null && a2 != null && !a1.equals(a2)) { result.put(translatedKey, a2); }
-            }
-            return result;
-        }
-        catch(Exception e) {
-            throw new PatchException(e);
-        }
-    }
-    
-    private <T> T apply(Patch patch, T o) throws PatchException {
-        try {
-            ReverseLowerCaseWithUnderscoresStrategy reverseNamingStrategy = new ReverseLowerCaseWithUnderscoresStrategy(o);        
 
-            Map<String,Object> replaceAttrs = patch.getReplace();
-            for(Map.Entry<String,Object> attr : replaceAttrs.entrySet()) {
-                // there are attributes we skip, like "class" from getClass() 
-                if( attr.getKey().equals("class") ) { continue; }
-                log.debug("patch replace attr {} value {}", attr.getKey(), attr.getValue());
-                // find the corresponding property in the object (reverse of naming strategy)
-                String key = reverseNamingStrategy.translate(attr.getKey());
-                PropertyUtils.setSimpleProperty(o, key, attr.getValue());
-            }
-            return o; // can be ignored by caller since we modify the argument
-        }
-        catch(Exception e) {
-            throw new PatchException(e);
-        }
-    }
     
-    /**
-     * Reverse of the LowerCaseWithUnderscoresStrategy; due to the rules of 
-     * the strategy the target object is required in order to map translated
-     * keys to their corresponding attributes in the object.
-     * 
-     * For example:
-     * fruit_name -> fruitName
-     * 
-     * Fruit fruit = new Fruit();
-     * fruit.setFruitName("apple");
-     * ReverseLowerCaseWithUnderscoresStrategy reverse = new ReverseLowerCaseWithUnderscoresStrategy(fruit);
-     * String attrName = reverse.translate("fruit_name");  // fruitName
-     * 
-     */
-    public static class ReverseLowerCaseWithUnderscoresStrategy {
-        private static final LowerCaseWithUnderscoresStrategy namingStrategy = new LowerCaseWithUnderscoresStrategy();
-        private HashMap<String,String> map = new HashMap<String,String>();
-        public ReverseLowerCaseWithUnderscoresStrategy(Object target) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-            Map<String,Object> attrs = PropertyUtils.describe(target);// throws IllegalAccessException, InvocationTargetException, NoSuchMethodException
-            for(String key : attrs.keySet()) {
-                map.put(namingStrategy.translate(key), key);
-            }
-        }
-        public String translate(String key) {
-            return map.get(key);
-        }
+    private <T,F extends FilterCriteria<T>,L extends PatchLink<T>> T apply(Patch<T,F,L> patch, T o) throws PatchException {
+        return PatchUtil.apply(patch.getReplace(), o);
     }
+
 }
