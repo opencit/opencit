@@ -12,7 +12,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class MleModuleFilterCollection implements FilterCriteria<MleModule> {
+public class MleModuleFilterCriteria implements FilterCriteria<MleModule> {
 
     @QueryParam("id")
     public UUID id;

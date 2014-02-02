@@ -9,6 +9,9 @@ if [ ! $currentUser == "root" ]; then
  exit -1
 fi
 
+#load the functions file first so we can use the generatePassword function
+if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
+
 #define defaults so that they can be overwriten 
 #if the value appears in mtwilson.env
 export INSTALLED_MARKER_FILE=/var/opt/intel/.mtwilsonInstalled
@@ -20,11 +23,11 @@ export LOG_SIZE=100M
 export LOG_OLD=7
 export MTWILSON_OWNER=$currentUser
 export AUTO_UPDATE_ON_UNTRUST=false
-
+export WEBSERVICE_USERNAME=mtwilsonAdmin
+export WEBSERVICE_PASSWORD=`generate_password 16`
 export INSTALL_LOG_FILE=/tmp/mtwilson-install.log
 cat /dev/null > $INSTALL_LOG_FILE
 
-if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 if [ -f /root/mtwilson.env ]; then  . /root/mtwilson.env; fi
 if [ -f mtwilson.env ]; then  . mtwilson.env; fi
 
@@ -166,11 +169,11 @@ elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
 if using_glassfish; then
-    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-3.0}
+    export glassfish_required_version=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
 fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
 
@@ -538,13 +541,13 @@ if using_glassfish; then
 	echo_warning "asadmin set-log-attributes --target server com.sun.enterprise.server.logging.GFFileHandler.rotationLimitInBytes=0"
   fi
 
-  if [ -e $glassfish_bin ]; then
-    echo "Increasing glassfish max thread pool size to 200..."
-      $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
-  else
-    echo_warning "Unable to locate asadmin, please run the following command on your system to increase HTTP-max-thread-size: "
-    echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
-  fi
+  #if [ -e $glassfish_bin ]; then
+  #  echo "Increasing glassfish max thread pool size to 200..."
+  #    $glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+  #else
+  #  echo_warning "Unable to locate asadmin, please run the following command on your system to increase HTTP-max-thread-size: "
+  #  echo_warning "asadmin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200"
+  #fi
   
   if [ -z "$SKIP_WEBSERVICE_INIT" ]; then 
     # glassfish init code here
@@ -656,7 +659,7 @@ fi
 mkdir -p /etc/logrotate.d
 
 if [ ! -a /etc/logrotate.d/mtwilson ]; then
- echo "/usr/share/glassfish3/glassfish/domains/domain1/logs/server.log {
+ echo "/usr/share/glassfish4/glassfish/domains/domain1/logs/server.log {
 	missingok
 	notifempty
 	rotate $LOG_OLD
@@ -692,7 +695,7 @@ mkdir -p /etc/monit/conf.d
 if [ -z "$NO_GLASSFISH_MONIT" ]; then 
 if [ ! -a /etc/monit/conf.d/glassfish.mtwilson ]; then
  echo "# Verify glassfish is installed (change path if Glassfish is installed to a different directory)
-check file gf_installed with path \"/usr/share/glassfish3/bin/asadmin\"
+check file gf_installed with path \"/usr/share/glassfish4/bin/asadmin\"
 	group gf_server
 	if does not exist then unmonitor
 # Monitoring the glassfish java service
@@ -868,9 +871,13 @@ echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "glassfish"
+  update_property_in_file "glassfish.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
+  update_property_in_file "glassfish.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
   glassfish_restart
 elif using_tomcat; then
   update_property_in_file "mtwilson.webserver.vendor" /etc/intel/cloudsecurity/mtwilson.properties "tomcat"
+  update_property_in_file "tomcat.admin.username" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_USERNAME"
+  update_property_in_file "tomcat.admin.password" /etc/intel/cloudsecurity/mtwilson.properties "$WEBSERVICE_PASSWORD"
   tomcat_restart
 fi
 

@@ -9,8 +9,8 @@ package_name=privacyca
 package_dir=/opt/intel/cloudsecurity/${package_name}
 package_config_filename=${intel_conf_dir}/${package_name}.properties
 #mysql_required_version=5.0
-#glassfish_required_version=3.0
-#java_required_version=1.6.0_29
+#glassfish_required_version=4.0
+#java_required_version=1.7.0_51
 #tomcat_required_version=6.0.29
 #tomcat_parent_dir=/usr/lib
 #tomcat_name=apache-tomcat-6.0.29
@@ -73,10 +73,10 @@ glassfish_privacyca_install() {
   GLASSFISH_APT_PACKAGES="unzip"
   glassfish_detect
   if [[ -z "$GLASSFISH_HOME" || -z "$glassfish" ]]; then
-    if [ -d /usr/share/glassfish3 ]; then
+    if [ -d /usr/share/glassfish4 ]; then
       # we do not remove it automatically in case there are applications or data in there that the user wants to save!!
-      echo_warning "Glassfish not detected but /usr/share/glassfish3 exists"
-      echo "Remove /usr/share/glassfish3 and try again"
+      echo_warning "Glassfish not detected but /usr/share/glassfish4 exists"
+      echo "Remove /usr/share/glassfish4 and try again"
       return 1
     fi
     if [[ -z "$GLASSFISH_PACKAGE" || ! -f "$GLASSFISH_PACKAGE" ]]; then
@@ -86,7 +86,7 @@ glassfish_privacyca_install() {
     auto_install "Glassfish requirements" "GLASSFISH"
     echo "Installing $GLASSFISH_PACKAGE"
     gunzip -c $GLASSFISH_PACKAGE | tar xf -
-    mv glassfish3 /usr/share/
+    mv glassfish4 /usr/share/
     # Glassfish requires hostname to be mapped to 127.0.0.1 in /etc/hosts
     if [ -f "/etc/hosts" ]; then
         local hostname=`hostname`

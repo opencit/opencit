@@ -10,7 +10,7 @@ TOMCAT_PACKAGE=`ls -1 apache-tomcat*.tgz 2>/dev/null | tail -n 1`
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
-if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
+if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; exit 1; fi
 tomcat_install $TOMCAT_PACKAGE
 
 # the Tomcat "endorsed" folder is not present by default, we have to create it.
@@ -43,7 +43,7 @@ fi
 
 cd $TOMCAT_CONF
 mv tomcat-users.xml tomcat-users.xml.old
-sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="tomcat" password="tomcat" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
+sed 's/<\/tomcat-users>/\n  <role rolename="manager"\/>\n  <user username="'$WEBSERVICE_USERNAME'" password="'$WEBSERVICE_PASSWORD'" roles="manager"\/>\n<\/tomcat-users>/g' tomcat-users.xml.old > tomcat-users.xml
 rm  -f tomcat-users.xml.old
 
 

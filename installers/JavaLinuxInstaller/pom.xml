@@ -45,7 +45,7 @@
       <groupId>com.oracle</groupId>
       <artifactId>jdk</artifactId>
       <version>1.7.0_51</version>
-      <type>bin</type>
+      <type>tar.gz</type>
       <classifier>linux-x64</classifier>
     </dependency>	
   </dependencies>
@@ -77,10 +77,10 @@
                   <groupId>com.oracle</groupId>
                   <artifactId>jdk</artifactId>
                   <version>1.7.0_51</version>
-                  <type>bin</type>
+                  <type>tar.gz</type>
 	          <classifier>linux-x64</classifier>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>jdk-7u51-linux-x64.bin</destFileName>
+                  <destFileName>jdk-7u51-linux-x64.tar.gz</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>

@@ -15,7 +15,7 @@
         Where is the web server log file?
       </question>
       <answer>
-        <p>Typically it is located in /usr/share/glassfish3/glassfish/domains/domain1/logs/server.log</p>
+        <p>Typically it is located in /usr/share/glassfish4/glassfish/domains/domain1/logs/server.log</p>
       </answer>
     </faq>
     </part>

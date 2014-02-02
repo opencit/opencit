@@ -69,7 +69,8 @@ public class Jersey2Application2 extends AbstractJerseyPluginApplication {
             File javaPath = new File(My.configuration().getMtWilsonJava());
             if( !javaPath.exists() ) {
                 // try target/.../WEB-INF/lib in case we are running on a developer laptop
-                javaPath = new File("target"+File.separator+"mtwilson-launcher-jersey2-"+Version.VERSION+File.separator+"WEB-INF"+File.separator+"lib");
+//                javaPath = new File("target"+File.separator+"mtwilson-launcher-jersey2-"+Version.VERSION+File.separator+"WEB-INF"+File.separator+"lib");
+                javaPath = new File("target"+File.separator+"mtwilson-launcher-jetty9-"+Version.VERSION+File.separator+"WEB-INF"+File.separator+"lib");
             }
             log.debug("Relative path for testing: {}", javaPath.getAbsolutePath());
             if(javaPath.exists()) {

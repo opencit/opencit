@@ -3,8 +3,8 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-#glassfish_required_version=3.0
-#java_required_version=1.6.0_29
+#glassfish_required_version=4.0
+#java_required_version=1.7.0_51
 
 # detect the packages we have to install
 GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
@@ -13,13 +13,19 @@ GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
 if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit 1; fi
 
 # SCRIPT EXECUTION
-if no_java ${JAVA_REQUIRED_VERSION:-1.6}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.6} or later"; exit 1; fi
+if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; exit 1; fi
 glassfish_install $GLASSFISH_PACKAGE
 
 cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
 cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
 cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
 
+asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
+echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"
+echo "Increasing glassfish max thread pool size to 200..."
+$glassfish_bin set server.thread-pools.thread-pool.http-thread-pool.max-thread-pool-size=200
+#echo "Enabling secure admin for glassfish..."
+#$glassfish_bin enable-secure-admin
 
 # on installations configured to use mysql, the customer is responsible for 
 # providing the java mysql connector before starting the mt wilson installer.
