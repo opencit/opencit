@@ -42,13 +42,13 @@
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>java</artifactId>
-      <version>1.6.0_29</version>
+      <version>1.7.0_51</version>
       <type>bin</type>
     </dependency>
     <dependency>
       <groupId>com.intel.mtwilson.linux</groupId>
       <artifactId>glassfish</artifactId>
-      <version>3.1.1</version>
+      <version>4.0</version>
       <type>bin</type>
     </dependency>
     <dependency>
@@ -241,13 +241,13 @@
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>java</artifactId>
-                  <version>1.6.0_29</version>
+                  <version>1.7.0_51</version>
                   <type>bin</type>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
                   <artifactId>glassfish</artifactId>
-                  <version>3.1.1</version>
+                  <version>4.0</version>
                   <type>bin</type>
                 </artifactItem>
                 <artifactItem>

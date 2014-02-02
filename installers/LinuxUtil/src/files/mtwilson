@@ -12,8 +12,8 @@ env_dir=/usr/local/share/mtwilson/env
 conf_dir=/etc/intel/cloudsecurity
 #apiclient_shell=${apiclient_dir}/shell
 #mysql_required_version=5.0
-#glassfish_required_version=3.0
-#java_required_version=1.6.0_29
+#glassfish_required_version=4.0
+#java_required_version=1.7.0_51
 
 # FUNCTION LIBRARY and VERSION INFORMATION
 if [ -f ${share_dir}/functions ]; then  . ${share_dir}/functions; else echo "Missing file: ${share_dir}/functions";   exit 1; fi
@@ -42,15 +42,15 @@ elif using_postgres; then
     export postgres_required_version=${POSTGRES_REQUIRED_VERSION:-8.4}
 fi
 if using_glassfish; then
-    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-3.0}
+    export GLASSFISH_REQUIRED_VERSION=${GLASSFISH_REQUIRED_VERSION:-4.0}
 elif using_tomcat; then
     export tomcat_required_version=${TOMCAT_REQUIRED_VERSION:-6.0}
 fi
-export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.6.0_29}
+export JAVA_REQUIRED_VERSION=${JAVA_REQUIRED_VERSION:-1.7.0_51} #1.6.0_29}
 export java_required_version=${JAVA_REQUIRED_VERSION}
 
 call_apiclient() {
-  if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; return 1; fi
+  if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; return 1; fi
   APICLIENT_JARS=$(JARS=(${apiclient_java}/*.jar); IFS=:; echo "${JARS[*]}")
   mainclass=com.intel.mtwilson.client.TextConsole
   $java -cp "$APICLIENT_JARS" -Dlogback.configurationFile=${conf_dir}/logback.xml $mainclass $@
@@ -214,7 +214,7 @@ case "$1" in
         setup_env
         ;;
   start)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
 		  glassfish_require
           glassfish_start_report
@@ -224,7 +224,7 @@ case "$1" in
         fi
         ;;
   stop)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
 		  glassfish_require
           glassfish_shutdown
@@ -234,7 +234,7 @@ case "$1" in
         fi
         ;;
   restart)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
 		  glassfish_require
           glassfish_restart
@@ -244,27 +244,27 @@ case "$1" in
         fi
         ;;
   glassfish-detect)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         glassfish_detect ${2:-$GLASSFISH_REQUIRED_VERSION}
         glassfish_env_report
         ;;
   glassfish-start)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         glassfish_require
         glassfish_start_report
         ;;
   glassfish-stop)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         glassfish_require
         glassfish_shutdown
         ;;
   glassfish-restart)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         glassfish_require
         glassfish_restart
         ;;
   glassfish-status)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         glassfish_require
         glassfish_running_report
         glassfish_sslcert_report
@@ -277,27 +277,27 @@ case "$1" in
         glassfish_enable_logging
         ;;
   tomcat-detect)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         tomcat_detect ${2:-$TOMCAT_REQUIRED_VERSION}
         tomcat_env_report
         ;;
   tomcat-start)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         tomcat_require
         tomcat_start_report
         ;;
   tomcat-stop)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         tomcat_require
         tomcat_shutdown
         ;;
   tomcat-restart)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         tomcat_require
         tomcat_restart
         ;;
   tomcat-status)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         tomcat_require
         tomcat_running_report
         tomcat_sslcert_report
@@ -341,7 +341,7 @@ case "$1" in
         # show server ssh fingerprint, glassfish ssl fingerprint, and saml cert fingerprint
         echo "== SSH HOST KEYS =="
         ssh_fingerprints
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         if using_glassfish; then
           glassfish_require
           echo "== GLASSFISH SSL CERTIFICATE =="
@@ -377,15 +377,15 @@ case "$1" in
         change_db_pass
         ;;
   uninstall)
-        if no_java ${java_required_version:-1.6}; then echo "Cannot find Java ${java_required_version:-1.6} or later"; exit 1; fi
+        if no_java ${java_required_version:-1.7}; then echo "Cannot find Java ${java_required_version:-1.7} or later"; exit 1; fi
         #load_default_env 1>/dev/null
         if using_glassfish; then
           glassfish_require
           echo "Stopping Glassfish..."
           glassfish_shutdown
           # application files
-          echo "Removing Glassfish in /usr/share/glassfish3..."
-          rm -rf /usr/share/glassfish3
+          echo "Removing Glassfish in /usr/share/glassfish4..."
+          rm -rf /usr/share/glassfish4
         elif using_tomcat; then
           tomcat_require
           echo "Stopping Tomcat..."

@@ -14,8 +14,8 @@ package_config_filename=${intel_conf_dir}/${package_name}.properties
 #package_name_rpm=ManagementService
 #package_name_deb=managementservice
 #mysql_required_version=5.0
-#glassfish_required_version=3.0
-#java_required_version=1.6.0_29
+#glassfish_required_version=4.0
+#java_required_version=1.7.0_51
 #APPLICATION_YUM_PACKAGES="make gcc openssl libssl-dev mysql-client-5.1"
 #APPLICATION_APT_PACKAGES="dpkg-dev make gcc openssl libssl-dev mysql-client-5.1"
 

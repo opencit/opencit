@@ -57,7 +57,7 @@ import sun.security.x509.X500Name;
  * Test case for signing remote Glassfish TLS certificate:
  * 
  * First import the mtwilson root ca you created into your computer's Trusted Certificate Authorities list (double click the file, follow prompts)
- * cd /usr/share/glassfish3/glassfish/domains/domain1/config
+ * cd /usr/share/glassfish4/glassfish/domains/domain1/config
  * keytool -list -keystore keystore.jks -storepass changeit
  * keytool -keystore keystore.jks -storepass changeit -exportcert -alias glassfish-instance -file ssl.selfsigned.crt
  * openssl x509 -in ssl.selfsigned.crt -inform der -text

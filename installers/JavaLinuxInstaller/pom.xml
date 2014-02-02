@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>java</artifactId>
-  <version>1.6.0_29</version>
+  <version>1.7.0_51</version>
 
   <packaging>pom</packaging>
   <name>Java Linux Installer</name>
@@ -44,8 +44,8 @@
     <dependency>
       <groupId>com.oracle</groupId>
       <artifactId>jdk</artifactId>
-      <version>1.6.0_29</version>
-      <type>bin</type>
+      <version>1.7.0_51</version>
+      <type>tar.gz</type>
       <classifier>linux-x64</classifier>
     </dependency>	
   </dependencies>
@@ -76,11 +76,11 @@
                 <artifactItem>
                   <groupId>com.oracle</groupId>
                   <artifactId>jdk</artifactId>
-                  <version>1.6.0_29</version>
-                  <type>bin</type>
+                  <version>1.7.0_51</version>
+                  <type>tar.gz</type>
 	          <classifier>linux-x64</classifier>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>jdk-1.6.0_29-linux-x64.bin</destFileName>
+                  <destFileName>jdk-7u51-linux-x64.tar.gz</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>
