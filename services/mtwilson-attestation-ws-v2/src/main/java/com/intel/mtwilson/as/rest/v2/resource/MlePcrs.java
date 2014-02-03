@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 @V2
 @Stateless
-@Path("/mle-pcrs")
+@Path("/mle/{id}/pcrs")
 public class MlePcrs extends AbstractJsonapiResource<MlePcr, MlePcrCollection, MlePcrFilterCriteria, NoLinks<MlePcr>, MlePcrLocator>{
 
     Logger log = LoggerFactory.getLogger(getClass().getName());
