@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 @Path("/hosts/{id}/tls-policies") // Should the user specified parameter here match the filterCriteria??
 public class HostTlsPolicies extends AbstractJsonapiResource<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, NoLinks<HostTlsPolicy>, HostTlsPolicyLocator> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     public HostTlsPolicies() {
         super();

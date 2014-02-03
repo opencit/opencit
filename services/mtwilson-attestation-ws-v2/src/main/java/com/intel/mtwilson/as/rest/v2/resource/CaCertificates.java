@@ -26,7 +26,12 @@ import org.slf4j.LoggerFactory;
  */
 public class CaCertificates extends AbstractCertificateResource<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLinks> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    
+    public CaCertificates() {
+        super();
+    }
+    
     
     @Override
     protected CaCertificateCollection search(CaCertificateFilterCriteria criteria) {

@@ -24,8 +24,6 @@ public class RpcResultMapper implements ResultSetMapper<Rpc> {
         Rpc rpc = new Rpc();
         rpc.setId(uuid);
         rpc.setName(rs.getString("Name"));
-        rpc.setInput(rs.getBytes("Input"));
-        rpc.setOutput(rs.getBytes("Output"));
         rpc.setStatus(Rpc.Status.valueOf(rs.getString("Status")));
         rpc.setCurrent(rs.getLong("ProgressCurrent"));
         rpc.setMax(rs.getLong("ProgressMax"));

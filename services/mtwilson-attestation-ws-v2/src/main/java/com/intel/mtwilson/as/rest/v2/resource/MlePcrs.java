@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 @Path("/mle/{id}/pcrs")
 public class MlePcrs extends AbstractJsonapiResource<MlePcr, MlePcrCollection, MlePcrFilterCriteria, NoLinks<MlePcr>, MlePcrLocator>{
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
 
     public MlePcrs() {
         super();

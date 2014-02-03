@@ -17,7 +17,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import com.intel.mtwilson.rpc.v2.model.RpcLocator;
-import com.intel.mtwilson.rpc.v2.model.RpcStatus;
+import com.intel.mtwilson.rpc.v2.model.RpcPriv;
 import com.intel.mtwilson.v2.rpc.jdbi.MyJdbi;
 import com.intel.mtwilson.v2.rpc.jdbi.RpcDAO;
 import java.util.HashMap;
@@ -48,19 +48,19 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
         
         RpcCollection rpcs = new RpcCollection();
         if( criteria.id != null ) {
-            RpcStatus item = dao.findStatusById(criteria.id);
-            rpcs.getDocuments().add(convert(item));
+            Rpc item = dao.findStatusById(criteria.id);
+            rpcs.getDocuments().add(item);
         }
         else if( criteria.nameEqualTo != null ) {
-            List<RpcStatus> items = dao.findStatusByName(criteria.nameEqualTo);
-            for(RpcStatus item : items) {
-                rpcs.getDocuments().add(convert(item));
+            List<Rpc> items = dao.findStatusByName(criteria.nameEqualTo);
+            for(Rpc item : items) {
+                rpcs.getDocuments().add(item);
             }
         }
         else if( criteria.status != null ) {
-            List<RpcStatus> items = dao.findStatusByStatus(criteria.status.toString());
-            for(RpcStatus item : items) {
-                rpcs.getDocuments().add(convert(item));
+            List<Rpc> items = dao.findStatusByStatus(criteria.status.toString());
+            for(Rpc item : items) {
+                rpcs.getDocuments().add(item);
             }
         }
         // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
@@ -73,8 +73,8 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
            if( dao != null ) { dao.close(); }
         }
     }
-    
-    private Rpc convert(RpcStatus from) {
+    /*
+    private Rpc convert(RpcPriv from) {
             Rpc rpc = new Rpc();
             rpc.setId(from.getId());
             rpc.setName(from.getName());
@@ -82,7 +82,7 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
             rpc.setCurrent(from.getCurrent());
             rpc.setMax(from.getMax());
             return rpc;
-    }
+    }*/
 
     @Override
     public Rpc retrieve(RpcLocator locator) {
@@ -94,28 +94,7 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
-            RpcStatus item = dao.findStatusById(locator.id);
-        // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
-        return convert(item);
-        }
-        catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-        finally {
-           if( dao != null ) { dao.close(); }
-        }
-    }
-
-    public Rpc retrieveInput(RpcLocator locator) {
-        // TODO replace with jpa code
-        if (locator.id == null) {
-            return null;
-        }
-        // TODO  replace with jpa code
-        RpcDAO dao = null;
-        try {
-         dao = MyJdbi.rpc();
-            Rpc item = dao.findById(locator.id);
+            Rpc item = dao.findStatusById(locator.id);
         // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
         return item;
         }
@@ -127,7 +106,7 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
         }
     }
 
-    public Rpc retrieveOutput(RpcLocator locator) {
+    public RpcPriv retrieveInput(RpcLocator locator) {
         // TODO replace with jpa code
         if (locator.id == null) {
             return null;
@@ -136,7 +115,28 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
         RpcDAO dao = null;
         try {
          dao = MyJdbi.rpc();
-            Rpc item = dao.findById(locator.id);
+            RpcPriv item = dao.findById(locator.id);
+        // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
+        return item;
+        }
+        catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+           if( dao != null ) { dao.close(); }
+        }
+    }
+
+    public RpcPriv retrieveOutput(RpcLocator locator) {
+        // TODO replace with jpa code
+        if (locator.id == null) {
+            return null;
+        }
+        // TODO  replace with jpa code
+        RpcDAO dao = null;
+        try {
+         dao = MyJdbi.rpc();
+            RpcPriv item = dao.findById(locator.id);
         // TODO: for each Rpc,  link to /input/{id} ,  link to /output/{id}  (only if completed)
         return item;
         }
@@ -159,6 +159,9 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
      */
     @Override
     public void create(Rpc item) {
+        throw new UnsupportedOperationException("Use the RPC interface to make RPC requests"); // only AsyncRpc is allowed to make requests; it uses the create(RpcPriv item) method
+    }
+    public void create(RpcPriv item) {
         log.debug("Create id {}", item.getId());
         // TODO  replace with jpa code
         RpcDAO dao = null;
@@ -183,6 +186,9 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
      */
     @Override
     public void store(Rpc item) {
+        throw new UnsupportedOperationException("Use the RPC interface to make RPC requests"); // AsyncPriv for creating requests and RpcInvoker for updating them use store(RpcPriv item)
+     }
+    public void store(RpcPriv item) {
         log.debug("Store id {}", item.getId());
         RpcDAO dao = null;
         try {

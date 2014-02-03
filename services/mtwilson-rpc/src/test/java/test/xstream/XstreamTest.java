@@ -7,6 +7,7 @@ package test.xstream;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import org.junit.Test;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
+import com.intel.mtwilson.rpc.v2.model.RpcPriv;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
@@ -23,7 +24,7 @@ public class XstreamTest {
     @Test
     public void testWriteObject() throws Exception {
         // make a sample object
-        Rpc rpc = new Rpc();
+        RpcPriv rpc = new RpcPriv();
         rpc.setId(new UUID());
         rpc.setName("test rpc");
         rpc.setStatus(Rpc.Status.QUEUE);
@@ -39,7 +40,7 @@ public class XstreamTest {
         // read from xml
         Object pojo = xs.fromXML(xml);
         log.debug("pojo: {}", pojo.getClass().getName());
-        Rpc rpc2 = (Rpc)pojo;
+        RpcPriv rpc2 = (RpcPriv)pojo;
         log.debug("id: {}" , rpc2.getId());
         log.debug("status: {}", rpc2.getStatus());
         log.debug("input: {}", rpc2.getInput());

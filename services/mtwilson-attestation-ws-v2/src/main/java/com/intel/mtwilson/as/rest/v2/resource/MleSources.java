@@ -31,8 +31,12 @@ import org.slf4j.LoggerFactory;
 @Path("/mle-sources")
 public class MleSources extends AbstractResource<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLinks>{
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
 
+    public MleSources() {
+        super();
+    }
+    
     @Override
     protected MleSourceCollection search(MleSourceFilterCriteria criteria) {
         MleSourceCollection mleSourceCollection = new MleSourceCollection();

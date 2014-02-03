@@ -40,10 +40,14 @@ import org.slf4j.LoggerFactory;
 @Path("/host-attestations")
 public class HostAttestations extends AbstractResource<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLinks> {
     
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
     
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
+    
+    public HostAttestations() {
+        super();
+    }
     
     @Override
     protected HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
