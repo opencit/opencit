@@ -264,4 +264,34 @@ BEGIN
 END$$;
 
 
+-- Updates for the MW_TA_Log table
+ALTER TABLE mw_ta_log ADD COLUMN uuid_hex CHAR(36) NULL;
+DO
+$$
+DECLARE
+    rec   record;
+BEGIN
+   FOR rec IN
+      SELECT *
+      FROM   mw_ta_log
+   LOOP
+      UPDATE mw_ta_log mh SET uuid_hex = (SELECT uuid_generate_v4()) where mh.id = rec.id;
+   END LOOP;
+END$$;
+-- Adds the reference to the HOST UUID column in the Hosts table
+ALTER TABLE mw_ta_log ADD COLUMN host_uuid_hex CHAR(36) NULL;
+DO
+$$
+DECLARE
+    rec   record;
+BEGIN
+   FOR rec IN
+      SELECT *
+      FROM   mw_ta_log
+   LOOP
+      UPDATE mw_ta_log mtl SET host_uuid_hex = (SELECT mh.uuid_hex FROM mw_hosts mh WHERE mm.ID = mh.Host_ID);
+   END LOOP;
+END$$;
+
+
 INSERT INTO mw_changelog (ID, APPLIED_AT, DESCRIPTION) VALUES (20140117160000,NOW(),'Added UUID fields for all the tables');

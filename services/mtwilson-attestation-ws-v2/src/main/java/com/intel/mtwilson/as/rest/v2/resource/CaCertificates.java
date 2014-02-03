@@ -36,7 +36,7 @@ public class CaCertificates extends AbstractCertificateResource<CaCertificate, C
     @Override
     protected CaCertificate retrieve(String id) {
         if (id == null) { return null;}
-        CaCertificate caCert = null;
+        CaCertificate caCert = new CaCertificate();
         
         if ("root".endsWith(id)) {
             try {

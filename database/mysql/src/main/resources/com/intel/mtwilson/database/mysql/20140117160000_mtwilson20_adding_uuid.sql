@@ -72,4 +72,12 @@ UPDATE mw_hosts mh SET bios_mle_uuid_hex = (SELECT mm.uuid_hex FROM mw_mle mm WH
 ALTER TABLE `mw_as`.`mw_hosts` ADD COLUMN `vmm_mle_uuid_hex` CHAR(36) NULL;
 UPDATE mw_hosts mh SET vmm_mle_uuid_hex = (SELECT mm.uuid_hex FROM mw_mle mm WHERE mm.ID = mm.VMM_MLE_ID);
 
+
+-- Updates for the MW_TA_Log table
+ALTER TABLE `mw_as`.`mw_ta_log` ADD COLUMN `uuid_hex` CHAR(36) NULL;
+UPDATE mw_ta_log SET uuid_hex = (SELECT uuid());
+-- Adds the reference to the HOST UUID column in the Hosts table
+ALTER TABLE `mw_as`.`mw_ta_log` ADD COLUMN `host_uuid_hex` CHAR(36) NULL;
+UPDATE mw_ta_log mtl SET host_uuid_hex = (SELECT mh.uuid_hex FROM mw_hosts mh WHERE mh.ID = mtl.Host_ID);
+
 INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20140117160000,NOW(),'Added UUID fields for all the tables');
