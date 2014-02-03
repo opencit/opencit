@@ -17,19 +17,18 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  *
  * @author ssbangal
  */
-@JacksonXmlRootElement(localName="ca_certificate_collection")
-public class CaCertificateCollection extends DocumentCollection<CaCertificate> {
-
-    private final ArrayList<CaCertificate> caCerts = new ArrayList<CaCertificate>();
+@JacksonXmlRootElement(localName="host_tls_certificate_collection")
+public class HostTlsCertificateCollection extends DocumentCollection<HostTlsCertificate> {
+    private final ArrayList<HostTlsCertificate> tlsCerts = new ArrayList<HostTlsCertificate>();
     
     @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
-    @JacksonXmlElementWrapper(localName="ca_certificates")
-    @JacksonXmlProperty(localName="ca_certificate")    
-    public List<CaCertificate> getCaCertificates() { return caCerts; }
+    @JacksonXmlElementWrapper(localName="host_tls_certificates")
+    @JacksonXmlProperty(localName="host_tls_certificate")    
+    public List<HostTlsCertificate> getCaCertificates() { return tlsCerts; }
     
     @Override
-    public List<CaCertificate> getDocuments() {
+    public List<HostTlsCertificate> getDocuments() {
         return getCaCertificates();
     }
     

@@ -20,13 +20,32 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@JacksonXmlRootElement(localName="ca_certificate")
-public class CaCertificate extends CertificateDocument {
-    
+@JacksonXmlRootElement(localName="host_tls_certificate")
+public class HostTlsCertificate extends CertificateDocument{
+
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
+    private String hostUuid;
+    private String sha1;
     private byte[] certificate;
 
+    public String getHostUuid() {
+        return hostUuid;
+    }
+
+    public void setHostUuid(String hostUuid) {
+        this.hostUuid = hostUuid;
+    }
+
+    public String getSha1() {
+        return sha1;
+    }
+
+    public void setSha1(String sha1) {
+        this.sha1 = sha1;
+    }
+
+    
     public byte[] getCertificate() {
         return certificate;
     }
@@ -64,6 +83,5 @@ public class CaCertificate extends CertificateDocument {
             log.error("Error decoding certificate.", ce);
             throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
-    }
-    
+    }    
 }
