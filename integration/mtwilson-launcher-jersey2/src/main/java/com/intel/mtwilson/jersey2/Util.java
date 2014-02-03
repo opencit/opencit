@@ -7,6 +7,7 @@ package com.intel.mtwilson.jersey2;
 import com.intel.dcsg.cpg.classpath.JarClassIterator;
 import com.intel.dcsg.cpg.extensions.ExtensionUtil;
 import com.intel.dcsg.cpg.extensions.Registrar;
+import com.intel.dcsg.cpg.performance.CountingIterator;
 import com.intel.dcsg.cpg.util.ArrayIterator;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.Version;
@@ -46,8 +47,18 @@ public class Util {
         }
     }
 
+    // TODO :   Extensions find* functions need to record the *results* that
+    //  they provide to callers in an in-memory log;  then at application shtudown
+    //  we can record the classes that were used during that run (maybe combine
+    // them with previous results if those were cached) 
+    //  so at startup we can read that log/cache and we can immediately register
+    //  all those classes and then schedule a background task to scan the jars
+    //  complete with this function.  that will makea pplication startup much
+    //  faster (with the assumption that any new plugins wont' be requested 
+    //  within the first 5-10 seconds of the app starting up) 
     public static void scanJars(File[] jars, Registrar[] registrars) {
-        Iterator<File> it = new ArrayIterator<File>(jars); // only scans directory for jar files; does NOT scan subdirectories
+        long time0 = System.currentTimeMillis();
+        CountingIterator<File> it = new CountingIterator<File>(new ArrayIterator<File>(jars)); // only scans directory for jar files; does NOT scan subdirectories
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if(cl==null) { cl = Util.class.getClassLoader(); }
         while (it.hasNext()) {
@@ -64,6 +75,8 @@ public class Util {
                 // log.error("Cannot read jar file {}", jar.getAbsolutePath());
             }
         }
+        long time1 = System.currentTimeMillis();
+        log.info("Scanned {} jars in {}ms", it.getValue(), time1-time0);
     }
     
 }
