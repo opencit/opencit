@@ -37,8 +37,22 @@
         <div class="header">
             <div class="title"><h1 data-i18n="app.title">Mt. Wilson</h1></div>
             <div class="loginDisplay">
-                <span id="loginStatusValue">Welcome <%=session.getAttribute("username")%>  </span>
-                <a href="javascript:logoutUser();" id="LogInOut" data-i18n="app.logout">Logout</a>
+                <table>
+                    <tr>
+                        <td>
+                            <span id="loginStatusValue">Welcome <%=session.getAttribute("username")%></span>
+                        </td>
+                        <td>
+                            <a href="javascript:logoutUser();" id="LogInOut" data-i18n="app.logout">Logout</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="javascript:openPreferences();" id="OpenPref" data-i18n="app.preferences">Preferences</a>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
             </div>
 
             <div class="clear hideSkiplink">

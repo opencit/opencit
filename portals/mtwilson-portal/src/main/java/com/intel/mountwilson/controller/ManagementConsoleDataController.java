@@ -794,6 +794,27 @@ public class ManagementConsoleDataController extends MultiActionController {
         //log.info("ManagementConsoleDataController.logOutUser <<");
         return responseView;
     }
+    
+    public ModelAndView openPreferences(HttpServletRequest req, HttpServletResponse res) throws ManagementConsolePortalException {
+        ModelAndView responseView = new ModelAndView("Preferences");
+        try {
+            List<Map<String, Object>> localeList = new ArrayList<Map<String, Object>>();
+            for (String localeName : demoPortalServices.getLocales(getApiClientService(req, ApiClient.class))) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("localeName", localeName);
+                localeList.add(map);
+            }
+            responseView.addObject("locales", localeList);
+        } catch (DemoPortalException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+            responseView.addObject("result", false);
+            responseView.addObject("message", StringEscapeUtils.escapeHtml(e.getMessage()));
+            return responseView;
+        }
+        responseView.addObject("message", "");
+        return responseView;
+    }
 
     /*
      * Method to provide Services Object while calling servies methods. used by Spring Conatiner.

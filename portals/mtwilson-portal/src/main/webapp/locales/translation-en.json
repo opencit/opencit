@@ -4,6 +4,7 @@
         "login": "Login",
         "logout": "Logout",
         "loading": "Loading...",
+        "preferences": "Preferences",
         "version": "Version",
         "branch": "Branch",
         "build_timestamp": "Built on"

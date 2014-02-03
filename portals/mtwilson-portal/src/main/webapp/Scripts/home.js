@@ -572,3 +572,12 @@ function logoutUser() {
 function displayLogingPage(responseHTML) {
 	$('#mainContainer').parent().html(responseHTML);
 }
+
+function openPreferences() {
+    setLoadImage('mainContainer', '40px', '510px');
+    sendHTMLAjaxRequest(false, 'getData/openPreferences.html', null, displayPreferencesPage, null);
+}
+
+function displayPreferencesPage(responseHTML) {
+	$('#mainContainer').parent().html(responseHTML);
+}
