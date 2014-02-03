@@ -198,9 +198,9 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
     }
 
     @Override
-    public void delete(String id) {
-        if( id == null ) { return; }
-        UUID uuid = UUID.valueOf(id);
+    public void delete(RpcLocator locator) {
+        if( locator.id == null ) { return; }
+        UUID uuid = locator.id;
         // TODO:  replace with jpa code
         RpcDAO dao = null;
         try {
@@ -213,6 +213,12 @@ public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFi
         finally {
            if( dao != null ) { dao.close(); }
         }
+    }
+
+    
+    @Override
+    public void delete(RpcFilterCriteria criteria) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 

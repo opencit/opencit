@@ -21,6 +21,7 @@ import com.intel.mtwilson.jersey.FilterCriteria;
 import com.intel.mtwilson.jersey.Locator;
 import com.intel.mtwilson.jersey.Patch;
 import com.intel.mtwilson.jersey.PatchLink;
+import com.sun.org.apache.xpath.internal.axes.LocPathIterator;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -131,7 +132,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
-        repository.delete(item.getId().toString());
+        repository.delete(locator);
         /*
         T item = repository.retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
@@ -156,10 +157,12 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
         if( collection.getDocuments().isEmpty() ) {            
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
-        for(T item : collection.getDocuments()) {
+        // Do the delete here after search
+        repository.delete(selector);
+        /*for(T item : collection.getDocuments()) {
             // TODO:  multi-threaded or parallel or have a repository method for multi-delete where we collect all the id's and then send a list
-            repository.delete(item.getId().toString());
-        }
+            repository.delete();
+        }*/
         
     }
 

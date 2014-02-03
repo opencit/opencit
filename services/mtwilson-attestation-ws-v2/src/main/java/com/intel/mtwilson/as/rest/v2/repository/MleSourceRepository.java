@@ -123,9 +123,10 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(MleSourceLocator locator) {
+        if (locator == null || locator.id == null) { return; }
         try {
-            new MleBO().deleteMleSource(null, null, null, null, null, id);
+            new MleBO().deleteMleSource(null, null, null, null, null, locator.id.toString());
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -139,6 +140,11 @@ public class MleSourceRepository implements SimpleRepository<MleSource, MleSourc
         convObj.setMleUuid(obj.getUuid_hex());
         convObj.setName(obj.getHostName());
         return convObj;
+    }
+
+    @Override
+    public void delete(MleSourceFilterCriteria criteria) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

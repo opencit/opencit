@@ -114,9 +114,10 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(MlePcrLocator locator) {
+        if (locator == null || locator.id == null) { return; }
         try {
-            new MleBO().deletePCRWhiteList(null, null, null, null, null, null, id);
+            new MleBO().deletePCRWhiteList(null, null, null, null, null, null, locator.id.toString());
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -133,6 +134,11 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
         convObj.setPcrDigest(obj.getValue());
         convObj.setDescription(obj.getPCRDescription());
         return convObj;
+    }
+
+    @Override
+    public void delete(MlePcrFilterCriteria criteria) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

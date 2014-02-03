@@ -47,8 +47,23 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     }
 
     @Override
-    public HostTlsPolicy retrieve(HostTlsPolicyLocator id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public HostTlsPolicy retrieve(HostTlsPolicyLocator locator) {
+        if (locator.id == null) { return null; }
+        String id = locator.id.toString();
+        try {
+            TblHostsJpaController jpaController = My.jpa().mwHosts();
+            TblHosts obj = jpaController.findHostByUuid(id);
+            if (obj != null) {
+                HostTlsPolicy htp = convert(obj);
+                return htp;
+            }
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during search for hosts.", ex);
+            throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
+        }
+        return null;
     }
 
     @Override
@@ -62,10 +77,15 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(HostTlsPolicyLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    @Override
+    public void delete(HostTlsPolicyFilterCriteria criteria) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     private HostTlsPolicy convert(TblHosts obj) {
         HostTlsPolicy convObj = new HostTlsPolicy();
         convObj.setHostUuid(obj.getUuid_hex());
