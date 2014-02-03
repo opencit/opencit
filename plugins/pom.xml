@@ -14,7 +14,7 @@
 	</parent>
   
   <modules>
-    <module>auto-refresh-trust</module>
+    <module>mtwilson-auto-refresh-trust</module>
   </modules>
 
 </project>
