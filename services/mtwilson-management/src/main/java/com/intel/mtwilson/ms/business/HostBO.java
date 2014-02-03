@@ -51,6 +51,7 @@ import com.intel.mtwilson.wlm.business.MleBO;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -331,7 +332,7 @@ public class HostBO extends BaseBO {
         
     }
     
-    private HostConfigData calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) {
+    private HostConfigData calibrateMLENames(HostConfigData hostConfigObj, Boolean isBIOSMLE) throws MalformedURLException {
         TxtHostRecord hostObj = hostConfigObj.getTxtHostRecord();
         
         if (isBIOSMLE) {
@@ -366,6 +367,11 @@ public class HostBO extends BaseBO {
                 // host registration.
                 hostObj.VMM_Version = hostObj.VMM_OSVersion + "-" + hostObj.VMM_Version;
 
+                // Bug 798
+                if(ConnectionString.from(hostObj).getVendor() == Vendor.CITRIX && hostObj.VMM_OSName.toLowerCase().contains("xen")){
+                    hostObj.VMM_Name = "Citrix_" + hostObj.VMM_OSName;
+                }
+                
                 // For VMware since there is no separate OS and VMM, we use the same name
                 if (hostObj.VMM_OSName.contains("ESX")) {
                     hostObj.VMM_Name = hostObj.VMM_OSName;
