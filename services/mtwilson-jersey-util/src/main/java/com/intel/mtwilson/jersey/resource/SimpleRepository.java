@@ -69,7 +69,13 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      *
      * @param id
      */
-//    void delete(L locator);
-    void delete(String id);
-    
+    void delete(L locator);
+//    void delete(String id);
+
+    /**
+     * 
+     * @param criteria 
+     */
+    void delete(F criteria);
+
 }
