@@ -12,7 +12,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class TlsPolicyFilterCriteria implements FilterCriteria<TlsPolicy> {
+public class HostTlsPolicyFilterCriteria implements FilterCriteria<HostTlsPolicy> {
     
     @QueryParam("hostUuid")
     public UUID hostUuid;    

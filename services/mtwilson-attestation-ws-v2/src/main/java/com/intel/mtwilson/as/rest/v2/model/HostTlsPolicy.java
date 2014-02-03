@@ -12,7 +12,7 @@ import com.intel.mtwilson.jersey.Document;
  * @author ssbangal
  */
 @JacksonXmlRootElement(localName="tls_policy")
-public class TlsPolicy extends Document {
+public class HostTlsPolicy extends Document {
     
     private String hostUuid;
     private String hostName;

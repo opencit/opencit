@@ -18,17 +18,17 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
  * @author ssbangal
  */
 @JacksonXmlRootElement(localName="tls_policy_collection")
-public class TlsPolicyCollection extends DocumentCollection<TlsPolicy> {
-    private final ArrayList<TlsPolicy> tlsPolicies = new ArrayList<TlsPolicy>();
+public class HostTlsPolicyCollection extends DocumentCollection<HostTlsPolicy> {
+    private final ArrayList<HostTlsPolicy> tlsPolicies = new ArrayList<HostTlsPolicy>();
     
     @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="tls_policies")
     @JacksonXmlProperty(localName="tls_policy")    
-    public List<TlsPolicy> getTlsPolicies() { return tlsPolicies; }
+    public List<HostTlsPolicy> getTlsPolicies() { return tlsPolicies; }
 
     @Override
-    public List<TlsPolicy> getDocuments() {
+    public List<HostTlsPolicy> getDocuments() {
         return getTlsPolicies();
     }
     
