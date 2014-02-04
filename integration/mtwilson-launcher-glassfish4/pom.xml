@@ -83,8 +83,10 @@
                     <groupId>javax</groupId>
                     <artifactId>javax.transaction</artifactId>
                 </exclusion>
-                
-                
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
