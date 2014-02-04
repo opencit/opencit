@@ -10,12 +10,15 @@ import com.intel.mtwilson.i18n.BundleName;
 //import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
@@ -30,7 +33,9 @@ import org.slf4j.LoggerFactory;
 public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     private static Logger log = LoggerFactory.getLogger(LocalizedExceptionMapper.class);
     
-    @Context private HttpServletRequest request;
+//    @Context private HttpServletRequest request;
+//    @Context private HttpRequestContext request;
+    @Context private HttpHeaders headers;
     
     @Override
     public Response toResponse(MWException exception) {
@@ -44,20 +49,22 @@ public class LocalizedExceptionMapper implements ExceptionMapper<MWException> {
     }
     
     private Locale localeForRequest() {
-        ArrayList<Locale> list = new ArrayList<Locale>();
+//        ArrayList<Locale> list = new ArrayList<Locale>();
         Locale locale = null;
-        Enumeration<Locale> locales = request.getLocales(); // in priority order based on the accept language header in the request; if request doesn't specify then it contains the server's default locale (java-provided, not mtwilson-configured)
-        while( locales.hasMoreElements() ) {
-            list.add(locales.nextElement());
-        }
+//        Enumeration<Locale> locales = request.getLocales(); // in priority order based on the accept language header in the request; if request doesn't specify then it contains the server's default locale (java-provided, not mtwilson-configured)
+//        while( locales.hasMoreElements() ) {
+//            list.add(locales.nextElement());
+//        }
+        List<Locale> list = headers.getAcceptableLanguages();
         if( list.isEmpty() ) {
-            list.add(Locale.getDefault()); // should never happen since the enumeration includes the platform default at the end
+//            list.add(Locale.getDefault()); // should never happen since the enumeration includes the platform default at the end
+            locale = Locale.getDefault();
         }
-        if( list.size() == 1 ) {
+        else if( list.size() == 1 ) {
             // simple case: either user specified just one language or no language at all
             locale = list.get(0);
         }
-        if( list.size() > 1 ) {
+        else if( list.size() > 1 ) {
             // check each locale to see if we have a bundle for it
             int i;
             int max = list.size() - 1; // no need to evaluate the last locale, it will be our default
