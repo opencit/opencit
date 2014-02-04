@@ -564,6 +564,7 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Retrieved file SUCCESSFULLY.', clearAfter: 'AUTO', status: 'INFO'});
                 break;
             case 'uuid':
+                alert("UUID of requested system is " + event.memo.response.host_uuid);
                 $('certificate-request-create-subject').value = event.memo.response.host_uuid;
             default:
                 log.debug("No handler for successful HTTP GET of " + event.memo.resource.name);
