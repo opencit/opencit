@@ -3,19 +3,19 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>Host Registration Page</title>
+        <title data-i18n="title.register_host">Host Registration Page</title>
     </head>
     <body>
         <div class="container" id="registerHostMainContainer">
-            <div class="nagPanel">Host Management &gt;</div> <!-- was: "Automation" -->
-            <div id="nameOfPage" class="NameHeader">Host Registration</div> <!-- was: "Register Host" -->
+            <div class="nagPanel"><span data-i18n="title.host_management">Host Management</span> &gt;</div> <!-- was: "Automation" -->
+            <div id="nameOfPage" class="NameHeader" data-i18n="header.register_host">Host Registration</div> <!-- was: "Register Host" -->
             <div id="mainLoadingDiv" class="mainContainer">
                 <div class="singleDiv">
-                    <div class="labelDiv">Import hosts from:</div> <!-- was: "Host Provided By" -->
+                    <div class="labelDiv" data-i18n="input.host_import_source">Import hosts from:</div> <!-- was: "Host Provided By" -->
                     <div class="valueDiv">
                         <select class="ddlBox_Border" id="MainContent_ddlHOSTProvider" onchange="fnChangehostType(this, false)" >
-                            <option value="Flat File" type="false" >Flat File</option>
-                            <option value="VMware Cluster" type="true" >VMware Cluster</option>
+                            <option value="Flat File" type="false" data-i18n="select.flat_file">Flat File</option>
+                            <option value="VMware Cluster" type="true" data-i18n="select.vmware_cluster">VMware Cluster</option>
                         </select>
                     </div>
                 </div>
@@ -23,11 +23,11 @@
                 
                 <div id="openSourcesHostType" style="display: none;">
                     <div class="singleDiv">
-                        <div class="labelDiv">Host(s) File : </div>
+                        <div class="labelDiv" data-i18n="input.host_import_file">Host(s) File:</div>
                         <div class="valueDiv">
                             <form class="uploadForm" action="UploadServlet" method="post" enctype="multipart/form-data">
-                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" />
-                                <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()">
+                                <input id="fileToUpload" class="uploadButton" type="file" name="file" size="50" data-i18n="[value]button.choose_file"/>
+                                <input type="button" class="uploadButton" value="Retrieve Hosts" onclick="fnUploadFlatFile()" data-i18n="[value]button.retrieve_hosts">
                             </form>
                             <input type="image" onclick="showDialogUpFlatFileHelp()" src="images/helpicon.png">
                             <span id="messageForFileUpload"></span>
@@ -37,25 +37,25 @@
 
                 <div id="vmwareHostType" style="display: none;">
                     <div class="singleDiv">
-                        <div class="labelDiv"><span>vCenter Server : </span><input type="image" onclick="showHelpForVCenterServer()" src="images/helpicon.png" class="helperImageClass"></div>
+                        <div class="labelDiv"><span data-i18n="input.vcenter_server">vCenter Server:</span> <input type="image" onclick="showHelpForVCenterServer()" src="images/helpicon.png" class="helperImageClass"></div>
                         <div class="valueDiv">
                             <input type="text" class="textBox_Border" id="mainRegisterHost_vCenterServer">
                             <span class="requiredField">*</span>
                         </div>
                     </div>
                     <div class="singleDiv">
-                        <div class="labelDiv">Login ID: </div>
+                        <div class="labelDiv" data-i18n="input.login_id">Login ID:</div>
                         <div class="valueDiv">
                             <input type="text" class="textBox_Border" id="mainRegisterHost_loginID">
                             <span class="requiredField">*</span>
                         </div>
                     </div>
                     <div class="singleDiv">
-                        <div class="labelDiv">Password: </div>
+                        <div class="labelDiv" data-i18n="input.password">Password:</div>
                         <div class="valueDiv">
                             <input type="password" class="textBox_Border" id="mainRegisterHost_password">
                             <span class="requiredField">*</span>
-                            <input type="button" class="" id="retrieveDatacentersButton" value="Retrieve Clusters" onclick="fnRetrieveClusters()">
+                            <input type="button" class="" id="retrieveDatacentersButton" value="Retrieve Clusters" onclick="fnRetrieveClusters()" data-i18n="[value]button.retrieve_clusters">
                         </div>
                     </div>
                     
@@ -69,12 +69,12 @@
                     </div>
                     -->
                     <div class="singleDiv">
-                        <div class="labelDiv">VMware Cluster : </div>
+                        <div class="labelDiv" data-i18n="input.vmware_cluster">VMware Cluster:</div>
                         <div class="valueDiv">
                             <select class="ddlBox_Border" id="MainContent_ddlClusterName" disabled>
                             </select>
                             <span class="requiredField">&nbsp;</span>
-                            <input type="button" class="" id="retriveHostButton" value="Retrieve Hosts" onclick="fnRetriveHostFromCluster()" disabled>
+                            <input type="button" class="" id="retriveHostButton" value="Retrieve Hosts" onclick="fnRetriveHostFromCluster()" disabled data-i18n="[value]button.retrieve_hosts">
                         </div>
                     </div>
                     <br>
@@ -83,20 +83,20 @@
                 <div id="registerHostTable" class="registerHostTable" style="display: none;">
                     <table cellpadding="0" cellspacing="0" width="100%" class="tableHeader">
                         <tr>
-                            <th class="registerHostRow1">Host Name</td>
-                            <th class="registerHostRow2">Port #</td>
-                            <th class="registerHostRow3">Add On Connection String</td>
-                            <th class="registerHostRow4"><input type="checkbox" checked="checked" onclick="fnSelectAllCheckBox(checked)"><span>&nbsp;Register</span></td>
-                            <th class="registerHostRow5" colspan="2"><span>Configuration</span></td>
-                            <th class="registerHostRow6Header">Status</td>
+                            <th class="registerHostRow1" data-i18n="table.host_name">Host Name</td>
+                            <th class="registerHostRow2" data-i18n="table.port_num">Port #</td>
+                            <th class="registerHostRow3" data-i18n="table.add_on_conn_string">Add On Connection String</td>
+                            <th class="registerHostRow4"><input type="checkbox" checked="checked" onclick="fnSelectAllCheckBox(checked)"><span>&nbsp;</span><span data-i18n="table.register">Register</span></td>
+                            <th class="registerHostRow5" colspan="2"><span data-i18n="table.configuration">Configuration</span></td>
+                            <th class="registerHostRow6Header" data-i18n="table.status">Status</td>
                         </tr>
                         <tr>
                             <th class="registerHostRow1">&nbsp;</td>
                             <th class="registerHostRow2">&nbsp;</td>
                             <th class="registerHostRow3">&nbsp;</td>
                             <th class="registerHostRow4">&nbsp;</td>
-                            <th class="registerHostRow5Sub">BIOS</td>
-                            <th class="registerHostRow5Sub">VMM</td>
+                            <th class="registerHostRow5Sub" data-i18n="table.bios">BIOS</td>
+                            <th class="registerHostRow5Sub" data-i18n="table.vmm">VMM</td>
                             <th class="registerHostRow6Header">&nbsp;</td>
                         </tr>
                     </table>
@@ -109,8 +109,8 @@
                     <br>
                     <div class="singleDiv" id="registerHostButton" >
                         <div class="valueDiv">
-                            <input type="button" class="" value="Register Host" onclick="fnRegisterMultipleHost()">
-                            <input type="button" value="Cancel" onclick="getRegisterHostPage()">
+                            <input type="button" class="" value="Register Host" onclick="fnRegisterMultipleHost()" data-i18n="[value]button.register_host">
+                            <input type="button" value="Cancel" onclick="getRegisterHostPage()" data-i18n="[value]button.cancel">
                         </div>
                     </div>
                 </div>

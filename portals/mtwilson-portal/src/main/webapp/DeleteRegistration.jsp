@@ -4,20 +4,20 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Delete Registration</title>
+<title data-i18n="title.delete_registration">Delete User</title>
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Administration &gt; Delete User</div>
-		<div id="nameOfPage" class="NameHeader">Delete Currently Registered Api Clients</div>
+		<div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.delete_registration">Delete User</span></div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.delete_registration">Delete Currently Registered Api Clients</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="registerHostTable" class="registerHostTable" style="display: none;">
 				<table cellpadding="0" cellspacing="0" width="100%" class="tableHeader">
 					<tr>
-						<td class="deleteRequestRow1">Name</td>
-						<td class="deleteRequestRow2">Requested Roles</td>
-						<td class="deleteRequestRow3">Expires</td>                                                
-						<td class="deleteRequestRow4Header">Options</td>
+						<td class="deleteRequestRow1" data-i18n="table.name">Name</td>
+						<td class="deleteRequestRow2" data-i18n="table.requested_roles">Requested Roles</td>
+						<td class="deleteRequestRow3" data-i18n="table.expires">Expires</td>
+						<td class="deleteRequestRow4Header" data-i18n="table.options">Options</td>
 					</tr>
 				</table>
 				<div class="requestDetailsTableContent">

@@ -2,9 +2,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
-<title>Welcome</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
+    <title data-i18n="title.home">Welcome</title>
 	
 	<link rel="stylesheet" type="text/css" href="CSS/home.css" />
 	<link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
@@ -40,7 +40,7 @@
                 <table>
                     <tr>
                         <td>
-                            <span id="loginStatusValue">Welcome <%=session.getAttribute("username")%></span>
+                            <span id="loginStatusValue"><span data-18n="app.greeting">Welcome</span> <%=session.getAttribute("username")%></span>
                         </td>
                         <td>
                             <a href="javascript:logoutUser();" id="LogInOut" data-i18n="app.logout">Logout</a>
@@ -213,7 +213,7 @@
         <div class="main" id="mainContainer">
         </div>
         <div class="footer">
-            <p>&copy; 2012-2013 Intel Corporation.<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
+            <p>&copy; 2012-2014 Intel Corporation<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
         </div>
 </body>
 </html>

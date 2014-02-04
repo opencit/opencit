@@ -3,27 +3,27 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loMLEe.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Edit Mle</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title data-i18n="title.edit_mle">Edit MLE</title>
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Whitelist &gt; Edit MLE    <!--<span style="float: right"><a href="javascript:getAddMLE();">Add MLE...</a></span>--></div>
-		<div id="nameOfPage" class="NameHeader">Edit Measured Launch Environment (MLE) Configuration</div>
+		<div class="nagPanel"><span data-i18n="title.whitelist">Whitelist</span> &gt; <span data-i18n="title.edit_mle">Edit MLE</span>    <!--<span style="float: right"><a href="javascript:getAddMLE();">Add MLE...</a></span>--></div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.edit_mle">Edit Measured Launch Environment (MLE) Configuration</div>
 		<div id="mainEditMleDisplayDiv">
 			<div class="tableDivMLE" style="margin-left: 61px;display: none;" id="mainTableDivEditMle">
 			<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 				<thead>
 					<tr>
-						<th class="row1">Options</th>
-						<th class="rowr3">Name</th>
-						<th class="row2">Version&nbsp;&nbsp;&nbsp;&nbsp;</th>
-						<th class="rowr3">Attestation Type&nbsp;&nbsp;</th>
+						<th class="row1" data-i18n="table.options">Options</th>
+						<th class="rowr3" data-i18n="table.name">Name</th>
+						<th class="row2"><span data-i18n="table.version">Version</span>&nbsp;&nbsp;&nbsp;&nbsp;</th>
+						<th class="rowr3"><span data-i18n="table.attestation_type">Attestation Type</span>&nbsp;&nbsp;</th>
 					 <!-- 	<th class="rowr7">MLE Manifests</th> -->
-						<th class="row4">&nbsp;&nbsp;&nbsp;MLE Type</th>
-						<th class="rowr4">OS Info</th>
-						<th class="rowr2">OEM Name</th>
-						<th class="rowr3">Description</th>
+						<th class="row4">&nbsp;&nbsp;&nbsp;<span data-i18n="table.mle_type">MLE Type</span></th>
+						<th class="rowr4" data-i18n="table.os_info">OS Info</th>
+						<th class="rowr2" data-i18n="table.oem_name">OEM Name</th>
+						<th class="rowr3" data-i18n="table.description">Description</th>
 					</tr>
 				</thead>
 				</table>

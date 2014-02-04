@@ -5,6 +5,8 @@ $(function() {
 });
 
 function fnChangeLocale(locale) {
+    //save to db
+    //read from db
     //save cookie for new locale
     //Cookie langCookie = new Cookie("lang", locale);
     //res.addCookie(langCookie);

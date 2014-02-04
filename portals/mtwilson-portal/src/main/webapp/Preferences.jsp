@@ -5,18 +5,18 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-        <title>My Preferences</title>
+        <title data-i18n="title.preferences">My Preferences</title>
     </head>
     <body>
         <div class="container">
-            <div class="nagPanel">My Preferences</div>
-            <div id="nameOfPage" class="NameHeader">My Preferences</div>
+            <div class="nagPanel"><span data-i18n="title.preferences">My Preferences</span> &gt;</div>
+            <div id="nameOfPage" class="NameHeader" data-i18n="header.preferences">My Preferences</div>
             <div id="mainPreferencesDisplayDiv">
                 <div class="tableDiv" style="margin-left: 61px; display: none;" id="mainEditTable">
                     <table cellpadding="3" cellspacing="5">
                         <tbody>
                             <tr>
-                                <td ><label>Locale : </label></td>
+                                <td><label data-i18n="input.locale">Locale:</label></td>
                                 <td>
                                     <select class="textBoxClass" id="ddlLocales" onchange="fnChangeLocale(this.selectedLocale)">
                                         <c:forEach var="locale" varStatus="rowCounter"  items="${locales}">

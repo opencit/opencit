@@ -11,11 +11,11 @@ response.setHeader("Content-Disposition","attachment;filename=mtwilson-rootCA");
 %>
 <html>
 <head>
-<title>Authorization Token</title>
+<title data-i18n="title.auth_token">Authorization Token</title>
 <meta http-equiv="AuthorizationToken" value="<%=request.getAttribute("AuthorizationToken")%>"/>
      
 </head>
 <body>
-    <p>AuthorizationToken: <%=request.getAttribute("AuthorizationToken")%></p>
+    <p><span data-i18n="input.auth_token">Authorization Token:</span> <%=request.getAttribute("AuthorizationToken")%></p>
 </body>
 </html>

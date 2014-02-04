@@ -9,29 +9,27 @@ response.setHeader("Content-Disposition",
 %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="application/octet-stream; charset=ISO-8859-1">
-
-<title>Download Certificate</title>
-
+    <meta http-equiv="Content-Type" content="application/octet-stream; charset=ISO-8859-1">
+    <title data-i18n="title.cert_download">Download Certificate</title>
 </head>
 <body onload="fnLookforRootCACertificate()">
 <div class="container">
-		<div class="nagPanel">Administration &gt; View Certificates</div> <!-- was: "Management Console Certificate &gt; View " -->
-		<div id="nameOfPage" class="NameHeader">Certificate Download</div>
+		<div class="nagPanel"><span data-i18n="title.administration">Administration</span> &gt; <span data-i18n="title.cert_download">Download Certificates</span></div> <!-- was: "Management Console Certificate &gt; View " -->
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.cert_download">Certificate Download</div>
 		<div id="mainLoadingDiv" class="mainContainer">
                 <!-- stdalex 1/18 the following downloads are disabled in 1.1 due to the files they require are
                      not created as part of install.  These will be back in 1.2 when we can do core vs. premium
                      TODO-stdalex -->
               
-            <div  id ="fdownloadRCA"class="registerUser">Click on Download icon to download Root Ca Certificate
+            <div  id ="fdownloadRCA"class="registerUser"><span data-i18n="label.dl_root_ca">Click on Download icon to download Root Ca Certificate</span>
 			<input type="image" onclick="fnforRootCACertificate()" src="images/download.jpg"></div>
-            <div  id ="fdownload"class="registerUser">Click on Download icon to download the Privacy CA Certificates
+            <div  id ="fdownload"class="registerUser"><span data-i18n="label.dl_privacy_ca">Click on Download icon to download the Privacy CA Certificates</span>
 			<input type="image" onclick="fnforPrivacyCACertificate()" src="images/download.jpg"></div>
             <!-- <div  id ="fdownload"class="registerUser">Click on Download icon to download all trusted Privacy CA Certificates
 			<input type="image" onclick="fnforPrivacyCACertificateList()" src="images/download.jpg"></div> -->
-            <div  id ="fdownload"class="registerUser">Click on Download icon to download TLS Certificate
+            <div  id ="fdownload"class="registerUser"><span data-i18n="label.dl_tls">Click on Download icon to download TLS Certificate</span>
 			<input type="image" onclick="fnforTLSCertificate()" src="images/download.jpg"></div>
-            <div  id ="fdownload"class="registerUser">Click on Download icon to download SAML Certificate
+            <div  id ="fdownload"class="registerUser"><span data-i18n="label.dl_saml">Click on Download icon to download SAML Certificate</span>
 			<input type="image" onclick="fnforSAMLCertificate()" src="images/download.jpg"></div>
                 
 			<div id="successMessage"></div>
