@@ -27,7 +27,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -67,7 +67,7 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
  * @author jbuhacoff
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/rpc")
 public class AsyncRpc {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AsyncRpc.class);

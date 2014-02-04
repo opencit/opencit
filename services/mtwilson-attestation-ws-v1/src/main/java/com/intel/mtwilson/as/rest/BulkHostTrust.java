@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author dmagadix
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/hosts/bulk")
 public class BulkHostTrust {
 

@@ -16,7 +16,7 @@ import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/ManagementService/resources/host")
 public class Host {
 

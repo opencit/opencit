@@ -25,7 +25,7 @@ import com.intel.mtwilson.as.business.trust.HostTrustBO;
 import com.intel.mtwilson.policy.TrustReport;
 
 import java.util.Date;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/host-attestations")
 public class HostAttestations extends AbstractResource<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLinks> {
     

@@ -3,7 +3,7 @@ package com.intel.mtwilson.as.rest;
 
 
 import com.intel.mtwilson.launcher.ws.ext.V1;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -15,7 +15,7 @@ import javax.ws.rs.GET;
  * * 
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/asstatus")
 public class AsStatus {
     @GET

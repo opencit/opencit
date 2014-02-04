@@ -22,7 +22,7 @@ import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.wlm.business.MleBO;
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/mle/{id}/pcrs")
 public class MlePcrs extends AbstractJsonapiResource<MlePcr, MlePcrCollection, MlePcrFilterCriteria, NoLinks<MlePcr>, MlePcrLocator>{
 
