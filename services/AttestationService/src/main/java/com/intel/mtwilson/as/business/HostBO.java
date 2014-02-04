@@ -873,7 +873,7 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_Version = tblHost.getVmmMleId().getVersion();
                 hostObj.VMM_OSName = tblHost.getVmmMleId().getOsId().getName();
                 hostObj.VMM_OSVersion = tblHost.getVmmMleId().getOsId().getVersion();
-
+                hostObj.Hardware_Uuid = tblHost.getHardwareUuid();
                 return hostObj;
         }
 

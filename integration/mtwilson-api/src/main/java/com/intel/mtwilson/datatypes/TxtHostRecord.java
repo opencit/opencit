@@ -57,7 +57,9 @@ public class TxtHostRecord {
     @JsonProperty
     public String AIK_SHA1;
     @JsonProperty
-    public String Processor_Info;    
+    public String Processor_Info;
+
+    public String Hardware_Uuid;
     
     public TxtHostRecord() {
         

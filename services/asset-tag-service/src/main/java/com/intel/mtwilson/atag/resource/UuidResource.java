@@ -7,6 +7,12 @@
 package com.intel.mtwilson.atag.resource;
 
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.api.ApiException;
+import com.intel.mtwilson.atag.Global;
+import com.intel.mtwilson.datatypes.TxtHostRecord;
+import java.io.IOException;
+import java.security.SignatureException;
+import java.util.List;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
@@ -46,12 +52,16 @@ public class UuidResource extends ServerResource{
     }
     
     @Get("json")
-    public UuidResponse search(/*TagSearchCriteria query*/) {
+    public UuidResponse search(/*TagSearchCriteria query*/) throws IOException, ApiException, SignatureException, Exception {
         String ip = getQuery().getFirstValue("ipaddress");
         log.debug("made it into actionAutomation! got ip of " + ip);
         //String ip = getQuery().getFirstValue("ipaddress");
         UuidResponse response = new UuidResponse();
-        response.host_uuid = "F4B17194-CAE7-11DF-B40B-001517FA9844";
+        List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip);
+        if(hostList == null || hostList.size() < 1) {
+            throw new Exception("No host records found");
+        }
+        response.host_uuid = hostList.get(0).Hardware_Uuid;
         return response;
     }
 }
