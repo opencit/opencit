@@ -39,11 +39,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-    
-    public HostAttestationRepository() {
-        super();
-    }
-    
+        
     @Override
     public HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
         HostAttestationCollection objCollection = new HostAttestationCollection();

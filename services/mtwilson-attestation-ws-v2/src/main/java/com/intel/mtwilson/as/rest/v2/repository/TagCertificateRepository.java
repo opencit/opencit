@@ -32,11 +32,7 @@ import org.slf4j.LoggerFactory;
 public class TagCertificateRepository implements SimpleRepository<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, TagCertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
-    
-    public TagCertificateRepository() {
-        super();
-    }
-    
+        
     @Override
     public TagCertificateCollection search(TagCertificateFilterCriteria criteria) {
         TagCertificateCollection objCollection = new TagCertificateCollection();
