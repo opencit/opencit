@@ -13,7 +13,7 @@ import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.as.rest.v2.repository.HostAttestationRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/host-attestations")
 public class HostAttestations extends AbstractJsonapiResource<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, NoLinks<HostAttestation>, HostAttestationLocator> {
     
