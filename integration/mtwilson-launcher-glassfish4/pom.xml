@@ -46,6 +46,46 @@
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-jersey2</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javaee-web-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javax.mail</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javax.persistence</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javax.resource</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax</groupId>
+                    <artifactId>javax.transaction</artifactId>
+                </exclusion>
+                
+                
+            </exclusions>
         </dependency>
 
         
