@@ -6,6 +6,8 @@ certSha1=/tmp/certSha1
 nvramPass=ffffffffffffffffffffffffffffffffffffffff
 ownerPass=ffffffffffffffffffffffffffffffffffffffff
 srkPass=ffffffffffffffffffffffffffffffffffffffff
+mode="VMWARE"
+selection=""
 server=""
 cert=""
 username=""
@@ -136,10 +138,14 @@ function getLocalTag() {
 
 function getRemoteTag() {
  functionReturn=0
- tagServer=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to download Asset tag Selection:" 8 50)
- if [ $? -eq 1 ]; then 
-  functionReturn=1
-  return
+ if [ -z "$selection" ]; then 
+	tagServer=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to download Asset tag Selection:" 8 50)
+	if [ $? -eq 1 ]; then 
+		functionReturn=1
+		return
+	fi
+ else
+    tagServer=$selection
  fi
  #wget "$URL" 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' |  dialog --gauge "Download Test" 10 100
  echo "$WGET $tagServer -O $selectionFile" >> $cmdFile
@@ -154,15 +160,21 @@ function getRemoteTag() {
 
 function getTagOption() {
  functionReturn=0
- tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
- if [ $? -eq 1 ]; then
+ if [ -z "$selection" ]; then
+	tagChoice=$(dialog --stdout --backtitle "$TITLE" --radiolist "Select how to obtain tags" 10 70 3 1 "Download from remote server" on 2 "Local file" off)
+	if [ $? -eq 1 ]; then
       exit 0;
+	fi
+ else
+  tagChoice=1
  fi
 }
 
 function provisionCert() {
  functionReturn=0
- server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
+ if [ -z "$server" ]; then 
+	server=$(dialog --stdout --backtitle "$TITLE" --inputbox "Enter URL to Asset Certificate Authority:" 8 50)
+ fi
  selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
  if [ $isUsingXml == 0 ]; then
    echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" >> $cmdFile
@@ -179,13 +191,20 @@ function provisionCert() {
  echo "$WGET  --header=Accept: application/xml $server/certificates/$certUUID -O $certFile" >> $cmdFile
  $WGET  --header="Accept: application/xml" $server/certificates/$certUUID -O $certFile  2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Downloading Asset Tag certificate from $server" 10 60 0
  clear
- acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
- if [ $? -eq 0 ]; then
-   xml2 < $certFile > $certFileValues
-   dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
+ if [ ! "$accept" == "yes" ]; then
+	acceptCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to view the certificate?" 10 60)
+	if [ $? -eq 0 ]; then
+		xml2 < $certFile > $certFileValues
+		dialog --stdout --backtitle "$TITLE" --title "Asset Certificate:" --textbox $certFileValues 35 80
+	fi
  fi
- writeCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to deploy downloaded certificate to host TPM?" 10 60)
- if [ $? -eq 0 ]; then
+ if [ ! "$accept" == "yes"]; then
+	writeCert=$(dialog --stdout --backtitle "$TITLE" --title "Asset Certificate"  --yesno "Do you wish to deploy downloaded certificate to host TPM?" 10 60)
+	resp=$?;
+ else
+    resp=0;
+ fi
+ if [ $resp -eq 0 ]; then
   sha1=`xml2 < $certFile  | grep sha1`
   sha1=`echo "${sha1#*sha1=}"`
   
@@ -207,9 +226,17 @@ function provisionCert() {
   result=$?
   sleep 5;
   if [ $result -eq 0 ]; then 
-   dialog --backtitle "$TITLE" --msgbox "Certificate deployed.\nThank you for using the Asset Tag Provisioning Tool" 10 34
+   if [ "$accept" == "yes" ]; then
+     echo "completed sucessfully " > /tmp/completion
+   else
+	dialog --backtitle "$TITLE" --msgbox "Certificate deployed.\nThank you for using the Asset Tag Provisioning Tool" 10 34
+   fi
   else
-   dialog --backtitle "$TITLE" --msgbox "Certificate not deployed.\nPlease check /tmp/certWrite for error messages" 10 34
+   if [ "$accept" == "yes" ]; then
+     echo "completed sucessfully " > /tmp/completion
+   else
+     dialog --backtitle "$TITLE" --msgbox "Certificate not deployed.\nPlease check /tmp/certWrite for error messages" 10 34
+   fi
   fi
  fi
 }
