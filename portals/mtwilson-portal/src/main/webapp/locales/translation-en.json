@@ -166,7 +166,8 @@
         "retrieve_hosts": "Retrieve Hosts",
         "retrieve_clusters": "Retrieve Clusters",
         "register_host": "Register Host",
-        "rekey": "Re-Key"
+        "rekey": "Re-Key",
+        "import_whitelist": "Import Whitelist"
     },
     "select": {
         "flat_file": "Flat File",
