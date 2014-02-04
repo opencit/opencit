@@ -10,31 +10,8 @@ import com.intel.mtwilson.as.rest.v2.resource.*;
 import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
-import com.intel.mtwilson.jersey.NoLinks;
-import com.intel.mtwilson.jersey.resource.AbstractResource;
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.as.rest.v2.model.FileLocator;
-import com.intel.mtwilson.jersey.http.OtherMediaType;
-import com.intel.mtwilson.launcher.ws.ext.V2;
-import javax.ejb.Stateless;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
-import com.intel.mtwilson.jersey.resource.AbstractResource;
-import com.intel.mtwilson.jersey.resource.AbstractSimpleResource;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
-import com.intel.mtwilson.launcher.ws.ext.V2;
-import com.intel.mtwilson.wlm.business.MleBO;
-import java.util.List;
-import javax.ejb.Stateless;
-import javax.ws.rs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -117,8 +94,13 @@ public class FileRepository implements SimpleRepository<File,FileCollection,File
     }
 
     @Override
-    public void delete(String id) {
-        log.debug("File delete: {}", id);
+    public void delete(FileLocator locator) {
+        log.debug("File delete: {}", locator.id.toString());
+    }
+
+    @Override
+    public void delete(FileFilterCriteria criteria) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 

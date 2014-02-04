@@ -33,7 +33,11 @@ import org.slf4j.LoggerFactory;
 @Stateless
 @Path("/oems")
 public class Oems extends AbstractResource<Oem, OemCollection, OemFilterCriteria, OemLinks>{
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    
+    public Oems() {
+        super();
+    }
     
     @Override
     protected OemCollection search(OemFilterCriteria criteria) {

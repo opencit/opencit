@@ -13,8 +13,10 @@ import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.resource.AbstractSimpleResource;
+import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.rpc.v2.model.RpcLocator;
+import com.intel.mtwilson.rpc.v2.model.RpcPriv;
 import com.intel.mtwilson.v2.rpc.RpcUtil;
 import com.thoughtworks.xstream.XStream;
 import java.io.ByteArrayInputStream;
@@ -45,7 +47,7 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
 @V2
 @Stateless
 @Path("/rpcs")
-public class Rpcs extends AbstractSimpleResource<Rpc,RpcCollection,RpcFilterCriteria,NoLinks<Rpc>,RpcLocator> {
+public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCriteria,NoLinks<Rpc>,RpcLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Rpcs.class);
   
     private RpcRepository repository;
@@ -98,7 +100,7 @@ public class Rpcs extends AbstractSimpleResource<Rpc,RpcCollection,RpcFilterCrit
     @GET
     public Response getRpcInput(@BeanParam RpcLocator locator) {
         log.debug("rpc get input, sending fake data");
-        Rpc rpc = repository.retrieveInput(locator);
+        RpcPriv rpc = repository.retrieveInput(locator);
         rpc.setInput("<input><sample/></input>".getBytes());
         Response response = Response.ok(rpc.getInput(), "application/octet-stream" /*rpc.getInputContentType()*/).build();
         return response;
@@ -158,7 +160,7 @@ public class Rpcs extends AbstractSimpleResource<Rpc,RpcCollection,RpcFilterCrit
 //    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
     @Produces(MediaType.WILDCARD)
     public Object getRpcOutput(@BeanParam RpcLocator locator, @Context HttpServletRequest request) {
-        Rpc rpc = repository.retrieveOutput(locator); 
+        RpcPriv rpc = repository.retrieveOutput(locator); 
         
         // convert the intermediate output to client's requested output type
         log.debug("Client requested output type: {}" ,request.getHeader(HttpHeaders.ACCEPT));
@@ -172,6 +174,11 @@ public class Rpcs extends AbstractSimpleResource<Rpc,RpcCollection,RpcFilterCrit
 //        Class outputContentClass = pojo.getClass();
         log.debug("output pojo: {}", pojo.getClass().getName());
         return pojo;
+    }
+
+    @Override
+    protected RpcCollection createEmptyCollection() {
+        return new RpcCollection();
     }
     
         

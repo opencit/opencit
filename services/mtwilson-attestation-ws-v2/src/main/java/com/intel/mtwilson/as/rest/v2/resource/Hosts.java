@@ -38,7 +38,11 @@ import org.slf4j.LoggerFactory;
 @Path("/hosts")
 public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriteria,HostLinks> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    
+    public Hosts() {
+        super();
+    }
     
     @Override
     protected HostCollection search(HostFilterCriteria criteria) {

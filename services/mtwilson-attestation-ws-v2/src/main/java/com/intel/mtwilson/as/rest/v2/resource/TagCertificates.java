@@ -35,7 +35,11 @@ import org.slf4j.LoggerFactory;
 @Path("/tag-certificates")
 public class TagCertificates extends AbstractResource<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, TagCertificateLinks> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    
+    public TagCertificates() {
+        super();
+    }
     
     @Override
     protected TagCertificateCollection search(TagCertificateFilterCriteria criteria) {

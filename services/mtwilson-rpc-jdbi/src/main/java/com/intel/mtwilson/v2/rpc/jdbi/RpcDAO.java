@@ -6,7 +6,7 @@ package com.intel.mtwilson.v2.rpc.jdbi;
 
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
-import com.intel.mtwilson.rpc.v2.model.RpcStatus;
+import com.intel.mtwilson.rpc.v2.model.RpcPriv;
 import java.util.Date;
 import java.util.List;
 import org.skife.jdbi.v2.sqlobject.Bind;
@@ -48,21 +48,21 @@ public interface RpcDAO {
     @SqlUpdate("update mw_rpc set ProgressCurrent=:progressCurrent,ProgressMax=:progressMax where ID=:id")
     void updateProgress(@Bind("id") UUID id, @Bind("proguressCurrent") Long progressCurrent, @Bind("progressMax") Long progressMax);
     
-    @RegisterMapper(RpcResultMapper.class)
+    @RegisterMapper(RpcPrivResultMapper.class)
     @SqlQuery("select ID,Name,Input,Output,Status,ProgressCurrent,ProgressMax from mw_rpc where ID=:id")
-    Rpc findById(@Bind("id") UUID id);
+    RpcPriv findById(@Bind("id") UUID id);
 
-    @RegisterMapper(RpcStatusResultMapper.class)
+    @RegisterMapper(RpcResultMapper.class)
     @SqlQuery("select ID,Name,Status,ProgressCurrent,ProgressMax from mw_rpc where ID=:id")
-    RpcStatus findStatusById(@Bind("id") UUID id);
+    Rpc findStatusById(@Bind("id") UUID id);
     
-    @RegisterMapper(RpcStatusResultMapper.class)
+    @RegisterMapper(RpcResultMapper.class)
     @SqlQuery("select ID,Name,Status,ProgressCurrent,ProgressMax from mw_rpc where Name=:name")
-    List<RpcStatus> findStatusByName(@Bind("name") String name);
+    List<Rpc> findStatusByName(@Bind("name") String name);
         
-    @RegisterMapper(RpcStatusResultMapper.class)
+    @RegisterMapper(RpcResultMapper.class)
     @SqlQuery("select ID,Name,Status,ProgressCurrent,ProgressMax from mw_rpc where Status=:status")
-    List<RpcStatus> findStatusByStatus(@Bind("status") String status);
+    List<Rpc> findStatusByStatus(@Bind("status") String status);
 
     @SqlUpdate("delete from mw_rpc where ID=:id")
     void delete(@Bind("id") UUID id);

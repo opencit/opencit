@@ -29,8 +29,8 @@ if [ -f "$asctl" ]; then
 fi
 
 # detect the packages we have to install
-JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
-GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
+#JAVA_PACKAGE=`ls -1 jdk-* jre-* 2>/dev/null | tail -n 1`
+#GLASSFISH_PACKAGE=`ls -1 glassfish*.zip 2>/dev/null | tail -n 1`
 WAR_PACKAGE=`ls -1 *.war 2>/dev/null | tail -n 1`
 
 

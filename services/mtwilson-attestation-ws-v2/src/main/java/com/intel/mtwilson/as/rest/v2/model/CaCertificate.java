@@ -45,7 +45,7 @@ public class CaCertificate extends CertificateDocument {
             return X509Util.decodeDerCertificate(certificate);
         }
         catch(CertificateException ce) {
-            log.error("Error decoding certificat.", ce);
+            log.error("Error decoding certificate.", ce);
             throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
     }
@@ -61,7 +61,7 @@ public class CaCertificate extends CertificateDocument {
             this.certificate = certificate.getEncoded();
         }
         catch(CertificateEncodingException ce) {
-            log.error("Error decoding certificat.", ce);
+            log.error("Error decoding certificate.", ce);
             throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
     }

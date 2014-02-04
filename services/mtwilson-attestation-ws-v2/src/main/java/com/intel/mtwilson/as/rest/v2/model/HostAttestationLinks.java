@@ -10,6 +10,6 @@ import com.intel.mtwilson.jersey.PatchLink;
  *
  * @author ssbangal
  */
-public class MlePcrLinks implements PatchLink<MlePcr>{
+public class HostAttestationLinks implements PatchLink<HostAttestation> {
     
 }

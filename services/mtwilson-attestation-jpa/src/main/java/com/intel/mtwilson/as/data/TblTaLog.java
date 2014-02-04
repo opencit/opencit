@@ -34,6 +34,8 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblTaLog.findByTrustStatus", query = "SELECT t FROM TblTaLog t WHERE t.trustStatus = :trustStatus"),
     @NamedQuery(name = "TblTaLog.findByError", query = "SELECT t FROM TblTaLog t WHERE t.error = :error"),
     @NamedQuery(name = "TblTaLog.findByUpdatedOn", query = "SELECT t FROM TblTaLog t WHERE t.updatedOn = :updatedOn"),
+    @NamedQuery(name = "TblTaLog.findByUuid", query = "SELECT t FROM TblTaLog t WHERE t.uuid_hex = :uuid_hex"),
+    @NamedQuery(name = "TblTaLog.findLatestTrustStatusByHostUuid", query = "SELECT t FROM TblTaLog t WHERE t.host_uuid_hex = :host_uuid_hex and t.updatedOn > :expiryTs and t.mleId = 0 ORDER BY t.updatedOn DESC"),
     @NamedQuery(name = "TblTaLog.getHostTALogEntryBefore", query = "SELECT t FROM TblTaLog t WHERE t.hostID = :hostId and t.updatedOn > :expiryTs and t.mleId = 0 ORDER BY t.updatedOn DESC")
 })
 
@@ -67,6 +69,10 @@ public class TblTaLog implements Serializable {
     private boolean trustStatus;
     @Column(name = "Error")
     private String error;
+    @Column(name = "uuid_hex")
+    private String uuid_hex;
+    @Column(name = "host_uuid_hex")
+    private String host_uuid_hex;
 
     public TblTaLog() {
     }
@@ -149,6 +155,23 @@ public class TblTaLog implements Serializable {
         this.updatedOn = updatedOn;
     }
 
+    public String getUuid_hex() {
+        return uuid_hex;
+    }
+
+    public void setUuid_hex(String uuid_hex) {
+        this.uuid_hex = uuid_hex;
+    }
+
+    public String getHost_uuid_hex() {
+        return host_uuid_hex;
+    }
+
+    public void setHost_uuid_hex(String host_uuid_hex) {
+        this.host_uuid_hex = host_uuid_hex;
+    }
+
+    
     @Override
     public int hashCode() {
         int hash = 0;

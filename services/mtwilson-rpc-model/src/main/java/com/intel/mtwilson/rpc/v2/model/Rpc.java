@@ -62,16 +62,10 @@ import com.intel.dcsg.cpg.performance.Progress;
 @JacksonXmlRootElement(localName="rpc")
 public class Rpc extends Document implements Progress {
     private String name;
-    private byte[] input;
-//    private String inputHeaders; // rfc822
-    private byte[] output;
-//    private String outputContentType; // an internet media type like application/json
-//    private String outputContentClass; // the Java class name of the class that is the model for the output; the message body reader/writer must know how to convert from this class to the content type - for example any POJO to json or xml, but X509Certificate to application/x-pem-file 
     @JsonInclude(JsonInclude.Include.ALWAYS)
     @JacksonXmlElementWrapper(localName="faults")
     @JacksonXmlProperty(localName="fault")        
     private Fault[] faults;
-    private String authorizationToken;
     private Status status;
     private Long current;
     private Long max;
@@ -84,69 +78,12 @@ public class Rpc extends Document implements Progress {
         this.name = name;
     }
 
-    public byte[] getInput() {
-        return input;
-    }
-
-    public void setInput(byte[] input) {
-        this.input = input;
-    }
-
-    // add a new inputclass  field  for rpc's that have different input and output
-    
-    public byte[] getOutput() {
-        return output;
-    }
-
-    public void setOutput(byte[] output) {
-        this.output = output;
-    }
-/*
-    // not necessary for java serialization / dataoutputstream
-    public String getOutputContentType() {
-        return outputContentType;
-    }
-
-    // not necessary for java serialization / dataoutputstream
-    public void setOutputContentType(String outputContentType) {
-        this.outputContentType = outputContentType;
-    }
-
-    // rename to outputclass
-    public String getOutputContentClass() {
-        return outputContentClass;
-    }
-
-    // rename to outputclass
-    public void setOutputContentClass(String outputContentClass) {
-        this.outputContentClass = outputContentClass;
-    }
-
-    // won't be needed
-    public String getInputHeaders() {
-        return inputHeaders;
-    }
-
-    // won't be needed
-    public void setInputHeaders(String inputHeaders) {
-        this.inputHeaders = inputHeaders;
-    }
-*/
-    
     public Fault[] getFaults() {
         return faults;
     }
 
     public void setFaults(Fault[] faults) {
         this.faults = faults;
-    }
-
-    public String getAuthorizationToken() {
-        return authorizationToken;
-    }
-    
-    public void setAuthorizationToken(String authorizationToken) {
-        this.authorizationToken = authorizationToken;
     }
 
     public Status getStatus() {
@@ -179,5 +116,13 @@ public class Rpc extends Document implements Progress {
         this.max = max;
     }
         
+    public void copyFrom(Rpc rpc) {
+        setId(rpc.getId());
+        setName(rpc.getName());
+        setFaults(rpc.getFaults());
+        setStatus(rpc.getStatus());
+        setCurrent(rpc.getCurrent());
+        setMax(rpc.getMax());
+    }
     
 }

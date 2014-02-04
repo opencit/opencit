@@ -30,7 +30,7 @@ public class CaCertificateCollection extends DocumentCollection<CaCertificate> {
     
     @Override
     public List<CaCertificate> getDocuments() {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        return getCaCertificates();
     }
     
 }

@@ -281,5 +281,38 @@ public class TblTaLogJpaController implements Serializable {
         return null;
     }
 
+    public TblTaLog findLatestTrustStatusByHostUuid(String uuid, Date expiryTime) {
+
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblTaLog.findLatestTrustStatusByHostUuid");
+            query.setParameter("host_uuid_hex", uuid);
+            query.setParameter("expiryTs", expiryTime);
+            
+            List<TblTaLog> logs = query.getResultList();
+            if(logs != null && logs.size() > 0) {
+                return logs.get(0);
+            }
+            
+        } finally {
+            em.close();
+        }
+        return null;
+    }
+
+    public TblTaLog findByUuid(String uuid) {
+
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNamedQuery("TblTaLog.findByUuid");
+            query.setParameter("uuid_hex", uuid);
+            
+            TblTaLog log = (TblTaLog) query.getSingleResult();
+            return log;
+            
+        } finally {
+            em.close();
+        }
+    }
 
 }
