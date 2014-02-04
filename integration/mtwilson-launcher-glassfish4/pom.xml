@@ -83,8 +83,10 @@
                     <groupId>javax</groupId>
                     <artifactId>javax.transaction</artifactId>
                 </exclusion>
-                
-                
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -103,6 +105,7 @@ org.glassfish.deployment.common.DeploymentException: CDI deployment failure:WELD
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
+            <scope>provided</scope>
         </dependency>        
 	<dependency>
             <groupId>org.glassfish.jersey.core</groupId>

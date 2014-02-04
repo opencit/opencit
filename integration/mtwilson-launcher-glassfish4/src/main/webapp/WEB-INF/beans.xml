@@ -10,4 +10,7 @@
         <exclude name="com.intel.mtwilson.**" />
     </scan>
     -->
+    <scan>
+        <exclude name="com.google.common.util.concurrent.ServiceManager" />
+    </scan>
 </beans>

@@ -91,7 +91,7 @@ register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class);
         log.debug("Registering exception mappers and filters");
 register(com.intel.mtwilson.util.LocalizedExceptionMapper.class);
 register(org.glassfish.jersey.server.filter.HttpMethodOverrideFilter.class); // jersey2 equivalent of com.sun.jersey.api.container.filter.PostReplaceFilter
-register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
+//register(org.glassfish.jersey.client.filter.HttpDigestAuthFilter.class); 
 //register(com.intel.mtwilson.as.helper.ASAuthenticationFilter.class); // XXX TODO to be replaced with APACHE SHIRO
 //register(org.apache.shiro.web.servlet.ShiroFilter.class); // must be in web.xml because it's a servlet filter, not a javax.ws.rs filter
 //register(com.intel.mtwilson.audit.helper.AuditJerseyRequestFilter.class);// XXX TODO re-enable
