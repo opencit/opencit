@@ -13,7 +13,7 @@ import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBElement;
@@ -24,7 +24,7 @@ import javax.xml.namespace.QName;
  * * 
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/hosts/reports")
 public class Reports {
     

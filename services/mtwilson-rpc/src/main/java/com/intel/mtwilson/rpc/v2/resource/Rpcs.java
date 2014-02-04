@@ -23,7 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.DELETE;
@@ -45,7 +45,7 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
  * @author jbuhacoff
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/rpcs")
 public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCriteria,NoLinks<Rpc>,RpcLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Rpcs.class);

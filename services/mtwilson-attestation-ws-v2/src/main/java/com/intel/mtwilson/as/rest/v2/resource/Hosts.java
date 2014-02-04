@@ -24,7 +24,7 @@ import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.wlm.business.OemBO;
 
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author jbuhacoff
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/hosts")
 public class Hosts extends AbstractResource<Host,HostCollection,HostFilterCriteria,HostLinks> {
 

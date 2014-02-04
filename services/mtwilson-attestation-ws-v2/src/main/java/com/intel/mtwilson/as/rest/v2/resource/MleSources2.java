@@ -11,7 +11,7 @@ import com.intel.mtwilson.as.rest.v2.model.MleSourceLinks;
 import com.intel.mtwilson.as.rest.v2.repository.MleSourceRepository;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.as.rest.v2.model.MleSourceLocator;
@@ -28,7 +28,7 @@ import javax.ws.rs.core.Response;
  * @author ssbangal
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/mles/{mle}/sources")
 public class MleSources2 extends AbstractJsonapiResource<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLinks, MleSourceLocator>{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources2.class);

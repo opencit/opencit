@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author jbuhacoff
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/test")
 public class Test {
     private Logger log = LoggerFactory.getLogger(getClass());

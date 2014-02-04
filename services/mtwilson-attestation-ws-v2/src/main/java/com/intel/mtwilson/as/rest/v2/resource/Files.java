@@ -15,7 +15,7 @@ import com.intel.mtwilson.as.rest.v2.repository.FileRepository;
 import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
  * @author jbuhacoff
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/files")
 public class Files extends AbstractJsonapiResource<File,FileCollection,FileFilterCriteria,NoLinks<File>,FileLocator> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Files.class);

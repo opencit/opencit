@@ -21,7 +21,7 @@ import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/tag-certificates")
 public class TagCertificates extends AbstractResource<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, TagCertificateLinks> {
 

@@ -16,7 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.codec.DecoderException;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author dsmagadx
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/ManagementService/resources/apiclient")
 public class APIClient {
     private Logger log = LoggerFactory.getLogger(getClass());
