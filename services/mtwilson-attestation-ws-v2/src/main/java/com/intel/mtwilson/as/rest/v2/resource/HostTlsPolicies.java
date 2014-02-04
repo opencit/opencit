@@ -27,11 +27,16 @@ import org.slf4j.LoggerFactory;
 public class HostTlsPolicies extends AbstractJsonapiResource<HostTlsPolicy, HostTlsPolicyCollection, HostTlsPolicyFilterCriteria, NoLinks<HostTlsPolicy>, HostTlsPolicyLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
-
+    private HostTlsPolicyRepository repository;
+    
     public HostTlsPolicies() {
-        super();
-        setRepository(new HostTlsPolicyRepository());
+//        super();
+//        setRepository(new HostTlsPolicyRepository());
+        repository = new HostTlsPolicyRepository();
     }
+    
+    @Override
+    protected HostTlsPolicyRepository getRepository() { return repository; }
 
     
     @Override

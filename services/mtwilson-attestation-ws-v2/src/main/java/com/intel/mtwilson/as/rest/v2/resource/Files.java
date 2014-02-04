@@ -38,10 +38,13 @@ public class Files extends AbstractJsonapiResource<File,FileCollection,FileFilte
     private FileRepository repository;
     
     public Files() {
-        super();
+//        super();
         repository = new FileRepository();
-        setRepository(repository);
+//        setRepository(repository);
     }
+    
+    @Override
+    protected FileRepository getRepository() { return repository; }
     
     @Override
     protected FileCollection createEmptyCollection() {

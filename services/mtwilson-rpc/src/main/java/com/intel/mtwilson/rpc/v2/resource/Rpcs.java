@@ -54,10 +54,13 @@ public class Rpcs extends AbstractJsonapiResource<Rpc,RpcCollection,RpcFilterCri
     private ObjectMapper mapper = new ObjectMapper(); // XXX for debugging only
     
     public Rpcs() {
-        super();
+//        super();
         repository = new RpcRepository();
-        setRepository(repository);
+//        setRepository(repository);
     }
+    
+    @Override
+    protected RpcRepository getRepository() { return repository; }
     
     @Context
     private MessageBodyWorkers workers;

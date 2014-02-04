@@ -28,11 +28,11 @@ import javax.ws.rs.core.Response;
 public abstract class AbstractCertificateJsonapiResource<T extends CertificateDocument, C extends DocumentCollection<T>, F extends FilterCriteria<T>, P extends PatchLink<T>, L extends Locator<T>> extends AbstractJsonapiResource<T,C,F,P,L> {
     
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractCertificateJsonapiResource.class);
-    
+    /*
     public AbstractCertificateJsonapiResource() {
         super();
     }
-    
+    */
         // XXX TODO find a mediatype/structure for list of DER-encoded certs...   could use APPLICATION_ZIP  but then we'd need to name the files inside! could use cert hashes...
     @GET
     @Produces({ OtherMediaType.APPLICATION_X_PEM_FILE, MediaType.TEXT_PLAIN})
