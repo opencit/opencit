@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -27,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author jbuhacoff
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/setup-tasks") 
 public class SetupTaskResource extends AbstractResource<SetupTask,SetupTaskCollection,SetupTaskFilterCriteria,NoLinks<SetupTask>> {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SetupTaskResource.class);

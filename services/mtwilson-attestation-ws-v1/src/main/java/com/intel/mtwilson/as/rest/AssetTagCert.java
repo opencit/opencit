@@ -7,7 +7,7 @@ package com.intel.mtwilson.as.rest;
 import com.intel.mtwilson.datatypes.AssetTagCertCreateRequest;
 import com.intel.mtwilson.datatypes.AssetTagCertRevokeRequest;
 import com.intel.mtwilson.security.annotations.RolesAllowed;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -24,7 +24,7 @@ import com.intel.mtwilson.launcher.ws.ext.V1;
  * @author ssbangal
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/assetTagCert")
 public class AssetTagCert {
  private Logger log = LoggerFactory.getLogger(getClass());

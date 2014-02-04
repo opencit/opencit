@@ -20,7 +20,7 @@ public class HostAttestationFilterCriteria implements FilterCriteria<HostAttesta
     public UUID hostUuid;
     @QueryParam("nameEqualTo")
     public String nameEqualTo;
-    @QueryParam("aikEqualTo")
-    public String aikEqualTo;
+    @QueryParam("aik")
+    public String aik;
     
 }

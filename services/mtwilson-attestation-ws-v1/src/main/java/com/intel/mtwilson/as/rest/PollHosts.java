@@ -9,7 +9,7 @@ import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/PollHosts")
 public class PollHosts {
     private static final Logger log = LoggerFactory.getLogger(PollHosts.class);

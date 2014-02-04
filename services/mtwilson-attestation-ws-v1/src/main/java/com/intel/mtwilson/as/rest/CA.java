@@ -1,7 +1,7 @@
 
 package com.intel.mtwilson.as.rest;
 
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -29,7 +29,7 @@ import org.apache.commons.codec.binary.Base64;
  * * 
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/ca2")
 public class CA {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CA.class);

@@ -12,7 +12,7 @@ import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,7 +31,7 @@ import javax.ws.rs.core.Response;
  * @author jbuhacoff
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/rpcs")
 public class RpcRepository implements SimpleRepository<Rpc, RpcCollection, RpcFilterCriteria, RpcLocator> {
 

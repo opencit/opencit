@@ -11,7 +11,7 @@ import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import javax.ejb.Stateless;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * REST Web Service *
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/AttestationService/resources/hosts")
 public class Host {
 

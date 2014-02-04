@@ -4,30 +4,17 @@
  */
 package com.intel.mtwilson.as.rest.v2.resource;
 
-import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASConfig;
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.My;
-import com.intel.mtwilson.as.controller.TblTaLogJpaController;
-import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblTaLog;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestation;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostAttestationFilterCriteria;
-import com.intel.mtwilson.as.rest.v2.model.HostAttestationLinks;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.datatypes.HostTrustResponse;
-import com.intel.mtwilson.datatypes.HostTrustStatus;
-import com.intel.mtwilson.jersey.resource.AbstractResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-import com.intel.mtwilson.model.Hostname;
-import com.intel.mtwilson.as.business.trust.HostTrustBO;
-import com.intel.mtwilson.policy.TrustReport;
-
-import java.util.Date;
-import javax.ejb.Stateless;
+import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
+import com.intel.mtwilson.as.rest.v2.repository.HostAttestationRepository;
+import com.intel.mtwilson.jersey.NoLinks;
+import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
+//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,135 +23,29 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Stateless
+//@Stateless
 @Path("/host-attestations")
-public class HostAttestations extends AbstractResource<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, HostAttestationLinks> {
+public class HostAttestations extends AbstractJsonapiResource<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, NoLinks<HostAttestation>, HostAttestationLocator> {
     
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
     private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
     private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
     
+    private HostAttestationRepository repository;
     public HostAttestations() {
-        super();
+        repository = new HostAttestationRepository();
     }
     
-    @Override
-    protected HostAttestationCollection search(HostAttestationFilterCriteria criteria) {
-        HostAttestationCollection objCollection = new HostAttestationCollection();
-        try {
-            TblTaLogJpaController jpaController = My.jpa().mwTaLog();
-            if (criteria.id != null) {
-                TblTaLog obj = jpaController.findByUuid(criteria.id.toString());
-                if (obj != null) {
-                    objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
-                }
-            } else if (criteria.hostUuid != null) {
-                TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(criteria.hostUuid.toString(), getCacheStaleAfter());
-                if (obj != null) {
-                    objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
-                }
-            } else if (criteria.aikEqualTo != null && !criteria.aikEqualTo.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikEqualTo.toString());
-                if (hostObj != null) {
-                    TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                    if (obj != null) {
-                        objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
-                    }
-                }
-            } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByName(criteria.nameEqualTo.toString());
-                if (hostObj != null) {
-                    TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                    if (obj != null) {
-                        objCollection.getHostAttestations().add(convert(obj, hostObj.getName()));
-                    }
-                }
-            }
-        } catch (ASException aex) {
-            throw aex;            
-        } catch (Exception ex) {
-            log.error("Error during retrieval of host attestation status from cache.", ex);
-            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
-        }
-        return objCollection;
-    }
-
-    @Override
-    protected HostAttestation retrieve(String id) {
-        if (id == null) { return null;}
-        try {
-            TblTaLogJpaController jpaController = My.jpa().mwTaLog();
-            TblTaLog obj = jpaController.findByUuid(id);
-            if (obj != null) {
-                HostAttestation haObj = convert(obj, id);
-                return haObj;
-            }
-        } catch (ASException aex) {
-            throw aex;            
-        } catch (Exception ex) {
-            log.error("Error during retrieval of host attestation status from cache.", ex);
-            throw new ASException(ErrorCode.AS_HOST_ATTESTATION_REPORT_ERROR, ex.getClass().getSimpleName());
-        }
-        return null;        
-    }
-
-    @Override
-    protected void store(HostAttestation item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    protected void create(HostAttestation item) {
-        try {
-            TblHosts hostObj = My.jpa().mwHosts().findHostByUuid(item.getHostUuid());
-            TrustReport htr = new HostTrustBO().getTrustReportForHost(hostObj, hostObj.getName());
-            item.setHostName(hostObj.getName());
-            item.setTrustReport(htr);
-        } catch (ASException aex) {
-            throw aex;            
-        } catch (Exception ex) {
-            log.error("Error during creating a new attestation report.", ex);
-            throw new ASException(ErrorCode.AS_HOST_REPORT_ERROR, ex.getClass().getSimpleName());
-        }
-    }
-
-    @Override
-    protected void delete(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     @Override
     protected HostAttestationCollection createEmptyCollection() {
         return new HostAttestationCollection();
     }
-    
-    private Date getCacheStaleAfter(){
-        return new DateTime().minusSeconds(CACHE_VALIDITY_SECS).toDate();
-    }
-    
-    private HostAttestation convert(TblTaLog obj, String hostName) {
-        HostAttestation convObj = new HostAttestation();
-        convObj.setId(UUID.valueOf(obj.getUuid_hex()));
-        convObj.setHostUuid(obj.getHost_uuid_hex());
-        convObj.setHostName(hostName);
-        convObj.setHostTrustResponse(new HostTrustResponse(new Hostname(hostName), getHostTrustStatusObj(obj)));
-        return convObj;
-    }
 
-    private HostTrustStatus getHostTrustStatusObj(TblTaLog tblTaLog) {
-        HostTrustStatus hostTrustStatus = new HostTrustStatus();
-        
-        String[] parts = tblTaLog.getError().split(",");
-        
-        for(String part : parts){
-            String[] subparts = part.split(":");
-            if(subparts[0].equalsIgnoreCase("BIOS")){
-                hostTrustStatus.bios = (Integer.valueOf(subparts[1]) != 0);
-            }else{
-                hostTrustStatus.vmm = (Integer.valueOf(subparts[1]) != 0);
-            }
-        }
-        return hostTrustStatus;
-    }    
+    @Override
+    protected HostAttestationRepository getRepository() {
+        return repository;
+    }
+    
 }

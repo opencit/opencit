@@ -56,9 +56,9 @@ import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
+//import javax.ejb.Stateless;
+//import javax.ejb.TransactionAttribute;
+//import javax.ejb.TransactionAttributeType;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
@@ -76,7 +76,7 @@ import javax.ws.rs.core.MediaType;
  * @author mkuchtiak
  */
 @V1
-@Stateless
+//@Stateless
 @Path("/WLMService/resources/mles")
 public class Mle {
 
