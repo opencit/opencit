@@ -53,10 +53,10 @@ public abstract class AbstractJsonapiResource<T extends Document, C extends Docu
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractJsonapiResource.class);
 
     protected abstract C createEmptyCollection(); 
-    
+    /*
     public AbstractJsonapiResource() {
         super();
-    }
+    }*/
 
     @GET
     @Produces(OtherMediaType.APPLICATION_VND_API_JSON)

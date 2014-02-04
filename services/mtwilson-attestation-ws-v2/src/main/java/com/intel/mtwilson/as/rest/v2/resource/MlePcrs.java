@@ -37,11 +37,15 @@ import org.slf4j.LoggerFactory;
 public class MlePcrs extends AbstractJsonapiResource<MlePcr, MlePcrCollection, MlePcrFilterCriteria, NoLinks<MlePcr>, MlePcrLocator>{
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
-
+    private MlePcrRepository repository;
     public MlePcrs() {
-        super();
-        setRepository(new MlePcrRepository());
+//        super();
+//        setRepository(new MlePcrRepository());
+        repository = new MlePcrRepository();
     }
+    
+    @Override
+    protected MlePcrRepository getRepository() { return repository; }
     
     @Override
     protected MlePcrCollection createEmptyCollection() {

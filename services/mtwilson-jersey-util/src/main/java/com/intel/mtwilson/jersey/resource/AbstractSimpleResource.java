@@ -78,6 +78,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AbstractSimpleResource.class);
     private ObjectMapper mapper = new ObjectMapper(); // for debugging only
+/*
     private SimpleRepository<T,C,F,L> repository;
     
     public void setRepository(SimpleRepository<T,C,F,L> repository) {
@@ -85,7 +86,8 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     } 
     
     protected SimpleRepository<T,C,F,L> getRepository() { return repository; }
-    
+    */
+    protected abstract SimpleRepository<T,C,F,L> getRepository();
     
     // TODO:   searchCollection  which @Produces   OtherMediaType.APPLICATION_VND_API_JSON  
     //       must be implemented in a subclass...
@@ -93,7 +95,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     public C searchCollection(@BeanParam F selector) {
         try { log.debug("searchCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("searchCollection: cannot serialize selector: {}", e.getMessage()); }
         ValidationUtil.validate(selector); // throw new MWException(e, ErrorCode.AS_INPUT_VALIDATION_ERROR, input, method.getName());
-        return repository.search(selector);
+        return getRepository().search(selector);
     }
 
     /**
@@ -115,7 +117,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
         if (item.getId() == null) {
             item.setId(new UUID());
         }
-        repository.create(item);
+        getRepository().create(item);
         return item;
     }
 
@@ -126,40 +128,40 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @DELETE
     public void deleteOne(@BeanParam L locator) {
         try { log.debug("deleteOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
-        T item = repository.retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
+        T item = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
-        repository.delete(locator);
+        getRepository().delete(locator);
         /*
-        T item = repository.retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
+        T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
-        repository.delete(id);*/
+        getRepository().delete(id);*/
                 /*
-//        C collection = repository.search(selector);
+//        C collection = getRepository().search(selector);
 //        if( collection.getDocuments().isEmpty() ) {            
 //            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
 //        }
 //        T item = collection.getDocuments().get(0);
         
-//        repository.delete(item.getId().toString());
+//        getRepository().delete(item.getId().toString());
 * */
     }
     
     @DELETE
     public void deleteCollection(@BeanParam F selector) {
         try { log.debug("deleteCollection: {}", mapper.writeValueAsString(selector)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize selector: {}", e.getMessage()); }
-        C collection = repository.search(selector);
+        C collection = getRepository().search(selector);
         if( collection.getDocuments().isEmpty() ) {            
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
         // Do the delete here after search
-        repository.delete(selector);
+        getRepository().delete(selector);
         /*for(T item : collection.getDocuments()) {
             // TODO:  multi-threaded or parallel or have a repository method for multi-delete where we collect all the id's and then send a list
-            repository.delete();
+            getRepository().delete();
         }*/
         
     }
@@ -179,18 +181,18 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     public T retrieveOne(@BeanParam L locator) {
         try { log.debug("retrieveOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
         /*
-        T item = repository.retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
+        T item = getRepository().retrieve(id); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }*/
         /*
-//        C collection = repository.search(selector);
+//        C collection = getRepository().search(selector);
 //        if( collection.getDocuments().isEmpty() ) {            
 //            throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
 //        }
 //        T item = collection.getDocuments().get(0);
 * */
-        T existing = repository.retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
+        T existing = getRepository().retrieve(locator); // subclass is responsible for validating the id in whatever manner it needs to;  most will return null if !UUID.isValid(id)  but we don't do it here because a resource might want to allow using something other than uuid as the url key, for example uuid OR hostname for hosts
         if (existing == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
@@ -217,11 +219,11 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
         ValidationUtil.validate(item);
 //        item.setId(UUID.valueOf(id));
         locator.copyTo(item);
-        T existing = repository.retrieve(locator); // subclass is responsible for validating id
+        T existing = getRepository().retrieve(locator); // subclass is responsible for validating id
         if (existing == null) {
-            repository.create(item);
+            getRepository().create(item);
         } else {
-            repository.store(item);
+            getRepository().store(item);
         }
 
         return item;
@@ -244,7 +246,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
     @Consumes({OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON})
     public T patchOne(@BeanParam L locator, Patch<T, F, P>[] patchArray) {
         try { log.debug("patchOne: {}", mapper.writeValueAsString(locator)); } catch(JsonProcessingException e) { log.debug("createOne: cannot serialize locator: {}", e.getMessage()); }
-        T item = repository.retrieve(locator); // subclass is responsible for validating id
+        T item = getRepository().retrieve(locator); // subclass is responsible for validating id
         if (item == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND); // TODO i18n
         }
@@ -260,7 +262,7 @@ public abstract class AbstractSimpleResource<T extends Document, C extends Docum
             }
 
         }
-        // XXX TODO wire up to repository...
+        // XXX TODO wire up to getRepository()...
         // look it up first, update whtever fields are specified for update by the patch format, then issue updates...
         //return new Host();
 //        return patch(null);

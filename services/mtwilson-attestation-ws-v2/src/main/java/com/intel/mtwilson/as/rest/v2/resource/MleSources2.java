@@ -33,11 +33,16 @@ import javax.ws.rs.core.Response;
 public class MleSources2 extends AbstractJsonapiResource<MleSource, MleSourceCollection, MleSourceFilterCriteria, MleSourceLinks, MleSourceLocator>{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MleSources2.class);
     
+    private MleSourceRepository repository;
     public MleSources2() {
-        super();
-        setRepository(new MleSourceRepository());
+//        super();
+//        setRepository(new MleSourceRepository());
+        repository = new MleSourceRepository();
     }
 
+    @Override
+    protected MleSourceRepository getRepository() { return repository; }
+    
     @Override
     protected MleSourceCollection createEmptyCollection() {
         return new MleSourceCollection();
