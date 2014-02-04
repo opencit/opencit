@@ -22,6 +22,7 @@
 	<!--  we don't need to build this every time, it can be done separately for each release
     <module>mtwilson-client-java5</module>
     <module>mtwilson-client-dotnet</module>
+    <module>mtwilson-client-php</module>
 	-->
     <module>mtwilson-launcher</module>
     <module>mtwilson-launcher-ext</module>

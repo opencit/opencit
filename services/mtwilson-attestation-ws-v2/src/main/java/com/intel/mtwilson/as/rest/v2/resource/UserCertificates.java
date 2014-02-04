@@ -39,7 +39,11 @@ import org.slf4j.LoggerFactory;
 @Path("/user-certificates")
 public class UserCertificates extends AbstractCertificateResource<UserCertificate, UserCertificateCollection, UserCertificateFilterCriteria, UserCertificateLinks> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    
+    public UserCertificates() {
+        super();
+    }
     
     @Override
     protected UserCertificateCollection search(UserCertificateFilterCriteria criteria) {

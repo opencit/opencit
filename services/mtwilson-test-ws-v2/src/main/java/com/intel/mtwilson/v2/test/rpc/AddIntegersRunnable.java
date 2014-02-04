@@ -15,6 +15,26 @@ import com.intel.mtwilson.launcher.ws.ext.RPC;
  * The name passed to @RPC annotation is what will be used to access
  * the API, like /rpc/add_integers
  * 
+ * Sample JSON input:
+ * {x:1,y:1}
+ * Sample XML input:
+ * <add_integers><x>1</x><y>1</y></add_integers>
+ * Sample YAML input:
+ * ---
+ * x: 1
+ * y: 1
+ * 
+ * 
+ * Sample JSON output:
+ * {x:1,y:1,result:2}
+ * Sample XML output:
+ * <add_integers><x>1</x><y>1</y><result>2</result></add_integers>
+ * Sample YAML output:
+ * ---
+ * x: 1
+ * y: 1
+ * result: 2
+ * 
  * @author jbuhacoff
  */
 @RPC("add_integers")

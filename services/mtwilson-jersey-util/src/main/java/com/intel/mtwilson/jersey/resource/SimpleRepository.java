@@ -10,7 +10,18 @@ import com.intel.mtwilson.jersey.FilterCriteria;
 import com.intel.mtwilson.jersey.Locator;
 
 /**
- *
+ * TODO:  possibly create a CollectionRepository interface which adds the
+ * following methods:
+ * 
+ * create(C items);
+ * store(C items);
+ * 
+ * which would then possibly take advantage of database-specific features,
+ * such as a multi-row insert/update, or it might use multithreading, etc.
+ * which might be better than the client having to loop through a collection
+ * or do multithreading code at the business layer for something that might become
+ * common.
+ * 
  * @author jbuhacoff
  */
 public interface SimpleRepository<T extends Document, C extends DocumentCollection<T>, F extends FilterCriteria<T>, L extends Locator<T>> {
@@ -69,7 +80,13 @@ public interface SimpleRepository<T extends Document, C extends DocumentCollecti
      *
      * @param id
      */
-//    void delete(L locator);
-    void delete(String id);
-    
+    void delete(L locator);
+//    void delete(String id);
+
+    /**
+     * 
+     * @param criteria 
+     */
+    void delete(F criteria);
+
 }

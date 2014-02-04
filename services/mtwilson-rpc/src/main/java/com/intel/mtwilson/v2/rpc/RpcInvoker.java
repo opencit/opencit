@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.launcher.ext.annotations.Background;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
+import com.intel.mtwilson.rpc.v2.model.RpcPriv;
 import com.intel.mtwilson.rpc.v2.model.RpcCollection;
 import com.intel.mtwilson.rpc.v2.model.RpcFilterCriteria;
 import com.thoughtworks.xstream.XStream;
@@ -64,7 +65,7 @@ public class RpcInvoker implements Runnable {
         
         RpcLocator locator = new RpcLocator();
         locator.id = id;
-        Rpc rpc = repository.retrieveInput(locator); // retrieve(locator) would only return the status info ;  so we have an additional retrieveInput method to also return the input
+        RpcPriv rpc = repository.retrieveInput(locator); // retrieve(locator) would only return the status info ;  so we have an additional retrieveInput method to also return the input
         
         // make sure we have an extension to handle this rpc
         RpcAdapter adapter = RpcUtil.findRpcForName(rpc.getName());

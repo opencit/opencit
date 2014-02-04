@@ -12,12 +12,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.jersey.Document;
 import com.intel.dcsg.cpg.performance.Progress;
-import com.intel.mtwilson.rpc.v2.model.Rpc.Status;
 
 /**
- * This is a limited view of the Rpc class which excludes the input and 
- * output.
- * 
  * A remote procedure call has an id, href, name of the procedure, input, 
  * status, progress, output, faults, and links.
  * 
@@ -63,65 +59,34 @@ import com.intel.mtwilson.rpc.v2.model.Rpc.Status;
  * 
  * @author jbuhacoff
  */
-@JacksonXmlRootElement(localName="rpc_status")
-public class RpcStatus extends Document implements Progress {
-    private String name;
-    @JsonInclude(JsonInclude.Include.ALWAYS)
-    @JacksonXmlElementWrapper(localName="faults")
-    @JacksonXmlProperty(localName="fault")        
-    private Fault[] faults;
-    private Status status;
-    private Long current;
-    private Long max;
+@JacksonXmlRootElement(localName="rpc")
+public class RpcPriv extends Rpc {
+    private byte[] input;
+    private byte[] output;
+    private String authorizationToken;
     
-    public String getName() {
-        return name;
+    public byte[] getInput() {
+        return input;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setInput(byte[] input) {
+        this.input = input;
     }
     
-    public Fault[] getFaults() {
-        return faults;
+    public byte[] getOutput() {
+        return output;
     }
 
-    public void setFaults(Fault[] faults) {
-        this.faults = faults;
+    public void setOutput(byte[] output) {
+        this.output = output;
     }
 
-    public Status getStatus() {
-        return status;
+    public String getAuthorizationToken() {
+        return authorizationToken;
+    }
+    
+    public void setAuthorizationToken(String authorizationToken) {
+        this.authorizationToken = authorizationToken;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
-    @Override
-    public Long getCurrent() {
-        return current;
-    }
-
-    @Override
-    public Long getMax() {
-        return max;
-    }
-
-    public void setCurrent(Long current) {
-        this.current = current;
-    }
-
-    public void setMax(Long max) {
-        this.max = max;
-    }
-        
-    public void copyFrom(Rpc rpc) {
-        setId(rpc.getId());
-        setName(rpc.getName());
-        setFaults(rpc.getFaults());
-        setStatus(rpc.getStatus());
-        setCurrent(rpc.getCurrent());
-        setMax(rpc.getMax());
-    }
 }

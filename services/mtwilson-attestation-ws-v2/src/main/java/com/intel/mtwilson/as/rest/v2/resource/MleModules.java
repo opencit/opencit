@@ -33,7 +33,11 @@ import org.slf4j.LoggerFactory;
 @Path("/mle-modules")
 public class MleModules extends AbstractResource<MleModule, MleModuleCollection, MleModuleFilterCriteria, MleModuleLinks> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
+    
+    public MleModules() {
+        super();
+    }
     
     @Override
     protected MleModuleCollection search(MleModuleFilterCriteria criteria) {

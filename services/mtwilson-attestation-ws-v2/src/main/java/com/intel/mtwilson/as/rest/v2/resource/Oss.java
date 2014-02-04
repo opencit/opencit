@@ -34,8 +34,12 @@ import org.slf4j.LoggerFactory;
 @Path("/oss")
 public class Oss extends AbstractResource<Os, OsCollection, OsFilterCriteria, OsLinks>{
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
 
+    public Oss() {
+        super();
+    }
+    
     @Override
     protected OsCollection search(OsFilterCriteria criteria) {
         // start with a collection instance; if we don't find anything we'll return the empty collection

@@ -36,9 +36,11 @@ public class UserCertificate extends CertificateDocument {
     private Integer serialNumber;
     private Date expires;
     private boolean enabled;
+    // @Regex("(?:APPROVED|PENDING|EXPIRED)") 
     private String status;
     
-    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
+    // Need to have the below 3 annotations for all the arrays
+    //@JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="roles")
     @JacksonXmlProperty(localName="role")        

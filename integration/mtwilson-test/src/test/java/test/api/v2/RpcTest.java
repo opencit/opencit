@@ -14,7 +14,7 @@ import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignature;
 import com.intel.mtwilson.v2.vm.attestation.model.ManifestSignatureInput;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
-import com.intel.mtwilson.rpc.v2.model.RpcStatus;
+import com.intel.mtwilson.rpc.v2.model.Rpc;
 import org.restlet.data.MediaType;
 /**
  *
@@ -50,7 +50,7 @@ public class RpcTest {
         log.debug("Output raw: {}", outputJson);
         
         // the response from an rpc call is the RpcStatus object
-        RpcStatus status = mapper.readValue(outputJson, RpcStatus.class);
+        Rpc status = mapper.readValue(outputJson, Rpc.class);
         log.debug("Status of rpc {} is {}  -- request id is {}", status.getName(), status.getStatus(), status.getId());
         
         // now make the call to get the status from the server

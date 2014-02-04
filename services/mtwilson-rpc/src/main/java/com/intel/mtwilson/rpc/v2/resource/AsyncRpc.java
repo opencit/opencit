@@ -15,7 +15,7 @@ import com.intel.mtwilson.jersey.http.OtherMediaType;
 import com.intel.mtwilson.launcher.ws.ext.RPC;
 import com.intel.mtwilson.launcher.ws.ext.V2;
 import com.intel.mtwilson.rpc.v2.model.Rpc;
-import com.intel.mtwilson.rpc.v2.model.RpcStatus;
+import com.intel.mtwilson.rpc.v2.model.RpcPriv;
 import com.intel.mtwilson.v2.rpc.RpcInvoker;
 import com.intel.mtwilson.v2.rpc.RpcUtil;
 import com.thoughtworks.xstream.XStream;
@@ -96,7 +96,7 @@ public class AsyncRpc {
     @POST
     @Consumes(MediaType.WILDCARD)
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, OtherMediaType.APPLICATION_YAML, OtherMediaType.TEXT_YAML})
-    public RpcStatus invokeRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
+    public Rpc invokeRemoteProcedureCall(@PathParam("name") String name, @Context HttpServletRequest request, byte[] input) {
         // make sure we have an extension to handle this rpc
         RpcAdapter adapter = RpcUtil.findRpcForName(name);
         if( adapter == null ) {
@@ -138,7 +138,7 @@ public class AsyncRpc {
         
         
         // prepare the rpc task with the input
-        Rpc rpc = new Rpc();
+        RpcPriv rpc = new RpcPriv();
         rpc.setId(new UUID());
         rpc.setName(name);
         rpc.setInput(inputXml);
@@ -152,7 +152,7 @@ public class AsyncRpc {
         // queue it (must follow storage to prevent situation where an executing task needs to store an update to the table and it hasn't been stored yet)
 //        RpcInvoker.getInstance().add(rpc.getId());
         
-        RpcStatus status = new RpcStatus();
+        Rpc status = new Rpc();
         status.copyFrom(rpc);
         
         return status;

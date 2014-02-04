@@ -306,7 +306,7 @@
 		<!--
         <dependency>
             <groupId>com.intel.mtwilson.plugins</groupId>
-            <artifactId>mtwilson-plugin-auto-refresh-trust</artifactId>
+            <artifactId>mtwilson-auto-refresh-trust</artifactId>
             <version>${project.version}</version>
         </dependency>
 		-->

@@ -33,8 +33,12 @@ import org.slf4j.LoggerFactory;
 @Path("/users")
 public class Users extends AbstractResource<User, UserCollection, UserFilterCriteria, UserLinks> {
 
-    Logger log = LoggerFactory.getLogger(getClass().getName());
+    private Logger log = LoggerFactory.getLogger(getClass().getName());
 
+    public Users() {
+        super();
+    }
+    
     @Override
     protected UserCollection search(UserFilterCriteria criteria) {
         UserCollection userCollection = new UserCollection();
