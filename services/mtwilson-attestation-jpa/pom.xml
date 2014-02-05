@@ -92,7 +92,7 @@
     </dependency>            
  	<dependency>
 	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>webservice-util</artifactId>
+	    <artifactId>mtwilson-webservice-util</artifactId>
 	    <version>${project.version}</version>
   	</dependency>
 	<dependency>

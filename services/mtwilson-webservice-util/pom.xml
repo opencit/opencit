@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>webservice-util</artifactId>
+  <artifactId>mtwilson-webservice-util</artifactId>
   <packaging>jar</packaging>
-  <name>Webservice Util</name>
+  <name>mtwilson-webservice-util</name>
   <description>Configuration, web application exceptions,  Components</description>
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
