@@ -615,8 +615,10 @@ if [ ! -z "opt_attservice" ]; then
 fi
 
 # temp symlink -- SAVY added 2014-02-04
-mkdir /opt/mtwilson
-ln -s /usr/share/glassfish4/glassfish/domains/domain1/applications/AttestationService/WEB-INF/lib /opt/mtwilson/java
+if [[ ! -e "/opt/mtwilson/java" ]]; then
+  mkdir -p /opt/mtwilson
+  ln -s "/usr/share/glassfish4/glassfish/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+fi
 
 if [ ! -z "$opt_mangservice" ]; then
   echo "Installing Management Service..." | tee -a  $INSTALL_LOG_FILE
