@@ -3,7 +3,7 @@
 
   <artifactId>mtwilson-http-security</artifactId>
   <packaging>jar</packaging>
-  <name>Http Client Security</name>
+  <name>mtwilson-http-security</name>
   
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
