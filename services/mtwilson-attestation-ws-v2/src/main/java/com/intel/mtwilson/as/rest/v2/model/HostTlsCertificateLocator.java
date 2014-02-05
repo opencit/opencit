@@ -14,15 +14,15 @@ import javax.ws.rs.PathParam;
  */
 public class HostTlsCertificateLocator implements Locator<HostTlsCertificate> {
     
-    @PathParam("id")
-    public UUID id;
+    @PathParam("host-id")
+    public UUID hostUuid;
     @PathParam("sha1")
     public String sha1;
 
 
     @Override
     public void copyTo(HostTlsCertificate item) {
-        item.setHostUuid(id.toString());
+        item.setHostUuid(hostUuid.toString());
         item.setSha1(sha1);
     }
     

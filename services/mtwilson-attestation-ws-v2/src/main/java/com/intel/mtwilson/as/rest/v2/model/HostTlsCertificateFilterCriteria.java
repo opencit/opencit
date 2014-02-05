@@ -5,6 +5,8 @@
 package com.intel.mtwilson.as.rest.v2.model;
 
 import com.intel.mtwilson.jersey.FilterCriteria;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 /**
  *
@@ -12,4 +14,9 @@ import com.intel.mtwilson.jersey.FilterCriteria;
  */
 public class HostTlsCertificateFilterCriteria implements FilterCriteria<HostTlsCertificate> {
     
+    @PathParam("host-id")
+    public String hostUuid;
+    @QueryParam("sha1")
+    public String sha1;
+        
 }

@@ -13,17 +13,17 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class MlePcrLocator implements Locator<MlePcr>{
+public class MleModuleLocator implements Locator<MleModule> {
 
-    @PathParam("id")
-    public UUID id;
-    @QueryParam("index")
-    public String index;
+    @PathParam("mle-id")
+    public UUID mleUuid;
+    @QueryParam("id")
+    public UUID moduleUuid;
     
     @Override
-    public void copyTo(MlePcr item) {
-        item.setMleUuid(id.toString());
-        item.setPcrName(index);
+    public void copyTo(MleModule item) {
+        item.setMleUuid(mleUuid.toString());
+        item.setId(moduleUuid);
     }
     
 }

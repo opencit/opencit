@@ -5,10 +5,13 @@
 package com.intel.mtwilson.as.rest.v2.resource;
 
 import com.intel.dcsg.cpg.crypto.RsaUtil;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.dcsg.cpg.x509.X509Builder;
 import com.intel.dcsg.cpg.x509.X509Util;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.UserCertificate;
+import com.intel.mtwilson.as.rest.v2.model.UserCertificateLocator;
+import com.intel.mtwilson.as.rest.v2.repository.UserCertificateRepository;
 import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
 import com.intel.mtwilson.ms.data.ApiClientX509;
 import java.io.File;
@@ -41,8 +44,11 @@ public class UserCertificatesTest {
     
     @Test
     public void testStoreUserCertificate() throws Exception {
-        UserCertificates userCertificates = new UserCertificates();
-        UserCertificate userCertificate = userCertificates.retrieve("7f2a647d-8172-44a6-b15a-30eaa42580e7");
+        //UserCertificates userCertificates = new UserCertificates();
+        UserCertificateRepository userCertificates = new UserCertificateRepository();
+        UserCertificateLocator locator = new UserCertificateLocator();
+        locator.id = UUID.valueOf("7f2a647d-8172-44a6-b15a-30eaa42580e7");
+        UserCertificate userCertificate = userCertificates.retrieve(locator);
         // create a new key and certificate for the same subject name
         KeyPair keypair = RsaUtil.generateRsaKeyPair(1024);
         X509Certificate certificate = X509Builder.factory().selfSigned(userCertificate.getName(), keypair).build();
@@ -60,8 +66,11 @@ public class UserCertificatesTest {
         log.debug("mtwilson.db.driver = {} configured in {}", My.configuration().getDatabaseDriver(), My.configuration().getSource("mtwilson.db.driver"));
         log.debug("mtwilson.db.schema = {} configured in {}", My.configuration().getDatabaseSchema(), My.configuration().getSource("mtwilson.db.schema"));
         log.debug("jdbc url = {}", My.jdbc().url());
-        UserCertificates userCertificates = new UserCertificates();
-        UserCertificate userCertificate = userCertificates.retrieve("7f2a647d-8172-44a6-b15a-30eaa42580e7");
+        //UserCertificates userCertificates = new UserCertificates();
+        UserCertificateRepository userCertificates = new UserCertificateRepository();
+        UserCertificateLocator locator = new UserCertificateLocator();
+        locator.id = UUID.valueOf("7f2a647d-8172-44a6-b15a-30eaa42580e7");
+        UserCertificate userCertificate = userCertificates.retrieve(locator);
         log.debug("Retrieved user certificate: {}", userCertificate.getName());
         log.debug("Certificate is {} bytes", userCertificate.getCertificate().length);
         FileOutputStream out = new FileOutputStream(new File("target/test.crt"));
