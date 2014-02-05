@@ -8,6 +8,7 @@ import com.intel.dcsg.cpg.validation.Regex;
 import java.net.MalformedURLException;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * A data transfer object. The TxtHost object is validated on construction
@@ -58,7 +59,7 @@ public class TxtHostRecord {
     public String AIK_SHA1;
     @JsonProperty
     public String Processor_Info;
-
+    @JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
     public String Hardware_Uuid;
     
     public TxtHostRecord() {
@@ -86,5 +87,6 @@ public class TxtHostRecord {
         AIK_Certificate = input.getAikCertificate();
         AIK_PublicKey = input.getAikPublicKey();
         AIK_SHA1 = input.getAikSha1();
+        Hardware_Uuid = null;
     }
 }

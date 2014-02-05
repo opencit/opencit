@@ -57,7 +57,7 @@ public class UuidResource extends ServerResource{
         log.debug("made it into actionAutomation! got ip of " + ip);
         //String ip = getQuery().getFirstValue("ipaddress");
         UuidResponse response = new UuidResponse();
-        List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip);
+        List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip,true);
         if(hostList == null || hostList.size() < 1) {
             throw new Exception("No host records found");
         }

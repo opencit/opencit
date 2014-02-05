@@ -818,6 +818,56 @@ public class HostBO extends BaseBO {
          * @param searchCriteria: If in case the user has not provided any
          * search criteria, then all the hosts would be returned back to the
          * caller
+         * @param includeHardwareUuid: if this is set to true, it causes the resulting 
+         * TxtHostRecord to include the hardware_uuid field from the tblHost
+         * @return
+         */
+        public List<TxtHostRecord> queryForHosts(String searchCriteria,boolean includeHardwareUuid) {
+                try {
+                        TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
+                        List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
+                        List<TblHosts> tblHostList;
+
+
+                        if (searchCriteria != null && !searchCriteria.isEmpty()) {
+                                tblHostList = tblHostsJpaController.findHostsByNameSearchCriteria(searchCriteria);
+                        } else {
+                                tblHostList = tblHostsJpaController.findTblHostsEntities();
+                        }
+
+                        if (tblHostList != null) {
+
+                                log.debug(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
+
+                                for (TblHosts tblHosts : tblHostList) {
+                                        TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts,includeHardwareUuid);
+                                        txtHostList.add(hostObj);
+                                }
+                        } else {
+                                log.debug(String.format("Found no hosts for search criteria [%s]", searchCriteria));
+                        }
+
+                        return txtHostList;
+                } catch (ASException e) {
+                        throw e;
+                } catch (Exception e) {
+                        // throw new ASException(e);
+                        // Bug: 1038 - prevent leaks in error messages to client
+                        log.error("Error during querying for registered hosts.", e);
+                        throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, e.getClass().getSimpleName());
+                }
+
+        }
+
+        
+        /**
+         * Author: Sudhir
+         *
+         * Searches for the hosts using the criteria specified.
+         *
+         * @param searchCriteria: If in case the user has not provided any
+         * search criteria, then all the hosts would be returned back to the
+         * caller
          * @return
          */
         public List<TxtHostRecord> queryForHosts(String searchCriteria) {
@@ -838,7 +888,7 @@ public class HostBO extends BaseBO {
                                 log.debug(String.format("Found [%d] host results for search criteria [%s]", tblHostList.size(), searchCriteria));
 
                                 for (TblHosts tblHosts : tblHostList) {
-                                        TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts);
+                                        TxtHostRecord hostObj = createTxtHostFromDatabaseRecord(tblHosts, false);
                                         txtHostList.add(hostObj);
                                 }
                         } else {
@@ -857,7 +907,7 @@ public class HostBO extends BaseBO {
 
         }
 
-        public TxtHostRecord createTxtHostFromDatabaseRecord(TblHosts tblHost) {
+        public TxtHostRecord createTxtHostFromDatabaseRecord(TblHosts tblHost,boolean includeHardwareUuid) {
                 TxtHostRecord hostObj = new TxtHostRecord();
                 hostObj.HostName = tblHost.getName();
                 hostObj.IPAddress = tblHost.getName();
@@ -873,7 +923,10 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_Version = tblHost.getVmmMleId().getVersion();
                 hostObj.VMM_OSName = tblHost.getVmmMleId().getOsId().getName();
                 hostObj.VMM_OSVersion = tblHost.getVmmMleId().getOsId().getVersion();
-                hostObj.Hardware_Uuid = tblHost.getHardwareUuid();
+                if(includeHardwareUuid)
+                    hostObj.Hardware_Uuid = tblHost.getHardwareUuid();
+                else
+                    hostObj.Hardware_Uuid = null;
                 return hostObj;
         }
 

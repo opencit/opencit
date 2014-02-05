@@ -860,6 +860,14 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return results;                
     }
 
+    @Override
+    public List<TxtHostRecord> queryForHosts(String searchCriteria, boolean includeHardware) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("searchCriteria", searchCriteria);        
+        ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
+        return results;                
+    }    
+    
     /**
      * javax.ws.rs.core.MediaType.APPLICATION_XML   application/xml
      * @param hostnames 
