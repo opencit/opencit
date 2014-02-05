@@ -19,7 +19,7 @@
 	<module>asset-tag-dao</module>
 	<module>asset-tag-dao-jooq</module>
 	<module>asset-tag-service</module>
-	<module>trust-policy</module>
+	<module>mtwilson-trust-policy</module>
     <module>webservice-util</module>
     <module>mtwilson-http-security</module>
     <module>mtwilson-audit-api</module>
