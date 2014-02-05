@@ -65,14 +65,17 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
 
     @Override
     public MlePcr retrieve(MlePcrLocator locator) {
-        if (locator.id == null) { return null;}
-        String id = locator.id.toString();
+        if (locator.id == null || locator.index == null) { return null;}
+        String mleUuid = locator.id.toString();
+        String pcrIndex = locator.index;
         try {
             TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
-            TblPcrManifest obj = jpaController.findTblPcrManifestByUuid(id);   
-            if (obj != null) {
-                MlePcr pcrObj = convert(obj);
-                return pcrObj;
+            List<TblPcrManifest> pcrs = jpaController.findTblPcrManifestByMleUuid(mleUuid);
+            for (TblPcrManifest pcr : pcrs) {
+                if (pcr.getName().equalsIgnoreCase(pcrIndex)) {
+                    MlePcr obj = convert(pcr);
+                    return obj;
+                }
             }
         } catch (ASException aex) {
             throw aex;            
@@ -115,9 +118,17 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
 
     @Override
     public void delete(MlePcrLocator locator) {
-        if (locator == null || locator.id == null) { return; }
+        if (locator.id == null || locator.index == null) { return ;}
+        String mleUuid = locator.id.toString();
+        String pcrIndex = locator.index;
         try {
-            new MleBO().deletePCRWhiteList(null, null, null, null, null, null, locator.id.toString());
+            TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
+            List<TblPcrManifest> pcrs = jpaController.findTblPcrManifestByMleUuid(mleUuid);
+            for (TblPcrManifest pcr : pcrs) {
+                if (pcr.getName().equalsIgnoreCase(pcrIndex)) {
+                    new MleBO().deletePCRWhiteList(null, null, null, null, null, null, pcr.getUuid_hex());
+                }
+            }            
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
