@@ -13,4 +13,4 @@ CREATE TABLE `mw_rpc` (
   PRIMARY KEY (`ID`)
 );
 
-INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20140205011500,NOW(),'Mt Wilson 2.0 - added RPC table for mysql');
+INSERT INTO `mw_changelog` (`ID`, `APPLIED_AT`, `DESCRIPTION`) VALUES (20140201124500,NOW(),'Mt Wilson 2.0 - added RPC table for mysql');
