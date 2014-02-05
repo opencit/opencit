@@ -33,8 +33,8 @@ public interface RpcDAO {
     // disabling create because it's different dependign on the database system used ... between the popular mysql and postgres there are enough differences to make this useless.  for example blob vs bytea.
     // use the .sql scripts in mtwilson-postgresql and mtwilson-mysql instead.  
     // TODO: check if JDBI has an update for database system dialects.
-    @SqlUpdate("create table certificate (id bigint primary key generated always as identity, uuid char(36), certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
-    void create();
+//    @SqlUpdate("create table certificate (id bigint primary key generated always as identity, uuid char(36), certificate blob, sha1 char(40), sha256 char(64), subject varchar(255), issuer varchar(255), notBefore timestamp, notAfter timestamp, revoked boolean)")
+//    void create();
     
     @SqlUpdate("insert into mw_rpc (ID, Name, Input, Output, Status, ProgressCurrent, ProgressMax) values (:id, :name, :input, :output, :status, :progressCurrent, :progressMax)")
     void insert(@Bind("id") UUID id, @Bind("name") String name, @Bind("input") byte[] input, @Bind("output") byte[] output, @Bind("status") String status, @Bind("progressCurrent") Long progressCurrent, @Bind("progressMax") Long progressMax);
