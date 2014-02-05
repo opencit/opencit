@@ -45,7 +45,6 @@
     <module>mtwilson-rpc-jdbi</module>
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
-    <module>MSCmdUtility</module>
 	<module>mtwilson-test-ws-v1</module>
         <module>mtwilson-test-ws-v2</module>
 	<module>mtwilson-version-ws-v2</module>

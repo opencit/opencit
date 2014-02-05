@@ -7,8 +7,8 @@
   <name>Management Service Command Utility</name>
   
     <parent>
-        <groupId>com.intel.mtwilson.services</groupId>
-        <artifactId>mtwilson-services</artifactId>
+        <groupId>com.intel.mtwilson.tools</groupId>
+        <artifactId>mtwilson-tools</artifactId>
         <version>1.2.3-SNAPSHOT</version>
     </parent>
     
