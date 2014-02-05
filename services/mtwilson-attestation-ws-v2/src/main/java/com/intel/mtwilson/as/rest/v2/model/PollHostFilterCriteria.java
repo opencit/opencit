@@ -4,12 +4,12 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
-import com.intel.mtwilson.jersey.PatchLink;
+import com.intel.mtwilson.jersey.FilterCriteria;
 
 /**
  *
  * @author ssbangal
  */
-public class OemLinks implements PatchLink<Oem>{
+public class PollHostFilterCriteria implements FilterCriteria<PollHost> {
     
 }

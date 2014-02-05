@@ -27,6 +27,7 @@ public class HostTlsCertificate extends CertificateDocument{
     
     private String hostUuid;
     private String sha1;
+    private String hostName;
     private byte[] certificate;
 
     public String getHostUuid() {
@@ -43,6 +44,14 @@ public class HostTlsCertificate extends CertificateDocument{
 
     public void setSha1(String sha1) {
         this.sha1 = sha1;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 
     
