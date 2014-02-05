@@ -22,9 +22,9 @@
 	<module>trust-policy</module>
     <module>webservice-util</module>
     <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
-    <module>audit-api</module>
-	<module>audit-data</module>
-    <module>audit-handler</module>
+    <module>mtwilson-audit-api</module>
+	<module>mtwilson-audit-data</module>
+    <module>mtwilson-audit-handler</module>
     <module>mtwilson-attestation-jpa</module>
     <module>mtwilson-management-jpa</module>
     <module>mtwilson-util</module>
