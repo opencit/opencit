@@ -3,7 +3,7 @@
 
     <artifactId>mtwilson-trust-utils</artifactId>
     <packaging>jar</packaging>
-    <name>Trust Utils Library</name>
+    <name>mtwilson-trust-utils</name>
     <parent>
         <groupId>com.intel.mtwilson.services</groupId>
         <artifactId>mtwilson-services</artifactId>
