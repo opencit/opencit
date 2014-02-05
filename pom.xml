@@ -28,6 +28,7 @@
     <module>plugins</module> <!-- XXX TODO     leads to a circular dependency when we don't have everything properly refactored;  need to work more on plugin api's s othey don't depend on actual attestation service classes -->
     <module>services</module>
     <module>portals</module>
+    <module>tools</module>
     <module>desktop</module>
     <module>installers</module>
   </modules>
@@ -702,6 +703,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
 	<dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-common</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+	<dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
             <version>2.4.1</version>
         </dependency>
         <dependency>

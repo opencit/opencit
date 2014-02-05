@@ -42,7 +42,7 @@
         </dependency>
 	<dependency>
 		  <groupId>com.intel.mtwilson.services</groupId>
-				 <artifactId>audit-data</artifactId>
+				 <artifactId>mtwilson-audit-data</artifactId>
 				 <version>${project.version}</version>
 	</dependency>
         <dependency>

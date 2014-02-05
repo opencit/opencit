@@ -12,7 +12,6 @@ import com.intel.mtwilson.as.rest.v2.repository.MlePcrRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
 import com.intel.mtwilson.launcher.ws.ext.V2;
-//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +21,13 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-//@Stateless
 @Path("/mle/{id}/pcrs")
 public class MlePcrs extends AbstractJsonapiResource<MlePcr, MlePcrCollection, MlePcrFilterCriteria, NoLinks<MlePcr>, MlePcrLocator>{
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     private MlePcrRepository repository;
+
     public MlePcrs() {
-//        super();
-//        setRepository(new MlePcrRepository());
         repository = new MlePcrRepository();
     }
     

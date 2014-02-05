@@ -19,12 +19,12 @@
 	<module>asset-tag-dao</module>
 	<module>asset-tag-dao-jooq</module>
 	<module>asset-tag-service</module>
-	<module>trust-policy</module>
-    <module>webservice-util</module>
-    <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
-    <module>audit-api</module>
-	<module>audit-data</module>
-    <module>audit-handler</module>
+	<module>mtwilson-trust-policy</module>
+    <module>mtwilson-webservice-util</module>
+    <module>mtwilson-http-security</module>
+    <module>mtwilson-audit-api</module>
+	<module>mtwilson-audit-data</module>
+    <module>mtwilson-audit-handler</module>
     <module>mtwilson-attestation-jpa</module>
     <module>mtwilson-management-jpa</module>
     <module>mtwilson-util</module>
@@ -36,8 +36,8 @@
     <module>mtwilson-tls-policy</module>
 	<module>mtwilson-jersey-util</module>
 	<module>mtwilson-shiro-util</module>
-    <module>MtWilsonHttpSecurityAdapters</module>
-    <module>trust-utils-jar</module>
+    <module>mtwilson-http-security-server</module>
+    <module>mtwilson-trust-utils</module>
     <module>mtwilson-whitelist</module>
     <module>mtwilson-whitelist-ws-v1</module>
     <module>mtwilson-management</module>
@@ -45,7 +45,6 @@
     <module>mtwilson-rpc-jdbi</module>
     <module>mtwilson-rpc-model</module>
     <module>mtwilson-rpc</module>
-    <module>MSCmdUtility</module>
 	<module>mtwilson-test-ws-v1</module>
         <module>mtwilson-test-ws-v2</module>
 	<module>mtwilson-version-ws-v2</module>

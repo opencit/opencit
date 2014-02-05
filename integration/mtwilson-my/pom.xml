@@ -143,7 +143,7 @@
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>audit-handler</artifactId>
+		<artifactId>mtwilson-audit-handler</artifactId>
 		<version>${project.version}</version>        
         <optional>true</optional>
         <scope>provided</scope>
@@ -163,7 +163,7 @@
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
-		<artifactId>audit-data</artifactId>
+		<artifactId>mtwilson-audit-data</artifactId>
 		<version>${project.version}</version>        
         <optional>true</optional>
     </dependency>

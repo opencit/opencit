@@ -101,7 +101,7 @@
         -->
 		<dependency>
 	    <groupId>com.intel.mtwilson.services</groupId>
-	    <artifactId>webservice-util</artifactId>
+	    <artifactId>mtwilson-webservice-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	<dependency>
@@ -150,12 +150,12 @@
         -->
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>audit-handler</artifactId>
+            <artifactId>mtwilson-audit-handler</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>audit-data</artifactId>
+            <artifactId>mtwilson-audit-data</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
