@@ -36,7 +36,7 @@
     <module>mtwilson-tls-policy</module>
 	<module>mtwilson-jersey-util</module>
 	<module>mtwilson-shiro-util</module>
-    <module>MtWilsonHttpSecurityAdapters</module>
+    <module>mtwilson-http-security-server</module>
     <module>trust-utils-jar</module>
     <module>mtwilson-whitelist</module>
     <module>mtwilson-whitelist-ws-v1</module>
