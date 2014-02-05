@@ -21,7 +21,7 @@
 	<module>asset-tag-service</module>
 	<module>trust-policy</module>
     <module>webservice-util</module>
-    <module>MtWilsonHttpSecurity</module> <!-- will be renamed to http-authorization -->
+    <module>mtwilson-http-security</module>
     <module>mtwilson-audit-api</module>
 	<module>mtwilson-audit-data</module>
     <module>mtwilson-audit-handler</module>
