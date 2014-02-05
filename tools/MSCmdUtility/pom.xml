@@ -36,7 +36,7 @@
 
   <dependencies>
       <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-utils</artifactId>
             <version>${project.version}</version>         
       </dependency>
