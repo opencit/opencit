@@ -854,6 +854,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     @Override
     public List<TxtHostRecord> queryForHosts(String searchCriteria) throws IOException, ApiException, SignatureException {
+        log.debug("queryForHosts no hardwareUuid");
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("searchCriteria", searchCriteria);        
         ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
@@ -862,8 +863,14 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
 
     @Override
     public List<TxtHostRecord> queryForHosts(String searchCriteria, boolean includeHardware) throws IOException, ApiException, SignatureException {
+        log.debug("queryForHosts includeHardwareUuid["+includeHardware+"]");
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("searchCriteria", searchCriteria);        
+        if(includeHardware){
+            query.add("includeHardwareUuid","true");
+        }else{
+            query.add("includeHardwareUuid","false");
+        }
         ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
         return results;                
     }    
