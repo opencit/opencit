@@ -567,7 +567,7 @@ mtwilson.atag = mtwilson.atag || {};
                 
                 //$('certificate-request-create-subject').value = event.memo.response.host_uuid;
                 data.certificateRequests['certificate-request-create-form']["certificate-request-create-subject"] = event.memo.response.host_uuid
-                alert("UUID of requested system is " + event.memo.response.host_uuid);
+                //alert("UUID of requested system is " + event.memo.response.host_uuid);
             default:
                 log.debug("No handler for successful HTTP GET of " + event.memo.resource.name);
                 break;
@@ -604,7 +604,8 @@ mtwilson.atag = mtwilson.atag || {};
                 mtwilson.atag.notify({text: 'Retrieve file FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
                 break;
             case 'uuid':
-                alert("getUUID:" + event.memo.response);
+                mtwilson.atag.notify({text: 'Retrieve UUID FAILED: ' + event.memo.message, clearAfter: 'CONFIRM', status: 'ERROR'});
+                //alert("getUUID:" + event.memo.response);
             default:
                 log.debug("No handler for failure HTTP GET of " + event.memo.resource.name);
                 break;

@@ -59,8 +59,10 @@ public class UuidResource extends ServerResource{
         UuidResponse response = new UuidResponse();
         List<TxtHostRecord> hostList = Global.mtwilson().queryForHosts(ip,true);
         if(hostList == null || hostList.size() < 1) {
+            log.debug("host uuid didn't return back any results");
             throw new Exception("No host records found");
         }
+        log.debug("get host uuid returned " + hostList.get(0).Hardware_Uuid);
         response.host_uuid = hostList.get(0).Hardware_Uuid;
         return response;
     }
