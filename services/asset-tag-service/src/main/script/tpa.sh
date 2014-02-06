@@ -122,7 +122,7 @@ function createIndex4() {
  functionReturn=0
  output=`$tpmnvinfo -i $INDEX`
  if [ -z "$output" ]; then
-  $tpmnvdefine -x -t -i $INDEX -s $SIZE -anvramPass -oownerPass -p AUTHWRITE
+  $tpmnvdefine -x -t -i $INDEX -s $SIZE -anvramPass -oownerPass -p "AUTHWRITE|OWNERWRITE"
  fi
 }
 
@@ -177,14 +177,15 @@ function provisionCert() {
  fi
  selectionUUID=`cat $selectionFile  | jshon  -e 0 -e uuid | sed 's/\"//g'`
  if [ $isUsingXml == 0 ]; then
-   echo "$WGET --header=Content-Type: application/json --post-data=[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}] $server/certificate-requests -O $certInfoFile" >> $cmdFile
-   $WGET --header="Content-Type: application/json" --post-data="[{\"subject\": \"$UUID\", \"selection\": \"$selectionUUID\"}]" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
+   json='[{ "subject": "'$UUID'", "selection": "'$selectionUUID'"}]'
+   echo "$WGET --header=Content-Type: application/json --post-data=$json $server/certificate-requests -O $certInfoFile" >> $cmdFile
+   $WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
    clear
  else
 	#here we need to read the xml from the file, escape the " with \ then build our string to send via wget
 	xmlData=`cat $tagFile | sed -e 's/\"/\\\\"/g'|tr -d '\n'`
 	json='[{ "subject": "'$UUID'", "selection": "xml", "xml": "'$xmlData'"}]'
-	echo "$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile" >> $cmdFile
+	echo "$WGET --header=\"Content-Type: application/json\" --post-data=\"$json\" $server/certificate-requests -O $certInfoFile" >> $cmdFile
 	$WGET --header="Content-Type: application/json" --post-data="$json" $server/certificate-requests -O $certInfoFile 2>&1 | awk '/[.] +[0-9][0-9]?[0-9]?%/ { print substr($0,63,3) }' | dialog --stdout --backtitle "$TITLE" --title "Please wait..." --gauge "Creating Asset Tag certificate with $server" 10 60 0
  fi
  certUUID=`cat $certInfoFile | jshon -e 0 -e certificate | sed -e 's/\"//g'`

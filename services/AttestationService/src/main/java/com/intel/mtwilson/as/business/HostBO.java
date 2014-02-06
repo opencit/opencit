@@ -823,6 +823,7 @@ public class HostBO extends BaseBO {
          * @return
          */
         public List<TxtHostRecord> queryForHosts(String searchCriteria,boolean includeHardwareUuid) {
+                log.debug("queryForHost " + searchCriteria + " includeHardwareUuid[" + includeHardwareUuid +"]");
                 try {
                         TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
@@ -871,6 +872,7 @@ public class HostBO extends BaseBO {
          * @return
          */
         public List<TxtHostRecord> queryForHosts(String searchCriteria) {
+                log.debug("queryForHost " + searchCriteria);
                 try {
                         TblHostsJpaController tblHostsJpaController = My.jpa().mwHosts(); //new TblHostsJpaController(getEntityManagerFactory());
                         List<TxtHostRecord> txtHostList = new ArrayList<TxtHostRecord>();
