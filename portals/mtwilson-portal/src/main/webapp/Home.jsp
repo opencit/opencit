@@ -90,6 +90,8 @@
                                 <li><a href="javascript:getAssetTagPage()">Tag Creation</a></li> <!-- was "Register Host" under Management Console automation -->
                                 <li><a href="javascript:getAssetSelectionPage()">Tag Selection</a></li>
                                 <li><a href="javascript:getAssetCertificatePage()">Certificate Management</a></li>
+                                <li><a href="javascript:getAssetSettingsPage()">Settings</a></li>
+                                <li><a href="javascript:getAssetLogPage()">Log</a></li>
                                 <!-- <li><a href="javascript:getAssetTagPage()">Settings</a></li>
                                 <li><a href="javascript:getAssetTagPage()">Log</a></li> -->
                             </ul>

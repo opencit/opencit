@@ -123,20 +123,34 @@ function getAssetTagPage() {
     //var serverAddy = <% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString();) %>;
     $('#mainContainer').html('<div id="AssetTagPage"></div>');
     //$('#AssetTagPage').html('<iframe src="' + assetTagUrl + "/#tags" + '" width="900" height="745" > </iframe>');
-    $('#AssetTagPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/tags.html" + '" width="100%" height="650" > </iframe>');
+    $('#AssetTagPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/tags.html" + '" width="100%" height="1000" > </iframe>');
             //'<iframe height="410" width="100%" frameBorder="3" src="http://www.google.com.au/webhp?sourceid=navclient&ie=UTF-8/index.php">your browser does not support IFRAMEs</iframe>'    
     //window.open("https://127.0.0.1:9999/",'mywin','left=20,top=20,width=865,height=725,toolbar=1,resizable=0');        
 }
 
 function getAssetSelectionPage() {
 	$('#mainContainer').html('<div id="AssetSelectionPage"></div>');
-        $('#AssetSelectionPage').html('<iframe src="' + assetTagUrl + "/#selections" + '" width="900" height="745" > </iframe>');
+        $('#AssetSelectionPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/selections.html" + '" width="100%" height="1000" > </iframe>');
 }
 
 function getAssetCertificatePage() {
 	$('#mainContainer').html('<div id="AssetCertificatePage"></div>');
-        $('#AssetCertificatePage').html('<iframe src="' + assetTagUrl + "/#certificates" + '" width="900" height="745" > </iframe>');
+        $('#AssetCertificatePage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/certificates.html" + '" width="100%" height="2000" > </iframe>');
+        //$('#AssetCertificatePage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/#certificates" + '" width="900" height="850" > </iframe>');
 }
+
+function getAssetSettingsPage() {
+	$('#mainContainer').html('<div id="AssetSettingsPage"></div>');
+        $('#AssetSettingsPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/settings.html" + '" width="100%" height="1500" > </iframe>');
+        //$('#AssetSettingsPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/#configure" + '" width="900" height="1200" > </iframe>');
+}
+
+function getAssetLogPage() {
+	$('#mainContainer').html('<div id="AssetLogPage"></div>');
+        $('#AssetLogPage').html('<iframe scrolling="no" frameborder="0" src="' + assetTagUrl + "/log.html" + '" width="900" height="900" > </iframe>');
+}
+
+
 
 function getViewHostPage() {
 	$('#mainContainer').html('<div id="ViewHostPage"></div>');
