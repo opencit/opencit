@@ -923,10 +923,13 @@ public class HostBO extends BaseBO {
                 hostObj.VMM_Version = tblHost.getVmmMleId().getVersion();
                 hostObj.VMM_OSName = tblHost.getVmmMleId().getOsId().getName();
                 hostObj.VMM_OSVersion = tblHost.getVmmMleId().getOsId().getVersion();
-                if(includeHardwareUuid)
+                if(includeHardwareUuid){
+                    log.debug("adding in hardware uuid field["+tblHost.getHardwareUuid()+"]");
                     hostObj.Hardware_Uuid = tblHost.getHardwareUuid();
-                else
+                }else{
+                    log.debug("not adding in hardware uuid");
                     hostObj.Hardware_Uuid = null;
+                }
                 return hostObj;
         }
 
