@@ -866,13 +866,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         log.debug("queryForHosts includeHardwareUuid["+includeHardware+"]");
         MultivaluedMap<String,String> query = new MultivaluedMapImpl();
         query.add("searchCriteria", searchCriteria);        
-        if(includeHardware){
-            query.add("includeHardwareUuid","true");
-        }else{
-            query.add("includeHardwareUuid","false");
-        }
+        query.add("includeHardwareUuid",String.valueOf(includeHardware));
         ListHostData results = fromJSON(httpGet(asurl("/hosts", query)), ListHostData.class);
-        return results;                
+        return results;
     }    
     
     /**
