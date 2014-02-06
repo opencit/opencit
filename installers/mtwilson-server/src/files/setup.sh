@@ -609,9 +609,9 @@ fi
 
 
 if [ ! -z "opt_attservice" ]; then
-  echo "Installing Attestation Service..." | tee -a  $INSTALL_LOG_FILE
+  echo "Installing mtwilson service..." | tee -a  $INSTALL_LOG_FILE
   ./$attestation_service 
-  echo "Attestation Service installed..." | tee -a  $INSTALL_LOG_FILE
+  echo "mtwilson service installed..." | tee -a  $INSTALL_LOG_FILE
 fi
 
 # temp symlink -- SAVY added 2014-02-04
