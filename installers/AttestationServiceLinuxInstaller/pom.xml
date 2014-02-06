@@ -100,7 +100,7 @@
                   <version>${project.version}</version>
                   <type>war</type>
                   <outputDirectory>${makeself.directory}</outputDirectory>
-                  <destFileName>AttestationService.war</destFileName>
+                  <destFileName>mtwilson.war</destFileName>
                 </artifactItem>
                 <artifactItem>
                   <groupId>com.intel.mtwilson.linux</groupId>
