@@ -122,7 +122,7 @@ function createIndex4() {
  functionReturn=0
  output=`$tpmnvinfo -i $INDEX`
  if [ -z "$output" ]; then
-  $tpmnvdefine -x -t -i $INDEX -s $SIZE -anvramPass -oownerPass -p "AUTHWRITE|OWNERWRITE"
+  $tpmnvdefine -x -t -i $INDEX -s $SIZE -anvramPass -oownerPass -p "AUTHWRITE"
  fi
 }
 
