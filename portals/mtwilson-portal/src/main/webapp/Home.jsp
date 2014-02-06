@@ -30,6 +30,7 @@
 	
 
         <script> var assetTagUrl = "<% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString()); %>"; </script>
+        
 
 
     </head>
@@ -90,11 +91,13 @@
                          <li >
                             <a>Asset Tag Management</a>
                             <ul>
-                                <li><a href="javascript:getAssetTagPage()">Tags</a></li> <!-- was "Register Host" under Management Console automation -->
-                                <li><a href="javascript:getAssetTagSelectionPage()">Selections</a></li>
-                                <li><a href="javascript:getAssetTagCertificatePage()">Certificates</a></li>
-                                <li><a href="javascript:getAssetTagConfigurePage()">Settings</a></li>
-                                <li><a href="javascript:getAssetTagLogPage()">Log</a></li>
+                                <li><a href="javascript:getAssetTagPage()">Tag Creation</a></li> <!-- was "Register Host" under Management Console automation -->
+                                <li><a href="javascript:getAssetSelectionPage()">Tag Selection</a></li>
+                                <li><a href="javascript:getAssetCertificatePage()">Certificate Management</a></li>
+                                <li><a href="javascript:getAssetSettingsPage()">Settings</a></li>
+                                <li><a href="javascript:getAssetLogPage()">Log</a></li>
+                                <!-- <li><a href="javascript:getAssetTagPage()">Settings</a></li>
+                                <li><a href="javascript:getAssetTagPage()">Log</a></li> -->
                             </ul>
                         </li>
                         <!--
