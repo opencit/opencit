@@ -14,12 +14,12 @@ import javax.ws.rs.PathParam;
  */
 public class HostTlsPolicyLocator implements Locator<HostTlsPolicy> {
 
-    @PathParam("id")
-    public UUID id;
+    @PathParam("host")
+    public UUID hostUuid;
 
     @Override
     public void copyTo(HostTlsPolicy item) {
-        item.setHostUuid(id.toString());
+        item.setHostUuid(hostUuid.toString());
     }
     
 }

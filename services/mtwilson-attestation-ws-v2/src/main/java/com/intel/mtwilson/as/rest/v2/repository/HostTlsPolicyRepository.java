@@ -28,7 +28,7 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     
     @Override
     public HostTlsPolicyCollection search(HostTlsPolicyFilterCriteria criteria) {
-        HostTlsPolicyCollection objCollection = new HostTlsPolicyCollection();
+       /* HostTlsPolicyCollection objCollection = new HostTlsPolicyCollection();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             if (criteria.hostUuid != null) {
@@ -43,13 +43,14 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
             log.error("Error during search for hosts.", ex);
             throw new ASException(ErrorCode.AS_QUERY_HOST_ERROR, ex.getClass().getSimpleName());
         }
-        return objCollection;
+        return objCollection;*/
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public HostTlsPolicy retrieve(HostTlsPolicyLocator locator) {
-        if (locator.id == null) { return null; }
-        String id = locator.id.toString();
+        if (locator.hostUuid == null) { return null; }
+        String id = locator.hostUuid.toString();
         try {
             TblHostsJpaController jpaController = My.jpa().mwHosts();
             TblHosts obj = jpaController.findHostByUuid(id);
@@ -68,7 +69,20 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
 
     @Override
     public void store(HostTlsPolicy item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            TblHostsJpaController jpaController = My.jpa().mwHosts();
+            TblHosts obj = jpaController.findHostByUuid(item.getHostUuid());
+            if (obj != null) {
+                obj.setTlsPolicyName(item.getName());
+                obj.setTlsKeystore(item.getKeyStore());
+                jpaController.edit(obj);
+            }
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during update of host Tls Policy.", ex);
+            throw new ASException(ErrorCode.AS_UPDATE_HOST_ERROR, ex.getClass().getSimpleName());
+        }
     }
 
     @Override
@@ -89,7 +103,6 @@ public class HostTlsPolicyRepository implements SimpleRepository<HostTlsPolicy, 
     private HostTlsPolicy convert(TblHosts obj) {
         HostTlsPolicy convObj = new HostTlsPolicy();
         convObj.setHostUuid(obj.getUuid_hex());
-        convObj.setHostName(obj.getName());
         convObj.setName(obj.getTlsPolicyName());
         convObj.setKeyStore(obj.getTlsKeystore());
         return convObj;
