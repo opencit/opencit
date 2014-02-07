@@ -2,7 +2,8 @@ package com.intel.mtwilson.datatypes;
 
 import com.intel.dcsg.cpg.validation.RegexPatterns;
 import com.intel.dcsg.cpg.validation.Regex;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 public class HostConfigData {
    

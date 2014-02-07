@@ -53,7 +53,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.xml.JAXB;
@@ -524,7 +525,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
             return mapper.readValue(document, valueType);
         }
-        catch(org.codehaus.jackson.JsonParseException e) {
+        catch(com.fasterxml.jackson.core.JsonParseException e) {
             log.error("Cannot parse response: "+document);
             throw new ApiException("Cannot parse response: "+document, e);
         }        
@@ -1174,6 +1175,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     // Registration API
     public void register(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException {
         System.out.println("savy003a");
+        System.out.println("savy003: " + apiClient.getCertificate());
+        System.out.println("savy003: " + toJSON(apiClient).content);
+        System.out.println("savy003: " + toJSON(apiClient).toString());
         httpPost(msurl("/apiclient/register"), toJSON(apiClient));
         System.out.println("savy003b");
         //return "true".equals(result);        

@@ -9,8 +9,10 @@ import com.intel.dcsg.cpg.validation.Regex;
 import com.intel.dcsg.cpg.validation.Validator;
 import com.intel.mtwilson.validators.ConnectionStringValidator;
 import java.net.MalformedURLException;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * A data transfer object. The TxtHost object is validated on construction

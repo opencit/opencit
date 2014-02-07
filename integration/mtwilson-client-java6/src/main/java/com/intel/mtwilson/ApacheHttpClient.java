@@ -50,7 +50,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -457,8 +458,19 @@ public class ApacheHttpClient implements java.io.Closeable {
         //log.debug("POST content: {}", message == null ? "(empty)" : message.content);
         HttpPost request = new HttpPost(requestURL);
         if( message != null && message.content != null ) {
+            System.out.println("Savy004a");
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
+        System.out.println("Savy004b: " + locale);
+        System.out.println("Savy004c: " + authority);
+        System.out.println("Savy004d: " + message.content);
+        System.out.println("Savy004e: " + message.contentType.toString());
+        System.out.println("Savy004f: " + (new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8"))).toString());
+        System.out.println("Savy004g: " + request.getEntity());
+        System.out.println("Savy004h: " + request.getEntity().getContent().toString());
+        System.out.println("Savy004i: " + request.getEntity().toString());
+        
+        
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
         }
@@ -466,6 +478,9 @@ public class ApacheHttpClient implements java.io.Closeable {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
         HttpResponse httpResponse = httpClient.execute(request);
+        System.out.println("Savy004j: " + httpResponse.getEntity());
+        System.out.println("Savy004k: " + httpResponse.getEntity().getContent().toString());
+        System.out.println("Savy004l: " + httpResponse.getEntity().toString());
         ApiResponse apiResponse = readResponse(httpResponse);
         request.releaseConnection();
         return apiResponse;

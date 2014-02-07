@@ -18,7 +18,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 /**
@@ -38,7 +39,7 @@ public class JavaAPIClientTest {
         try {
             return mapper.readValue(document, valueType);
         }
-        catch(org.codehaus.jackson.JsonParseException e) {
+        catch(com.fasterxml.jackson.core.JsonParseException e) {
            
             throw new ApiException("Cannot parse response", e);
         }

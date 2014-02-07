@@ -7,7 +7,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * Representation of a hostname. This class enforces some rules on the 

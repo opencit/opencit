@@ -1,7 +1,8 @@
 package com.intel.mtwilson.datatypes;
 
 import com.intel.mtwilson.model.Hostname;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @since 0.5.2
