@@ -6,7 +6,8 @@ package com.intel.mtwilson.jersey;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.security.cert.X509Certificate;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *

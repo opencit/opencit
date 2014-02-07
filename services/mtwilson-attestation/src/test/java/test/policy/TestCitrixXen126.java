@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -65,7 +66,7 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
 public class TestCitrixXen126 {
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    private transient static com.fasterxml.jackson.databind.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private transient static com.fasterxml.jackson.databind.ObjectWriter xml = new XmlMapper().writerWithDefaultPrettyPrinter(); 
     private transient String hostname = "10.1.70.126";
     private transient String connection = "citrix:https://10.1.70.126:443;root;P@ssw0rd";

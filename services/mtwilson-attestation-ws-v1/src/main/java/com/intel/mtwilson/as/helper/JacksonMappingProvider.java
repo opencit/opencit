@@ -7,8 +7,11 @@ package com.intel.mtwilson.as.helper;
 import java.net.URL;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.DeserializationConfig;
+//import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * Allows the OpenStack JSON format where a single-element array is serialized
@@ -42,7 +45,7 @@ public class JacksonMappingProvider implements ContextResolver<ObjectMapper> {
             System.out.println("[JACKSON JAR] "+jackson.toExternalForm());
         }
         */
-        mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
     }
     
     @Override

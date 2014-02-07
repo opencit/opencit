@@ -49,6 +49,7 @@
         </dependency>
 
 <!-- testing support for serializing json -->
+<!--
 <dependency>
 	<groupId>org.codehaus.jackson</groupId>
 	<artifactId>jackson-mapper-asl</artifactId>
@@ -67,6 +68,7 @@
 	<version>1.9.11</version>
   <scope>test</scope>
 </dependency>
+-->
 
 <!-- testing support for serializing xml -->
 <dependency>

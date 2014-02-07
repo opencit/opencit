@@ -3,7 +3,8 @@
  */
 package com.intel.mountwilson.datamodel;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 //import org.codehaus.jackson.map.annotate.JacksonInject;
 
 /**
