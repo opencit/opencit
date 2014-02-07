@@ -7,6 +7,7 @@ package com.intel.mtwilson.as.rest.v2.repository;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
@@ -181,7 +182,14 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
 
     @Override
     public void delete(HostTlsCertificateFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HostTlsCertificateCollection objCollection = search(criteria);
+        if (objCollection != null && !objCollection.getTlsCertificates().isEmpty()) {
+            for (HostTlsCertificate obj : objCollection.getTlsCertificates()) {
+                HostTlsCertificateLocator locator = new HostTlsCertificateLocator();
+                locator.hostUuid = UUID.valueOf(obj.getHostUuid());
+                locator.sha1 = Sha1Digest.valueOf(obj.getCertificate()).toString();
+            }
+        }
     }
     
 }
