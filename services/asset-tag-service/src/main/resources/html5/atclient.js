@@ -97,6 +97,16 @@ mtwilson.atag = mtwilson.atag || {};
             log.debug("Creating view data area: " + elementId);
             mtwilson.rivets.views[ elementId ] = rivets.bind(dataviews[i], mtwilson.atag.data);
         }
+        
+        var tabledisplaybind = $$('.tableDisplayBind');
+        log.debug("Found " + tabledisplaybind.length + " tabledisplaybind to bind");
+        var elementId;
+        i = tabledisplaybind.length;
+        while (i--) {
+            elementId = tabledisplaybind[i].id; // XXX TODO  what if it doesn't have an id ? create one randomly? move up to nearest parent that has an id and bind there??
+            log.debug("Creating tabledisplaybind area: " + elementId);
+            mtwilson.rivets.views[ elementId ] = rivets.bind(tabledisplaybind[i], mtwilson.atag.data);
+        }
 
 //        mtwilson.atag.view.sync();
 

@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+
+
 <html lang="en">
     <!--
     HTML5 documentation:
@@ -20,6 +23,35 @@
     
     -->
     <head>
+        
+        <script type="text/javascript">
+    //alert(document.location);
+    /*
+    $(document).ready( function(){
+        var scrollToElement = $("#selections");
+        $(window).scrollTop( scrollToElement.offset().top);
+       }); */
+    
+    /*
+    function moveWindow() {
+    var anchorValue;
+    var url = document.location;
+    var strippedUrl = url.toString().split("#");
+    if(strippedUrl.length > 1)
+    anchorvalue = strippedUrl[1];
+    window.location.hash =  'certificates';
+    //window.location.href =  strippedUrl[0]+ '#certificates';
+    //window.location='#selections';
+    
+  
+        //window.location.assign="certificates";
+        //location.assign( strippedUrl[0]+ '#selections');
+    } */
+   
+</script>
+    
+</script>
+        
         <title>Asset Tag Reference Implementation</title>
         <meta name="application-name" content="Mt Wilson Asset Tag Reference Implementation"/>
         <meta name="description" content="A web-based tool for defining tags and provisioning asset certificates" />
@@ -52,6 +84,10 @@
         <link rel="stylesheet" href="morestyle.css" type="text/css" />
         -->
         <link rel="stylesheet" href="images/at.css" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="CSS/home.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
+        <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
+
 
         <!--		<script src="ie-settimeout.js" type="text/javascript"><script> -->
         <script src="watch.js" type="text/javascript"></script> <!-- required to use rivets -->
@@ -159,6 +195,7 @@ function isNumber(n) {
 
     </head>
     <body>
+        
         <!-- wrap starts here -->
         <div id="wrap">
 
@@ -174,7 +211,7 @@ function isNumber(n) {
                 </div>		
                 -->
                 <div id="header-caption">
-                    <h1>Asset Tag Management UI</h1>
+                    <h1>Asset Tag Management UI - test 4 </h1>
                 </div>
 
                 <!--header ends-->					
@@ -580,7 +617,7 @@ function isNumber(n) {
                                 <li><input type="submit" value="Save" onclick="ws.createCertificateRequest(this); return false;"/></li>
                             </ul>
                         </form>
-
+                        <div id="search-certificate-requests-div" style="display: none;">
                         <h2>Search Certificate Requests</h2>
 
                         <form id="certificate-request-search-form" action="#" onsubmit="return false;">
@@ -644,7 +681,7 @@ function isNumber(n) {
                                 </tr>
                             </tbody>
                         </table>
-
+                        </div>
                         <h2>Search Certificates</h2>
 
                         <form id="certificate-search-form" action="#" onsubmit="return false;">
@@ -1083,8 +1120,17 @@ function isNumber(n) {
                     }
                 }
             });
+            
+            
+            var anchorValue;
+            var url = document.location;
+            var strippedUrl = url.toString().split("#");
+            if(strippedUrl.length > 1)
+            anchorvalue = strippedUrl[1];
+            navTabs.setActiveTab(anchorvalue);
+            
             //navTabs.setActiveTab('tags');
-//            navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
+            //navTabs.setActiveTab('certificates');  // XXX for debugging only; normally start with 'tags''
             //$('ajaxstatus').hide();
             $('auto-populate-uuid-form').hide();
             $('certificate-provision-form').hide();
