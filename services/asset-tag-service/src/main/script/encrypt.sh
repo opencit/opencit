@@ -37,12 +37,13 @@ PBKDF2_OPTS=
 PBKDF2_RFC822=
 
 parse_args() {
-  if ! options=$(getopt -a -n encrypt.sh -l enc:,auth: -o e:,a: -- "$@"); then exit 1; fi
+  if ! options=$(getopt -a -n encrypt.sh -l nopbkdf2,enc:,auth: -o e:,a: -- "$@"); then exit 1; fi
   eval set -- "$options"
   while [ $# -gt 0 ]
   do
     case $1 in
-      -e|--enc) ENC_PASSWORD="$2"; shift;;
+      --nopbkdf2) USE_PBKDF2=false;;
+      -e|--enc) eval ENC_PASSWORD="\$$2"; shift;;
       -a|--auth) eval AUTH_PASSWORD="\$$2"; shift;;
       --) OUTFILE="$2"; shift; shift; INFILES="$@"; shift;;
     esac
@@ -53,6 +54,7 @@ parse_args() {
 parse_args $@
 
 export ENC_PASSWORD
+export AUTH_PASSWORD
 
 if [[ "$USE_PBKDF2" == "true" ]]; then
   PBKDF2_OPTS="-pbkdf2 -c $PBKDF2_ITER"
