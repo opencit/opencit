@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.Locator;
 import javax.ws.rs.PathParam;
 
@@ -13,12 +14,12 @@ import javax.ws.rs.PathParam;
  */
 public class HostAttestationLocator implements Locator<HostAttestation> {
 
-    @PathParam("aik")
-    public String aik;
+    @PathParam("id")
+    public UUID id;
     
     @Override
     public void copyTo(HostAttestation item) {
-        item.setAikFingerPrint(aik);
+        item.setId(id);
     }
     
 }

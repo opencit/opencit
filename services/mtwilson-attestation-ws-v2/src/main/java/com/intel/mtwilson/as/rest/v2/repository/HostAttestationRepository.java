@@ -55,8 +55,8 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
                 if (obj != null) {
                     objCollection.getHostAttestations().add(convert(obj, obj.getHost_uuid_hex()));
                 }
-            } else if (criteria.aik != null && !criteria.aik.isEmpty()) {
-                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aik.toString());
+            } else if (criteria.aikSha1 != null && !criteria.aikSha1.isEmpty()) {
+                TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(criteria.aikSha1.toString());
                 if (hostObj != null) {
                     TblTaLog obj = jpaController.findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
                     if (obj != null) {
@@ -83,17 +83,14 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
 
     @Override
     public HostAttestation retrieve(HostAttestationLocator locator) {
-        if (locator == null || locator.aik == null) { return null;}
-        String aik = locator.aik;
+        if (locator == null || locator.id == null) { return null;}
+        String id = locator.id.toString();
         try {
-            TblHosts hostObj = My.jpa().mwHosts().findByAikSha1(aik);
-            if (hostObj != null) {
-                TblTaLog obj = My.jpa().mwTaLog().findLatestTrustStatusByHostUuid(hostObj.getUuid_hex(), getCacheStaleAfter());
-                if (obj != null) {
-                    HostAttestation haObj = convert(obj, hostObj.getName());
-                    return haObj;
-                }
-            }           
+            TblTaLog obj = My.jpa().mwTaLog().findByUuid(id);
+            if (obj != null) {
+                HostAttestation haObj = convert(obj, obj.getHost_uuid_hex());
+                return haObj;
+            }
         } catch (ASException aex) {
             throw aex;            
         } catch (Exception ex) {
@@ -126,6 +123,7 @@ public class HostAttestationRepository implements SimpleRepository<HostAttestati
     @Override
     public void delete(HostAttestationLocator locator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO : We should be able to delete the report in the future. If possible by GA release
     }
 
     @Override
