@@ -2122,6 +2122,7 @@ glassfish_create_ssl_cert() {
   local keystorePassword=changeit
   local domain_found=`$glassfish list-domains | head -n 1 | awk '{ print $1 }'`
   local keystore=${GLASSFISH_HOME}/domains/${domain_found}/config/keystore.jks
+  local cacerts=${GLASSFISH_HOME}/domains/${domain_found}/config/cacerts.jks
   local keytool=${JAVA_HOME}/bin/keytool
   local mtwilson=`which mtwilson 2>/dev/null`
   # does the keystore already have a cert with this alias? the alias has to be s1as (too much work to change it) so we check to see if a separate certificate file has been saved, indicating that s1as has already been replaced.
@@ -2135,7 +2136,13 @@ glassfish_create_ssl_cert() {
     echo "SSL Certificate for ${serverName} already exists"
   else
     echo "Creating SSL Certificate for ${serverName}..."
+    
+    # Delete public insecure certs within keystore.jks and cacerts.jks
     $keytool -delete -alias s1as  -keystore $keystore -storepass $keystorePassword
+    $keytool -delete -alias glassfish-instance -keystore $keystore -storepass $keystorePassword
+    $keytool -delete -alias s1as -keystore $cacerts -storepass $keystorePassword
+    $keytool -delete -alias glassfish-instance -keystore $cacerts -storepass $keystorePassword
+
     # NIARL code in Trust Agent uses Bouncy Castle APIs which require a Subject Alternative Name in the Server's SSL certificate in order to validate a certificate with an IP address in the subject.
     # Java 7 supports -ext san=ip:1.2.3.4    to add the extension.  Java 6 does not.  So we use the mtwilson command to generate it. 
     #$keytool -genkey -alias s1as -keysize 2048 -keyalg RSA -dname "CN=${serverName}, OU=Mt Wilson, C=US" -keystore $keystore -storepass $keystorePassword -keypass $keystorePassword -validity 3650
@@ -2146,11 +2153,25 @@ glassfish_create_ssl_cert() {
     else
      tmpCN="dns:${serverName}"
     fi
-    $mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
-    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
+    
+    ## 2014-02-05:rksavinx - Unneccesary as java7 is being used and keytool can be implemented for this
+    #$mtwilson api CreateSSLCertificate "${serverName}" "${tmpCN}" $keystore s1as "$keystorePassword"
+
+    # Update keystore.jks
+    $keytool -genkeypair -alias s1as -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+    $keytool -genkeypair -alias glassfish-instance -dname "CN=$serverName, OU=Mt Wilson, O=Trusted Data Center, C=US" -ext san=$tmpCN -keyalg RSA -keysize 2048 -validity 3650 -keystore $keystore -keypass $keystorePassword -storepass $keystorePassword
+
+    # Export certificates from keystore.jks
+    $keytool -export -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
+    $keytool -export -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${serverName}.crt" -keystore $keystore -storepass $keystorePassword
+
+    # Update cacerts.jks
+    $keytool -importcert -noprompt -alias s1as -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${serverName}.crt" -keystore $cacerts -storepass $keystorePassword
+    $keytool -importcert -noprompt -alias glassfish-instance -file "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.gi.${serverName}.crt" -keystore $cacerts -storepass $keystorePassword
+
     #openssl x509 -in "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" -out /tmp/mycert.der -outform DER
     #openssl x509 -in /tmp/mycert.der -inform DER -out /etc/intel/cloudsecurity/ssl.crt.pem -outform PEM
-    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
+    cp "${GLASSFISH_HOME}/domains/${domain_found}/config/ssl.s1as.${serverName}.crt" /etc/intel/cloudsecurity/ssl.crt
     echo "Restarting Glassfish domain..."
     glassfish_restart
   fi
