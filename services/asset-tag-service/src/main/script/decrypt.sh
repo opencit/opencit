@@ -28,12 +28,13 @@ PBKDF2_OPTS=
 DEBUG=
 
 parse_args() {
-  if ! options=$(getopt -a -n decrypt.sh -l enc:,auth: -o e:,a: -- "$@"); then exit 1; fi
+  if ! options=$(getopt -a -n decrypt.sh -l passwd:,enc:,auth: -o p:,e:,a: -- "$@"); then exit 1; fi
   eval set -- "$options"
   while [ $# -gt 0 ]
   do
     case $1 in
-      -e|--enc) ENC_PASSWORD="$2"; shift;;
+      -p|--passwd) eval ENC_PASSWORD="\$$2"; eval AUTH_PASSWORD="\$$2"; shift;;
+      -e|--enc) eval ENC_PASSWORD="\$$2"; shift;;
       -a|--auth) eval AUTH_PASSWORD="\$$2"; shift;;
       --) INFILE="$2"; shift;;
     esac
@@ -80,6 +81,7 @@ if [[ "$DEBUG" ]]; then
 fi
 
 export ENC_PASSWORD
+export AUTH_PASSWORD
 
   # decrypt using the hints in the content type parameters
   cat $encfile | awk 'BEGIN { RS="\n\n" } NR==2 { print }' | openssl enc -d -$enc_alg -pass env:ENC_PASSWORD -md $enc_digest_alg $PBKDF2_OPTS -base64 > $txtfile
