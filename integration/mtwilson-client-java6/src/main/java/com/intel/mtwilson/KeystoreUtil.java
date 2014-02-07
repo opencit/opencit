@@ -344,10 +344,11 @@ public class KeystoreUtil {
         return createUserInResource(resource, username, password, server, tlsPolicy, roles, "TLS");
     }
     public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy, String[] roles, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
+        URL baseUrl = new URL(server.getProtocol() + "://" + server.getAuthority());
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
-        log.trace("URL Protocol: {}", server.getProtocol());
-        if( "https".equals(server.getProtocol()) ) {
-            TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol); //CryptographyException, IOException            
+        log.trace("URL Protocol: {}", baseUrl.getProtocol());
+        if( "https".equals(baseUrl.getProtocol()) ) {
+            TlsUtil.addSslCertificatesToKeystore(keystore, baseUrl, tlsProtocol); //CryptographyException, IOException            
         }
         if(log.isTraceEnabled()) {
             try {
@@ -373,6 +374,7 @@ public class KeystoreUtil {
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded()); //CertificateEncodingException
             user.setRoles(roles);
+            log.error("");
             c.register(user); //IOException
         }
         catch(IOException e) {

@@ -6,6 +6,7 @@ package com.intel.mtwilson.crypto;
 
 import com.intel.dcsg.cpg.crypto.HmacCredential;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.mtwilson.KeystoreUtil;
 import com.intel.mtwilson.ApiClient;
@@ -14,6 +15,9 @@ import com.intel.mtwilson.datatypes.OsData;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
+import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
+import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
+import com.intel.mtwilson.datatypes.Role;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -252,13 +256,19 @@ mtwilson.api.secretKey=
     }
     
     @Test
-    public void testCreateUserInResource() throws MalformedURLException, IOException, ApiException, CryptographyException, ClientException, KeyStoreException {
-        ByteArrayResource resource = new ByteArrayResource();
-        URL server = new URL("https://10.1.71.88:8181");
-        SimpleKeystore keystore = KeystoreUtil.createUserInResource(resource, "testuser1", "password", server, new String[] { "Attestation" });        
-        for(String alias : keystore.aliases()) {
-            System.out.println("Keystore now has alias: "+alias);
-        }
+    public void testCreateUserInResource() throws MalformedURLException, IOException, ApiException, CryptographyException, ClientException, KeyStoreException, CertificateEncodingException, SignatureException, FileNotFoundException, NoSuchAlgorithmException, UnrecoverableEntryException {
+        String username = "rksavinx";
+        String password = "savinorules";
+        URL fullUrl = new URL("https://10.1.71.134:8181/mtwilson/v1/");
+        URL baseUrl = new URL(fullUrl.getProtocol() + "://" + fullUrl.getAuthority());
+        //URL server = new URL("https://10.1.71.134:8181");
+        String[] roles = { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()};
+        
+        ByteArrayResource certResource = new ByteArrayResource();
+        SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, fullUrl, roles);
+        
+        
+        System.out.println("DONE");
     }
     
 }
