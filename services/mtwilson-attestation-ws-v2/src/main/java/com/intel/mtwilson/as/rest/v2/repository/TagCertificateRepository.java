@@ -85,16 +85,7 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
 
     @Override
     public void store(TagCertificate item) {
-        AssetTagCertRevokeRequest obj = new AssetTagCertRevokeRequest();
-        try {
-            obj.setSha256OfAssetCert(null);
-            new AssetTagCertBO().revokeAssetTagCertificate(obj, item.getId().toString());
-        } catch (ASException aex) {
-            throw aex;            
-        } catch (Exception ex) {
-            log.error("Error during update of asset tag certificate.", ex);
-            throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_UPDATE_ERROR, ex.getClass().getSimpleName());
-        }        
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.    
     }
 
     @Override
@@ -113,12 +104,29 @@ public class TagCertificateRepository implements SimpleRepository<TagCertificate
 
     @Override
     public void delete(TagCertificateLocator locator) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (locator == null || locator.id == null) { return; }
+        AssetTagCertRevokeRequest obj = new AssetTagCertRevokeRequest();
+        try {
+            obj.setSha256OfAssetCert(null);
+            new AssetTagCertBO().revokeAssetTagCertificate(obj, locator.id.toString());
+        } catch (ASException aex) {
+            throw aex;            
+        } catch (Exception ex) {
+            log.error("Error during update of asset tag certificate.", ex);
+            throw new ASException(ErrorCode.AS_ASSET_TAG_CERT_UPDATE_ERROR, ex.getClass().getSimpleName());
+        }                
     }
     
     @Override
     public void delete(TagCertificateFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        TagCertificateCollection objCollection = search(criteria);
+        if (objCollection != null && !objCollection.getTagCertificates().isEmpty()) {
+            for (TagCertificate obj : objCollection.getTagCertificates()) {
+                TagCertificateLocator locator = new TagCertificateLocator();
+                locator.id = obj.getId();
+                delete(locator);
+            }
+        }
     }
 
     private TagCertificate convert(MwAssetTagCertificate obj) {
