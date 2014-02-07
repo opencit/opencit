@@ -7,6 +7,7 @@
     <packaging>pom</packaging>
 
   <name>Mt Wilson Services</name>
+  <description>mtwilson-services</description>
 
 	<parent>
 		<groupId>com.intel.mtwilson</groupId>
