@@ -16,9 +16,12 @@ if [ -f functions ]; then . functions; else echo "Missing file: functions"; exit
 if no_java ${JAVA_REQUIRED_VERSION:-1.7}; then echo "Cannot find Java ${JAVA_REQUIRED_VERSION:-1.7} or later"; exit 1; fi
 glassfish_install $GLASSFISH_PACKAGE
 
-cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
-cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
-cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
+#cp jackson-core-asl.jar ${GLASSFISH_HOME}/modules/
+#cp jackson-mapper-asl.jar ${GLASSFISH_HOME}/modules/
+#cp jackson-xc.jar ${GLASSFISH_HOME}/modules/
+cp jackson-annotations.jar ${GLASSFISH_HOME}/modules/
+cp jackson-core.jar ${GLASSFISH_HOME}/modules/
+cp jackson-databind.jar ${GLASSFISH_HOME}/modules/
 
 asenvFile=`find "$GLASSFISH_HOME" -name asenv.conf`
 echo "AS_JAVA=$JAVA_HOME" >> "$asenvFile"

@@ -9,8 +9,10 @@ import com.intel.mountwilson.common.WLMPortalException;
 import com.intel.mtwilson.api.*;
 import com.sun.jersey.api.client.ClientHandlerException;
 import java.io.IOException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+//import org.codehaus.jackson.JsonParseException;
+//import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

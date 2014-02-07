@@ -463,6 +463,11 @@
        	    <version>0.1-SNAPSHOT</version>
        	</dependency>-->
         <!-- end Java 1.5 backport dependencies -->
+        <dependency>
+            <groupId>com.intel.dcsg.cpg</groupId>
+            <artifactId>cpg-validation</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
     </dependencies>  
 
     <profiles>
