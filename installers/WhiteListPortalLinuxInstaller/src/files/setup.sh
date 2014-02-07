@@ -3,7 +3,7 @@
 # *** do NOT use TABS for indentation, use SPACES
 # *** TABS will cause errors in some linux distributions
 
-# SCRIPT CONFIGURATION:
+# SCRIPT CONFIGURATION:   
 intel_conf_dir=/etc/intel/cloudsecurity
 package_name=whitelist-portal
 package_dir=/opt/intel/cloudsecurity/${package_name}

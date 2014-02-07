@@ -15,7 +15,7 @@ import org.junit.Test;
 public class HostTlsPoliciesTest {
     @Test
     public void testHostTlsPoliciesResource() {
-        HostTlsPolicies r = new HostTlsPolicies();
+        HostTlsPolicy r = new HostTlsPolicy();
         HostTlsPolicyCollection c = r.createEmptyCollection();
     }
 }
