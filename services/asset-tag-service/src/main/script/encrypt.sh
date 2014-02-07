@@ -84,7 +84,7 @@ write_signature() {
 
   # Append the original input file and calculate the signature:
   cat $infile >> $docfile  
-  local signature=`openssl dgst -sha256 -hmac $AUTH_PASSWORD -hex $docfile | awk '{ print $2 }'`
+  local signature=`openssl dgst -sha256 -hmac $AUTH_PASSWORD -binary $docfile | openssl enc -base64`
 
   # The signature document file is a temporary file, so delete it:
   rm $docfile

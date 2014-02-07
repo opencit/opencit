@@ -130,7 +130,7 @@ inputmac=$(awk 'BEGIN { RS="\n\n" } NR==2 { print }' $sigfile)
 
 # calculate the hmac over the entire input file  
 # TODO:  add to this the headers in the sig file... 
-calcmac=$(openssl dgst -$sig_digest_alg -$sig_alg $AUTH_PASSWORD -hex $docfile | awk '{ print $2 }')
+calcmac=$(openssl dgst -$sig_digest_alg -$sig_alg $AUTH_PASSWORD -binary $docfile | openssl enc -base64)
 #echo "calcmac: $calcmac"
 
 if [ "$inputmac" != "$calcmac" ]; then
