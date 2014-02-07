@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 @V2
 //@Stateless
-@Path("/tag-certificates/{id}")
+@Path("/tag-certificates")
 public class TagCertificates extends AbstractCertificateJsonapiResource<TagCertificate, TagCertificateCollection, TagCertificateFilterCriteria, NoLinks<TagCertificate>, TagCertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());

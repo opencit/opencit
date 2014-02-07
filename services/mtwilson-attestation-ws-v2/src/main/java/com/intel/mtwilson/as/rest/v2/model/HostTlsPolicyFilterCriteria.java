@@ -14,7 +14,7 @@ import javax.ws.rs.QueryParam;
  */
 public class HostTlsPolicyFilterCriteria implements FilterCriteria<HostTlsPolicy> {
     
-    @QueryParam("hostUuid")
+    @QueryParam("host")
     public UUID hostUuid;    
     
 }
