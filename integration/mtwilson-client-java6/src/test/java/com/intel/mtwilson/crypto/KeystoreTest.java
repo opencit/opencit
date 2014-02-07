@@ -260,8 +260,6 @@ mtwilson.api.secretKey=
         String username = "rksavinx";
         String password = "savinorules";
         URL fullUrl = new URL("https://10.1.71.134:8181/mtwilson/v1/");
-        URL baseUrl = new URL(fullUrl.getProtocol() + "://" + fullUrl.getAuthority());
-        //URL server = new URL("https://10.1.71.134:8181");
         String[] roles = { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()};
         
         ByteArrayResource certResource = new ByteArrayResource();

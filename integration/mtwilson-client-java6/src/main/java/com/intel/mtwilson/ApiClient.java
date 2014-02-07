@@ -1173,7 +1173,9 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     
     // Registration API
     public void register(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException {
+        System.out.println("savy003a");
         httpPost(msurl("/apiclient/register"), toJSON(apiClient));
+        System.out.println("savy003b");
         //return "true".equals(result);        
     }
 
