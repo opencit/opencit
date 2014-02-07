@@ -31,6 +31,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -374,7 +375,10 @@ public class KeystoreUtil {
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded()); //CertificateEncodingException
             user.setRoles(roles);
-            log.error("");
+            ObjectMapper mapper = new ObjectMapper();
+            System.out.println("Savy001: " +  mapper.writeValueAsString(user)); 
+            System.out.println("Savy001: " +  user.getCertificate()); 
+
             c.register(user); //IOException
         }
         catch(IOException e) {

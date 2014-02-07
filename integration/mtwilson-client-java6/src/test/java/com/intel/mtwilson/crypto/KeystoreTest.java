@@ -267,7 +267,6 @@ mtwilson.api.secretKey=
         ByteArrayResource certResource = new ByteArrayResource();
         SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, fullUrl, roles);
         
-        
         System.out.println("DONE");
     }
     
