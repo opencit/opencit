@@ -259,7 +259,8 @@ mtwilson.api.secretKey=
     public void testCreateUserInResource() throws MalformedURLException, IOException, ApiException, CryptographyException, ClientException, KeyStoreException, CertificateEncodingException, SignatureException, FileNotFoundException, NoSuchAlgorithmException, UnrecoverableEntryException {
         String username = "rksavinx";
         String password = "savinorules";
-        URL fullUrl = new URL("https://10.1.71.134:8181/mtwilson/v1/");
+        //URL fullUrl = new URL("https://10.1.71.134:8181/mtwilson/v1/");
+        URL fullUrl = new URL("http://localhost:8080/v1");
         String[] roles = { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()};
         
         ByteArrayResource certResource = new ByteArrayResource();
