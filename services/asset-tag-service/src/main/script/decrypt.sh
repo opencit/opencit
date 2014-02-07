@@ -34,7 +34,7 @@ parse_args() {
   do
     case $1 in
       -e|--enc) ENC_PASSWORD="$2"; shift;;
-      -a|--auth) AUTH_PASSWORD="$2"; shift;;
+      -a|--auth) eval AUTH_PASSWORD="\$$2"; shift;;
       --) INFILE="$2"; shift;;
     esac
     shift

@@ -21,7 +21,7 @@
 #U2FsdGVkX1+LU5kNud8jedWmWagnq8WR0xf1TVFkBmkLm+wb
 #
 # Sample format of the generated plain.txt.sig files:
-#Content-Type: application/signature.openssl; alg="hmac"; digest-alg="sha256"
+#Content-Type: application/mtwilson-signature; alg="hmac"; digest-alg="sha256"; headers="content-type,link,date"
 #Link: <plain.txt>; rel=signed
 #
 #8586ab1b22c774b32d70de87c3f48385efc3e0588a4b5c3ca9fa8f179da3b59b
@@ -43,7 +43,7 @@ parse_args() {
   do
     case $1 in
       -e|--enc) ENC_PASSWORD="$2"; shift;;
-      -a|--auth) AUTH_PASSWORD="$2"; shift;;
+      -a|--auth) eval AUTH_PASSWORD="\$$2"; shift;;
       --) OUTFILE="$2"; shift; shift; INFILES="$@"; shift;;
     esac
     shift
@@ -76,7 +76,7 @@ write_signature() {
   # 2. the signature, base-64 encoded
 
   # Generate signature headers and trailing blank line:
-  echo "Content-Type: application/signature.openssl; alg=\"hmac\"; digest-alg=\"sha256\"" > $docfile
+  echo "Content-Type: application/mtwilson-signature; alg=\"hmac\"; digest-alg=\"sha256\"; headers=\"content-type,link,date\"" > $docfile
   echo "Link: <${infilename}>; rel=signed" >> $docfile
   echo "Date: $(date)" >> $docfile
   local signature_headers=`cat $docfile`
