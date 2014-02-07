@@ -11,14 +11,12 @@ import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.controller.TblHostsJpaController;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.rest.v2.model.HostCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsCertificate;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsCertificateFilterCriteria;
 import com.intel.mtwilson.as.rest.v2.model.HostTlsCertificateLocator;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.jersey.resource.SimpleRepository;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +50,7 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
                                 hostTlsCert.setX509Certificate(credential.getCertificate());
                                 hostTlsCert.setHostUuid(criteria.hostUuid);
                                 hostTlsCert.setSha1(criteria.sha1);
-                                objCollection.getCaCertificates().add(hostTlsCert);
+                                objCollection.getTlsCertificates().add(hostTlsCert);
 
                             } catch(Exception ex) {
                                 log.debug("Cannot read TLS key from keystore", ex);
@@ -133,9 +131,9 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
                 SimpleKeystore tlsKeystore = new SimpleKeystore(obj.getTlsKeystoreResource(), ksPassword);
                 Sha1Digest sha1 = Sha1Digest.digestOf(item.getCertificate());
                 tlsKeystore.addTrustedCertificate(item.getX509Certificate(), sha1.toString());
-                tlsKeystore.save();
+                tlsKeystore.save(); // Calling the save should automatically call the onClose method in the controller which should convert this to byte array and save
                 
-                obj.setTlsKeystore(tlsKeystore.toString().getBytes());
+                //obj.setTlsKeystore(obj.getTlsKeystoreResource());
                 jpaController.edit(obj);
             }            
         } catch (ASException aex) {
@@ -168,6 +166,10 @@ public class HostTlsCertificateRepository implements SimpleRepository<HostTlsCer
                         tlsKeystore.delete(alias);
                     }
                 }
+                
+                tlsKeystore.save(); // Calling the save should automatically call the onClose method in the controller which should convert this to byte array and save                
+                //obj.setTlsKeystore(obj.getTlsKeystoreResource());
+                jpaController.edit(obj);
             }
         } catch (ASException aex) {
             throw aex;            
