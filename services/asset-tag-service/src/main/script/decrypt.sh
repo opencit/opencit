@@ -155,7 +155,7 @@ SIGFILES=`ls -1 $INFILE.d/*.sig`
 for sigfile in $SIGFILES
 do
   signedfile=$INFILE.d/$(basename $sigfile .sig)
-  echo "found signed file: $signedfile"
+  #echo "found signed file: $signedfile"
   verify_signature $signedfile $sigfile
   echo "Verified $signedfile"
 done
