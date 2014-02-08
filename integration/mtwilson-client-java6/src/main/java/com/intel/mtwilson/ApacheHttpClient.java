@@ -51,6 +51,7 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.Charset;
 //import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -482,6 +483,10 @@ public class ApacheHttpClient implements java.io.Closeable {
         System.out.println("Savy004k: " + httpResponse.getEntity().getContent().toString());
         System.out.println("Savy004l: " + httpResponse.getEntity().toString());
         ApiResponse apiResponse = readResponse(httpResponse);
+        System.out.println("Savy004m: " + apiResponse.content);
+        System.out.println("Savy004m: " + new String(apiResponse.content, Charset.forName("UTF-8")));
+        System.out.println("Savy004n: " + apiResponse.httpStatusCode);
+        System.out.println("Savy004n: " + apiResponse.toString());
         request.releaseConnection();
         return apiResponse;
     }
