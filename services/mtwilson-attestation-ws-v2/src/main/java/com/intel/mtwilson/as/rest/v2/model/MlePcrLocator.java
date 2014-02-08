@@ -15,15 +15,15 @@ import javax.ws.rs.QueryParam;
  */
 public class MlePcrLocator implements Locator<MlePcr>{
 
-    @PathParam("id")
-    public UUID id;
+    @PathParam("mle_id") // change id to mle_id
+    public UUID mleUuid;
     @QueryParam("index")
-    public String index;
+    public String pcrIndex;
     
     @Override
     public void copyTo(MlePcr item) {
-        item.setMleUuid(id.toString());
-        item.setPcrName(index);
+        item.setMleUuid(mleUuid.toString());
+        item.setPcrIndex(pcrIndex);
     }
     
 }

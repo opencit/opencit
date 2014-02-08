@@ -394,5 +394,24 @@ public class TblPcrManifestJpaController implements Serializable {
             em.close();
         }               
     }    
+
+    public List<TblPcrManifest> findByPcrValue(String pcrValue) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("MwMleSource.findByValue");
+            query.setParameter("value", pcrValue);
+
+            List<TblPcrManifest> pcrList = query.getResultList();
+            return pcrList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("PCR information with value {} not found in the DB.", pcrValue));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
     
 }
