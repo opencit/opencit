@@ -26,11 +26,11 @@ public class HostTlsCertificateCollection extends DocumentCollection<HostTlsCert
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="host_tls_certificates")
     @JacksonXmlProperty(localName="host_tls_certificate")    
-    public List<HostTlsCertificate> getCaCertificates() { return tlsCerts; }
+    public List<HostTlsCertificate> getTlsCertificates() { return tlsCerts; }
     
     @Override
     public List<HostTlsCertificate> getDocuments() {
-        return getCaCertificates();
+        return getTlsCertificates();
     }
     
 }

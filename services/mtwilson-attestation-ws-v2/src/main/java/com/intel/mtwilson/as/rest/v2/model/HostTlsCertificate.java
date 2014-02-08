@@ -26,7 +26,7 @@ public class HostTlsCertificate extends CertificateDocument{
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
     private String hostUuid;
-    private String sha1;
+    private String sha1; // We may not be able to support for this release as we do not have a separate column for it the DB
     private String hostName;
     private byte[] certificate;
 

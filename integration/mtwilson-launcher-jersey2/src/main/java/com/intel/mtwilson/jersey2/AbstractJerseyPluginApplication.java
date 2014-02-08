@@ -64,13 +64,6 @@ public abstract class AbstractJerseyPluginApplication extends ResourceConfig {
         Util.scanJars(Util.findAllJars(),getRegistrars());
         
         log.debug("Registering YAML, XML, JSON providers");
-register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
-register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
-register(com.intel.mtwilson.jersey.provider.JacksonYamlObjectMapperProvider.class);
-register(com.intel.mtwilson.jersey.provider.ApplicationYamlProvider.class);
-register(com.intel.mtwilson.jersey.provider.X509CertificatePemProvider.class);
-register(com.intel.mtwilson.jersey.provider.X509CertificateDerProvider.class);
-register(com.intel.mtwilson.jersey.provider.X509CertificateArrayPemProvider.class);
 register(com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper.class);
 register(com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper.class); 
 register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
