@@ -576,5 +576,77 @@ public class TblMleJpaController implements Serializable {
             em.close();
         }        
     }
+
+    public List<TblMle> findByNameLike(String name) {
+        List<TblMle> mleList = new ArrayList<TblMle>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findByNameLike");
+            query.setParameter("name", "%"+name+"%");
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }
+        
+        return mleList;        
+    }
+
+    public List<TblMle> findByName(String name) {
+        List<TblMle> mleList = new ArrayList<TblMle>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findByName");
+            query.setParameter("name", name);
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }
+        
+        return mleList;        
+    }
+
+    public List<TblMle> findByOemUuid(String oemUuid) {
+        List<TblMle> mleList = new ArrayList<TblMle>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findByOemUuid");
+            query.setParameter("oem_uuid_hex", oemUuid);
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }
+        
+        return mleList;        
+    }
+
+    public List<TblMle> findByOsUuid(String osUuid) {
+        List<TblMle> mleList = new ArrayList<TblMle>();
+        EntityManager em = getEntityManager();
+        try {                       
+            Query query = em.createNamedQuery("TblMle.findByOsUuid");
+            query.setParameter("os_uuid_hex", osUuid);
+
+            List<TblMle> vmmList = query.getResultList();
+            if(vmmList != null && vmmList.size() > 0)
+                mleList.addAll(vmmList);
+            
+        } finally {
+            em.close();
+        }
+        
+        return mleList;        
+    }
     
 }
