@@ -462,12 +462,10 @@ public class ApacheHttpClient implements java.io.Closeable {
             System.out.println("Savy004a");
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
-        System.out.println("Savy004b: " + locale);
-        System.out.println("Savy004c: " + authority);
         System.out.println("Savy004d: " + message.content);
         System.out.println("Savy004e: " + message.contentType.toString());
         System.out.println("Savy004f: " + (new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8"))).toString());
-        System.out.println("Savy004g: " + request.getEntity());
+        System.out.println("Savy004g: " + request.getEntity().getContent());
         System.out.println("Savy004h: " + request.getEntity().getContent().toString());
         System.out.println("Savy004i: " + request.getEntity().toString());
         
