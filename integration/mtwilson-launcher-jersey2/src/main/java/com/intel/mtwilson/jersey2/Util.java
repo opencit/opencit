@@ -71,7 +71,7 @@ public class Util {
                 }
             }
             catch(Throwable e) { // catch ClassNotFoundException and NoClassDefFoundError 
-                log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName() + e.getMessage());
+                log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName() + ": " + e.getMessage());
                 //e.printStackTrace();
                 // log.error("Cannot read jar file {}", jar.getAbsolutePath());
             }
