@@ -15,7 +15,7 @@ import javax.ws.rs.QueryParam;
  */
 public class MleModuleLocator implements Locator<MleModule> {
 
-    @PathParam("mle-id")
+    @PathParam("mle_id")
     public UUID mleUuid;
     @QueryParam("id")
     public UUID moduleUuid;

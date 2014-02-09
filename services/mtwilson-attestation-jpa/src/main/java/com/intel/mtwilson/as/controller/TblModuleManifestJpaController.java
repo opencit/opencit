@@ -606,7 +606,7 @@ public class TblModuleManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByMleUuidHex");
+            Query query = em.createNamedQuery("TblModuleManifest.findByMleUuidHex");
             query.setParameter("mle_uuid_hex", mleUuid);
 
             List<TblModuleManifest> moduleList = query.getResultList();
@@ -625,7 +625,7 @@ public class TblModuleManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByUuidHex");
+            Query query = em.createNamedQuery("TblModuleManifest.findByUuidHex");
             query.setParameter("uuid_hex", uuid);
 
             TblModuleManifest pcrObj = (TblModuleManifest) query.getSingleResult();
@@ -644,7 +644,7 @@ public class TblModuleManifestJpaController implements Serializable {
         EntityManager em = getEntityManager();
         try {
 
-            Query query = em.createNamedQuery("MwMleSource.findByComponentNameLike");
+            Query query = em.createNamedQuery("TblModuleManifest.findByComponentNameLike");
             query.setParameter("name", moduleName);
 
             List<TblModuleManifest> pcrList = query.getResultList();
@@ -652,6 +652,25 @@ public class TblModuleManifestJpaController implements Serializable {
 
         } catch(NoResultException e){
         	log.error(String.format("Module information with name {} not found in the DB.", moduleName));
+        	return null;
+        } finally {
+            em.close();
+        }               
+    }    
+
+    public List<TblModuleManifest> findByComponentVlaue(String digestValue) {
+        
+        EntityManager em = getEntityManager();
+        try {
+
+            Query query = em.createNamedQuery("TblModuleManifest.findByModuleValue");
+            query.setParameter("digestValue", digestValue);
+
+            List<TblModuleManifest> pcrList = query.getResultList();
+            return pcrList;
+
+        } catch(NoResultException e){
+        	log.error(String.format("Module information with name {} not found in the DB.", digestValue));
         	return null;
         } finally {
             em.close();
