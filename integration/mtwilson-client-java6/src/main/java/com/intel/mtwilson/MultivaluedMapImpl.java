@@ -47,4 +47,24 @@ public class MultivaluedMapImpl<K,V> extends HashMap<K,List<V>> implements Multi
         return list.get(0);
     }
 
+    @Override
+    public void addAll(K k, V... vs) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void addAll(K k, List<V> list) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void addFirst(K k, V v) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean equalsIgnoreValueOrder(MultivaluedMap<K, V> mm) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

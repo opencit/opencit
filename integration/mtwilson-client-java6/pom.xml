@@ -377,20 +377,27 @@
     
         <!-- jersey-core provides MultivaluedMap and MediaType -->
         <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <!--
+        <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-core</artifactId>
             <version>${jersey-version}</version>
             <type>jar</type>
         </dependency>
-
+        -->
         <!-- jersey client is used for creating JSON requests -->
+        <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
             <version>${jersey-version}</version>
             <type>jar</type>
         </dependency>
-
+        -->
         <!--
 <dependency>
 <groupId>javax.activation</groupId>
