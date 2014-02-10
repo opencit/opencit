@@ -139,6 +139,7 @@
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
     </dependency>
+    <!--
     <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-client</artifactId>
@@ -164,6 +165,7 @@
         <artifactId>jersey-media-multipart</artifactId>
         <scope>provided</scope>
     </dependency>
+    -->
     <dependency>
         <groupId>javax.ws.rs</groupId>
         <artifactId>javax.ws.rs-api</artifactId>
