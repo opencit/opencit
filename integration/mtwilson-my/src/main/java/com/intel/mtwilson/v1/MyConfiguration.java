@@ -2,7 +2,7 @@
  * Copyright (C) 2013 Intel Corporation
  * All rights reserved.
  */
-package com.intel.mtwilson;
+package com.intel.mtwilson.v1;
 
 import com.intel.dcsg.cpg.crypto.file.PasswordEncryptedFile;
 import com.intel.dcsg.cpg.io.AllCapsEnvironmentConfiguration;
@@ -173,8 +173,14 @@ public class MyConfiguration {
                     in.close();
                     if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
                         // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
-                        String password = getApplicationConfigurationPassword();
-                        if( password == null ) {
+                        String password = null;
+                        if( system.containsKey("mtwilson.password") ) {
+                            password = system.getString("mtwilson.password");
+                        }
+                        else if( env.containsKey("MTWILSON_PASSWORD") ) {
+                            password = env.getString("MTWILSON_PASSWORD");
+                        }
+                        else {
                             log.warn("Found encrypted configuration file, but no password was found in system properties or environment");
                         }
                         if( password != null ) {
@@ -238,17 +244,6 @@ public class MyConfiguration {
         return composite;
     }
     
-    private String getApplicationConfigurationPassword() {
-        String password = null;
-        if( System.getProperties().containsKey("mtwilson.password") ) {
-            password = System.getProperty("mtwilson.password");
-        }
-        else if( System.getenv().containsKey("MTWILSON_PASSWORD") ) {
-            password = System.getenv("MTWILSON_PASSWORD");
-        }
-        return password;
-    }
-    
     /**
      * This is the only method that uses the Java Preferences API to get its value. Everything
      * else uses the mtwilson.properties file located the directory returned by this method.
@@ -259,12 +254,10 @@ public class MyConfiguration {
      * @return ~/.mtwilson  unless you have changed your preferences (see testSetMyConfigDir)
      */
     public final String getDirectoryPath() {
-//        return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
-        return getDirectory().getAbsolutePath();
+        return prefs.get("mtwilson.config.dir", System.getProperty("user.home") + File.separator + ".mtwilson");
     }
     public final File getDirectory() {
-//        return new File(getDirectoryPath());
-        return new File(getMtWilsonConf()); // use MTWILSON_CONF instead of java preferences, so admin can set it before running setup
+        return new File(getDirectoryPath());
     }
 /* /// this one is a bad idea because the configuration can come from several places, and the config file is not the top priority source,
  * // so providing this could create a situation where someone think that by writing to this config file they can affect the configuration
@@ -296,7 +289,6 @@ public class MyConfiguration {
 
         // sixth priority: properties defined in standard install location
         if( Platform.isWindows() ) {
-            files.add(new File( getMtWilsonConf() + File.separator + "mtwilson.properties")); // like C:\Intel\MtWilson\conf\mtwilson.properties
             files.add(new File("C:" + File.separator + "Intel" + File.separator
                     + "CloudSecurity" + File.separator + "mtwilson.properties"));
 //            files.add(new File(System.getProperty("user.home") + File.separator
@@ -318,7 +310,6 @@ public class MyConfiguration {
         }
         // linux-specific location
         if (Platform.isUnix() ) {
-            files.add(new File( getMtWilsonConf() + File.separator + "mtwilson.properties")); // like /etc/mtwilson/mtwilson.properties
 //            files.add(new File("/etc/intel/cloudsecurity/" + propertiesFilename));
             files.add(new File("/etc/intel/cloudsecurity/mtwilson.properties"));
             files.add(new File("/etc/intel/cloudsecurity/management-service.properties"));
@@ -470,7 +461,7 @@ public class MyConfiguration {
     ///////////////////////// saml key for attestation service //////////////////////////////////
 
     public File getSamlKeystoreFile() {
-        return new File(conf.getString("saml.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-saml.jks"));
+        return new File(conf.getString("saml.keystore.file", getDirectoryPath() + File.separator + "mtwilson-saml.jks"));
     }
     public String getSamlKeystorePassword() {
         return conf.getString("saml.key.password", ""); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
@@ -483,7 +474,7 @@ public class MyConfiguration {
 
     // XXX TODO   if using glassfish or tomcat need to point to where they keep their keystores.... or configure them to use this one (but only if WE install them... not if we deploy mtwilson onto an existing web server which already has its keystore)
     public File getTlsKeystoreFile() {
-        return new File(conf.getString("mtwilson.tls.keystore.file",getMtWilsonConf() + File.separator + "mtwilson-tls.jks"));
+        return new File(conf.getString("mtwilson.tls.keystore.file",getDirectoryPath() + File.separator + "mtwilson-tls.jks"));
     }
 
     public String getTlsKeystorePassword() {
@@ -536,130 +527,5 @@ public class MyConfiguration {
         return conf.getString("mtwilson.atag.mtwilson.baseurl", "");
     }
     
-    ///////////////////////// mtwilson portal  //////////////////////////////////
-    
-    public String getPortalHtml5Dir() {
-        return conf.getString("mtwilson.portal.html5.dir");
-    }
-    
-    ///////////////////////// filesystem locations  //////////////////////////////////
-    
-    /**
-     * 
-     * @return /opt/mtwilson on Linux or value of MTWILSON_HOME
-     */
-    public String getMtWilsonHome() {
-        String mtwilsonHome = System.getenv("MTWILSON_HOME");
-        log.debug("MTWILSON_HOME={}", mtwilsonHome);
-        if( mtwilsonHome == null ) {
-            if( Platform.isUnix() ) {
-                mtwilsonHome = "/opt/mtwilson";
-                log.debug("MTWILSON_HOME={} (Linux default)", mtwilsonHome);
-            }
-            if( Platform.isWindows() ) {
-                mtwilsonHome = /*System.getenv("ProgramFiles")*/ "C:" + File.separator + "mtwilson"; // applications in Program Files need administrator permission to write to their folders 
-                log.debug("MTWILSON_HOME={} (Windows default)", mtwilsonHome);
-            }
-        }
-        if( mtwilsonHome == null ) {
-            throw new IllegalStateException("MTWILSON_HOME environment variable must be defined");
-        }
-        return mtwilsonHome;
-    }
-    
-    /**
-     * 
-     * @return /etc/mtwilson on Linux or value of MTWILSON_CONF
-     */
-    public String getMtWilsonConf() {
-        String mtwilsonConf = System.getenv("MTWILSON_CONF");
-        log.debug("MTWILSON_CONF={}", mtwilsonConf);
-        if( mtwilsonConf == null ) {
-            if( Platform.isUnix() ) {
-                mtwilsonConf = "/etc/mtwilson";
-                log.debug("MTWILSON_CONF={} (Linux default)", mtwilsonConf);
-            }
-            if( Platform.isWindows() ) {
-                mtwilsonConf = getMtWilsonHome() + File.separator + "etc"; 
-                log.debug("MTWILSON_CONF={} (Windows default)", mtwilsonConf);
-            }
-        }
-        if( mtwilsonConf == null ) {
-            throw new IllegalStateException("MTWILSON_CONF environment variable must be defined");
-        }
-        return mtwilsonConf;
-    }
 
-    /**
-     * 
-     * @return /opt/mtwilson/bin on Linux or MTWILSON_HOME/bin
-     */
-    public String getMtWilsonBin() {
-        return getMtWilsonHome() + File.separator + "bin";
-    }
-    
-    
-    /**
-     * 
-     * @return /opt/mtwilson/env.d on Linux or MTWILSON_HOME/env.d
-     */
-    public String getMtWilsonEnv() {
-        return getMtWilsonHome() + File.separator + "env.d";
-    }
-    
-    /**
-     * 
-     * @return /opt/mtwilson/java on Linux or MTWILSON_HOME/java or MTWILSON_JAVA
-     */
-    public String getMtWilsonJava() {
-        String mtwilsonJava = System.getenv("MTWILSON_JAVA");
-        log.debug("MTWILSON_JAVA={}", mtwilsonJava);
-        if( mtwilsonJava == null ) {
-            mtwilsonJava = getMtWilsonHome() + File.separator + "java";
-        }
-        return mtwilsonJava;
-    }
-    
-    /**
-     * 
-     * @return /opt/mtwilson/util.d on Linux or MTWILSON_HOME/util.d
-     */
-    public String getMtWilsonUtil() {
-        return getMtWilsonHome() + File.separator + "util.d";
-    }
-    
-    /**
-     * 
-     * @return /opt/mtwilson/resource on Linux or MTWILSON_HOME/resource
-     */
-    public String getMtWilsonResource() {
-        return getMtWilsonHome() + File.separator + "resource";
-    }
-
-    /**
-     * 
-     * @return /opt/mtwilson/license.d on Linux or MTWILSON_HOME/license.d
-     */
-    public String getMtWilsonLicense() {
-        return getMtWilsonHome() + File.separator + "license.d";
-    }
-    
-    ///////////////////////// certificate authority //////////////////////////////////
-    
-    // XXX TODO this assumes the CA keystore is on disk... it might be in
-    // the database, which means this should really be encapsulated into a
-    // CA plugin that declares a repository interface so we can swap out
-    // the storage mechanism as needed
-    // XXX TODO INSECURE need to specify the encryption and integrity 
-    // algorithms IAW our minimum requirements
-    // another alternative is to use a zip/gzip file that uses our
-    // encryption and integrity format over the entire zip/gzip file ,
-    // so it simply contains one key or cert per file inside it
-    public File getCaKeystoreFile() {
-        return new File(getMtWilsonConf() + File.separator + "cakey.pem");
-    }
-    // XXX TODO INSECURE needs to be integrity protected 
-    public File getCaCertsFile() {
-        return new File(getMtWilsonConf() + File.separator + "cacerts.pem");
-    }
 }
