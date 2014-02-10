@@ -63,7 +63,7 @@ div.menu ul li a, div.menu ul li a:visited
     background-color: #465c71;
     border: 1px #4e667d solid;       
     color: #dde4ec;
-    display: block;
+    display: inline;
     line-height: 1.35em;
     padding: 4px 20px;
     text-decoration: none;
