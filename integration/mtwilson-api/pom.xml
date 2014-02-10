@@ -3,7 +3,7 @@
 
     <artifactId>mtwilson-api</artifactId>
     <packaging>jar</packaging>
-    <name>Mt Wilson API for Java 6</name>
+    <name>mtwilson-api</name>
     <description>
         The Mt Wilson API for Java provides an easy-to-use programming interface to access 
         Mt Wilson services. Using the Mt Wilson API for Java, you can manage the Whitelist,

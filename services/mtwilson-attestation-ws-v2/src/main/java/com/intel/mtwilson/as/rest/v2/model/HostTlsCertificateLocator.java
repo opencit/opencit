@@ -16,7 +16,7 @@ public class HostTlsCertificateLocator implements Locator<HostTlsCertificate> {
     
     @PathParam("host")
     public UUID hostUuid;
-    @PathParam("sha1")
+    @PathParam("id")
     public String sha1;
 
 

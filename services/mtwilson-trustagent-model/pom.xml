@@ -146,7 +146,6 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.2</version>
         </dependency>                        
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
