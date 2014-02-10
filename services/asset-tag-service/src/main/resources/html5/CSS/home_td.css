@@ -3,20 +3,16 @@
 /*-------------------------------------- DEFAULTS----------------------------------------------------------*/
 
 body {
-    background: none repeat scroll 0 0 #B6B7BC;
+   /*  background: none repeat scroll 0 0 #B6B7BC; */
     color: #696969;
     font-family: "Helvetica Neue","Lucida Grande","Segoe UI",Arial,Helvetica,Verdana,sans-serif;
     font-size: 0.9em;
     margin: 0;
     padding: 0;
     min-height: 768px;
-    min-width: 1024px;
+    min-width: 1070px;
 }
 
-textarea{
-	resize:none;
-	
-}
 a:link, a:visited
 {
     color: #034af3;
@@ -63,7 +59,7 @@ div.menu ul li a, div.menu ul li a:visited
     background-color: #465c71;
     border: 1px #4e667d solid;       
     color: #dde4ec;
-    display: inline;
+    display: block;
     line-height: 1.35em;
     padding: 4px 20px;
     text-decoration: none;
@@ -93,24 +89,33 @@ div.menu ul li a:active
 /*---------------------------------- Others---------------------*/
 
 .title {
-    float: left;    
-   /*Start Below message is changed by Soni  as per email on Fri 9/14/2012 10:21 AM  for Header Consistency */
-    /*width: 100%;*/
-    /*Stop Below message is changed by Soni  as per email on Fri 9/14/2012 10:21 AM r Header Consistency */
+    display: block;
+    float: left;
+    font-family: Arial;
+    text-align: left;
+    float: left;
+    /* width: 100%; */
 }
 
 .header
 {
-    background: #4b6c9e;
+    position: relative;
+    margin: 0px;
+    padding: 0px;
+    background: #3A4F63;
     width: 100%;
-    height: 110px;    
+    /*top: 2px;*/
+    left: 0px;    
+    height: 95px;     
 }
 
 .header h1
 {
+    font-weight: 700;
     margin: 0px;
     padding: 0px 0px 0px 20px;
     color: #f9f9f9;
+    border: none;
     line-height: 2em;
     font-size: 2em;
 }
@@ -120,20 +125,18 @@ div.menu ul li a:active
 
 div.hideSkiplink {
     background-color: #3A4F63;
+    width: 100%;
+     /* height: 90%; */
 }
 
 .loginDisplay
 {
     font-size: 1.1em;
+    display: block;
     text-align: right;
     padding: 10px;
     color: White;
-    height: 0px;
-}
-
-.loginDisplay span
-{
-    margin-right:40px;
+    float: right;
 }
 
 .loginDisplay a:link
@@ -212,14 +215,17 @@ h5, h6
 /* PRIMARY LAYOUT */
 
 .main {
+   /* margin: 12px 8px 8px;*/
     min-height: 650px;
+   /* padding: 0 12px;*/
     background: white;
     width: 100%;
 }
 .footer
 {
-    background: none repeat scroll 0 0 #4B6C9E;
+    background: none repeat scroll 0 0 #3A4F63;
     color: #F9F9F9;
+    line-height: normal;
     margin: 0 auto;
     min-height: 90px;
     padding: 8px 0 0;
@@ -230,93 +236,60 @@ h5, h6
 /* ---------- Class for main container ------------- */
 
 .container{
-	padding-left: 25px;
-    padding-top: 15px;
-    padding-right: 25px;
+	margin-left: 20px;
+    margin-top: 15px;
+    margin-right: 20px;
+    /* width: auto; */
 }
 
 .nagPanel{
 	color: #3A4F63;
-    font-size: small;
+    font-size: large;
     font-weight: bold;
     padding-bottom: 12px;
 }
 
 .NameHeader{
-	color: #4B6C9E;
+	color: #3A4F63;
     font-size: x-large;
     height: 50px;
     width: auto;
 }
 
 .tableDisplay{
-	color: #3A4F63;
+	color: #333333;
 	text-align: center;
 	width: 100%;
-            /* Removed the column height so as to allow the resize automatically */
-	/* height: 40px; */
-        table-layout: fixed;
 	}
-    
+.tableDisplay table{
+    table-layout: fixed;
+}
 .tableDisplay thead{
-	background-color: #3A4F63;
+    background-color: #5D7B9D;
     color: White;
     font-weight: bold;
 }
+
 .tableDisplay tr td{
-    border: 1px solid #3A4F63;
-    empty-cells: show;
-     overflow: hidden;
-     word-wrap: break-word;
-}
-
-.tableBorderClass tr td{
-    border: 1px solid #3A4F63;
+    border: 1px solid #5D7B9D;
     empty-cells: show;
     word-wrap: break-word;
+    height: 35px;
 }
-.tableBorderClass tr th{
-    border: 1px solid #3A4F63;
+.tableDisplay tr th{
+/*    border: 1px solid #3A4F63;*/
     empty-cells: show;
     word-wrap: break-word;
 }
 
-/* Commented out the MLE specific table settings since it was causing scroll bars.
-.tableDivMLE{
-	width: 1000px;
-   max-height: 350px;
+.tableContentStyle{
+    overflow: auto; border: 1px solid #5D7B9D;
 }
-.tableDivMLE table{
-	border: 1px solid #3A4F63;
-}
-.tableDivMLE table tr{
-	height: 25px;
-}
-
-.tableDivEditMle{
-    max-height: 330px;
-    width: 870px; *
-} */
-
-
-.tableDiv{
-   max-height: 330px;
-    width: 650px;
-}
-
-.tableDiv table{
-	border: 1px solid #3A4F63;
-}
-
-.tableDiv table tr{
-	height: 28px;
-}
-
 .mainTableContant{
 	width: 100%;
 	max-height: 454px;
 	overflow: auto;
-	
+	text-align: center;
 }
 
 .mainTableContant table tr{
@@ -324,50 +297,15 @@ h5, h6
 }
 
 .evenRow{
-	background-color:#D8D8D8;
+	color:#333333;background-color:#F7F6F3;
 }
 .oddRow{
-	background-color:white;
+	background-color:White;
 }
 
-.registerHostRow1{width: 95px;}
-.registerHostRow2{width: 60px;}
-.registerHostRow3{width: 177px;}
-.registerHostRow4{width: 80px;}
-.registerHostRow5{width: 280px;}  
-.registerHostRow6{width: 240px;}
-.registerHostRow6Header{width: 240px;}
-.registerHostRow5Sub{width: 140px;}
-
-.tableDivMLE .row1{width: 80px;}
-.tableDivMLE .row2{width: 80px;}
-.tableDivMLE .rowv{width: 140px;}
-.tableDivMLE .row3{width: 80px;}
-.tableDivMLE .row4{width: 80px;}
-.tableDivMLE .rowr1{width: 100px;}
-.tableDivMLE .rowr2{width: 120px;}
-.tableDivMLE .rowr3{width: 170px;}
-.tableDivMLE .rowr4{width: 130px;}
-.tableDivMLE .rowr5{width: 100px;}
-.tableDivMLE .rowr6{width: 65px;}
-.tableDivMLE .rowr7{width: 90px;}
-
-/*.row1{width: 20px;}
-.row2{width: 80px;}
-.row3{width: 175px;}
-.row4{width: 80px;}
-.row5{width: 300px;} 
-.row6{width: 120px;}
-.row7{width: 90px;}
-.row8{width: 90px;}
-.row9{width: 170px;}
-.row10{width: 110px;}
-.row11{width: 50px;}
-.row5Sub{width: 150px;}*/
-
 .row1{width: 20px;}
-.row2{width: 80px;}
-.row3{width: 50px;}
+.row2{width: 105px;}
+.row3{width: 64px;}
 .row4{width: 55px;}
 .row5{width: 60px;}
 .row6{width: 75px;}
@@ -379,94 +317,19 @@ h5, h6
 .row12{width: 210px;}
 .rowHelp{width:50px; }
 
-/*.row12{width: 50px;}*/
-
-.manifestModuleTypeRow1{width: 144px;}
-.manifestModuleTypeRow2{width: 160px;}
-.manifestModuleTypeRow3{width: 115px;}
-.manifestModuleTypeRow4{width: 65px;}
-.manifestModuleTypeRow5{width: 65px;}
-.manifestModuleTypeRow6{width: 75px;}
-
-.manifestModuleTypeTableHeader{
-    table-layout: fixed;
-    text-align: center;
-    width: 98%;
-}
-
-.manifestModuleTypeTableHeader thead{
-/*    background-color: #6E3F4A;*/
-    color: White;
-    font-weight: bold;
-}
-
-.manifestModuleTypeTableContent{
-    text-align: center;
-    overflow: auto;
-    max-height: 461px;
-}
-.manifestModuleTypeTableContent table{
-    table-layout: fixed;
-}
-.manifestModuleTypeTableContent tr td{
-    border: 1px solid #3A4F63;
-    empty-cells: show;
-    word-wrap: break-word;
-}
-
-/* Class for View Pending Registration page */
-.viewRequestRow1{width: 412px;}
-.viewRequestRow2{width: 413px;}
-.viewRequestRow3{width: 120px;}
-.viewRequestRow3Header{width: 140px;}
-
-/* Class for Delete request Registration page and Extend Request page */
-.deleteRequestRow1{width: 357px;}
-.deleteRequestRow2{width: 230px;}
-.deleteRequestRow3{width: 189px;}
-.deleteRequestRow4{width: 169px;}
-.deleteRequestRow4Header{width: 189px;}
-
-
-/* Class for View Host page */
-.vh_viewRow1{width: 100px;}
-.vh_viewRow2{width: 100px;}
-.vh_viewRow3{width: 50px;}
-.vh_viewRow4{width: 70px;}
-.vh_viewRow5{width: 50px;}
-.vh_viewRow6{width: 150px;}
-.vh_viewRow7{width: 60px;}
-.vh_viewRow8{width: 70px;}
-.vh_viewRow9{width: 100px;}
-.vh_viewRow10{width: 70px;}
-
-/* Class for View Request page */
-.viewRow1{width: 260px;}
-.viewRow2{width: 120px;}
-.viewRow3{width: 231px;}
-.viewRow4{width: 150px;}
-.viewRow5{width: 180px;}
-.viewRow5Header{width: 200px;}
-
 .imageClass{
 	
 }
 
 .tableButton{
-	width: 67%;
+	font-size: 13px;
+    width: 93%;
 }
 
-.requiredField{
-	color: red;
-	float: left;
-	font-size: small;
-	margin-left: 4px;
-}
 .errorMessage{
 	color: red;
 	float: left;
 	font-size: small;
-	margin-left: 5px;
 }
 .successMessage{
 	color: green;
@@ -487,32 +350,13 @@ h5, h6
     color: black;
 	
 }
-
-.manifestListClass{
-	max-height: 200px;
-	margin-top: 25px;
-}
-
 .singleDiv{
 	/*height: 28px;*/
 	margin-top: 10px;
-	height: 28px;
-    width: 100%;
-}
-.singleDivConfig{
-	/*height: 28px;*/
-	height: 30px;
-    margin-top: 14px;
-    width: 100%;
 }
 .labelDiv{
-	width: 200px;
+	width: 150px;
 	padding-right: 20px;
-	float: left;
-}
-.labelDivConfig{
-	width: 180px;
-	padding-right: 25px;
 	float: left;
 }
 .labelDivgkv{
@@ -539,34 +383,21 @@ h5, h6
 .disabledDiv{
 	min-width: 965px;
 	height: 540px;
+	height: 538px;
 	z-index: 2;
-	position: absolute; 
+	position: absolute;
 	opacity:0.6;
 	filter:alpha(opacity=50); /* For IE8 and earlier */
 	text-align: center;
 	background-image: url("../images/blankImage.jpg");
-	width: 90%
-}
-
-.textBox_Border{
-	border: 1px solid #7A5660;
-	width: 300px;
-	height: 20px;
-}
-
-.ddlBox_Border{
-    border: 1px solid #7A5660;
-    width: 503px;
-    height: 24px;
-    float: left;
+	width: 97% 
 }
 
 .uploadButton{
 	float: left;
-	margin-right: 5px;
 }
 .uploadForm{
-	float: left;
+	width: 520px;
 }
 .subLabelDivgkv{
 text-align: center;	
@@ -576,22 +407,9 @@ text-align: center;
     margin-top: 2px;
     height: 25px;
 }
-/*class for help dialog pcr div*/
-
-.pcrDivHelp{
-	margin-top: 10px;
-}
 
 
 /* --------------- class specific  for Demo Portal --------*/
-/*.mainTableDiv{
-	color: black;
-    height: 500px;
-    padding-left: 35px;
-    text-align: center;
-    width: 93%;
-}*/
-
 .mainTableDiv{
 	color: black;
     height: 500px;
@@ -604,27 +422,22 @@ text-align: center;
       /* Soni_End_02/10/2012_issue_table aligned at the left  */
 }
 
-.mainTableDisplayDiv{
-    min-width: 1030px;
-}
-
-.mainTableDisplayDiv table{
-	 table-layout: fixed; 
-}
-
-.mainTableDisplayDiv table tr td{
-	word-wrap: break-word;
-}
-
 .subTableDiv{
 	padding-bottom: 5px;
     padding-left: 25px;
     padding-top: 6px;
-    width: 85%;
+    width: 92%;
 }
 
 .subTableDiv table tr{
-	height: 25px;
+	height: 30px;
+}
+.subTableDiv table{
+	border: 1px solid #4B6C9E;
+}
+
+.subTableDiv table tr td{
+	border: 1px solid #4B6C9E;
 }
 
 .textBoxClass{
@@ -633,29 +446,91 @@ text-align: center;
 	border:1px solid #3A4F63;
 }
 .textAreaBoxClass{
-	width:300px; 
-	border: 1px solid #3A4F63;
-        height: 35px;;
+	min-width:200px; 
+	height: 34px;
+	border:1px solid #3A4F63;
 }
+
+.viewRow0{width: 90px;}
+.viewRow1{width: 95px;}
+.viewRow2{width: 95px;}
+.viewRow3{width: 50px;}
+.viewRow4{width: 80px;}
+.viewRow5{width: 65px;}
+.viewRow6{width: 130px;}
+.viewRow7{width: 95px;}
+.viewRow8{width: 100px;}
+.viewRow9{width: 165px;}
+.viewRow10{width: 86px;}
+
+/*Class for edit host page.*/
+.editRow0{width: 85px;}
+.editRow1{width: 95px;}
+.editRow2{width: 90px;}
+.editRow3{width: 50px;}
+.editRow4{width: 80px;}
+.editRow5{width: 65px;}
+.editRow6{width: 110px;}
+.editRow7{width: 95px;}
+.editRow8{width: 90px;}
+.editRow9{width: 118px;}
+.editRow10{width: 80px;}
+
+.requiredFiled{
+	float: right;
+	width: 43%;
+	color: red;
+}
+
+/* Class for Report page */
+.reportViewRow1{width: 50px}
+.reportViewRow2{width: 238px}
+.reportViewRow3{width: 227px}
+.reportViewRow4{width: 108px}
+.reportViewRow5{width: 238px}
+.reportViewRow6{width: 108px;}
+
+
+.reportResultRow1{width: 115px;}
+.reportResultRow2{width: 400px;}
+.reportResultRow3{width: 130px;}
+.reportResultRow4{width: 80px;}
+.reportResultRow5Header{width: 145px;}
+.reportResultRow5{width: 130px;}
 
 .getReportButton{
 	margin-top: 20px;
 	text-align: center;
 }
 
-.mainTableForReports{
-	width: 850px;
-}
-
 .errorDiv{
 	margin-top: 12px;
 }
+
+.subDivTable{
+	height: 80px;
+}
+.subDivTable img{
+	margin-top: 31px;
+}
+.subDivMessage{
+	margin: 10px;
+	text-align: left;
+}
+
+/*class for sub table while showing up VM for host*/
+.showVMHostrow1{width: 115px;}
+.showVMHostrow2{width: 100px;}
+.showVMHostrow3{width: 130px;}
+.showVMHostrow4{width: 100px;}
+.showVMHostrow5{width: 165px;}
+.showVMHostrow6{width: 220px;}
 
 /*dialog classs*/
 
 .ui-widget-content { border: 1px solid #dddddd; /*background: #eeeeee url(images/ui-bg_highlight-soft_100_eeeeee_1x100.png) 50% top repeat-x;*/ color: #333333; }
 /*---------------------------------- Dialog----------------------------------*/
-.ui-dialog { position: relative;  width: 300px; background-color: #496077;}
+.ui-dialog { position: relative;  width: 300px; background-color: #3A4F63;}
 .ui-dialog .ui-dialog-titlebar {height: 29px; padding: .5em .3em .3em 1em; position: relative;  }
 .ui-dialog .ui-dialog-title { float: left; margin: .1em 0 .2em;font-size: medium;font-weight: bold; color: white;} 
 .ui-dialog .ui-dialog-titlebar-close { position: absolute; right: .3em; top: 50%; width: 19px; margin: -16px 0 0 0; padding: 1px; height: 18px;padding: 0;font-size: large;color: black; }
@@ -670,129 +545,24 @@ text-align: center;
 .ui-widget-overlay { background: #666666 50% 50% repeat; opacity: .50;filter:Alpha(Opacity=50); }
 .ui-widget-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-.dialogClass{
-	font-size: 13px;
-}
 
-.edit_textbox{
-	border: 1px solid #3A4F63;
-}
-
-/*.requiredField{
-	color: red;
-	float: left;
-	font-size: small;
-	margin-left: 4px;
-        display:inline-block;
-	width:10px;
-}*/
-
-#moduleTypeAttestationMez{
-	font-size: 12px;
-	color: black;
-	margin-left: 40px;
-	font-weight: bold;
-	margin-top: 35px;
-	margin-bottom: 5px;
-}
-
-#mainContainerForWhiteList{
-    overflow: auto;
-}
-
-.whiteListSingleDiv{
-    height: 10px;
-    margin-top: 10px;
-    width: 600px;
-}
-
-/*Class for White List Configuration page*/
-.mainContainer{
-	color: black;
-}
-
-.textBox_Border{
-	width: 500px;
-	height: 20px;
-	float: left;
-}
-.registerHostTable{
-	float: left;
-    margin-bottom: 10px;
-    margin-top: 10px;
-    min-width: 965px;
-    text-align: center;
-    width: 100%;
-}
-
-.registerHostTable table{
-	 table-layout: fixed; 
-}
-
-.registerHostTable table tr td{
-	border: 1px solid #3A4F63;
-	height: 30px;
-	word-wrap: break-word;
-}
-.tableHeader{
-	background-color: #3A4F63;
-	color: white;
-}
-.tableHeader tr td{
-	font-weight: bold; 
-}
-.helpDiv{
-	margin-top: 10px;
-}
-.registerHostTableContent{
-            /* Bug 770: Do not want to restrict the height of the table*/
-	/*max-height: 150px;*/
-	overflow: auto;
-}
-
-.registerHostTableContent table tr td{
-    height: 50px;
-}
-.requestDetailsTableContent{
-	max-height: 402px;
-	overflow: auto;
-}
-
-#retriveHostButton{
-	float: left;
-	margin-left: 10px;
-}
-
-#retrieveDatacentersButton{
-	float: left;
-	margin-left: 10px;
-}
-
-.requestedRolesDispaly{ 
-	margin-right: 7px;
-}
-#successMessage{
-	float: left;
-    width: 100%;
+#ReportTableContent{
+    max-height: 427px;
 }
 .registerUser{
     font-size: 12px;margin-bottom: 12px;
 }
-.valueDivConfig{
+
+.requiredField{
+	color: red;
 	float: left;
-	width: 25%;
+	font-size: small;
+	margin-left: 4px;
 }
 
-.registerHostConfigDropDown{
-	width: 80px;
+textarea {
+    resize: none;
 }
-.helperImageClass{
-	padding-left: 6px;
-}
-.whiteListConfigDropDown{
-	width: 150px;
-}
-
 .failureReportdiv{
 	margin:20px 5px;
 	text-align: center;
@@ -819,3 +589,14 @@ text-align: center;
 .failureReportSubRow2{width: 100px;}
 .failureReportSubRow3{width: 390px;}
 
+.mainTableDisplayDiv{
+    min-width: 1030px;
+}
+
+.mainTableDisplayDiv table{
+	 table-layout: fixed; 
+}
+
+.mainTableDisplayDiv table tr td{
+	word-wrap: break-word;
+}

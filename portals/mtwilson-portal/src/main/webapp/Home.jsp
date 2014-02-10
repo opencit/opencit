@@ -37,10 +37,7 @@
     <body>
         <div class="header">
             <div class="title"><h1>Mt. Wilson</h1></div>
-            <div class="loginDisplay">
-                <span id="loginStatusValue">Welcome <%=session.getAttribute("username")%>  </span>
-                <a href="javascript:logoutUser();" id="LogInOut">Logout</a>
-            </div>
+            
 
             <div class="clear hideSkiplink">
                 <div id="NavigationMenu" class="menu" style="float: left;">
@@ -202,7 +199,7 @@
         <div class="main" id="mainContainer">
         </div>
         <div class="footer">
-            <p>&copy; 2012-2013 Intel Corporation.<br/><span style="font-size:0.8em"><%@include file="mtwilson-version.txt" %></span></p>
+            <p>&copy; 2012-2013 Intel Corporation.<br/></p>
         </div>
     </body>
 </html>
