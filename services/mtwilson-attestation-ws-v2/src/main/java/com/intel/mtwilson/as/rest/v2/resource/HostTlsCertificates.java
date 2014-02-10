@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-@Path("/hosts/{host}/tls-policy/certificates")
+@Path("/hosts/{host_id}/tls-policy/certificates")
 public class HostTlsCertificates extends AbstractCertificateJsonapiResource<HostTlsCertificate, HostTlsCertificateCollection, HostTlsCertificateFilterCriteria, NoLinks<HostTlsCertificate>, HostTlsCertificateLocator>{
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());

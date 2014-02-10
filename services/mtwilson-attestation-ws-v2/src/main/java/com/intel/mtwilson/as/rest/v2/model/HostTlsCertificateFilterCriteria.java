@@ -14,7 +14,7 @@ import javax.ws.rs.QueryParam;
  */
 public class HostTlsCertificateFilterCriteria implements FilterCriteria<HostTlsCertificate> {
     
-    @PathParam("host")
+    @PathParam("host_id")
     public String hostUuid;
     @QueryParam("sha1")
     public String sha1;

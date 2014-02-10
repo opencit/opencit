@@ -14,7 +14,7 @@ public class PollHostLocator implements Locator<PollHost> {
 
     @Override
     public void copyTo(PollHost item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return;
     }
     
 }
