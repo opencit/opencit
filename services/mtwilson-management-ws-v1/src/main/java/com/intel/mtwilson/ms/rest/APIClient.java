@@ -194,9 +194,11 @@ public class APIClient {
     @Consumes("application/json")
     @Produces(MediaType.TEXT_PLAIN)
     public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
-        ValidationUtil.validate(apiClientRequest);
+        //ValidationUtil.validate(apiClientRequest);
         log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
-        log.error("Savy001: " + apiClientRequest.getCertificate());
+        log.error("Savy001a: " + apiClientRequest.getCertificate());
+        log.error("Savy001b: " + apiClientRequest.toString());
+        log.error("Savy001c: " + apiClientRequest.getRoles());
         new ApiClientBO().create(apiClientRequest, null);
         return "OK";
     }
