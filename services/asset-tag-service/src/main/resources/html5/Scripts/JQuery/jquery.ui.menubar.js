@@ -14,8 +14,6 @@
  *	jquery.ui.menu.js
  */
 (function( $ ) {
-    
-    //alert("starting menubar script!!");
 
 // TODO when mixing clicking menus and keyboard navigation, focus handling is broken
 // there has to be just one item that has tabindex
@@ -33,7 +31,6 @@ $.widget( "ui.menubar", {
 		}
 	},
 	_create: function() {
-                //alert("inside create funtion");
 		var that = this;
 		this.menuItems = this.element.children( this.options.items );
 		this.items = this.menuItems.children( "button, a" );

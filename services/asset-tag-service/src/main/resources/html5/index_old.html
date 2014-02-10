@@ -3,16 +3,79 @@
 
 
 <html lang="en">
-
+    <!--
+    HTML5 documentation:
+    http://www.w3.org/html/wg/drafts/html/master/
+    http://www.w3.org/TR/2010/WD-html5-20100624/
+    http://dev.w3.org/html5/html-author/
+    
+    Documentation on properties of HTA:APPLICATION: 
+    http://www.htmlgoodies.com/beyond/reference/article.php/3472841/HTML-Applications.htm
+    http://msdn.microsoft.com/library/default.asp?url=/workshop/author/hta/overview/htaoverview.asp
+    
+    It's possible to pack all the resources into a single executable with a custom icon using WinRAR:
+    http://stackoverflow.com/questions/4592410/is-it-possible-to-add-custom-icon-to-hta
+    http://www.rarlab.com/shop2rarlab-index.php?prod=winrar&x-source=winraronly
+    
+    <h1>Credits</h1>
+    <p>Javascript libraries <a href="http://prototypejs.org/" target="_blank">prototype.js</a> (<a href="http://prototypejs.org/license.html" target="_blank">MIT License</a>), <a href="http://script.aculo.us/" target="_blank">scriptaculous.js</a> (<a href="http://madrobby.github.io/scriptaculous/license/" target="_blank">MIT License</a>), <a href="http://livepipe.net/" target="_blank">livepipe.js</a> (<a href="http://livepipe.net/#MIT" target="_blank">MIT License</a>), and <a href="https://github.com/atetlaw/Really-Easy-Field-Validation" target="_blank">validation</a> (<a href="http://opensource.org/licenses/MIT" target="_blank">MIT License</a>).</p>
+    http://ajaxload.info/  for the ajax loading icon. license: "generated gifs are totally free for use"
+    
+    -->
     <head>
-                
+        
+        <script type="text/javascript">
+    //alert(document.location);
+    /*
+    $(document).ready( function(){
+        var scrollToElement = $("#selections");
+        $(window).scrollTop( scrollToElement.offset().top);
+       }); */
+    
+    /*
+    function moveWindow() {
+    var anchorValue;
+    var url = document.location;
+    var strippedUrl = url.toString().split("#");
+    if(strippedUrl.length > 1)
+    anchorvalue = strippedUrl[1];
+    window.location.hash =  'certificates';
+    //window.location.href =  strippedUrl[0]+ '#certificates';
+    //window.location='#selections';
+    
+  
+        //window.location.assign="certificates";
+        //location.assign( strippedUrl[0]+ '#selections');
+    } */
+   
+</script>
+    
+</script>
+        
         <title>Asset Tag Reference Implementation</title>
         <meta name="application-name" content="Mt Wilson Asset Tag Reference Implementation"/>
         <meta name="description" content="A web-based tool for defining tags and provisioning asset certificates" />
         <meta name="keywords" content="Mt Wilson, attestation, asset, inventory, management, security, cloud, data center" />
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 
-      
+        <!--
+    <HTA:APPLICATION ID="oMyApp" 
+        APPLICATIONNAME="Mystery Hill Demo" 
+        BORDER="yes"
+        BORDERSTYLE="normal"
+        innerBorder="yes"
+        navigable="yes"
+        CAPTION="yes"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        maximizeButton="yes"
+        minimizeButton="yes"
+        SYSMENU="yes"
+        SCROLL="auto"
+        scrollFlat="no"
+        ICON="intel-logo-blue-transparent-160x121.ico"
+        WINDOWSTATE="maximize"/>
+        -->
         <link rel="resources" type="application/vnd.mtwilson.resource+json" href="/resources.json">
         
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
@@ -20,7 +83,7 @@
         <link rel="stylesheet" href="images/MarketPlace.css" type="text/css" />
         <link rel="stylesheet" href="morestyle.css" type="text/css" />
         -->
-        <!--link rel="stylesheet" href="images/at.css" type="text/css" /-->
+        <link rel="stylesheet" href="images/at.css" type="text/css" />
         <link rel="stylesheet" type="text/css" href="CSS/home.css" />
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/jquery.ui.menubar.css" />
         <link rel="stylesheet" type="text/css" href="CSS/JQueryHelperCSS/style.css" />
@@ -131,19 +194,61 @@ function isNumber(n) {
         </script>
 
     </head>
-    <body style="background: #ffffff">
+    <body>
         
         <!-- wrap starts here -->
-        <div class="main" id="mainContainer">
+        <div id="wrap">
 
-           
+            <!--header -->
+            <div id="header">			
+
+                <!--
+                <div id="header-links">
+                    <p>
+                        <a href="http://www.intel.com" target="_blank">Intel</a> | 
+                        <a href="http://http://cloudsecurityportal.intel.com/" target="_blank">Mt Wilson</a>
+                    </p>		
+                </div>		
+                -->
+                <div id="header-caption">
+                    <h1>Asset Tag Management UI - test 4 </h1>
+                </div>
+
+                <!--header ends-->					
+            </div>
+
+            <!-- navigation starts-->	
+            <nav id="nav">
+                <ul id="navtabs"> <!-- put  id="current"  on the li tag that is currently displayed -->
+                    <li class="tab"><a href="#tags">Tag Creation</a></li>  <!-- red color:  style="color: #c55" -->
+                    <!-- <li class="tab"><a href="#rdf">RDF</a></li> -->
+                    <li class="tab"><a href="#selections">Tag Selection</a></li>
+                    <li class="tab"><a href="#certificates">Certificate Management</a></li>			
+                    <li class="tab"><a href="#configure">Settings</a></li>
+                    <li class="tab"><a href="#log">Log</a></li>
+                </ul>
+                <!-- navigation ends-->	
+            </nav>				
+            <div id="ajaxstatus" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+            </div>
+            <!--
+            <div id="notifications" style="clear: both; width: 840px; height: 20px; max-height: 50px;  margin-top: 0px; padding: 4px;">
+                <ul style="margin-left: 0px; padding-left: 0px; list-style: none;">
+                    <li style="border: 1px solid black; border-radius: 3px; padding-left: 5px; padding-right: 5px; margin: 3px;" data-bind-each-item="notices"><span data-bind-text="item.text"></span> <a href="#" style="color: black; font-weight: bold;" onclick="javascript:$(this).up('li').remove();">X</a></li>                    
+                </ul>
+            </div>
+            -->
+
             <!-- content-wrap starts -->
-            <div class="container" id="tagsMainContainer">
+            <div id="content-wrap" class="one-col"  >	
 
                 <div id="main">
 
-                    <div id="tags" style="display: none;">
-                       
+                    <div id="tags">
+                        <h1>Tag Management</h1>
+
+
+                        <h2>Create New Tag</h2>
                         <script>
                             function tag_create_form_addValue() {
                                 mtwilson.rivets.forms['tag-create-form'].input.mergeInsert({values:[]}); // sets the values to empty array if it's not already defined (applies first time this function is called)
@@ -263,7 +368,7 @@ function isNumber(n) {
                         <!-- end tags tab  -->
                     </div>
 
-                    <div id="selections" style="display: none;">
+                    <div id="selections">
                         <h1>Tag Selection</h1>
 
                         <h2>Create New Tag Selection</h2>
@@ -472,227 +577,207 @@ function isNumber(n) {
                     </div>
 
                     <div id="certificates">
-                        <div class="nagPanel">Manage Certificates &gt;</div>
-                        <div id="nameOfPage" class="NameHeader">Create New Certificate Request</div> 
-                        
-                        
+
+                        <h1>Manage Certificates</h1>
+
+
+
+                        <h2>Create New Certificate Request</h2>
+
                         <form id="certificate-request-create-form" action="#" onsubmit="return false;">
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Subject : </div>
-                                <div class="valueDiv">
-                                    <input type="text" class="textBox_Border" id="certificate-request-create-subject" name="subject" data-bind-value="input.subject" placeholder="Host UUID">
-                                    <span class="requiredField">*</span>
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Tag Selection: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-request-create-tag-selection" data-bind-value="input.selection"> <!-- this is required -->
-                                        <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
+                            <ul>
+                                <li><label for="certificate-request-create-subject">Subject</label>
+                                    <input type="text" id="certificate-request-create-subject" name="subject" placeholder="Host UUID" data-bind-value="input.subject" class="required"/>
+                                </li>
+                                <li><label for="certificate-request-create-tag-selection">Tag Selection</label>
+                                    <select id="certificate-request-create-tag-selection" data-bind-value="input.selection" class="required">
+                                            <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option>
                                     </select>
-                                   
-                                    <input type="submit" class="uploadButton" value="Save" onclick="ws.createCertificateRequest(this); return false;"/>
-                                </div>
-                            </div>
-                           
+                                </li>
+                                <!-- <li><label for="tag-create-description">Tag description</label><input type="text" id="tag-create-description" name="description"/></li> -->
+                                <li><input type="submit" value="Save" onclick="ws.createCertificateRequest(this); return false;"/></li>
+                            </ul>
                         </form>
-                        
-                        <div class="singleDiv" style="height: 25px;"></div>
-                        <div id="nameOfPage" class="NameHeader">Search Certificate Requests</div> 
-                        <!--h2>Search Certificate Requests</h2-->
+
+                        <h2>Search Certificate Requests</h2>
 
                         <form id="certificate-request-search-form" action="#" onsubmit="return false;">
-                            
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Subject: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-request-search-subject-criteria"> 
+                            <ul>
+                                <li>
+                                    <label for="certificate-request-search-subject">Subject</label>
+                                    <select id="certificate-request-search-subject-criteria">
                                         <option value="EqualTo">is</option>
                                     </select>
-                                   
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-request-search-subject" name="subject" placeholder="Host UUID"/>
-                                    
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Selection: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-request-search-selection-criteria"> 
+                                    <input type="text" id="certificate-request-search-subject" name="subject" placeholder="Host UUID"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-request-search-selection">Selection</label>
+                                    <select id="certificate-request-search-selection-criteria">
                                         <option value="EqualTo">is</option>
                                     </select>
-                                   
-                                    <input type="text" class="textBox_Border" style="width: 290px;" id="certificate-request-search-selection" name="selection" placeholder="Selection Name or UUID"/>
-                                    
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Status: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-request-search-status-criteria"> 
+                                    <input type="text" id="certificate-request-search-selection" name="selection" placeholder="Selection Name or UUID"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-request-search-status">Status</label>
+                                    <select id="certificate-request-search-status-criteria">
                                         <option value="EqualTo">is</option>
                                     </select>
-                                    <select class="ddlBox_small_Border" id="certificate-request-search-status"> 
+                                    <select id="certificate-request-search-status">
                                         <option value=''>All</option>
                                         <option>New</option>
                                         <option>Pending</option>
                                         <option>Done</option>
                                         <option>Error</option>
                                     </select>
-                                   
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-request-search-selection" name="selection" placeholder="Selection Name or UUID"/>
-                                    
-                                </div>
-                            </div>
-                          
-           
-                            <input type="button" class="uploadButton" value="Search..." onclick="ws.searchCertificateRequests(this); return false;"/>
-                          
+                                </li>
+                                <li><input type="button" value="Search..." onclick="ws.searchCertificateRequests(this); return false;"/></li>
+                            </ul>
                         </form>
 
-                        <div class="singleDiv" style="height: 25px;"></div>
-                        <div id="nameOfPage" class="NameHeader">Browse Certificate Requests</div> 
-                        <!--h2>Browse Certificate Requests</h2-->
-      
-                        <div  class="tableDisplayScroll_small">
-                        <table id="certificate-request-browse-table" class="tableDisplayBind" style="width: 600px;">
+                        <h2>Browse Certificate Requests</h2>
+
+                        <table id="certificate-request-browse-table" class="dataview">
+                            <caption>Certificate Requests</caption>
                             <thead>
                                 <tr>
-                                    <th class="row9">Subject (host uuid)</th>
-                                    <th class="row9">Selection</th>
-                                    <th class="row9">Status</th>
-                                    <th class="row12" style="width: 300px;"></th>
+                                    <th>Subject (host uuid)</th>
+                                    <th>Selection</th>
+                                    <th>Status</th>
+                                    <th></th>
                                 </tr>
                             </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
                             <tbody>
-                                <tr class="evenRow" data-bind-each-item="certificateRequests">
-                                    <td align="center" class="row1" data-bind-text="item.subject"></td>
-                                    <td align="center" class="row2" data-bind-text="item.selection"></td>
-                                    <td align="center" class="row3" data-bind-text="item.status"></td>
-                                    <td align="center" class="row4"><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeCertificateRequest(this.getAttribute('uuid')); return false;">delete</a></td>
+                                <tr data-bind-each-item="certificateRequests">
+                                    <td data-bind-text="item.subject"></td>
+                                    <td data-bind-text="item.selection"></td>
+                                    <td data-bind-text="item.status"></td>
+                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeCertificateRequest(this.getAttribute('uuid')); return false;">delete</a></td>
                                 </tr>
                             </tbody>
                         </table>
-                        </div>
                         
-                        
-                        <div class="singleDiv" style="height: 25px;"></div>
-                        <div id="nameOfPage" class="NameHeader">Search Certificates</div> 
-                        <!--h2>Search Certificates</h2-->
+                        <h2>Search Certificates</h2>
 
                         <form id="certificate-search-form" action="#" onsubmit="return false;">
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Subject: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-search-subject-criteria"> 
+                            <ul>
+                                <li>
+                                    <label for="certificate-search-subject">Subject</label>
+                                    <select id="certificate-search-subject-criteria">
                                         <option value="EqualTo">is</option>
                                         <option value="Contains">contains</option>
                                     </select>
-                                   
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-subject"  name="subject" placeholder="Host UUID"/>
-                                    
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Issuer: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-search-issuer-criteria"> 
+                                    <input type="text" id="certificate-search-subject" name="subject" placeholder="Host UUID"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-issuer">Issuer</label>
+                                    <select id="certificate-search-issuer-criteria">
                                         <option value="EqualTo">is</option>
                                         <option value="Contains">contains</option>
                                     </select>
-                                   
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-issuer" name="issuer" placeholder="Issuer name"/>
-                                    
-                                </div>
-                            </div>
-                            
-                             <div class="singleDiv">
-                                <div class="labelDiv">Validity Date: </div> 
-                                <div class="valueDiv">
-                                    <select class="ddlBox_small_Border" id="certificate-search-valid-criteria"> 
+                                    <input type="text" id="certificate-search-issuer" name="issuer" placeholder="Issuer name"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-valid">Validity Date</label>
+                                    <select id="certificate-search-valid-criteria">
                                         <option value="On">on</option>
                                         <option value="Before">before</option>
                                         <option value="After">after</option>
                                     </select>
-                                   
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-valid" name="valid" placeholder="Date" onblur='$(this).value = Date.parse($(this).value).toISOString();'/>
+                                    <input type="text" id="certificate-search-valid" name="valid" placeholder="Date" onblur='$(this).value = Date.parse($(this).value).toISOString();'/>
                                     <span class="help">Try "today", "next tuesday", or most reasonable date formats</span>
-                                    
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">SHA-1: </div> 
-                                <div class="valueDiv">
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-sha1" name="sha1" placeholder="Hex (40 characters)"/>
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">SHA256: </div> 
-                                <div class="valueDiv">
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-sha256" name="sha256" placeholder="Hex (64 characters)"/>
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">PCR Even: </div> 
-                                <div class="valueDiv">
-                                    <input type="text" class="textBox_Border" style="width: 395px;" id="certificate-search-pcrEvent" name="pcrEvent" placeholder="Hex (40 characters)"/>
-                                </div>
-                            </div>
-                            
-                            <div class="singleDiv">
-                                <div class="labelDiv">Status: </div> 
-                                <div class="valueDiv">
+                                </li>
+                                <li>
+                                    <label for="certificate-search-sha1">SHA-1</label>
+                                    <!-- <input type="hidden" id="certificate-search-sha1-criteria" value="Hex"/> -->
+                                    <input type="text" id="certificate-search-sha1" name="sha1" placeholder="Hex (40 characters)"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-sha256">SHA256</label>
+                                    <!-- <input type="hidden" id="certificate-search-sha256-criteria" value="Hex"/> -->
+                                    <input type="text" id="certificate-search-sha256" name="sha256" placeholder="Hex (64 characters)"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-pcrEvent">PCR Event</label>
+                                    <!-- <input type="hidden" id="certificate-search-pcrEvent-criteria" value="Hex"/> -->
+                                    <input type="text" id="certificate-search-pcrEvent" name="pcrEvent" placeholder="Hex (40 characters)"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-revoked">Status</label>
                                     <input type="hidden" id="certificate-search-revoked-criteria" value=""/>
-                                    <select class="ddlBox_small_Border" id="certificate-search-revoked">
+                                    <select id="certificate-search-revoked">
                                         <option value="">Any</option>
                                         <option value="false">Active</option>
                                         <option value="true">Revoked</option>
                                     </select>
-                                    
-                                    <input type="button" class="uploadButton" value="Search..." onclick="ws.searchCertificates(this); return false;"/>
-                                </div>
-                            </div>
-                          
+                                </li>
+                                
+                                <!--
+                                <li>
+                                    <label for="certificate-search-selection">Selection</label>
+                                    <select id="certificate-search-selection-criteria">
+                                        <option value="EqualTo">is</option>
+                                    </select>
+                                    <input type="text" id="certificate-search-selection" name="selection" placeholder="Selection Name or UUID"/>
+                                </li>
+                                <li>
+                                    <label for="certificate-search-status">Status</label>
+                                    <select id="certificate-search-status-criteria">
+                                        <option value="EqualTo">is</option>
+                                    </select>
+                                    <select id="certificate-search-status">
+                                        <option value=''>All</option>
+                                        <option>New</option>
+                                        <option>Pending</option>
+                                        <option>Done</option>
+                                        <option>Error</option>
+                                    </select>
+                                </li>
+                                -->
+                                <li><input type="button" value="Search..." onclick="ws.searchCertificates(this); return false;"/></li>
+                            </ul>
                         </form>
                                                 
 
-                        <div class="singleDiv" style="height: 25px;"></div>
-                        <div id="nameOfPage" class="NameHeader">Browse Certificates</div> 
-                        <!--h2>Browse Certificates</h2-->
                         
-                        <div  class="tableDisplayScroll_big">
-                        <table id="certificate-browse-table" class="tableDisplayBind" style="width: 700px;">
+                        <h2>Browse Certificates</h2>
+                        <table id="certificate-browse-table" class="dataview">
                             <thead>
                                 <tr>
-                                    <th class="row9" style="width: 100px;">Subject (Host ID)</th>
-                                    <th class="row9" style="width: 100px;">Issuer</th>
-                                    <th class="row9" style="width: 100px;">Not Before</th>
-                                    <th class="row9" style="width: 100px;">Not After</th>
-                                    <th class="row9" style="width: 100px;">Status</th>
-                                    <th class="row9" style="width: 100px;">Fingerprint (SHA-1)</th>
-                                    <th class="row9" style="width: 100px;">Fingerprint (SHA256)</th>
-                                    <th class="row12" style="width: 100px;">Certificate</th>
+                                    <th>Subject (Host ID)</th>
+                                    <th>Issuer</th>
+                                    <th style="width: 40px;">Not Before</th>
+                                    <th style="width: 40px;">Not After</th>
+                                    <th>Status</th>
+                                    <th>Fingerprint (SHA-1)</th>
+                                    <th>Fingerprint (SHA256)</th>
+                                    <th>Certificate</th>
                                 </tr>
                             </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="5">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
                             <tbody>
-                                <tr class="evenRow" data-bind-each-item="certificates">
-                                    <td align="center" class="row1" data-bind-text="item.subject"></td>
-                                    <td align="center" class="row2" data-bind-text="item.issuer"></td>
-                                    <td align="center" class="row3" data-bind-text="item.notBefore | date"></td>
-                                    <td align="center" class="row4" data-bind-text="item.notAfter | date"></td>
-                                    <td align="center" class="row5" data-bind-text="item.revoked | yesno Revoked Active"></td>
-                                    <td align="center" class="row6" data-bind-text="item.sha1 | wrap 16"></td>
-                                    <td align="center" class="row7" data-bind-text="item.sha256 | wrap 16"></td>
-                                    <td align="center" class="row8">
+                                <tr data-bind-each-item="certificates">
+                                    <td data-bind-text="item.subject"></td>
+                                    <td data-bind-text="item.issuer"></td>
+                                    <td data-bind-text="item.notBefore | date"></td>
+                                    <td data-bind-text="item.notAfter | date"></td>
+                                    <td data-bind-text="item.revoked | yesno Revoked Active"></td>
+                                    <td data-bind-text="item.sha1 | wrap 16"></td>
+                                    <td data-bind-text="item.sha256 | wrap 16"></td>
+                                    <td>
+                                        
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.deleteCertificate(this.getAttribute('uuid')); return false;">Delete</a> <br/>
                                         <a data-bind-uuid="item.uuid" href="#" onclick="javascript:$('certificate-provision-uuid').value=this.getAttribute('uuid'); $('certificate-provision-form').show(); return false;">Deploy</a> <br/>
                                         <a href="" onmouseover="$(this).href='data:application/octet-stream;base64,'+($(this).next('span').innerHTML);">Download</a><span style="display:none;" data-bind-text="item.certificate"></span> <br/>
@@ -702,9 +787,8 @@ function isNumber(n) {
                                 </tr>
                             </tbody>
                         </table>
-                        </div>
                         
-                        <form id="certificate-provision-form" style="display: none;" action="#" onsubmit="return false;" >
+                        <form id="certificate-provision-form" action="#" onsubmit="return false;">
                             <p>Currently push-provisioning works only with Citrix Xen hosts.</p>
                             <input type="hidden" name="certificateUuid" id="certificate-provision-uuid"/>
                             <ul>
@@ -739,13 +823,254 @@ function isNumber(n) {
                         
                         
                     </div> <!-- end certificates tab -->
-                   
-                   
+                   <!--
+                    <div id="rdf">
+                        <h1>Tag Policy Management</h1>
+
+
+                        <h2>Create New RDF Triple</h2>
+
+                        <form id="rdf-triple-create-form">
+                            <ul>
+                                <li><label for="rdf-triple-create-subject">Subject</label><input type="text" id="rdf-triple-create-subject" data-bind-value="input.subject" name="subject" placeholder="ID"/></li>
+                                <li><label for="rdf-triple-create-predicate">Predicate</label><input type="text" id="rdf-triple-create-predicate" data-bind-value="input.predicate" name="predicate" placeholder="Attribute name"/></li>
+                                <li><label for="rdf-triple-create-object">Object</label><input type="text" id="rdf-triple-create-object" data-bind-value="input.object" name="object" placeholder="Attribute value"/></li>
+                                <li><input type="button" value="Save" onclick="ws.createRdfTriple(this); return false;"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Search RDF Triples</h2>
+
+                        <form id="rdf-triple-search-form" action="#" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="rdf-triple-search-subject">Subject (id)</label>
+                                    <select id="rdf-triple-search-subject-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-search-subject" name="subject" placeholder="ID"/>
+                                </li>
+                                <li>
+                                    <label for="rdf-triple-search-predicate">Predicate</label>
+                                    <select id="rdf-triple-search-predicate-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-search-predicate" name="predicate" placeholder="Attribute name"/>
+                                </li>
+                                <li>
+                                    <label for="rdf-triple-search-object">Object</label>
+                                    <select id="rdf-triple-search-object-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-search-object" name="object" placeholder="Attribute value"/>
+                                </li>
+                               restore comment --
+                                <li>
+                                    <label for="rdf-triple-search-description">Rdf Triple description</label>
+                                    <select id="rdf-triple-search-description-criteria">
+                                        <option>contains</option>
+                                        <option>is</option>
+                                    </select>
+                                    <input type="text" id="rdf-triple-create-description" name="predicate"/>
+                                </li>
+                                --
+                                <li><input type="button" value="Search..." onclick="ws.searchRdfTriples(this); return false;"/></li>
+                            </ul>
+                        </form>
+
+                        <h2>Browse RDF Triples</h2>
+
+                        <table id="rdf-triple-browse-table" class="dataview">
+                            <caption>RDF Triples</caption>
+                            <thead>
+                                <tr>
+                                    <th>Subject (id)</th>
+                                    <th>Predicate (attribute name)</th>
+                                    <th>Object (attribute value)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr> <td colspan="4">
+                                        <a href="#">&lt; prev</a> | <a href="#">next 10 &gt;</a>
+                                        view&nbsp;<a href="#">5</a>&nbsp;<a href="#">10</a>&nbsp;<a href="#">25</a>&nbsp;<a href="#">50</a>&nbsp;<a href="#">100</a>&nbsp;per page
+                                    </td></tr>
+                            </tfoot>
+                            <tbody>
+                                <tr data-bind-each-item="rdfTriples">
+                                    <td data-bind-text="item.subject"></td>
+                                    <td data-bind-text="item.predicate"></td>
+                                    <td data-bind-text="item.object"></td>
+                                    <td><a data-bind-uuid="item.uuid" href="#" onclick="javascript:ws.removeRdfTriple(this.getAttribute('uuid')); return false;">delete</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                    </div>       
+                   -->
+                    <div id="configure">
+                        
+                        <form id="configuration-search-form" style="display: none;" onsubmit="return false;">
+                            <ul>
+                                <li>
+                                    <label for="configuration-search-name">Name</label>
+                                    <select id="configuration-search-name-criteria">
+                                        <option value="EqualTo">is</option>
+                                        <option value="Contains">contains</option>
+                                    </select>
+                                    <input type="text" id="configuration-search-name" name="name" placeholder="Configuration name, eg 'main'"/>
+                                </li>
+                                <li style="display: none;">
+                                    <label for="configuration-search-contentType">Content Type</label>
+                                    <input type="hidden" id="configuration-search-contentType-criteria" value="EqualTo"/>
+                                    <select id="configuration-search-contentType">
+                                        <option>JSON</option>
+                                    </select>
+                                </li>
+                                <li><input type="button" value="Search..." onclick="ws.searchConfigurations(this); return false;"/></li>
+                            </ul>
+                        </form>
+                        
+                        <form id="config-form" onsubmit="return false;">
+                            <input type="button" id="config-save-button" value="Save" onclick="ws.storeMainConfiguration(this); return false;"/>
+                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration(); return false;"/>
+
+                                <!--
+                                <h2>Local Data</h2>
+                                <ul>
+                                <li><label for="mhclient-config-json">MHCLIENT_CONFIG</label> <input type="text" size="80" id="mhclient-config-json" value="C:\Users\jbuhacof\.mystery-hill\client\client-html5-config.json"/></li>
+                                <li><label for="mhclient-home-dir">MHCLIENT_HOME</label> <input type="text" size="80" id="mhclient-home-dir" value="C:\Users\jbuhacof\workspace\mystery-hill\client\target"/> location of mhclient.jar</li>
+                                <li><label for="mhclient-image-dir">MHCLIENT_IMAGES</label> <input type="text" size="80" id="mhclient-image-dir" value="C:\Users\jbuhacof\Downloads\VM Images"/></li>
+                                <li><label for="mhclient-encrypted-image-dir">MHCLIENT_ENC_IMAGES</label> <input type="text" size="80" id="mhclient-encrypted-image-dir" value="C:\Users\jbuhacof\Downloads\VM Encrypted Images"/></li>
+                                </ul>
+                                -->
+                                <!--
+                            <fieldset><legend>Client Configuration</legend>
+
+                                <br/>
+                                <h2>Web Services</h2>
+                                <ul>
+                                    <li><label for="provsvc">MTWILSON_ATAG_PROVSVC_URL</label> <input type="text" size="80" id="provsvc" value="https://localhost:8080" placeholder="URL"/></li>
+                                </ul>
+                            </fieldset> -->
+                            <fieldset><legend>Server Configuration</legend>
+                                <br/>
+                                <!--
+                                <h2>Local Data</h2>
+                                <ul>
+                                <li><label for="mhclient-config-json">MHCLIENT_CONFIG</label> <input type="text" size="80" id="mhclient-config-json" value="C:\Users\jbuhacof\.mystery-hill\client\client-html5-config.json"/></li>
+                                <li><label for="mhclient-home-dir">MHCLIENT_HOME</label> <input type="text" size="80" id="mhclient-home-dir" value="C:\Users\jbuhacof\workspace\mystery-hill\client\target"/> location of mhclient.jar</li>
+                                <li><label for="mhclient-image-dir">MHCLIENT_IMAGES</label> <input type="text" size="80" id="mhclient-image-dir" value="C:\Users\jbuhacof\Downloads\VM Images"/></li>
+                                <li><label for="mhclient-encrypted-image-dir">MHCLIENT_ENC_IMAGES</label> <input type="text" size="80" id="mhclient-encrypted-image-dir" value="C:\Users\jbuhacof\Downloads\VM Encrypted Images"/></li>
+                                </ul>
+                                -->
+                                <h2>Provisioning</h2>
+                                <ul>
+                                    <li>
+                                        <label for="allow-tags-in-certificate-requests">Allow tag selections in certificate requests</label>
+                                        <select data-bind-value="input.allowTagsInCertificateRequests" id="allow-tags-in-certificate-requests" name="allowTagsInCertificateRequests">
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                        <p>Choosing 'Yes' here enables the "Manual" and "Automatic Host-Based" provisioning request models.
+                                        Note: for "Automatic Host-Based" provisioning you also need to configure a code signing certificate.</p>
+                                    </li>
+                                    <li>
+                                        <label for="allow-automatic-tag-selection">Allow server to automatically select tags for certificate requests</label>
+                                        <select data-bind-value="input.allowAutomaticTagSelection"  id="allow-automatic-tag-selection" name="allowAutomaticTagSelection">
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                        <p>Choosing 'Yes' here enables the "Automatic Server-Based" provisioning request models.
+                                        Note: for "Automatic Server-Based" provisioning you also need to set a tag selection policy.</p>
+                                    </li>
+                                    <li>
+                                        <label for="automatic-tag-selection-name">Choose a tag selection to use for all certificate requests</label>
+                                        <!-- bind value below for the option used to be item.uuid but it's conveinnt to configure wiht human-readable name ... XXX solve this later by making the sample data use the uuid not the name when it configures -->
+                                        <select data-bind-value="input.automaticTagSelectionName"  id="automatic-tag-selection-name" name="automaticTagSelectionName">
+                                            <option data-bind-each-item="global.selections" data-bind-value="item.uuid" data-bind-text="item.name"></option> 
+                                        </select>
+                                        <p>If you use "Automatic Server-Based" provisioning, the server needs to know which tag selection
+                                        to use for incoming certificate requests. Currently only one tag selection is supported.</p>
+                                    </li>
+                                    <li><label for="approval-method">Approval Method</label> 
+                                        <select  data-bind-value="input.approveAllCertificateRequests"  id="approval-method" name="approveAllCertificateRequests">
+                                            <option value="true">Automatic/internal</option>
+                                            <option value="false">Manual/external</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                            </fieldset>
+                            
+                                <fieldset>
+                                    <legend>Mt Wilson</legend>
+                                    <ul>
+                                        <li>
+                                            <label for="mtwilson-url">MtWilson Base URL (https://mtwilson:port/)</label>
+                                            <input type="text" data-bind-value="mtwilsonUrl" id="mtwilson-url" name="mtwilsonUrl" class="validate-url"/>
+                                        </li>
+                                        <li>
+                                            <label for="mtwilson-client-keystore-username">MtWilson API Client Username</label>
+                                            <input type="text" data-bind-value="mtwilsonClientKeystoreUsername" id="mtwilson-client-keystore-username" name="mtwilsonClientKeystoreUsername"/>
+                                        </li>
+                                        <li>
+                                            <label for="mtwilson-client-keystore-password">MtWilson API Client Password</label>
+                                            <input type="password" data-bind-value="mtwilsonClientKeystorePassword" id="mtwilson-client-keystore-password" name="mtwilsonClientKeystorePassword"/>
+                                        </li>
+                                    </ul>                                    
+                                </fieldset>
+
+                        </form>
+
+                          <!-- since there is a create-ca-key command now, disabling this forma nd just showing the cacerts for import to mt wilson -->
+                        <form id="ca-update-form">
+                            <fieldset>
+                                <legend>Certificate Authority</legend>
+                                <p>A certificate authority is automatically created during a new install. 
+                                    You can update the authority information here. Updating the authority information
+                                    will cause the existing certificate authority to be revoked and a new one to be
+                                    created with the updated information.</p>
+                                <p>To create a new CA, use the "create-ca-key" command on the asset tag server.</p>
+                                <ul style="display: none;"> 
+                                    <li><label for="ca-cn">Common Name</label><input type="text" id="ca-cn" size="30" data-bind-value="input.cn" placeholder="First Name &amp; Last Name" class="required"/></li>
+                                    <li><label for="ca-ou">Organizational Unit</label><input type="text" id="ca-ou" size="30" data-bind-value="input.ou" placeholder="Department" value="Cloud Security" class="required"/></li>
+                                    <li><label for="ca-o">Organization</label><input type="text" id="ca-o" size="30" data-bind-value="input.o" placeholder="Organization or Company" value="Intel" class="required"/></li>
+                                    <li><label for="ca-l">Locality</label><input type="text" id="ca-l" size="30" data-bind-value="input.l" placeholder="City" value="Folsom" class="required"/></li>
+                                    <li><label for="ca-st">State</label><input type="text" id="ca-st" size="30" data-bind-value="input.st" placeholder="State or Province" value="CA" class="required"/></li>
+                                    <li><label for="ca-c">Country</label><input type="text" id="ca-c" size="30" data-bind-value="input.c" placeholder="Country" value="US" class="required"/></li>
+                                    <li><input type="button" value="Update" onclick="ws.updateCertificateAuthority(this);"/></li>
+                                </ul>
+                                <!-- not using data binding right now because we're not supporting updating the file... but we will later to allow user to import external ca certs by just appending them here -->
+                                <textarea id="cacerts-text" rows='20' cols='80'></textarea>
+                            </fieldset>
+                        </form>
+                          
+                        <!-- end configure tab -->
+                    </div>
                 </div>
-                
+
+                <div id="log">
+                    <h1>Application Log</h1>
+                    <div id="logwindow" style="height: 250px; max-height: 250px; overflow: scroll; border: 2px solid #555555; margin-top: 15px; padding: 4px;">
+                    </div>
+                    <!-- end log tab -->
+                </div>
                 <!-- content-wrap ends-->	
             </div>
 
+            
+            <!-- footer starts -->			
+            <div id="footer-wrap"><div id="footer">				
+
+                    <p>
+                        &copy; 2013 Intel Corporation
+                    </p>
+
+                </div></div>
+            <!-- footer ends-->	
 
             <!-- wrap ends here -->
         </div>
