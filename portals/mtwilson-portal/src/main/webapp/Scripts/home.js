@@ -45,6 +45,13 @@ function getViewRequest() {
 	sendHTMLAjaxRequest(false, 'getView/getViewRequestPage.html', null, fnDisplayContent, null,'getViewRequest');
 }
 
+function getAddHostPage() {
+	isAddHostPage = true;
+	$('#mainContainer').html('<div id="AddHostPage"></div>');
+	setLoadImage('AddHostPage', '40px', '500px');
+	sendHTMLAjaxRequest(false, 'getView/getAddHostPage.html', null, fnDisplayContent, null,'AddHostPage');
+}
+
 /*--Begin Added by Soni on 18/10/12 for New Screen for CA */
 function getCAStatus() {
 	$('#mainContainer').html('<div id="getCAStatus"></div>');
