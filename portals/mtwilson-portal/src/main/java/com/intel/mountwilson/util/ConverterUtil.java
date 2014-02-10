@@ -21,7 +21,8 @@ import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.mtwilson.datatypes.TxtHost;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
+//import com.sun.jersey.core.util.MultivaluedMapImpl;
+import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -415,7 +416,8 @@ public class ConverterUtil {
 	}
 	
 	public static MultivaluedMap<String, String> getOSDataMultivaluedMap(OSDataVO os){
-		MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+		//MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+                MultivaluedMap<String, String> map = new MultivaluedStringMap();
 		map.add("Name", os.getOsName());
 		map.add("Version", os.getOsVersion());
 		map.add("Description", os.getOsDescription());
