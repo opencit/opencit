@@ -556,23 +556,18 @@ function isNumber(n) {
                         <div id="certificates">
                             <div class="nagPanel">Manage Certificates &gt;</div>
                             <div id="nameOfPage" class="NameHeader">Create New Certificate Request</div> 
-                           <form id="auto-populate-uuid-form" action="#" onsubmit="return false;">
-                            <p>Please enter the host name as it appears in Mt. Wilson (Host must already be registered in Mt. Wilson to use this function)</p>
-                            <input type="hidden" name="populateUuid" id="populate-uuid"/>
-                            <ul>
-                                <li>
-                                    <label for="uuid-populate-host">HostName</label>
-                                    <input type="text" id="uuid-populate-host" name="uuidHost" size="40" placeholder="Hostname or IP Address"/>
-                                </li>
-                                <li>
-                                    <input type="button" value="Populate UUID Box" onclick="ws.autoPopulateUUID(this); return false;"/>                                    
-                                </li>
-                            </ul>
-                        </form>
-
+                           
                             <form id="certificate-request-create-form" action="#" onsubmit="return false;">
-
+                                 <div class="singleDiv">
+                                    
+                                    <div class="labelDiv">Hostname: </div>
+                                    <div class="valueDiv">
+                                        <input type="text" id="uuid-populate-host" name="uuidHost" size="40" placeholder="Hostname or IP Address"/>
+                                        <input type="button" value="Populate Subject Box" onclick="ws.autoPopulateUUID(this); return false;"/> 
+                                    </div>
+                                </div>
                                 <div class="singleDiv">
+                                    
                                     <div class="labelDiv">Subject : </div>
                                     <div class="valueDiv">
                                         <input type="text" class="textBox_Border" id="certificate-request-create-subject" name="subject" data-bind-value="input.subject" placeholder="Host UUID">
@@ -915,6 +910,7 @@ function isNumber(n) {
                                 </fieldset>
 
                                 <div class="singleDiv" style="height: 25px;"></div>
+                                <div style="display: none;">
                                 <fieldset>
                                     <legend>Mt Wilson</legend>
 
@@ -942,7 +938,7 @@ function isNumber(n) {
                                     </div>                               
 
                                 </fieldset>
-
+                                </div>
                             </form>
 
                              <div class="singleDiv" style="height: 25px;"></div>
