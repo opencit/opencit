@@ -475,7 +475,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         request.releaseConnection();
         return apiResponse;
     }
-
+    
     public Locale getLocale() {
         return locale;
     }
