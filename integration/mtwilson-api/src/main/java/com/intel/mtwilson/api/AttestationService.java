@@ -92,4 +92,6 @@ public interface AttestationService {
     //This method is currently not exposed to the external customers. There is another API, which would call this API.
     // This function has not been added to Mtwilson.java since the javadoc would be created from it
     String checkMatchingMLEExists(TxtHostRecord hostObj) throws IOException, ApiException, SignatureException;
+    
+    public String testMediaType(String testStr) throws IOException, ApiException, SignatureException;
 }

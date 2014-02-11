@@ -27,9 +27,11 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.Consumes;
 //import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -58,6 +60,18 @@ public class Test {
     @Produces(MediaType.TEXT_PLAIN)
     public String error400() {
         throw new MWException(ErrorCode.UNKNOWN_ERROR);
+    }
+    
+    @PermitAll
+    @POST
+    @Path("/testMediaType")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testMediaType(String testStr) {
+        if (testStr == "savinorules")
+            return "TEST VERIFIED!";
+        else
+            return "Something went wrong...";
     }
     
     /**

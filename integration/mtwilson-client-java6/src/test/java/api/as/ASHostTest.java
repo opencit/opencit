@@ -103,6 +103,11 @@ public class ASHostTest {
         HostLocation hlObj = new HostLocation("Folsom", "7C07CFF3C83882A7BE74A2C7869CD5991E6F166F");
         boolean result = c.addHostLocation(hlObj);
         System.out.println(result);        
-    }         
+    }
+    
+    @Test
+    public void testMediaType() throws IOException, ApiException, SignatureException {
+        System.out.println("SAVY TEST: " + c.testMediaType("savinorules"));
+    }
     
 }

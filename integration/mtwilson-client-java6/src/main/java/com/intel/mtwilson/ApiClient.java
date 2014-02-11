@@ -1552,4 +1552,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return results;                
     }
     
+    @Override
+    public String testMediaType(String testStr) throws IOException, ApiException, SignatureException {
+        return text(httpPost(asurl("/test/testMediaType"), toJSON(testStr)));
+    }
 }
