@@ -42,19 +42,23 @@ import javax.ws.rs.core.MediaType;
 @Provider
 @Produces({MediaType.APPLICATION_XML,MediaType.TEXT_XML})
 public class JacksonXmlMapperProvider implements ContextResolver<XmlMapper> {
- 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JacksonXmlMapperProvider.class);
+
     private final XmlMapper xmlMapper;
  
     public JacksonXmlMapperProvider() {
+        log.debug("JacksonXmlMapperProvider constructor");
         xmlMapper = createDefaultMapper();
     }
  
     @Override
     public XmlMapper getContext(Class<?> type) {
+        log.debug("JacksonXmlMapperProvider getContext");
         return xmlMapper;
     }
  
     private XmlMapper createDefaultMapper() {
+        log.debug("JacksonXmlMapperProvider createDefaultMapper");
 //        JsonFactory jsonFactory = new JsonFactory();
 //        jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
         XmlMapper mapper = new XmlMapper(/*jsonFactory*/);

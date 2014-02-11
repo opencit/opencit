@@ -60,7 +60,15 @@ public class Test {
     @GET
     @Path("/error/400")
     @Produces(MediaType.TEXT_PLAIN)
-    public String error400() {
+    public String error400TextPlain() {
+        throw new MWException(ErrorCode.UNKNOWN_ERROR);
+    }
+    @PermitAll
+    @GET
+    @Path("/error/400")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String error400ApplicatinoJson() {
         throw new MWException(ErrorCode.UNKNOWN_ERROR);
     }
     

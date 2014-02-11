@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author jbuhacoff
  */
-@Background
+//@Background // TODO:  re-enable this and add an increasing delay behavior to the backgroudn task runner so if a task has errors the next one will be delayed etc.  and maybe then just shut it off after a while and make a facility for adding new background tasks at runtime
 public class RpcInvoker implements Runnable {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RpcInvoker.class);
 
