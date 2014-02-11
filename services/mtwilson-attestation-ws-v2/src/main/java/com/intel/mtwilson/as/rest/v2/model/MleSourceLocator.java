@@ -13,10 +13,11 @@ import javax.ws.rs.PathParam;
  * @author jbuhacoff
  */
 public class MleSourceLocator implements Locator<MleSource> {
+
+    @PathParam("mle_id")
+    public String mleUuid;
     @PathParam("id")
     public UUID id;
-    @PathParam("mle")
-    public String mleUuid;
     
     @Override
     public void copyTo(MleSource item) {
