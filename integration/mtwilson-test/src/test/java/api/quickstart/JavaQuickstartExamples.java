@@ -34,10 +34,11 @@ public class JavaQuickstartExamples {
         File directory = new File(System.getProperty("user.home", "."));
         String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
-        URL server = new URL("http://127.0.0.1:8080/v1"); // your Mt Wilson server
+        URL server = new URL("http://127.0.0.1:48080/mtwilson/v1"); // your Mt Wilson server
         String[] roles = new String[] { "Attestation", "Whitelist" };
         KeystoreUtil.createUserInDirectory(directory, username, password, server, roles);
     }
+    
     /*
     @Test
     public void registerV2() throws Exception {

@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.Consumes;
 //import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -56,7 +57,15 @@ public class Test {
     @GET
     @Path("/error/400")
     @Produces(MediaType.TEXT_PLAIN)
-    public String error400() {
+    public String error400TextPlain() {
+        throw new MWException(ErrorCode.UNKNOWN_ERROR);
+    }
+    @PermitAll
+    @GET
+    @Path("/error/400")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String error400ApplicatinoJson() {
         throw new MWException(ErrorCode.UNKNOWN_ERROR);
     }
     

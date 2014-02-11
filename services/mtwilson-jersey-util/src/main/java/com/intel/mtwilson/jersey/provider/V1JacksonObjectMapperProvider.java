@@ -31,29 +31,29 @@ import javax.ws.rs.core.MediaType;
  * @author jbuhacoff
  */
 @Provider
-@Produces({MediaType.APPLICATION_JSON,OtherMediaType.APPLICATION_RELATIONAL_PATCH_JSON,OtherMediaType.APPLICATION_VND_API_JSON,OtherMediaType.APPLICATION_JSON_PATCH})
-public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper> {
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(JacksonObjectMapperProvider.class);
+@Produces({MediaType.APPLICATION_JSON})
+public class V1JacksonObjectMapperProvider implements ContextResolver<ObjectMapper> {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(V1JacksonObjectMapperProvider.class);
 
     private final ObjectMapper defaultObjectMapper;
  
-    public JacksonObjectMapperProvider() {
-        log.debug("JacksonObjectMapperProvider constructor");
+    public V1JacksonObjectMapperProvider() {
+        log.debug("V1JacksonObjectMapperProvider constructor");
         defaultObjectMapper = createDefaultMapper();
     }
  
     @Override
     public ObjectMapper getContext(Class<?> type) {
-        log.debug("JacksonObjectMapperProvider getContext");
+        log.debug("V1JacksonObjectMapperProvider getContext");
         return defaultObjectMapper;
     }
  
     private ObjectMapper createDefaultMapper() {
-        log.debug("JacksonObjectMapperProvider createDefaultMapper");
+        log.debug("V1JacksonObjectMapperProvider createDefaultMapper");
         JsonFactory jsonFactory = new JsonFactory();
         jsonFactory.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
         ObjectMapper mapper = new ObjectMapper(jsonFactory);
-        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy());
+//        mapper.setPropertyNamingStrategy(new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy()); // v1 apis dont' use this because it overrides @JsonProperty annotations 
         return mapper;
     }
  

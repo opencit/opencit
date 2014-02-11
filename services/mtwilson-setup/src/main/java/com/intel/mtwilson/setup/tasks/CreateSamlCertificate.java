@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
@@ -58,11 +59,10 @@ public class CreateSamlCertificate extends LocalSetupTask {
             configuration("SAML distinguished name is not configured");
         }
         samlKeystorePassword = My.configuration().getSamlKeystorePassword();
-        if( samlKeystorePassword == null ) {
-            // XXX TODO automatically generate samlKeystorePassword 
-            // after configure() the application should  getSamlKeystorePassword()  from us and 
-            // save it (for example in mtwilson.properties)
-            samlKeystorePassword ="password";
+        if( samlKeystorePassword == null || samlKeystorePassword.isEmpty() ) {
+            samlKeystorePassword = RandomUtil.randomBase64String(16);
+            My.configuration().update("saml.key.password", samlKeystorePassword);// XXX should this be updated here or after execute?  advantage here is that if there's an error writing to the file, we won't proceed;  which is better than trying and failing after execute when the keystore has been created and then we're left not able to record the password...   at least here if we create a password but then cannot create the keystore, the password will still be used next time we try to create the keystore
+            My.reset();
         }
         
         // this section about checkign the ca key availability

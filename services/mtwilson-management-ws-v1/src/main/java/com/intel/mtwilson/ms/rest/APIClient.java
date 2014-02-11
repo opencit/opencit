@@ -49,7 +49,7 @@ public class APIClient {
      */
     @RolesAllowed({"Security"})
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public ApiClientInfo getApiClientInfo(@QueryParam("fingerprint") String fingerprintHex) {
         ValidationUtil.validate(fingerprintHex);
         byte[] fingerprint = fromHex(fingerprintHex);
@@ -63,7 +63,7 @@ public class APIClient {
      */
     @RolesAllowed({"Security"})
     @PUT
-    @Consumes("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String updateApiClient(ApiClientUpdateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
@@ -82,7 +82,7 @@ public class APIClient {
      */
     @RolesAllowed({"Security"})
     @POST
-    @Consumes("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String addApiClient(ApiClientCreateRequest apiClientRequest) {
         ValidationUtil.validate(apiClientRequest);
@@ -97,7 +97,7 @@ public class APIClient {
     @Path("/availableRoles")
     @RolesAllowed({"Security"})
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public Role[] listAvailableRoles() {
         return new Role[] { Role.Security, Role.Whitelist, Role.Attestation, Role.Report, Role.Audit, Role.AssetTagManagement }; // XXX intentionally omitting the cache role, because we are removing AH from the design, and anyway the cache needs a "real" permission to read whatever it is caching.
     }
@@ -112,7 +112,7 @@ public class APIClient {
     @Path("/search")
     @RolesAllowed({"Security"})
     @GET
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public List<ApiClientInfo> searchApiClientInfo(
             @QueryParam("enabledEqualTo") String enabledEqualTo,
             @QueryParam("expiresAfter") String expiresAfter,
@@ -191,7 +191,7 @@ public class APIClient {
     @PermitAll
     @POST
     @Path("/register")
-    @Consumes("application/json")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String registerApiClient(ApiClientCreateRequest apiClientRequest) {
         //ValidationUtil.validate(apiClientRequest);

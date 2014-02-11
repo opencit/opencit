@@ -56,6 +56,7 @@ public class Jersey2Application2 extends AbstractJerseyPluginApplication {
         
 register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
 register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
+
 register(com.intel.mtwilson.jersey.provider.JacksonYamlObjectMapperProvider.class);
 register(com.intel.mtwilson.jersey.provider.ApplicationYamlProvider.class);
 register(com.intel.mtwilson.jersey.provider.X509CertificatePemProvider.class);

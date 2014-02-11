@@ -62,17 +62,23 @@ public abstract class AbstractJerseyPluginApplication extends ResourceConfig {
     
     public AbstractJerseyPluginApplication() {
         Util.scanJars(Util.findAllJars(),getRegistrars());
-        
+register(JacksonFeature.class);        
         log.debug("Registering YAML, XML, JSON providers");
-register(com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper.class);
-register(com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper.class); 
-register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
+        
+        // THESE WERE ENABLED:
+//register(com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper.class);
+//register(com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper.class); 
+//register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);
 //register(com.fasterxml.jackson.jaxrs.json.JsonParseExceptionMapper.class);
+
+/*        // THESE WERE ENABLED:
 register(com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider.class);
-//register(com.fasterxml.jackson.jaxrs.json.JsonMappingExceptionMapper.class);
 register(com.fasterxml.jackson.jaxrs.xml.JacksonJaxbXMLProvider.class); 
-//register(com.fasterxml.jackson.jaxrs.xml.JsonParseExceptionMapper.class); 
 register(com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider.class); 
+*/
+        
+//register(com.fasterxml.jackson.jaxrs.json.JsonMappingExceptionMapper.class);
+//register(com.fasterxml.jackson.jaxrs.xml.JsonParseExceptionMapper.class); 
 //register(com.fasterxml.jackson.jaxrs.xml.JsonMappingExceptionMapper.class);
         // we can register javax.ws.rs filters here that implement
         // javax.ws.rs.container.ContainerRequestFilter or
