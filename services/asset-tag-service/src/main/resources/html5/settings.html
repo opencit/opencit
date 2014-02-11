@@ -766,7 +766,7 @@ function isNumber(n) {
                         
                         <form id="config-form" onsubmit="return false;">
                             <input type="button" id="config-save-button" value="Save" onclick="ws.storeMainConfiguration(this); return false;"/>
-                            <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration(); return false;"/>
+                           <!-- <input type="button" id="config-load-button" value="Reset" onclick="ws.retrieveMainConfiguration(); return false;"/> -->
                             
                             <fieldset>
                                     <legend>Server Configuration</legend>
@@ -830,7 +830,8 @@ function isNumber(n) {
                           
                             </fieldset>
                       
-                            <div class="singleDiv" style="height: 25px;"></div>
+                            <!-- <div class="singleDiv" style="height: 25px;"></div> -->
+                            <div style="display: none;">
                             <fieldset>
                                 <legend>Mt Wilson</legend>
                                 
@@ -856,11 +857,11 @@ function isNumber(n) {
                                         <input type="password" class="textBox_Border" data-bind-value="mtwilsonClientKeystorePassword" id="mtwilson-client-keystore-password" name="mtwilsonClientKeystorePassword"/>
                                     </div>
                                 </div>                               
-                                
+                            
                             </fieldset>
-
+                            </div>
                         </form>
-
+                        
                          <div class="singleDiv" style="height: 25px;"></div>
                           <!-- since there is a create-ca-key command now, disabling this forma nd just showing the cacerts for import to mt wilson -->
                         <form id="ca-update-form">
