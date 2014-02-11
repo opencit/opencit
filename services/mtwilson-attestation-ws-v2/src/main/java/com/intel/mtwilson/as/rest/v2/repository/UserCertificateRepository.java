@@ -45,6 +45,13 @@ public class UserCertificateRepository implements SimpleRepository<UserCertifica
                 if (userCert != null) {
                     userCertCollection.getUserCertificates().add(convert(userCert));
                 }
+            } else if (criteria.userUuid != null) {
+                List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByUserUUID(criteria.userUuid.toString());
+                if (userList != null && !userList.isEmpty()) {
+                    for(ApiClientX509 userObj : userList) {
+                        userCertCollection.getUserCertificates().add(convert(userObj));
+                    }
+                }                
             } else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
                 List<ApiClientX509> userList = userCertJpaController.findApiClientX509ByName(criteria.nameEqualTo);
                 if (userList != null && !userList.isEmpty()) {

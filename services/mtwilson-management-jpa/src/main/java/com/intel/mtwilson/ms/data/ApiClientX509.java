@@ -47,7 +47,8 @@ import javax.persistence.Convert;
     @NamedQuery(name = "ApiClientX509.findByEnabled", query = "SELECT a FROM ApiClientX509 a WHERE a.enabled = :enabled"),
     @NamedQuery(name = "ApiClientX509.findByStatus", query = "SELECT a FROM ApiClientX509 a WHERE a.status = :status"),
     @NamedQuery(name = "ApiClientX509.findByEnabledStatus", query = "SELECT a FROM ApiClientX509 a WHERE a.enabled = :enabled AND a.status = :status"),
-    @NamedQuery(name = "ApiClientX509.findByUUID_Hex", query = "SELECT a FROM ApiClientX509 a WHERE a.uuid_hex = :uuid_hex")})
+    @NamedQuery(name = "ApiClientX509.findByUuid", query = "SELECT a FROM ApiClientX509 a WHERE a.uuid_hex = :uuid_hex"),
+    @NamedQuery(name = "ApiClientX509.findByUserUuid", query = "SELECT a FROM ApiClientX509 a WHERE a.user_uuid_hex = :user_uuid_hex")})
 
 public class ApiClientX509 implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -89,9 +90,12 @@ public class ApiClientX509 implements Serializable {
     @Basic(optional = true)
     @Column(name = "locale")
     private String locale;
-    @Basic(optional = true)
+    @Basic(optional = false)
     @Column(name = "uuid_hex")
     private String uuid_hex;
+    @Basic(optional = false)
+    @Column(name = "user_uuid_hex")
+    private String user_uuid_hex;
 
     public ApiClientX509() {
     }
@@ -214,6 +218,15 @@ public class ApiClientX509 implements Serializable {
         this.uuid_hex = uuid_hex;
     }
 
+    public String getUser_uuid_hex() {
+        return user_uuid_hex;
+    }
+
+    public void setUser_uuid_hex(String user_uuid_hex) {
+        this.user_uuid_hex = user_uuid_hex;
+    }
+
+    
     
     // XXX TODO rewrite using cpg-io library com.intel.dcsg.cpg.x500.DN class like this:   DN dn = new DN(x509UserName); return dn.getCommonName(); 
     public String getUserNameFromName() {

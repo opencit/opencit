@@ -14,6 +14,8 @@ import javax.ws.rs.PathParam;
  */
 public class UserCertificateLocator implements Locator<UserCertificate>{
 
+    @PathParam("user_id")
+    public UUID userUuid;
     @PathParam("id")
     public UUID id;
 
@@ -21,6 +23,7 @@ public class UserCertificateLocator implements Locator<UserCertificate>{
     @Override
     public void copyTo(UserCertificate item) {
         item.setId(id);
+        item.setUserUuid(userUuid);
     }
     
 }

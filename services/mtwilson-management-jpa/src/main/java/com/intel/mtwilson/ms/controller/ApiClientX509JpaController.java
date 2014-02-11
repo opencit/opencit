@@ -268,11 +268,18 @@ public class ApiClientX509JpaController extends GenericJpaController<ApiClientX5
     
     public ApiClientX509 findApiClientX509ByUUID(String uuid_hex) {
         
-        List<ApiClientX509> list = searchByNamedQuery("findByUUID_Hex", "uuid_hex", uuid_hex);
+        List<ApiClientX509> list = searchByNamedQuery("findByUuid", "uuid_hex", uuid_hex);
         if( list != null && !list.isEmpty() ) {
             return list.get(0);
         }
         return null;
+        
+    }
+
+    public List<ApiClientX509> findApiClientX509ByUserUUID(String user_uuid_hex) {
+        
+        List<ApiClientX509> list = searchByNamedQuery("findByUserUuid", "user_uuid_hex", user_uuid_hex);
+        return list;
         
     }
     

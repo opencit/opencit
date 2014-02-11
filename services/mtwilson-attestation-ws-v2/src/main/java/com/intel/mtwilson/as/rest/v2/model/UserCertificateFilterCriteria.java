@@ -16,7 +16,9 @@ import javax.ws.rs.QueryParam;
  */
 public class UserCertificateFilterCriteria implements FilterCriteria<UserCertificate>{
     
-    @PathParam("id")
+    @PathParam("user_id")
+    public UUID userUuid;
+    @QueryParam("id")
     public UUID id;
     @QueryParam("nameEqualTo")
     public String nameEqualTo;
