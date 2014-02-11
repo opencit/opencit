@@ -63,6 +63,9 @@ bootstrap_first_user() {
   export MC_FIRST_USERNAME="$MC_FIRST_USERNAME"
   prompt_with_default_password MC_FIRST_PASSWORD
   export MC_FIRST_PASSWORD="$MC_FIRST_PASSWORD"
+  echo  -n "Waiting for webserver to restart... "
+  sleep 10s        #XXX TODO: remove when we have solution for webserver up
+  echo "Done"
   $mtwilson setup BootstrapUser --keystore.users.dir="${package_keystore_users_dir}" --mtwilson.api.baseurl="${MTWILSON_API_BASEURL}" "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #$mtwilson setup BootstrapUser ${package_keystore_users_dir} ${MTWILSON_API_BASEURL} "${MC_FIRST_USERNAME}" env:MC_FIRST_PASSWORD
   #msctl approve-user ${package_keystore_users_dir} "${MC_FIRST_USERNAME}" "${MC_FIRST_PASSWORD}"
