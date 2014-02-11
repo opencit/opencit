@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.crypto;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.crypto.HmacCredential;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
@@ -13,10 +14,12 @@ import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OsData;
 import com.intel.dcsg.cpg.io.ByteArrayResource;
+import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.dcsg.cpg.io.Resource;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
+import com.intel.mtwilson.datatypes.OemData;
 import com.intel.mtwilson.datatypes.Role;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -47,7 +50,7 @@ public class KeystoreTest {
         // create a temporary keystore file for this test suite
         File tmp = File.createTempFile("keystore", ".jks"); // IOException.  // creates a temporary file
         config = new Properties();
-        config.setProperty("mtwilson.api.baseurl", "https://10.1.71.81:8181");
+        config.setProperty("mtwilson.api.baseurl", "https://10.1.71.134:8181");
         config.setProperty("mtwilson.api.keystore", tmp.getAbsolutePath());
         config.setProperty("mtwilson.api.keystore.password", "changeit123");
         config.setProperty("mtwilson.api.key.alias", "mysecretapikey");

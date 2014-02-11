@@ -22,6 +22,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Web Service
@@ -30,9 +32,8 @@ import javax.ws.rs.core.MediaType;
  */
 @V1
 @Path("/WLMService/resources/oem")
-public class Oem {  
-
-    
+public class Oem {
+    private Logger log = LoggerFactory.getLogger(getClass());
     private OemBO oemBo;
 
     /** Creates a new instance of Oem */
@@ -94,6 +95,8 @@ public class Oem {
     @Produces(MediaType.TEXT_PLAIN)
     public String addOem(OemData oemData) {
         ValidationUtil.validate(oemData);
+        log.error("OEM Name: " + oemData.getName());
+        log.error("OEM Description: " + oemData.getDescription());
         return oemBo.createOem(oemData, null); // passing in default null for UUID
     }
     

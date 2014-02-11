@@ -80,10 +80,10 @@ public class ASHostTest {
         wlObj.setVmmWhiteList(true);
         wlObj.setBiosWLTarget(HostWhiteListTarget.BIOS_HOST);
         wlObj.setVmmWLTarget(HostWhiteListTarget.BIOS_HOST);
-        wlObj.setRegisterHost(true);        
+        wlObj.setRegisterHost(true);
         boolean result = c.configureWhiteList(wlObj);
         System.out.println(result);        
-    }     
+    }
     
     @Test
     public void testRegisterWhiteList()throws IOException, ApiException, SignatureException {

@@ -459,16 +459,9 @@ public class ApacheHttpClient implements java.io.Closeable {
         //log.debug("POST content: {}", message == null ? "(empty)" : message.content);
         HttpPost request = new HttpPost(requestURL);
         if( message != null && message.content != null ) {
-            System.out.println("Savy004a");
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
         System.out.println("Savy004d: " + message.content);
-        System.out.println("Savy004e: " + message.contentType.toString());
-        System.out.println("Savy004f: " + (new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8"))).toString());
-        System.out.println("Savy004g: " + request.getEntity().getContent());
-        System.out.println("Savy004h: " + request.getEntity().getContent().toString());
-        System.out.println("Savy004i: " + request.getEntity().toString());
-        
         
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
@@ -477,14 +470,8 @@ public class ApacheHttpClient implements java.io.Closeable {
             authority.addAuthorization((HttpEntityEnclosingRequest)request); // add authorization header
         }
         HttpResponse httpResponse = httpClient.execute(request);
-        System.out.println("Savy004j: " + httpResponse.getEntity());
-        System.out.println("Savy004k: " + httpResponse.getEntity().getContent().toString());
-        System.out.println("Savy004l: " + httpResponse.getEntity().toString());
         ApiResponse apiResponse = readResponse(httpResponse);
-        System.out.println("Savy004m: " + apiResponse.content);
         System.out.println("Savy004m: " + new String(apiResponse.content, Charset.forName("UTF-8")));
-        System.out.println("Savy004n: " + apiResponse.httpStatusCode);
-        System.out.println("Savy004n: " + apiResponse.toString());
         request.releaseConnection();
         return apiResponse;
     }

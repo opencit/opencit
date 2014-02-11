@@ -376,10 +376,6 @@ public class KeystoreUtil {
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded()); //CertificateEncodingException
             user.setRoles(roles);
-            ObjectMapper mapper = new ObjectMapper();
-            System.out.println("Savy001: " +  mapper.writeValueAsString(user)); 
-            System.out.println("Savy001: " +  user.getCertificate()); 
-
             c.register(user); //IOException
         }
         catch(IOException e) {
