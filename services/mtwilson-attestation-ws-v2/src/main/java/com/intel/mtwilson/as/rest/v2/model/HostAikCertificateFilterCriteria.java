@@ -12,7 +12,7 @@ import javax.ws.rs.QueryParam;
  *
  * @author ssbangal
  */
-public class HostAikFilterCriteria implements FilterCriteria<HostAik> {
+public class HostAikCertificateFilterCriteria implements FilterCriteria<HostAikCertificate> {
     
     @PathParam("host_id")
     public String hostUuid;

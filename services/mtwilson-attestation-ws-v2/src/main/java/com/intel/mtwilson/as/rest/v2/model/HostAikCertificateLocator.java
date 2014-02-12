@@ -12,15 +12,15 @@ import javax.ws.rs.PathParam;
  *
  * @author ssbangal
  */
-public class HostAikLocator implements Locator<HostAik> {
-
+public class HostAikCertificateLocator implements Locator<HostAikCertificate> {
+    
     @PathParam("host_id")
     public UUID hostUuid;
     @PathParam("id")
     public String aikSha1;
     
     @Override
-    public void copyTo(HostAik item) {
+    public void copyTo(HostAikCertificate item) {
         item.setHostUuid(hostUuid.toString());
         item.setAikSha1(aikSha1);
     }
