@@ -79,9 +79,6 @@ public class Test {
     @Produces(MediaType.TEXT_PLAIN)
     public String testMediaTypePlainText(ApiClientCreateRequest apiClientRequest) {
         log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
-        log.error("Savy001a: " + apiClientRequest.getCertificate());
-        log.error("Savy001b: " + apiClientRequest.toString());
-        log.error("Savy001c: " + apiClientRequest.getRoles());
         //new ApiClientBO().create(apiClientRequest, null);
         return "OK";
     }
@@ -93,9 +90,6 @@ public class Test {
     @Produces(MediaType.TEXT_PLAIN)
     public String testMediaTypeJSON(ApiClientCreateRequest apiClientRequest) {
         log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
-        log.error("Savy001a: " + apiClientRequest.getCertificate());
-        log.error("Savy001b: " + apiClientRequest.toString());
-        log.error("Savy001c: " + apiClientRequest.getRoles());
         //new ApiClientBO().create(apiClientRequest, null);
         return "OK";
     }
@@ -107,9 +101,6 @@ public class Test {
     @Produces(MediaType.TEXT_PLAIN)
     public String testMediaTypeXML(ApiClientCreateRequest apiClientRequest) {
         log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
-        log.error("Savy001a: " + apiClientRequest.getCertificate());
-        log.error("Savy001b: " + apiClientRequest.toString());
-        log.error("Savy001c: " + apiClientRequest.getRoles());
         //new ApiClientBO().create(apiClientRequest, null);
         return "OK";
     }
