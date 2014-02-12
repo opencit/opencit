@@ -129,7 +129,9 @@ public class BootstrapUser implements Command {
         // load the new key
          ByteArrayResource certResource = new ByteArrayResource();
          SimpleKeystore keystore = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseurl),new String[] { Role.Whitelist.toString(),Role.Attestation.toString(),Role.Security.toString()});
-         MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);
+         // Feb 12, 2014: Sudhir: This code will be called by the ApiClientBO itself so that the user in the portal user table would be created first before the entry
+         // in the api client table.
+         /*MwPortalUser apiClient = portalUserJpa.findMwPortalUserByUserName(username);
          if(apiClient == null){
             MwPortalUser keyTable = new MwPortalUser();
             keyTable.setUsername(username);
@@ -137,7 +139,7 @@ public class BootstrapUser implements Command {
             keyTable.setStatus("PENDING");
             keyTable.setUuid_hex(new UUID().toHexString());
             portalUserJpa.create(keyTable);
-         }
+         }*/
          RsaCredentialX509 rsaCredentialX509 = keystore.getRsaCredentialX509(username, password);
         // check database for record
 //        ApiClientBO bo = new ApiClientBO();

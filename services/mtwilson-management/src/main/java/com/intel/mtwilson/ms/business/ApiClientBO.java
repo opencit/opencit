@@ -139,6 +139,17 @@ public class ApiClientBO extends BaseBO {
             X509Certificate x509Certificate, String uuid) {
 
         try {
+            UUID userTableUuid = new UUID();
+            //Feb 12,2014 - Sudhir: First we need to create the user in the portal user table. Then we need to use that user ID and create the entry
+            // in the api client x509 table.
+            if (apiClientRequest.getKeyStore() != null && apiClientRequest.getKeyStore().length > 0) {
+                MwPortalUser pUser = new MwPortalUser();
+                pUser.setUuid_hex(userTableUuid.toString()); // The UUID that is being passed into the call is from the new API v2 for the api_client_x509 table.
+                pUser.setKeystore(apiClientRequest.getKeyStore());
+                pUser.setStatus(ApiClientStatus.PENDING.toString());
+                pUser.setUsername(getSimpleNameFromCert(x509Certificate));
+                My.jpa().mwPortalUser().create(pUser);
+            }
 
             ApiClientX509 apiClientX509 = new ApiClientX509();
 
@@ -146,6 +157,10 @@ public class ApiClientBO extends BaseBO {
                 apiClientX509.setUuid_hex(uuid);
             else
                 apiClientX509.setUuid_hex(new UUID().toString());
+            
+            // Feb 12, 2014: Adding the reference to the user table in the x509 table.
+            apiClientX509.setUser_uuid_hex(userTableUuid.toString());
+            
             apiClientX509.setCertificate(apiClientRequest.getCertificate());
             apiClientX509.setEnabled(false);
             apiClientX509.setExpires(x509Certificate.getNotAfter());
@@ -404,4 +419,10 @@ public class ApiClientBO extends BaseBO {
             throw new MSException(ErrorCode.MS_API_USER_SEARCH_ERROR, ex.getClass().getSimpleName());            
         }
     }    
+
+    private String getSimpleNameFromCert(X509Certificate x509Certificate) {
+        String certName = x509Certificate.getSubjectX500Principal().getName();
+        certName = certName.substring((certName.indexOf("CN=")+(("CN=").length())), certName.indexOf(",OU="));
+        return certName;
+    }
 }
