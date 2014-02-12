@@ -14,7 +14,7 @@ import javax.ws.rs.PathParam;
  */
 public class HostTlsPolicyLocator implements Locator<HostTlsPolicy> {
 
-    @PathParam("host")
+    @PathParam("host_id")
     public UUID hostUuid;
 
     @Override

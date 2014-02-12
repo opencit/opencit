@@ -12,17 +12,17 @@ import javax.ws.rs.PathParam;
  *
  * @author ssbangal
  */
-public class MleModuleLocator implements Locator<MleModule> {
-
-    @PathParam("mle_id")
-    public UUID mleUuid;
+public class HostAikCertificateLocator implements Locator<HostAikCertificate> {
+    
+    @PathParam("host_id")
+    public UUID hostUuid;
     @PathParam("id")
-    public UUID moduleUuid;
+    public String aikSha1;
     
     @Override
-    public void copyTo(MleModule item) {
-        item.setMleUuid(mleUuid.toString());
-        item.setId(moduleUuid);
+    public void copyTo(HostAikCertificate item) {
+        item.setHostUuid(hostUuid.toString());
+        item.setAikSha1(aikSha1);
     }
     
 }

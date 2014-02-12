@@ -4,27 +4,21 @@
  */
 package com.intel.mtwilson.as.rest.v2.repository;
 
+import com.intel.mtwilson.as.rest.v2.resource.*;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificate;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
+import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
+import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
+import com.intel.mtwilson.datatypes.ErrorCode;
+import com.intel.mtwilson.jersey.resource.AbstractCertificateResource;
+import com.intel.mtwilson.jersey.resource.SimpleRepository;
+import com.intel.mtwilson.ms.common.MSConfig;
 import com.intel.mtwilson.ms.common.MSException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.apache.commons.io.IOUtils;
-import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
-import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
-//import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
-//import com.intel.mtwilson.datatypes.ApiClientStatus;
-//import com.intel.mtwilson.datatypes.ApiClientUpdateRequest;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.resource.SimpleRepository;
-import com.intel.mtwilson.ms.common.MSConfig;
-//import com.intel.mtwilson.ms.controller.ApiClientX509JpaController;
-//import com.intel.mtwilson.ms.data.ApiClientX509;
-//import com.intel.mtwilson.ms.data.ApiRoleX509;
-//import com.intel.mtwilson.ms.business.ApiClientBO;
-//import com.intel.mtwilson.ms.common.MSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +32,15 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         
     @Override
     public CaCertificateCollection search(CaCertificateFilterCriteria criteria) {
-        throw new UnsupportedOperationException("Not implemented");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public CaCertificate retrieve(CaCertificateLocator locator) {
         if (locator == null || locator.id == null) { return null;}
         CaCertificate caCert = new CaCertificate();
-        
-        if ("root".endsWith(locator.id)) {
+        String id = locator.id;
+        if ("root".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.rootca.certificate.file");
                 if( certFile != null && !certFile.startsWith(File.separator) ) {
@@ -73,7 +67,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
                 log.error("Error during retrieval of root certificate CA chain. ", e);            
                 throw new MSException(ErrorCode.MS_ROOT_CA_CERT_ERROR, e.getClass().getSimpleName());
             }
-        } else if ("saml".equals(locator.id)) {
+        } else if ("saml".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.saml.certificate.file"); 
                 if( certFile != null && !certFile.startsWith(File.separator) ) {
@@ -100,7 +94,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
                 log.error("Error during retrieval of SAML certificate chain.", e);
                 throw new MSException(ErrorCode.MS_SAML_CERT_ERROR, e.getClass().getSimpleName());
             }      
-        } else if ("privacy".equals(locator.id)) {
+        } else if ("privacy".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.privacyca.certificate.list.file");
                  if( certFile != null && !certFile.startsWith(File.separator) ) {
@@ -128,7 +122,7 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
                 throw new MSException(ErrorCode.MS_PRIVACYCA_CERT_ERROR, e.getClass().getSimpleName());
             }
             
-        } else if ("tls".equals(locator.id)) {
+        } else if ("tls".equals(id)) {
             try {
                 String certFile = MSConfig.getConfiguration().getString("mtwilson.tls.certificate.file");
                 if( certFile != null && !certFile.startsWith(File.separator) ) {
@@ -171,17 +165,17 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
 
     @Override
     public void store(CaCertificate item) {
-        throw new UnsupportedOperationException("not implemented");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void create(CaCertificate item) {
-        throw new UnsupportedOperationException("not implemented");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public void delete(CaCertificateLocator locator) {
-        throw new UnsupportedOperationException("not implemented");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -189,5 +183,4 @@ public class CaCertificateRepository implements SimpleRepository<CaCertificate, 
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-
 }

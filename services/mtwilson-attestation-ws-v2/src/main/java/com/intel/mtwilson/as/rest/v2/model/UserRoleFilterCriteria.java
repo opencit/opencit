@@ -4,17 +4,12 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
-import com.intel.mtwilson.jersey.Locator;
+import com.intel.mtwilson.jersey.FilterCriteria;
 
 /**
  *
  * @author ssbangal
  */
-public class PollHostLocator implements Locator<PollHost> {
-
-    @Override
-    public void copyTo(PollHost item) {
-        return;
-    }
+public class UserRoleFilterCriteria implements FilterCriteria<UserRole> {
     
 }

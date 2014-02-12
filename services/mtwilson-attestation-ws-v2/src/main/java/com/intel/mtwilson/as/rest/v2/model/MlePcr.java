@@ -15,8 +15,8 @@ import com.intel.mtwilson.jersey.Document;
 public class MlePcr extends Document{
     
     private String mleUuid;
-    private String pcrName;
-    private String pcrDigest;
+    private String pcrIndex;
+    private String pcrValue;
     private String description;
 
     public String getMleUuid() {
@@ -27,22 +27,23 @@ public class MlePcr extends Document{
         this.mleUuid = mleUuid;
     }
 
-    public String getPcrName() {
-        return pcrName;
+    public String getPcrIndex() {
+        return pcrIndex;
     }
 
-    public void setPcrName(String pcrName) {
-        this.pcrName = pcrName;
+    public void setPcrIndex(String pcrIndex) {
+        this.pcrIndex = pcrIndex;
     }
 
-    public String getPcrDigest() {
-        return pcrDigest;
+    public String getPcrValue() {
+        return pcrValue;
     }
 
-    public void setPcrDigest(String pcrDigest) {
-        this.pcrDigest = pcrDigest;
+    public void setPcrValue(String pcrValue) {
+        this.pcrValue = pcrValue;
     }
 
+    
     public String getDescription() {
         return description;
     }

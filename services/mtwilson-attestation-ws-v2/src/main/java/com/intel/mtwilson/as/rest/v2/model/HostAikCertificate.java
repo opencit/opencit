@@ -20,23 +20,31 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-@JacksonXmlRootElement(localName="ca_certificate")
-public class CaCertificate extends CertificateDocument {
-    
+@JacksonXmlRootElement(localName="host_aik_certificate")
+public class HostAikCertificate extends CertificateDocument {
+
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
-    private String name;
+    private String hostUuid;
+    private String aikSha1;
     private byte[] certificate;
 
-    public String getName() {
-        return name;
+    public String getHostUuid() {
+        return hostUuid;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setHostUuid(String hostUuid) {
+        this.hostUuid = hostUuid;
     }
 
-    
+    public String getAikSha1() {
+        return aikSha1;
+    }
+
+    public void setAikSha1(String aikSha1) {
+        this.aikSha1 = aikSha1;
+    }
+
     public byte[] getCertificate() {
         return certificate;
     }
@@ -44,7 +52,7 @@ public class CaCertificate extends CertificateDocument {
     public void setCertificate(byte[] certificate) {
         this.certificate = certificate;
     }
-
+    
     
     @JsonIgnore
     @Override
@@ -74,6 +82,6 @@ public class CaCertificate extends CertificateDocument {
             log.error("Error decoding certificate.", ce);
             throw new ASException(ErrorCode.MS_CERTIFICATE_ENCODING_ERROR, ce.getClass().getSimpleName());
         }
-    }
+    }    
     
 }

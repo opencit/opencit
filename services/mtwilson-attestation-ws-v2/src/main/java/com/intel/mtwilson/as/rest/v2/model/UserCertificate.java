@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public class UserCertificate extends CertificateDocument {
     Logger log = LoggerFactory.getLogger(getClass().getName());
 
+    private UUID userUuid;
     private String name;
     private byte[] certificate;
     private byte[] fingerprint;
@@ -49,6 +51,15 @@ public class UserCertificate extends CertificateDocument {
     
     private String comment;
 
+    public UUID getUserUuid() {
+        return userUuid;
+    }
+
+    public void setUserUuid(UUID userUuid) {
+        this.userUuid = userUuid;
+    }
+
+    
     public String getName() {
         return name;
     }

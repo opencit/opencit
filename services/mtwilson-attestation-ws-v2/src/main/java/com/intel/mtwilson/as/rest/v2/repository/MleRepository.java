@@ -46,7 +46,28 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
                     mleCollection.getMles().add(convert(tblMle));
                 }
             } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
-                List<TblMle> mleList = jpaController.findMleByNameSearchCriteria(criteria.nameContains);
+                List<TblMle> mleList = jpaController.findByNameLike(criteria.nameContains);
+                if (mleList != null && !mleList.isEmpty()) {
+                    for(TblMle mleObj : mleList) {
+                        mleCollection.getMles().add(convert(mleObj));
+                    }
+                }                
+            }  else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
+                List<TblMle> mleList = jpaController.findByName(criteria.nameEqualTo);
+                if (mleList != null && !mleList.isEmpty()) {
+                    for(TblMle mleObj : mleList) {
+                        mleCollection.getMles().add(convert(mleObj));
+                    }
+                }                
+            } else if (criteria.osUuid != null && !criteria.osUuid.isEmpty()) {
+                List<TblMle> mleList = jpaController.findByOsUuid(criteria.osUuid);
+                if (mleList != null && !mleList.isEmpty()) {
+                    for(TblMle mleObj : mleList) {
+                        mleCollection.getMles().add(convert(mleObj));
+                    }
+                }                
+            } else if (criteria.oemUuid != null && !criteria.oemUuid.isEmpty()) {
+                List<TblMle> mleList = jpaController.findByOemUuid(criteria.oemUuid);
                 if (mleList != null && !mleList.isEmpty()) {
                     for(TblMle mleObj : mleList) {
                         mleCollection.getMles().add(convert(mleObj));

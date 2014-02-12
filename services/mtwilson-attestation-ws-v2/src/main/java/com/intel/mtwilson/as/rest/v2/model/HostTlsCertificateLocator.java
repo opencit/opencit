@@ -14,7 +14,7 @@ import javax.ws.rs.PathParam;
  */
 public class HostTlsCertificateLocator implements Locator<HostTlsCertificate> {
     
-    @PathParam("host")
+    @PathParam("host_id")
     public UUID hostUuid;
     @PathParam("id")
     public String sha1;

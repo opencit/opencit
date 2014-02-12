@@ -10,6 +10,10 @@ UPDATE mw_portal_user SET uuid_hex = (SELECT uuid());
 -- Updates for the API Client X509 table
 ALTER TABLE `mw_as`.`mw_api_client_x509` ADD COLUMN `uuid_hex` CHAR(36) NULL;
 UPDATE mw_api_client_x509 SET uuid_hex = (SELECT uuid());
+-- Adds the reference to the User UUID column in the Portal User table
+ALTER TABLE `mw_as`.`mw_api_client_x509` ADD COLUMN `user_uuid_hex` CHAR(36) NULL;
+UPDATE mw_api_client_x509 mac SET user_uuid_hex = (SELECT mpu.uuid_hex FROM mw_portal_user mpu WHERE moem.ID = mm.OEM_ID);
+UPDATE mw_api_client_x509 mac SET user_uuid_hex = (SELECT mpu.uuid_hex FROM mw_portal_user mpu WHERE concat('CN=',`username`,',OU=Mt Wilson,O=Trusted Data Center,C=US') = mac.name);
 
 
 -- Updates for the OEM table

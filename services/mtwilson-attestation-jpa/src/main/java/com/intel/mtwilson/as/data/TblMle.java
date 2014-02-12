@@ -47,7 +47,10 @@ import org.eclipse.persistence.annotations.Customizer;
     @NamedQuery(name = "TblMle.findVmmMle", query = "SELECT t FROM TblMle t WHERE t.name = :name and t.version = :version and t.osId.name = :osName and t.osId.version =:osVersion"),
     @NamedQuery(name = "TblMle.findVmmMleByNameSearchCriteria", query = "SELECT t FROM TblMle t WHERE t.name like :search order by t.name"),
     @NamedQuery(name = "TblMle.findByUUID_Hex", query = "SELECT t FROM TblMle t WHERE t.uuid_hex = :uuid_hex"),
-    @NamedQuery(name = "TblMle.findBiosMleByNameSearchCriteria", query = "SELECT t FROM TblMle t WHERE t.name like :search order by t.name")})
+    @NamedQuery(name = "TblMle.findBiosMleByNameSearchCriteria", query = "SELECT t FROM TblMle t WHERE t.name like :search order by t.name"),
+    @NamedQuery(name = "TblMle.findByNameLike", query = "SELECT t FROM TblMle t WHERE t.name LIKE :name"),
+    @NamedQuery(name = "TblMle.findByOsUuid", query = "SELECT t FROM TblMle t WHERE t.os_uuid_hex = :os_uuid_hex"),
+    @NamedQuery(name = "TblMle.findByOemUuid", query = "SELECT t FROM TblMle t WHERE t.oem_uuid_hex = :oem_uuid_hex")})
 //    @NamedQuery(name = "TblMle.findVmmMleByNameSearchCriteria", query = "SELECT t FROM TblMle t WHERE t.name like :search or t.osId.name like :search"),
 //    @NamedQuery(name = "TblMle.findBiosMleByNameSearchCriteria", query = "SELECT t FROM TblMle t WHERE t.name like :search or t.oemId.name like :search")})
 //

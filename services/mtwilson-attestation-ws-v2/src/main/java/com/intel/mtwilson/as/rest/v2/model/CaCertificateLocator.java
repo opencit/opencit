@@ -4,7 +4,6 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
-//import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.Locator;
 import javax.ws.rs.PathParam;
 
@@ -12,14 +11,13 @@ import javax.ws.rs.PathParam;
  *
  * @author ssbangal
  */
-public class CaCertificateLocator implements Locator<CaCertificate> {
-    
+public class CaCertificateLocator implements Locator<CaCertificate>{
     @PathParam("id")
     public String id;
 
-
     @Override
     public void copyTo(CaCertificate item) {
+        item.setName(id);
     }
     
 }

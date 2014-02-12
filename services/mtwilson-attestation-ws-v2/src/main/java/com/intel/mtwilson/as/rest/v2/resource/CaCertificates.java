@@ -7,19 +7,12 @@ package com.intel.mtwilson.as.rest.v2.resource;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificate;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateCollection;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateFilterCriteria;
-import com.intel.mtwilson.as.rest.v2.model.CaCertificateLinks;
 import com.intel.mtwilson.as.rest.v2.model.CaCertificateLocator;
 import com.intel.mtwilson.as.rest.v2.repository.CaCertificateRepository;
-import com.intel.mtwilson.datatypes.ErrorCode;
-import com.intel.mtwilson.jersey.resource.AbstractCertificateResource;
-import com.intel.mtwilson.ms.common.MSConfig;
-import com.intel.mtwilson.ms.common.MSException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import javax.ws.rs.BeanParam;
-import org.apache.commons.io.IOUtils;
+import com.intel.mtwilson.jersey.NoLinks;
+import com.intel.mtwilson.jersey.resource.AbstractCertificateJsonapiResource;
+import com.intel.mtwilson.launcher.ws.ext.V2;
+import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,18 +20,25 @@ import org.slf4j.LoggerFactory;
  *
  * @author ssbangal
  */
-public class CaCertificates extends AbstractCertificateResource<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, CaCertificateLinks, CaCertificateLocator> {
+@V2
+@Path("/ca-certificates")
+public class CaCertificates extends AbstractCertificateJsonapiResource<CaCertificate, CaCertificateCollection, CaCertificateFilterCriteria, NoLinks<CaCertificate>, CaCertificateLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     private CaCertificateRepository repository;
     
     public CaCertificates() {
-        super();
         repository = new CaCertificateRepository();
     }
     
     @Override
-    public CaCertificateRepository getRepository() {
+    protected CaCertificateCollection createEmptyCollection() {
+        return new CaCertificateCollection();
+    }
+
+    @Override
+    protected CaCertificateRepository getRepository() {
         return repository;
     }
+    
 }
