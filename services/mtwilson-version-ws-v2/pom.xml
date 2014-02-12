@@ -29,13 +29,14 @@
     	<version>2.3.0</version>
         <optional>true</optional>
     </dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-mapper-asl</artifactId>
-	<version>1.9.13</version>
-    <optional>true</optional>
-</dependency>
-		
+    <!--
+    <dependency>
+        <groupId>org.codehaus.jackson</groupId>
+        <artifactId>jackson-mapper-asl</artifactId>
+        <version>1.9.13</version>
+        <optional>true</optional>
+    </dependency>
+    -->
         <dependency>
             <groupId>com.intel.mtwilson.integration</groupId>
             <artifactId>mtwilson-launcher-ext</artifactId>

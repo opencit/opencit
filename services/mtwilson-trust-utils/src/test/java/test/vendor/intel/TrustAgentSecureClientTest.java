@@ -26,7 +26,8 @@ import javax.xml.bind.PropertyException;
 import javax.xml.stream.XMLStreamException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 /**

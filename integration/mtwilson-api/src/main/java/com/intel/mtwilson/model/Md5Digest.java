@@ -6,7 +6,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * Representation of a single MD5 Digest. An MD5 Digest is a 16-byte value.

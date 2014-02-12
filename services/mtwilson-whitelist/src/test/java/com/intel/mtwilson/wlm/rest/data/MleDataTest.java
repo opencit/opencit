@@ -10,9 +10,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+//import org.codehaus.jackson.map.ObjectMapper;
+//import org.codehaus.jackson.JsonGenerationException;
+//import org.codehaus.jackson.map.JsonMappingException;
 import org.junit.*;
 import static org.junit.Assert.*;
 import java.util.ArrayList;

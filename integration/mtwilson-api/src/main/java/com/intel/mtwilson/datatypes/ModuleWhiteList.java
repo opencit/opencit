@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.datatypes;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * TODO: Once we use the same API DataTypes package in the backend service, we can 

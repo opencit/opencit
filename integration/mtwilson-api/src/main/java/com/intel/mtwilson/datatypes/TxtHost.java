@@ -1,13 +1,16 @@
 package com.intel.mtwilson.datatypes;
 
 import java.net.MalformedURLException;
-import org.codehaus.jackson.annotate.JsonCreator;
+
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.model.Bios;
 import com.intel.mtwilson.model.Hostname;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonCreator;
+//import org.codehaus.jackson.annotate.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *

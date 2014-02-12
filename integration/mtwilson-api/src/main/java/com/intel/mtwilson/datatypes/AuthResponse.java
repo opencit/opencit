@@ -5,7 +5,9 @@
 package com.intel.mtwilson.datatypes;
 
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -74,8 +76,8 @@ public class AuthResponse {
     
   
     
-    @org.codehaus.jackson.annotate.JsonIgnore(true) // jackson 1.9
-    @com.fasterxml.jackson.annotation.JsonIgnore // jackson 2.0
+    //@org.codehaus.jackson.annotate.JsonIgnore(true) // jackson 1.9
+    @JsonIgnore // jackson 2.0
     public ErrorCode getErrorCodeEnum(){
         return errorCode;
     }

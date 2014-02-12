@@ -22,7 +22,35 @@ public class ConfigureDatabase extends LocalSetupTask {
     private String databaseUsername;
     private String databasePassword;
     private String databaseUrl;
-            
+
+    public String getDatabaseHost() {
+        return databaseHost;
+    }
+
+    public String getDatabasePort() {
+        return databasePort;
+    }
+
+    public String getDatabaseDriver() {
+        return databaseDriver;
+    }
+
+    // XXX TODO INSECURE  need to protect this with apache shiro so it will require administrator permission to view
+    public String getDatabaseUsername() {
+        return databaseUsername;
+    }
+
+    // XXX TODO INSECURE  need to protect this with apache shiro so it will require administrator permission to view
+    public String getDatabasePassword() {
+        return databasePassword;
+    }
+
+    public String getDatabaseUrl() {
+        return databaseUrl;
+    }
+    
+    
+
     @Override
     protected void configure() throws Exception {
         databaseDriver = My.jdbc().driver();

@@ -2,7 +2,8 @@ package com.intel.mountwilson.datamodel;
 
 import java.util.List;
 import java.util.Map;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 public class HostEntryServer {
 	

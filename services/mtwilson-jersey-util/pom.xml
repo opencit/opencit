@@ -111,7 +111,6 @@
     <artifactId>jackson-jaxrs</artifactId>
     <optional>true</optional>
 </dependency>
--->
 <dependency>
 	<groupId>org.codehaus.jackson</groupId>
 	<artifactId>jackson-mapper-asl</artifactId>
@@ -127,7 +126,7 @@
 	<artifactId>jackson-xc</artifactId>
     <optional>true</optional>
 </dependency>
-                            
+-->
                             <!-- logging -->
     <dependency>
 		<groupId>org.slf4j</groupId>
@@ -228,7 +227,6 @@
 <dependency>
     <groupId>javax.ws.rs</groupId>
     <artifactId>javax.ws.rs-api</artifactId>
-    <version>2.0</version>
     <scope>provided</scope>
 </dependency>
     <!-- <scope>provided</scope>   provided is only if we're deployed in glassfish because it already includes this ... -->

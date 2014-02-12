@@ -7,10 +7,13 @@ import com.intel.mountwilson.common.DemoPortalException;
 import com.intel.mountwilson.common.ManagementConsolePortalException;
 import com.intel.mountwilson.common.WLMPortalException;
 import com.intel.mtwilson.api.*;
-import com.sun.jersey.api.client.ClientHandlerException;
+import javax.ws.rs.client.ResponseProcessingException;
+//import com.sun.jersey.api.client.ClientHandlerException;
 import java.io.IOException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+//import org.codehaus.jackson.JsonParseException;
+//import org.codehaus.jackson.map.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +28,8 @@ public class ConnectionUtil {
 	// method to take a common Exception and return specific error based on Exception type.
 	public static ManagementConsolePortalException handleManagementConsoleException(Exception exceptionObject) throws ManagementConsolePortalException{
 		exceptionObject.printStackTrace();
-		if(exceptionObject.getClass().equals(ClientHandlerException.class)){
+		//if(exceptionObject.getClass().equals(ClientHandlerException.class)){
+                if(exceptionObject.getClass().equals(ResponseProcessingException.class)){
 			return new ManagementConsolePortalException("Could not able to Connect to Server. Error Connection Refused.",exceptionObject);
 		}
 		if (exceptionObject.getClass().equals(JsonParseException.class)) {
@@ -55,7 +59,8 @@ public class ConnectionUtil {
 	// method to take a common Exception and return specific error based on Exception type.
 	public static DemoPortalException handleDemoPortalException(Exception exceptionObject) throws DemoPortalException{
 		exceptionObject.printStackTrace();
-		if(exceptionObject.getClass().equals(ClientHandlerException.class)){
+		//if(exceptionObject.getClass().equals(ClientHandlerException.class)){
+                if(exceptionObject.getClass().equals(ResponseProcessingException.class)){
 			return new DemoPortalException("Could not able to Connect to Server. Error Connection Refused.",exceptionObject);
 		}
 		if (exceptionObject.getClass().equals(JsonParseException.class)) {
@@ -85,7 +90,8 @@ public class ConnectionUtil {
 	// method to take a common Exception and return specific error based on Exception type.
 	public static WLMPortalException handleWLMPortalException(Exception exceptionObject) throws WLMPortalException{
 		exceptionObject.printStackTrace();
-		if(exceptionObject.getClass().equals(ClientHandlerException.class)){
+		//if(exceptionObject.getClass().equals(ClientHandlerException.class)){
+                if(exceptionObject.getClass().equals(ResponseProcessingException.class)){
 			return new WLMPortalException("Could not able to Connect to Server. Error Connection Refused.",exceptionObject);
 		}
 		if (exceptionObject.getClass().equals(JsonParseException.class)) {

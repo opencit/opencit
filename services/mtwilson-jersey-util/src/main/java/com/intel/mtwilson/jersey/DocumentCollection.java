@@ -39,7 +39,7 @@ public abstract class DocumentCollection<T> {
         return linked;
     }
 
-    @com.fasterxml.jackson.annotation.JsonIgnore // jackson 2.x
 //    @org.codehaus.jackson.annotate.JsonIgnore // jackson 1.x
+    @com.fasterxml.jackson.annotation.JsonIgnore // jackson 2.x
     public abstract List<T> getDocuments();
 }
