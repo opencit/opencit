@@ -256,6 +256,13 @@ setup_interactive_install() {
     webservice_uninstall "${webservice_application_name}"
     webservice_install "${webservice_application_name}" "${package_dir}"/mtwilson.war
     glassfish_restart
+
+    # temp symlink -- SAVY added 2014-02-04
+    if [[ ! -e "/opt/mtwilson/java" ]]; then
+      mkdir -p /opt/mtwilson
+      ln -s "/usr/share/glassfish4/glassfish/domains/domain1/applications/mtwilson/WEB-INF/lib" "/opt/mtwilson/java"
+    fi
+    
     echo -n "Waiting for ${webservice_application_name} to become accessible... "
     read
     #sleep 90s        #XXX TODO: remove when we have solution for webserver up
