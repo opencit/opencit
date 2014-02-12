@@ -800,6 +800,8 @@ public class ManagementConsoleDataController extends MultiActionController {
     
     public ModelAndView openPreferences(HttpServletRequest req, HttpServletResponse res) throws ManagementConsolePortalException {
         ModelAndView responseView = new ModelAndView("Preferences");
+        String username = req.getParameter("username");
+        
         try {
             List<Map<String, Object>> localeList = new ArrayList<Map<String, Object>>();
             for (String localeName : demoPortalServices.getLocales(getApiClientService(req, ApiClient.class))) {
@@ -808,6 +810,7 @@ public class ManagementConsoleDataController extends MultiActionController {
                 localeList.add(map);
             }
             responseView.addObject("locales", localeList);
+            responseView.addObject("selectedLocale", demoPortalServices.getLocale(username, getApiClientService(req, ApiClient.class)));
         } catch (DemoPortalException e) {
             e.printStackTrace();
             log.error(e.toString());
