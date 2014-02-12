@@ -15,8 +15,10 @@ import com.intel.mtwilson.ms.data.MwPortalUser;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.codec.binary.BinaryCodec;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -29,6 +31,13 @@ import org.slf4j.LoggerFactory;
  */
 public class DashboardTest {
     private Logger log = LoggerFactory.getLogger(getClass());
+    
+    @Test
+    public void testConfigurationRead() throws IOException {
+        for (String localeName : My.configuration().getAvailableLocales()) {
+                System.out.println(localeName);
+            }
+    }
     
     //@Test
     public void testGetStatusForVmware173() throws Exception {

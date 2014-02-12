@@ -8,16 +8,15 @@ response.setHeader("Content-Disposition",
 %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="application/octet-stream; charset=ISO-8859-1">
-
-<title>Insert title here</title>
+    <meta http-equiv="Content-Type" content="application/octet-stream; charset=ISO-8859-1">
+    <title data-i18n="title.saml_download">Insert title here</title>
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">SAML Certificate > Download </div>
-		<div id="nameOfPage" class="NameHeader">SAML Certificate Download</div>
+		<div class="nagPanel" data-i18n="title.saml_download">SAML Certificate Download</div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.saml_download">SAML Certificate Download</div>
 		<div id="mainLoadingDiv" class="mainContainer">
-			<div  id ="fdownload"class="registerUser">Click on Download icon to download SAML Certificate
+			<div  id ="fdownload"class="registerUser"><span data-i18n="label.click_download_saml">Click on Download icon to download SAML Certificate</span>
 			<input type="image" onclick="fnforSAMLCertificate()" src="images/download.jpg"></div>
 		
 			<div id="successMessage"></div>

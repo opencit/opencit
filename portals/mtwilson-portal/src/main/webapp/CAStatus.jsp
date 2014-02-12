@@ -4,22 +4,22 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>View CA Status Page</title>
+<title data-i18n="title.ca_status">CA Status</title>
 </head>
 <body>
 <div class="container">
-		<div class="nagPanel">Certificate Authority > Enable/Disable </div>
-		<div id="nameOfPage" class="NameHeader">View CA Status </div>
+		<div class="nagPanel"><span data-i18n="title.cert_auth">Certificate Authority</span> > <span data-i18n="title.ca_status">CA Status</span></div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.ca_status">View CA Status</div>
 		<div id="mainLoadingDiv" class="mainContainer">
 			<div id="caStatusTable" class="registerHostTable" style="display: none;">
 				<table cellpadding="0" cellspacing="0" width="100%" class="tableHeader">
 					<tr>
-						<td class="viewRow1">Name</td>
+						<td class="viewRow1" data-i18n="table.name">Name</td>
 						<!--  <td class="viewRow2">Fingerprint</td>-->
-						<td class="viewRow3">Download</td>						
-						<td class="viewRow4">Status</td>
-						<td class="viewRow4">Expires On</td>
-						<td class="viewRow5Header">Comments</td>
+						<td class="viewRow3" data-i18n="table.download">Download</td>
+						<td class="viewRow4" data-i18n="table.status">Status</td>
+						<td class="viewRow4" data-i18n="table.expires">Expires On</td>
+						<td class="viewRow5Header" data-i18n="table.comments">Comments</td>
 					</tr>
 				</table>
 				<div class="requestDetailsTableContent">

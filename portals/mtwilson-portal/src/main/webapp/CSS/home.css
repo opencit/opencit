@@ -124,8 +124,9 @@ div.hideSkiplink {
 
 .loginDisplay
 {
+    float: right;
     font-size: 1.1em;
-    text-align: right;
+    text-align: center;
     padding: 10px;
     color: White;
     height: 0px;

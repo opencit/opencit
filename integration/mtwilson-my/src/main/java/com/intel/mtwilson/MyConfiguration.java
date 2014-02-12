@@ -444,7 +444,8 @@ public class MyConfiguration {
     }
     
     public String[] getAvailableLocales() {
-        return conf.getString("mtwilson.locales", "en").split(",");
+        String localeParsed = conf.getProperty("mtwilson.locales").toString().replaceAll("\\s+", "");
+        return localeParsed.substring(1, localeParsed.length() - 1).split(",");
     }
 
     ///////////////////////// database //////////////////////////////////

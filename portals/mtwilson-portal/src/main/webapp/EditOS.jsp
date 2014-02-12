@@ -4,21 +4,21 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Edit OS</title>
+<title data-i18n="title.edit_os">Edit OS</title>
 </head>
 <body>
 	<div class="container">
-		<div class="nagPanel">Whitelist &gt; Edit OS <span style="float: right"><a href="javascript:fnGetAddOS()">Add OS...</a></span></div>
-		<div id="nameOfPage" class="NameHeader">OS/Hypervisor Combination Edit/Delete</div>
+		<div class="nagPanel"><span data-i18n="title.whitelist">Whitelist</span> &gt; <span data-i18n="title.edit_os">Edit OS</span><span style="float: right"><a href="javascript:fnGetAddOS()" data-i18n="link.add_os">Add OS</a></span></div>
+		<div id="nameOfPage" class="NameHeader" data-i18n="header.edit_os">OS/Hypervisor Combination Edit/Delete</div>
 		<div id="mainEditOSDisplayDiv">
 			<div class="tableDiv" style="margin-left: 61px; display: none;" id="mainEditTable">
 				<table class="tableDisplay" width="100%" cellpadding="0" cellspacing="0">
 					<thead>
 						<tr>
-							<th class="row1">Options</th>
-							<th class="row2">OS Name</th>
-							<th class="row3">Version</th>
-							<th class="row4">Description</th>
+							<th class="row1" data-i18n="table.options">Options</th>
+							<th class="row2" data-i18n="table.os_name">OS Name</th>
+							<th class="row3" data-i18n="table.version">Version</th>
+							<th class="row4" data-i18n="table.description">Description</th>
 						</tr>
 					</thead>
 					</table>

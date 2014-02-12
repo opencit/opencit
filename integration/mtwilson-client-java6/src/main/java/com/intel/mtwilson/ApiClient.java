@@ -1551,4 +1551,33 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         HostConfigResponseList results = fromJSON(httpPost(msurl("/host/bulk/custom"), toJSON(hostRecords)), HostConfigResponseList.class);
         return results;                
     }
+    /**
+     * Retrieves list of available i18n locales
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    @Override
+    public String[] getLocales() throws IOException, ApiException, SignatureException {
+        String[] locales = fromJSON(httpGet(msurl("/i18n/locales")), String[].class);
+        return locales;
+    }
+    
+    /**
+     * Retrieves locale for specific portal user
+     * 
+     * @param username
+     * @return
+     * @throws IOException
+     * @throws ApiException
+     * @throws SignatureException 
+     */
+    @Override
+    public String getLocale(String username) throws IOException, ApiException, SignatureException {
+        MultivaluedMap<String,String> query = new MultivaluedMapImpl();
+        query.add("username", username);
+        String userLocale = text(httpGet(msurl("/i18n/locale", query)));
+        return userLocale;
+    }
 }

@@ -144,4 +144,24 @@ public interface IDemoPortalServices {
 	 * @throws Exception
 	 */
 	public List<PcrLogReport> getFailureReportData(String hostName,ApiClient attestationService) throws DemoPortalException, Exception;
+        
+        /**
+         * Retrieves available i18n locales
+         * 
+         * @param ManagementService
+	 * @return
+	 * @throws DemoPortalException
+         */
+        public String[] getLocales(ManagementService apiClientServices) throws DemoPortalException;
+        
+        /**
+         * Returns locale for specified portal user.
+         * 
+         * @param username
+         * @param apiclient
+         * @return
+         * @throws DemoPortalException 
+         */
+        public String getLocale(String username, ApiClient apiclient) throws DemoPortalException;
 }
+

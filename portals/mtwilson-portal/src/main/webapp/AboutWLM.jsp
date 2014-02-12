@@ -4,13 +4,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>About</title>
+<title data-i18n="title.about">About</title>
 </head>
 <body>
 	<div style="text-align: center;width: 90%;height: 90%;font-weight: bolder;font-size: x-large;padding-top: 50px;">
-		<div>WLM Portal</div>
-		<div>Ver : 1.1</div>
-		<div>Intel Corp @ 2012</div>  
+		<div data-18n="app.title">WLM Portal</div>
+		<div><span data-18n="app.version">Version</span> : 2.0</div>
+		<div>Intel Corp @ 2014</div>  
 	</div>
 </body>
 </html>
