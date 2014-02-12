@@ -19,10 +19,11 @@ public class HostAttestation extends Document {
     
     private String hostUuid;
     private String hostName;
-    private String aikFingerPrint;
+    private String aikSha1;
     private String challenge;
     private TrustReport trustReport;
     private HostTrustResponse hostTrustResponse;
+    // TODO: Add the capability to send back the complete TrustReport even in the case of GET operation (for the 2.x release)
 
     public String getHostUuid() {
         return hostUuid;
@@ -40,12 +41,12 @@ public class HostAttestation extends Document {
         this.hostName = hostName;
     }
 
-    public String getAikFingerPrint() {
-        return aikFingerPrint;
+    public String getAikSha1() {
+        return aikSha1;
     }
 
-    public void setAikFingerPrint(String aikFingerPrint) {
-        this.aikFingerPrint = aikFingerPrint;
+    public void setAikSha1(String aikSha1) {
+        this.aikSha1 = aikSha1;
     }
 
     public String getChallenge() {

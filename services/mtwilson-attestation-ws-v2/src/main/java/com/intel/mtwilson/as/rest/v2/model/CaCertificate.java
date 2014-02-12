@@ -25,8 +25,18 @@ public class CaCertificate extends CertificateDocument {
     
     Logger log = LoggerFactory.getLogger(getClass().getName());
     
+    private String name;
     private byte[] certificate;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    
     public byte[] getCertificate() {
         return certificate;
     }

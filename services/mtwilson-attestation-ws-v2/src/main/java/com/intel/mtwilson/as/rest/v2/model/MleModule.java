@@ -15,8 +15,8 @@ import com.intel.mtwilson.jersey.Document;
 public class MleModule extends Document{
     
     private String mleUuid;
-    private String componentName;
-    private String digestValue;
+    private String moduleName;
+    private String moduleValue;
     private String eventName;
     private String extendedToPCR;
     private String packageName;
@@ -33,20 +33,20 @@ public class MleModule extends Document{
         this.mleUuid = mleUuid;
     }
 
-    public String getComponentName() {
-        return componentName;
+    public String getModuleName() {
+        return moduleName;
     }
 
-    public void setComponentName(String componentName) {
-        this.componentName = componentName;
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
     }
 
-    public String getDigestValue() {
-        return digestValue;
+    public String getModuleValue() {
+        return moduleValue;
     }
 
-    public void setDigestValue(String digestValue) {
-        this.digestValue = digestValue;
+    public void setModuleValue(String moduleValue) {
+        this.moduleValue = moduleValue;
     }
 
     public String getEventName() {

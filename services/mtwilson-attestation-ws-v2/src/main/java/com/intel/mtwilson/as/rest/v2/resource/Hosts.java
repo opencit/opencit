@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author jbuhacoff
  */
 @V2
-@Path("/hosts/{id}")
+@Path("/hosts")
 public class Hosts extends AbstractJsonapiResource<Host, HostCollection, HostFilterCriteria, NoLinks<Host>, HostLocator> {
 
     private Logger log = LoggerFactory.getLogger(getClass().getName());

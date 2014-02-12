@@ -7,7 +7,6 @@ package com.intel.mtwilson.as.rest.v2.model;
 import com.intel.dcsg.cpg.io.UUID;
 import com.intel.mtwilson.jersey.Locator;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 /**
  *
@@ -15,15 +14,15 @@ import javax.ws.rs.QueryParam;
  */
 public class MlePcrLocator implements Locator<MlePcr>{
 
+    @PathParam("mle_id") // change id to mle_id
+    public UUID mleUuid;
     @PathParam("id")
-    public UUID id;
-    @QueryParam("index")
-    public String index;
+    public String pcrIndex;
     
     @Override
     public void copyTo(MlePcr item) {
-        item.setMleUuid(id.toString());
-        item.setPcrName(index);
+        item.setMleUuid(mleUuid.toString());
+        item.setPcrIndex(pcrIndex);
     }
     
 }

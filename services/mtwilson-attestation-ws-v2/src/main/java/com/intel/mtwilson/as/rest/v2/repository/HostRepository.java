@@ -218,6 +218,7 @@ public class HostRepository implements SimpleRepository<Host,HostCollection,Host
 
     @Override
     public void delete(HostFilterCriteria criteria) {
+        // TODO: Call into the search function and delete all the items. Low priority for WW 14
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

@@ -36,6 +36,20 @@ BEGIN
       UPDATE mw_api_client_x509 mw SET uuid_hex = (SELECT uuid_generate_v4()) where mw.id = rec.id;
    END LOOP;
 END$$;
+-- Adds the reference to the User UUID column in the Portal User table
+ALTER TABLE mw_api_client_x509 ADD COLUMN user_uuid_hex CHAR(36) NULL;
+DO
+$$
+DECLARE
+    rec   record;
+BEGIN
+   FOR rec IN
+      SELECT *
+      FROM   mw_api_client_x509
+   LOOP
+      UPDATE mw_api_client_x509 mac SET user_uuid_hex = (SELECT mpu.uuid_hex FROM mw_portal_user mpu WHERE ('CN='||username||',OU=Mt Wilson,O=Trusted Data Center,C=US') = mac.name);
+   END LOOP;
+END$$;
 
 
 -- Updates for the OEM table

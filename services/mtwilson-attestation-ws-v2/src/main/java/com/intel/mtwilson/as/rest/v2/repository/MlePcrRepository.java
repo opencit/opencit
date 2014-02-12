@@ -46,8 +46,15 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
                         objCollection.getMlePcrs().add(convert(obj));
                     }
                 }                
-            }else if (criteria.nameEqualTo != null && !criteria.nameEqualTo.isEmpty()) {
-                List<TblPcrManifest> objList = jpaController.findTblPcrManifestByPcrName(criteria.nameEqualTo);
+            } else if (criteria.indexEqualTo != null && !criteria.indexEqualTo.isEmpty()) {
+                List<TblPcrManifest> objList = jpaController.findTblPcrManifestByPcrName(criteria.indexEqualTo);
+                if (objList != null && !objList.isEmpty()) {
+                    for(TblPcrManifest obj : objList) {
+                        objCollection.getMlePcrs().add(convert(obj));
+                    }
+                }                
+            } else if (criteria.valueEqualTo != null && !criteria.valueEqualTo.isEmpty()) {
+                List<TblPcrManifest> objList = jpaController.findByPcrValue(criteria.valueEqualTo);
                 if (objList != null && !objList.isEmpty()) {
                     for(TblPcrManifest obj : objList) {
                         objCollection.getMlePcrs().add(convert(obj));
@@ -65,9 +72,9 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
 
     @Override
     public MlePcr retrieve(MlePcrLocator locator) {
-        if (locator.id == null || locator.index == null) { return null;}
-        String mleUuid = locator.id.toString();
-        String pcrIndex = locator.index;
+        if (locator.mleUuid == null || locator.pcrIndex == null) { return null;}
+        String mleUuid = locator.mleUuid.toString();
+        String pcrIndex = locator.pcrIndex;
         try {
             TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
             List<TblPcrManifest> pcrs = jpaController.findTblPcrManifestByMleUuid(mleUuid);
@@ -90,8 +97,8 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     public void store(MlePcr item) {
         PCRWhiteList obj = new PCRWhiteList();
         try {
-            obj.setPcrName(item.getPcrName());
-            obj.setPcrDigest(item.getPcrDigest());
+            obj.setPcrName(item.getPcrIndex());
+            obj.setPcrDigest(item.getPcrValue());
             new MleBO().updatePCRWhiteList(obj, null, item.getId().toString());
         } catch (ASException aex) {
             throw aex;            
@@ -105,8 +112,8 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
     public void create(MlePcr item) {
         PCRWhiteList obj = new PCRWhiteList();
         try {
-            obj.setPcrName(item.getPcrName());
-            obj.setPcrDigest(item.getPcrDigest());
+            obj.setPcrName(item.getPcrIndex());
+            obj.setPcrDigest(item.getPcrValue());
             new MleBO().addPCRWhiteList(obj, null, item.getId().toString(), item.getMleUuid());
         } catch (ASException aex) {
             throw aex;            
@@ -118,9 +125,9 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
 
     @Override
     public void delete(MlePcrLocator locator) {
-        if (locator.id == null || locator.index == null) { return ;}
-        String mleUuid = locator.id.toString();
-        String pcrIndex = locator.index;
+        if (locator.mleUuid == null || locator.pcrIndex == null) { return ;}
+        String mleUuid = locator.mleUuid.toString();
+        String pcrIndex = locator.pcrIndex;
         try {
             TblPcrManifestJpaController jpaController = My.jpa().mwPcrManifest();
             List<TblPcrManifest> pcrs = jpaController.findTblPcrManifestByMleUuid(mleUuid);
@@ -141,8 +148,8 @@ public class MlePcrRepository implements SimpleRepository<MlePcr, MlePcrCollecti
         MlePcr convObj = new MlePcr();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
         convObj.setMleUuid(obj.getUuid_hex());
-        convObj.setPcrName(obj.getName());
-        convObj.setPcrDigest(obj.getValue());
+        convObj.setPcrIndex(obj.getName());
+        convObj.setPcrValue(obj.getValue());
         convObj.setDescription(obj.getPCRDescription());
         return convObj;
     }

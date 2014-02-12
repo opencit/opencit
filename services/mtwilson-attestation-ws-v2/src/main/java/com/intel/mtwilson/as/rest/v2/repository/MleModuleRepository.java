@@ -46,8 +46,15 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
                         objCollection.getMleModules().add(convert(obj));
                     }
                 }                
-            }else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
+            } else if (criteria.nameContains != null && !criteria.nameContains.isEmpty()) {
                 List<TblModuleManifest> objList = jpaController.findTblModuleManifestByComponentNameLike(criteria.nameContains);
+                if (objList != null && !objList.isEmpty()) {
+                    for(TblModuleManifest obj : objList) {
+                        objCollection.getMleModules().add(convert(obj));
+                    }
+                }                
+            } else if (criteria.valueEqualTo != null && !criteria.valueEqualTo.isEmpty()) {
+                List<TblModuleManifest> objList = jpaController.findByComponentVlaue(criteria.valueEqualTo);
                 if (objList != null && !objList.isEmpty()) {
                     for(TblModuleManifest obj : objList) {
                         objCollection.getMleModules().add(convert(obj));
@@ -86,7 +93,7 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     public void store(MleModule item) {
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
-            obj.setDigestValue(item.getDigestValue());
+            obj.setDigestValue(item.getModuleValue());
             obj.setDescription(item.getDescription());
             new MleBO().updateModuleWhiteList(obj, null, item.getId().toString());
         } catch (ASException aex) {
@@ -101,8 +108,8 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
     public void create(MleModule item) {
         ModuleWhiteList obj = new ModuleWhiteList();
         try {
-            obj.setComponentName(item.getComponentName());
-            obj.setDigestValue(item.getDigestValue());
+            obj.setComponentName(item.getModuleName());
+            obj.setDigestValue(item.getModuleValue());
             obj.setDescription(item.getDescription());
             obj.setEventName(item.getEventName());
             obj.setExtendedToPCR(item.getExtendedToPCR());
@@ -136,9 +143,9 @@ public class MleModuleRepository implements SimpleRepository<MleModule, MleModul
         MleModule convObj = new MleModule();
         convObj.setId(UUID.valueOf(obj.getUuid_hex()));
         convObj.setMleUuid(obj.getUuid_hex());
-        convObj.setComponentName(obj.getComponentName());
+        convObj.setModuleName(obj.getComponentName());
         convObj.setDescription(obj.getDescription());
-        convObj.setDigestValue(obj.getDigestValue());
+        convObj.setModuleValue(obj.getDigestValue());
         convObj.setEventName(obj.getEventID().getName());
         convObj.setExtendedToPCR(obj.getExtendedToPCR());
         convObj.setPackageName(obj.getPackageName());

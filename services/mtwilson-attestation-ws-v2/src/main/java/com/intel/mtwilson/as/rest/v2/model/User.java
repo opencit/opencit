@@ -11,7 +11,6 @@ import com.intel.mtwilson.jersey.Document;
  *
  * @author ssbangal
  */
-// The JacksonXmlRootElement(localName="user") annotation is responsible for the lowercase "user" tag, otherwise the default would be "User"
 @JacksonXmlRootElement(localName="user")
 public class User extends Document{
     private String name;

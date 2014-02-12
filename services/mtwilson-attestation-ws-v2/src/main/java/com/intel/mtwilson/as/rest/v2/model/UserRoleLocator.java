@@ -4,12 +4,17 @@
  */
 package com.intel.mtwilson.as.rest.v2.model;
 
-import com.intel.mtwilson.jersey.PatchLink;
+import com.intel.mtwilson.jersey.Locator;
 
 /**
  *
  * @author ssbangal
  */
-public class CaCertificateLinks implements PatchLink<CaCertificate>{
+public class UserRoleLocator implements Locator<UserRole> {
+
+    @Override
+    public void copyTo(UserRole item) {
+        return;
+    }
     
 }

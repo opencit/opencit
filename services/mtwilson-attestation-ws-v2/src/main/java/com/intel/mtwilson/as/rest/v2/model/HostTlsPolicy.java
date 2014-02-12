@@ -15,7 +15,6 @@ import com.intel.mtwilson.jersey.Document;
 public class HostTlsPolicy extends Document {
     
     private String hostUuid;
-    private String hostName;
     private String name;
     private byte[] keyStore;
 
@@ -25,14 +24,6 @@ public class HostTlsPolicy extends Document {
 
     public void setHostUuid(String hostUuid) {
         this.hostUuid = hostUuid;
-    }
-
-    public String getHostName() {
-        return hostName;
-    }
-
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
     }
     
     public String getName() {

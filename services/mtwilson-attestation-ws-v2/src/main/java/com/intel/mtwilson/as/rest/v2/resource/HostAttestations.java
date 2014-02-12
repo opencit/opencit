@@ -13,7 +13,6 @@ import com.intel.mtwilson.as.rest.v2.model.HostAttestationLocator;
 import com.intel.mtwilson.as.rest.v2.repository.HostAttestationRepository;
 import com.intel.mtwilson.jersey.NoLinks;
 import com.intel.mtwilson.jersey.resource.AbstractJsonapiResource;
-//import javax.ejb.Stateless;
 import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +22,13 @@ import org.slf4j.LoggerFactory;
  * @author ssbangal
  */
 @V2
-//@Stateless
 @Path("/host-attestations")
 public class HostAttestations extends AbstractJsonapiResource<HostAttestation, HostAttestationCollection, HostAttestationFilterCriteria, NoLinks<HostAttestation>, HostAttestationLocator> {
     
     private Logger log = LoggerFactory.getLogger(getClass().getName());
     
-    private static final int DEFAULT_CACHE_VALIDITY_SECS = 3600;
-    private static final int CACHE_VALIDITY_SECS = ASConfig.getConfiguration().getInt("saml.validity.seconds", DEFAULT_CACHE_VALIDITY_SECS);
-    
     private HostAttestationRepository repository;
+
     public HostAttestations() {
         repository = new HostAttestationRepository();
     }
