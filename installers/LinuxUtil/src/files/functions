@@ -3031,6 +3031,9 @@ webservice_install() {
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Glassfish..."
         ${glassfish} redeploy --name ${WEBSERVICE_DEPLOYED} ${WAR_FILE}
         glassfish_restart
+        echo -n "Waiting for webserver to restart... "
+        sleep 20s        #XXX TODO: remove when we have solution for webserver up
+        echo "Done"
       elif using_tomcat; then
         echo "Re-deploying ${WEBSERVICE_DEPLOYED} to Tomcat..."
         rm -rf $TOMCAT_HOME/webapps/$WAR_NAME
@@ -3043,6 +3046,9 @@ webservice_install() {
         echo "Deploying ${webservice_application_name} to Glassfish..."
         ${glassfish} deploy --name ${webservice_application_name} ${WAR_FILE}
         glassfish_restart
+        echo -n "Waiting for webserver to restart... "
+        sleep 20s        #XXX TODO: remove when we have solution for webserver up
+        echo "Done"
       elif using_tomcat; then
         #if [ ! tomcat_running ]; then
         #  tomcat_start
