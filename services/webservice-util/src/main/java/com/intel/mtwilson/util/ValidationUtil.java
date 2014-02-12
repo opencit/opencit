@@ -347,7 +347,7 @@ public class ValidationUtil {
             validateInput(Integer.toString(cs.url.getPort()), getPattern(RegExAnnotation.PORT));
             if (cs.options != null && !cs.options.isEmpty()) {
                 validateInput(cs.options.getString(ConnectionString.OPT_HOSTNAME), getPattern(RegExAnnotation.IPADDR_FQDN));
-                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(RegExAnnotation.DEFAULT));
+                validateInput(cs.options.getString(ConnectionString.OPT_USERNAME), getPattern(RegExAnnotation.USERNAME));
                 validateInput(cs.options.getString(ConnectionString.OPT_PASSWORD), getPattern(RegExAnnotation.PASSWORD));
             }
         }

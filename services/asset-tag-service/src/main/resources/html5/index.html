@@ -792,13 +792,14 @@ function isNumber(n) {
                             </div>
 
                             <form id="certificate-provision-form" style="display: none;" action="#" onsubmit="return false;" >
-                                <p>Currently push-provisioning works only with Citrix Xen hosts.</p>
+                                <p>Currently push-provisioning works only with Citrix Xen hosts and Intel Trust agents and must currently be registered in Mt. Wilson.</p>
                                 <input type="hidden" name="certificateUuid" id="certificate-provision-uuid"/>
                                 <ul>
                                     <li>
                                         <label for="certificate-provision-host">Internet Address</label>
                                         <input type="text" id="certificate-provision-host" name="host" size="40" placeholder="Hostname or IP Address"/>
                                     </li>
+                                    <!-- 
                                     <li>
                                         <label for="certificate-provision-username">Username</label>
                                         <input type="text" id="certificate-provision-username" name="username" placeholder="Username"/>
@@ -807,7 +808,7 @@ function isNumber(n) {
                                         <label for="certificate-provision-password">Password</label>
                                         <input type="password" id="certificate-provision-password" name="password" placeholder="Password"/>
                                     </li>
-                                    
+                                    -->
                                      <li>
                                             <input type="button" value="Provision" onclick="ws.provisionCertificate(this); return false;"/>
                                             <input type="button" value="Cancel" onclick="$('certificate-provision-form').hide(); return false;"/>
