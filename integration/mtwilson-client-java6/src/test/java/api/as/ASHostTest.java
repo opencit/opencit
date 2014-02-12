@@ -4,14 +4,25 @@
  */
 package api.as;
 
+import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
+import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.ApiClient;
 import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.*;
 import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateEncodingException;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -103,6 +114,5 @@ public class ASHostTest {
         HostLocation hlObj = new HostLocation("Folsom", "7C07CFF3C83882A7BE74A2C7869CD5991E6F166F");
         boolean result = c.addHostLocation(hlObj);
         System.out.println(result);        
-    }         
-    
+    }
 }

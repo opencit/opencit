@@ -461,7 +461,7 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( message != null && message.content != null ) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
-        System.out.println("Savy004d: " + message.content);
+        //System.out.println("XXX debug|HTTP POST message content: " + message.content);
         
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
@@ -471,11 +471,11 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
-        System.out.println("Savy004m: " + new String(apiResponse.content, Charset.forName("UTF-8")));
+        //System.out.println("XXX debug|HTTP Response content: " + new String(apiResponse.content, Charset.forName("UTF-8")));
         request.releaseConnection();
         return apiResponse;
     }
-
+    
     public Locale getLocale() {
         return locale;
     }
