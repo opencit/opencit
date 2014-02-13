@@ -74,8 +74,11 @@ public class TpmPasswordResource extends ServerResource{
         }
     }
 
-    @Post("json")
-    public void setTpmPassword(/*TagSearchCriteria query*/TpmPasswordRequest request) {
+    @Post()
+    public void setTpmPassword(/*TagSearchCriteria query*//*TpmPasswordRequest request*/) {
+        TpmPasswordRequest request = new TpmPasswordRequest();
+        request.setUuid(getQuery().getFirstValue("uuid"));
+        request.setPassword(getQuery().getFirstValue("password"));
         log.debug("Storing tpm password for " + request.uuid + " with password " + request.password);
         TpmPassword result = dao.findByUuid(request.uuid);
         if(result == null) {
