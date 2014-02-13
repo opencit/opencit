@@ -84,6 +84,7 @@ public class TpmPasswordResource extends ServerResource{
         if(result == null) {
             log.debug("no entry for " + request.uuid + " proceeding with add" );
             dao.insert(request.uuid,request.password);
+            log.debug("insert successful for " + request.uuid);
         }else{
             log.debug("entry already found for this host, not updating");
         }
