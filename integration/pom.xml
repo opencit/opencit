@@ -19,7 +19,7 @@
     <module>mtwilson-api</module>
     <module>mtwilson-my</module>
     <module>mtwilson-client-java6</module>
-    <module>mtwilson-client-java7</module>
+    <module>mtwilson-client-java6-jaxrs2</module>
 	<!--  we don't need to build this every time, it can be done separately for each release
     <module>mtwilson-client-java5</module>
     <module>mtwilson-client-dotnet</module>
