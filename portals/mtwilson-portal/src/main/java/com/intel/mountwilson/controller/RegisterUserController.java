@@ -91,15 +91,16 @@ public class RegisterUserController extends AbstractController {
                 ByteArrayResource certResource = new ByteArrayResource();
                 log.info("registerusercontroller calling createUserInResource");
         	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL),new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
-                // Feb 12, 2014: Sudhir: This code will be called by the ApiClientBO itself so that the user in the portal user table would be created first before the entry
-                // in the api client table.
-                /*MwPortalUser keyTable = new MwPortalUser();
-                keyTable.setUsername(username);
-                keyTable.setStatus("PENDING");
-                keyTable.setKeystore(certResource.toByteArray());
-                keyTable.setUuid_hex(new UUID().toHexString());
-                log.info("registerusercontroller calling create");
-                keystoreJpa.create(keyTable);*/
+                // Feb 12, 2014: Sudhir: Since the portal user would be created by the above call, we just need to update with the keystore.                
+                MwPortalUser keyTable = keystoreJpa.findMwPortalUserByUserName(username);
+                if (keyTable != null) {                    
+                    keyTable.setKeystore(certResource.toByteArray());
+                    log.info("registerusercontroller updateing the portal user table with the new keystore.");
+                    keystoreJpa.edit(keyTable);
+                } else {
+                    view.addObject("result",false);
+                    view.addObject("message", "Error during user registration. Please see the server log for more details.");                    
+                }
         	
             if (response == null) {
                 view.addObject("result",false);

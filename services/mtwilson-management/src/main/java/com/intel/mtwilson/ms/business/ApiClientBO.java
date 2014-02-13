@@ -142,10 +142,13 @@ public class ApiClientBO extends BaseBO {
             UUID userTableUuid = new UUID();
             //Feb 12,2014 - Sudhir: First we need to create the user in the portal user table. Then we need to use that user ID and create the entry
             // in the api client x509 table.
-            if (apiClientRequest.getKeyStore() != null && apiClientRequest.getKeyStore().length > 0) {
+            // Since we are reusing this function even from the new API v2, we need to check who is calling into this. If the new API is calling into
+            // this API, then we should not be creating the user. It is expected that users of new API v2 should do that.
+            if (uuid == null || uuid.isEmpty()) {
                 MwPortalUser pUser = new MwPortalUser();
                 pUser.setUuid_hex(userTableUuid.toString()); // The UUID that is being passed into the call is from the new API v2 for the api_client_x509 table.
-                pUser.setKeystore(apiClientRequest.getKeyStore());
+                // We will not set the keystore here. The caller who calls into the keystore.createuserinresource is responsible for updating the 
+                // portal user table with the new keystore.
                 pUser.setStatus(ApiClientStatus.PENDING.toString());
                 pUser.setUsername(getSimpleNameFromCert(x509Certificate));
                 My.jpa().mwPortalUser().create(pUser);

@@ -13,7 +13,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 public class ApiClientCreateRequest {
     private byte[] certificate;
     private String[] roles;
-    private byte[] keyStore; // We are using this as a workaround for creating the user first and then the api client x509 entry 
     
     @JsonProperty("X509Certificate")
     public byte[] getCertificate() {
@@ -33,17 +32,6 @@ public class ApiClientCreateRequest {
     public void setRoles(String[] roles) {
         this.roles = roles;
     }
-
-    @JsonProperty("Keystore")
-    public byte[] getKeyStore() {
-        return keyStore;
-    }
-
-    @JsonProperty("Keystore")
-    public void setKeyStore(byte[] keyStore) {
-        this.keyStore = keyStore;
-    }
-
     
 
 }

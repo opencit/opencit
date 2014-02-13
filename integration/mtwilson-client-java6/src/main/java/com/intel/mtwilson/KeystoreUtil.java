@@ -374,11 +374,6 @@ public class KeystoreUtil {
             ApiClientCreateRequest user = new ApiClientCreateRequest();
             user.setCertificate(rsaCredential.getCertificate().getEncoded()); //CertificateEncodingException
             user.setRoles(roles);
-            
-            // Feb 12, 2014: Passing in the keystore as well so that the api client BO can create the entry in the portal user table as well.
-            ByteArrayResource byteResource = (ByteArrayResource) resource;
-            user.setKeyStore(byteResource.toByteArray());
-            
             c.register(user); //IOException
         }
         catch(IOException e) {
