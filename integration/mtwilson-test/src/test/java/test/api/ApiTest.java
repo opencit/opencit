@@ -14,6 +14,7 @@ import com.intel.mtwilson.datatypes.Role;
 import java.io.File;
 import java.io.IOException;
 import java.security.SignatureException;
+import java.util.Arrays;
 import org.junit.Test;
 
 /**
@@ -39,8 +40,8 @@ public class ApiTest {
     public void testGetLocales() throws IOException, ClientException, ApiException, SignatureException {
         try {
             ApiClientTest act = new ApiClientTest(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
-            String locales = act.getLocales();
-            System.out.println("LOCALES: " + locales);
+            String[] locales = act.getLocales();
+            System.out.println("LOCALES: " + Arrays.toString(locales));
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.toString());

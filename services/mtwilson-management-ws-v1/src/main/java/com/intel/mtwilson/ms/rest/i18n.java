@@ -108,6 +108,6 @@ public class i18n {
     @RolesAllowed({"Security"})
     public String getLocales() throws IOException {
         log.debug("Retrieving available locales: {}", Arrays.toString(My.configuration().getAvailableLocales()));
-        return My.configuration().getAvailableLocales();
+        return Arrays.toString(My.configuration().getAvailableLocales());
     }
 }
