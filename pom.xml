@@ -30,6 +30,7 @@
     <module>portals</module>
     <module>tools</module>
     <module>desktop</module>
+    <module>features</module>
     <module>installers</module>
   </modules>
 
