@@ -22,7 +22,7 @@ import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheHttpAuthorization;
 import com.intel.mtwilson.security.http.HttpRequestURL;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import java.io.ByteArrayOutputStream;

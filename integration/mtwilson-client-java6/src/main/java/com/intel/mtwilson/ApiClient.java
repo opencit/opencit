@@ -3,6 +3,8 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
+import com.intel.mtwilson.security.http.apache.ApacheHmacHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheRsaHttpAuthorization;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.api.MtWilson;
