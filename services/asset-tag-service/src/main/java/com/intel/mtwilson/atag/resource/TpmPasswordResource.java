@@ -76,9 +76,11 @@ public class TpmPasswordResource extends ServerResource{
         
         TpmPassword result = dao.findByUuid(uuid);
         if(result == null) {
+            log.debug("tpm-password did not get any results back for " + uuid);
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);
             return null;
         }
+        log.debug("tpm-passwords returned back result for " + uuid + " of " + result.getPassword());
         response.password = result.getPassword();
         return response;
     }
