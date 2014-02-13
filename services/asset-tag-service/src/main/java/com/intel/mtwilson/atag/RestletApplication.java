@@ -53,6 +53,7 @@ public class RestletApplication extends Application {
         router.attach("/certificates", CertificateListResource.class); 
         router.attach("/certificates/{id}", CertificateResource.class);
         router.attach("/host-uuids", UuidResource.class);
+        router.attach("/tpm-passwords",TpmPasswordResource.class);
         router.attach("/configurations", ConfigurationListResource.class); 
         router.attach("/configurations/{id}", ConfigurationResource.class); 
         router.attach("/files", FileListResource.class); 
