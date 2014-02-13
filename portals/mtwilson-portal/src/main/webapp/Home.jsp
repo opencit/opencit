@@ -25,10 +25,12 @@
         <script type="text/javascript" src="Scripts/commonUtils.js"></script>
         <script type="text/javascript" src="Scripts/CommonMessage.js"></script>
         <script type="text/javascript" src="Scripts/home.js"></script>
-        <script> var assetTagUrl = "<% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString()); %>"; </script>
+        <script> var assetTagUrl = "<% out.print(com.intel.mtwilson.My.configuration().getAssetTagServerString()); %>"; 
+        </script>
         
-
-
+        
+        
+        
     </head>
     <body>
         <div class="header">
