@@ -35,11 +35,22 @@
 
 
     <dependencies>
+		<dependency>
+			<groupId>com.intel.mtwilson.services</groupId>
+			<artifactId>mtwilson-hostagent-ext</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+        
+        
+        <!-- TODO (step 2): remove mtwilson-vmware-hostagent dependnecy and load all hostagents using cpg-extensions -->
         <dependency>
-            <groupId>net.sourceforge.vijava</groupId>
-            <artifactId>vijava</artifactId>
-            <version>5.5</version>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-vmware-hostagent</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        
+        
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

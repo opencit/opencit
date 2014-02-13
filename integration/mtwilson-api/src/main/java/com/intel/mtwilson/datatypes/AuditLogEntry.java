@@ -5,7 +5,8 @@
 package com.intel.mtwilson.datatypes;
 
 import java.util.Date;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  *

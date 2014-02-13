@@ -64,6 +64,7 @@
             <artifactId>guava</artifactId>
             <version>12.0</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-jaxrs</artifactId>
@@ -79,11 +80,22 @@
             <artifactId>jackson-mapper-asl</artifactId>
             <version>1.9.11</version>
         </dependency>
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.1</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-bundle</artifactId>
@@ -93,6 +105,32 @@
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
             <version>1.12</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
+            <scope>provided</scope>
+        </dependency>        
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -147,6 +185,12 @@
       <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-utils</artifactId>
+            <version>${project.version}</version>         
+      </dependency>        
+      <!-- TODO for plugin architecture and html5 portal rewrite, the vmware-specific GUI features need to be moved to a plugin -->
+      <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-vmware-hostagent</artifactId>
             <version>${project.version}</version>         
       </dependency>        
                 <!-- for MwPowrtalUser only;  XXX TODO maybe MwPortalUser should be in a separate persistence unit -->

@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intel.dcsg.cpg.validation.Fault;
 import com.intel.mtwilson.setup.SetupTask;
 import java.util.ArrayList;
@@ -25,10 +26,10 @@ public class SetupTest {
         CreateTlsCertificate createTlsCertificate = new CreateTlsCertificate();
         createTlsCertificate.setDnsAlternativeName("localhost");
         createTlsCertificate.setIpAlternativeName("127.0.0.1");
-        createTlsCertificate.setTlsKeystorePassword("password"); // or use My.configuration()...
+//        createTlsCertificate.setTlsKeystorePassword("password"); // or use My.configuration()...
         tasks.add(createTlsCertificate);
         CreateSamlCertificate createSamlCertificate = new CreateSamlCertificate();
-        createSamlCertificate.setSamlKeystorePassword("password");// or use My.configuration()...
+//        createSamlCertificate.setSamlKeystorePassword("password");// or use My.configuration()...
         tasks.add(createSamlCertificate);
         tasks.add(new ConfigureDatabase());
         tasks.add(new InitDatabase());
@@ -47,6 +48,12 @@ public class SetupTest {
     public void testAllSetupTasks() {
         List<SetupTask> tasks = getSetupTasks();
         runSetupTasks(tasks);
+    }
+    
+    @Test
+    public void testPreviewAllSetupTasks() throws Exception {
+        List<SetupTask> tasks = getSetupTasks();
+        previewSetupTasks(tasks);
     }
         
     public void runSetupTasks(List<SetupTask> tasks) {
@@ -74,4 +81,26 @@ public class SetupTest {
             }
         }
     }
+
+    public void previewSetupTasks(List<SetupTask> tasks) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        for(SetupTask task : tasks) {
+            if( task.isConfigured() && task.isValidated() ) {
+                log.debug("nothing to do for {}", task.getClass().getName());
+                log.debug("configured {}: {}", task.getClass().getName(), mapper.writeValueAsString(task));
+            }
+            else if( !task.isConfigured() ) {
+                for(Fault fault : task.getConfigurationFaults()) {
+                    log.debug("configuration: {}", fault.toString());
+                }
+            }
+            else if( task.isConfigured() && !task.isValidated() ) {
+                log.debug("Task to run: {}", task.getClass().getName());
+            }
+            else {
+                log.error("unexpected condition setup task {} configured? {} validated? {}", task.getClass().getName(), task.isConfigured(), task.isValidated());
+            }
+        }
+    }
+
 }

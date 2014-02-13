@@ -4,47 +4,17 @@
  */
 package com.intel.mtwilson.policy.impl;
 
-import com.intel.mtwilson.policy.rule.PcrMatchesConstant;
-import com.intel.mtwilson.policy.rule.PcrEventLogIntegrity;
-import com.intel.mtwilson.policy.rule.PcrEventLogIncludes;
-import com.intel.mountwilson.as.common.ASException;
 import com.intel.mtwilson.My;
-import com.intel.mtwilson.agent.HostAgent;
-import com.intel.mtwilson.agent.HostAgentFactory;
 import java.util.HashSet;
-import com.intel.mtwilson.agent.Vendor;
-import com.intel.mtwilson.agent.VendorHostAgentFactory;
-import com.intel.mtwilson.as.business.HostBO;
-import com.intel.mtwilson.as.controller.TblLocationPcrJpaController;
-import com.intel.mtwilson.as.controller.TblMleJpaController;
-import com.intel.mtwilson.as.controller.TblModuleManifestJpaController;
-import com.intel.mtwilson.as.controller.TblPcrManifestJpaController;
 import com.intel.mtwilson.as.data.MwAssetTagCertificate;
-import com.intel.mtwilson.as.data.TblHostSpecificManifest;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.data.TblLocationPcr;
-import com.intel.mtwilson.as.data.TblMle;
-import com.intel.mtwilson.as.data.TblModuleManifest;
-import com.intel.mtwilson.as.data.TblPcrManifest;
-import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.model.Bios;
-import com.intel.mtwilson.model.Measurement;
-import com.intel.mtwilson.model.Pcr;
-import com.intel.mtwilson.model.PcrEventLog;
-import com.intel.mtwilson.model.PcrIndex;
-import com.intel.mtwilson.model.PcrManifest;
-import com.intel.mtwilson.model.Sha1Digest;
 import com.intel.mtwilson.model.Vmm;
 import com.intel.mtwilson.policy.*;
 import com.intel.mtwilson.policy.impl.vendor.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,14 +42,14 @@ public class HostTrustPolicyManager {
     private EntityManagerFactory entityManagerFactory;
     private JpaPolicyReader reader;
 
-    private Map<Vendor,VendorHostTrustPolicyFactory> vendorFactoryMap = new EnumMap<Vendor,VendorHostTrustPolicyFactory>(Vendor.class);
+    private Map<String,VendorHostTrustPolicyFactory> vendorFactoryMap = new HashMap<String,VendorHostTrustPolicyFactory>();
     //private Logger log = LoggerFactory.getLogger(getClass());
     public HostTrustPolicyManager(EntityManagerFactory entityManagerFactory) {
         reader = new JpaPolicyReader(entityManagerFactory);
         // we initialize the map with the known vendors; but this could also be done through IoC
-        vendorFactoryMap.put(Vendor.INTEL, new IntelHostTrustPolicyFactory(reader));
-        vendorFactoryMap.put(Vendor.CITRIX, new CitrixHostTrustPolicyFactory(reader));
-        vendorFactoryMap.put(Vendor.VMWARE, new VmwareHostTrustPolicyFactory(reader));
+        vendorFactoryMap.put("intel", new IntelHostTrustPolicyFactory(reader));
+        vendorFactoryMap.put("citrix", new CitrixHostTrustPolicyFactory(reader));
+        vendorFactoryMap.put("vmware", new VmwareHostTrustPolicyFactory(reader));
         
         this.entityManagerFactory = entityManagerFactory;
     }
@@ -90,7 +60,7 @@ public class HostTrustPolicyManager {
      * It is recommended to supply an EnumMap instance
      * @param map of vendor host agent factories
      */
-    public void setVendorFactoryMap(Map<Vendor,VendorHostTrustPolicyFactory> map) {
+    public void setVendorFactoryMap(Map<String,VendorHostTrustPolicyFactory> map) {
         vendorFactoryMap = map;
     }
         
@@ -221,14 +191,13 @@ public class HostTrustPolicyManager {
     }
     */
     protected VendorHostTrustPolicyFactory getVendorHostTrustPolicyFactoryForHost(TblHosts host) {
-        Vendor[] vendors = Vendor.values();
         if( host.getAddOnConnectionInfo() == null ) {
             throw new IllegalArgumentException("Connection info missing");
         }
-        for(Vendor vendor : vendors) {
-            String prefix = vendor.name().toLowerCase()+":"; // "INTEL" becomes "intel:"
+        for(String vendorProtocol : vendorFactoryMap.keySet()) {
+            String prefix = vendorProtocol.toLowerCase()+":"; // "INTEL" or "intel" becomes "intel:"
             if( host.getAddOnConnectionInfo().startsWith(prefix) ) {
-                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendor);
+                VendorHostTrustPolicyFactory factory = vendorFactoryMap.get(vendorProtocol);
                 if( factory != null ) {
                     return factory;
                 }

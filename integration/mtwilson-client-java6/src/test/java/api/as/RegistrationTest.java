@@ -6,7 +6,8 @@ package api.as;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 /**

@@ -25,7 +25,9 @@ public class Util {
     
     public static File[] findAllJars() {
         try {
+            // XXX TODO SETUP use MyFilesystem
             // find the plugin directory, try My.configuration() first then the maven target folder
+            log.debug("Configured java libs: {}", My.configuration().getMtWilsonJava());
             File javaPath = new File(My.configuration().getMtWilsonJava());
             if( !javaPath.exists() ) {
                 // try target/.../WEB-INF/lib in case we are running on a developer laptop
@@ -71,7 +73,8 @@ public class Util {
                 }
             }
             catch(Throwable e) { // catch ClassNotFoundException and NoClassDefFoundError 
-                log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName());
+                log.error("Cannot read jar file {} because {}", jar.getAbsolutePath(), e.getClass().getName() + ": " + e.getMessage());
+                //e.printStackTrace();
                 // log.error("Cannot read jar file {}", jar.getAbsolutePath());
             }
         }

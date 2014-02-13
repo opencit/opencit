@@ -1,7 +1,8 @@
 package com.intel.mtwilson.model;
 
 import com.intel.dcsg.cpg.validation.ObjectModel;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * The PcrManifest class represents a list of PCR numbers, their values,

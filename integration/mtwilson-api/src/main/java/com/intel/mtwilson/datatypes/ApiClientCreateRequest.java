@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.datatypes;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  *
@@ -32,6 +33,6 @@ public class ApiClientCreateRequest {
     public void setRoles(String[] roles) {
         this.roles = roles;
     }
-
+    
 
 }

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.intel.mtwilson.jersey.DocumentCollection;
 import java.util.ArrayList;
 import java.util.List;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *
@@ -19,7 +19,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 public class HostAikCollection extends DocumentCollection<HostAik> {
     private final ArrayList<HostAik> aiks = new ArrayList<HostAik>();
     
-    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
+//    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="host_aiks")
     @JacksonXmlProperty(localName="host_aik")    

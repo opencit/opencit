@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
+//import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -59,7 +61,7 @@ com.intel.mountwilson.as.openssl.cmd=openssl.bat
 public class TestLinuxXen169 {
 
     private transient Logger log = LoggerFactory.getLogger(getClass());
-    private transient static org.codehaus.jackson.map.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    private transient static com.fasterxml.jackson.databind.ObjectWriter json = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private transient static com.fasterxml.jackson.databind.ObjectWriter xml = new XmlMapper().writerWithDefaultPrettyPrinter(); 
     private transient String hostname = "10.1.71.169";
     private transient String connection = "intel:https://10.1.71.169:9999";
@@ -254,13 +256,13 @@ Pcr 23 = 0000000000000000000000000000000000000000
             if( agent.isAikCaAvailable() ) {
                 X509Certificate aikcert = agent.getAikCertificate();
                 host.setAIKCertificate(X509Util.encodePemCertificate(aikcert));
-                host.setAikPublicKey(X509Util.encodePemPublicKey(aikcert.getPublicKey()));
+                host.setAikPublicKey(RsaUtil.encodePemPublicKey(aikcert.getPublicKey()));
                 host.setAikSha1(Sha1Digest.valueOf(aikcert.getPublicKey().getEncoded()).toString());
             }
             else {
                 PublicKey aikpubkey = agent.getAik();
                 host.setAIKCertificate(null);
-                host.setAikPublicKey(X509Util.encodePemPublicKey(aikpubkey));
+                host.setAikPublicKey(RsaUtil.encodePemPublicKey(aikpubkey));
                 host.setAikSha1(Sha1Digest.valueOf(aikpubkey.getEncoded()).toString());
             }
         }

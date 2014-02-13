@@ -3,7 +3,8 @@ package com.intel.mtwilson.datatypes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  *

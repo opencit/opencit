@@ -94,18 +94,27 @@
           <groupId>org.eclipse.persistence</groupId>
           <artifactId>eclipselink</artifactId>
     </dependency>
+    <!--
     <dependency>
     	<groupId>org.codehaus.jackson</groupId>
     	<artifactId>jackson-jaxrs</artifactId>
     	<version>1.9.11</version>
         <optional>true</optional>
     </dependency>
+    -->
+    <dependency>
+        <groupId>javax.ws.rs</groupId>
+        <artifactId>javax.ws.rs-api</artifactId>
+        <scope>provided</scope>
+    </dependency>
+    <!--
     <dependency>
         <groupId>com.sun.jersey</groupId>
         <artifactId>jersey-server</artifactId>
         <version>1.9-ea04</version>
         <scope>provided</scope>
     </dependency>
+    -->
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>

@@ -40,7 +40,7 @@ public class TestConnectionPool {
     @Test
     public void testEclipseLinkNormal() throws ClassNotFoundException, IOException {
         Properties jpaProperties = getJpaProperties();
-        log.debug("Loading database driver {} for persistence unit {}", new String[] { jpaProperties.getProperty("javax.persistence.jdbc.driver"), persistenceUnitName });
+        log.debug("Loading database driver {} for persistence unit {}",  jpaProperties.getProperty("javax.persistence.jdbc.driver"), persistenceUnitName );
         Class.forName(jpaProperties.getProperty("javax.persistence.jdbc.driver"));
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(persistenceUnitName,jpaProperties);
         TblOemJpaController hostsJpa = new TblOemJpaController(factory);

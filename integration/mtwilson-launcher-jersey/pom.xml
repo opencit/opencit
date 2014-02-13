@@ -140,12 +140,13 @@ This error message indicates you need jackson 1.x implementation like org.codeha
         
         
         <!-- for jersey 1.x -->
+        <!--
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-server</artifactId>
             <version>${jersey-version}</version>
         </dependency>
-        
+        -->
     </dependencies>
     
 </project>
