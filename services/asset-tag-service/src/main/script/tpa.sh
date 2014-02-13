@@ -94,7 +94,9 @@ function generatePasswordHex() {
 
 function takeOwnershipTpm() {
  functionReturn=0
- $tpmtakeownership -x -t -oownerPass -z > /dev/null 2>&1
+ if [ "$mode" == "VMWARE" ]; then
+	$tpmtakeownership -x -t -oownerPass -z > /dev/null 2>&1
+ fi
 #(
 #$expect << EOD
 #spawn $tpmtakeownership
@@ -210,9 +212,17 @@ function provisionCert() {
   sha1=`echo "${sha1#*sha1=}"`
   
   # Generate passwords for ownership and nvram  
-  export nvramPass=`generatePasswordHex 40`
-  export ownerPass=`generatePasswordHex 40`
-  export srkPass=`generatePasswordHex 40`
+  if [ "$mode" == "VMWARE" ]; then
+	export nvramPass=`generatePasswordHex 40`
+	export ownerPass=`generatePasswordHex 40`
+	export srkPass=`generatePasswordHex 40`
+  else
+    $WGET $server/tpm-passwords?uuid=$UUID -O /tmp/tpmPassword
+	ownerPass=`cat /tmp/tpmPassword | cut -d':' -f2 | sed -e 's/\"//g'| sed -e 's/}//g'`
+	export ownerPass="$ownerPass"
+	export nvramPass=`generatePasswordHex 40`
+	export srkPass=`generatePasswordHex 40`
+  fi
   
   # Overwrite password if TA, skip taking ownership
 

@@ -86,7 +86,10 @@ public class TpmPasswordResource extends ServerResource{
             dao.insert(request.uuid,request.password);
             log.debug("insert successful for " + request.uuid);
         }else{
-            log.debug("entry already found for this host, not updating");
+            log.debug("entry already found for this host, deleting entry and updating");
+            dao.deleteByUuid(request.uuid);
+            log.debug("adding in new entry");
+            dao.insert(request.uuid,request.password);
         }
     }
     
