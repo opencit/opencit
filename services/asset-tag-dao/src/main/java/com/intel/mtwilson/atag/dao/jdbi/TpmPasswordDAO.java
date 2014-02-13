@@ -44,10 +44,7 @@ public interface TpmPasswordDAO {
 
     @SqlQuery("select id,uuid,password from tpm_password where uuid=:uuid")
     TpmPassword findByUuid(@Bind("uuid") String uuid);
-
     
     void close();
-
-    
     
 }

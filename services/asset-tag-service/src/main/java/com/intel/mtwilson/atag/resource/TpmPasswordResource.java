@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.List;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
@@ -51,6 +52,37 @@ public class TpmPasswordResource extends ServerResource{
             dao.close();
         }
         super.doRelease();
+    }
+    
+    public class TpmPasswordRequest {
+        public String uuid;
+        public String password;
+        
+        public TpmPasswordRequest(){}
+        
+        public void setUuid(String uuid){
+            this.uuid = uuid;
+        }
+        public String getUuid(){
+            return this.uuid;
+        }
+        public void setPassword(String password) {
+            this.password = password;
+        }
+        public String getPassword(){
+            return this.password;
+        }
+    }
+
+    @Post()
+    public void setTpmPassword(/*TagSearchCriteria query*/TpmPasswordRequest request) {
+        log.debug("Storing tpm password for " + request.uuid + " with password " + request.password);
+        TpmPassword result = dao.findByUuid(request.uuid);
+        if(result == null) {
+            log.debug("no entry for " + request.uuid + " proceeding with add" );
+            dao.insert(request.uuid,request.password);
+        }else{
+        }
     }
     
     public class TpmPasswordResponse{
