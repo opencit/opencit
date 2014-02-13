@@ -37,13 +37,16 @@ public class CA {
     private TrustAgentCertificateAuthority ca = null;
     
     public CA() {
+        /*
         try {
+            // XXX disabled this while working on installation because it's throwing an error // Exception Description: Deployment of PersistenceUnit [ASDataPU] failed. Close all factories for this PersistenceUnit.
             ca = new TrustAgentCertificateAuthority();
         }
         catch(IOException e) {
             log.error("Cannot initialize CA", e);
             ca = null;
         }
+        */
     }
     
     

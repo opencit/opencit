@@ -31,6 +31,8 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.MapConfiguration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -344,10 +346,11 @@ public class KeystoreUtil {
         return createUserInResource(resource, username, password, server, tlsPolicy, roles, "TLS");
     }
     public static SimpleKeystore createUserInResource(Resource resource, String username, String password, URL server, TlsPolicy tlsPolicy, String[] roles, String tlsProtocol) throws IOException, ApiException, CryptographyException, ClientException {
+        URL baseUrl = new URL(server.getProtocol() + "://" + server.getAuthority());
         SimpleKeystore keystore = createUserKeystoreInResource(resource, username, password);
-        log.trace("URL Protocol: {}", server.getProtocol());
-        if( "https".equals(server.getProtocol()) ) {
-            TlsUtil.addSslCertificatesToKeystore(keystore, server, tlsProtocol); //CryptographyException, IOException            
+        log.trace("URL Protocol: {}", baseUrl.getProtocol());
+        if( "https".equals(baseUrl.getProtocol()) ) {
+            TlsUtil.addSslCertificatesToKeystore(keystore, baseUrl, tlsProtocol); //CryptographyException, IOException            
         }
         if(log.isTraceEnabled()) {
             try {

@@ -4,9 +4,12 @@
  */
 package com.intel.mtwilson.datatypes;
 
-import org.codehaus.jackson.annotate.JsonGetter;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+//import org.codehaus.jackson.annotate.JsonGetter;
+//import org.codehaus.jackson.annotate.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonSetter;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 
 /**

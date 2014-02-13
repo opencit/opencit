@@ -27,30 +27,50 @@
       <type>sh</type>
     </dependency>
     -->
-    <dependency>
-	  <groupId>org.apache</groupId>
-	  <artifactId>apache-tomcat</artifactId>
-	  <version>6.0.29</version>
-      <type>tgz</type>
-    </dependency>	
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-core-asl</artifactId>
-	<version>1.9.11</version>
-        <type>jar</type>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-mapper-asl</artifactId>
-	<version>1.9.11</version>
-        <type>jar</type>
-</dependency>
-<dependency>
-	<groupId>org.codehaus.jackson</groupId>
-	<artifactId>jackson-xc</artifactId>
-	<version>1.9.11</version>
-        <type>jar</type>
-</dependency>
+      <dependency>
+          <groupId>org.apache</groupId>
+          <artifactId>apache-tomcat</artifactId>
+          <version>6.0.29</version>
+          <type>tgz</type>
+      </dependency>
+      <!--
+      <dependency>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-core-asl</artifactId>
+          <version>1.9.11</version>
+          <type>jar</type>
+      </dependency>
+      <dependency>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-mapper-asl</artifactId>
+          <version>1.9.11</version>
+          <type>jar</type>
+      </dependency>
+      <dependency>
+          <groupId>org.codehaus.jackson</groupId>
+          <artifactId>jackson-xc</artifactId>
+          <version>1.9.11</version>
+          <type>jar</type>
+      </dependency>
+      -->
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-annotations</artifactId>
+          <version>2.3.0</version>
+          <type>jar</type>
+      </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-core</artifactId>
+          <version>2.3.0</version>
+          <type>jar</type>
+      </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+          <version>2.3.0</version>
+          <type>jar</type>
+      </dependency>
   </dependencies>
 
   <build>
@@ -108,6 +128,7 @@
                   <outputDirectory>${makeself.directory}</outputDirectory>
                   <destFileName>apache-tomcat-6.0.29.tgz</destFileName>
                 </artifactItem>
+                <!--
                 <artifactItem>
                     <groupId>org.codehaus.jackson</groupId>
                     <artifactId>jackson-core-asl</artifactId>
@@ -131,6 +152,31 @@
                     <type>jar</type>
                     <outputDirectory>${makeself.directory}</outputDirectory>
                     <destFileName>jackson-xc.jar</destFileName>
+                </artifactItem>
+                -->
+                <artifactItem>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                    <version>2.3.0</version>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jackson-annotations.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                    <version>2.3.0</version>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jackson-core.jar</destFileName>
+                </artifactItem>
+                <artifactItem>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <version>2.3.0</version>
+                    <type>jar</type>
+                    <outputDirectory>${makeself.directory}</outputDirectory>
+                    <destFileName>jackson-databind.jar</destFileName>
                 </artifactItem>
               </artifactItems>
               <overWriteReleases>false</overWriteReleases>

@@ -220,8 +220,7 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.2</version>
-        </dependency>                        
+        </dependency>
         <dependency>
             <groupId>com.intel.mtwilson.services</groupId>
             <artifactId>mtwilson-trust-policy</artifactId>
@@ -230,6 +229,7 @@
         
         
 <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
+<!--
 <dependency>
     <groupId>org.codehaus.jackson</groupId>
     <artifactId>jackson-jaxrs</artifactId>
@@ -254,7 +254,19 @@
 	<version>1.9.13</version>
 	<optional>true</optional>
 </dependency>
-        
+-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.3.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.3.0</version>
+            <optional>true</optional>
+        </dependency>
         
     </dependencies>
     <properties />

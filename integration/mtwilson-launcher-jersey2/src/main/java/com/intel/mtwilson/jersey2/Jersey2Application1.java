@@ -50,6 +50,10 @@ public class Jersey2Application1 extends AbstractJerseyPluginApplication {
     
     public Jersey2Application1() {
         super();
+        
+//register(com.intel.mtwilson.jersey.provider.JacksonXmlMapperProvider.class); 
+register(com.intel.mtwilson.jersey.provider.V1JacksonObjectMapperProvider.class);
+        
         // now get the list of classes that implement @V1 and @Path
         List<Object> resources = Extensions.findAll(V1.class.getName()); // we could search for @Path but then we'd find v1 and v2 classes as well as utility classes for both such as the application.wadl generator ; we use .class.getName() and not just .class because we want the object instances, not the annotation itself as <T>
         for(Object resource : resources) {

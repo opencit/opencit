@@ -50,7 +50,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.Charset;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -459,6 +461,8 @@ public class ApacheHttpClient implements java.io.Closeable {
         if( message != null && message.content != null ) {
             request.setEntity(new StringEntity(message.content, ContentType.create(message.contentType.toString(), "UTF-8")));
         }
+        //System.out.println("XXX debug|HTTP POST message content: " + message.content);
+        
         if( locale != null ) {
             request.addHeader(ACCEPT_LANGUAGE, LocaleUtil.toAcceptHeader(locale));
         }
@@ -467,10 +471,11 @@ public class ApacheHttpClient implements java.io.Closeable {
         }
         HttpResponse httpResponse = httpClient.execute(request);
         ApiResponse apiResponse = readResponse(httpResponse);
+        //System.out.println("XXX debug|HTTP Response content: " + new String(apiResponse.content, Charset.forName("UTF-8")));
         request.releaseConnection();
         return apiResponse;
     }
-
+    
     public Locale getLocale() {
         return locale;
     }

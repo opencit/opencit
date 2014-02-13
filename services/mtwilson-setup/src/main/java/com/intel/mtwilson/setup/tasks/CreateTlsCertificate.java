@@ -4,6 +4,7 @@
  */
 package com.intel.mtwilson.setup.tasks;
 
+import com.intel.dcsg.cpg.crypto.RandomUtil;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
@@ -60,6 +61,7 @@ public class CreateTlsCertificate extends LocalSetupTask {
         this.dnsAlternativeName = dnsAlternativeName;
     }
 
+    // XXX TODO INSECURE  need to protect this with apache shiro so it will require administrator permission to view
     public String getTlsKeystorePassword() {
         return tlsKeystorePassword;
     }
@@ -79,11 +81,10 @@ public class CreateTlsCertificate extends LocalSetupTask {
             configuration("No alternative name is configured; set IP, DNS, or both");
         }
         tlsKeystorePassword = My.configuration().getTlsKeystorePassword();
-        if( tlsKeystorePassword == null ) {
-            // XXX TODO automatically generate tlsKeystorePassword 
-            // after configure() the application should  getTlsKeystorePassword()  from us and 
-            // save it (for example in mtwilson.properties)
-            tlsKeystorePassword ="password";
+        if( tlsKeystorePassword == null || tlsKeystorePassword.isEmpty() ) {
+            tlsKeystorePassword = RandomUtil.randomBase64String(16);
+            My.configuration().update("mtwilson.tls.keystore.password", tlsKeystorePassword);// XXX should this be updated here or after execute?  advantage here is that if there's an error writing to the file, we won't proceed;  which is better than trying and failing after execute when the keystore has been created and then we're left not able to record the password...   at least here if we create a password but then cannot create the keystore, the password will still be used next time we try to create the keystore
+            My.reset();
         }
         
         // this section about checkign the ca key availability

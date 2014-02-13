@@ -8,8 +8,10 @@ import com.intel.mtwilson.api.*;
 import com.intel.mtwilson.datatypes.OpenStackHostTrustLevelQuery;
 import com.intel.mtwilson.model.Hostname;
 import java.io.IOException;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.DeserializationConfig;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +34,7 @@ public class JsonTest {
         try {
             return mapper.readValue(document, valueType);
         }
-        catch(org.codehaus.jackson.JsonParseException e) {
+        catch(com.fasterxml.jackson.core.JsonParseException e) {
             log.error("Cannot parse response: "+document);
             throw new ApiException("Cannot parse response", e);
         }
@@ -56,7 +58,7 @@ public class JsonTest {
     public void testMultipleDeserializeJsonToHostnameSinglePOJO() throws IOException, ApiException {
         String jsonSingle = "{\"hosts\":\"myHostname\"}";
         String jsonArray = "{\"hosts\":[\"myHostname\"]}";
-        mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+        //mapper.configure(DeserializationConfig.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         OpenStackHostTrustLevelQuery single = fromJSON(jsonSingle, OpenStackHostTrustLevelQuery.class);
         System.out.println("(single) count: "+single.hosts.length+", first: "+single.hosts[0].toString());
         OpenStackHostTrustLevelQuery array = fromJSON(jsonArray, OpenStackHostTrustLevelQuery.class);

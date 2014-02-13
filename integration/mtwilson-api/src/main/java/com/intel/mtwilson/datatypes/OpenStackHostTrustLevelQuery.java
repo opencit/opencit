@@ -1,8 +1,10 @@
 package com.intel.mtwilson.datatypes;
 
 import com.intel.mtwilson.model.Hostname;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+//import org.codehaus.jackson.annotate.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonSetter;
 
 /**
  * Currently the pcrMask field is ignored by PollHosts and HostTrustBO.

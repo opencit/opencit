@@ -4,7 +4,8 @@
  */
 package com.intel.mtwilson.datatypes;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+//import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * This object would be used to return back the status of the host registration/update.

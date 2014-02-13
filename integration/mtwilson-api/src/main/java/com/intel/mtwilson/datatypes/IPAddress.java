@@ -2,7 +2,8 @@ package com.intel.mtwilson.datatypes;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * Representation of an IP Address in either IPv4 or IPv6 format.

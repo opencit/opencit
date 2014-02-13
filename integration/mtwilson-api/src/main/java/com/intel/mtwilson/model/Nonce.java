@@ -7,7 +7,8 @@ package com.intel.mtwilson.model;
 import com.intel.dcsg.cpg.validation.ObjectModel;
 import java.math.BigInteger;
 import org.apache.commons.codec.binary.Hex;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * XXX TODO this class is just a draft. It needs to be finished.

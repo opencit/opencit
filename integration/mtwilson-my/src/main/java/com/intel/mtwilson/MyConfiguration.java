@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -136,6 +137,58 @@ public class MyConfiguration {
         return keySourceMap.get(key); // will be null if the key is not defined
     }
     
+    /**
+     * Writes the key-value pair to mtwilson.properties
+     */
+    public void update(String key, String value) throws FileNotFoundException, IOException {
+        List<File> files = listConfigurationFiles(); // in priority order - first one found for which we have write access will be updated
+        for(File file : files) {
+            log.debug("Looking at file: {}", file.getAbsolutePath());
+            if( file.exists()  && file.canRead() && file.canWrite() ) {
+                log.debug("Writable, checking encryption");
+                    // first check if the file is encrypted... if it is, we need to decrypt it before loading!
+                    FileInputStream in = new FileInputStream(file);
+                    String content = IOUtils.toString(in);
+                    in.close();
+                    if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
+                        // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
+                        String password = getApplicationConfigurationPassword();
+                        if( password == null ) {
+                            log.warn("Found encrypted configuration file, but no password was found in system properties or environment");
+                        }
+                        if( password != null ) {
+                            ExistingFileResource resource = new ExistingFileResource(file);
+                            PasswordEncryptedFile encryptedFile = new PasswordEncryptedFile(resource, password);
+                            String decryptedContent = encryptedFile.loadString();
+                            Properties p = new Properties();
+                            p.load(new StringReader(decryptedContent));
+                            
+                            p.setProperty(key, value);
+                            
+                            StringWriter writer = new StringWriter();
+                            p.store(writer, String.format("Changed: %s",key));
+//                            log.debug("Updated: {} = {}", key, value);
+                            encryptedFile.saveString(writer.toString());
+                            break;
+                        }
+                    }
+                    else {
+                        log.debug("Writing plaintext properties to {}", file.getAbsolutePath());
+                        Properties p = new Properties();
+                        p.load(new StringReader(content));
+                        
+                        p.setProperty(key, value);
+                        
+                        FileOutputStream out = new FileOutputStream(file);
+                        p.store(out, String.format("Changed: %s",key));
+                        out.close();
+                        break;
+                    }
+                
+            }
+        }
+    }
+    
     private Configuration gatherConfiguration(Properties customProperties) {
         CompositeConfiguration composite = new CompositeConfiguration();
 
@@ -173,14 +226,8 @@ public class MyConfiguration {
                     in.close();
                     if( Pem.isPem(content) ) { // starts with something like -----BEGIN ENCRYPTED DATA----- and ends with -----END ENCRYPTED DATA-----
                         // a pem-format file indicates it's encrypted... we could check for "ENCRYPTED DATA" in the header and footer too.
-                        String password = null;
-                        if( system.containsKey("mtwilson.password") ) {
-                            password = system.getString("mtwilson.password");
-                        }
-                        else if( env.containsKey("MTWILSON_PASSWORD") ) {
-                            password = env.getString("MTWILSON_PASSWORD");
-                        }
-                        else {
+                        String password = getApplicationConfigurationPassword();
+                        if( password == null ) {
                             log.warn("Found encrypted configuration file, but no password was found in system properties or environment");
                         }
                         if( password != null ) {
@@ -242,6 +289,17 @@ public class MyConfiguration {
         
         
         return composite;
+    }
+    
+    private String getApplicationConfigurationPassword() {
+        String password = null;
+        if( System.getProperties().containsKey("mtwilson.password") ) {
+            password = System.getProperty("mtwilson.password");
+        }
+        else if( System.getenv().containsKey("MTWILSON_PASSWORD") ) {
+            password = System.getenv("MTWILSON_PASSWORD");
+        }
+        return password;
     }
     
     /**
@@ -479,7 +537,7 @@ public class MyConfiguration {
         return new File(conf.getString("saml.keystore.file", getMtWilsonConf() + File.separator + "mtwilson-saml.jks"));
     }
     public String getSamlKeystorePassword() {
-        return conf.getString("saml.key.password", ""); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
+        return conf.getString("saml.key.password"); // bug #733 XXX the "SAMLPASSWORD" alternative is implemented for hytrust 3.5 ONLY; do not document for any other customer, and remove from here when hytrust is using the complete encrypted configuration file
     }
     
     ///////////////////////// tls policy  //////////////////////////////////
@@ -493,7 +551,7 @@ public class MyConfiguration {
     }
 
     public String getTlsKeystorePassword() {
-        return conf.getString("mtwilson.tls.keystore.password", ""); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
+        return conf.getString("mtwilson.tls.keystore.password"); // Intentionally not providing a default password;  the mtwilson-server install script automatically generates a password for new installs. 
     }
     
     public boolean getAutoUpdateHosts() {
@@ -555,6 +613,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson on Linux or value of MTWILSON_HOME
      */
     public String getMtWilsonHome() {
+            // XXX TODO SETUP use MyFilesystem
         String mtwilsonHome = System.getenv("MTWILSON_HOME");
         log.debug("MTWILSON_HOME={}", mtwilsonHome);
         if( mtwilsonHome == null ) {
@@ -563,7 +622,7 @@ public class MyConfiguration {
                 log.debug("MTWILSON_HOME={} (Linux default)", mtwilsonHome);
             }
             if( Platform.isWindows() ) {
-                mtwilsonHome = /*System.getenv("ProgramFiles")*/ "C:" + File.separator + "Intel" + File.separator + "MtWilson"; // applications in Program Files need administrator permission to write to their folders 
+                mtwilsonHome = /*System.getenv("ProgramFiles")*/ "C:" + File.separator + "mtwilson"; // applications in Program Files need administrator permission to write to their folders 
                 log.debug("MTWILSON_HOME={} (Windows default)", mtwilsonHome);
             }
         }
@@ -578,6 +637,7 @@ public class MyConfiguration {
      * @return /etc/mtwilson on Linux or value of MTWILSON_CONF
      */
     public String getMtWilsonConf() {
+            // XXX TODO SETUP use MyFilesystem
         String mtwilsonConf = System.getenv("MTWILSON_CONF");
         log.debug("MTWILSON_CONF={}", mtwilsonConf);
         if( mtwilsonConf == null ) {
@@ -586,7 +646,7 @@ public class MyConfiguration {
                 log.debug("MTWILSON_CONF={} (Linux default)", mtwilsonConf);
             }
             if( Platform.isWindows() ) {
-                mtwilsonConf = getMtWilsonHome() + File.separator + "conf"; 
+                mtwilsonConf = getMtWilsonHome() + File.separator + "configuration"; 
                 log.debug("MTWILSON_CONF={} (Windows default)", mtwilsonConf);
             }
         }
@@ -601,6 +661,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson/bin on Linux or MTWILSON_HOME/bin
      */
     public String getMtWilsonBin() {
+            // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "bin";
     }
     
@@ -610,6 +671,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson/env.d on Linux or MTWILSON_HOME/env.d
      */
     public String getMtWilsonEnv() {
+            // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "env.d";
     }
     
@@ -621,6 +683,9 @@ public class MyConfiguration {
         String mtwilsonJava = System.getenv("MTWILSON_JAVA");
         log.debug("MTWILSON_JAVA={}", mtwilsonJava);
         if( mtwilsonJava == null ) {
+            mtwilsonJava = conf.getString("mtwilson.fs.java");
+        }
+        if( mtwilsonJava == null ) {
             mtwilsonJava = getMtWilsonHome() + File.separator + "java";
         }
         return mtwilsonJava;
@@ -631,6 +696,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson/util.d on Linux or MTWILSON_HOME/util.d
      */
     public String getMtWilsonUtil() {
+            // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "util.d";
     }
     
@@ -639,6 +705,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson/resource on Linux or MTWILSON_HOME/resource
      */
     public String getMtWilsonResource() {
+            // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "resource";
     }
 
@@ -647,6 +714,7 @@ public class MyConfiguration {
      * @return /opt/mtwilson/license.d on Linux or MTWILSON_HOME/license.d
      */
     public String getMtWilsonLicense() {
+            // XXX TODO SETUP use MyFilesystem
         return getMtWilsonHome() + File.separator + "license.d";
     }
     

@@ -11,6 +11,7 @@ import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
 import com.intel.mtwilson.as.ASComponentFactory;
 import com.intel.dcsg.cpg.crypto.CryptographyException;
+import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.launcher.ws.ext.V1;
 import com.intel.mtwilson.model.*;
@@ -27,13 +28,16 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.Consumes;
 //import javax.ejb.Stateless;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +60,49 @@ public class Test {
     @GET
     @Path("/error/400")
     @Produces(MediaType.TEXT_PLAIN)
-    public String error400() {
+    public String error400TextPlain() {
         throw new MWException(ErrorCode.UNKNOWN_ERROR);
+    }
+    @PermitAll
+    @GET
+    @Path("/error/400")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String error400ApplicatinoJson() {
+        throw new MWException(ErrorCode.UNKNOWN_ERROR);
+    }
+    
+    @PermitAll
+    @POST
+    @Path("/testMediaType")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testMediaTypePlainText(ApiClientCreateRequest apiClientRequest) {
+        log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
+        //new ApiClientBO().create(apiClientRequest, null);
+        return "OK";
+    }
+    
+    @PermitAll
+    @POST
+    @Path("/testMediaType")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testMediaTypeJSON(ApiClientCreateRequest apiClientRequest) {
+        log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
+        //new ApiClientBO().create(apiClientRequest, null);
+        return "OK";
+    }
+    
+    @PermitAll
+    @POST
+    @Path("/testMediaType")
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String testMediaTypeXML(ApiClientCreateRequest apiClientRequest) {
+        log.error("API client registration: {}", Base64.encodeBase64String(apiClientRequest.getCertificate()));
+        //new ApiClientBO().create(apiClientRequest, null);
+        return "OK";
     }
     
     /**

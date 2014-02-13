@@ -6,6 +6,7 @@ package com.intel.mtwilson.as.rest.v2.model;
 
 import com.intel.mtwilson.jersey.Locator;
 import javax.ws.rs.PathParam;
+import com.intel.dcsg.cpg.io.UUID;
 
 /**
  *
@@ -17,7 +18,7 @@ public class CaCertificateLocator implements Locator<CaCertificate>{
 
     @Override
     public void copyTo(CaCertificate item) {
-        item.setName(id);
+        item.setId(UUID.valueOf(id));
     }
     
 }

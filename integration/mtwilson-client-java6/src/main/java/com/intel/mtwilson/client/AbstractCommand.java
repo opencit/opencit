@@ -9,7 +9,8 @@ import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import java.io.IOException;
 import org.apache.commons.configuration.Configuration;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  *

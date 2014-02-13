@@ -242,7 +242,6 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.2</version>
         </dependency>                        
 		
 <!-- fixes the following issue: Error in annotation processing: java.lang.NoClassDefFoundError: com/sun/jersey/spi/spring/container/SpringComponentProviderFactory -->
@@ -271,6 +270,7 @@
 		</dependency>
         
 <!-- jackson 1.9 annotations, json mapper, and xml mapper -->                            
+<!--
 <dependency>
     <groupId>org.codehaus.jackson</groupId>
     <artifactId>jackson-jaxrs</artifactId>
@@ -291,7 +291,17 @@
 	<artifactId>jackson-xc</artifactId>
 	<version>1.9.13</version>
 </dependency>
-        
+-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.3.0</version>
+        </dependency>
         
     </dependencies>
     <properties />

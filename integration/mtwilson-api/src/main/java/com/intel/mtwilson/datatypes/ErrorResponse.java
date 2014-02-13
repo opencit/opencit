@@ -7,6 +7,7 @@ package com.intel.mtwilson.datatypes;
 import com.intel.dcsg.cpg.i18n.Localizable;
 import com.intel.mtwilson.i18n.ErrorMessage;
 import com.intel.mtwilson.i18n.Message;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Locale;
 
 /**
@@ -18,12 +19,12 @@ public final class ErrorResponse implements Localizable {
 
     private Locale locale = null;
 
-    @org.codehaus.jackson.annotate.JsonProperty("error_code")
-    @com.fasterxml.jackson.annotation.JsonProperty("error_code")
+    //@com.fasterxml.jackson.annotation.JsonProperty("error_code")
+    @JsonProperty("error_code")
     private ErrorCode errorCode;
     
-    @org.codehaus.jackson.annotate.JsonProperty("error_message")
-    @com.fasterxml.jackson.annotation.JsonProperty("error_message")
+    //@com.fasterxml.jackson.annotation.JsonProperty("error_message")
+    @JsonProperty("error_message")
     private Message errorMessage;
 
     /*
