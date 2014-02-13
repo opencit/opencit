@@ -25,23 +25,25 @@ public class ApiTest {
     
     @Test
     public void testMediaType() throws IOException, ApiException, SignatureException, ClientException {
-//        String username = "rksavinx";
-//        String password = "savinorules";
-//        ByteArrayResource certResource = new ByteArrayResource();
-//        SimpleKeystore keystore = new SimpleKeystore(certResource, password); // KeystoreUtil.createUserInResource(certResource, username, password, fullUrl, roles);
-
         ApiClientTest act = new ApiClientTest(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
         String[] roles = {Role.Whitelist.toString(), Role.Attestation.toString(), Role.Security.toString()};
         ApiClientCreateRequest user = new ApiClientCreateRequest();
         String testStr = "[\"X509Certificate\":\"AAAAAAAAAAAAAA==\",\"Roles\":[\"Whitelist\",\"Attestation\",\"Security\"]]";
-        //String testStr="[\"X509Certificate\":\"test2\",\"Roles\":\"test4\"]";
-//        RsaCredentialX509 rsaCredential = keystore.getRsaCredentialX509(username, password);
-//        System.out.println(new String(rsaCredential.getCertificate().getEncoded(), Charset.forName("UTF-8")));
         user.setCertificate(new byte[10]);
         user.setRoles(roles);
         
         act.testMediaType(user);
-
-        
+    }
+    
+    @Test
+    public void testGetLocales() throws IOException, ClientException, ApiException, SignatureException {
+        try {
+            ApiClientTest act = new ApiClientTest(ConfigurationUtil.fromPropertiesFile(new File("C:/Intel/CloudSecurity/RSATool.properties")));
+            String locales = act.getLocales();
+            System.out.println("LOCALES: " + locales);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.toString());
+        }
     }
 }

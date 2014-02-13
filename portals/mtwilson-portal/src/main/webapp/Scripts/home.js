@@ -574,10 +574,11 @@ function displayLogingPage(responseHTML) {
 }
 
 function openPreferences() {
-    setLoadImage('mainContainer', '40px', '510px');
-    sendHTMLAjaxRequest(false, 'getData/openPreferences.html', null, displayPreferencesPage, null);
+    $('#mainContainer').html('<div id="PreferencesPage"></div>');
+    setLoadImage('mainContainer', '40px', '500px');
+    sendHTMLAjaxRequest(false, 'getData/openPreferences.html', null, fnDisplayContent, null,'openPreferences');
 }
 
-function displayPreferencesPage(responseHTML) {
-	$('#mainContainer').parent().html(responseHTML);
-}
+//function displayPreferencesPage(responseHTML) {
+//	$('#mainContainer').parent().html(responseHTML);
+//}

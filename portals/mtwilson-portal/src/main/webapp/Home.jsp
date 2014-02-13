@@ -48,7 +48,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <a href="javascript:openPreferences();" id="OpenPref" data-i18n="app.preferences">Preferences</a>
+                            <a href="javascript:;" onclick="openPreferences();" id="OpenPref" data-i18n="app.preferences">Preferences</a>
                         </td>
                         <td></td>
                     </tr>

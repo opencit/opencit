@@ -39,5 +39,17 @@ public class ApiClientTest extends ApiClient {
         System.out.println("savino: " + savino.contentType);
         httpPost(asurl("/test/testMediaType"), toXML(apiClient));
     }
+//    
+//    public String[] getLocales() throws IOException, ApiException, SignatureException {
+//        String[] locales = fromJSON(httpGet(msurl("/i18n/locales")), String[].class);
+//        return locales;
+//    }
+//    
+//    public void testGetLocales(ApiClientCreateRequest apiClient) throws IOException, ApiException, SignatureException {
+//        ApiRequest savino = toXML(apiClient);
+//        System.out.println("savino: " + savino.content);
+//        System.out.println("savino: " + savino.contentType);
+//        httpPost(asurl("/test/testMediaType"), toXML(apiClient));
+//    }
     
 }

@@ -1559,8 +1559,8 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
      * @throws SignatureException 
      */
     @Override
-    public String[] getLocales() throws IOException, ApiException, SignatureException {
-        String[] locales = fromJSON(httpGet(msurl("/i18n/locales")), String[].class);
+    public String getLocales() throws IOException, ApiException, SignatureException {
+        String locales = text(httpGet(msurl("/i18n/locales")));
         return locales;
     }
     

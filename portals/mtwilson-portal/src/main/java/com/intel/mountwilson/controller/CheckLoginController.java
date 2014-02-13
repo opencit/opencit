@@ -121,6 +121,7 @@ public class CheckLoginController extends AbstractController {
                     URL baseURL = new URL(My.configuration().getConfiguration().getString("mtwilson.api.baseurl"));
                     rsaApiClient = new ApiClient(baseURL, credential, keystore, new MapConfiguration(p));
                     locale = rsaApiClient.getLocale(keyAliasName);
+                    log.debug("Found locale {} for portal user: {}", locale, keyAliasName);
                 } catch (ClientException e) {
                     log.error("Cannot create API client: "+e.toString(), e);
                     view.addObject("result", false);
