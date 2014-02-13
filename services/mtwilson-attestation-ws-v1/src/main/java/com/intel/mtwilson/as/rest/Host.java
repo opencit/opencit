@@ -1,17 +1,9 @@
 package com.intel.mtwilson.as.rest;
 
-import com.intel.mountwilson.as.common.ASException;
-import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mtwilson.as.data.TblHosts;
-import com.intel.mtwilson.as.ASComponentFactory;
-import com.intel.dcsg.cpg.crypto.SimpleKeystore;
-import com.intel.mtwilson.datatypes.*;
 import com.intel.mtwilson.model.*;
-import com.intel.mtwilson.security.annotations.*;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import java.security.cert.X509Certificate;
-import java.util.List;
-//import javax.ejb.Stateless;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,7 +14,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
 import com.intel.mtwilson.as.business.HostBO;
 import com.intel.mountwilson.as.common.ASException;
 import com.intel.mountwilson.as.common.ValidationException;
@@ -34,7 +25,6 @@ import com.intel.mtwilson.security.annotations.*;
 import java.io.IOException;
 import com.intel.dcsg.cpg.validation.ValidationUtil;
 import com.intel.mtwilson.launcher.ws.ext.V1;
-import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.DefaultValue;
 import org.slf4j.Logger;

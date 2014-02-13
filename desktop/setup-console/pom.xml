@@ -154,6 +154,11 @@
             <artifactId>mtwilson-mysql</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.intel.mtwilson.services</groupId>
+            <artifactId>mtwilson-hostagent-ext</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- 
         ***IMPORTANT NOTE***
         The MySQL Connector/J is included here with scope "test" so that we can run JUnit tests against
