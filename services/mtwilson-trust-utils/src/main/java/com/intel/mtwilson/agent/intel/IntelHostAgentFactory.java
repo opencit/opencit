@@ -24,6 +24,9 @@ public class IntelHostAgentFactory implements VendorHostAgentFactory {
     private Logger log = LoggerFactory.getLogger(getClass());
     
     @Override
+    public String getVendorProtocol() { return "intel"; }
+    
+    @Override
     public IntelHostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {
         try {
             URL url = new URL(vendorConnectionString);

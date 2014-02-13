@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.intel.mtwilson.features</groupId>
+  <artifactId>mtwilson-features</artifactId>
+  <packaging>pom</packaging>
+
+  <name>mtwilson-features</name>
+
+	<parent>
+		<groupId>com.intel.mtwilson</groupId>
+		<artifactId>mtwilson</artifactId>
+		<version>1.2.3-SNAPSHOT</version>
+	</parent>
+
+    <properties>
+        <license.copyright>2014 Intel Corporation. All rights reserved.</license.copyright>
+        <license.url>http://cscenter.intel.com/portal/</license.url>
+    </properties>
+      
+  <modules>
+    <module>mtwilson-vmware-attestation</module>
+  </modules>
+
+</project>

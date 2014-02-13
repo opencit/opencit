@@ -257,8 +257,7 @@ public class HostTrustBO extends BaseBO {
             // Note that the MLE can make either the host trusted or un-trusted. As long as we have an MLE with matching name and version, 
             // we need to map the host to it even though it might make the host untrusted.
             if ((hostObjToRegister.BIOS_Name == null) || (hostObjToRegister.BIOS_Name.isEmpty())) {
-                String [] params = {hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.HostName};
-                log.error("getTrustStatusOfHostNotInDB: BIOS MLE {} with version {} is not configured for host {}.", params);
+                log.error("getTrustStatusOfHostNotInDB: BIOS MLE {} with version {} is not configured for host {}.", hostObj.BIOS_Name, hostObj.BIOS_Version, hostObj.HostName);
                 throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.BIOS_Name, hostObj.BIOS_Version);
             }
             
@@ -310,17 +309,14 @@ public class HostTrustBO extends BaseBO {
                 }
             } else {
                 log.error("getTrustStatusOfHostNotInDB: VMM MLE search for '{}' did not retrieve any matching MLEs.", hostObj.VMM_Name);
-                String [] params = {hostObj.VMM_Name, hostObj.VMM_Version, hostObj.HostName};
-                log.error("getTrustStatusOfHostNotInDB: VMM MLE {} with version {} is not configured for host {}.", params);
-                String [] params2 = {hostObj.VMM_Name, hostObj.VMM_Version};
-                log.error(String.format(ErrorCode.AS_MLE_DOES_NOT_EXIST.getMessage(), params2));
+                log.error("getTrustStatusOfHostNotInDB: VMM MLE {} with version {} is not configured for host {}.", hostObj.VMM_Name, hostObj.VMM_Version, hostObj.HostName);
+                log.error(String.format(ErrorCode.AS_MLE_DOES_NOT_EXIST.getMessage(), hostObj.VMM_Name, hostObj.VMM_Version));
                 throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.VMM_Name, hostObj.VMM_Version);
             }
             
             // If at the end of the above loop, we do not find any VMM MLE matching for the host we need to throw an appropriate exception
             if ((hostObjToRegister.VMM_Name == null) || (hostObjToRegister.VMM_Name.isEmpty())) {
-                String [] params = {hostObj.VMM_Name, hostObj.VMM_Version, hostObj.HostName};
-                log.error("VMM MLE {} with version {} is not configured for host {}.", params);
+                log.error("VMM MLE {} with version {} is not configured for host {}.", hostObj.VMM_Name, hostObj.VMM_Version, hostObj.HostName);
                 throw new ASException(ErrorCode.AS_MLE_DOES_NOT_EXIST, hostObj.VMM_Name, hostObj.VMM_Version);
             }
 
@@ -1095,7 +1091,7 @@ public class HostTrustBO extends BaseBO {
                 String hostTrustStatus = getTrustStatusString(hostName);
 
                 log.debug("The trust status of {} is :{}",
-                        new String[]{hostName.toString(), hostTrustStatus});
+                        hostName.toString(), hostTrustStatus);
 
                 trustLevel = parseTrustStatus(hostTrustStatus);
             } catch (ASException e) {

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature xmlns="urn:mtwilson-feature">
+    <id>feature3</id>
+    <version>0.1</version>
+    <name>Feature #3</name>
+    <description>A third example feature which depends on the first feature and conflicts with the second feature</description>
+    <provider>
+        <name>Intel</name>
+        <url>http://www.intel.com</url>
+    </provider>
+    <license>
+        <copyright>2014 Intel Corporation. All rights reserved.</copyright>
+        <url>file:///LICENSE.TXT</url>
+    </license>
+    <requires>
+        <feature-ref>
+            <id>feature1</id>
+        </feature-ref>
+    </requires>
+    <conflicts>
+        <feature-ref>
+            <id>feature2</id>
+        </feature-ref>
+    </conflicts>
+</feature>
+
