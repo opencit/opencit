@@ -35,7 +35,7 @@ public interface TpmPasswordDAO {
     @SqlUpdate("create table tpm_password (id bigint primary key generated always as identity, uuid varchar(255), password varchar(255))")
     void create();
     
-    @SqlUpdate("insert into tag_value (tagId,value) values (:tagId, :value)")
+    @SqlUpdate("insert into tag_value (uuid,password) values (:uuid, :password)")
     @GetGeneratedKeys
     long insert(@Bind("uuid") String uuid, @Bind("password") String password);
        
