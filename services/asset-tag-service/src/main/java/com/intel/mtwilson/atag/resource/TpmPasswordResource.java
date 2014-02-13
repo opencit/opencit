@@ -74,7 +74,7 @@ public class TpmPasswordResource extends ServerResource{
         }
     }
 
-    @Post()
+    @Post("json:json")
     public void setTpmPassword(/*TagSearchCriteria query*/TpmPasswordRequest request) {
         log.debug("Storing tpm password for " + request.uuid + " with password " + request.password);
         TpmPassword result = dao.findByUuid(request.uuid);
@@ -82,6 +82,7 @@ public class TpmPasswordResource extends ServerResource{
             log.debug("no entry for " + request.uuid + " proceeding with add" );
             dao.insert(request.uuid,request.password);
         }else{
+            log.debug("entry already found for this host, not updating");
         }
     }
     
