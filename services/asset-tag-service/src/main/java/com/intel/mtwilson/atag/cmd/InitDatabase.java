@@ -37,6 +37,7 @@ public class InitDatabase extends AtagCommand {
     private    SelectionDAO selectionDao;
     private    SelectionTagValueDAO selectionTagValueDao;
     private    RdfTripleDAO rdfTripleDao;
+    private    TpmPasswordDAO tpmPasswordDao;
     
     private String oid(String relative) {
         return OID_CUSTOMER_ROOT+"."+relative;
@@ -71,7 +72,9 @@ public class InitDatabase extends AtagCommand {
          tagValueDao = Derby.tagValueDao();
          selectionDao = Derby.selectionDao();
          selectionTagValueDao = Derby.selectionTagValueDao();
-         rdfTripleDao = Derby.rdfTripleDao();        
+         rdfTripleDao = Derby.rdfTripleDao();   
+         tpmPasswordDao = Derby.tpmPasswordDao();
+         
     }
     
     public void close() {
@@ -80,7 +83,8 @@ public class InitDatabase extends AtagCommand {
         if(tagDao!=null) {tagDao.close(); tagDao = null; }
         if(tagValueDao!=null) {tagValueDao.close(); tagValueDao = null;}
         if(selectionDao!=null) {selectionDao.close(); selectionDao = null; }
-        if(selectionTagValueDao!=null) {selectionTagValueDao.close(); selectionTagValueDao = null;        }
+        if(selectionTagValueDao!=null) {selectionTagValueDao.close(); selectionTagValueDao = null;}
+        if(tpmPasswordDao!=null){tpmPasswordDao.close();tpmPasswordDao = null;}
     }
     
     public boolean isDatabaseEmpty() throws SQLException, IOException {
@@ -148,6 +152,7 @@ public class InitDatabase extends AtagCommand {
         rdfTripleDao.insert(new UUID(), "country", "contains", "state");
         rdfTripleDao.insert(new UUID(), "state", "contains", "city");
         
+        tpmPasswordDao.insert("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "TPMPASSWORD");
         
     // mtwilsonUrl, mtwilsonClientKeystoreUsername, mtwilsonClientKeystorePassword (should generate automatically)
 //        String mtwilsonClientKeystoreUsername = "asset-tag-prov-svc";
