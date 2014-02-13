@@ -6,6 +6,7 @@ package com.intel.mtwilson.client.jaxrs;
 
 import com.intel.mtwilson.client.jaxrs.Files;
 import com.intel.dcsg.cpg.io.UUID;
+import com.intel.mtwilson.My;
 import com.intel.mtwilson.as.rest.v2.model.File;
 import com.intel.mtwilson.as.rest.v2.model.FileCollection;
 import java.util.Properties;
@@ -22,6 +23,7 @@ public class FileTest {
     
     @BeforeClass
     public static void init() throws Exception {
+        /*
         String username = "myusername"; // you choose a username
         String password = "changeit"; // you choose a password
         Properties properties = new Properties();
@@ -31,6 +33,8 @@ public class FileTest {
         properties.setProperty("mtwilson.api.key.alias", username);
         properties.setProperty("mtwilson.api.key.password", password);
         client = new Files(properties);
+        */
+        client = new Files(My.configuration().getClientProperties());
     }
     
     @Test

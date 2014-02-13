@@ -46,7 +46,7 @@ public class MtWilsonClient {
     }
 
     public MtWilsonClient(Properties properties) throws KeyManagementException, IOException, CryptographyException, GeneralSecurityException {
-        baseurl = properties.getProperty("mtwilson.api.baseurl"); // example: "http://localhost:8080/v2";
+        baseurl = properties.getProperty("mtwilson.api.url", properties.getProperty("mtwilson.api.baseurl")); // example: "http://localhost:8080/v2";
         clientConfig = new ClientConfig();
         clientConfig.register(com.intel.mtwilson.jersey.provider.JacksonObjectMapperProvider.class);
         clientConfig.register(com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider.class);

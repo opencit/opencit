@@ -374,7 +374,7 @@ public class MyConfiguration {
     }
 
     public URL getMtWilsonURL() throws MalformedURLException {
-        return new URL(conf.getString("mtwilson.api.url", "https://127.0.0.1:8181"));
+        return new URL(conf.getString("mtwilson.api.url", conf.getString("mtwilson.api.baseurl", "https://127.0.0.1:8181")));
     }
 
     public String getMtWilsonRoleString() {
@@ -383,6 +383,17 @@ public class MyConfiguration {
 
     public String[] getMtWilsonRoleArray() {
         return getMtWilsonRoleString().split(",");
+    }
+    
+    // use this to instantiate a client  from mtwilson-client-java6-jaxrs2
+    public Properties getClientProperties() throws MalformedURLException {
+        Properties properties = new Properties();
+        properties.setProperty("mtwilson.api.url", getMtWilsonURL().toString());
+        properties.setProperty("mtwilson.api.keystore", getKeystoreUsername());
+        properties.setProperty("mtwilson.api.keystore.password", getKeystorePassword());
+        properties.setProperty("mtwilson.api.key.alias", getKeystoreUsername());
+        properties.setProperty("mtwilson.api.key.password", getKeystorePassword());
+        return properties;
     }
     
     public String[] getAvailableLocales() {
