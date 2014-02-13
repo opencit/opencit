@@ -169,7 +169,7 @@ public class BootstrapUser implements Command {
             apiClient.setStatus("Approved");
             apiClient.setEnabled(true);
             portalUserJpa.edit(apiClient);
-            System.err.println(String.format("Attempt to approved %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
+            System.err.println(String.format("Attempt to approve %s [fingerprint %s]", username, Hex.encodeHexString(fingerprint))); 
             ApiClientX509JpaController x509jpaController = new ApiClientX509JpaController(persistenceManager.getEntityManagerFactory("MSDataPU"));
             ApiClientX509 client = x509jpaController.findApiClientX509ByFingerprint(fingerprint);
             if( client == null ) {

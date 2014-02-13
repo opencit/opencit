@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * Represents an ordered list of modules (hash,description), options, or other data that

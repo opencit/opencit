@@ -22,7 +22,7 @@ import com.intel.dcsg.cpg.io.ConfigurationUtil;
 import com.intel.mtwilson.model.*;
 import com.intel.dcsg.cpg.rfc822.Rfc822Date;
 import com.intel.dcsg.cpg.tls.policy.TlsUtil;
-import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheHttpAuthorization;
 import com.intel.mtwilson.security.http.HttpRequestURL;
 import com.intel.mtwilson.security.http.RsaSignatureInput;
 import java.io.ByteArrayOutputStream;
@@ -55,7 +55,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,7 +226,7 @@ public class SecurityTest {
             try {
                 return mapper.readValue(document, valueType);
             }
-            catch(org.codehaus.jackson.JsonParseException e) {
+            catch(com.fasterxml.jackson.core.JsonParseException e) {
                 log.error("Cannot parse response: "+document);
                 throw new ApiException("Cannot parse response: "+document, e);
             }        

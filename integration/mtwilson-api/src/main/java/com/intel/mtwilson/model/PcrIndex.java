@@ -1,7 +1,8 @@
 package com.intel.mtwilson.model;
 
 import com.intel.dcsg.cpg.validation.ObjectModel;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 
 /**
  * BUG #497  renamed PcrIndex to be clearer that it's just the register number,

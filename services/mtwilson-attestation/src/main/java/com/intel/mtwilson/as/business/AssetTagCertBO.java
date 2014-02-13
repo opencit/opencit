@@ -26,8 +26,8 @@ import com.intel.mtwilson.datatypes.ConnectionString;
 import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.Vendor;
 import com.intel.dcsg.cpg.jpa.PersistenceManager;
-import com.intel.mtwilson.security.http.ApacheBasicHttpAuthorization;
-import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheHttpAuthorization;
 import com.intel.dcsg.cpg.tls.policy.impl.InsecureTlsPolicy;
 import com.intel.mtwilson.util.ResourceFinder;
 import java.io.File;
@@ -55,7 +55,8 @@ import org.apache.http.auth.AuthScope;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -422,7 +423,7 @@ public class AssetTagCertBO extends BaseBO{
         try {
             return mapper.readValue(document, valueType);
         }
-        catch(org.codehaus.jackson.JsonParseException e) {
+        catch(com.fasterxml.jackson.core.JsonParseException e) {
            
             throw new ApiException("Cannot parse response", e);
         }

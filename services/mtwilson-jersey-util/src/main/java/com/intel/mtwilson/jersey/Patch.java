@@ -8,7 +8,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+//import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  *

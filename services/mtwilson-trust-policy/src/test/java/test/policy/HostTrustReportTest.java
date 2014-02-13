@@ -19,8 +19,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.databind.ObjectWriter;
 //import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
+//import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -519,7 +520,7 @@ Modules missing from PCR 8:
     }
     
     
-    private static ObjectWriter json = new org.codehaus.jackson.map.ObjectMapper().writerWithDefaultPrettyPrinter();
+    private static ObjectWriter json = new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter();
     /*
     private static ObjectWriter writer;
     @BeforeClass

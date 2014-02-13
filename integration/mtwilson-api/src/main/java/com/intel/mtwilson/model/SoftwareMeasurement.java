@@ -6,7 +6,8 @@ package com.intel.mtwilson.model;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.codehaus.jackson.annotate.JsonValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+//import org.codehaus.jackson.annotate.JsonValue;
 import com.intel.dcsg.cpg.crypto.Sha1Digest;
 
 /**

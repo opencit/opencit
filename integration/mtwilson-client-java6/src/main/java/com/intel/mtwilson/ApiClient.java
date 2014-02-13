@@ -3,6 +3,8 @@
  * All rights reserved.
  */
 package com.intel.mtwilson;
+import com.intel.mtwilson.security.http.apache.ApacheHmacHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheRsaHttpAuthorization;
 import com.intel.mountwilson.as.hostmanifestreport.data.HostManifestReportType;
 import com.intel.mountwilson.as.hosttrustreport.data.HostsTrustReportType;
 import com.intel.mtwilson.api.MtWilson;
@@ -53,7 +55,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.intel.dcsg.cpg.xml.JAXB;
@@ -385,38 +388,38 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         return queryString;
     }
     
-    private String asurl(String apiPath) {
+    protected String asurl(String apiPath) {
         return baseURL.toExternalForm().concat(attestationServicePath).concat(apiPath);
     }
-    private String asurl(String apiPath, MultivaluedMap<String,String> query) {
+    protected String asurl(String apiPath, MultivaluedMap<String,String> query) {
         return baseURL.toExternalForm().concat(attestationServicePath).concat(apiPath).concat("?").concat(querystring(query));
     }
 
-    private String wlmurl(String apiPath) {
+    protected String wlmurl(String apiPath) {
         return baseURL.toExternalForm().concat(whitelistServicePath).concat(apiPath);
     }
     
-    private String wlmurl(String apiPath, MultivaluedMap<String,String> query) {
+    protected String wlmurl(String apiPath, MultivaluedMap<String,String> query) {
         return baseURL.toExternalForm().concat(whitelistServicePath).concat(apiPath).concat("?").concat(querystring(query));
     }
 
-    private String msurl(String apiPath) {
+    protected String msurl(String apiPath) {
         return baseURL.toExternalForm().concat(managementServicePath).concat(apiPath);
     }
-    private String msurl(String apiPath, MultivaluedMap<String,String> query) {
+    protected String msurl(String apiPath, MultivaluedMap<String,String> query) {
         return baseURL.toExternalForm().concat(managementServicePath).concat(apiPath).concat("?").concat(querystring(query));
     }
 
-    private ApiResponse httpGet(String path) throws IOException, ApiException, SignatureException {
+    protected ApiResponse httpGet(String path) throws IOException, ApiException, SignatureException {
         return httpClient.get(path);
     }
-    private ApiResponse httpDelete(String path) throws IOException, ApiException, SignatureException {
+    protected ApiResponse httpDelete(String path) throws IOException, ApiException, SignatureException {
         return httpClient.delete(path);
     }
-    private ApiResponse httpPut(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
+    protected ApiResponse httpPut(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
         return httpClient.put(path, body);
     }
-    private ApiResponse httpPost(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
+    protected ApiResponse httpPost(String path, ApiRequest body) throws IOException, ApiException, SignatureException {
         return httpClient.post(path, body);
     }
     
@@ -524,7 +527,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         try {
             return mapper.readValue(document, valueType);
         }
-        catch(org.codehaus.jackson.JsonParseException e) {
+        catch(com.fasterxml.jackson.core.JsonParseException e) {
             log.error("Cannot parse response: "+document);
             throw new ApiException("Cannot parse response: "+document, e);
         }        
@@ -537,7 +540,7 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
     private ApiRequest toJSON(Object value) throws IOException {
         return new ApiRequest(APPLICATION_JSON_TYPE, mapper.writeValueAsString(value));
     }
-
+    
     private <T> T xml(ApiResponse response, Class<T> valueType) throws IOException, ApiException {
         if( response.httpStatusCode == HttpStatus.SC_OK && response.contentType.isCompatible(APPLICATION_XML_TYPE) ) { // XXX or isCompatible(TEXT_XML_TYPE)
             return xml(new String(response.content, "UTF-8"), valueType);                
@@ -1550,5 +1553,4 @@ public class ApiClient implements MtWilson, AttestationService, WhitelistService
         HostConfigResponseList results = fromJSON(httpPost(msurl("/host/bulk/custom"), toJSON(hostRecords)), HostConfigResponseList.class);
         return results;                
     }
-    
 }

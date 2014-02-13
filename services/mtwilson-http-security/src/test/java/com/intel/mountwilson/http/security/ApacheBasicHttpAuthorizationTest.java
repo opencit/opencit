@@ -4,7 +4,7 @@
  */
 package com.intel.mountwilson.http.security;
 
-import com.intel.mtwilson.security.http.ApacheBasicHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheBasicHttpAuthorization;
 import java.security.SignatureException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;

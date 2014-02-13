@@ -15,7 +15,7 @@ import com.intel.mtwilson.datatypes.ErrorCode;
 import com.intel.mtwilson.datatypes.HostConfigData;
 import com.intel.mtwilson.datatypes.TxtHostRecord;
 import com.intel.mtwilson.datatypes.Vendor;
-import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheHttpAuthorization;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
