@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.intel.dcsg.cpg.crypto.RsaUtil;
 //import org.codehaus.jackson.map.ObjectMapper;
 //import org.codehaus.jackson.map.ObjectWriter;
 import org.junit.Test;
@@ -308,13 +309,13 @@ public class TestVmwareEsxi51 {
             if( agent.isAikCaAvailable() ) {
                 X509Certificate aikcert = agent.getAikCertificate();
                 host.setAIKCertificate(X509Util.encodePemCertificate(aikcert));
-                host.setAikPublicKey(X509Util.encodePemPublicKey(aikcert.getPublicKey()));
+                host.setAikPublicKey(RsaUtil.encodePemPublicKey(aikcert.getPublicKey()));
                 host.setAikSha1(Sha1Digest.valueOf(aikcert.getPublicKey().getEncoded()).toString());
             }
             else {
                 PublicKey aikpubkey = agent.getAik();
                 host.setAIKCertificate(null);
-                host.setAikPublicKey(X509Util.encodePemPublicKey(aikpubkey));
+                host.setAikPublicKey(RsaUtil.encodePemPublicKey(aikpubkey));
                 host.setAikSha1(Sha1Digest.valueOf(aikpubkey.getEncoded()).toString());
             }
         }

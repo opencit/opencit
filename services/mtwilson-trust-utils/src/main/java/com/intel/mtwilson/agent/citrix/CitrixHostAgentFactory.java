@@ -18,6 +18,9 @@ import java.net.URL;
  * @author stdalex
  */
 public class CitrixHostAgentFactory implements VendorHostAgentFactory {
+    @Override
+    public String getVendorProtocol() { return "citrix"; }
+    
 
     @Override
     public HostAgent getHostAgent(InternetAddress hostAddress, String vendorConnectionString, TlsPolicy tlsPolicy) throws IOException {

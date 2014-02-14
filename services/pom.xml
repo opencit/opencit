@@ -55,6 +55,8 @@
 	<module>mtwilson-configuration-ws-v2</module>
 	<module>mtwilson-http-servlets</module>
 	<module>mtwilson-vm-attestation-ws-v2</module>
+	<module>mtwilson-hostagent-ext</module>
+	<module>mtwilson-vmware-hostagent</module>
   </modules>
 
 </project>

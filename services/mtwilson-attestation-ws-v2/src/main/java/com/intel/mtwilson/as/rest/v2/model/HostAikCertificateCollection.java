@@ -21,7 +21,7 @@ public class HostAikCertificateCollection extends DocumentCollection<HostAikCert
     
     private final ArrayList<HostAikCertificate> aikCerts = new ArrayList<HostAikCertificate>();
     
-    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
+//    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="host_aik_certificates")
     @JacksonXmlProperty(localName="host_aik_certificate")    

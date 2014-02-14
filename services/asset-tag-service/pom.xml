@@ -257,6 +257,11 @@ our customers.
         <artifactId>mtwilson-webservice-util</artifactId>
         <version>${project.version}</version>
         </dependency>
+	<dependency>
+	    <groupId>com.intel.mtwilson.services</groupId>
+	    <artifactId>mtwilson-hostagent-ext</artifactId>
+	    <version>${project.version}</version>
+  	</dependency>
         
 <dependency>  
    <groupId>org.restlet.jse</groupId>  
@@ -400,21 +405,16 @@ our customers.
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-            <type>jar</type>
         </dependency>
         <!-- deps to support ssl -->
         <dependency>
             <groupId>simple-framework</groupId>
             <artifactId>simple-framework</artifactId>
             <version>5.1</version>
-            <type>jar</type>
         </dependency>
     <!--
         <dependency>
@@ -449,17 +449,14 @@ our customers.
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-core</artifactId>
-    	<version>2.2.2</version>
     </dependency>
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-annotations</artifactId>
-    	<version>2.2.2</version>
     </dependency>
     <dependency>
     	<groupId>com.fasterxml.jackson.core</groupId>
     	<artifactId>jackson-databind</artifactId>
-    	<version>2.2.2</version>
     </dependency>
 
 <!-- jooq  database query assembly -->

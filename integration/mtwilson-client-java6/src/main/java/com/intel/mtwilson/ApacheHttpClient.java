@@ -7,7 +7,7 @@ import com.intel.dcsg.cpg.i18n.LocaleUtil;
 import com.intel.mtwilson.api.*;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
 import com.intel.dcsg.cpg.tls.policy.ProtocolSelector;
-import com.intel.mtwilson.security.http.ApacheHttpAuthorization;
+import com.intel.mtwilson.security.http.apache.ApacheHttpAuthorization;
 import com.intel.dcsg.cpg.tls.policy.impl.ApacheTlsPolicy;
 import com.intel.dcsg.cpg.x509.repository.KeystoreCertificateRepository;
 import com.intel.dcsg.cpg.tls.policy.TlsPolicy;

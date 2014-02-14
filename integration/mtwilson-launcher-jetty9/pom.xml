@@ -76,7 +76,11 @@ This error message indicates you need a jersey implementation like org.glassfish
             <artifactId>mtwilson-launcher-jersey2</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+		<!-- TODO: PLEASE REMOVE THIS DEPENDENCY BEFORE PRODUCTION BUILD. ADDED ONLY FOR DEVELOPMENT PURPOSES -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
         
         <!-- for jersey 2.x deployment on glassfish4, we have to exclude the jersey jars because glassfish 4 already has them and will throw this error 
 		if they are included in the war file:

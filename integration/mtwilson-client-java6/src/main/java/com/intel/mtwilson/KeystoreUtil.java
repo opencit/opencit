@@ -9,6 +9,7 @@ import com.intel.dcsg.cpg.crypto.RsaCredential;
 import com.intel.dcsg.cpg.crypto.RsaCredentialX509;
 import com.intel.dcsg.cpg.crypto.RsaUtil;
 import com.intel.dcsg.cpg.crypto.SimpleKeystore;
+import com.intel.dcsg.cpg.io.ByteArrayResource;
 import com.intel.mtwilson.datatypes.ApiClientCreateRequest;
 import com.intel.dcsg.cpg.io.FileResource;
 import com.intel.dcsg.cpg.io.Resource;

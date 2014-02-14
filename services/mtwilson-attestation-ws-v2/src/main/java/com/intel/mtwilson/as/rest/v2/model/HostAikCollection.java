@@ -20,7 +20,7 @@ import java.util.List;
 public class HostAikCollection extends DocumentCollection<HostAik> {
     private final ArrayList<HostAik> aiks = new ArrayList<HostAik>();
     
-    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
+//    @JsonSerialize(include=JsonSerialize.Inclusion.ALWAYS) // jackson 1.9
     @JsonInclude(JsonInclude.Include.ALWAYS)                // jackson 2.0
     @JacksonXmlElementWrapper(localName="host_aiks")
     @JacksonXmlProperty(localName="host_aik")    

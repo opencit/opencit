@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature xmlns="urn:mtwilson-feature">
+    <id>feature4</id>
+    <version>0.1</version>
+    <name>Feature #4</name>
+    <description>An example feature</description>
+    <provider>
+        <name>Intel</name>
+        <url>http://www.intel.com</url>
+    </provider>
+    <license>
+        <copyright>2014 Intel Corporation. All rights reserved.</copyright>
+        <url>file:///LICENSE.TXT</url>
+    </license>
+    <includes>
+        <components>
+            <component>
+                <id>componentA</id>
+                <version>0.76</version>
+                <name>Component A</name>
+                <description>An important sub-component</description>
+                <provider>
+                    <name>Intel</name>
+                    <url>http://www.intel.com</url>
+                </provider>
+                <license>
+                    <copyright>2014 Intel Corporation. All rights reserved.</copyright>
+                    <url>file:///LICENSE.TXT</url>
+                </license>
+            </component>
+        </components>
+    </includes>
+    <!--
+    <links>
+        <link rel="issues">http://www.provider.com/support</link>
+        <link rel="mailing list">mailto:feature4-users@provider.com</link>
+    </links>
+    -->
+    <links>
+        <link>
+            <rel>issues</rel>
+            <href>http://www.provider.com/support</href>
+        </link>
+        <link>
+            <rel>mailing list</rel>
+            <href>mailto:feature4-users@provider.com</href>
+        </link>
+    </links>
+</feature>
+

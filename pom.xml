@@ -30,6 +30,7 @@
     <module>portals</module>
     <module>tools</module>
     <module>desktop</module>
+    <module>features</module>
     <module>installers</module>
   </modules>
 
@@ -516,6 +517,11 @@ Throw an exception if people try to use setQueryTimeout with a non-zero value as
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>8.2-507.jdbc4</version>
+        </dependency>
+       <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901-1.jdbc4</version>
         </dependency>
         -->
        <dependency>

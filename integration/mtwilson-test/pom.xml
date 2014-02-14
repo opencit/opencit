@@ -120,6 +120,16 @@
     </dependency>
     <dependency>
 		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-hostagent-ext</artifactId>
+		<version>${project.version}</version>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
+		<artifactId>mtwilson-vmware-hostagent</artifactId>
+		<version>${project.version}</version>
+    </dependency>
+    <dependency>
+		<groupId>com.intel.mtwilson.services</groupId>
 		<artifactId>mtwilson-vm-attestation-ws-v2</artifactId>
 		<version>${project.version}</version>
     </dependency>

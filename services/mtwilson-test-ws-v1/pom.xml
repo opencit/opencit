@@ -35,6 +35,11 @@
         <artifactId>mtwilson-launcher-ext</artifactId>
         <version>${project.version}</version>
     </dependency>
+    <dependency>
+        <groupId>com.intel.mtwilson.services</groupId>
+        <artifactId>mtwilson-hostagent-ext</artifactId>
+        <version>${project.version}</version>
+    </dependency>
 	<dependency>
 	    <groupId>com.intel.mtwilson.integration</groupId>
 	    <artifactId>mtwilson-api</artifactId>

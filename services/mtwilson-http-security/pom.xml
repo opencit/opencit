@@ -58,69 +58,8 @@
 			<artifactId>cpg-rfc822</artifactId>
 		</dependency>
             
-    <!-- begin jersey -->
-    <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-client</artifactId>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-common</artifactId>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.glassfish.jersey.core</groupId>
-        <artifactId>jersey-server</artifactId>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.glassfish.jersey.containers</groupId>
-        <artifactId>jersey-container-servlet</artifactId>
-        <scope>provided</scope>
-    </dependency>        
-    <dependency>
-        <groupId>org.glassfish.jersey.media</groupId>
-        <artifactId>jersey-media-multipart</artifactId>
-        <scope>provided</scope>
-    </dependency>
-    <dependency>
-        <groupId>javax.ws.rs</groupId>
-        <artifactId>javax.ws.rs-api</artifactId>
-        <scope>provided</scope>
-    </dependency>
-    <!--
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-client</artifactId>
-      <version>${jersey-version}</version>
-      <type>jar</type>
-	<scope>provided</scope>
-    </dependency>
-    -->
-    <!--
-    <dependency>
-		<groupId>javax</groupId>
-		<artifactId>javaee-web-api</artifactId>
-		<scope>provided</scope>
-	</dependency>
 	
-    <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-server</artifactId>
-        <version>${jersey-version}</version>
-	<scope>provided</scope>
-    </dependency>
-	-->
-    <!--
-    <dependency>
-        <groupId>com.sun.jersey</groupId>
-        <artifactId>jersey-core</artifactId>
-        <version>${jersey-version}</version>
-	<scope>provided</scope>
-    </dependency>
-    -->
-    <!--
+	<!--
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk15on</artifactId>
@@ -130,7 +69,6 @@
     </dependency>
     -->
 	
-	<!-- end jersey -->
 	
 	<!--
 	<dependency>
@@ -165,7 +103,6 @@
     <dependency>
 		<groupId>commons-beanutils</groupId>
 		<artifactId>commons-beanutils</artifactId>
-		<scope>compile</scope>
     </dependency>
 	<dependency>
 		<groupId>commons-codec</groupId>
@@ -192,15 +129,54 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-		<scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-		<scope>provided</scope>
+            <optional>true</optional>
         </dependency>
     <!-- end httpclient -->
     
+      <!-- begin jersey 1.x support -->
+      
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>${jersey-version}</version>
+            <optional>true</optional>
+    </dependency>
+    <dependency>
+        <groupId>com.sun.jersey</groupId>
+        <artifactId>jersey-core</artifactId>
+        <version>${jersey-version}</version>
+            <optional>true</optional>
+    </dependency>
+	<!-- end jersey 1.x -->
+    
+    <!-- begin jersey 2.x support -->
+    <!--
+	<dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.4.1</version>
+            <optional>true</optional>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.2</version>
+            <optional>true</optional>
+        </dependency>
+    
+    <!-- end jersey 2.x -->
   </dependencies>  
 
 </project>
