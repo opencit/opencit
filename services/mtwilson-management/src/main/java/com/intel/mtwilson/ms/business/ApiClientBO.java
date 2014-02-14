@@ -123,9 +123,16 @@ public class ApiClientBO extends BaseBO {
      * @param fingerprint
      * @return 
      */
-    private boolean isDuplicate(byte[] fingerprint) {		
-        if(new ApiClientX509JpaController(getMSEntityManagerFactory()).findApiClientX509ByFingerprint(fingerprint) != null) {
+    private boolean isDuplicate(byte[] fingerprint) {
+        try {
+            if (My.jpa().mwApiClientX509().findApiClientX509ByFingerprint(fingerprint) != null) {
                 return true;
+            }
+            // if(new ApiClientX509JpaController(getMSEntityManagerFactory()).findApiClientX509ByFingerprint(fingerprint) != null) {
+            // return true;
+            // }
+        } catch (Exception ex) {
+            return false;
         }
         return false;
     }
