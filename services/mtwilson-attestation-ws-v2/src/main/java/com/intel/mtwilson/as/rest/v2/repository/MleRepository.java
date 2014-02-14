@@ -192,8 +192,15 @@ public class MleRepository implements SimpleRepository<Mle, MleCollection, MleFi
         mle.setId(UUID.valueOf(tblMleObj.getUuid_hex()));
         mle.setName(tblMleObj.getName());
         mle.setVersion(tblMleObj.getVersion());
-        mle.setOemUuid(tblMleObj.getOemId().getUuid_hex());
-        mle.setOsUuid(tblMleObj.getOsId().getUuid_hex());
+        mle.setAttestationType(Mle.AttestationType.valueOf(tblMleObj.getAttestationType()));
+        mle.setMleType(Mle.MleType.valueOf(tblMleObj.getMLEType()));
+        if (tblMleObj.getMLEType().equalsIgnoreCase(Mle.MleType.BIOS.name())) {
+            mle.setOemUuid(tblMleObj.getOemId().getUuid_hex());
+            mle.setOsUuid(null);
+        } else {
+            mle.setOemUuid(null);
+            mle.setOsUuid(tblMleObj.getOsId().getUuid_hex());
+        }
         mle.setDescription(tblMleObj.getDescription());   
         // Since there will be only one entry per MLE in the MleSource table, we will try to get it and return it back to the caller
         Collection<MwMleSource> mwMleSourceCollection = tblMleObj.getMwMleSourceCollection();
