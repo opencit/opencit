@@ -867,7 +867,11 @@ fi
 #elif using_postgres; then
 #  postgres_write_connection_properties /etc/intel/cloudsecurity/mtwilson.properties mtwilson.db
 #fi
-  
+
+echo -n "Waiting for ${webservice_application_name} to become accessible... "
+sleep 50s        #XXX TODO: remove when we have solution for webserver up
+echo "Done"
+
 echo "Restarting webservice for all changes to take effect"
 #Restart webserver
 if using_glassfish; then
