@@ -41,20 +41,30 @@ public class RegisterUserController extends AbstractController {
 		log.info("RegisterUserController >>");
 		ModelAndView view = new ModelAndView(new JSONView());
 		
-		String username;
+            String username;
 	    String password;
+            String locale;
 	    final String baseURL = MCPConfig.getConfiguration().getString("mtwilson.api.baseurl");
 		
-		if (isNullOrEmpty(req.getParameter("userNameTXT")) || isNullOrEmpty(req.getParameter("passwordTXT"))) {
-			view.addObject("result",false);
-			view.addObject("message", "username and password can't be Blank.");
-			return view;
-		}else {
-			//Getting User Name and Password from request object.
-			username = req.getParameter("userNameTXT");
-			password = req.getParameter("passwordTXT");
-                        
-		}
+            // Get username and password from js
+            if (isNullOrEmpty(req.getParameter("userNameTXT")) || isNullOrEmpty(req.getParameter("passwordTXT"))) {
+                view.addObject("result", false);
+                view.addObject("message", "username and password can't be Blank.");
+                return view;
+            } else {
+                //Getting User Name and Password from request object.
+                username = req.getParameter("userNameTXT");
+                password = req.getParameter("passwordTXT");
+            }
+
+            // Get locale from js
+            if (isNullOrEmpty(req.getParameter("localeTXT"))) {
+                view.addObject("result", false);
+                view.addObject("message", "locale cannot be blank.");
+                return view;
+            } else {
+                locale = req.getParameter("localeTXT");
+            }
                 
 		//stdalex 1/15 jks2db!disk
                 //Checking for duplicate user registration by seeing if there is already a cert in table for user
@@ -93,9 +103,10 @@ public class RegisterUserController extends AbstractController {
         	SimpleKeystore response = KeystoreUtil.createUserInResource(certResource, username, password, new URL(baseURL),new String[] { Role.Whitelist.toString(),Role.Attestation.toString()});
                 // Feb 12, 2014: Sudhir: Since the portal user would be created by the above call, we just need to update with the keystore.                
                 MwPortalUser keyTable = keystoreJpa.findMwPortalUserByUserName(username);
-                if (keyTable != null) {                    
+                if (keyTable != null) {
+                    keyTable.setLocale(locale);
                     keyTable.setKeystore(certResource.toByteArray());
-                    log.info("registerusercontroller updateing the portal user table with the new keystore.");
+                    log.info("registerusercontroller updating the portal user table with the new keystore.");
                     keystoreJpa.edit(keyTable);
                 } else {
                     view.addObject("result",false);
