@@ -88,7 +88,10 @@ public class OemRepository implements SimpleRepository<Oem, OemCollection, OemFi
     public void store(Oem item) {
         OemData obj = new OemData();
         try {
-            obj.setName(item.getName());
+            // Since the name cannot be updated, appropriate error has to be returned back.
+            if (item.getName() != null && !item.getName().isEmpty())
+                throw new ASException(ErrorCode.AS_NOT_EDITABLE_PARAMETER, item.getName());
+            
             obj.setDescription(item.getDescription());
             new OemBO().updateOem(obj, item.getId().toString());
         } catch (ASException aex) {
