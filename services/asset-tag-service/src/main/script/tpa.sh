@@ -157,7 +157,9 @@ function getRemoteTag() {
   dialog --stdout --backtitle "$TITLE" --msgbox 'Unable to download tag selection!' 6 20
   exit -1;
  fi
- dialog --stdout --backtitle "$TITLE" --msgbox 'Tag selection downloaded successfully!' 6 20
+ if [ ! "$accept" == "yes"]; then
+	dialog --stdout --backtitle "$TITLE" --msgbox 'Tag selection downloaded successfully!' 6 20
+ fi
 }
 
 function getTagOption() {
